@@ -26,6 +26,14 @@ def init_session_state() -> None:
         "selected_question": None,
         "session_active": False,
         "session_start": None,
+        "session_name_draft": "",
+        "loaded_session_id": None,
+        "loaded_session_start": None,
+        "loaded_session_end": None,
+        "session_load_warning": None,
+        "pending_delete_session_id": None,
+        "pending_session_load_record": None,
+        "pending_return_to_live_data": False,
         "auto_refresh": config.AUTO_REFRESH_DEFAULT,
         "refresh_interval": config.AUTO_REFRESH_INTERVAL_DEFAULT,
         "last_refresh": None,
@@ -65,14 +73,22 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
 
         if not st.session_state["session_active"]:
             if st.button("Start Lab Session", key="start_session"):
+                start_time = datetime.now()
                 st.session_state["session_active"] = True
-                st.session_state["session_start"] = datetime.now()
+                st.session_state["session_start"] = start_time
+                st.session_state["session_name_draft"] = (
+                    f"Lab Session {start_time.strftime('%Y-%m-%d %H:%M')}"
+                )
+                st.session_state["loaded_session_id"] = None
+                st.session_state["loaded_session_start"] = None
+                st.session_state["loaded_session_end"] = None
                 data_loader.fetch_raw_data.clear()
                 st.rerun()
         else:
             elapsed = datetime.now() - st.session_state["session_start"]
             hours, remainder = divmod(int(elapsed.total_seconds()), 3600)
             minutes, seconds = divmod(remainder, 60)
+            st.text_input("Session Name", key="session_name_draft", max_chars=80)
             st.markdown(
                 f"""
                 <div class="session-active">
@@ -83,9 +99,30 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
                 unsafe_allow_html=True,
             )
             if st.button("End Session", key="end_session"):
+                end_time = datetime.now()
+                record = data_loader.build_session_record_from_state(end_time)
+                if record is not None:
+                    try:
+                        data_loader.save_session_record(record)
+                        st.session_state["loaded_session_id"] = record["id"]
+                    except Exception:
+                        st.session_state["session_load_warning"] = (
+                            "Session ended, but it could not be saved to local history."
+                        )
                 st.session_state["session_active"] = False
                 st.session_state["session_start"] = None
                 data_loader.fetch_raw_data.clear()
+                st.rerun()
+
+        if (
+            not st.session_state["session_active"]
+            and st.session_state.get("loaded_session_start") is not None
+            and st.session_state.get("loaded_session_end") is not None
+        ):
+            session_name = st.session_state.get("session_name_draft", "Saved Session")
+            st.caption(f"Viewing saved session: {session_name}")
+            if st.button("Back to Live Data", key="back_to_live_data"):
+                st.session_state["pending_return_to_live_data"] = True
                 st.rerun()
 
         st.markdown("---")
@@ -157,6 +194,16 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
         # --- Session-based filtering ---
         elif st.session_state["session_active"] and st.session_state["session_start"]:
             df = data_loader.filter_by_session_start(df, st.session_state["session_start"])
+        elif (
+            st.session_state.get("loaded_session_start") is not None
+            and st.session_state.get("loaded_session_end") is not None
+        ):
+            df = data_loader.filter_by_datetime_window(
+                df,
+                st.session_state.get("loaded_session_start"),
+                st.session_state.get("loaded_session_end"),
+            )
+            st.caption(f"Filtered records: {len(df):,} (loaded saved session)")
 
         st.markdown("---")
 
@@ -216,6 +263,37 @@ def main() -> None:
             "Unable to load data from the API. Please check your connection and try again."
         )
         st.stop()
+
+    pending_record = st.session_state.get("pending_session_load_record")
+    if isinstance(pending_record, dict):
+        available_modules = (
+            ["All Modules"] + sorted(df["module"].unique().tolist())
+            if not df.empty
+            else ["All Modules"]
+        )
+        data_loader.apply_saved_session_to_state(
+            pending_record,
+            available_modules=available_modules,
+        )
+        st.session_state["pending_session_load_record"] = None
+        st.rerun()
+
+    if st.session_state.get("pending_return_to_live_data"):
+        st.session_state["pending_return_to_live_data"] = False
+        st.session_state["loaded_session_id"] = None
+        st.session_state["loaded_session_start"] = None
+        st.session_state["loaded_session_end"] = None
+        st.session_state["session_name_draft"] = ""
+        st.session_state["session_load_warning"] = None
+        st.session_state["pending_delete_session_id"] = None
+        st.session_state["pending_session_load_record"] = None
+        st.session_state["time_filter_enabled"] = False
+        st.session_state["secondary_module_filter"] = "All Modules"
+        st.session_state["selected_student"] = None
+        st.session_state["selected_question"] = None
+        st.session_state["dashboard_view"] = "In Class View"
+        st.session_state["current_view"] = "In Class View"
+        st.rerun()
 
     # Sidebar controls and filtering
     df = render_sidebar(df)

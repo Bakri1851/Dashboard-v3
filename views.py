@@ -1,6 +1,8 @@
 # ============================================================
 # views.py — Page-level view layouts
 # ============================================================
+from datetime import datetime
+
 import pandas as pd
 import streamlit as st
 
@@ -10,13 +12,35 @@ import config
 import data_loader
 
 
+def _format_session_timestamp(raw_value: str) -> str:
+    """Render ISO timestamp in a compact display format."""
+    if not raw_value:
+        return "-"
+    try:
+        return datetime.fromisoformat(raw_value).strftime("%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        return raw_value
+
+
+def _format_duration(seconds: int) -> str:
+    """Render seconds as HH:MM:SS."""
+    total = max(0, int(seconds))
+    hours, remainder = divmod(total, 3600)
+    minutes, secs = divmod(remainder, 60)
+    return f"{hours:02d}:{minutes:02d}:{secs:02d}"
+
+
 # -----------------------------------------------------------------
 # In Class View (default)
 # -----------------------------------------------------------------
 
 def in_class_view(df: pd.DataFrame) -> None:
     """Main leaderboard view with summary cards, leaderboards, and distributions."""
-    components.render_header()
+    load_warning = st.session_state.get("session_load_warning")
+    if load_warning:
+        st.warning(load_warning)
+        st.session_state["session_load_warning"] = None
+
     components.render_info_bar(
         view_name="In Class View",
         total_submissions=len(df),
@@ -261,7 +285,6 @@ def question_detail_view(df: pd.DataFrame, question_id: str) -> None:
 
 def data_analysis_view(df: pd.DataFrame) -> None:
     """Secondary view with 5 analytical chart types."""
-    components.render_header()
     components.render_info_bar(
         view_name="Data Analysis",
         total_submissions=len(df),
@@ -310,7 +333,6 @@ def data_analysis_view(df: pd.DataFrame) -> None:
 
 def settings_view(df: pd.DataFrame) -> None:
     """Application settings."""
-    components.render_header()
     components.render_info_bar(
         view_name="Settings",
         total_submissions=len(df),
@@ -339,3 +361,73 @@ def settings_view(df: pd.DataFrame) -> None:
     if st.button("Refresh Now", key="settings_refresh_now"):
         data_loader.fetch_raw_data.clear()
         st.rerun()
+
+    st.markdown("---")
+
+    st.markdown(
+        f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
+        f'text-transform:uppercase; letter-spacing:2px; font-size:1rem;">Saved Sessions</h3>',
+        unsafe_allow_html=True,
+    )
+
+    saved_sessions = data_loader.load_saved_sessions()
+    if not saved_sessions:
+        st.caption("No saved sessions yet. End an active lab session to store one.")
+        return
+
+    pending_delete = st.session_state.get("pending_delete_session_id")
+
+    for record in saved_sessions:
+        session_id = str(record.get("id", ""))
+        if not session_id:
+            continue
+
+        context = record.get("context", {})
+        if not isinstance(context, dict):
+            context = {}
+
+        is_loaded = st.session_state.get("loaded_session_id") == session_id
+        session_name = record.get("name", "Untitled Session")
+        start_at = _format_session_timestamp(record.get("start_time", ""))
+        end_at = _format_session_timestamp(record.get("end_time", ""))
+        duration = _format_duration(record.get("duration_seconds", 0))
+        dashboard_view = context.get("dashboard_view", "In Class View")
+        module_filter = context.get("secondary_module_filter", "All Modules")
+        time_filter_state = "Enabled" if context.get("time_filter_enabled") else "Disabled"
+
+        with st.container(border=True):
+            loaded_note = " | LOADED" if is_loaded else ""
+            st.markdown(f"**{session_name}**{loaded_note}")
+            st.caption(
+                f"Start: {start_at} | End: {end_at} | Duration: {duration} | "
+                f"View: {dashboard_view} | Module: {module_filter} | Time Filter: {time_filter_state}"
+            )
+
+            action_col_1, action_col_2, action_col_3 = st.columns([1, 1, 6])
+            with action_col_1:
+                if st.button("Load", key=f"load_session_{session_id}"):
+                    st.session_state["pending_session_load_record"] = record
+                    st.session_state["pending_delete_session_id"] = None
+                    st.rerun()
+
+            with action_col_2:
+                if st.button("Delete", key=f"delete_session_{session_id}"):
+                    st.session_state["pending_delete_session_id"] = session_id
+                    st.rerun()
+
+            if pending_delete == session_id:
+                st.warning("Confirm delete for this saved session.")
+                confirm_col, cancel_col = st.columns(2)
+                with confirm_col:
+                    if st.button("Confirm Delete", key=f"confirm_delete_session_{session_id}"):
+                        data_loader.delete_session_record(session_id)
+                        st.session_state["pending_delete_session_id"] = None
+                        if st.session_state.get("loaded_session_id") == session_id:
+                            st.session_state["loaded_session_id"] = None
+                            st.session_state["loaded_session_start"] = None
+                            st.session_state["loaded_session_end"] = None
+                        st.rerun()
+                with cancel_col:
+                    if st.button("Cancel", key=f"cancel_delete_session_{session_id}"):
+                        st.session_state["pending_delete_session_id"] = None
+                        st.rerun()
