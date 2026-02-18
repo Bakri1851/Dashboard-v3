@@ -186,48 +186,53 @@ def normalize_and_clean(records: list[dict]) -> pd.DataFrame:
 
 def load_data() -> tuple[pd.DataFrame, str]:
     """Top-level: fetch -> detect -> parse -> clean. Returns (DataFrame, error_msg)."""
-    _empty = pd.DataFrame(
+    empty_df = pd.DataFrame(
         columns=[
-            "module", "question", "timestamp",
-            "student_answer", "ai_feedback", "session", "user",
+            "module",
+            "question",
+            "timestamp",
+            "student_answer",
+            "ai_feedback",
+            "session",
+            "user",
         ]
     )
     try:
         raw = fetch_raw_data()
     except Exception as e:
-        return _empty, f"API connection failed: {type(e).__name__} — {e}"
+        return empty_df, f"API connection failed: {type(e).__name__} - {e}"
 
     fmt = detect_format(raw)
 
     if fmt == "json":
         try:
             records = parse_json_response(raw)
-        except Exception:
+        except Exception as json_error:
             try:
                 records = parse_xml_response(raw)
-            except Exception:
-                return pd.DataFrame(
-                    columns=[
-                        "module", "question", "timestamp",
-                        "student_answer", "ai_feedback", "session", "user",
-                    ]
+            except Exception as xml_error:
+                return (
+                    empty_df,
+                    "Unable to parse API response as JSON or XML: "
+                    f"{type(json_error).__name__}, {type(xml_error).__name__}",
                 )
     else:
         try:
             records = parse_xml_response(raw)
-        except Exception:
+        except Exception as xml_error:
             try:
                 records = parse_json_response(raw)
-            except Exception:
-                return pd.DataFrame(
-                    columns=[
-                        "module", "question", "timestamp",
-                        "student_answer", "ai_feedback", "session", "user",
-                    ]
+            except Exception as json_error:
+                return (
+                    empty_df,
+                    "Unable to parse API response as XML or JSON: "
+                    f"{type(xml_error).__name__}, {type(json_error).__name__}",
                 )
 
-    return normalize_and_clean(records)
-
+    try:
+        return normalize_and_clean(records), ""
+    except Exception as e:
+        return empty_df, f"Data normalization failed: {type(e).__name__} - {e}"
 
 def _saved_sessions_path() -> Path:
     """Absolute path to the local saved-session store."""
@@ -535,3 +540,4 @@ def filter_by_session_start(
     if session_start is None or df.empty:
         return df
     return df[df["timestamp"] >= pd.Timestamp(session_start)].copy()
+

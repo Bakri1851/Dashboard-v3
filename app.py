@@ -225,6 +225,26 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
                 st.session_state["current_view"] = "Settings"
                 st.rerun()
 
+        st.markdown("---")
+
+        # --- Previous Sessions ---
+        st.markdown(
+            f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
+            f'text-transform:uppercase; letter-spacing:2px; font-size:0.9rem;">History</h3>',
+            unsafe_allow_html=True,
+        )
+        if st.session_state["current_view"] == "Previous Sessions":
+            if st.button("Back to Dashboard", key="back_from_previous_sessions"):
+                _on_view_change()
+                st.session_state["current_view"] = st.session_state["dashboard_view"]
+                st.rerun()
+            st.caption("Currently viewing previous sessions.")
+        else:
+            if st.button("Open Previous Sessions", key="open_previous_sessions"):
+                _on_view_change()
+                st.session_state["current_view"] = "Previous Sessions"
+                st.rerun()
+
     return df
 
 
@@ -257,12 +277,16 @@ def main() -> None:
         st.session_state["last_refresh"] = datetime.now()
 
     # Load data
-    df = data_loader.load_data()
-    if df.empty and st.session_state["current_view"] != "Settings":
-        st.error(
-            "Unable to load data from the API. Please check your connection and try again."
-        )
-        st.stop()
+    df, load_error = data_loader.load_data()
+    if st.session_state["current_view"] not in {"Settings", "Previous Sessions"}:
+        if load_error:
+            st.error(load_error)
+            st.stop()
+        if df.empty:
+            st.error(
+                "Unable to load data from the API. Please check your connection and try again."
+            )
+            st.stop()
 
     pending_record = st.session_state.get("pending_session_load_record")
     if isinstance(pending_record, dict):
@@ -307,6 +331,8 @@ def main() -> None:
         views.in_class_view(df)
     elif st.session_state["current_view"] == "Data Analysis View":
         views.data_analysis_view(df)
+    elif st.session_state["current_view"] == "Previous Sessions":
+        views.previous_sessions_view(df)
     elif st.session_state["current_view"] == "Settings":
         views.settings_view(df)
 

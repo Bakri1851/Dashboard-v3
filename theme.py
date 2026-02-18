@@ -53,6 +53,21 @@ def get_main_css() -> str:
         text-transform: uppercase;
         letter-spacing: 2px;
     }}
+    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {{
+        gap: 0.35rem;
+    }}
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {{
+        margin: 0.2rem 0 0.3rem 0 !important;
+        line-height: 1.2;
+    }}
+    section[data-testid="stSidebar"] [data-testid="stButton"] {{
+        margin: 0.1rem 0 !important;
+    }}
+    section[data-testid="stSidebar"] hr {{
+        margin: 0.45rem 0 !important;
+    }}
     section[data-testid="stSidebar"] .stRadio > div label,
     section[data-testid="stSidebar"] .stRadio > div label p,
     section[data-testid="stSidebar"] .stRadio > div label span,

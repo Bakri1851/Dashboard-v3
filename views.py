@@ -364,15 +364,27 @@ def settings_view(df: pd.DataFrame) -> None:
 
     st.markdown("---")
 
+
+def previous_sessions_view(df: pd.DataFrame) -> None:
+    """Saved previous sessions view."""
+    components.render_info_bar(
+        view_name="Previous Sessions",
+        total_submissions=len(df),
+        unique_students=df["user"].nunique() if not df.empty else 0,
+        unique_questions=df["question"].nunique() if not df.empty else 0,
+    )
+
+    st.markdown("---")
+
     st.markdown(
         f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
-        f'text-transform:uppercase; letter-spacing:2px; font-size:1rem;">Saved Sessions</h3>',
+        f'text-transform:uppercase; letter-spacing:2px; font-size:1rem;">Previous Sessions</h3>',
         unsafe_allow_html=True,
     )
 
     saved_sessions = data_loader.load_saved_sessions()
     if not saved_sessions:
-        st.caption("No saved sessions yet. End an active lab session to store one.")
+        st.caption("No previous sessions yet. End an active lab session to store one.")
         return
 
     pending_delete = st.session_state.get("pending_delete_session_id")
