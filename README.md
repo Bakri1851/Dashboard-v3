@@ -6,8 +6,7 @@ This repository contains a Streamlit dashboard used during lab sessions to track
 - question difficulty (leaderboard + drill-down)
 - live and saved session filtering
 
-The product requirements are documented in `system-documentation.md`.  
-This `README.md` explains how the code is organized and how to work on it.
+This `README.md` is the main source of truth for understanding how the code is organized and how to work on it.
 
 ## Tech stack
 - Python 3.11+
@@ -38,7 +37,7 @@ python -m streamlit run app.py
 - `data_loader.py`: API fetch/parse/clean pipeline plus saved session persistence helpers.
 - `config.py`: all tunable constants (weights, thresholds, colors, limits, API config).
 - `saved_sessions.json`: local storage for saved sessions created when ending a lab session.
-- `system-documentation.md`: PRD and product requirements.
+- `README.md`: developer onboarding, architecture, and workflows.
 
 ## Runtime flow
 1. `app.py:main()` initializes Streamlit and session state.
