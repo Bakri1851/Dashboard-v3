@@ -33,11 +33,11 @@ INCORRECTNESS_MORE_NEGATIVE: float = 0.7
 INCORRECTNESS_DEFAULT: float = 0.5
 
 # --- Student Struggle Score Weights ---
-STRUGGLE_WEIGHT_N: float = 0.05   # submission count (min-max → collapses; minimal)
+STRUGGLE_WEIGHT_N: float = 0.10   # submission count (min-max → collapses; minimal)
 STRUGGLE_WEIGHT_T: float = 0.10   # time active      (min-max → collapses; halved)
-STRUGGLE_WEIGHT_E: float = 0.35   # error rate       (raw ratio → stable; elevated)
+STRUGGLE_WEIGHT_E: float = 0.25   # error rate       (raw ratio → stable; elevated)
 STRUGGLE_WEIGHT_F: float = 0.15   # feedback rate    (raw ratio → stable; reduced)
-STRUGGLE_WEIGHT_A: float = 0.35   # recent incorrectness (absolute → most sensitive; elevated)
+STRUGGLE_WEIGHT_A: float = 0.45   # recent incorrectness (absolute → most sensitive; elevated)
 
 # --- Recent Incorrectness (A_raw) ---
 RECENT_SUBMISSION_COUNT: int = 5
@@ -45,17 +45,17 @@ RECENT_WEIGHTS: list[float] = [0.35, 0.25, 0.20, 0.12, 0.08]
 
 # --- Student Struggle Thresholds: (low, high, label, color) ---
 STRUGGLE_THRESHOLDS: list[tuple[float, float, str, str]] = [
-    (0.00, 0.35, "On Track",     "#00ff88"),
-    (0.35, 0.50, "Minor Issues", "#ffcc00"),
-    (0.50, 0.75, "Struggling",   "#ff6600"),
-    (0.75, 1.00, "Needs Help",   "#ff2d55"),
+    (0.00, 0.20, "On Track",     "#00ff88"),
+    (0.20, 0.35, "Minor Issues", "#ffcc00"),
+    (0.35, 0.50, "Struggling",   "#ff6600"),
+    (0.50, 1.00, "Needs Help",   "#ff2d55"),
 ]
 
 # --- Question Difficulty Score Weights ---
-DIFFICULTY_WEIGHT_C: float = 0.40   # incorrect rate       (raw ratio → stable; elevated)
-DIFFICULTY_WEIGHT_T: float = 0.10   # avg time per student (min-max → collapses; halved)
-DIFFICULTY_WEIGHT_A: float = 0.10   # avg attempts         (min-max → collapses; reduced)
-DIFFICULTY_WEIGHT_F: float = 0.40   # avg incorrectness    (raw mean → stable; elevated)
+DIFFICULTY_WEIGHT_C: float = 0.35   # incorrect rate       (raw ratio → stable; elevated)
+DIFFICULTY_WEIGHT_T: float = 0.15   # avg time per student (min-max → collapses; halved)
+DIFFICULTY_WEIGHT_A: float = 0.25   # avg attempts         (min-max → collapses; reduced)
+DIFFICULTY_WEIGHT_F: float = 0.25   # avg incorrectness    (raw mean → stable; elevated)
 
 # --- Question Difficulty Thresholds: (low, high, label, color) ---
 DIFFICULTY_THRESHOLDS: list[tuple[float, float, str, str]] = [
