@@ -2,6 +2,7 @@
 # app.py — Main entry point: sidebar, routing, state, auto-refresh
 # ============================================================
 from datetime import datetime, time as dt_time
+import html
 
 import pandas as pd
 import streamlit as st
@@ -165,6 +166,19 @@ def _on_dashboard_view_change() -> None:
     _on_view_change()
 
 
+def _render_lab_code_card(code: str) -> None:
+    safe_code = html.escape(code.strip().upper())
+    st.markdown(
+        f"""
+        <div class="lab-code-card">
+            <div class="lab-code-label">Lab Code</div>
+            <div class="lab-code-value">{safe_code}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
     """Render all sidebar controls and return the filtered DataFrame."""
     with st.sidebar:
@@ -207,22 +221,8 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
             )
             code = st.session_state.get("lab_session_code", "")
             if code:
-                st.markdown(
-                    f"""
-                    <div style="background:rgba(0,245,255,0.08); border:1px solid
-                                {config.COLORS['cyan']}; border-radius:8px; padding:12px;
-                                text-align:center; margin-top:8px;">
-                        <div style="font-family:'{config.FONT_BODY}',monospace;
-                                    color:{config.COLORS['text_dim']}; font-size:0.65rem;
-                                    letter-spacing:3px; text-transform:uppercase;">Lab Code</div>
-                        <div style="font-family:'{config.FONT_HEADING}',sans-serif;
-                                    font-size:1.8rem; font-weight:700;
-                                    color:{config.COLORS['cyan']}; letter-spacing:6px;
-                                    text-shadow:0 0 16px rgba(0,245,255,0.5);">{code}</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
+                _render_lab_code_card(code)
+                st.markdown('<div class="session-action-gap"></div>', unsafe_allow_html=True)
             if st.button("End Session", key="end_session"):
                 end_time = datetime.now()
                 record = data_loader.build_session_record_from_state(end_time)

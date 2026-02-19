@@ -1,0 +1,376 @@
+"""Shared lab-session state management for instructor and assistant apps."""
+
+from __future__ import annotations
+
+import json
+import random
+import string
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Optional
+
+from filelock import FileLock
+
+import config
+
+
+_STATE_FILE = Path(config.LAB_SESSION_FILE)
+_LOCK_FILE = _STATE_FILE.with_suffix(".lock")
+_LOCK_TIMEOUT_SECONDS = 5
+_SESSION_CODE_ALPHABET = string.ascii_uppercase + string.digits
+
+
+def _now_iso() -> str:
+    return datetime.now().isoformat(timespec="seconds")
+
+
+def _default_state() -> dict[str, Any]:
+    return {
+        "session_code": None,
+        "session_active": False,
+        "generated_at": _now_iso(),
+        "lab_assistants": {},
+        "assignments": {},
+    }
+
+
+def _lock() -> FileLock:
+    _LOCK_FILE.parent.mkdir(parents=True, exist_ok=True)
+    return FileLock(str(_LOCK_FILE), timeout=_LOCK_TIMEOUT_SECONDS)
+
+
+def _normalize_state(raw_state: Any) -> dict[str, Any]:
+    state = _default_state()
+    if not isinstance(raw_state, dict):
+        return state
+
+    session_code = raw_state.get("session_code")
+    if isinstance(session_code, str) and session_code:
+        state["session_code"] = session_code.strip().upper()
+
+    state["session_active"] = bool(raw_state.get("session_active", False))
+
+    generated_at = raw_state.get("generated_at")
+    if isinstance(generated_at, str) and generated_at:
+        state["generated_at"] = generated_at
+
+    assistants_raw = raw_state.get("lab_assistants", {})
+    assistants: dict[str, dict[str, Any]] = {}
+    if isinstance(assistants_raw, dict):
+        for assistant_id, info in assistants_raw.items():
+            if not isinstance(assistant_id, str) or not assistant_id.strip():
+                continue
+            if not isinstance(info, dict):
+                continue
+            name = info.get("name")
+            if not isinstance(name, str) or not name.strip():
+                continue
+            joined_at = info.get("joined_at")
+            assistants[assistant_id] = {
+                "name": name.strip(),
+                "joined_at": joined_at if isinstance(joined_at, str) and joined_at else _now_iso(),
+                "assigned_student": None,
+            }
+
+    assignments_raw = raw_state.get("assignments", {})
+    assignments: dict[str, dict[str, Any]] = {}
+    assistant_taken: set[str] = set()
+    if isinstance(assignments_raw, dict):
+        for student_id, entry in assignments_raw.items():
+            if not isinstance(student_id, str) or not student_id.strip():
+                continue
+            if not isinstance(entry, dict):
+                continue
+            assistant_id = entry.get("assistant_id")
+            if not isinstance(assistant_id, str) or assistant_id not in assistants:
+                continue
+            if assistant_id in assistant_taken:
+                continue
+
+            status = entry.get("status")
+            if status not in {"helping", "helped"}:
+                status = "helping"
+
+            assignment = {
+                "assistant_id": assistant_id,
+                "status": status,
+                "assigned_at": (
+                    entry.get("assigned_at")
+                    if isinstance(entry.get("assigned_at"), str) and entry.get("assigned_at")
+                    else _now_iso()
+                ),
+            }
+            helped_at = entry.get("helped_at")
+            if isinstance(helped_at, str) and helped_at:
+                assignment["helped_at"] = helped_at
+
+            assignments[student_id] = assignment
+            assistants[assistant_id]["assigned_student"] = student_id
+            assistant_taken.add(assistant_id)
+
+    state["lab_assistants"] = assistants
+    state["assignments"] = assignments
+    return state
+
+
+def _read_state_unlocked() -> dict[str, Any]:
+    if not _STATE_FILE.exists():
+        return _default_state()
+    try:
+        raw = json.loads(_STATE_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return _default_state()
+    return _normalize_state(raw)
+
+
+def _write_state_unlocked(state: dict[str, Any]) -> None:
+    _STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    normalized = _normalize_state(state)
+    tmp_file = _STATE_FILE.with_suffix(".tmp")
+    tmp_file.write_text(json.dumps(normalized, indent=2), encoding="utf-8")
+    tmp_file.replace(_STATE_FILE)
+
+
+def _build_assistant_id(name: str, existing_ids: set[str]) -> str:
+    base = "".join(ch.lower() if ch.isalnum() else "_" for ch in name.strip())
+    base = "_".join(part for part in base.split("_") if part)[:18] or "assistant"
+    for _ in range(200):
+        candidate = f"{base}_{random.randint(1000, 9999)}"
+        if candidate not in existing_ids:
+            return candidate
+    candidate = f"{base}_{int(datetime.now().timestamp())}"
+    return candidate
+
+
+def read_lab_state() -> dict[str, Any]:
+    with _lock():
+        state = _read_state_unlocked()
+        _write_state_unlocked(state)
+        return _read_state_unlocked()
+
+
+def generate_session_code() -> str:
+    return "".join(random.choices(_SESSION_CODE_ALPHABET, k=config.LAB_CODE_LENGTH))
+
+
+def start_lab_session(session_code: Optional[str] = None) -> None:
+    code = (session_code or "").strip().upper()
+    if len(code) != config.LAB_CODE_LENGTH:
+        code = generate_session_code()
+
+    with _lock():
+        state = _default_state()
+        state["session_code"] = code
+        state["session_active"] = True
+        state["generated_at"] = _now_iso()
+        _write_state_unlocked(state)
+
+
+def end_lab_session() -> None:
+    with _lock():
+        state = _read_state_unlocked()
+        state["session_active"] = False
+        state["assignments"] = {}
+        for info in state["lab_assistants"].values():
+            info["assigned_student"] = None
+        _write_state_unlocked(state)
+
+
+def join_session(session_code: str, name: str) -> tuple[bool, Optional[str], Optional[str]]:
+    code = (session_code or "").strip().upper()
+    clean_name = (name or "").strip()
+    if not clean_name:
+        return False, None, "Name is required."
+
+    with _lock():
+        state = _read_state_unlocked()
+        if not state.get("session_active"):
+            return False, None, "No active lab session."
+        if code != state.get("session_code"):
+            return False, None, "Invalid session code."
+
+        for assistant_id, info in state["lab_assistants"].items():
+            existing_name = str(info.get("name", "")).strip()
+            if existing_name.casefold() == clean_name.casefold():
+                return True, assistant_id, None
+
+        assistant_id = _build_assistant_id(clean_name, set(state["lab_assistants"].keys()))
+        state["lab_assistants"][assistant_id] = {
+            "name": clean_name,
+            "joined_at": _now_iso(),
+            "assigned_student": None,
+        }
+        _write_state_unlocked(state)
+        return True, assistant_id, None
+
+
+def assign_student(student_id: str, assistant_id: str) -> bool:
+    student = (student_id or "").strip()
+    aid = (assistant_id or "").strip()
+    if not student or not aid:
+        return False
+
+    with _lock():
+        state = _read_state_unlocked()
+        if not state.get("session_active"):
+            return False
+
+        assistants = state["lab_assistants"]
+        assignments = state["assignments"]
+        assistant = assistants.get(aid)
+        if assistant is None:
+            return False
+
+        existing = assignments.get(student)
+        if existing:
+            return existing.get("assistant_id") == aid
+
+        current_student = assistant.get("assigned_student")
+        if current_student and current_student != student:
+            return False
+
+        assignments[student] = {
+            "assistant_id": aid,
+            "status": "helping",
+            "assigned_at": _now_iso(),
+        }
+        assistant["assigned_student"] = student
+        _write_state_unlocked(state)
+        return True
+
+
+def self_claim_student(student_id: str, assistant_id: str) -> tuple[bool, Optional[str]]:
+    student = (student_id or "").strip()
+    aid = (assistant_id or "").strip()
+    if not student:
+        return False, "Student is required."
+    if not aid:
+        return False, "Assistant ID is required."
+
+    with _lock():
+        state = _read_state_unlocked()
+        if not state.get("session_active"):
+            return False, "No active lab session."
+
+        assistants = state["lab_assistants"]
+        assignments = state["assignments"]
+        assistant = assistants.get(aid)
+        if assistant is None:
+            return False, "Assistant is not part of this session."
+
+        current_student = assistant.get("assigned_student")
+        if current_student and current_student != student:
+            return False, "You are already assigned to another student."
+
+        existing = assignments.get(student)
+        if existing and existing.get("assistant_id") != aid:
+            return False, "Student has already been claimed."
+        if existing and existing.get("assistant_id") == aid:
+            return True, None
+
+        assignments[student] = {
+            "assistant_id": aid,
+            "status": "helping",
+            "assigned_at": _now_iso(),
+        }
+        assistant["assigned_student"] = student
+        _write_state_unlocked(state)
+        return True, None
+
+
+def get_assignment_for_assistant(assistant_id: str) -> Optional[str]:
+    aid = (assistant_id or "").strip()
+    if not aid:
+        return None
+
+    with _lock():
+        state = _read_state_unlocked()
+        assistant = state["lab_assistants"].get(aid)
+        if assistant is None:
+            return None
+
+        assigned_student = assistant.get("assigned_student")
+        if (
+            isinstance(assigned_student, str)
+            and assigned_student in state["assignments"]
+            and state["assignments"][assigned_student].get("assistant_id") == aid
+        ):
+            return assigned_student
+
+        for student_id, assignment in state["assignments"].items():
+            if assignment.get("assistant_id") == aid:
+                assistant["assigned_student"] = student_id
+                _write_state_unlocked(state)
+                return student_id
+
+        if assistant.get("assigned_student") is not None:
+            assistant["assigned_student"] = None
+            _write_state_unlocked(state)
+        return None
+
+
+def mark_student_helped(student_id: str) -> bool:
+    student = (student_id or "").strip()
+    if not student:
+        return False
+
+    with _lock():
+        state = _read_state_unlocked()
+        assignment = state["assignments"].get(student)
+        if assignment is None:
+            return False
+        assignment["status"] = "helped"
+        assignment["helped_at"] = _now_iso()
+        _write_state_unlocked(state)
+        return True
+
+
+def unassign_student(student_id: str) -> bool:
+    student = (student_id or "").strip()
+    if not student:
+        return False
+
+    with _lock():
+        state = _read_state_unlocked()
+        changed = False
+        assignment = state["assignments"].pop(student, None)
+        if assignment is not None:
+            changed = True
+            assistant_id = assignment.get("assistant_id")
+            assistant = state["lab_assistants"].get(assistant_id)
+            if assistant and assistant.get("assigned_student") == student:
+                assistant["assigned_student"] = None
+
+        for info in state["lab_assistants"].values():
+            if info.get("assigned_student") == student:
+                info["assigned_student"] = None
+                changed = True
+
+        if changed:
+            _write_state_unlocked(state)
+        return changed
+
+
+def leave_session(assistant_id: str) -> tuple[bool, Optional[str]]:
+    aid = (assistant_id or "").strip()
+    if not aid:
+        return False, "Assistant ID is required."
+
+    with _lock():
+        state = _read_state_unlocked()
+        assistants = state["lab_assistants"]
+        if aid not in assistants:
+            return False, "Assistant not found."
+
+        assigned_student = assistants[aid].get("assigned_student")
+        if isinstance(assigned_student, str) and assigned_student:
+            state["assignments"].pop(assigned_student, None)
+
+        for student_id in list(state["assignments"].keys()):
+            assignment = state["assignments"].get(student_id)
+            if assignment and assignment.get("assistant_id") == aid:
+                state["assignments"].pop(student_id, None)
+
+        assistants.pop(aid, None)
+        _write_state_unlocked(state)
+        return True, None

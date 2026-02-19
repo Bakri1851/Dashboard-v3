@@ -2,6 +2,7 @@
 # lab_app.py — Mobile lab assistant app (runs on separate port)
 # Usage: streamlit run lab_app.py --server.port 8502
 # ============================================================
+import html
 from typing import Optional
 
 import pandas as pd
@@ -18,6 +19,8 @@ import theme
 # -----------------------------------------------------------------
 # Helpers
 # -----------------------------------------------------------------
+
+_JOIN_NOTICE_KEY = "lab_join_notice"
 
 def _load_student_data() -> tuple[pd.DataFrame, Optional[pd.DataFrame]]:
     """Fetch live data and compute struggle scores. Returns (df, struggle_df)."""
@@ -57,6 +60,62 @@ def _struggle_badge(level: str, color: str) -> str:
     )
 
 
+def _set_join_notice(message: str) -> None:
+    st.session_state[_JOIN_NOTICE_KEY] = message
+
+
+def _pop_join_notice() -> Optional[str]:
+    value = st.session_state.get(_JOIN_NOTICE_KEY)
+    if value:
+        st.session_state[_JOIN_NOTICE_KEY] = None
+        return str(value)
+    return None
+
+
+def _clear_assistant_query_param() -> None:
+    params = st.query_params
+    if "aid" in params:
+        del params["aid"]
+
+
+def _coerce_query_value(raw_value: object) -> Optional[str]:
+    if isinstance(raw_value, list):
+        if not raw_value:
+            return None
+        raw_value = raw_value[0]
+    if isinstance(raw_value, str):
+        value = raw_value.strip()
+        return value or None
+    return None
+
+
+def _leave_session(assistant_id: str) -> None:
+    ok, err = lab_state.leave_session(assistant_id)
+    if ok:
+        _set_join_notice("You have left the session. Rejoin when you are ready.")
+        _clear_assistant_query_param()
+        st.rerun()
+    st.error(f"Could not leave session: {err or 'Unknown error.'}")
+
+
+def _render_session_status_strip(lab_data: dict, assistant_name: str) -> None:
+    session_code = str(lab_data.get("session_code") or "------").upper()
+    safe_name = html.escape(assistant_name)
+    safe_code = html.escape(session_code)
+    st.markdown(
+        f"""
+        <div class="assistant-session-strip">
+            <div class="assistant-session-strip-label">Current Session</div>
+            <div class="assistant-session-strip-meta">
+                <span>Assistant: {safe_name}</span>
+                <span>Code: {safe_code}</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 # -----------------------------------------------------------------
 # View: No active session
 # -----------------------------------------------------------------
@@ -92,6 +151,9 @@ def render_session_ended() -> None:
 def render_join_screen(lab_data: dict) -> None:
     _heading("Lab Assistant", sub="JOIN SESSION")
     st.markdown("---")
+    notice = _pop_join_notice()
+    if notice:
+        st.info(notice)
 
     name = st.text_input("Your Name", placeholder="e.g. Alice", max_chars=40, key="join_name")
     code = st.text_input(
@@ -128,6 +190,9 @@ def render_unassigned_view(
 ) -> None:
     assistant_info = lab_data["lab_assistants"][assistant_id]
     _heading(f"Hello, {assistant_info['name']}", sub="WAITING FOR ASSIGNMENT")
+    _render_session_status_strip(lab_data, assistant_info["name"])
+    if st.button("Leave Session", key="leave_session_unassigned"):
+        _leave_session(assistant_id)
 
     # Poll: check if instructor has now assigned this assistant
     current = lab_state.get_assignment_for_assistant(assistant_id)
@@ -208,6 +273,9 @@ def render_assigned_view(
 ) -> None:
     assistant_info = lab_data["lab_assistants"][assistant_id]
     _heading(f"Hello, {assistant_info['name']}")
+    _render_session_status_strip(lab_data, assistant_info["name"])
+    if st.button("Leave Session", key="leave_session_assigned"):
+        _leave_session(assistant_id)
 
     # Look up student struggle data
     student_row = None
@@ -302,7 +370,6 @@ def render_assigned_view(
             lab_state.unassign_student(student_id)
             st.rerun()
 
-
 # -----------------------------------------------------------------
 # Main
 # -----------------------------------------------------------------
@@ -323,7 +390,7 @@ def main() -> None:
 
     # Restore identity from URL params (survives phone browser refresh)
     params = st.query_params
-    assistant_id: Optional[str] = params.get("aid", None)
+    assistant_id: Optional[str] = _coerce_query_value(params.get("aid", None))
 
     # Fresh state read on every rerun
     lab_data = lab_state.read_lab_state()
@@ -333,11 +400,28 @@ def main() -> None:
         render_session_ended()
         return
 
-    if not assistant_id or assistant_id not in lab_data.get("lab_assistants", {}):
+    assistants = lab_data.get("lab_assistants", {})
+    if not assistant_id:
         render_join_screen(lab_data)
         return
 
-    assigned_student = lab_data["lab_assistants"][assistant_id].get("assigned_student")
+    if assistant_id not in assistants:
+        _set_join_notice("Your previous assistant session is no longer active. Please join again.")
+        _clear_assistant_query_param()
+        st.rerun()
+
+    assigned_student = lab_state.get_assignment_for_assistant(assistant_id)
+    lab_data = lab_state.read_lab_state()
+    assistants = lab_data.get("lab_assistants", {})
+    if assistant_id not in assistants:
+        _set_join_notice("Your previous assistant session was closed. Please join again.")
+        _clear_assistant_query_param()
+        st.rerun()
+
+    if assigned_student:
+        assignment = lab_data.get("assignments", {}).get(assigned_student, {})
+        if assignment.get("assistant_id") != assistant_id:
+            assigned_student = None
 
     df, struggle_df = _load_student_data()
 

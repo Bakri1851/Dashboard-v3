@@ -341,6 +341,47 @@ def get_main_css() -> str:
         margin-top: 4px;
     }}
 
+    /* ===== Sidebar Session Blocks ===== */
+    section[data-testid="stSidebar"] .lab-code-card {{
+        background: rgba({accent_rgb}, 0.08);
+        border: 1px solid {c['cyan']};
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 8px;
+        margin-bottom: 4px;
+        text-align: center;
+        display: block;
+        position: relative;
+        z-index: 1;
+    }}
+    section[data-testid="stSidebar"] .lab-code-label {{
+        font-family: '{fb}', monospace;
+        color: {c['text_dim']};
+        font-size: 0.65rem;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+    }}
+    section[data-testid="stSidebar"] .lab-code-value {{
+        font-family: '{fh}', sans-serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: {c['cyan']};
+        letter-spacing: 6px;
+        line-height: 1.2;
+        text-shadow: 0 0 16px rgba({accent_rgb}, 0.5);
+        white-space: nowrap;
+    }}
+    section[data-testid="stSidebar"] .session-action-gap {{
+        display: block;
+        height: 0.35rem;
+    }}
+    @media (max-width: 1200px) {{
+        section[data-testid="stSidebar"] .lab-code-value {{
+            font-size: 1.5rem;
+            letter-spacing: 4px;
+        }}
+    }}
+
     /* ===== Streamlit Header / Top Spacing ===== */
     header {{
         visibility: visible !important;
@@ -654,6 +695,32 @@ def get_mobile_css() -> str:
         letter-spacing: 8px;
         text-shadow: 0 0 20px rgba({accent_rgb}, 0.6);
         margin-top: 6px;
+    }}
+
+    /* ===== Assistant Session Status Strip ===== */
+    .assistant-session-strip {{
+        background: rgba({accent_rgb}, 0.08);
+        border: 1px solid rgba({accent_rgb}, 0.45);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin: 8px 0 12px 0;
+    }}
+    .assistant-session-strip-label {{
+        font-family: '{fb}', monospace;
+        color: {c['text_dim']};
+        font-size: 0.66rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }}
+    .assistant-session-strip-meta {{
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+        font-family: '{fb}', monospace;
+        font-size: 0.78rem;
+        color: {c['text']};
     }}
 
     /* ===== Student Card (assigned view) ===== */
