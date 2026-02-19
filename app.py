@@ -43,6 +43,7 @@ def init_session_state() -> None:
         "time_filter_enabled": False,
         "previous_scores": {},
         "lab_session_code": None,
+        "pending_remove_assistant_id": None,
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -62,10 +63,14 @@ def _render_lab_assignment_panel(df: pd.DataFrame) -> None:
     """
     lab_data = _lab_state.read_lab_state()
     if not lab_data.get("session_active"):
+        st.session_state["pending_remove_assistant_id"] = None
         return
 
     assistants = lab_data.get("lab_assistants", {})
     assignments = lab_data.get("assignments", {})
+    pending_remove_id = st.session_state.get("pending_remove_assistant_id")
+    if pending_remove_id and pending_remove_id not in assistants:
+        st.session_state["pending_remove_assistant_id"] = None
 
     st.markdown("---")
     st.markdown(
@@ -76,6 +81,7 @@ def _render_lab_assignment_panel(df: pd.DataFrame) -> None:
     )
 
     if not assistants:
+        st.session_state["pending_remove_assistant_id"] = None
         st.caption("No lab assistants have joined yet.")
         return
 
@@ -97,23 +103,47 @@ def _render_lab_assignment_panel(df: pd.DataFrame) -> None:
             st.markdown(
                 f'<div style="font-size:0.8rem; padding:3px 0;">'
                 f'<span style="color:{config.COLORS["cyan"]};">{info["name"]}</span>'
-                f' → <span style="color:{config.COLORS["text"]};">{assigned_student}</span>'
+                f' &rarr; <span style="color:{config.COLORS["text"]};">{assigned_student}</span>'
                 f' <span style="color:{status_color}; font-size:0.65rem;">({status})</span>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
-            if st.button(f"Release {info['name']}", key=f"release_{aid}"):
-                _lab_state.unassign_student(assigned_student)
-                st.rerun()
+            release_col, remove_col = st.columns(2)
+            with release_col:
+                if st.button(f"Release {info['name']}", key=f"release_{aid}"):
+                    _lab_state.unassign_student(assigned_student)
+                    st.rerun()
+            with remove_col:
+                if st.button(f"Remove {info['name']}", key=f"remove_{aid}"):
+                    st.session_state["pending_remove_assistant_id"] = aid
+                    st.rerun()
         else:
             unassigned_assistants.append((aid, info["name"]))
             st.markdown(
                 f'<div style="font-size:0.8rem; padding:3px 0;">'
                 f'<span style="color:{config.COLORS["cyan"]};">{info["name"]}</span>'
-                f' — <span style="color:{config.COLORS["text_dim"]};">waiting</span>'
+                f' &mdash; <span style="color:{config.COLORS["text_dim"]};">waiting</span>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
+            if st.button(f"Remove {info['name']}", key=f"remove_{aid}"):
+                st.session_state["pending_remove_assistant_id"] = aid
+                st.rerun()
+
+        if st.session_state.get("pending_remove_assistant_id") == aid:
+            st.warning("This will remove the assistant and release their current student.")
+            confirm_col, cancel_col = st.columns(2)
+            with confirm_col:
+                if st.button("Confirm Remove", key=f"confirm_remove_{aid}"):
+                    ok, err = _lab_state.remove_assistant(aid)
+                    st.session_state["pending_remove_assistant_id"] = None
+                    if ok:
+                        st.rerun()
+                    st.error(err or "Could not remove assistant.")
+            with cancel_col:
+                if st.button("Cancel", key=f"cancel_remove_{aid}"):
+                    st.session_state["pending_remove_assistant_id"] = None
+                    st.rerun()
 
     # Instructor assignment controls
     if struggle_df is not None and not struggle_df.empty and unassigned_assistants:
@@ -194,6 +224,7 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
                 start_time = datetime.now()
                 st.session_state["session_active"] = True
                 st.session_state["session_start"] = start_time
+                st.session_state["pending_remove_assistant_id"] = None
                 st.session_state["session_name_draft"] = (
                     f"Lab Session {start_time.strftime('%Y-%m-%d %H:%M')}"
                 )
@@ -238,6 +269,7 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
                 st.session_state["lab_session_code"] = None
                 st.session_state["session_active"] = False
                 st.session_state["session_start"] = None
+                st.session_state["pending_remove_assistant_id"] = None
                 data_loader.fetch_raw_data.clear()
                 st.rerun()
 
@@ -441,6 +473,7 @@ def main() -> None:
         st.session_state["session_load_warning"] = None
         st.session_state["pending_delete_session_id"] = None
         st.session_state["pending_session_load_record"] = None
+        st.session_state["pending_remove_assistant_id"] = None
         st.session_state["time_filter_enabled"] = False
         st.session_state["secondary_module_filter"] = "All Modules"
         st.session_state["selected_student"] = None

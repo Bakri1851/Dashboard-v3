@@ -351,6 +351,27 @@ def unassign_student(student_id: str) -> bool:
         return changed
 
 
+def _remove_assistant_unlocked(
+    state: dict[str, Any],
+    assistant_id: str,
+) -> tuple[bool, Optional[str]]:
+    assistants = state["lab_assistants"]
+    if assistant_id not in assistants:
+        return False, "Assistant not found."
+
+    assigned_student = assistants[assistant_id].get("assigned_student")
+    if isinstance(assigned_student, str) and assigned_student:
+        state["assignments"].pop(assigned_student, None)
+
+    for student_id in list(state["assignments"].keys()):
+        assignment = state["assignments"].get(student_id)
+        if assignment and assignment.get("assistant_id") == assistant_id:
+            state["assignments"].pop(student_id, None)
+
+    assistants.pop(assistant_id, None)
+    return True, None
+
+
 def leave_session(assistant_id: str) -> tuple[bool, Optional[str]]:
     aid = (assistant_id or "").strip()
     if not aid:
@@ -358,19 +379,22 @@ def leave_session(assistant_id: str) -> tuple[bool, Optional[str]]:
 
     with _lock():
         state = _read_state_unlocked()
-        assistants = state["lab_assistants"]
-        if aid not in assistants:
-            return False, "Assistant not found."
+        ok, err = _remove_assistant_unlocked(state, aid)
+        if not ok:
+            return False, err
+        _write_state_unlocked(state)
+        return True, None
 
-        assigned_student = assistants[aid].get("assigned_student")
-        if isinstance(assigned_student, str) and assigned_student:
-            state["assignments"].pop(assigned_student, None)
 
-        for student_id in list(state["assignments"].keys()):
-            assignment = state["assignments"].get(student_id)
-            if assignment and assignment.get("assistant_id") == aid:
-                state["assignments"].pop(student_id, None)
+def remove_assistant(assistant_id: str) -> tuple[bool, Optional[str]]:
+    aid = (assistant_id or "").strip()
+    if not aid:
+        return False, "Assistant ID is required."
 
-        assistants.pop(aid, None)
+    with _lock():
+        state = _read_state_unlocked()
+        ok, err = _remove_assistant_unlocked(state, aid)
+        if not ok:
+            return False, err
         _write_state_unlocked(state)
         return True, None
