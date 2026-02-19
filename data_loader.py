@@ -1,6 +1,4 @@
-# ============================================================
 # data_loader.py — API fetching, parsing, normalization, cleaning
-# ============================================================
 import json
 import xml.etree.ElementTree as ET
 from datetime import date as dt_date, datetime, time as dt_time

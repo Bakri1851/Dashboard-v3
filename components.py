@@ -1,6 +1,4 @@
-# ============================================================
 # components.py — Reusable Streamlit UI components
-# ============================================================
 from typing import Optional
 
 import plotly.graph_objects as go
@@ -11,9 +9,7 @@ import config
 import theme
 
 
-# -----------------------------------------------------------------
 # Header
-# -----------------------------------------------------------------
 
 def render_header() -> None:
     """Dashboard title with gradient text and subtitle."""
@@ -29,9 +25,7 @@ def render_header() -> None:
     )
 
 
-# -----------------------------------------------------------------
 # Info Bar
-# -----------------------------------------------------------------
 
 def render_info_bar(
     view_name: str,
@@ -54,9 +48,7 @@ def render_info_bar(
     )
 
 
-# -----------------------------------------------------------------
 # Metric Cards
-# -----------------------------------------------------------------
 
 def render_metric_card(label: str, value, color: str) -> None:
     """Single metric card with glow border."""
@@ -111,9 +103,7 @@ def render_question_detail_metrics(question_data: dict) -> None:
             render_metric_card(label, value, color)
 
 
-# -----------------------------------------------------------------
 # Leaderboard Charts
-# -----------------------------------------------------------------
 
 def render_student_leaderboard(
     struggle_df: pd.DataFrame,
@@ -353,9 +343,7 @@ def render_question_leaderboard(
     return None
 
 
-# -----------------------------------------------------------------
 # Score Distributions
-# -----------------------------------------------------------------
 
 def render_score_distributions(
     struggle_df: pd.DataFrame,
@@ -414,9 +402,7 @@ def render_score_distributions(
             st.info("No question data for distribution.")
 
 
-# -----------------------------------------------------------------
 # Formula Info Panel (Bug #1 fix: all values from config)
-# -----------------------------------------------------------------
 
 def render_formula_info() -> None:
     """Expandable section showing scoring formulas with dynamic config values."""
@@ -472,18 +458,14 @@ def render_formula_info() -> None:
                 )
 
 
-# -----------------------------------------------------------------
 # Back Button
-# -----------------------------------------------------------------
 
 def render_back_button(key: str = "back") -> bool:
     """Styled back button. Returns True if clicked."""
     return st.button("\u2190 Back to Dashboard", key=key)
 
 
-# -----------------------------------------------------------------
 # Entity Header Card (drill-down)
-# -----------------------------------------------------------------
 
 def render_entity_header_card(
     title: str,
@@ -504,9 +486,7 @@ def render_entity_header_card(
     )
 
 
-# -----------------------------------------------------------------
 # Generic Charts for Drill-Downs
-# -----------------------------------------------------------------
 
 def render_bar_chart(
     data: pd.DataFrame,
@@ -617,9 +597,7 @@ def render_data_table(
     st.dataframe(display, use_container_width=True, hide_index=True)
 
 
-# -----------------------------------------------------------------
 # Data Analysis Charts
-# -----------------------------------------------------------------
 
 def render_module_usage_chart(df: pd.DataFrame) -> None:
     """Vertical bar chart of submission counts per module."""
@@ -672,9 +650,7 @@ def render_students_by_module_chart(df: pd.DataFrame) -> None:
     render_bar_chart(counts, x_col="module", y_col="students", title="Students by Module", color=config.COLORS["purple"])
 
 
-# -----------------------------------------------------------------
 # Helpers
-# -----------------------------------------------------------------
 
 def _hex_to_rgb(hex_color: str) -> str:
     """Convert '#rrggbb' to 'r, g, b' string for rgba()."""

@@ -1,6 +1,4 @@
-# ============================================================
 # config.py — All tunable parameters for the dashboard
-# ============================================================
 
 # --- API Configuration ---
 API_URL: str = "http://sccb2.sci-project.lboro.ac.uk/retrievalEndpoint.php"

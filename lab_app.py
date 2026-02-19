@@ -1,7 +1,5 @@
-# ============================================================
 # lab_app.py — Mobile lab assistant app (runs on separate port)
 # Usage: streamlit run lab_app.py --server.port 8502
-# ============================================================
 import html
 from typing import Optional
 
@@ -16,9 +14,7 @@ import lab_state
 import theme
 
 
-# -----------------------------------------------------------------
 # Helpers
-# -----------------------------------------------------------------
 
 _JOIN_NOTICE_KEY = "lab_join_notice"
 
@@ -116,9 +112,7 @@ def _render_session_status_strip(lab_data: dict, assistant_name: str) -> None:
     )
 
 
-# -----------------------------------------------------------------
 # View: No active session
-# -----------------------------------------------------------------
 
 def render_session_ended() -> None:
     st.markdown(
@@ -144,9 +138,7 @@ def render_session_ended() -> None:
     )
 
 
-# -----------------------------------------------------------------
 # View: Join screen
-# -----------------------------------------------------------------
 
 def render_join_screen(lab_data: dict) -> None:
     _heading("Lab Assistant", sub="JOIN SESSION")
@@ -179,9 +171,7 @@ def render_join_screen(lab_data: dict) -> None:
             st.rerun()
 
 
-# -----------------------------------------------------------------
 # View: Joined but no assignment yet
-# -----------------------------------------------------------------
 
 def render_unassigned_view(
     assistant_id: str,
@@ -260,9 +250,7 @@ def render_unassigned_view(
         st.caption(f"{hidden_count} student(s) not shown (Minor Issues or On Track).")
 
 
-# -----------------------------------------------------------------
 # View: Assigned to a student
-# -----------------------------------------------------------------
 
 def render_assigned_view(
     assistant_id: str,
@@ -370,9 +358,7 @@ def render_assigned_view(
             lab_state.unassign_student(student_id)
             st.rerun()
 
-# -----------------------------------------------------------------
 # Main
-# -----------------------------------------------------------------
 
 def main() -> None:
     st.set_page_config(

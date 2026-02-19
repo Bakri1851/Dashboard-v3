@@ -1,6 +1,4 @@
-# ============================================================
 # views.py — Page-level view layouts
-# ============================================================
 from datetime import datetime
 
 import pandas as pd
@@ -30,9 +28,7 @@ def _format_duration(seconds: int) -> str:
     return f"{hours:02d}:{minutes:02d}:{secs:02d}"
 
 
-# -----------------------------------------------------------------
 # In Class View (default)
-# -----------------------------------------------------------------
 
 def in_class_view(df: pd.DataFrame) -> None:
     """Main leaderboard view with summary cards, leaderboards, and distributions."""
@@ -96,9 +92,7 @@ def in_class_view(df: pd.DataFrame) -> None:
     components.render_formula_info()
 
 
-# -----------------------------------------------------------------
 # Student Drill-Down View
-# -----------------------------------------------------------------
 
 def student_detail_view(df: pd.DataFrame, student_id: str) -> None:
     """Detailed view for a single student."""
@@ -188,9 +182,7 @@ def student_detail_view(df: pd.DataFrame, student_id: str) -> None:
     components.render_data_table(recent, "Recent Submissions", max_rows=config.RECENT_SUBMISSIONS_LIMIT)
 
 
-# -----------------------------------------------------------------
 # Question Drill-Down View
-# -----------------------------------------------------------------
 
 def question_detail_view(df: pd.DataFrame, question_id: str) -> None:
     """Detailed view for a single question."""
@@ -279,9 +271,7 @@ def question_detail_view(df: pd.DataFrame, question_id: str) -> None:
     components.render_data_table(samples, "Sample Answers", max_rows=config.SAMPLE_ANSWERS_LIMIT)
 
 
-# -----------------------------------------------------------------
 # Data Analysis View
-# -----------------------------------------------------------------
 
 def data_analysis_view(df: pd.DataFrame) -> None:
     """Secondary view with 5 analytical chart types."""
@@ -327,9 +317,7 @@ def data_analysis_view(df: pd.DataFrame) -> None:
         components.render_students_by_module_chart(df)
 
 
-# -----------------------------------------------------------------
 # Settings View
-# -----------------------------------------------------------------
 
 def settings_view(df: pd.DataFrame) -> None:
     """Application settings."""

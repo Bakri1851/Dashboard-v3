@@ -1,6 +1,4 @@
-# ============================================================
 # app.py — Main entry point: sidebar, routing, state, auto-refresh
-# ============================================================
 from datetime import datetime, time as dt_time
 import html
 
@@ -16,9 +14,7 @@ import theme
 import views
 
 
-# -----------------------------------------------------------------
 # Session State Initialization
-# -----------------------------------------------------------------
 
 def init_session_state() -> None:
     """Initialize all session state keys with defaults if not present."""
@@ -50,9 +46,7 @@ def init_session_state() -> None:
             st.session_state[key] = value
 
 
-# -----------------------------------------------------------------
 # Lab Assignment Panel
-# -----------------------------------------------------------------
 
 def _render_lab_assignment_panel(df: pd.DataFrame) -> None:
     """
@@ -180,9 +174,7 @@ def _render_lab_assignment_panel(df: pd.DataFrame) -> None:
                     st.error("Assignment failed — student may already be claimed.")
 
 
-# -----------------------------------------------------------------
 # Sidebar
-# -----------------------------------------------------------------
 
 def _on_view_change() -> None:
     """Callback when the view radio changes — clear drill-down selections."""
@@ -410,9 +402,7 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-# -----------------------------------------------------------------
 # Main
-# -----------------------------------------------------------------
 
 def main() -> None:
     """Main application entry point."""

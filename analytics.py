@@ -1,6 +1,4 @@
-# ============================================================
 # analytics.py — Scoring calculations (UI-independent)
-# ============================================================
 from typing import Optional
 
 import numpy as np
@@ -9,9 +7,7 @@ import pandas as pd
 import config
 
 
-# -----------------------------------------------------------------
 # Incorrectness Estimation from AI Feedback
-# -----------------------------------------------------------------
 
 def estimate_incorrectness(feedback: Optional[str]) -> float:
     """
@@ -58,9 +54,7 @@ def compute_incorrectness_column(df: pd.DataFrame) -> pd.Series:
     return df["ai_feedback"].apply(estimate_incorrectness)
 
 
-# -----------------------------------------------------------------
 # Min-Max Normalization
-# -----------------------------------------------------------------
 
 def min_max_normalize(series: pd.Series) -> pd.Series:
     """(x - min) / (max - min), clamped to [0, 1]. Returns 0 if min == max."""
