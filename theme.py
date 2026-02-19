@@ -550,6 +550,206 @@ def get_plotly_layout_defaults() -> dict:
     }
 
 
+def get_mobile_css() -> str:
+    """Mobile-optimized CSS for lab_app.py. Designed for 375px+ phone screens."""
+    c = config.COLORS
+    fh = config.FONT_HEADING
+    fb = config.FONT_BODY
+    accent_rgb = _hex_to_rgb(c["cyan"])
+    panel_rgb = _hex_to_rgb(c["panel_bg"])
+
+    return f"""
+    /* ===== Mobile Reset ===== */
+    .stApp {{
+        background: linear-gradient(180deg, {c['dark_bg']} 0%, {c['panel_bg']} 100%);
+        color: {c['text']};
+        font-family: '{fb}', monospace;
+    }}
+    [data-testid="stAppViewContainer"] .block-container {{
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 0.75rem 1rem 3rem 1rem !important;
+    }}
+
+    /* Hide sidebar on mobile */
+    section[data-testid="stSidebar"] {{ display: none !important; }}
+    [data-testid="collapsedControl"] {{ display: none !important; }}
+    [data-testid="stSidebarCollapseButton"] {{ display: none !important; }}
+
+    /* ===== Headings ===== */
+    h1, h2, h3, h4 {{
+        color: {c['cyan']} !important;
+        font-family: '{fh}', sans-serif !important;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin: 0.5rem 0 0.25rem 0 !important;
+    }}
+
+    /* ===== Body Text ===== */
+    p, li, span, div, td, th, label {{
+        font-family: '{fb}', monospace;
+    }}
+
+    /* ===== Full-width large buttons ===== */
+    .stButton > button {{
+        background: linear-gradient(135deg, rgba({accent_rgb}, 0.2), rgba({accent_rgb}, 0.05));
+        color: {c['cyan']};
+        border: 1px solid {c['cyan']};
+        font-family: '{fh}', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 700;
+        border-radius: 8px;
+        min-height: 52px;
+        font-size: 0.9rem;
+        width: 100%;
+        transition: all 0.2s ease;
+    }}
+    .stButton > button:hover {{
+        background: rgba({accent_rgb}, 0.3);
+        box-shadow: 0 0 18px rgba({accent_rgb}, 0.4);
+        color: #ffffff;
+    }}
+
+    /* ===== Inputs ===== */
+    .stTextInput > div > div > input {{
+        background-color: {c['dark_bg']};
+        border: 1px solid rgba({accent_rgb}, 0.45);
+        color: {c['text']};
+        font-family: '{fb}', monospace;
+        font-size: 1.05rem;
+        min-height: 48px;
+        border-radius: 6px;
+    }}
+    .stTextInput > label {{
+        color: {c['text']} !important;
+        font-family: '{fb}', monospace !important;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }}
+
+    /* ===== Session Code Display ===== */
+    .lab-code-display {{
+        background: rgba({accent_rgb}, 0.08);
+        border: 2px solid {c['cyan']};
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        margin: 12px 0;
+        box-shadow: 0 0 24px rgba({accent_rgb}, 0.2);
+    }}
+    .lab-code-display .code-label {{
+        font-family: '{fb}', monospace;
+        color: {c['text_dim']};
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+    }}
+    .lab-code-display .code-value {{
+        font-family: '{fh}', sans-serif;
+        font-size: 2.6rem;
+        font-weight: 700;
+        color: {c['cyan']};
+        letter-spacing: 8px;
+        text-shadow: 0 0 20px rgba({accent_rgb}, 0.6);
+        margin-top: 6px;
+    }}
+
+    /* ===== Student Card (assigned view) ===== */
+    .student-card {{
+        border-radius: 12px;
+        padding: 20px;
+        margin: 12px 0;
+    }}
+    .student-card .card-label {{
+        font-family: '{fb}', monospace;
+        color: {c['text_dim']};
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        margin-bottom: 6px;
+    }}
+    .student-card .student-id {{
+        font-family: '{fh}', sans-serif;
+        color: {c['text']};
+        font-size: 1.05rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        word-break: break-all;
+    }}
+    .student-card .score-value {{
+        font-family: '{fh}', sans-serif;
+        font-size: 2.4rem;
+        font-weight: 700;
+        margin-top: 8px;
+        line-height: 1.1;
+    }}
+
+    /* ===== Struggle Badge ===== */
+    .struggle-badge {{
+        display: inline-block;
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-family: '{fh}', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border: 1px solid;
+        margin-top: 8px;
+    }}
+
+    /* ===== Student List Item (unassigned view) ===== */
+    .student-list-item {{
+        background: rgba({panel_rgb}, 0.7);
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin: 6px 0;
+        border-left: 3px solid;
+    }}
+
+    /* ===== Section Label ===== */
+    .section-label {{
+        font-family: '{fb}', monospace;
+        color: {c['cyan']};
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        margin: 16px 0 8px 0;
+    }}
+
+    /* ===== Status message ===== */
+    .status-ended {{
+        text-align: center;
+        padding: 48px 0;
+    }}
+
+    /* ===== Divider ===== */
+    hr {{
+        border-color: rgba({accent_rgb}, 0.15) !important;
+        margin: 12px 0 !important;
+    }}
+
+    /* ===== Alert/Info boxes ===== */
+    [data-testid="stAlert"] {{
+        border-radius: 8px;
+        font-family: '{fb}', monospace;
+    }}
+
+    /* ===== Hide Streamlit defaults ===== */
+    #MainMenu {{visibility: hidden;}}
+    footer {{visibility: hidden;}}
+    [data-testid="stDecoration"] {{visibility: hidden; height: 0;}}
+    [data-testid="stHeader"] {{
+        background: transparent !important;
+        border-bottom: none !important;
+        box-shadow: none !important;
+    }}
+    [data-testid="stToolbar"] {{ background: transparent !important; }}
+    """
+
+
 def _hex_to_rgb(hex_color: str) -> str:
     """Convert '#rrggbb' hex color to 'r, g, b' string for rgba()."""
     h = hex_color.lstrip("#")

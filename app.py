@@ -7,8 +7,10 @@ import pandas as pd
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 
+import analytics
 import config
 import data_loader
+import lab_state as _lab_state
 import theme
 import views
 
@@ -39,10 +41,112 @@ def init_session_state() -> None:
         "last_refresh": None,
         "time_filter_enabled": False,
         "previous_scores": {},
+        "lab_session_code": None,
     }
     for key, value in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = value
+
+
+# -----------------------------------------------------------------
+# Lab Assignment Panel
+# -----------------------------------------------------------------
+
+def _render_lab_assignment_panel(df: pd.DataFrame) -> None:
+    """
+    Render lab assistant management panel inside the sidebar.
+    Shows joined assistants, their current assignments, and allows
+    the instructor to assign struggling students to waiting assistants.
+    Called only when a session is active.
+    """
+    lab_data = _lab_state.read_lab_state()
+    if not lab_data.get("session_active"):
+        return
+
+    assistants = lab_data.get("lab_assistants", {})
+    assignments = lab_data.get("assignments", {})
+
+    st.markdown("---")
+    st.markdown(
+        f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
+        f'text-transform:uppercase; letter-spacing:2px; font-size:0.9rem;">'
+        f'Lab Assistants ({len(assistants)})</h3>',
+        unsafe_allow_html=True,
+    )
+
+    if not assistants:
+        st.caption("No lab assistants have joined yet.")
+        return
+
+    # Build struggle data for the assignment UI
+    struggle_df = None
+    if not df.empty:
+        struggle_df = analytics.compute_student_struggle_scores(df)
+
+    # List each assistant with their current assignment
+    unassigned_assistants: list[tuple[str, str]] = []
+    for aid, info in assistants.items():
+        assigned_student = info.get("assigned_student")
+        if assigned_student:
+            entry = assignments.get(assigned_student, {})
+            status = entry.get("status", "helping")
+            status_color = (
+                config.COLORS["green"] if status == "helped" else config.COLORS["yellow"]
+            )
+            st.markdown(
+                f'<div style="font-size:0.8rem; padding:3px 0;">'
+                f'<span style="color:{config.COLORS["cyan"]};">{info["name"]}</span>'
+                f' → <span style="color:{config.COLORS["text"]};">{assigned_student}</span>'
+                f' <span style="color:{status_color}; font-size:0.65rem;">({status})</span>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+            if st.button(f"Release {info['name']}", key=f"release_{aid}"):
+                _lab_state.unassign_student(assigned_student)
+                st.rerun()
+        else:
+            unassigned_assistants.append((aid, info["name"]))
+            st.markdown(
+                f'<div style="font-size:0.8rem; padding:3px 0;">'
+                f'<span style="color:{config.COLORS["cyan"]};">{info["name"]}</span>'
+                f' — <span style="color:{config.COLORS["text_dim"]};">waiting</span>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+
+    # Instructor assignment controls
+    if struggle_df is not None and not struggle_df.empty and unassigned_assistants:
+        assigned_student_ids = set(assignments.keys())
+        eligible = struggle_df[
+            (struggle_df["struggle_level"].isin({"Struggling", "Needs Help"}))
+            & (~struggle_df["user"].isin(assigned_student_ids))
+        ]["user"].tolist()
+
+        if eligible:
+            st.markdown(
+                f'<p style="font-size:0.75rem; color:{config.COLORS["cyan"]}; '
+                f'text-transform:uppercase; letter-spacing:1px; margin-top:8px;">Assign</p>',
+                unsafe_allow_html=True,
+            )
+            chosen_student = st.selectbox(
+                "Student",
+                options=eligible,
+                key="assign_student_select",
+                label_visibility="collapsed",
+            )
+            assistant_options = {name: aid for aid, name in unassigned_assistants}
+            chosen_name = st.selectbox(
+                "Assistant",
+                options=list(assistant_options.keys()),
+                key="assign_assistant_select",
+                label_visibility="collapsed",
+            )
+            if st.button("Assign", key="do_assign"):
+                ok = _lab_state.assign_student(chosen_student, assistant_options[chosen_name])
+                if ok:
+                    st.rerun()
+                else:
+                    st.error("Assignment failed — student may already be claimed.")
 
 
 # -----------------------------------------------------------------
@@ -82,6 +186,9 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
                 st.session_state["loaded_session_id"] = None
                 st.session_state["loaded_session_start"] = None
                 st.session_state["loaded_session_end"] = None
+                code = _lab_state.generate_session_code()
+                st.session_state["lab_session_code"] = code
+                _lab_state.start_lab_session(code)
                 data_loader.fetch_raw_data.clear()
                 st.rerun()
         else:
@@ -98,6 +205,24 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
                 """,
                 unsafe_allow_html=True,
             )
+            code = st.session_state.get("lab_session_code", "")
+            if code:
+                st.markdown(
+                    f"""
+                    <div style="background:rgba(0,245,255,0.08); border:1px solid
+                                {config.COLORS['cyan']}; border-radius:8px; padding:12px;
+                                text-align:center; margin-top:8px;">
+                        <div style="font-family:'{config.FONT_BODY}',monospace;
+                                    color:{config.COLORS['text_dim']}; font-size:0.65rem;
+                                    letter-spacing:3px; text-transform:uppercase;">Lab Code</div>
+                        <div style="font-family:'{config.FONT_HEADING}',sans-serif;
+                                    font-size:1.8rem; font-weight:700;
+                                    color:{config.COLORS['cyan']}; letter-spacing:6px;
+                                    text-shadow:0 0 16px rgba(0,245,255,0.5);">{code}</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
             if st.button("End Session", key="end_session"):
                 end_time = datetime.now()
                 record = data_loader.build_session_record_from_state(end_time)
@@ -109,10 +234,15 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
                         st.session_state["session_load_warning"] = (
                             "Session ended, but it could not be saved to local history."
                         )
+                _lab_state.end_lab_session()
+                st.session_state["lab_session_code"] = None
                 st.session_state["session_active"] = False
                 st.session_state["session_start"] = None
                 data_loader.fetch_raw_data.clear()
                 st.rerun()
+
+        if st.session_state["session_active"]:
+            _render_lab_assignment_panel(df)
 
         if (
             not st.session_state["session_active"]

@@ -4,3 +4,6 @@ __pycache__/
 
 .venv/
 .claude/
+
+lab_session.json
+lab_session.lock

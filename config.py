@@ -106,6 +106,10 @@ AUTO_REFRESH_OPTIONS: list[int] = [5, 10, 15, 30, 60]
 SAVED_SESSIONS_FILE: str = "saved_sessions.json"
 SAVED_SESSIONS_VERSION: int = 1
 
+# --- Lab Session State ---
+LAB_SESSION_FILE: str = "lab_session.json"
+LAB_CODE_LENGTH: int = 6
+
 # --- Color Palette ---
 COLORS: dict[str, str] = {
     "green":    "#00ff88",
