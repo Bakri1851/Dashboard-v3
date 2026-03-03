@@ -16,6 +16,7 @@ This `README.md` is the main source of truth for understanding how the code is o
 - Requests
 - streamlit-autorefresh (auto-polling in lab assistant app)
 - filelock (thread-safe concurrent writes to `lab_session.json`)
+- openai (GPT-4o-mini incorrectness scoring via AI tutor feedback)
 
 Dependencies are listed in `requirements.txt`.
 
@@ -45,6 +46,7 @@ Both processes share state through `lab_session.json` on disk.
 - `analytics.py`: scoring engine (incorrectness, struggle score, difficulty score, classification).
 - `data_loader.py`: API fetch/parse/clean pipeline plus saved session persistence helpers.
 - `lab_state.py`: shared file-locked state management for instructor and assistant apps (session lifecycle, assistant roster, student assignments).
+- `sound.py`: synthesized sci-fi sound effects via the browser Web Audio API (session start/end, navigation, selection, assistant join, high-struggle alarm, etc.). All effects respect the `sounds_enabled` session state flag.
 - `config.py`: all tunable constants (weights, thresholds, colors, limits, API config).
 - `saved_sessions.json`: local storage for saved sessions created when ending a lab session.
 - `lab_session.json`: runtime file persisting active lab session state (assistants, assignments); auto-created on first use.
@@ -71,15 +73,108 @@ Both processes share state through `lab_session.json` on disk.
 - in-class view
 - data analysis view
 - settings view
+- previous sessions view
 
-## Scoring model locations
-- Incorrectness estimation: `analytics.py:estimate_incorrectness`
-- Student struggle score: `analytics.py:compute_student_struggle_scores`
-- Question difficulty score: `analytics.py:compute_question_difficulty_scores`
-- Level classification helper: `analytics.py:classify_score`
-- Weights and thresholds: `config.py`
+## Scoring models
 
-If you need to change model behavior, start in `config.py`, then update `analytics.py` only if logic must change.
+All scoring logic lives in `analytics.py`; all tunable constants live in `config.py`. Start in `config.py` for weight/threshold changes; only touch `analytics.py` if the algorithm itself must change.
+
+### Incorrectness estimation
+
+Every submission carries an `ai_feedback` string produced by the backend AI tutor. The dashboard scores that feedback using OpenAI:
+
+- **Model**: GPT-4o-mini (`config.OPENAI_MODEL`), `temperature=0`
+- **Batching**: up to 50 feedback texts per API call (`config.OPENAI_BATCH_SIZE`)
+- **Output**: float in **[0, 1]** — 0 = fully correct, 1 = fully incorrect
+- **Empty / null feedback** → **0.5** (neutral, no API call made)
+- **In-process cache** (`_incorrectness_cache` dict in `analytics.py`): identical feedback strings are scored only once per process lifetime, avoiding redundant API calls across Streamlit reruns
+- **Correct threshold**: `config.CORRECT_THRESHOLD = 0.5` — incorrectness < 0.5 is treated as "correct" in all binary counts
+
+Key functions: `analytics.estimate_incorrectness`, `analytics.compute_incorrectness_column`
+
+---
+
+### Student struggle score
+
+**Formula (S_raw):**
+```
+S_raw = 0.10·n̂ + 0.10·t̂ + 0.20·î + 0.10·r̂ + 0.38·A_raw + 0.05·d̂ + 0.07·rep̂
+```
+
+**Bayesian shrinkage** (reduces noise for students with few submissions):
+```
+w_n    = n / (n + K),   K = 5
+S_final = w_n · S_raw + (1 − w_n) · S̄_class
+```
+Students with n >> 5 are effectively unaffected; students with n << 5 are pulled toward the class mean.
+
+**Components:**
+
+| Symbol | Name | Computation | Weight |
+|---|---|---|---|
+| `n̂` | Submission count | min-max normalized across all students | 0.10 |
+| `t̂` | Time active | first-to-last submission timestamp delta (minutes); min-max normalized | 0.10 |
+| `î` | Mean incorrectness | mean OpenAI incorrectness score across all of the student's submissions | 0.20 |
+| `r̂` | Retry rate | `1 − (unique_questions / total_submissions)`; 0 = all unique questions, 1 = all retries | 0.10 |
+| `A_raw` | Recent incorrectness | exponential time-decay weighted mean of last `N=5` submissions; `w_i = exp(−λ·Δt)`, λ = ln2 / 1800 (30-min half-life); falls back to equal weights when all timestamps are identical | 0.38 |
+| `d̂` | Improvement trajectory | linear regression slope of incorrectness vs. submission order (oldest = 0); positive = getting worse; min-max normalized across all students | 0.05 |
+| `rep̂` | Answer repetition rate | fraction of submissions that exactly repeat a prior answer on the same question (per-question, chronological; strip-normalized) | 0.07 |
+
+**Struggle level thresholds:**
+
+| Score range | Label | Color |
+|---|---|---|
+| [0.00, 0.20) | On Track | `#00ff88` |
+| [0.20, 0.35) | Minor Issues | `#ffcc00` |
+| [0.35, 0.50) | Struggling | `#ff6600` |
+| [0.50, 1.00] | Needs Help | `#ff2d55` |
+
+Key functions: `analytics.compute_student_struggle_scores`, `analytics.compute_recent_incorrectness`, `analytics.classify_score`
+
+---
+
+### Question difficulty score
+
+**Formula (D):**
+```
+D = 0.28·c̃ + 0.12·t̃ + 0.20·ã + 0.20·f̃ + 0.20·p̃
+```
+
+**Components:**
+
+| Symbol | Name | Computation | Weight |
+|---|---|---|---|
+| `c̃` | Incorrect rate | `1 − (correct_attempts / total_attempts)`; "correct" = incorrectness < 0.5 | 0.28 |
+| `t̃` | Avg time per student | minutes from a student's first to last attempt on this question; 0 for single-attempt students; mean across all students; min-max normalized | 0.12 |
+| `ã` | Avg attempts per student | `total_attempts / unique_students`; min-max normalized | 0.20 |
+| `f̃` | Avg incorrectness | mean OpenAI incorrectness score across all attempts on this question | 0.20 |
+| `p̃` | First-attempt failure rate | fraction of students whose chronologically first attempt has incorrectness ≥ 0.5 | 0.20 |
+
+**Difficulty level thresholds:**
+
+| Score range | Label | Color |
+|---|---|---|
+| [0.00, 0.35) | Easy | `#00ff88` |
+| [0.35, 0.50) | Medium | `#ffcc00` |
+| [0.50, 0.75) | Hard | `#ff6600` |
+| [0.75, 1.00] | Very Hard | `#ff2d55` |
+
+Key function: `analytics.compute_question_difficulty_scores`
+
+---
+
+### Min-max normalization
+`analytics.min_max_normalize(series)` applies `(x − min) / (max − min)`, clamped to [0, 1].
+Returns **0.0 for all entries** when `min == max` (avoids NaN when all students have identical values).
+
+---
+
+### Temporal smoothing (stub — not active)
+Infrastructure exists in `analytics.apply_temporal_smoothing`:
+```
+S_t = (1 − α) · S_prev + α · S_raw,   α = 0.3
+```
+`config.SMOOTHING_ENABLED = False`. Not wired into any active code path.
 
 ## Session behavior
 There are two session concepts:
@@ -110,6 +205,7 @@ The lab assistant system runs as two cooperating Streamlit processes sharing sta
   "session_code": "A3X7K2",
   "session_active": true,
   "generated_at": "2026-02-07T17:00:00",
+  "allow_self_allocation": true,
   "lab_assistants": {
     "alice_1234": {
       "name": "Alice",
@@ -141,7 +237,7 @@ The lab assistant system runs as two cooperating Streamlit processes sharing sta
 
 ### Assignment flows
 - **Instructor assigns**: sidebar dropdown selects an unassigned assistant and a struggling student → `lab_state.assign_student(student_id, assistant_id)`.
-- **Assistant self-claims**: unassigned assistant sees students rated "Struggling" or "Needs Help" and clicks **Help {user}** → `lab_state.self_claim_student(student_id, assistant_id)`.
+- **Assistant self-claims**: unassigned assistant sees students rated "Struggling" or "Needs Help" and clicks **Help {user}** → `lab_state.self_claim_student(student_id, assistant_id)`. Self-claim is only available when the instructor has enabled it via the `allow_self_allocation` toggle in the sidebar; when disabled, the unassigned view shows a waiting message instead of the student list.
 
 An assistant can only hold one assignment at a time; trying to claim a second student returns an error.
 
@@ -154,6 +250,7 @@ An assistant can only hold one assignment at a time; trying to claim a second st
 - `unassign_student(student_id)` — releases the assignment and frees the assistant.
 - `leave_session(assistant_id)` — assistant voluntarily leaves; releases assigned student.
 - `remove_assistant(assistant_id)` — instructor removes an assistant; releases assigned student.
+- `set_allow_self_allocation(flag)` — instructor toggles whether assistants can self-claim students; updates `allow_self_allocation` in shared state.
 
 ### Why deferred actions exist
 Streamlit does not allow changing certain `st.session_state` keys after their widgets are instantiated in the same run.  
@@ -212,6 +309,9 @@ Key runtime state in `app.py:init_session_state()`:
 | `time_filter_enabled` | Manual date/time filter toggle |
 | `lab_session_code` | Session code shown in sidebar code card while a live session is active |
 | `pending_remove_assistant_id` | Deferred assistant removal ID; cleared before sidebar widgets render |
+| `sounds_enabled` | Whether sci-fi sound effects are active (default: `True`) |
+| `auto_refresh_enabled` | Whether automatic data polling is active (default: `True`) |
+| `auto_refresh_interval` | Polling interval in seconds (default: 60; options: 5, 10, 15, 30, 60) |
 
 ## Common change recipes
 ### Add a new chart to existing pages
@@ -244,7 +344,7 @@ Key runtime state in `app.py:init_session_state()`:
 ## Validation checklist
 Run syntax checks:
 ```bash
-python -m py_compile app.py config.py views.py theme.py components.py analytics.py data_loader.py
+python -m py_compile app.py config.py views.py theme.py components.py analytics.py data_loader.py sound.py
 ```
 
 Manual smoke tests:
@@ -262,6 +362,8 @@ Manual smoke tests:
 12. Mark the student as helped in `lab_app.py`; verify the status updates in both apps.
 13. Remove an assistant from the instructor sidebar; verify they are ejected and `lab_app.py` shows the rejoin prompt.
 14. End the live session; verify `lab_app.py` shows "No Active Session".
+15. In Settings, toggle sound effects off; confirm no audio fires on navigation or selection. Toggle back on and confirm sound returns.
+16. During an active session, toggle the **Allow self-allocation** switch in the instructor sidebar; open `lab_app.py` as an unassigned assistant and verify the student claim list appears (enabled) or is replaced by a waiting message (disabled).
 
 ## Troubleshooting notes
 - If loading a saved session shows all data, check `loaded_session_start` and `loaded_session_end` are populated.
