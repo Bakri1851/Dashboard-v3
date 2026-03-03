@@ -550,6 +550,37 @@ def get_main_css() -> str:
         -webkit-text-fill-color: #ffffff !important;
     }}
 
+    /* ===== Entry Animations ===== */
+    @keyframes fadeInUp {{
+        from {{ opacity: 0; transform: translateY(20px); }}
+        to   {{ opacity: 1; transform: translateY(0);    }}
+    }}
+
+    .dashboard-header {{
+        animation: fadeInUp 0.4s ease both;
+    }}
+    .info-bar {{
+        animation: fadeInUp 0.4s ease both;
+        animation-delay: 0.05s;
+    }}
+    .metric-card {{
+        animation: fadeInUp 0.4s ease both;
+        animation-delay: 0.1s;
+    }}
+    [data-testid="stColumn"]:nth-child(1) .metric-card {{ animation-delay: 0.10s; }}
+    [data-testid="stColumn"]:nth-child(2) .metric-card {{ animation-delay: 0.18s; }}
+    [data-testid="stColumn"]:nth-child(3) .metric-card {{ animation-delay: 0.26s; }}
+    [data-testid="stColumn"]:nth-child(4) .metric-card {{ animation-delay: 0.34s; }}
+
+    .entity-header {{
+        animation: fadeInUp 0.4s ease both;
+        animation-delay: 0.05s;
+    }}
+    section[data-testid="stSidebar"] .lab-code-card {{
+        animation: fadeInUp 0.35s ease both;
+        animation-delay: 0.05s;
+    }}
+
     /* ===== Hide Streamlit defaults ===== */
     #MainMenu {{visibility: hidden;}}
     footer {{visibility: hidden;}}
@@ -589,6 +620,10 @@ def get_plotly_layout_defaults() -> dict:
             "font": {"family": f"{config.FONT_BODY}, monospace", "color": c["text"]},
         },
         "margin": {"l": 10, "r": 10, "t": 40, "b": 10},
+        "transition": {
+            "duration": 600,
+            "easing": "cubic-in-out",
+        },
     }
 
 
@@ -805,6 +840,17 @@ def get_mobile_css() -> str:
         border-radius: 8px;
         font-family: '{fb}', monospace;
     }}
+
+    /* ===== Mobile Entry Animations ===== */
+    @keyframes fadeInUp {{
+        from {{ opacity: 0; transform: translateY(12px); }}
+        to   {{ opacity: 1; transform: translateY(0);    }}
+    }}
+
+    .lab-code-display {{ animation: fadeInUp 0.3s ease both; }}
+    .assistant-session-strip {{ animation: fadeInUp 0.3s ease both; }}
+    .student-card {{ animation: fadeInUp 0.3s ease both; animation-delay: 0.05s; }}
+    .student-list-item {{ animation: fadeInUp 0.3s ease both; animation-delay: 0.08s; }}
 
     /* ===== Hide Streamlit defaults ===== */
     #MainMenu {{visibility: hidden;}}
