@@ -77,6 +77,17 @@ def _render_lab_assignment_panel() -> None:
         unsafe_allow_html=True,
     )
 
+    allow_self = lab_data.get("allow_self_allocation", True)
+    new_allow = st.checkbox(
+        "Allow assistants to self-allocate",
+        value=allow_self,
+        key="allow_self_allocation_toggle",
+        help="When off, assistants must wait for you to assign them a student.",
+    )
+    if new_allow != allow_self:
+        _lab_state.set_allow_self_allocation(new_allow)
+        st.rerun()
+
     if not assistants:
         st.session_state["pending_remove_assistant_id"] = None
         st.caption("No lab assistants have joined yet.")

@@ -209,6 +209,8 @@ def render_unassigned_view(
         struggle_df[~struggle_df["struggle_level"].isin(eligible_levels)]
     )
 
+    allow_self = lab_data.get("allow_self_allocation", True)
+
     if available.empty:
         st.success("All struggling students are covered — great work!")
     else:
@@ -240,12 +242,16 @@ def render_unassigned_view(
                 """,
                 unsafe_allow_html=True,
             )
-            if st.button(f"Help {user}", key=f"claim_{user}"):
-                ok, err = lab_state.self_claim_student(user, assistant_id)
-                if ok:
-                    st.rerun()
-                else:
-                    st.error(err)
+            if allow_self:
+                if st.button(f"Help {user}", key=f"claim_{user}"):
+                    ok, err = lab_state.self_claim_student(user, assistant_id)
+                    if ok:
+                        st.rerun()
+                    else:
+                        st.error(err)
+
+        if not allow_self:
+            st.caption("Self-allocation is disabled — wait for the instructor to assign you.")
 
     if hidden_count > 0:
         st.caption(f"{hidden_count} student(s) not shown (Minor Issues or On Track).")

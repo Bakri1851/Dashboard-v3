@@ -31,6 +31,7 @@ def _default_state() -> dict[str, Any]:
         "generated_at": _now_iso(),
         "lab_assistants": {},
         "assignments": {},
+        "allow_self_allocation": True,
     }
 
 
@@ -49,6 +50,7 @@ def _normalize_state(raw_state: Any) -> dict[str, Any]:
         state["session_code"] = session_code.strip().upper()
 
     state["session_active"] = bool(raw_state.get("session_active", False))
+    state["allow_self_allocation"] = bool(raw_state.get("allow_self_allocation", True))
 
     generated_at = raw_state.get("generated_at")
     if isinstance(generated_at, str) and generated_at:
@@ -274,6 +276,13 @@ def self_claim_student(student_id: str, assistant_id: str) -> tuple[bool, Option
         assistant["assigned_student"] = student
         _write_state_unlocked(state)
         return True, None
+
+
+def set_allow_self_allocation(enabled: bool) -> None:
+    with _lock():
+        state = _read_state_unlocked()
+        state["allow_self_allocation"] = bool(enabled)
+        _write_state_unlocked(state)
 
 
 def get_assignment_for_assistant(assistant_id: str) -> Optional[str]:
