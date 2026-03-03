@@ -325,6 +325,15 @@ def settings_view(df: pd.DataFrame) -> None:
 
     st.markdown(
         f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
+        f'text-transform:uppercase; letter-spacing:2px; font-size:1rem;">Sound Effects</h3>',
+        unsafe_allow_html=True,
+    )
+    st.checkbox("Enable Sound Effects", key="sounds_enabled", help="Play sci-fi sound effects for key events (session start/end, student selection, data refresh, etc.).")
+
+    st.markdown("---")
+
+    st.markdown(
+        f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
         f'text-transform:uppercase; letter-spacing:2px; font-size:1rem;">Refresh</h3>',
         unsafe_allow_html=True,
     )

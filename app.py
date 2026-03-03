@@ -1,6 +1,7 @@
 # app.py — Main entry point: sidebar, routing, state, auto-refresh
 from datetime import datetime, time as dt_time
 import html
+import os
 
 import pandas as pd
 import streamlit as st
@@ -12,7 +13,9 @@ import data_loader
 import lab_state as _lab_state
 import theme
 import views
+import sound
 
+os.environ.setdefault("OPENAI_API_KEY", st.secrets.get("OPENAI_API_KEY", ""))
 
 # Session State Initialization
 
@@ -43,6 +46,12 @@ def init_session_state() -> None:
         "_autorefresh_count": None,
         "_struggle_df": None,
         "_difficulty_df": None,
+        "sounds_enabled":            config.SOUNDS_ENABLED_DEFAULT,
+        "_prev_session_active":      False,
+        "_prev_selected_student":    None,
+        "_prev_selected_question":   None,
+        "_prev_dashboard_view":      "In Class View",
+        "_prev_high_struggle_count": 0,
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -438,6 +447,15 @@ def main() -> None:
     # Initialize state
     init_session_state()
 
+    # Sound: session lifecycle (detect start/end transitions)
+    _prev_active = st.session_state.get("_prev_session_active", False)
+    _curr_active = st.session_state["session_active"]
+    if _curr_active and not _prev_active:
+        sound.play_session_start()
+    elif not _curr_active and _prev_active:
+        sound.play_session_end()
+    st.session_state["_prev_session_active"] = _curr_active
+
     # Inject theme
     st.markdown(theme.get_google_fonts_import(), unsafe_allow_html=True)
     st.markdown(f"<style>{theme.get_main_css()}</style>", unsafe_allow_html=True)
@@ -453,6 +471,7 @@ def main() -> None:
         if refresh_count != prev_count:
             data_loader.fetch_raw_data.clear()
             st.session_state["last_refresh"] = datetime.now()
+            sound.play_refresh()
         st.session_state["_autorefresh_count"] = refresh_count
 
     # Load data
@@ -502,12 +521,49 @@ def main() -> None:
     # Sidebar controls and filtering
     df = render_sidebar(df)
 
+    # Sound: navigation transition
+    _prev_view = st.session_state.get("_prev_dashboard_view")
+    _curr_view = st.session_state["current_view"]
+    if _prev_view is not None and _prev_view != _curr_view and _curr_view in {"In Class View", "Data Analysis View"}:
+        sound.play_navigation()
+    st.session_state["_prev_dashboard_view"] = _curr_view
+
+    # Sound: student selected
+    _prev_s = st.session_state.get("_prev_selected_student")
+    _curr_s = st.session_state["selected_student"]
+    if _curr_s is not None and _curr_s != _prev_s:
+        sound.play_selection()
+    st.session_state["_prev_selected_student"] = _curr_s
+
+    # Sound: question selected
+    _prev_q = st.session_state.get("_prev_selected_question")
+    _curr_q = st.session_state["selected_question"]
+    if _curr_q is not None and _curr_q != _prev_q:
+        sound.play_selection()
+    st.session_state["_prev_selected_question"] = _curr_q
+
+    # Sound: lab assistant joined (instructor hears it)
+    _lab_sound_data = _lab_state.read_lab_state()
+    _curr_aids = set((_lab_sound_data.get("lab_assistants") or {}).keys())
+    _prev_aids = st.session_state.get("_prev_lab_assistant_ids", _curr_aids)
+    if _curr_aids - _prev_aids:
+        sound.play_assistant_join()
+    st.session_state["_prev_lab_assistant_ids"] = _curr_aids
+
     # Compute scores once per render; stored in session state for the sidebar
     # panel (which rendered above and will read them on the next cycle).
     struggle_df = analytics.compute_student_struggle_scores(df)
     difficulty_df = analytics.compute_question_difficulty_scores(df)
     st.session_state["_struggle_df"] = struggle_df
     st.session_state["_difficulty_df"] = difficulty_df
+
+    # Sound: high-struggle student count increased
+    if st.session_state["session_active"] and struggle_df is not None and not struggle_df.empty:
+        _curr_hs = int((struggle_df["struggle_level"] == "Needs Help").sum())
+        _prev_hs = st.session_state.get("_prev_high_struggle_count", 0)
+        if _curr_hs > _prev_hs:
+            sound.play_high_struggle()
+        st.session_state["_prev_high_struggle_count"] = _curr_hs
 
     # Route to view
     if st.session_state["selected_student"] is not None:

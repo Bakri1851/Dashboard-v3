@@ -7,3 +7,5 @@ __pycache__/
 
 lab_session.json
 lab_session.lock
+
+.streamlit/secrets.toml

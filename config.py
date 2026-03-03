@@ -1,5 +1,4 @@
 # config.py — All tunable parameters for the dashboard
-import re
 
 # --- API Configuration ---
 API_URL: str = "http://sccb2.sci-project.lboro.ac.uk/retrievalEndpoint.php"
@@ -10,33 +9,9 @@ CACHE_TTL: int = 10            # seconds
 EXCLUDED_MODULES: list[str] = ["AI_TEST", "24COB231", "24WSC701"]
 MODULE_RENAME_MAP: dict[str, str] = {"25COA504": "25COP504"}
 
-# --- Incorrectness Estimation Keywords ---
-POSITIVE_KEYWORDS: list[str] = [
-    "correct", "right", "good", "excellent", "perfect",
-    "well done", "great", "yes", "exactly", "accurate",
-]
-NEGATIVE_KEYWORDS: list[str] = [
-    "incorrect", "wrong", "error", "mistake", "try again",
-    "not quite", "reconsider", "check", "review", "missing",
-    "incomplete", "no",
-]
-PARTIAL_KEYWORDS: list[str] = [
-    "partially", "almost", "close", "nearly", "but", "however",
-]
-
-# Pre-compiled for fast single-pass matching in analytics.estimate_incorrectness
-POSITIVE_RE = re.compile("|".join(re.escape(kw) for kw in POSITIVE_KEYWORDS))
-NEGATIVE_RE = re.compile("|".join(re.escape(kw) for kw in NEGATIVE_KEYWORDS))
-PARTIAL_RE  = re.compile("|".join(re.escape(kw) for kw in PARTIAL_KEYWORDS))
-
-# --- Incorrectness Scores ---
-INCORRECTNESS_EMPTY: float = 0.5
-INCORRECTNESS_ONLY_POSITIVE: float = 0.1
-INCORRECTNESS_ONLY_NEGATIVE: float = 0.9
-INCORRECTNESS_PARTIAL: float = 0.5
-INCORRECTNESS_MORE_POSITIVE: float = 0.3
-INCORRECTNESS_MORE_NEGATIVE: float = 0.7
-INCORRECTNESS_DEFAULT: float = 0.5
+# --- OpenAI Configuration ---
+OPENAI_MODEL: str = "gpt-4o-mini"
+OPENAI_BATCH_SIZE: int = 50       # max feedback items per API call
 
 # --- Student Struggle Score Weights ---
 STRUGGLE_WEIGHT_N: float = 0.10   # submission count (min-max → collapses; minimal)
@@ -105,6 +80,9 @@ DATA_ANALYSIS_TOP_USERS: int = 20
 AUTO_REFRESH_DEFAULT: bool = True
 AUTO_REFRESH_INTERVAL_DEFAULT: int = 60  # seconds
 AUTO_REFRESH_OPTIONS: list[int] = [5, 10, 15, 30, 60]
+
+# --- Sound Effects ---
+SOUNDS_ENABLED_DEFAULT: bool = True
 
 # --- Saved Session Persistence ---
 SAVED_SESSIONS_FILE: str = "saved_sessions.json"

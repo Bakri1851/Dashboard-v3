@@ -12,6 +12,7 @@ import config
 import data_loader
 import lab_state
 import theme
+import sound
 
 
 # Helpers
@@ -404,6 +405,14 @@ def main() -> None:
         st.rerun()
 
     assigned_student = lab_state.get_assignment_for_assistant(assistant_id)
+
+    # Sound: assignment received (None → assigned transition)
+    if "sounds_enabled" not in st.session_state:
+        st.session_state["sounds_enabled"] = True
+    _prev_assigned = st.session_state.get("_prev_assigned_student")
+    if assigned_student is not None and _prev_assigned is None:
+        sound.play_assignment_received()
+    st.session_state["_prev_assigned_student"] = assigned_student
 
     if assigned_student:
         assignment = lab_data.get("assignments", {}).get(assigned_student, {})

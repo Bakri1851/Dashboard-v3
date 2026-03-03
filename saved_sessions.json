@@ -2,6 +2,40 @@
   "version": 1,
   "sessions": [
     {
+      "id": "78edfd34-e715-4603-970a-86d0708f3c6f",
+      "name": "Lab Session 2026-03-03 03:34",
+      "created_at": "2026-03-03T03:35:11",
+      "start_time": "2026-03-03T03:34:56",
+      "end_time": "2026-03-03T03:35:11",
+      "duration_seconds": 14,
+      "context": {
+        "dashboard_view": "In Class View",
+        "secondary_module_filter": "All Modules",
+        "time_filter_enabled": false,
+        "time_date_range": null,
+        "time_start": null,
+        "time_end": null
+      },
+      "notes": ""
+    },
+    {
+      "id": "1c41fafc-e07a-4596-8a19-e6f49968aa9c",
+      "name": "Lab Session 2026-03-03 03:34",
+      "created_at": "2026-03-03T03:34:39",
+      "start_time": "2026-03-03T03:34:30",
+      "end_time": "2026-03-03T03:34:39",
+      "duration_seconds": 9,
+      "context": {
+        "dashboard_view": "In Class View",
+        "secondary_module_filter": "All Modules",
+        "time_filter_enabled": false,
+        "time_date_range": null,
+        "time_start": null,
+        "time_end": null
+      },
+      "notes": ""
+    },
+    {
       "id": "77da526e-5405-4af7-881d-c70482d0d4bd",
       "name": "Lab Session 2026-02-19 11:23",
       "created_at": "2026-02-19T11:35:22",

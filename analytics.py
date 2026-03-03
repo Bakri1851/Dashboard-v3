@@ -1,57 +1,75 @@
 # analytics.py — Scoring calculations (UI-independent)
+import json
 from typing import Optional
 
 import numpy as np
 import pandas as pd
+from openai import OpenAI
 
 import config
 
 
-# Incorrectness Estimation from AI Feedback
+# Incorrectness Estimation via OpenAI
+
+_incorrectness_cache: dict[str, float] = {}
+
+
+def _call_openai_batch(feedbacks: list[str]) -> list[float]:
+    """
+    Send a batch of feedback texts to OpenAI and return incorrectness scores [0, 1].
+    Returns [0.5] * len(feedbacks) on any error.
+    """
+    numbered = "\n".join(f"{i + 1}. {text}" for i, text in enumerate(feedbacks))
+    prompt = (
+        "You are scoring student answers based on AI tutor feedback.\n"
+        "For each numbered feedback text below, return a JSON array of floats "
+        "from 0.0 (fully correct) to 1.0 (fully incorrect).\n"
+        "Return ONLY the JSON array, nothing else.\n\n"
+        f"Feedbacks:\n{numbered}"
+    )
+    try:
+        client = OpenAI()
+        response = client.chat.completions.create(
+            model=config.OPENAI_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0,
+        )
+        scores = json.loads(response.choices[0].message.content.strip())
+        if isinstance(scores, list) and len(scores) == len(feedbacks):
+            return [float(max(0.0, min(1.0, s))) for s in scores]
+    except Exception:
+        pass
+    return [0.5] * len(feedbacks)
+
 
 def estimate_incorrectness(feedback: Optional[str]) -> float:
-    """
-    Keyword-based heuristic on AI feedback text.
-    Returns float in [0, 1] where 0=correct, 1=completely incorrect.
-    Rules applied in order — first match wins.
-    """
-    # Rule 1: empty / null
+    """Score a single feedback string via OpenAI. Returns float in [0, 1]."""
     if not feedback or not str(feedback).strip():
-        return config.INCORRECTNESS_EMPTY
-
-    text = str(feedback).lower()
-
-    positive_count = len(config.POSITIVE_RE.findall(text))
-    negative_count = len(config.NEGATIVE_RE.findall(text))
-    partial_count  = len(config.PARTIAL_RE.findall(text))
-
-    # Rule 2: only positive
-    if positive_count > 0 and negative_count == 0 and partial_count == 0:
-        return config.INCORRECTNESS_ONLY_POSITIVE
-
-    # Rule 3: only negative
-    if negative_count > 0 and positive_count == 0 and partial_count == 0:
-        return config.INCORRECTNESS_ONLY_NEGATIVE
-
-    # Rule 4: any partial
-    if partial_count > 0:
-        return config.INCORRECTNESS_PARTIAL
-
-    # Rule 5: more positive than negative
-    if positive_count > negative_count:
-        return config.INCORRECTNESS_MORE_POSITIVE
-
-    # Rule 6: more negative than positive
-    if negative_count > positive_count:
-        return config.INCORRECTNESS_MORE_NEGATIVE
-
-    # Rule 7: otherwise
-    return config.INCORRECTNESS_DEFAULT
+        return 0.5
+    key = str(feedback).strip()
+    if key not in _incorrectness_cache:
+        _incorrectness_cache[key] = _call_openai_batch([key])[0]
+    return _incorrectness_cache[key]
 
 
 def compute_incorrectness_column(df: pd.DataFrame) -> pd.Series:
-    """Apply estimate_incorrectness to the ai_feedback column."""
-    return df["ai_feedback"].apply(estimate_incorrectness)
+    """
+    Score all ai_feedback values via OpenAI, batched for efficiency.
+    Results are cached in-process to avoid repeat API calls across reruns.
+    Empty/null feedback → 0.5 without an API call.
+    """
+    feedbacks = df["ai_feedback"].astype(str).str.strip()
+
+    # Collect unique non-empty texts not yet cached
+    uncached = [t for t in feedbacks.unique() if t and t not in _incorrectness_cache]
+
+    # Fetch in batches
+    for i in range(0, len(uncached), config.OPENAI_BATCH_SIZE):
+        batch = uncached[i : i + config.OPENAI_BATCH_SIZE]
+        scores = _call_openai_batch(batch)
+        _incorrectness_cache.update(zip(batch, scores))
+
+    return feedbacks.map(lambda t: _incorrectness_cache.get(t, 0.5))
 
 
 # Min-Max Normalization
