@@ -144,8 +144,6 @@ def _build_assistant_id(name: str, existing_ids: set[str]) -> str:
 
 def read_lab_state() -> dict[str, Any]:
     with _lock():
-        state = _read_state_unlocked()
-        _write_state_unlocked(state)
         return _read_state_unlocked()
 
 

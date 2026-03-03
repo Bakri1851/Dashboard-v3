@@ -105,6 +105,52 @@ def render_question_detail_metrics(question_data: dict) -> None:
 
 # Leaderboard Charts
 
+def _apply_leaderboard_layout(
+    fig: go.Figure,
+    title: str,
+    score_max: float,
+    n_items: int,
+) -> None:
+    """Apply shared layout to both leaderboard bar charts."""
+    layout = theme.get_plotly_layout_defaults()
+    fig.update_layout(**layout)
+    fig.update_layout(
+        title=dict(
+            text=title,
+            font=dict(family=f"{config.FONT_HEADING}, sans-serif", size=14, color=config.COLORS["cyan"]),
+        ),
+        legend=dict(
+            orientation="v",
+            yanchor="middle",
+            y=0.5,
+            xanchor="left",
+            x=1.02,
+            font=dict(family=f"{config.FONT_BODY}, monospace", size=11),
+        ),
+        yaxis=dict(
+            visible=False,
+            showgrid=False,
+            zeroline=False,
+            showticklabels=False,
+            title=None,
+            categoryorder="trace",
+            autorange="reversed",
+        ),
+        xaxis=dict(
+            visible=False,
+            showgrid=False,
+            zeroline=False,
+            showticklabels=False,
+            title=None,
+            range=[0, min(1.15, score_max + 0.15)],
+        ),
+        barmode="overlay",
+        height=max(300, n_items * 38),
+        bargap=0.15,
+    )
+
+
+
 def render_student_leaderboard(
     struggle_df: pd.DataFrame,
 ) -> Optional[str]:
@@ -167,41 +213,11 @@ def render_student_leaderboard(
             cliponaxis=False,
         ))
 
-    layout = theme.get_plotly_layout_defaults()
-    fig.update_layout(**layout)
-    fig.update_layout(
-        title=dict(
-            text="STUDENT STRUGGLE LEADERBOARD",
-            font=dict(family=f"{config.FONT_HEADING}, sans-serif", size=14, color=config.COLORS["cyan"]),
-        ),
-        legend=dict(
-            orientation="v",
-            yanchor="middle",
-            y=0.5,
-            xanchor="left",
-            x=1.02,
-            font=dict(family=f"{config.FONT_BODY}, monospace", size=11),
-        ),
-        yaxis=dict(
-            visible=False,
-            showgrid=False,
-            zeroline=False,
-            showticklabels=False,
-            title=None,
-            categoryorder="trace",
-            autorange="reversed",
-        ),
-        xaxis=dict(
-            visible=False,
-            showgrid=False,
-            zeroline=False,
-            showticklabels=False,
-            title=None,
-            range=[0, min(1.15, display["struggle_score"].max() + 0.15)],
-        ),
-        barmode="overlay",
-        height=max(300, len(display) * 38),
-        bargap=0.15,
+    _apply_leaderboard_layout(
+        fig,
+        title="STUDENT STRUGGLE LEADERBOARD",
+        score_max=display["struggle_score"].max(),
+        n_items=len(display),
     )
 
     event = st.plotly_chart(
@@ -289,41 +305,11 @@ def render_question_leaderboard(
             cliponaxis=False,
         ))
 
-    layout = theme.get_plotly_layout_defaults()
-    fig.update_layout(**layout)
-    fig.update_layout(
-        title=dict(
-            text="QUESTION DIFFICULTY LEADERBOARD",
-            font=dict(family=f"{config.FONT_HEADING}, sans-serif", size=14, color=config.COLORS["cyan"]),
-        ),
-        legend=dict(
-            orientation="v",
-            yanchor="middle",
-            y=0.5,
-            xanchor="left",
-            x=1.02,
-            font=dict(family=f"{config.FONT_BODY}, monospace", size=11),
-        ),
-        yaxis=dict(
-            visible=False,
-            showgrid=False,
-            zeroline=False,
-            showticklabels=False,
-            title=None,
-            categoryorder="trace",
-            autorange="reversed",
-        ),
-        xaxis=dict(
-            visible=False,
-            showgrid=False,
-            zeroline=False,
-            showticklabels=False,
-            title=None,
-            range=[0, min(1.15, display["difficulty_score"].max() + 0.15)],
-        ),
-        barmode="overlay",
-        height=max(300, len(display) * 38),
-        bargap=0.15,
+    _apply_leaderboard_layout(
+        fig,
+        title="QUESTION DIFFICULTY LEADERBOARD",
+        score_max=display["difficulty_score"].max(),
+        n_items=len(display),
     )
 
     event = st.plotly_chart(

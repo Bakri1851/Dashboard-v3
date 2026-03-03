@@ -18,6 +18,7 @@ import theme
 
 _JOIN_NOTICE_KEY = "lab_join_notice"
 
+@st.cache_data(ttl=10)
 def _load_student_data() -> tuple[pd.DataFrame, Optional[pd.DataFrame]]:
     """Fetch live data and compute struggle scores. Returns (df, struggle_df)."""
     df, _err = data_loader.load_data()
@@ -397,12 +398,6 @@ def main() -> None:
         st.rerun()
 
     assigned_student = lab_state.get_assignment_for_assistant(assistant_id)
-    lab_data = lab_state.read_lab_state()
-    assistants = lab_data.get("lab_assistants", {})
-    if assistant_id not in assistants:
-        _set_join_notice("Your previous assistant session was closed. Please join again.")
-        _clear_assistant_query_param()
-        st.rerun()
 
     if assigned_student:
         assignment = lab_data.get("assignments", {}).get(assigned_student, {})

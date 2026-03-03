@@ -21,9 +21,9 @@ def estimate_incorrectness(feedback: Optional[str]) -> float:
 
     text = str(feedback).lower()
 
-    positive_count = sum(1 for kw in config.POSITIVE_KEYWORDS if kw in text)
-    negative_count = sum(1 for kw in config.NEGATIVE_KEYWORDS if kw in text)
-    partial_count = sum(1 for kw in config.PARTIAL_KEYWORDS if kw in text)
+    positive_count = len(config.POSITIVE_RE.findall(text))
+    negative_count = len(config.NEGATIVE_RE.findall(text))
+    partial_count  = len(config.PARTIAL_RE.findall(text))
 
     # Rule 2: only positive
     if positive_count > 0 and negative_count == 0 and partial_count == 0:

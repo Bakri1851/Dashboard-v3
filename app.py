@@ -40,6 +40,9 @@ def init_session_state() -> None:
         "previous_scores": {},
         "lab_session_code": None,
         "pending_remove_assistant_id": None,
+        "_autorefresh_count": None,
+        "_struggle_df": None,
+        "_difficulty_df": None,
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -48,7 +51,7 @@ def init_session_state() -> None:
 
 # Lab Assignment Panel
 
-def _render_lab_assignment_panel(df: pd.DataFrame) -> None:
+def _render_lab_assignment_panel() -> None:
     """
     Render lab assistant management panel inside the sidebar.
     Shows joined assistants, their current assignments, and allows
@@ -79,10 +82,8 @@ def _render_lab_assignment_panel(df: pd.DataFrame) -> None:
         st.caption("No lab assistants have joined yet.")
         return
 
-    # Build struggle data for the assignment UI
-    struggle_df = None
-    if not df.empty:
-        struggle_df = analytics.compute_student_struggle_scores(df)
+    # Use scores cached from the previous render cycle (at most one rerun stale)
+    struggle_df = st.session_state.get("_struggle_df")
 
     # List each assistant with their current assignment
     unassigned_assistants: list[tuple[str, str]] = []
@@ -266,7 +267,7 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
                 st.rerun()
 
         if st.session_state["session_active"]:
-            _render_lab_assignment_panel(df)
+            _render_lab_assignment_panel()
 
         if (
             not st.session_state["session_active"]
@@ -381,6 +382,17 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
 
         st.markdown("---")
 
+        # --- Quick Refresh ---
+        if st.session_state["auto_refresh"] and st.session_state["last_refresh"]:
+            st.caption(
+                f"Last refresh: {st.session_state['last_refresh'].strftime('%H:%M:%S')}"
+            )
+        if st.button("Refresh Now", key="sidebar_refresh_now"):
+            data_loader.fetch_raw_data.clear()
+            st.rerun()
+
+        st.markdown("---")
+
         # --- Previous Sessions ---
         st.markdown(
             f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
@@ -421,12 +433,16 @@ def main() -> None:
 
     # Auto-refresh
     if st.session_state["auto_refresh"]:
-        st_autorefresh(
+        refresh_count = st_autorefresh(
             interval=st.session_state["refresh_interval"] * 1000,
             limit=None,
             key="auto_refresh_component",
         )
-        st.session_state["last_refresh"] = datetime.now()
+        prev_count = st.session_state.get("_autorefresh_count", refresh_count)
+        if refresh_count != prev_count:
+            data_loader.fetch_raw_data.clear()
+            st.session_state["last_refresh"] = datetime.now()
+        st.session_state["_autorefresh_count"] = refresh_count
 
     # Load data
     df, load_error = data_loader.load_data()
@@ -475,13 +491,20 @@ def main() -> None:
     # Sidebar controls and filtering
     df = render_sidebar(df)
 
+    # Compute scores once per render; stored in session state for the sidebar
+    # panel (which rendered above and will read them on the next cycle).
+    struggle_df = analytics.compute_student_struggle_scores(df)
+    difficulty_df = analytics.compute_question_difficulty_scores(df)
+    st.session_state["_struggle_df"] = struggle_df
+    st.session_state["_difficulty_df"] = difficulty_df
+
     # Route to view
     if st.session_state["selected_student"] is not None:
-        views.student_detail_view(df, st.session_state["selected_student"])
+        views.student_detail_view(df, st.session_state["selected_student"], struggle_df)
     elif st.session_state["selected_question"] is not None:
-        views.question_detail_view(df, st.session_state["selected_question"])
+        views.question_detail_view(df, st.session_state["selected_question"], difficulty_df)
     elif st.session_state["current_view"] == "In Class View":
-        views.in_class_view(df)
+        views.in_class_view(df, struggle_df, difficulty_df)
     elif st.session_state["current_view"] == "Data Analysis View":
         views.data_analysis_view(df)
     elif st.session_state["current_view"] == "Previous Sessions":

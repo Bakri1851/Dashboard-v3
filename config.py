@@ -1,4 +1,5 @@
 # config.py — All tunable parameters for the dashboard
+import re
 
 # --- API Configuration ---
 API_URL: str = "http://sccb2.sci-project.lboro.ac.uk/retrievalEndpoint.php"
@@ -22,6 +23,11 @@ NEGATIVE_KEYWORDS: list[str] = [
 PARTIAL_KEYWORDS: list[str] = [
     "partially", "almost", "close", "nearly", "but", "however",
 ]
+
+# Pre-compiled for fast single-pass matching in analytics.estimate_incorrectness
+POSITIVE_RE = re.compile("|".join(re.escape(kw) for kw in POSITIVE_KEYWORDS))
+NEGATIVE_RE = re.compile("|".join(re.escape(kw) for kw in NEGATIVE_KEYWORDS))
+PARTIAL_RE  = re.compile("|".join(re.escape(kw) for kw in PARTIAL_KEYWORDS))
 
 # --- Incorrectness Scores ---
 INCORRECTNESS_EMPTY: float = 0.5

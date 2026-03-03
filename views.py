@@ -30,7 +30,7 @@ def _format_duration(seconds: int) -> str:
 
 # In Class View (default)
 
-def in_class_view(df: pd.DataFrame) -> None:
+def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd.DataFrame) -> None:
     """Main leaderboard view with summary cards, leaderboards, and distributions."""
     load_warning = st.session_state.get("session_load_warning")
     if load_warning:
@@ -57,9 +57,11 @@ def in_class_view(df: pd.DataFrame) -> None:
         st.warning("No data available for the selected filters.")
         return
 
-    # Compute scores
-    struggle_df = analytics.compute_student_struggle_scores(view_df)
-    difficulty_df = analytics.compute_question_difficulty_scores(view_df)
+    # Recompute scores only when a module sub-filter is active; otherwise reuse
+    # the pre-computed DataFrames passed in from main() to avoid redundant work.
+    if secondary_module != "All Modules":
+        struggle_df = analytics.compute_student_struggle_scores(view_df)
+        difficulty_df = analytics.compute_question_difficulty_scores(view_df)
 
     # Summary cards
     components.render_summary_cards(struggle_df)
@@ -94,7 +96,7 @@ def in_class_view(df: pd.DataFrame) -> None:
 
 # Student Drill-Down View
 
-def student_detail_view(df: pd.DataFrame, student_id: str) -> None:
+def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataFrame) -> None:
     """Detailed view for a single student."""
     # Back button
     if components.render_back_button(key="back_student"):
@@ -107,9 +109,7 @@ def student_detail_view(df: pd.DataFrame, student_id: str) -> None:
         st.warning(f"No data found for student: {student_id}")
         return
 
-    # Compute struggle score for this student (needs full dataset for normalization)
-    all_struggle = analytics.compute_student_struggle_scores(df)
-    student_row = all_struggle[all_struggle["user"] == student_id]
+    student_row = struggle_df[struggle_df["user"] == student_id]
 
     if student_row.empty:
         st.warning(f"Could not compute scores for student: {student_id}")
@@ -148,10 +148,7 @@ def student_detail_view(df: pd.DataFrame, student_id: str) -> None:
     st.markdown("---")
 
     # Questions table
-    # Count feedback requests per question (single-pass, Bug #2 fix)
-    has_fb = student_df["ai_feedback"].notna() & (student_df["ai_feedback"].astype(str).str.strip() != "")
-    student_df_with_fb = student_df.copy()
-    student_df_with_fb["has_feedback"] = has_fb
+    student_df_with_fb = data_loader.add_feedback_flag(student_df)
 
     questions_table = (
         student_df_with_fb.groupby("question")
@@ -184,7 +181,7 @@ def student_detail_view(df: pd.DataFrame, student_id: str) -> None:
 
 # Question Drill-Down View
 
-def question_detail_view(df: pd.DataFrame, question_id: str) -> None:
+def question_detail_view(df: pd.DataFrame, question_id: str, difficulty_df: pd.DataFrame) -> None:
     """Detailed view for a single question."""
     # Back button
     if components.render_back_button(key="back_question"):
@@ -197,9 +194,7 @@ def question_detail_view(df: pd.DataFrame, question_id: str) -> None:
         st.warning(f"No data found for question: {question_id}")
         return
 
-    # Compute difficulty score (needs full dataset for normalization)
-    all_difficulty = analytics.compute_question_difficulty_scores(df)
-    question_row = all_difficulty[all_difficulty["question"] == question_id]
+    question_row = difficulty_df[difficulty_df["question"] == question_id]
 
     if question_row.empty:
         st.warning(f"Could not compute scores for question: {question_id}")
@@ -238,9 +233,7 @@ def question_detail_view(df: pd.DataFrame, question_id: str) -> None:
     st.markdown("---")
 
     # Students table
-    has_fb = question_df["ai_feedback"].notna() & (question_df["ai_feedback"].astype(str).str.strip() != "")
-    question_df_with_fb = question_df.copy()
-    question_df_with_fb["has_feedback"] = has_fb
+    question_df_with_fb = data_loader.add_feedback_flag(question_df)
 
     students_table = (
         question_df_with_fb.groupby("user")

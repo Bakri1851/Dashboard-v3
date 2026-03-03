@@ -1,4 +1,6 @@
 # theme.py — Sci-fi neon theme CSS generation
+import functools
+
 import config
 
 
@@ -11,6 +13,7 @@ def get_google_fonts_import() -> str:
     """
 
 
+@functools.lru_cache(maxsize=1)
 def get_main_css() -> str:
     """Complete CSS string for the sci-fi neon dashboard theme."""
     c = config.COLORS
@@ -589,6 +592,7 @@ def get_plotly_layout_defaults() -> dict:
     }
 
 
+@functools.lru_cache(maxsize=1)
 def get_mobile_css() -> str:
     """Mobile-optimized CSS for lab_app.py. Designed for 375px+ phone screens."""
     c = config.COLORS

@@ -182,6 +182,13 @@ def normalize_and_clean(records: list[dict]) -> pd.DataFrame:
     return df
 
 
+def add_feedback_flag(df: pd.DataFrame) -> pd.DataFrame:
+    """Return a copy of df with a boolean 'has_feedback' column."""
+    out = df.copy()
+    out["has_feedback"] = out["ai_feedback"].notna() & (out["ai_feedback"].astype(str).str.strip() != "")
+    return out
+
+
 def load_data() -> tuple[pd.DataFrame, str]:
     """Top-level: fetch -> detect -> parse -> clean. Returns (DataFrame, error_msg)."""
     empty_df = pd.DataFrame(
