@@ -112,6 +112,25 @@ def compute_recent_incorrectness(student_submissions: pd.DataFrame) -> float:
 
 
 # -----------------------------------------------------------------
+# Improvement Trajectory Helper
+# -----------------------------------------------------------------
+
+def _compute_slope(student_submissions: pd.DataFrame) -> float:
+    """
+    Linear regression slope of incorrectness vs. submission order (oldest=0).
+    Positive slope = getting worse; negative = improving.
+    Returns 0.0 if fewer than 2 submissions.
+    """
+    sorted_subs = student_submissions.sort_values("timestamp", ascending=True)
+    scores = sorted_subs["incorrectness"].tolist()
+    n = len(scores)
+    if n < 2:
+        return 0.0
+    slope = np.polyfit(range(n), scores, 1)[0]
+    return float(slope)
+
+
+# -----------------------------------------------------------------
 # Classification Helpers
 # -----------------------------------------------------------------
 
@@ -142,8 +161,8 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return pd.DataFrame(columns=[
             "user", "submission_count", "time_active_min", "n_hat", "t_hat",
-            "e_hat", "f_hat", "A_raw", "struggle_score", "struggle_level",
-            "struggle_color", "error_rate_pct", "recent_incorrectness",
+            "i_hat", "r_hat", "A_raw", "d_hat", "struggle_score", "struggle_level",
+            "struggle_color", "mean_incorrectness_pct", "recent_incorrectness",
         ])
 
     work = df.copy()
@@ -162,15 +181,18 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
         else:
             t = 0.0
 
-        # Error rate: submissions with incorrectness > threshold / total
-        e_hat = (group["incorrectness"] > config.CORRECT_THRESHOLD).sum() / n
+        # Mean incorrectness: continuous gradient, no binary threshold
+        i_hat = group["incorrectness"].mean()
 
-        # Feedback rate: non-empty AI feedback in single pass (Bug #2 fix)
-        has_feedback = group["ai_feedback"].notna() & (group["ai_feedback"].astype(str).str.strip() != "")
-        f_hat = has_feedback.sum() / n
+        # Retry rate: fraction of submissions that are repeats of an already-attempted question
+        unique_q = group["question"].nunique()
+        r_hat = 1.0 - (unique_q / n) if n > 0 else 0.0
 
         # Recent incorrectness (A_raw)
         a_raw = compute_recent_incorrectness(group)
+
+        # Improvement trajectory: linear slope of incorrectness over submission order
+        d_raw = _compute_slope(group)
 
         rows.append({
             "user": user,
@@ -178,24 +200,27 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
             "time_active_min": round(t, 2),
             "n_raw": n,
             "t_raw": t,
-            "e_hat": e_hat,
-            "f_hat": f_hat,
+            "i_hat": i_hat,
+            "r_hat": r_hat,
             "A_raw": a_raw,
+            "d_raw": d_raw,
         })
 
     result = pd.DataFrame(rows)
 
-    # Min-max normalize n and t across all students
+    # Min-max normalize n, t, and trajectory slope across all students
     result["n_hat"] = min_max_normalize(result["n_raw"])
     result["t_hat"] = min_max_normalize(result["t_raw"])
+    result["d_hat"] = min_max_normalize(result["d_raw"])  # positive = getting worse
 
     # Compute S_raw
     result["struggle_score"] = (
         config.STRUGGLE_WEIGHT_N * result["n_hat"]
         + config.STRUGGLE_WEIGHT_T * result["t_hat"]
-        + config.STRUGGLE_WEIGHT_E * result["e_hat"]
-        + config.STRUGGLE_WEIGHT_F * result["f_hat"]
+        + config.STRUGGLE_WEIGHT_I * result["i_hat"]
+        + config.STRUGGLE_WEIGHT_R * result["r_hat"]
         + config.STRUGGLE_WEIGHT_A * result["A_raw"]
+        + config.STRUGGLE_WEIGHT_D * result["d_hat"]
     ).clip(0.0, 1.0)
 
     # Classify
@@ -206,7 +231,7 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
     result["struggle_color"] = levels_colors.apply(lambda x: x[1])
 
     # Convenience columns
-    result["error_rate_pct"] = (result["e_hat"] * 100).round(1)
+    result["mean_incorrectness_pct"] = (result["i_hat"] * 100).round(1)
     result["recent_incorrectness"] = result["A_raw"].round(3)
 
     # Sort descending by score
@@ -227,7 +252,7 @@ def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return pd.DataFrame(columns=[
             "question", "total_attempts", "unique_students", "avg_attempts",
-            "c_tilde", "t_tilde", "a_tilde", "f_tilde",
+            "c_tilde", "t_tilde", "a_tilde", "f_tilde", "p_tilde",
             "difficulty_score", "difficulty_level", "difficulty_color",
             "incorrect_rate_pct",
         ])
@@ -247,14 +272,16 @@ def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
         correct_count = (group["incorrectness"] < config.CORRECT_THRESHOLD).sum()
         c_tilde = 1.0 - (correct_count / total_attempts) if total_attempts > 0 else 0.0
 
-        # t_raw: avg time per student (only students with 2+ attempts)
+        # t_raw: avg time per student (all students; 1-attempt students contribute 0)
         time_values = []
         for _user, user_group in group.groupby("user"):
             if len(user_group) >= 2:
                 t_student = (
                     user_group["timestamp"].max() - user_group["timestamp"].min()
                 ).total_seconds() / 60.0
-                time_values.append(t_student)
+            else:
+                t_student = 0.0
+            time_values.append(t_student)
         t_raw = np.mean(time_values) if time_values else 0.0
 
         # a_raw: avg attempts per student
@@ -262,6 +289,11 @@ def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
 
         # f_tilde: average incorrectness across all attempts
         f_tilde = group["incorrectness"].mean()
+
+        # p_tilde: first-attempt failure rate
+        first_attempts = group.sort_values("timestamp").groupby("user").first().reset_index()
+        failed_first = (first_attempts["incorrectness"] >= config.CORRECT_THRESHOLD).sum()
+        p_tilde = failed_first / unique_students if unique_students > 0 else 0.0
 
         rows.append({
             "question": question,
@@ -272,6 +304,7 @@ def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
             "t_raw": t_raw,
             "a_raw": a_raw,
             "f_tilde": f_tilde,
+            "p_tilde": p_tilde,
         })
 
     result = pd.DataFrame(rows)
@@ -286,6 +319,7 @@ def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
         + config.DIFFICULTY_WEIGHT_T * result["t_tilde"]
         + config.DIFFICULTY_WEIGHT_A * result["a_tilde"]
         + config.DIFFICULTY_WEIGHT_F * result["f_tilde"]
+        + config.DIFFICULTY_WEIGHT_P * result["p_tilde"]
     ).clip(0.0, 1.0)
 
     # Classify

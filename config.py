@@ -14,11 +14,12 @@ OPENAI_MODEL: str = "gpt-4o-mini"
 OPENAI_BATCH_SIZE: int = 50       # max feedback items per API call
 
 # --- Student Struggle Score Weights ---
-STRUGGLE_WEIGHT_N: float = 0.10   # submission count (min-max → collapses; minimal)
-STRUGGLE_WEIGHT_T: float = 0.10   # time active      (min-max → collapses; halved)
-STRUGGLE_WEIGHT_E: float = 0.25   # error rate       (raw ratio → stable; elevated)
-STRUGGLE_WEIGHT_F: float = 0.15   # feedback rate    (raw ratio → stable; reduced)
-STRUGGLE_WEIGHT_A: float = 0.45   # recent incorrectness (absolute → most sensitive; elevated)
+STRUGGLE_WEIGHT_N: float = 0.10   # submission count (min-max normalised)
+STRUGGLE_WEIGHT_T: float = 0.10   # time active (min-max normalised)
+STRUGGLE_WEIGHT_I: float = 0.22   # mean incorrectness (replaces binary error rate)
+STRUGGLE_WEIGHT_R: float = 0.13   # retry rate (replaces feedback presence)
+STRUGGLE_WEIGHT_A: float = 0.40   # weighted recent incorrectness
+STRUGGLE_WEIGHT_D: float = 0.05   # improvement trajectory slope (min-max normalised)
 
 # --- Recent Incorrectness (A_raw) ---
 RECENT_SUBMISSION_COUNT: int = 5
@@ -33,10 +34,11 @@ STRUGGLE_THRESHOLDS: list[tuple[float, float, str, str]] = [
 ]
 
 # --- Question Difficulty Score Weights ---
-DIFFICULTY_WEIGHT_C: float = 0.35   # incorrect rate       (raw ratio → stable; elevated)
-DIFFICULTY_WEIGHT_T: float = 0.15   # avg time per student (min-max → collapses; halved)
-DIFFICULTY_WEIGHT_A: float = 0.25   # avg attempts         (min-max → collapses; reduced)
-DIFFICULTY_WEIGHT_F: float = 0.25   # avg incorrectness    (raw mean → stable; elevated)
+DIFFICULTY_WEIGHT_C: float = 0.28   # incorrect rate (raw ratio)
+DIFFICULTY_WEIGHT_T: float = 0.12   # avg time per student (min-max normalised, all students)
+DIFFICULTY_WEIGHT_A: float = 0.20   # avg attempts per student (min-max normalised)
+DIFFICULTY_WEIGHT_F: float = 0.20   # avg incorrectness score
+DIFFICULTY_WEIGHT_P: float = 0.20   # first-attempt failure rate
 
 # --- Question Difficulty Thresholds: (low, high, label, color) ---
 DIFFICULTY_THRESHOLDS: list[tuple[float, float, str, str]] = [

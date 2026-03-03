@@ -81,7 +81,7 @@ def render_student_detail_metrics(student_data: dict) -> None:
     metrics = [
         ("Total Submissions", student_data.get("submission_count", 0), config.COLORS["cyan"]),
         ("Time Active (min)", student_data.get("time_active_min", 0), config.COLORS["blue"]),
-        ("Error Rate (%)", student_data.get("error_rate_pct", 0), config.COLORS["orange"]),
+        ("Mean Incorrectness (%)", student_data.get("mean_incorrectness_pct", 0), config.COLORS["orange"]),
         ("Recent Incorrectness", student_data.get("recent_incorrectness", 0), config.COLORS["magenta"]),
     ]
     for col, (label, value, color) in zip(cols, metrics):
@@ -400,17 +400,19 @@ def render_formula_info() -> None:
             st.markdown(
                 f"**S_raw** = {config.STRUGGLE_WEIGHT_N} \u00d7 n\u0302 + "
                 f"{config.STRUGGLE_WEIGHT_T} \u00d7 t\u0302 + "
-                f"{config.STRUGGLE_WEIGHT_E} \u00d7 \u00ea + "
-                f"{config.STRUGGLE_WEIGHT_F} \u00d7 f\u0302 + "
-                f"{config.STRUGGLE_WEIGHT_A} \u00d7 A_raw"
+                f"{config.STRUGGLE_WEIGHT_I} \u00d7 i_hat + "
+                f"{config.STRUGGLE_WEIGHT_R} \u00d7 r_hat + "
+                f"{config.STRUGGLE_WEIGHT_A} \u00d7 A_raw + "
+                f"{config.STRUGGLE_WEIGHT_D} \u00d7 d_hat"
             )
             st.markdown("**Components:**")
             st.markdown(
                 f"- **n\u0302** (w={config.STRUGGLE_WEIGHT_N}): Submission count, min-max normalised\n"
                 f"- **t\u0302** (w={config.STRUGGLE_WEIGHT_T}): Time active (minutes), min-max normalised\n"
-                f"- **\u00ea** (w={config.STRUGGLE_WEIGHT_E}): Error rate (incorrectness > {config.CORRECT_THRESHOLD})\n"
-                f"- **f\u0302** (w={config.STRUGGLE_WEIGHT_F}): Feedback request rate\n"
-                f"- **A_raw** (w={config.STRUGGLE_WEIGHT_A}): Weighted recent incorrectness (last {config.RECENT_SUBMISSION_COUNT})"
+                f"- **i_hat** (w={config.STRUGGLE_WEIGHT_I}): Mean incorrectness across all submissions\n"
+                f"- **r_hat** (w={config.STRUGGLE_WEIGHT_R}): Retry rate (1 \u2212 unique questions / total submissions)\n"
+                f"- **A_raw** (w={config.STRUGGLE_WEIGHT_A}): Weighted recent incorrectness (last {config.RECENT_SUBMISSION_COUNT})\n"
+                f"- **d_hat** (w={config.STRUGGLE_WEIGHT_D}): Improvement trajectory slope, min-max normalised"
             )
             st.markdown("**Thresholds:**")
             for low, high, label, color in config.STRUGGLE_THRESHOLDS:
@@ -426,14 +428,16 @@ def render_formula_info() -> None:
                 f"**D_raw** = {config.DIFFICULTY_WEIGHT_C} \u00d7 c\u0303 + "
                 f"{config.DIFFICULTY_WEIGHT_T} \u00d7 t\u0303 + "
                 f"{config.DIFFICULTY_WEIGHT_A} \u00d7 a\u0303 + "
-                f"{config.DIFFICULTY_WEIGHT_F} \u00d7 f\u0303"
+                f"{config.DIFFICULTY_WEIGHT_F} \u00d7 f\u0303 + "
+                f"{config.DIFFICULTY_WEIGHT_P} \u00d7 p\u0303"
             )
             st.markdown("**Components:**")
             st.markdown(
                 f"- **c\u0303** (w={config.DIFFICULTY_WEIGHT_C}): Incorrect rate (1 - correct/total)\n"
-                f"- **t\u0303** (w={config.DIFFICULTY_WEIGHT_T}): Avg time per student, min-max normalised\n"
+                f"- **t\u0303** (w={config.DIFFICULTY_WEIGHT_T}): Avg time per student, min-max normalised (all students)\n"
                 f"- **a\u0303** (w={config.DIFFICULTY_WEIGHT_A}): Avg attempts per student, min-max normalised\n"
-                f"- **f\u0303** (w={config.DIFFICULTY_WEIGHT_F}): Avg incorrectness score"
+                f"- **f\u0303** (w={config.DIFFICULTY_WEIGHT_F}): Avg incorrectness score\n"
+                f"- **p\u0303** (w={config.DIFFICULTY_WEIGHT_P}): First-attempt failure rate"
             )
             st.markdown("**Thresholds:**")
             for low, high, label, color in config.DIFFICULTY_THRESHOLDS:
