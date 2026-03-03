@@ -1,5 +1,6 @@
 # analytics.py — Scoring calculations (UI-independent)
 import json
+import math
 from typing import Optional
 
 import numpy as np
@@ -90,8 +91,10 @@ def min_max_normalize(series: pd.Series) -> pd.Series:
 
 def compute_recent_incorrectness(student_submissions: pd.DataFrame) -> float:
     """
-    Last N submissions (most recent first), weighted by RECENT_WEIGHTS.
-    If fewer than N, renormalize active weights to sum to 1.0.
+    Last N submissions (most recent first), weighted by exponential time decay.
+    w_i = exp(-lambda * delta_t_i) where delta_t_i = seconds since submission i.
+    Weights are normalised to sum to 1.0.
+    Falls back to equal weights if all timestamps are identical.
     """
     recent = (
         student_submissions.sort_values("timestamp", ascending=False)
@@ -103,11 +106,21 @@ def compute_recent_incorrectness(student_submissions: pd.DataFrame) -> float:
     if n_actual == 0:
         return 0.0
 
-    weights = config.RECENT_WEIGHTS[:n_actual]
-    weight_sum = sum(weights)
-    if weight_sum > 0:
-        weights = [w / weight_sum for w in weights]
+    timestamps = recent["timestamp"].tolist()
+    t_now = timestamps[0]  # most recent after descending sort
+    lam = math.log(2) / config.DECAY_HALFLIFE_SECONDS
 
+    raw_weights = [
+        math.exp(-lam * max(0.0, (t_now - ts).total_seconds()))
+        for ts in timestamps
+    ]
+    weight_sum = sum(raw_weights)
+
+    # Equal-weight fallback if all timestamps are identical (e.g. bulk import)
+    if weight_sum <= 0 or all(w == raw_weights[0] for w in raw_weights):
+        return sum(scores) / n_actual
+
+    weights = [w / weight_sum for w in raw_weights]
     return sum(w * s for w, s in zip(weights, scores))
 
 
@@ -161,8 +174,9 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return pd.DataFrame(columns=[
             "user", "submission_count", "time_active_min", "n_hat", "t_hat",
-            "i_hat", "r_hat", "A_raw", "d_hat", "struggle_score", "struggle_level",
-            "struggle_color", "mean_incorrectness_pct", "recent_incorrectness",
+            "i_hat", "r_hat", "rep_hat", "A_raw", "d_hat", "struggle_score",
+            "struggle_level", "struggle_color", "mean_incorrectness_pct",
+            "recent_incorrectness",
         ])
 
     work = df.copy()
@@ -194,6 +208,20 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
         # Improvement trajectory: linear slope of incorrectness over submission order
         d_raw = _compute_slope(group)
 
+        # Answer repetition rate: fraction of submissions that exactly repeat
+        # a previously submitted answer on the same question (exact match after strip).
+        total_repeat_submissions = 0
+        for _q, q_group in group.groupby("question"):
+            answers = q_group.sort_values("timestamp")["student_answer"].tolist()
+            seen: set[str] = set()
+            for ans in answers:
+                cleaned = str(ans).strip()
+                if cleaned in seen:
+                    total_repeat_submissions += 1
+                else:
+                    seen.add(cleaned)
+        rep_hat = total_repeat_submissions / n if n > 0 else 0.0
+
         rows.append({
             "user": user,
             "submission_count": n,
@@ -204,6 +232,7 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
             "r_hat": r_hat,
             "A_raw": a_raw,
             "d_raw": d_raw,
+            "rep_hat": rep_hat,
         })
 
     result = pd.DataFrame(rows)
@@ -221,6 +250,15 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
         + config.STRUGGLE_WEIGHT_R * result["r_hat"]
         + config.STRUGGLE_WEIGHT_A * result["A_raw"]
         + config.STRUGGLE_WEIGHT_D * result["d_hat"]
+        + config.STRUGGLE_WEIGHT_REP * result["rep_hat"]
+    ).clip(0.0, 1.0)
+
+    # Bayesian shrinkage: pull low-n scores toward the class mean to reduce noise.
+    # w_n = n / (n + K) → students with few submissions are shrunk more strongly.
+    s_class_mean = result["struggle_score"].mean()
+    w_n = result["n_raw"] / (result["n_raw"] + config.SHRINKAGE_K)
+    result["struggle_score"] = (
+        w_n * result["struggle_score"] + (1 - w_n) * s_class_mean
     ).clip(0.0, 1.0)
 
     # Classify

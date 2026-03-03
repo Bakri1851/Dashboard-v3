@@ -16,14 +16,21 @@ OPENAI_BATCH_SIZE: int = 50       # max feedback items per API call
 # --- Student Struggle Score Weights ---
 STRUGGLE_WEIGHT_N: float = 0.10   # submission count (min-max normalised)
 STRUGGLE_WEIGHT_T: float = 0.10   # time active (min-max normalised)
-STRUGGLE_WEIGHT_I: float = 0.22   # mean incorrectness (replaces binary error rate)
-STRUGGLE_WEIGHT_R: float = 0.13   # retry rate (replaces feedback presence)
-STRUGGLE_WEIGHT_A: float = 0.40   # weighted recent incorrectness
+STRUGGLE_WEIGHT_I: float = 0.20   # mean incorrectness
+STRUGGLE_WEIGHT_R: float = 0.10   # retry rate
+STRUGGLE_WEIGHT_A: float = 0.38   # weighted recent incorrectness (exponential time decay)
 STRUGGLE_WEIGHT_D: float = 0.05   # improvement trajectory slope (min-max normalised)
+STRUGGLE_WEIGHT_REP: float = 0.07 # answer repetition rate (exact-match repeats / total)
+# Sum: 0.10+0.10+0.20+0.10+0.38+0.05+0.07 = 1.00
 
 # --- Recent Incorrectness (A_raw) ---
 RECENT_SUBMISSION_COUNT: int = 5
-RECENT_WEIGHTS: list[float] = [0.35, 0.25, 0.20, 0.12, 0.08]
+# RECENT_WEIGHTS superseded by exponential time decay — kept for reference only.
+# RECENT_WEIGHTS: list[float] = [0.35, 0.25, 0.20, 0.12, 0.08]
+DECAY_HALFLIFE_SECONDS: int = 1800  # 30-min half-life; submission 30 min ago gets w=0.5 relative to now
+
+# --- Bayesian Shrinkage ---
+SHRINKAGE_K: int = 5  # students with n >> K are unaffected; n << K pulled toward class mean
 
 # --- Student Struggle Thresholds: (low, high, label, color) ---
 STRUGGLE_THRESHOLDS: list[tuple[float, float, str, str]] = [

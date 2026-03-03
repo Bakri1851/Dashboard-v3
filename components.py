@@ -398,21 +398,28 @@ def render_formula_info() -> None:
         with col1:
             st.markdown(f"### Student Struggle Score")
             st.markdown(
-                f"**S_raw** = {config.STRUGGLE_WEIGHT_N} \u00d7 n\u0302 + "
-                f"{config.STRUGGLE_WEIGHT_T} \u00d7 t\u0302 + "
-                f"{config.STRUGGLE_WEIGHT_I} \u00d7 i_hat + "
-                f"{config.STRUGGLE_WEIGHT_R} \u00d7 r_hat + "
-                f"{config.STRUGGLE_WEIGHT_A} \u00d7 A_raw + "
-                f"{config.STRUGGLE_WEIGHT_D} \u00d7 d_hat"
+                f"**S_raw** = {config.STRUGGLE_WEIGHT_N:.2f} \u00d7 n + "
+                f"{config.STRUGGLE_WEIGHT_T:.2f} \u00d7 t + "
+                f"{config.STRUGGLE_WEIGHT_I:.2f} \u00d7 i + "
+                f"{config.STRUGGLE_WEIGHT_R:.2f} \u00d7 r + "
+                f"{config.STRUGGLE_WEIGHT_A:.2f} \u00d7 A + "
+                f"{config.STRUGGLE_WEIGHT_D:.2f} \u00d7 d + "
+                f"{config.STRUGGLE_WEIGHT_REP:.2f} \u00d7 rep"
+            )
+            st.markdown(
+                f"*Shrinkage-adjusted: S\_adj = w \u00d7 S\_raw + (1 \u2212 w) \u00d7 class mean, "
+                f"w = n / (n + {config.SHRINKAGE_K})*"
             )
             st.markdown("**Components:**")
             st.markdown(
-                f"- **n\u0302** (w={config.STRUGGLE_WEIGHT_N}): Submission count, min-max normalised\n"
-                f"- **t\u0302** (w={config.STRUGGLE_WEIGHT_T}): Time active (minutes), min-max normalised\n"
-                f"- **i_hat** (w={config.STRUGGLE_WEIGHT_I}): Mean incorrectness across all submissions\n"
-                f"- **r_hat** (w={config.STRUGGLE_WEIGHT_R}): Retry rate (1 \u2212 unique questions / total submissions)\n"
-                f"- **A_raw** (w={config.STRUGGLE_WEIGHT_A}): Weighted recent incorrectness (last {config.RECENT_SUBMISSION_COUNT})\n"
-                f"- **d_hat** (w={config.STRUGGLE_WEIGHT_D}): Improvement trajectory slope, min-max normalised"
+                f"- **n** (w={config.STRUGGLE_WEIGHT_N:.2f}): Submission count, min-max normalised\n"
+                f"- **t** (w={config.STRUGGLE_WEIGHT_T:.2f}): Time active (minutes), min-max normalised\n"
+                f"- **i** (w={config.STRUGGLE_WEIGHT_I:.2f}): Mean incorrectness across all submissions\n"
+                f"- **r** (w={config.STRUGGLE_WEIGHT_R:.2f}): Retry rate (1 \u2212 unique questions / total submissions)\n"
+                f"- **A** (w={config.STRUGGLE_WEIGHT_A:.2f}): Exponential time-decay recent incorrectness "
+                f"(last {config.RECENT_SUBMISSION_COUNT}, half-life {config.DECAY_HALFLIFE_SECONDS}s)\n"
+                f"- **d** (w={config.STRUGGLE_WEIGHT_D:.2f}): Improvement trajectory slope, min-max normalised\n"
+                f"- **rep** (w={config.STRUGGLE_WEIGHT_REP:.2f}): Answer repetition rate (exact-match repeats / total submissions)"
             )
             st.markdown("**Thresholds:**")
             for low, high, label, color in config.STRUGGLE_THRESHOLDS:
@@ -425,19 +432,19 @@ def render_formula_info() -> None:
         with col2:
             st.markdown(f"### Question Difficulty Score")
             st.markdown(
-                f"**D_raw** = {config.DIFFICULTY_WEIGHT_C} \u00d7 c\u0303 + "
-                f"{config.DIFFICULTY_WEIGHT_T} \u00d7 t\u0303 + "
-                f"{config.DIFFICULTY_WEIGHT_A} \u00d7 a\u0303 + "
-                f"{config.DIFFICULTY_WEIGHT_F} \u00d7 f\u0303 + "
-                f"{config.DIFFICULTY_WEIGHT_P} \u00d7 p\u0303"
+                f"**D_raw** = {config.DIFFICULTY_WEIGHT_C:.2f} \u00d7 c + "
+                f"{config.DIFFICULTY_WEIGHT_T:.2f} \u00d7 t + "
+                f"{config.DIFFICULTY_WEIGHT_A:.2f} \u00d7 a + "
+                f"{config.DIFFICULTY_WEIGHT_F:.2f} \u00d7 f + "
+                f"{config.DIFFICULTY_WEIGHT_P:.2f} \u00d7 p"
             )
             st.markdown("**Components:**")
             st.markdown(
-                f"- **c\u0303** (w={config.DIFFICULTY_WEIGHT_C}): Incorrect rate (1 - correct/total)\n"
-                f"- **t\u0303** (w={config.DIFFICULTY_WEIGHT_T}): Avg time per student, min-max normalised (all students)\n"
-                f"- **a\u0303** (w={config.DIFFICULTY_WEIGHT_A}): Avg attempts per student, min-max normalised\n"
-                f"- **f\u0303** (w={config.DIFFICULTY_WEIGHT_F}): Avg incorrectness score\n"
-                f"- **p\u0303** (w={config.DIFFICULTY_WEIGHT_P}): First-attempt failure rate"
+                f"- **c** (w={config.DIFFICULTY_WEIGHT_C:.2f}): Incorrect rate (1 - correct/total)\n"
+                f"- **t** (w={config.DIFFICULTY_WEIGHT_T:.2f}): Avg time per student, min-max normalised (all students)\n"
+                f"- **a** (w={config.DIFFICULTY_WEIGHT_A:.2f}): Avg attempts per student, min-max normalised\n"
+                f"- **f** (w={config.DIFFICULTY_WEIGHT_F:.2f}): Avg incorrectness score\n"
+                f"- **p** (w={config.DIFFICULTY_WEIGHT_P:.2f}): First-attempt failure rate"
             )
             st.markdown("**Thresholds:**")
             for low, high, label, color in config.DIFFICULTY_THRESHOLDS:
