@@ -93,7 +93,7 @@ DATA_ANALYSIS_TOP_USERS: int = 20
 
 # --- Auto-Refresh ---
 AUTO_REFRESH_DEFAULT: bool = True
-AUTO_REFRESH_INTERVAL_DEFAULT: int = 120  # seconds
+AUTO_REFRESH_INTERVAL_DEFAULT: int = 300  # seconds
 AUTO_REFRESH_OPTIONS: list[int] = [5, 10, 15, 30, 60, 120,300]
 
 # --- Sound Effects ---
