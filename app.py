@@ -201,6 +201,8 @@ def _on_view_change() -> None:
     """Callback when the view radio changes — clear drill-down selections."""
     st.session_state["selected_student"] = None
     st.session_state["selected_question"] = None
+    st.session_state.pop("student_leaderboard", None)
+    st.session_state.pop("question_leaderboard", None)
 
 
 def _on_dashboard_view_change() -> None:
@@ -451,9 +453,9 @@ def main() -> None:
     _prev_active = st.session_state.get("_prev_session_active", False)
     _curr_active = st.session_state["session_active"]
     if _curr_active and not _prev_active:
-        sound.play_session_start()
+        sound.play_selection()
     elif not _curr_active and _prev_active:
-        sound.play_session_end()
+        sound.play_selection()
     st.session_state["_prev_session_active"] = _curr_active
 
     # Inject theme
@@ -554,6 +556,8 @@ def main() -> None:
     # panel (which rendered above and will read them on the next cycle).
     struggle_df = analytics.compute_student_struggle_scores(df)
     difficulty_df = analytics.compute_question_difficulty_scores(df)
+    if "incorrectness" not in df.columns:
+        df["incorrectness"] = analytics.compute_incorrectness_column(df)
     st.session_state["_struggle_df"] = struggle_df
     st.session_state["_difficulty_df"] = difficulty_df
 

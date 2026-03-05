@@ -101,6 +101,7 @@ def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataF
     # Back button
     if components.render_back_button(key="back_student"):
         st.session_state["selected_student"] = None
+        st.session_state.pop("student_leaderboard", None)
         st.rerun()
 
     # Filter to this student
@@ -186,6 +187,7 @@ def question_detail_view(df: pd.DataFrame, question_id: str, difficulty_df: pd.D
     # Back button
     if components.render_back_button(key="back_question"):
         st.session_state["selected_question"] = None
+        st.session_state.pop("question_leaderboard", None)
         st.rerun()
 
     # Filter to this question
