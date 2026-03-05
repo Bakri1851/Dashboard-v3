@@ -103,6 +103,95 @@ def render_question_detail_metrics(question_data: dict) -> None:
             render_metric_card(label, value, color)
 
 
+def render_mistake_clusters(clusters: list[dict]) -> None:
+    """
+    Render mistake clusters as neon-themed cards in a 2-column grid.
+    Each card shows: cluster label, student count, percentage, expandable example answers.
+    """
+    c = config.COLORS
+    fh = config.FONT_HEADING
+    fb = config.FONT_BODY
+
+    st.markdown(
+        f'<h4 style="color:{c["cyan"]}; font-family:{fh}, sans-serif; '
+        f'text-transform:uppercase; letter-spacing:2px; font-size:0.95rem; margin-bottom:12px;">'
+        f'Mistake Clusters</h4>',
+        unsafe_allow_html=True,
+    )
+
+    if not clusters:
+        st.info("No clusters to display.")
+        return
+
+    cluster_colors = [
+        c["magenta"], c["orange"], c["purple"], c["cyan"], c["green"],
+    ]
+
+    for row_start in range(0, len(clusters), 2):
+        row_clusters = clusters[row_start: row_start + 2]
+        cols = st.columns(len(row_clusters), gap="medium")
+
+        for col, cluster, color_idx in zip(cols, row_clusters, range(row_start, row_start + len(row_clusters))):
+            color = cluster_colors[color_idx % len(cluster_colors)]
+            rgb = _hex_to_rgb(color)
+
+            with col:
+                st.markdown(
+                    f"""
+                    <div style="
+                        background: {c['card_bg']};
+                        border: 1px solid {color};
+                        box-shadow: 0 0 14px rgba({rgb}, 0.25);
+                        border-radius: 8px;
+                        padding: 16px 18px 14px 18px;
+                        margin-bottom: 6px;
+                    ">
+                        <div style="
+                            font-family: '{fh}', sans-serif;
+                            color: {color};
+                            font-size: 0.88rem;
+                            text-transform: uppercase;
+                            letter-spacing: 1.5px;
+                            font-weight: 700;
+                            line-height: 1.35;
+                        ">{cluster['label']}</div>
+                        <div style="margin-top: 12px; display: flex; align-items: center; gap: 10px;">
+                            <span style="
+                                background: rgba({rgb}, 0.15);
+                                border: 1px solid {color};
+                                border-radius: 4px;
+                                padding: 2px 10px;
+                                font-family: '{fh}', sans-serif;
+                                font-size: 1.4rem;
+                                font-weight: 700;
+                                color: {color};
+                            ">{cluster['count']}</span>
+                            <span style="
+                                font-family: '{fb}', monospace;
+                                color: {c['text_dim']};
+                                font-size: 0.8rem;
+                            ">students &nbsp;·&nbsp; {cluster['percent_of_wrong']}% of wrong</span>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+                if cluster["example_answers"]:
+                    with st.expander("Example answers"):
+                        for i, ans in enumerate(cluster["example_answers"]):
+                            display = ans if len(ans) <= config.CLUSTER_EXAMPLE_MAX_CHARS else ans[:config.CLUSTER_EXAMPLE_MAX_CHARS] + "…"
+                            st.markdown(
+                                f'<div style="'
+                                f'font-family: \'{fb}\', monospace; '
+                                f'color: {c["text"]}; '
+                                f'font-size: 0.85rem; '
+                                f'padding: 6px 0; '
+                                f'border-bottom: 1px solid rgba({rgb}, 0.15);'
+                                f'">{i + 1}. {display}</div>',
+                                unsafe_allow_html=True,
+                            )
+
+
 # Leaderboard Charts
 
 def _apply_leaderboard_layout(

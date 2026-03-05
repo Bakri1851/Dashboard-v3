@@ -17,6 +17,7 @@ This `README.md` is the main source of truth for understanding how the code is o
 - streamlit-autorefresh (auto-polling in lab assistant app)
 - filelock (thread-safe concurrent writes to `lab_session.json`)
 - openai (GPT-4o-mini incorrectness scoring via AI tutor feedback)
+- scikit-learn (TF-IDF vectorisation and K-means clustering for mistake grouping)
 
 Dependencies are listed in `requirements.txt`.
 
@@ -43,7 +44,7 @@ Both processes share state through `lab_session.json` on disk.
 - `views.py`: page-level views (`In Class`, `Data Analysis`, `Settings`, and drill-down views).
 - `components.py`: reusable UI building blocks (leaderboards, cards, tables, charts, formula panel).
 - `theme.py`: global CSS and Plotly theme defaults.
-- `analytics.py`: scoring engine (incorrectness, struggle score, difficulty score, classification).
+- `analytics.py`: scoring engine (incorrectness, struggle score, difficulty score, classification, mistake clustering).
 - `data_loader.py`: API fetch/parse/clean pipeline plus saved session persistence helpers.
 - `lab_state.py`: shared file-locked state management for instructor and assistant apps (session lifecycle, assistant roster, student assignments).
 - `sound.py`: synthesized sci-fi sound effects via the browser Web Audio API (session start/end, navigation, selection, assistant join, high-struggle alarm, etc.). All effects respect the `sounds_enabled` session state flag.
@@ -160,6 +161,42 @@ D = 0.28·c̃ + 0.12·t̃ + 0.20·ã + 0.20·f̃ + 0.20·p̃
 | [0.75, 1.00] | Very Hard | `#ff2d55` |
 
 Key function: `analytics.compute_question_difficulty_scores`
+
+---
+
+### Mistake clustering
+
+When a teacher drills into a question, incorrect student answers are automatically grouped into clusters so the teacher can see the dominant mistake types at a glance rather than raw individual answers.
+
+**Pipeline:**
+1. Filter submissions to incorrect answers (`incorrectness ≥ config.CORRECT_THRESHOLD`)
+2. Deduplicate by exact answer text
+3. TF-IDF vectorise unique answers (`max_features=500`, `sublinear_tf=True`)
+4. Auto-select cluster count k=2..`CLUSTER_MAX_K` (default 5) using silhouette score with cosine metric; best k chosen
+5. K-means cluster (final fit with best k); assign each submission to its cluster
+6. Per cluster: pick up to `CLUSTER_MAX_EXAMPLES` representative answers by cosine similarity to centroid
+7. Single GPT-4o-mini call labels all clusters in one request; returns short (3–6 word) conceptual mistake descriptions
+
+**Caching:** `_cluster_cache` dict in `analytics.py`, keyed by `(question_id, wrong_answer_count)`. Cache is invalidated when new wrong answers arrive (count changes).
+
+**Edge cases:**
+- Fewer than `CLUSTER_MIN_WRONG` (default 3) wrong answers → info message, no API call
+- All wrong answers identical → single "Common Wrong Answer" cluster, sklearn skipped
+- Only 2 unique wrong answers → single "Mixed Wrong Answers" cluster, silhouette loop skipped
+- OpenAI label call fails → fallback labels "Mistake Group 1", "Mistake Group 2", etc.
+
+**Config constants** (all in `config.py`):
+
+| Constant | Default | Meaning |
+|---|---|---|
+| `CLUSTER_MIN_WRONG` | 3 | Min incorrect submissions needed to attempt clustering |
+| `CLUSTER_MAX_K` | 5 | Max clusters to evaluate via silhouette |
+| `CLUSTER_MAX_EXAMPLES` | 3 | Representative answers shown per cluster |
+| `CLUSTER_EXAMPLE_MAX_CHARS` | 300 | Truncate long answers in UI |
+
+**Return format:** `list[dict]` sorted by count descending, each dict: `{label, count, percent_of_wrong, example_answers}`.
+
+Key functions: `analytics.cluster_question_mistakes`, `analytics._label_clusters_with_openai`
 
 ---
 
@@ -364,6 +401,7 @@ Manual smoke tests:
 14. End the live session; verify `lab_app.py` shows "No Active Session".
 15. In Settings, toggle sound effects off; confirm no audio fires on navigation or selection. Toggle back on and confirm sound returns.
 16. During an active session, toggle the **Allow self-allocation** switch in the instructor sidebar; open `lab_app.py` as an unassigned assistant and verify the student claim list appears (enabled) or is replaced by a waiting message (disabled).
+17. Click a question with ≥ 3 incorrect submissions; verify the "Mistake Clusters" section appears with AI-labelled cluster cards and expandable example answers. Click a question with fewer than 3 incorrect submissions and verify the info message appears instead.
 
 ## Troubleshooting notes
 - If loading a saved session shows all data, check `loaded_session_start` and `loaded_session_end` are populated.

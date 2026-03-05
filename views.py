@@ -215,20 +215,23 @@ def question_detail_view(df: pd.DataFrame, question_id: str, difficulty_df: pd.D
 
     st.markdown("---")
 
-    # Students Who Attempted chart (top 15)
-    student_counts = (
-        question_df.groupby("user").size().reset_index(name="attempts")
-        .sort_values("attempts", ascending=False)
-    )
-    components.render_bar_chart(
-        student_counts,
-        x_col="attempts",
-        y_col="user",
-        title="Students Who Attempted",
-        color=config.COLORS["magenta"],
-        orientation="h",
-        max_items=config.QUESTION_DETAIL_TOP_STUDENTS,
-    )
+    # Mistake Clusters
+    if "incorrectness" not in question_df.columns:
+        st.info("Incorrectness scores not yet computed.")
+    else:
+        wrong_count = (question_df["incorrectness"] >= config.CORRECT_THRESHOLD).sum()
+        if wrong_count < config.CLUSTER_MIN_WRONG:
+            st.info(
+                f"Not enough incorrect answers to cluster "
+                f"({wrong_count} found — need at least {config.CLUSTER_MIN_WRONG})."
+            )
+        else:
+            with st.spinner("Analysing mistake patterns..."):
+                clusters = analytics.cluster_question_mistakes(question_df, question_id)
+            if clusters is None:
+                st.info("Could not generate clusters for this question.")
+            else:
+                components.render_mistake_clusters(clusters)
 
     st.markdown("---")
 
@@ -253,15 +256,6 @@ def question_detail_view(df: pd.DataFrame, question_id: str, difficulty_df: pd.D
         question_df, "timestamp", "Attempt Timeline", config.COLORS["magenta"]
     )
 
-    st.markdown("---")
-
-    # Sample Answers table (first 10)
-    samples = (
-        question_df.sort_values("timestamp")
-        .head(config.SAMPLE_ANSWERS_LIMIT)
-        [["user", "timestamp", "student_answer", "ai_feedback"]]
-    )
-    components.render_data_table(samples, "Sample Answers", max_rows=config.SAMPLE_ANSWERS_LIMIT)
 
 
 # Data Analysis View

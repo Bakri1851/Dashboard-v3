@@ -82,6 +82,12 @@ QUESTION_DETAIL_TOP_STUDENTS: int = 15
 RECENT_SUBMISSIONS_LIMIT: int = 10
 SAMPLE_ANSWERS_LIMIT: int = 10
 HISTOGRAM_BINS: int = 20
+
+# --- Mistake Clustering ---
+CLUSTER_MIN_WRONG: int = 3             # min incorrect submissions needed to attempt clustering
+CLUSTER_MAX_K: int = 5                 # max clusters to evaluate via silhouette
+CLUSTER_MAX_EXAMPLES: int = 3         # representative answers shown per cluster
+CLUSTER_EXAMPLE_MAX_CHARS: int = 300  # truncate long answers in UI
 DATA_ANALYSIS_TOP_QUESTIONS: int = 10
 DATA_ANALYSIS_TOP_USERS: int = 20
 
