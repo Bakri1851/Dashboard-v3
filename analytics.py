@@ -1,16 +1,23 @@
 # analytics.py — Scoring calculations (UI-independent)
 import json
 import math
+import os
 from typing import Optional
 
 import numpy as np
 import pandas as pd
+import streamlit as st
 from openai import OpenAI
 from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import silhouette_score
 
 import config
+
+
+def _get_openai_client() -> OpenAI:
+    key = st.secrets.get("OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY", "")
+    return OpenAI(api_key=key)
 
 
 # Incorrectness Estimation via OpenAI
@@ -33,7 +40,7 @@ def _call_openai_batch(feedbacks: list[str]) -> list[float]:
         f"Feedbacks:\n{numbered}"
     )
     try:
-        client = OpenAI()
+        client = _get_openai_client()
         response = client.chat.completions.create(
             model=config.OPENAI_MODEL,
             messages=[{"role": "user", "content": prompt}],
@@ -409,7 +416,7 @@ def _label_clusters_with_openai(clusters: list[dict], question_id: str) -> list[
     )
 
     try:
-        client = OpenAI()
+        client = _get_openai_client()
         response = client.chat.completions.create(
             model=config.OPENAI_MODEL,
             messages=[{"role": "user", "content": prompt}],

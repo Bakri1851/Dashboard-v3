@@ -44,6 +44,28 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
         unique_questions=df["question"].nunique() if not df.empty else 0,
     )
 
+    # Scope toggle — only shown when no session/time filter is controlling the data
+    _session_controlled = (
+        st.session_state.get("time_filter_enabled")
+        or st.session_state.get("session_active")
+        or st.session_state.get("loaded_session_id") is not None
+    )
+    if not _session_controlled:
+        today_only = st.session_state.get("today_filter_only", True)
+        no_today_data = not st.session_state.get("_today_has_data", True)
+        _scope_cols = st.columns([7, 3])
+        with _scope_cols[1]:
+            if today_only:
+                if no_today_data:
+                    st.caption("No data for today — showing all")
+                elif st.button("View All Data →", use_container_width=True, key="scope_all"):
+                    st.session_state["today_filter_only"] = False
+                    st.rerun()
+            else:
+                if st.button("← Today Only", use_container_width=True, key="scope_today"):
+                    st.session_state["today_filter_only"] = True
+                    st.rerun()
+
     # Secondary module filter (in main content area, NOT sidebar)
     modules = ["All Modules"] + sorted(df["module"].unique().tolist()) if not df.empty else ["All Modules"]
     secondary_module = st.selectbox(

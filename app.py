@@ -41,6 +41,7 @@ def init_session_state() -> None:
         "refresh_interval": config.AUTO_REFRESH_INTERVAL_DEFAULT,
         "last_refresh": None,
         "time_filter_enabled": False,
+        "today_filter_only": True,
         "previous_scores": {},
         "lab_session_code": None,
         "pending_remove_assistant_id": None,
@@ -519,6 +520,7 @@ def main() -> None:
         st.session_state["selected_question"] = None
         st.session_state["dashboard_view"] = "In Class View"
         st.session_state["current_view"] = "In Class View"
+        st.session_state["today_filter_only"] = True
         st.rerun()
 
     # Cache lab session state — read file at most once per second across all consumers
@@ -529,6 +531,24 @@ def main() -> None:
 
     # Sidebar controls and filtering
     df = render_sidebar(df)
+
+    # Today-only filter — active when no session/time filter overrides it.
+    # Applied here (after render_sidebar, after the empty-df guard) so that an
+    # empty today result never triggers the st.stop() safety check.
+    _today_filter_controlling = (
+        st.session_state.get("today_filter_only", True)
+        and not st.session_state.get("time_filter_enabled")
+        and not st.session_state.get("session_active")
+        and st.session_state.get("loaded_session_id") is None
+    )
+    if _today_filter_controlling:
+        _today = datetime.now().date()
+        _today_df = data_loader.filter_by_time(df, start_date=_today, end_date=_today)
+        st.session_state["_today_has_data"] = not _today_df.empty
+        if not _today_df.empty:
+            df = _today_df
+    else:
+        st.session_state["_today_has_data"] = True
 
     # Sound: navigation transition
     _prev_view = st.session_state.get("_prev_dashboard_view")
@@ -565,8 +585,6 @@ def main() -> None:
     if st.session_state.get("_analytics_key") != _analytics_key:
         struggle_df = analytics.compute_student_struggle_scores(df)
         difficulty_df = analytics.compute_question_difficulty_scores(df)
-        if "incorrectness" not in df.columns:
-            df["incorrectness"] = analytics.compute_incorrectness_column(df)
         st.session_state["_struggle_df"] = struggle_df
         st.session_state["_difficulty_df"] = difficulty_df
         st.session_state["_analytics_key"] = _analytics_key
@@ -574,6 +592,8 @@ def main() -> None:
     else:
         struggle_df = st.session_state["_struggle_df"]
         difficulty_df = st.session_state["_difficulty_df"]
+
+    df["incorrectness"] = analytics.compute_incorrectness_column(df)
 
     # Sound: high-struggle student count increased
     if st.session_state["session_active"] and struggle_df is not None and not struggle_df.empty:
