@@ -544,19 +544,16 @@ def get_main_css() -> str:
         -webkit-text-fill-color: #ffffff !important;
     }}
 
+    /* ===== Prevent stale rerender dimming ===== */
+    [data-stale="true"] {{
+        opacity: 1 !important;
+    }}
+
     /* ===== Hide Streamlit defaults ===== */
     #MainMenu {{visibility: hidden;}}
     footer {{visibility: hidden;}}
     [data-testid="stDecoration"] {{visibility: hidden; height: 0;}}
 
-    /* ===== View Transition (smooth re-render) ===== */
-    section.main > div {{
-        animation: fadeIn 0.15s ease-in;
-    }}
-    @keyframes fadeIn {{
-        from {{ opacity: 0.6; }}
-        to   {{ opacity: 1.0; }}
-    }}
     """
 
 
@@ -806,6 +803,11 @@ def get_mobile_css() -> str:
     [data-testid="stAlert"] {{
         border-radius: 8px;
         font-family: '{fb}', monospace;
+    }}
+
+    /* ===== Prevent stale rerender dimming ===== */
+    [data-stale="true"] {{
+        opacity: 1 !important;
     }}
 
 
