@@ -57,11 +57,19 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
         st.warning("No data available for the selected filters.")
         return
 
-    # Recompute scores only when a module sub-filter is active; otherwise reuse
-    # the pre-computed DataFrames passed in from main() to avoid redundant work.
+    # When a secondary module filter is active, scores must be relative to that
+    # subset — but only recompute when the filter or underlying data changes.
     if secondary_module != "All Modules":
-        struggle_df = analytics.compute_student_struggle_scores(view_df)
-        difficulty_df = analytics.compute_question_difficulty_scores(view_df)
+        _sec_key = (st.session_state.get("_analytics_key"), secondary_module)
+        if st.session_state.get("_sec_analytics_key") != _sec_key:
+            struggle_df = analytics.compute_student_struggle_scores(view_df)
+            difficulty_df = analytics.compute_question_difficulty_scores(view_df)
+            st.session_state["_sec_struggle_df"] = struggle_df
+            st.session_state["_sec_difficulty_df"] = difficulty_df
+            st.session_state["_sec_analytics_key"] = _sec_key
+        else:
+            struggle_df = st.session_state["_sec_struggle_df"]
+            difficulty_df = st.session_state["_sec_difficulty_df"]
 
     # Summary cards
     components.render_summary_cards(struggle_df)

@@ -2,6 +2,7 @@
 from datetime import datetime, time as dt_time
 import html
 import os
+import time
 
 import pandas as pd
 import streamlit as st
@@ -67,7 +68,7 @@ def _render_lab_assignment_panel() -> None:
     the instructor to assign struggling students to waiting assistants.
     Called only when a session is active.
     """
-    lab_data = _lab_state.read_lab_state()
+    lab_data = st.session_state.get("_lab_state_cache") or _lab_state.read_lab_state()
     if not lab_data.get("session_active"):
         st.session_state["pending_remove_assistant_id"] = None
         return
@@ -520,6 +521,12 @@ def main() -> None:
         st.session_state["current_view"] = "In Class View"
         st.rerun()
 
+    # Cache lab session state — read file at most once per second across all consumers
+    _now = time.time()
+    if _now - st.session_state.get("_lab_state_ts", 0) > 1.0:
+        st.session_state["_lab_state_cache"] = _lab_state.read_lab_state()
+        st.session_state["_lab_state_ts"] = _now
+
     # Sidebar controls and filtering
     df = render_sidebar(df)
 
@@ -545,21 +552,28 @@ def main() -> None:
     st.session_state["_prev_selected_question"] = _curr_q
 
     # Sound: lab assistant joined (instructor hears it)
-    _lab_sound_data = _lab_state.read_lab_state()
+    _lab_sound_data = st.session_state.get("_lab_state_cache", {})
     _curr_aids = set((_lab_sound_data.get("lab_assistants") or {}).keys())
     _prev_aids = st.session_state.get("_prev_lab_assistant_ids", _curr_aids)
     if _curr_aids - _prev_aids:
         sound.play_assistant_join()
     st.session_state["_prev_lab_assistant_ids"] = _curr_aids
 
-    # Compute scores once per render; stored in session state for the sidebar
-    # panel (which rendered above and will read them on the next cycle).
-    struggle_df = analytics.compute_student_struggle_scores(df)
-    difficulty_df = analytics.compute_question_difficulty_scores(df)
-    if "incorrectness" not in df.columns:
-        df["incorrectness"] = analytics.compute_incorrectness_column(df)
-    st.session_state["_struggle_df"] = struggle_df
-    st.session_state["_difficulty_df"] = difficulty_df
+    # Cache analytics scores — only recompute when the filtered data changes.
+    # Key on row count + timestamp range as a fast fingerprint of df content.
+    _analytics_key = (len(df), str(df["timestamp"].min()), str(df["timestamp"].max()))
+    if st.session_state.get("_analytics_key") != _analytics_key:
+        struggle_df = analytics.compute_student_struggle_scores(df)
+        difficulty_df = analytics.compute_question_difficulty_scores(df)
+        if "incorrectness" not in df.columns:
+            df["incorrectness"] = analytics.compute_incorrectness_column(df)
+        st.session_state["_struggle_df"] = struggle_df
+        st.session_state["_difficulty_df"] = difficulty_df
+        st.session_state["_analytics_key"] = _analytics_key
+        st.session_state["_sec_analytics_key"] = None  # invalidate secondary cache
+    else:
+        struggle_df = st.session_state["_struggle_df"]
+        difficulty_df = st.session_state["_difficulty_df"]
 
     # Sound: high-struggle student count increased
     if st.session_state["session_active"] and struggle_df is not None and not struggle_df.empty:

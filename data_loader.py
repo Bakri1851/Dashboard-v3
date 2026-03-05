@@ -207,6 +207,11 @@ def load_data() -> tuple[pd.DataFrame, str]:
     except Exception as e:
         return empty_df, f"API connection failed: {type(e).__name__} - {e}"
 
+    # Skip parse/normalize when raw data hasn't changed since last render
+    raw_hash = hash(raw)
+    if st.session_state.get("_df_hash") == raw_hash and "_df" in st.session_state:
+        return st.session_state["_df"], ""
+
     fmt = detect_format(raw)
 
     if fmt == "json":
@@ -235,7 +240,10 @@ def load_data() -> tuple[pd.DataFrame, str]:
                 )
 
     try:
-        return normalize_and_clean(records), ""
+        df = normalize_and_clean(records)
+        st.session_state["_df_hash"] = raw_hash
+        st.session_state["_df"] = df
+        return df, ""
     except Exception as e:
         return empty_df, f"Data normalization failed: {type(e).__name__} - {e}"
 

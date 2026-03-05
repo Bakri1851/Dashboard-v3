@@ -4,6 +4,7 @@ import functools
 import config
 
 
+@functools.lru_cache(maxsize=1)
 def get_google_fonts_import() -> str:
     """HTML style block importing Orbitron and Share Tech Mono from Google Fonts."""
     return """
@@ -547,6 +548,15 @@ def get_main_css() -> str:
     #MainMenu {{visibility: hidden;}}
     footer {{visibility: hidden;}}
     [data-testid="stDecoration"] {{visibility: hidden; height: 0;}}
+
+    /* ===== View Transition (smooth re-render) ===== */
+    section.main > div {{
+        animation: fadeIn 0.15s ease-in;
+    }}
+    @keyframes fadeIn {{
+        from {{ opacity: 0.6; }}
+        to   {{ opacity: 1.0; }}
+    }}
     """
 
 
