@@ -605,7 +605,7 @@ def main() -> None:
 
     # Route to view
     if st.session_state["selected_student"] is not None:
-        views.student_detail_view(df, st.session_state["selected_student"], struggle_df)
+        views.student_detail_view(df, st.session_state["selected_student"], struggle_df, difficulty_df)
     elif st.session_state["selected_question"] is not None:
         views.question_detail_view(df, st.session_state["selected_question"], difficulty_df)
     elif st.session_state["current_view"] == "In Class View":

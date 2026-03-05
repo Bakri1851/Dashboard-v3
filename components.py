@@ -668,6 +668,36 @@ def render_timeline_chart(
     st.plotly_chart(fig, use_container_width=True)
 
 
+def render_correctness_trend(trend_df: pd.DataFrame) -> None:
+    """Rolling-average correctness line chart ordered by submission sequence."""
+    fig = go.Figure()
+    color = config.COLORS["green"]
+    fig.add_trace(
+        go.Scatter(
+            x=trend_df.index,
+            y=trend_df["rolling_correctness"],
+            mode="lines",
+            line=dict(color=color, width=2),
+            fill="tozeroy",
+            fillcolor=f"rgba({_hex_to_rgb(color)}, 0.1)",
+            name="Correctness (rolling avg)",
+        )
+    )
+
+    layout = theme.get_plotly_layout_defaults()
+    fig.update_layout(**layout)
+    fig.update_layout(
+        title=dict(
+            text="CORRECTNESS TREND",
+            font=dict(family=f"{config.FONT_HEADING}, sans-serif", size=13, color=config.COLORS["green"]),
+        ),
+        xaxis=dict(title="Submission #"),
+        yaxis=dict(title="Correctness", range=[0, 1]),
+        height=300,
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
 def render_data_table(
     df: pd.DataFrame,
     title: str,

@@ -126,7 +126,7 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
 
 # Student Drill-Down View
 
-def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataFrame) -> None:
+def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataFrame, difficulty_df: pd.DataFrame | None = None) -> None:
     """Detailed view for a single student."""
     # Back button
     if components.render_back_button(key="back_student"):
@@ -190,6 +190,9 @@ def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataF
         .reset_index()
         .sort_values("attempts", ascending=False)
     )
+    if difficulty_df is not None and not difficulty_df.empty:
+        diff_cols = difficulty_df[["question", "difficulty_level", "difficulty_score"]].copy()
+        questions_table = questions_table.merge(diff_cols, on="question", how="left")
     components.render_data_table(questions_table, "Questions Attempted")
 
     st.markdown("---")
@@ -198,6 +201,20 @@ def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataF
     components.render_timeline_chart(
         student_df, "timestamp", "Submission Timeline", config.COLORS["cyan"]
     )
+
+    st.markdown("---")
+
+    # Correctness trend — only submissions with actual AI feedback have meaningful scores
+    scored_df = student_df_with_fb[student_df_with_fb["has_feedback"]].copy()
+    if "incorrectness" in scored_df.columns and len(scored_df) >= 3:
+        trend_df = (
+            scored_df.sort_values("timestamp")
+            .reset_index(drop=True)
+            .assign(correctness=lambda d: (1 - d["incorrectness"]).clip(0, 1))
+        )
+        window = min(5, len(trend_df))
+        trend_df["rolling_correctness"] = trend_df["correctness"].rolling(window, min_periods=1).mean()
+        components.render_correctness_trend(trend_df)
 
     st.markdown("---")
 
