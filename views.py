@@ -204,17 +204,13 @@ def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataF
 
     st.markdown("---")
 
-    # Correctness trend — only submissions with actual AI feedback have meaningful scores
-    scored_df = student_df_with_fb[student_df_with_fb["has_feedback"]].copy()
-    if "incorrectness" in scored_df.columns and len(scored_df) >= 3:
-        trend_df = (
-            scored_df.sort_values("timestamp")
-            .reset_index(drop=True)
-            .assign(correctness=lambda d: (1 - d["incorrectness"]).clip(0, 1))
-        )
+    # Retry intensity trend — attempt number per question, rolling average
+    trend_df = student_df.sort_values("timestamp").copy().reset_index(drop=True)
+    trend_df["attempt_number"] = trend_df.groupby("question").cumcount() + 1
+    if len(trend_df) >= 3:
         window = min(5, len(trend_df))
-        trend_df["rolling_correctness"] = trend_df["correctness"].rolling(window, min_periods=1).mean()
-        components.render_correctness_trend(trend_df)
+        trend_df["rolling_retry"] = trend_df["attempt_number"].rolling(window, min_periods=1).mean()
+        components.render_retry_trend(trend_df)
 
     st.markdown("---")
 

@@ -668,19 +668,19 @@ def render_timeline_chart(
     st.plotly_chart(fig, use_container_width=True)
 
 
-def render_correctness_trend(trend_df: pd.DataFrame) -> None:
-    """Rolling-average correctness line chart ordered by submission sequence."""
+def render_retry_trend(trend_df: pd.DataFrame) -> None:
+    """Rolling-average attempt number chart ordered by submission sequence."""
+    color = config.COLORS["orange"]
     fig = go.Figure()
-    color = config.COLORS["green"]
     fig.add_trace(
         go.Scatter(
             x=trend_df.index,
-            y=trend_df["rolling_correctness"],
+            y=trend_df["rolling_retry"],
             mode="lines",
             line=dict(color=color, width=2),
             fill="tozeroy",
             fillcolor=f"rgba({_hex_to_rgb(color)}, 0.1)",
-            name="Correctness (rolling avg)",
+            name="Avg attempt # (rolling)",
         )
     )
 
@@ -688,11 +688,11 @@ def render_correctness_trend(trend_df: pd.DataFrame) -> None:
     fig.update_layout(**layout)
     fig.update_layout(
         title=dict(
-            text="CORRECTNESS TREND",
-            font=dict(family=f"{config.FONT_HEADING}, sans-serif", size=13, color=config.COLORS["green"]),
+            text="RETRY INTENSITY",
+            font=dict(family=f"{config.FONT_HEADING}, sans-serif", size=13, color=color),
         ),
         xaxis=dict(title="Submission #"),
-        yaxis=dict(title="Correctness", range=[0, 1]),
+        yaxis=dict(title="Avg attempt #", rangemode="tozero"),
         height=300,
     )
     st.plotly_chart(fig, use_container_width=True)
