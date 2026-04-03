@@ -17,7 +17,7 @@ This `README.md` is the main source of truth for understanding how the code is o
 - streamlit-autorefresh (auto-polling in lab assistant app)
 - filelock (thread-safe concurrent writes to `lab_session.json`)
 - openai (GPT-4o-mini incorrectness scoring via AI tutor feedback)
-- scikit-learn (TF-IDF vectorisation and K-means clustering for mistake grouping)
+- scikit-learn (TF-IDF vectorisation, K-means clustering for mistake grouping, cosine similarity for collaborative filtering)
 
 Dependencies are listed in `requirements.txt`.
 
@@ -213,6 +213,51 @@ S_t = (1 − α) · S_prev + α · S_raw,   α = 0.3
 ```
 `config.SMOOTHING_ENABLED = False`. Not wired into any active code path.
 
+---
+
+### Collaborative filtering (CF) struggle detection
+
+CF is a secondary, opt-in layer that runs **after** the parametric model. It identifies students who have not yet crossed the parametric struggle threshold but are behaviourally similar to students who have, surfacing them as proactive intervention candidates.
+
+**How it works:**
+
+1. Build an interaction matrix **X** from five normalised features: `n_hat`, `t_hat`, `i_hat`, `A_raw`, `d_hat`
+2. Compute pairwise cosine similarity **W** using `sklearn.metrics.pairwise.cosine_similarity`
+3. Label each student: `h_i = 1` if `struggle_score >= τ` (configurable threshold, default 0.6), else `h_i = 0`
+4. For each student where `h_i = 0`: find k=3 nearest neighbours by similarity, compute `cf_score = weighted_avg(neighbours' h values)` using similarity as weights
+5. For each student where `h_i = 1`: `cf_score = 1.0`
+6. Students with `h_i = 0` and `cf_score > 0` are "elevated" — at least one of their nearest neighbours is a confirmed struggler
+
+**Settings (Settings page only):**
+
+| Control | Session state key | Default |
+|---|---|---|
+| Enable/disable toggle | `cf_enabled` | `False` |
+| Threshold slider τ (0.0–1.0, step 0.05) | `cf_threshold` | `0.6` |
+
+The threshold slider only appears when CF is enabled. No CF controls exist outside Settings.
+
+**Dashboard visibility:**
+
+| Location | What is shown | Condition |
+|---|---|---|
+| In Class View (after leaderboards) | 3 metric cards (elevated count, parametric flagged count, τ value) + table of elevated students with parametric score, CF score, and nearest neighbours | `cf_enabled = True` |
+| Student drill-down (after recent submissions) | Table of 5 most similar students with similarity score, struggle score, and struggle level | `cf_enabled = True` |
+
+When `cf_enabled = False`, no CF-related UI renders anywhere.
+
+**Edge cases:**
+
+| Condition | Behaviour |
+|---|---|
+| Fewer than 4 students | Falls back to parametric scores; shows info message |
+| No students above τ | Falls back to parametric scores; shows warning |
+| CF computation error | Shows `st.warning` in CF panel only; rest of dashboard unaffected |
+
+Key functions: `analytics.compute_cf_struggle_scores`, `analytics.get_similar_students`
+
+---
+
 ## Session behavior
 There are two session concepts:
 
@@ -346,6 +391,8 @@ Key runtime state in `app.py:init_session_state()`:
 | `time_filter_enabled` | Manual date/time filter toggle |
 | `lab_session_code` | Session code shown in sidebar code card while a live session is active |
 | `pending_remove_assistant_id` | Deferred assistant removal ID; cleared before sidebar widgets render |
+| `cf_enabled` | Whether collaborative filtering is active (default: `False`) |
+| `cf_threshold` | CF threshold τ for labelling parametric strugglers (default: `0.6`) |
 | `sounds_enabled` | Whether sci-fi sound effects are active (default: `True`) |
 | `auto_refresh_enabled` | Whether automatic data polling is active (default: `True`) |
 | `auto_refresh_interval` | Polling interval in seconds (default: 60; options: 5, 10, 15, 30, 60) |
@@ -402,6 +449,8 @@ Manual smoke tests:
 15. In Settings, toggle sound effects off; confirm no audio fires on navigation or selection. Toggle back on and confirm sound returns.
 16. During an active session, toggle the **Allow self-allocation** switch in the instructor sidebar; open `lab_app.py` as an unassigned assistant and verify the student claim list appears (enabled) or is replaced by a waiting message (disabled).
 17. Click a question with ≥ 3 incorrect submissions; verify the "Mistake Clusters" section appears with AI-labelled cluster cards and expandable example answers. Click a question with fewer than 3 incorrect submissions and verify the info message appears instead.
+18. In Settings, enable Collaborative Filtering; verify the threshold slider appears. Return to In Class View and verify the CF panel shows metric cards and (if applicable) an elevated students table. Click a student and verify the "Most Similar Students" table appears at the bottom of the drill-down.
+19. In Settings, disable Collaborative Filtering; verify no CF-related UI appears in In Class View or student drill-downs.
 
 ## Troubleshooting notes
 - If loading a saved session shows all data, check `loaded_session_start` and `loaded_session_end` are populated.

@@ -115,6 +115,52 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
 
     st.markdown("---")
 
+    # --- Collaborative Filtering Panel ---
+    if st.session_state.get("cf_enabled", False):
+        try:
+            cf_threshold = st.session_state.get("cf_threshold", 0.6)
+            _cf_scores, cf_diag = analytics.compute_cf_struggle_scores(
+                struggle_df, threshold=cf_threshold,
+            )
+
+            if cf_diag.get("fallback", False):
+                reason = cf_diag.get("error") or cf_diag.get("reason", "unknown")
+                st.warning(f"Collaborative Filtering could not run: {reason}")
+            else:
+                st.markdown(
+                    f'<h3 style="color:{config.COLORS["purple"]}; font-family:{config.FONT_HEADING}; '
+                    f'text-transform:uppercase; letter-spacing:2px; font-size:1rem;">'
+                    f'Collaborative Filtering</h3>',
+                    unsafe_allow_html=True,
+                )
+
+                cf_c1, cf_c2, cf_c3 = st.columns(3)
+                with cf_c1:
+                    components.render_metric_card(
+                        "CF Elevated", cf_diag["n_elevated_cf"], config.COLORS["purple"],
+                    )
+                with cf_c2:
+                    components.render_metric_card(
+                        "Parametric Flagged", cf_diag["n_flagged_parametric"], config.COLORS["orange"],
+                    )
+                with cf_c3:
+                    components.render_metric_card(
+                        "Threshold (τ)", f"{cf_threshold:.2f}", config.COLORS["cyan"],
+                    )
+
+                elevated = cf_diag.get("elevated_students", [])
+                if elevated:
+                    components.render_data_table(
+                        pd.DataFrame(elevated), "Students Elevated by CF",
+                    )
+                else:
+                    st.info("CF found no additional at-risk students beyond parametric detection.")
+
+            st.markdown("---")
+        except Exception as e:
+            st.warning(f"Collaborative Filtering encountered an error: {e}")
+            st.markdown("---")
+
     # Score distributions
     components.render_score_distributions(struggle_df, difficulty_df)
 
@@ -221,6 +267,26 @@ def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataF
         [["timestamp", "question", "student_answer", "ai_feedback"]]
     )
     components.render_data_table(recent, "Recent Submissions", max_rows=config.RECENT_SUBMISSIONS_LIMIT)
+
+    # --- CF: Similar Students ---
+    if st.session_state.get("cf_enabled", False):
+        try:
+            similar_df = analytics.get_similar_students(student_id, struggle_df, k=5)
+            if similar_df is not None and not similar_df.empty:
+                st.markdown("---")
+                st.markdown(
+                    f'<h3 style="color:{config.COLORS["purple"]}; font-family:{config.FONT_HEADING}; '
+                    f'text-transform:uppercase; letter-spacing:2px; font-size:1rem;">'
+                    f'Most Similar Students (CF)</h3>',
+                    unsafe_allow_html=True,
+                )
+                st.caption(
+                    "Students ranked by cosine similarity across five behavioural features. "
+                    "High similarity means comparable submission patterns."
+                )
+                components.render_data_table(similar_df, "", max_rows=5)
+        except Exception as e:
+            st.warning(f"Could not compute similar students: {e}")
 
 
 # Question Drill-Down View
@@ -390,6 +456,38 @@ def settings_view(df: pd.DataFrame) -> None:
     if st.button("Refresh Now", key="settings_refresh_now"):
         data_loader.fetch_raw_data.clear()
         st.rerun()
+
+    st.markdown("---")
+
+    st.markdown(
+        f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
+        f'text-transform:uppercase; letter-spacing:2px; font-size:1rem;">Collaborative Filtering</h3>',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        "When enabled, CF identifies students who behave similarly to those already flagged as "
+        "struggling by the parametric model, but whose own scores fall just below the threshold. "
+        "It compares five normalised behavioural features using cosine similarity and checks the "
+        "3 nearest neighbours of each unflagged student. If those neighbours include flagged "
+        "students, the student is highlighted as potentially at risk.",
+    )
+
+    st.checkbox(
+        "Enable Collaborative Filtering",
+        key="cf_enabled",
+        help="Run CF as a secondary detection layer after parametric scoring.",
+    )
+
+    if st.session_state.get("cf_enabled", False):
+        st.slider(
+            "Struggle Score Threshold (τ)",
+            min_value=0.0,
+            max_value=1.0,
+            step=0.05,
+            key="cf_threshold",
+            help="Students with a parametric struggle score at or above this value are used as reference 'struggling' students for CF.",
+        )
 
     st.markdown("---")
 
