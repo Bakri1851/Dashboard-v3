@@ -10,4 +10,9 @@ data/lab_session.json
 data/lab_session.lock
 data/*.corrupt.*.json
 
+# Legacy root-level data files (before data/ migration)
+saved_sessions.json
+lab_session.json
+lab_session.lock
+
 .streamlit/secrets.toml

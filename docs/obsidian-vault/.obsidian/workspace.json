@@ -11,10 +11,14 @@
             "id": "3f273c3e70ceb827",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "markdown",
+              "state": {
+                "file": "Operations/Next Steps.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Next Steps"
             }
           }
         ]
@@ -178,8 +182,13 @@
   },
   "active": "3f273c3e70ceb827",
   "lastOpenFiles": [
-    "Logic/Student Struggle Logic.md",
     "Home.md",
+    "Overview/Architecture.md",
+    "Modules/Instructor Dashboard.md",
+    "Modules/Data Loading and Session Persistence.md",
+    "Operations/Next Steps.md",
+    "Logic/Student Struggle Logic.md",
+    "Overview/Data Pipeline.md",
     "Logic/Question Difficulty Logic.md",
     "Flows/Dashboard Pages and UI Flow.md"
   ]
