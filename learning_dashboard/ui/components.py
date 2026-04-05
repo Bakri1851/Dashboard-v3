@@ -5,8 +5,8 @@ import plotly.graph_objects as go
 import pandas as pd
 import streamlit as st
 
-import config
-import theme
+from learning_dashboard import config
+from learning_dashboard.ui import theme
 
 
 # Header

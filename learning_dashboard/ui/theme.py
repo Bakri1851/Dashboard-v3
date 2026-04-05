@@ -1,7 +1,7 @@
 # theme.py — Sci-fi neon theme CSS generation
 import functools
 
-import config
+from learning_dashboard import config
 
 
 @functools.lru_cache(maxsize=1)

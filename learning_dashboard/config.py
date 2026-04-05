@@ -100,11 +100,9 @@ AUTO_REFRESH_OPTIONS: list[int] = [5, 10, 15, 30, 60, 120,300]
 SOUNDS_ENABLED_DEFAULT: bool = True
 
 # --- Saved Session Persistence ---
-SAVED_SESSIONS_FILE: str = "saved_sessions.json"
 SAVED_SESSIONS_VERSION: int = 1
 
 # --- Lab Session State ---
-LAB_SESSION_FILE: str = "lab_session.json"
 LAB_CODE_LENGTH: int = 6
 
 # --- Color Palette ---

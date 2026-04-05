@@ -1,5 +1,5 @@
 # sound.py — Sci-fi synthesized sound effects via Web Audio API
-# All sounds are generated in JavaScript using OscillatorNode/GainNode.
+# All sounds are generated in JavaScript using OscillatorNode/GainNode inside the package.
 # Injection uses st.components.v1.html() (zero-height iframe, executes JS).
 import streamlit as st
 import streamlit.components.v1 as components

@@ -10,7 +10,7 @@ import pandas as pd
 import requests
 import streamlit as st
 
-import config
+from learning_dashboard import config, paths
 
 
 @st.cache_data(ttl=config.CACHE_TTL)
@@ -249,7 +249,7 @@ def load_data() -> tuple[pd.DataFrame, str]:
 
 def _saved_sessions_path() -> Path:
     """Absolute path to the local saved-session store."""
-    return Path(__file__).resolve().parent / config.SAVED_SESSIONS_FILE
+    return paths.saved_sessions_path()
 
 
 def _empty_saved_sessions_payload() -> dict:
@@ -293,6 +293,7 @@ def _read_saved_sessions_payload() -> dict:
 
 def _write_saved_sessions_payload(payload: dict) -> None:
     path = _saved_sessions_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_suffix(path.suffix + ".tmp")
     tmp_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     tmp_path.replace(path)
@@ -553,4 +554,3 @@ def filter_by_session_start(
     if session_start is None or df.empty:
         return df
     return df[df["timestamp"] >= pd.Timestamp(session_start)].copy()
-

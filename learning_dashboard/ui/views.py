@@ -4,10 +4,8 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 
-import analytics
-import components
-import config
-import data_loader
+from learning_dashboard import analytics, config, data_loader
+from learning_dashboard.ui import components
 
 
 def _format_session_timestamp(raw_value: str) -> str:

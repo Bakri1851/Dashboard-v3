@@ -13,7 +13,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import silhouette_score
 from sklearn.metrics.pairwise import cosine_similarity
 
-import config
+from learning_dashboard import config
 
 
 def _get_openai_client() -> OpenAI:

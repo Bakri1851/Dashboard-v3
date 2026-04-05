@@ -6,16 +6,13 @@ import json
 import random
 import string
 from datetime import datetime
-from pathlib import Path
 from typing import Any, Optional
 
 from filelock import FileLock
 
-import config
+from learning_dashboard import config, paths
 
 
-_STATE_FILE = Path(config.LAB_SESSION_FILE)
-_LOCK_FILE = _STATE_FILE.with_suffix(".lock")
 _LOCK_TIMEOUT_SECONDS = 5
 _SESSION_CODE_ALPHABET = string.ascii_uppercase + string.digits
 
@@ -36,8 +33,9 @@ def _default_state() -> dict[str, Any]:
 
 
 def _lock() -> FileLock:
-    _LOCK_FILE.parent.mkdir(parents=True, exist_ok=True)
-    return FileLock(str(_LOCK_FILE), timeout=_LOCK_TIMEOUT_SECONDS)
+    lock_file = paths.lab_session_lock_path()
+    lock_file.parent.mkdir(parents=True, exist_ok=True)
+    return FileLock(str(lock_file), timeout=_LOCK_TIMEOUT_SECONDS)
 
 
 def _normalize_state(raw_state: Any) -> dict[str, Any]:
@@ -116,21 +114,23 @@ def _normalize_state(raw_state: Any) -> dict[str, Any]:
 
 
 def _read_state_unlocked() -> dict[str, Any]:
-    if not _STATE_FILE.exists():
+    state_file = paths.lab_session_path()
+    if not state_file.exists():
         return _default_state()
     try:
-        raw = json.loads(_STATE_FILE.read_text(encoding="utf-8"))
+        raw = json.loads(state_file.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return _default_state()
     return _normalize_state(raw)
 
 
 def _write_state_unlocked(state: dict[str, Any]) -> None:
-    _STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    state_file = paths.lab_session_path()
+    state_file.parent.mkdir(parents=True, exist_ok=True)
     normalized = _normalize_state(state)
-    tmp_file = _STATE_FILE.with_suffix(".tmp")
+    tmp_file = state_file.with_suffix(".tmp")
     tmp_file.write_text(json.dumps(normalized, indent=2), encoding="utf-8")
-    tmp_file.replace(_STATE_FILE)
+    tmp_file.replace(state_file)
 
 
 def _build_assistant_id(name: str, existing_ids: set[str]) -> str:
