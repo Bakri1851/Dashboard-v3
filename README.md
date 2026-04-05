@@ -221,8 +221,12 @@ CF is a secondary, opt-in layer that runs **after** the parametric model. It ide
 
 **How it works:**
 
-1. Build an interaction matrix **X** from five normalised features: `n_hat`, `t_hat`, `i_hat`, `A_raw`, `d_hat`
-2. Compute pairwise cosine similarity **W** using `sklearn.metrics.pairwise.cosine_similarity`
+1. Build an interaction matrix **X** (N × 5) where each student is a row vector of five normalised features: `[n_hat, t_hat, i_hat, A_raw, d_hat]`
+2. Compute pairwise cosine similarity **W** (N × N) where each entry is:
+   ```
+   sim(A, B) = (A · B) / (‖A‖ × ‖B‖)
+   ```
+   This measures the angle between two students' feature vectors — students with similar *proportions* across the five behavioural features score close to 1.0, regardless of absolute magnitude. Computed via `sklearn.metrics.pairwise.cosine_similarity`
 3. Label each student: `h_i = 1` if `struggle_score >= τ` (configurable threshold, default 0.6), else `h_i = 0`
 4. For each student where `h_i = 0`: find k=3 nearest neighbours by similarity, compute `cf_score = weighted_avg(neighbours' h values)` using similarity as weights
 5. For each student where `h_i = 1`: `cf_score = 1.0`
