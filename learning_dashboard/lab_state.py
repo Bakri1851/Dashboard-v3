@@ -25,6 +25,7 @@ def _default_state() -> dict[str, Any]:
     return {
         "session_code": None,
         "session_active": False,
+        "session_start": None,
         "generated_at": _now_iso(),
         "lab_assistants": {},
         "assignments": {},
@@ -49,6 +50,10 @@ def _normalize_state(raw_state: Any) -> dict[str, Any]:
 
     state["session_active"] = bool(raw_state.get("session_active", False))
     state["allow_self_allocation"] = bool(raw_state.get("allow_self_allocation", True))
+
+    session_start = raw_state.get("session_start")
+    if isinstance(session_start, str) and session_start:
+        state["session_start"] = session_start
 
     generated_at = raw_state.get("generated_at")
     if isinstance(generated_at, str) and generated_at:
@@ -162,6 +167,7 @@ def start_lab_session(session_code: Optional[str] = None) -> None:
         state = _default_state()
         state["session_code"] = code
         state["session_active"] = True
+        state["session_start"] = _now_iso()
         state["generated_at"] = _now_iso()
         _write_state_unlocked(state)
 
@@ -192,6 +198,8 @@ def join_session(session_code: str, name: str) -> tuple[bool, Optional[str], Opt
         for assistant_id, info in state["lab_assistants"].items():
             existing_name = str(info.get("name", "")).strip()
             if existing_name.casefold() == clean_name.casefold():
+                info["assigned_student"] = None
+                _write_state_unlocked(state)
                 return True, assistant_id, None
 
         assistant_id = _build_assistant_id(clean_name, set(state["lab_assistants"].keys()))

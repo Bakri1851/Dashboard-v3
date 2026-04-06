@@ -10,6 +10,7 @@ from streamlit_autorefresh import st_autorefresh
 
 from learning_dashboard import analytics, config, data_loader, sound
 from learning_dashboard import lab_state as _lab_state
+from learning_dashboard.models import measurement
 from learning_dashboard.ui import theme, views
 
 os.environ.setdefault("OPENAI_API_KEY", st.secrets.get("OPENAI_API_KEY", ""))
@@ -52,6 +53,9 @@ def init_session_state() -> None:
         "_prev_selected_question":   None,
         "_prev_dashboard_view":      "In Class View",
         "_prev_high_struggle_count": 0,
+        "improved_models_enabled": False,
+        "_measurement_df": None,
+        "_improved_models_key": None,
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -453,9 +457,9 @@ def main() -> None:
     _prev_active = st.session_state.get("_prev_session_active", False)
     _curr_active = st.session_state["session_active"]
     if _curr_active and not _prev_active:
-        sound.play_selection()
+        sound.play_session_start()
     elif not _curr_active and _prev_active:
-        sound.play_selection()
+        sound.play_session_end()
     st.session_state["_prev_session_active"] = _curr_active
 
     # Inject theme
@@ -579,7 +583,8 @@ def main() -> None:
 
     # Cache analytics scores — only recompute when the filtered data changes.
     # Key on row count + timestamp range as a fast fingerprint of df content.
-    _analytics_key = (len(df), str(df["timestamp"].min()), str(df["timestamp"].max()))
+    _analytics_key = (len(df), str(df["timestamp"].min()), str(df["timestamp"].max()),
+                      int(pd.util.hash_pandas_object(df).sum()))
     if st.session_state.get("_analytics_key") != _analytics_key:
         struggle_df = analytics.compute_student_struggle_scores(df)
         difficulty_df = analytics.compute_question_difficulty_scores(df)
@@ -587,11 +592,22 @@ def main() -> None:
         st.session_state["_difficulty_df"] = difficulty_df
         st.session_state["_analytics_key"] = _analytics_key
         st.session_state["_sec_analytics_key"] = None  # invalidate secondary cache
+        st.session_state["_improved_models_key"] = None  # invalidate improved models cache
     else:
         struggle_df = st.session_state["_struggle_df"]
         difficulty_df = st.session_state["_difficulty_df"]
 
     df["incorrectness"] = analytics.compute_incorrectness_column(df)
+
+    # --- Improved models (Phase 1), gated by feature flag ---
+    if st.session_state.get("improved_models_enabled", False):
+        if st.session_state.get("_improved_models_key") != _analytics_key:
+            st.session_state["_measurement_df"] = measurement.compute_incorrectness_with_confidence(df)
+            st.session_state["_improved_models_key"] = _analytics_key
+    else:
+        if st.session_state.get("_improved_models_key") is not None:
+            st.session_state["_measurement_df"] = None
+            st.session_state["_improved_models_key"] = None
 
     # Sound: high-struggle student count increased
     if st.session_state["session_active"] and struggle_df is not None and not struggle_df.empty:

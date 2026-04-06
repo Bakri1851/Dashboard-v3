@@ -182,11 +182,12 @@
   },
   "active": "3f273c3e70ceb827",
   "lastOpenFiles": [
+    "Reference/Glossary.md",
+    "Operations/Next Steps.md",
     "Home.md",
     "Overview/Architecture.md",
     "Modules/Instructor Dashboard.md",
     "Modules/Data Loading and Session Persistence.md",
-    "Operations/Next Steps.md",
     "Logic/Student Struggle Logic.md",
     "Overview/Data Pipeline.md",
     "Logic/Question Difficulty Logic.md",

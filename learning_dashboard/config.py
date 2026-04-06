@@ -126,3 +126,7 @@ COLORS: dict[str, str] = {
 # --- Font Configuration ---
 FONT_HEADING: str = "Orbitron"
 FONT_BODY: str = "Share Tech Mono"
+
+# --- Phase 1: Measurement Confidence ---
+MEASUREMENT_CONFIDENCE_MIN_LENGTH: int = 20
+MEASUREMENT_CONFIDENCE_BASE: float = 0.7

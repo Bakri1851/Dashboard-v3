@@ -21,6 +21,13 @@ def _load_student_data() -> tuple[pd.DataFrame, Optional[pd.DataFrame]]:
     df, _err = data_loader.load_data()
     if df.empty:
         return df, None
+    # Filter to only include submissions within the instructor's active session window
+    state = lab_state.read_state()
+    session_start = state.get("session_start")
+    if session_start and "timestamp" in df.columns:
+        df = df[df["timestamp"] >= session_start].copy()
+        if df.empty:
+            return df, None
     struggle_df = analytics.compute_student_struggle_scores(df)
     return df, struggle_df
 

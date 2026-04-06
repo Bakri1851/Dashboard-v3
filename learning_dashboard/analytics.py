@@ -602,7 +602,8 @@ def cluster_question_mistakes(
     if total_wrong < config.CLUSTER_MIN_WRONG:
         return None
 
-    cache_key = (question_id, total_wrong)
+    _answer_hash = hash(tuple(sorted(wrong_df["student_answer"].tolist())))
+    cache_key = (question_id, total_wrong, _answer_hash)
     if cache_key in _cluster_cache:
         return _cluster_cache[cache_key]
 
