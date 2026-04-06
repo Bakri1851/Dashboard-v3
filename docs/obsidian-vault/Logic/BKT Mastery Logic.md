@@ -67,6 +67,16 @@ Two DataFrames are produced:
 - Division-by-zero guards (denominator clamped to 1e-12) handle degenerate parameter combinations.
 - Result is always clipped to [0, 1].
 
+## Leaderboard integration
+
+When the "Use IRT / BKT models" toggle is active in the In Class View, BKT mastery is converted to a struggle-like score for the student leaderboard:
+
+- `struggle_score = 1 - mean_mastery` (low mastery = high struggle)
+- Scores are **min-max normalized** (`analytics.min_max_normalize`) before classification so they spread across the full threshold range. Without normalization, raw mastery values cluster at similar levels (typically low) and all students appear in the same category.
+- Classification uses the standard `STRUGGLE_THRESHOLDS`.
+
+Raw mastery values are preserved in session state for Phase 4 (improved struggle model) and Phase 5 (comparison UI).
+
 ## Feature flag
 
 BKT computation is gated by `improved_models_enabled` in session state (toggled in Settings). When enabled, results are cached in `st.session_state["_mastery_df"]` and `st.session_state["_mastery_summary_df"]`. When disabled, both caches are cleared.
@@ -76,3 +86,4 @@ BKT computation is gated by `improved_models_enabled` in session state (toggled 
 - `learning_dashboard/models/bkt.py`: `bkt_update()`, `compute_student_mastery()`, `compute_all_mastery()`, `compute_student_mastery_summary()`
 - `learning_dashboard/config.py`: `BKT_P_INIT`, `BKT_P_LEARN`, `BKT_P_GUESS`, `BKT_P_SLIP`, `BKT_MASTERY_THRESHOLD`
 - `learning_dashboard/instructor_app.py`: feature-flag integration (~line 680)
+- `learning_dashboard/ui/views.py`: leaderboard toggle and normalization (~line 115)

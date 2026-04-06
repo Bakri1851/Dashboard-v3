@@ -91,6 +91,55 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
             struggle_df = st.session_state["_sec_struggle_df"]
             difficulty_df = st.session_state["_sec_difficulty_df"]
 
+    # --- Model toggle ---
+    # When improved models are enabled and have data, allow switching the
+    # leaderboards between baseline scores and IRT/BKT scores.
+    _improved_on = st.session_state.get("improved_models_enabled", False)
+    _irt_df = st.session_state.get("_irt_difficulty_df")
+    _mastery_summary = st.session_state.get("_mastery_summary_df")
+    _can_switch = (
+        _improved_on
+        and _irt_df is not None and not _irt_df.empty
+        and _mastery_summary is not None and not _mastery_summary.empty
+    )
+
+    use_improved = False
+    if _can_switch:
+        use_improved = st.toggle(
+            "Use IRT / BKT models",
+            value=st.session_state.get("_use_improved_leaderboards", False),
+            key="_use_improved_leaderboards",
+            help="Switch leaderboards to IRT difficulty and BKT mastery-gap scores.",
+        )
+
+    if use_improved and _can_switch:
+        # Adapt IRT difficulty → question leaderboard format
+        # Min-max normalize so scores spread across threshold ranges
+        difficulty_df = _irt_df.copy()
+        difficulty_df["difficulty_score"] = analytics.min_max_normalize(
+            difficulty_df["irt_difficulty"]
+        )
+        _d_classified = difficulty_df["difficulty_score"].apply(
+            lambda s: analytics.classify_score(s, config.DIFFICULTY_THRESHOLDS)
+        )
+        difficulty_df["difficulty_level"] = _d_classified.str[0]
+        difficulty_df["difficulty_color"] = _d_classified.str[1]
+
+        # Adapt BKT mastery summary → student leaderboard format
+        # Low mastery ≈ high struggle, so score = 1 - mean_mastery
+        # Min-max normalize so scores spread across threshold ranges
+        _ms = _mastery_summary.copy()
+        _ms["struggle_score"] = analytics.min_max_normalize(
+            1.0 - _ms["mean_mastery"]
+        )
+        _ms = _ms.sort_values("struggle_score", ascending=False).reset_index(drop=True)
+        _s_classified = _ms["struggle_score"].apply(
+            lambda s: analytics.classify_score(s, config.STRUGGLE_THRESHOLDS)
+        )
+        _ms["struggle_level"] = _s_classified.str[0]
+        _ms["struggle_color"] = _s_classified.str[1]
+        struggle_df = _ms[["user", "struggle_score", "struggle_level", "struggle_color"]]
+
     # Summary cards
     components.render_summary_cards(struggle_df)
 

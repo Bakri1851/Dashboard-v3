@@ -36,6 +36,7 @@ Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossa
 - [[Student Struggle Logic]]
 - [[Question Difficulty Logic]]
 - [[IRT Difficulty Logic]]
+- [[BKT Mastery Logic]]
 
 ### Operations and reference
 

@@ -55,7 +55,7 @@ def init_session_state() -> None:
         "_prev_selected_question":   None,
         "_prev_dashboard_view":      "In Class View",
         "_prev_high_struggle_count": 0,
-        "improved_models_enabled": False,
+        "improved_models_enabled": True,
         "_measurement_df": None,
         "_improved_models_key": None,
     }
@@ -678,7 +678,11 @@ def main() -> None:
 
     # --- Improved models (Phases 1–3), gated by feature flag ---
     if st.session_state.get("improved_models_enabled", False):
-        if st.session_state.get("_improved_models_key") != _analytics_key:
+        _need_recompute = (
+            st.session_state.get("_improved_models_key") != _analytics_key
+            or st.session_state.get("_mastery_summary_df") is None
+        )
+        if _need_recompute:
             st.session_state["_measurement_df"] = measurement.compute_incorrectness_with_confidence(df)
             st.session_state["_irt_difficulty_df"] = irt.compute_irt_difficulty_scores(df)
             mastery_df = bkt.compute_all_mastery(df)

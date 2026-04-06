@@ -46,6 +46,15 @@ Output columns: `question`, `irt_difficulty`, `irt_difficulty_level`, `irt_diffi
 - If no valid data remains after filtering, an empty DataFrame is returned.
 - The model degrades gracefully with small datasets but may not converge.
 
+## Leaderboard integration
+
+When the "Use IRT / BKT models" toggle is active in the In Class View, IRT difficulty powers the question leaderboard:
+
+- Raw `irt_difficulty` values (sigmoid of logit-scale `b_i`) are **min-max normalized** (`analytics.min_max_normalize`) before classification. Without normalization, sigmoid maps all large positive `b_i` values to near 1.0, making every question appear "Very Hard".
+- Classification uses the standard `DIFFICULTY_THRESHOLDS`.
+
+Raw IRT values are preserved in session state for Phase 4 and Phase 5.
+
 ## Feature flag
 
 IRT computation is gated by `improved_models_enabled` in session state (toggled in Settings). When enabled, results are cached in `st.session_state["_irt_difficulty_df"]`. When disabled, the cache is cleared.
@@ -54,4 +63,5 @@ IRT computation is gated by `improved_models_enabled` in session state (toggled 
 
 - `learning_dashboard/models/irt.py`: `build_response_matrix()`, `fit_rasch_model()`, `compute_irt_difficulty_scores()`
 - `learning_dashboard/config.py`: `IRT_MIN_ATTEMPTS_PER_QUESTION`, `IRT_MIN_ATTEMPTS_PER_STUDENT`, `IRT_MAX_ITER`, `IRT_DIFFICULTY_THRESHOLDS`
-- `learning_dashboard/instructor_app.py`: feature-flag integration (~line 604)
+- `learning_dashboard/instructor_app.py`: feature-flag integration (~line 680)
+- `learning_dashboard/ui/views.py`: leaderboard toggle and normalization (~line 115)

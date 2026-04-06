@@ -12,6 +12,8 @@ Related: [[Instructor Dashboard]], [[Lab Assistant System]], [[Analytics Engine]
 - Mistake-cluster caching is too coarse: `_cluster_cache` is keyed only by `(question_id, total_wrong)`. Different wrong answers with the same count can therefore reuse stale cluster output. See [[Question Difficulty Logic]] and [[Analytics Engine]].
 - Session lifecycle sounds are miswired: `play_session_start()` and `play_session_end()` exist, but the instructor app currently calls `play_selection()` when session activity toggles. See [[UI System]] and [[Dashboard Pages and UI Flow]].
 
+- BKT student leaderboard scores cluster near 1.0: when the "Use IRT / BKT models" toggle is on, student struggle scores (derived from `1 - mean_mastery`, min-max normalized) still cluster tightly, placing nearly all students in "Needs Help". The IRT question leaderboard spreads correctly. Root cause is likely that BKT `mean_mastery` values have very low variance across students with this dataset — min-max normalization amplifies tiny differences but the underlying signal lacks differentiation. Needs investigation into whether a different BKT-derived metric (e.g. per-question mastery variance, min_mastery, or mastered_count ratio) would produce better spread. See [[BKT Mastery Logic]] and [[Next Steps]].
+
 ## Why these matter
 
 - They affect trust in what the dashboard is showing.
