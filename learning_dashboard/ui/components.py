@@ -35,10 +35,13 @@ def render_info_bar(
 ) -> None:
     """Subtle summary bar with key counts."""
     c = config.COLORS
+    period = st.session_state.get("current_academic_period", "")
+    period_item = f'<div class="info-item">Period: <span class="info-value">{period}</span></div>' if period else ""
     st.markdown(
         f"""
         <div class="info-bar">
             <div class="info-item"><span class="info-value">{view_name}</span></div>
+            {period_item}
             <div class="info-item">Submissions: <span class="info-value">{total_submissions:,}</span></div>
             <div class="info-item">Students: <span class="info-value">{unique_students:,}</span></div>
             <div class="info-item">Questions: <span class="info-value">{unique_questions:,}</span></div>
@@ -755,6 +758,23 @@ def render_user_activity_chart(df: pd.DataFrame, module: Optional[str] = None) -
 def render_activity_timeline_chart(df: pd.DataFrame) -> None:
     """Line chart with hourly granularity and filled area glow."""
     render_timeline_chart(df, "timestamp", "Activity Timeline", config.COLORS["cyan"])
+
+
+def render_academic_period_chart(df: pd.DataFrame) -> None:
+    """Bar chart of submissions grouped by academic period in chronological order."""
+    from learning_dashboard.academic_calendar import academic_period_sorter
+
+    if df.empty or "academic_period" not in df.columns:
+        st.info("No academic period data available.")
+        return
+    counts = df.groupby("academic_period").size().reset_index(name="submissions")
+    counts["_sort"] = counts["academic_period"].apply(academic_period_sorter)
+    counts = counts.sort_values("_sort").drop(columns="_sort")
+    render_bar_chart(
+        counts, x_col="academic_period", y_col="submissions",
+        title="Activity by Academic Week", color=config.COLORS["cyan"],
+        max_items=40,
+    )
 
 
 def render_students_by_module_chart(df: pd.DataFrame) -> None:

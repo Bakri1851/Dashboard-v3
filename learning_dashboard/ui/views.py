@@ -387,6 +387,7 @@ def data_analysis_view(df: pd.DataFrame) -> None:
         "Top Questions",
         "User Activity",
         "Activity Timeline",
+        "Activity by Academic Week",
         "Students by Module",
     ]
     selected_chart = st.selectbox("Select Analysis", chart_options, key="analysis_chart")
@@ -409,11 +410,72 @@ def data_analysis_view(df: pd.DataFrame) -> None:
     elif selected_chart == "Activity Timeline":
         components.render_activity_timeline_chart(df)
 
+    elif selected_chart == "Activity by Academic Week":
+        components.render_academic_period_chart(df)
+
     elif selected_chart == "Students by Module":
         components.render_students_by_module_chart(df)
 
 
 # Settings View
+
+def _setting_toggle(label: str, state_key: str, **kwargs) -> None:
+    """Render a checkbox that persists via session state (survives view changes).
+
+    Streamlit deletes widget-bound keys when the widget stops rendering.
+    This helper uses a dedicated widget key and an ``on_change`` callback
+    to copy the value back into the canonical session-state key so the
+    setting survives navigation away from the Settings page.
+    """
+    widget_key = f"_w_{state_key}"
+
+    def _sync():
+        st.session_state[state_key] = st.session_state[widget_key]
+
+    st.checkbox(
+        label,
+        value=st.session_state.get(state_key, False),
+        key=widget_key,
+        on_change=_sync,
+        **kwargs,
+    )
+
+
+def _setting_slider(label: str, state_key: str, **kwargs) -> None:
+    """Render a slider that persists via session state."""
+    widget_key = f"_w_{state_key}"
+
+    def _sync():
+        st.session_state[state_key] = st.session_state[widget_key]
+
+    st.slider(
+        label,
+        value=st.session_state.get(state_key, kwargs.pop("default", 0.5)),
+        key=widget_key,
+        on_change=_sync,
+        **kwargs,
+    )
+
+
+def _setting_selectbox(label: str, state_key: str, options, **kwargs) -> None:
+    """Render a selectbox that persists via session state."""
+    widget_key = f"_w_{state_key}"
+
+    def _sync():
+        st.session_state[state_key] = st.session_state[widget_key]
+
+    current = st.session_state.get(state_key)
+    idx = options.index(current) if current in options else 0
+
+    st.selectbox(
+        label,
+        options,
+        index=idx,
+        key=widget_key,
+        on_change=_sync,
+        **kwargs,
+    )
+
 
 def settings_view(df: pd.DataFrame) -> None:
     """Application settings."""
@@ -431,7 +493,7 @@ def settings_view(df: pd.DataFrame) -> None:
         f'text-transform:uppercase; letter-spacing:2px; font-size:1rem;">Sound Effects</h3>',
         unsafe_allow_html=True,
     )
-    st.checkbox("Enable Sound Effects", key="sounds_enabled", help="Play sci-fi sound effects for key events (session start/end, student selection, data refresh, etc.).")
+    _setting_toggle("Enable Sound Effects", "sounds_enabled", help="Play sci-fi sound effects for key events (session start/end, student selection, data refresh, etc.).")
 
     st.markdown("---")
 
@@ -440,12 +502,12 @@ def settings_view(df: pd.DataFrame) -> None:
         f'text-transform:uppercase; letter-spacing:2px; font-size:1rem;">Refresh</h3>',
         unsafe_allow_html=True,
     )
-    st.checkbox("Enable Auto-Refresh", key="auto_refresh")
-    st.selectbox(
+    _setting_toggle("Enable Auto-Refresh", "auto_refresh")
+    _setting_selectbox(
         "Interval (seconds)",
+        "refresh_interval",
         config.AUTO_REFRESH_OPTIONS,
-        key="refresh_interval",
-        disabled=not st.session_state["auto_refresh"],
+        disabled=not st.session_state.get("auto_refresh", False),
     )
 
     if st.session_state["last_refresh"]:
@@ -471,19 +533,20 @@ def settings_view(df: pd.DataFrame) -> None:
         "students, the student is highlighted as potentially at risk.",
     )
 
-    st.checkbox(
+    _setting_toggle(
         "Enable Collaborative Filtering",
-        key="cf_enabled",
+        "cf_enabled",
         help="Run CF as a secondary detection layer after parametric scoring.",
     )
 
     if st.session_state.get("cf_enabled", False):
-        st.slider(
+        _setting_slider(
             "Struggle Score Threshold (τ)",
+            "cf_threshold",
             min_value=0.0,
             max_value=1.0,
             step=0.05,
-            key="cf_threshold",
+            default=0.5,
             help="Students with a parametric struggle score at or above this value are used as reference 'struggling' students for CF.",
         )
 
@@ -501,9 +564,9 @@ def settings_view(df: pd.DataFrame) -> None:
         "models provide a second estimate for comparison.",
     )
 
-    st.checkbox(
+    _setting_toggle(
         "Enable Improved Models",
-        key="improved_models_enabled",
+        "improved_models_enabled",
         help="Run IRT difficulty estimation alongside the baseline model. "
              "Results are cached in session state for use by future comparison views.",
     )
@@ -531,6 +594,30 @@ def previous_sessions_view(df: pd.DataFrame) -> None:
     saved_sessions = data_loader.load_saved_sessions()
     if not saved_sessions:
         st.caption("No previous sessions yet. End an active lab session to store one.")
+        return
+
+    # Academic period filter
+    from learning_dashboard.academic_calendar import get_academic_period, academic_period_sorter
+
+    def _session_period(record):
+        raw = record.get("start_time", "")
+        if not raw:
+            return "Unknown"
+        try:
+            return get_academic_period(datetime.fromisoformat(raw))
+        except (ValueError, TypeError):
+            return "Unknown"
+
+    period_labels = list({_session_period(r) for r in saved_sessions})
+    period_labels.sort(key=lambda p: academic_period_sorter(p) if p != "Unknown" else (99, 0))
+    period_options = ["All Periods"] + period_labels
+    selected_period = st.selectbox("Filter by Academic Period", period_options, key="sessions_period_filter")
+
+    if selected_period != "All Periods":
+        saved_sessions = [r for r in saved_sessions if _session_period(r) == selected_period]
+
+    if not saved_sessions:
+        st.caption("No sessions found for this period.")
         return
 
     pending_delete = st.session_state.get("pending_delete_session_id")

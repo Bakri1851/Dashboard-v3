@@ -43,6 +43,7 @@ Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossa
 - [[Known Issues]]
 - [[Next Steps]]
 - [[Glossary]]
+- [[Academic Period Converter]]
 
 ## Code references
 

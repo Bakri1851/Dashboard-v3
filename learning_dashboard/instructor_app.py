@@ -329,66 +329,6 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
 
         st.markdown("---")
 
-        # --- Time Filter ---
-        st.markdown(
-            f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
-            f'text-transform:uppercase; letter-spacing:2px; font-size:0.9rem;">Time Filter</h3>',
-            unsafe_allow_html=True,
-        )
-
-        st.checkbox("Enable Time Filter", key="time_filter_enabled")
-
-        if st.session_state["time_filter_enabled"]:
-            today = datetime.now().date()
-            # Default to today if data exists for today
-            if not df.empty:
-                min_date = df["timestamp"].min().date()
-                max_date = df["timestamp"].max().date()
-                has_today = min_date <= today <= max_date
-            else:
-                min_date = today
-                max_date = today
-                has_today = False
-
-            default_start = today if has_today else min_date
-            default_end = today if has_today else max_date
-
-            date_range = st.date_input(
-                "Date Range",
-                value=(default_start, default_end),
-                key="time_date_range",
-            )
-
-            start_time = st.time_input("Start Time", value=dt_time(0, 0), key="time_start")
-            end_time = st.time_input("End Time", value=dt_time(23, 59), key="time_end")
-
-            if isinstance(date_range, tuple) and len(date_range) == 2:
-                df = data_loader.filter_by_time(
-                    df,
-                    start_date=date_range[0],
-                    end_date=date_range[1],
-                    start_time=start_time,
-                    end_time=end_time,
-                )
-
-            st.caption(f"Filtered records: {len(df):,}")
-
-        # --- Session-based filtering ---
-        elif st.session_state["session_active"] and st.session_state["session_start"]:
-            df = data_loader.filter_by_session_start(df, st.session_state["session_start"])
-        elif (
-            st.session_state.get("loaded_session_start") is not None
-            and st.session_state.get("loaded_session_end") is not None
-        ):
-            df = data_loader.filter_by_datetime_window(
-                df,
-                st.session_state.get("loaded_session_start"),
-                st.session_state.get("loaded_session_end"),
-            )
-            st.caption(f"Filtered records: {len(df):,} (loaded saved session)")
-
-        st.markdown("---")
-
         # --- Settings ---
         st.markdown(
             f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
@@ -410,7 +350,7 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
         st.markdown("---")
 
         # --- Quick Refresh ---
-        if st.session_state["auto_refresh"] and st.session_state["last_refresh"]:
+        if st.session_state.get("auto_refresh") and st.session_state["last_refresh"]:
             st.caption(
                 f"Last refresh: {st.session_state['last_refresh'].strftime('%H:%M:%S')}"
             )
@@ -420,12 +360,96 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
 
         st.markdown("---")
 
-        # --- Previous Sessions ---
+        # --- History (time filter + previous sessions + save) ---
         st.markdown(
             f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
             f'text-transform:uppercase; letter-spacing:2px; font-size:0.9rem;">History</h3>',
             unsafe_allow_html=True,
         )
+
+        # Time filter
+        _w_tf = st.checkbox(
+            "Enable Time Filter",
+            value=st.session_state.get("time_filter_enabled", False),
+            key="_w_time_filter_enabled",
+        )
+        st.session_state["time_filter_enabled"] = _w_tf
+
+        if _w_tf:
+            from learning_dashboard.academic_calendar import (
+                ALL_PERIOD_LABELS, get_period_date_range,
+            )
+
+            if not df.empty and "academic_period" in df.columns:
+                data_periods = set(df["academic_period"].unique())
+                available_labels = [p for p in ALL_PERIOD_LABELS if p in data_periods]
+            else:
+                available_labels = []
+            period_options = ["Custom"] + available_labels
+            selected_period = st.selectbox(
+                "Academic Period",
+                period_options,
+                key="time_filter_period",
+            )
+
+            today = datetime.now().date()
+            if not df.empty:
+                min_date = df["timestamp"].min().date()
+                max_date = df["timestamp"].max().date()
+                has_today = min_date <= today <= max_date
+            else:
+                min_date = today
+                max_date = today
+                has_today = False
+
+            if selected_period != "Custom":
+                period_range = get_period_date_range(selected_period)
+                if period_range:
+                    default_start, default_end = period_range
+                else:
+                    default_start = today if has_today else min_date
+                    default_end = today if has_today else max_date
+            else:
+                default_start = today if has_today else min_date
+                default_end = today if has_today else max_date
+
+            date_range = st.date_input(
+                "Date Range",
+                value=(default_start, default_end),
+                key="time_date_range",
+            )
+
+            start_time = st.time_input("Start Time", value=dt_time(0, 0), key="time_start")
+            end_time = st.time_input("End Time", value=dt_time(23, 59), key="time_end")
+
+            if isinstance(date_range, tuple) and len(date_range) == 2:
+                df = data_loader.filter_by_time(
+                    df,
+                    start_date=date_range[0],
+                    end_date=date_range[1],
+                    start_time=start_time,
+                    end_time=end_time,
+                )
+
+            st.caption(f"Filtered records: {len(df):,}")
+
+        # Session-based filtering (live session or loaded saved session)
+        elif st.session_state["session_active"] and st.session_state["session_start"]:
+            df = data_loader.filter_by_session_start(df, st.session_state["session_start"])
+        elif (
+            st.session_state.get("loaded_session_start") is not None
+            and st.session_state.get("loaded_session_end") is not None
+        ):
+            df = data_loader.filter_by_datetime_window(
+                df,
+                st.session_state.get("loaded_session_start"),
+                st.session_state.get("loaded_session_end"),
+            )
+            st.caption(f"Filtered records: {len(df):,} (loaded saved session)")
+
+        st.markdown("")
+
+        # Previous sessions / save
         if st.session_state["current_view"] == "Previous Sessions":
             if st.button("Back to Dashboard", key="back_from_previous_sessions"):
                 _on_view_change()
@@ -436,6 +460,51 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
             if st.button("Open Previous Sessions", key="open_previous_sessions"):
                 _on_view_change()
                 st.session_state["current_view"] = "Previous Sessions"
+                st.rerun()
+
+        if st.button("Save Current Session", key="save_retro_session"):
+            st.session_state["_retro_save_open"] = True
+            st.rerun()
+
+        if st.session_state.get("_retro_save_open"):
+            retro_name = st.text_input(
+                "Session Name",
+                value=f"Session {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+                key="retro_session_name",
+                max_chars=80,
+            )
+            if st.button("Confirm Save", key="confirm_retro_session"):
+                date_range = st.session_state.get("time_date_range")
+                has_time_filter = (
+                    st.session_state.get("time_filter_enabled")
+                    and isinstance(date_range, (tuple, list))
+                    and len(date_range) == 2
+                )
+                if has_time_filter:
+                    record = data_loader.build_retroactive_session_record(
+                        name=retro_name,
+                        start_date=date_range[0],
+                        end_date=date_range[1],
+                        start_time=st.session_state.get("time_start"),
+                        end_time=st.session_state.get("time_end"),
+                    )
+                else:
+                    today = datetime.now().date()
+                    record = data_loader.build_retroactive_session_record(
+                        name=retro_name,
+                        start_date=today,
+                        end_date=today,
+                    )
+                try:
+                    data_loader.save_session_record(record)
+                    st.session_state["loaded_session_id"] = record["id"]
+                    st.session_state["_retro_save_open"] = False
+                    st.success("Session saved.")
+                except Exception:
+                    st.error("Could not save session.")
+                st.rerun()
+            if st.button("Cancel", key="cancel_retro_session"):
+                st.session_state["_retro_save_open"] = False
                 st.rerun()
 
     return df
@@ -483,6 +552,11 @@ def main() -> None:
 
     # Load data
     df, load_error = data_loader.load_data()
+
+    # Current academic period (shown in info bar)
+    from learning_dashboard.academic_calendar import get_academic_period
+    st.session_state["current_academic_period"] = get_academic_period(datetime.now())
+
     if st.session_state["current_view"] not in {"Settings", "Previous Sessions"}:
         if load_error:
             st.error(load_error)

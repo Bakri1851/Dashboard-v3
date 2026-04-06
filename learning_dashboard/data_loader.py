@@ -179,6 +179,10 @@ def normalize_and_clean(records: list[dict]) -> pd.DataFrame:
     # Sort by timestamp
     df = df.sort_values("timestamp").reset_index(drop=True)
 
+    # Add academic period label
+    from learning_dashboard.academic_calendar import add_academic_period_column
+    df = add_academic_period_column(df)
+
     return df
 
 
@@ -432,6 +436,51 @@ def build_session_record_from_state(now: datetime) -> Optional[dict]:
             "time_end": end_time_iso if time_filter_enabled else None,
         },
         "notes": "",
+    }
+
+
+def build_retroactive_session_record(
+    name: str,
+    start_date,
+    end_date,
+    start_time=None,
+    end_time=None,
+) -> dict:
+    """Build a session record from manual time-filter values.
+
+    Used when an instructor forgot to record a live session and wants to
+    retroactively save a time window as a session.
+    """
+    from datetime import time as dt_time
+
+    if not name.strip():
+        name = f"Retroactive Session {start_date.isoformat()}"
+
+    start_time = start_time or dt_time(0, 0)
+    end_time = end_time or dt_time(23, 59)
+
+    start_dt = datetime.combine(start_date, start_time)
+    end_dt = datetime.combine(end_date, end_time)
+    duration_seconds = max(0, int((end_dt - start_dt).total_seconds()))
+
+    return {
+        "id": str(uuid4()),
+        "name": name.strip(),
+        "created_at": datetime.now().isoformat(timespec="seconds"),
+        "start_time": start_dt.isoformat(timespec="seconds"),
+        "end_time": end_dt.isoformat(timespec="seconds"),
+        "duration_seconds": duration_seconds,
+        "context": {
+            "dashboard_view": st.session_state.get("dashboard_view", "In Class View"),
+            "secondary_module_filter": st.session_state.get(
+                "secondary_module_filter", "All Modules"
+            ),
+            "time_filter_enabled": True,
+            "time_date_range": [start_date.isoformat(), end_date.isoformat()],
+            "time_start": start_time.isoformat() if start_time else None,
+            "time_end": end_time.isoformat() if end_time else None,
+        },
+        "notes": "Retroactive session (saved from time filter)",
     }
 
 
