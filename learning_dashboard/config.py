@@ -141,3 +141,10 @@ IRT_DIFFICULTY_THRESHOLDS: list[tuple[float, float, str, str]] = [
     (0.50, 0.75, "Hard",      "#ff6600"),
     (0.75, 1.00, "Very Hard", "#ff2d55"),
 ]
+
+# --- Phase 3: BKT Mastery Tracking ---
+BKT_P_INIT: float = 0.3       # P(L_0): prior probability student knows skill
+BKT_P_LEARN: float = 0.1      # P(T):   probability of learning per opportunity
+BKT_P_GUESS: float = 0.2      # P(G):   probability of guessing correctly
+BKT_P_SLIP: float = 0.1       # P(S):   probability of slipping (wrong despite knowing)
+BKT_MASTERY_THRESHOLD: float = 0.95  # P(L) above this = "mastered"

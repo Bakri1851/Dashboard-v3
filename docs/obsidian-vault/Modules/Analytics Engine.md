@@ -32,6 +32,7 @@ Alternative and enhanced models live in the `models/` package, gated by the `imp
 
 - `measurement.py` (Phase 1): adds confidence metadata to incorrectness scores.
 - `irt.py` (Phase 2): Rasch IRT difficulty estimation as an alternative to the baseline weighted score. See [[IRT Difficulty Logic]].
+- `bkt.py` (Phase 3): Bayesian Knowledge Tracing for per-student per-question mastery estimation. See [[BKT Mastery Logic]].
 
 ## Code references
 

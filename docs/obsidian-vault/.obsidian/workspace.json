@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Logic/IRT Difficulty Logic.md",
+                "file": "Reference/Academic Period Converter.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "IRT Difficulty Logic"
+              "title": "Academic Period Converter"
             }
           }
         ]
@@ -182,8 +182,8 @@
   },
   "active": "3f273c3e70ceb827",
   "lastOpenFiles": [
-    "Operations/Next Steps.md",
     "Logic/IRT Difficulty Logic.md",
+    "Operations/Next Steps.md",
     "Reference/Glossary.md",
     "Home.md",
     "Overview/Architecture.md",

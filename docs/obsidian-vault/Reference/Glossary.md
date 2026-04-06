@@ -31,6 +31,18 @@ Related: [[Student Struggle Logic]], [[Question Difficulty Logic]], [[Instructor
 - `improved_models_enabled`: feature flag in session state gating IRT, BKT, and improved struggle models.
 - `Response matrix`: binary student x question matrix used as IRT input; built from best attempt per pair.
 
+## BKT and mastery tracking
+
+- `BKT`: Bayesian Knowledge Tracing — HMM-based model that estimates the probability a student has learned a skill (question) from their submission history.
+- `P(L)`: latent mastery probability for a student-question pair; updated after each observation via Bayes' rule + learning transition.
+- `P(L_0)` / `BKT_P_INIT`: prior probability of knowing a skill before any practice (default 0.3).
+- `P(T)` / `BKT_P_LEARN`: probability of learning on each attempt (default 0.1).
+- `P(G)` / `BKT_P_GUESS`: probability of guessing correctly without knowing (default 0.2).
+- `P(S)` / `BKT_P_SLIP`: probability of a wrong answer despite knowing (default 0.1).
+- `BKT_MASTERY_THRESHOLD`: P(L) above 0.95 classifies a student-question pair as "mastered".
+- `mastery_df`: per-student per-question mastery DataFrame cached in session state.
+- `mastery_summary_df`: per-student aggregate mastery statistics (mean, min, mastered count).
+
 ## Code references
 
 - `learning_dashboard/config.py`

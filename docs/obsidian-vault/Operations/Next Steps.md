@@ -196,7 +196,7 @@ IRT_DIFFICULTY_THRESHOLDS: list[tuple[float, float, str, str]] = [
 
 ## Phase 3: BKT-based mastery tracking
 
-- [ ] Complete
+- [x] Complete
 
 **Goal:** Add per-student per-question mastery tracking via Bayesian Knowledge Tracing. Mastery is explicitly distinct from live struggle — it represents accumulated knowledge over time.
 
