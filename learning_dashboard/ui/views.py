@@ -91,54 +91,27 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
             struggle_df = st.session_state["_sec_struggle_df"]
             difficulty_df = st.session_state["_sec_difficulty_df"]
 
-    # --- Model toggle ---
-    # When improved models are enabled and have data, allow switching the
-    # leaderboards between baseline scores and IRT/BKT scores.
-    _improved_on = st.session_state.get("improved_models_enabled", False)
-    _irt_df = st.session_state.get("_irt_difficulty_df")
-    _mastery_summary = st.session_state.get("_mastery_summary_df")
-    _can_switch = (
-        _improved_on
-        and _irt_df is not None and not _irt_df.empty
-        and _mastery_summary is not None and not _mastery_summary.empty
-    )
+    # --- Model selection (driven by Settings toggles) ---
+    if st.session_state.get("improved_models_enabled", False):
+        # Difficulty model
+        if st.session_state.get("difficulty_model") == "IRT":
+            _irt_df = st.session_state.get("_irt_difficulty_df")
+            if _irt_df is not None and not _irt_df.empty:
+                difficulty_df = _irt_df.copy()
+                difficulty_df["difficulty_score"] = analytics.min_max_normalize(
+                    difficulty_df["irt_difficulty"]
+                )
+                _d_classified = difficulty_df["difficulty_score"].apply(
+                    lambda s: analytics.classify_score(s, config.DIFFICULTY_THRESHOLDS)
+                )
+                difficulty_df["difficulty_level"] = _d_classified.str[0]
+                difficulty_df["difficulty_color"] = _d_classified.str[1]
 
-    use_improved = False
-    if _can_switch:
-        use_improved = st.toggle(
-            "Use IRT / BKT models",
-            value=st.session_state.get("_use_improved_leaderboards", False),
-            key="_use_improved_leaderboards",
-            help="Switch leaderboards to IRT difficulty and BKT mastery-gap scores.",
-        )
-
-    if use_improved and _can_switch:
-        # Adapt IRT difficulty → question leaderboard format
-        # Min-max normalize so scores spread across threshold ranges
-        difficulty_df = _irt_df.copy()
-        difficulty_df["difficulty_score"] = analytics.min_max_normalize(
-            difficulty_df["irt_difficulty"]
-        )
-        _d_classified = difficulty_df["difficulty_score"].apply(
-            lambda s: analytics.classify_score(s, config.DIFFICULTY_THRESHOLDS)
-        )
-        difficulty_df["difficulty_level"] = _d_classified.str[0]
-        difficulty_df["difficulty_color"] = _d_classified.str[1]
-
-        # Adapt BKT mastery summary → student leaderboard format
-        # Low mastery ≈ high struggle, so score = 1 - mean_mastery
-        # Min-max normalize so scores spread across threshold ranges
-        _ms = _mastery_summary.copy()
-        _ms["struggle_score"] = analytics.min_max_normalize(
-            1.0 - _ms["mean_mastery"]
-        )
-        _ms = _ms.sort_values("struggle_score", ascending=False).reset_index(drop=True)
-        _s_classified = _ms["struggle_score"].apply(
-            lambda s: analytics.classify_score(s, config.STRUGGLE_THRESHOLDS)
-        )
-        _ms["struggle_level"] = _s_classified.str[0]
-        _ms["struggle_color"] = _s_classified.str[1]
-        struggle_df = _ms[["user", "struggle_score", "struggle_level", "struggle_color"]]
+        # Struggle model
+        if st.session_state.get("struggle_model") == "Improved":
+            _improved_struggle_df = st.session_state.get("_improved_struggle_df")
+            if _improved_struggle_df is not None and not _improved_struggle_df.empty:
+                struggle_df = _improved_struggle_df
 
     # Summary cards
     components.render_summary_cards(struggle_df)
@@ -608,17 +581,35 @@ def settings_view(df: pd.DataFrame) -> None:
     )
 
     st.markdown(
-        "When enabled, alternative scoring models (IRT difficulty, BKT mastery) "
-        "run alongside the baseline. The baseline is never replaced — improved "
-        "models provide a second estimate for comparison.",
+        "When enabled, alternative scoring models (IRT difficulty, BKT mastery, "
+        "improved struggle) run alongside the baseline. Use the selectors below "
+        "to choose which model powers each leaderboard.",
     )
 
     _setting_toggle(
         "Enable Improved Models",
         "improved_models_enabled",
-        help="Run IRT difficulty estimation alongside the baseline model. "
-             "Results are cached in session state for use by future comparison views.",
+        help="Compute IRT difficulty, BKT mastery, and improved struggle scores "
+             "alongside the baseline. Must be enabled to use non-baseline models.",
     )
+
+    if st.session_state.get("improved_models_enabled", False):
+        st.markdown("")
+        _setting_selectbox(
+            "Student Struggle Model",
+            "struggle_model",
+            ["Baseline", "Improved"],
+            help="**Baseline:** 7-signal weighted behavioral score.  \n"
+                 "**Improved:** behavioral + BKT mastery gap + IRT difficulty adjustment.",
+        )
+        _setting_selectbox(
+            "Question Difficulty Model",
+            "difficulty_model",
+            ["Baseline", "IRT"],
+            help="**Baseline:** weighted sum of incorrect rate, time, attempts, "
+                 "mean incorrectness, first-attempt failure.  \n"
+                 "**IRT:** Rasch model latent difficulty estimated via MLE.",
+        )
 
     st.markdown("---")
 

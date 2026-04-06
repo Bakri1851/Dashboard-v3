@@ -41,6 +41,10 @@ Related: [[Analytics Engine]], [[Instructor Dashboard]], [[Dashboard Pages and U
 - Assistant assignment eligibility in the instructor sidebar.
 - Available-student list in the assistant waiting view.
 
+## Improved model
+
+Phase 4 adds an improved struggle model that incorporates BKT mastery and IRT difficulty alongside behavioral signals. See [[Improved Struggle Logic]] for full details. The baseline model documented here remains unchanged and available for comparison.
+
 ## Collaborative filtering note
 
 - Collaborative filtering is computed from struggle-model features, but the current UI treats it as a separate diagnostic layer.

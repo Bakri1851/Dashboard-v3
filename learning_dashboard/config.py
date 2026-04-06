@@ -148,3 +148,8 @@ BKT_P_LEARN: float = 0.1      # P(T):   probability of learning per opportunity
 BKT_P_GUESS: float = 0.2      # P(G):   probability of guessing correctly
 BKT_P_SLIP: float = 0.1       # P(S):   probability of slipping (wrong despite knowing)
 BKT_MASTERY_THRESHOLD: float = 0.95  # P(L) above this = "mastered"
+
+# --- Phase 4: Improved Struggle Model ---
+IMPROVED_STRUGGLE_WEIGHT_BEHAVIORAL: float = 0.45
+IMPROVED_STRUGGLE_WEIGHT_MASTERY_GAP: float = 0.30
+IMPROVED_STRUGGLE_WEIGHT_DIFFICULTY_ADJ: float = 0.25

@@ -55,9 +55,9 @@ When the "Use IRT / BKT models" toggle is active in the In Class View, IRT diffi
 
 Raw IRT values are preserved in session state for Phase 4 and Phase 5.
 
-## Feature flag
+## Settings integration
 
-IRT computation is gated by `improved_models_enabled` in session state (toggled in Settings). When enabled, results are cached in `st.session_state["_irt_difficulty_df"]`. When disabled, the cache is cleared.
+IRT computation is gated by `improved_models_enabled` in session state (toggled in Settings). When enabled, results are cached in `st.session_state["_irt_difficulty_df"]`. When disabled, the cache is cleared. The active difficulty model is selected via the **Question Difficulty Model** selectbox in Settings ("Baseline" or "IRT"). IRT difficulty also feeds into the improved struggle model's difficulty-adjusted signal group.
 
 ## Code references
 

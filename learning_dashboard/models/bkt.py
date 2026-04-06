@@ -72,7 +72,13 @@ def compute_student_mastery(
     return mastery
 
 
-def compute_all_mastery(df: pd.DataFrame) -> pd.DataFrame:
+def compute_all_mastery(
+    df: pd.DataFrame,
+    p_init: float = config.BKT_P_INIT,
+    p_learn: float = config.BKT_P_LEARN,
+    p_guess: float = config.BKT_P_GUESS,
+    p_slip: float = config.BKT_P_SLIP,
+) -> pd.DataFrame:
     """Per-student, per-question mastery for the entire dataset.
 
     Returns DataFrame with columns: user, question, mastery, n_attempts.
@@ -85,7 +91,9 @@ def compute_all_mastery(df: pd.DataFrame) -> pd.DataFrame:
     rows: list[dict] = []
 
     for user, group in df.groupby("user"):
-        for qid, p in compute_student_mastery(group).items():
+        for qid, p in compute_student_mastery(
+            group, p_init=p_init, p_learn=p_learn, p_guess=p_guess, p_slip=p_slip
+        ).items():
             rows.append(
                 {
                     "user": user,

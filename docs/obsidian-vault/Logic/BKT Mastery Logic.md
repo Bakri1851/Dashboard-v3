@@ -69,17 +69,13 @@ Two DataFrames are produced:
 
 ## Leaderboard integration
 
-When the "Use IRT / BKT models" toggle is active in the In Class View, BKT mastery is converted to a struggle-like score for the student leaderboard:
+When the "Use Improved Models" toggle is active in the In Class View, BKT mastery feeds into the improved struggle model (Phase 4) via the mastery gap signal. The previous approach of using `1 - mean_mastery` directly as a struggle proxy caused scores to cluster near 1.0 because BKT `mean_mastery` values had very low variance across students. The improved model resolves this by using mastery as one of three signal groups rather than the sole metric. See [[Improved Struggle Logic]].
 
-- `struggle_score = 1 - mean_mastery` (low mastery = high struggle)
-- Scores are **min-max normalized** (`analytics.min_max_normalize`) before classification so they spread across the full threshold range. Without normalization, raw mastery values cluster at similar levels (typically low) and all students appear in the same category.
-- Classification uses the standard `STRUGGLE_THRESHOLDS`.
+Raw mastery values are preserved in session state for the improved struggle model and future comparison UI.
 
-Raw mastery values are preserved in session state for Phase 4 (improved struggle model) and Phase 5 (comparison UI).
+## Settings integration
 
-## Feature flag
-
-BKT computation is gated by `improved_models_enabled` in session state (toggled in Settings). When enabled, results are cached in `st.session_state["_mastery_df"]` and `st.session_state["_mastery_summary_df"]`. When disabled, both caches are cleared.
+BKT computation is gated by `improved_models_enabled` in session state (toggled in Settings). When enabled, results are cached in `st.session_state["_mastery_df"]` and `st.session_state["_mastery_summary_df"]`. When disabled, both caches are cleared. BKT mastery is consumed by the improved struggle model when the **Student Struggle Model** is set to "Improved" in Settings.
 
 ## Code references
 

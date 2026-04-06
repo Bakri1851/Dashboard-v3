@@ -254,7 +254,7 @@ BKT_MASTERY_THRESHOLD: float = 0.95  # P(L) above this = "mastered"
 
 ## Phase 4: Improved struggle model (mastery-aware)
 
-- [ ] Complete
+- [x] Complete
 
 **Goal:** Struggle score that incorporates IRT difficulty and BKT mastery alongside behavioral signals from the baseline. Requires Phase 2 (IRT) and Phase 3 (BKT).
 
