@@ -386,10 +386,19 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
             else:
                 available_labels = []
             period_options = ["Custom"] + available_labels
-            selected_period = st.selectbox(
+
+            def _on_period_change():
+                picked = st.session_state.get("time_filter_period", "Custom")
+                if picked != "Custom":
+                    pr = get_period_date_range(picked)
+                    if pr:
+                        st.session_state["time_date_range"] = pr
+
+            st.selectbox(
                 "Academic Period",
                 period_options,
                 key="time_filter_period",
+                on_change=_on_period_change,
             )
 
             today = datetime.now().date()
@@ -402,16 +411,8 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
                 max_date = today
                 has_today = False
 
-            if selected_period != "Custom":
-                period_range = get_period_date_range(selected_period)
-                if period_range:
-                    default_start, default_end = period_range
-                else:
-                    default_start = today if has_today else min_date
-                    default_end = today if has_today else max_date
-            else:
-                default_start = today if has_today else min_date
-                default_end = today if has_today else max_date
+            default_start = today if has_today else min_date
+            default_end = today if has_today else max_date
 
             date_range = st.date_input(
                 "Date Range",

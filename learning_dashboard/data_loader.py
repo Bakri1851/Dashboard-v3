@@ -417,7 +417,6 @@ def build_session_record_from_state(now: datetime) -> Optional[dict]:
     return {
         "id": str(uuid4()),
         "name": session_name,
-        "created_at": now.isoformat(timespec="seconds"),
         "start_time": session_start.isoformat(timespec="seconds"),
         "end_time": now.isoformat(timespec="seconds"),
         "duration_seconds": duration_seconds,
@@ -466,7 +465,6 @@ def build_retroactive_session_record(
     return {
         "id": str(uuid4()),
         "name": name.strip(),
-        "created_at": datetime.now().isoformat(timespec="seconds"),
         "start_time": start_dt.isoformat(timespec="seconds"),
         "end_time": end_dt.isoformat(timespec="seconds"),
         "duration_seconds": duration_seconds,
