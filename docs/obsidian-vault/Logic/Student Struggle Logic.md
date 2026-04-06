@@ -45,6 +45,14 @@ Related: [[Analytics Engine]], [[Instructor Dashboard]], [[Dashboard Pages and U
 
 Phase 4 adds an improved struggle model that incorporates BKT mastery and IRT difficulty alongside behavioral signals. See [[Improved Struggle Logic]] for full details. The baseline model documented here remains unchanged and available for comparison.
 
+## Design rationale
+
+The weighted parametric model was chosen over collaborative filtering as the primary approach for three reasons: (1) it produces scores immediately with no minimum class size, avoiding the cold-start problem where CF requires k+1 active students; (2) it is interpretable — each weight has a clear meaning; (3) it runs in O(n) per update versus O(n^2) for CF's pairwise similarity matrix. See [[Ch3 – Design and Modelling]] for the thesis comparison table.
+
+The thesis design chapter defines a 5-component struggle formula (n, t, e, f, A_raw). The V2 implementation extends this to 7 components, adding retry rate (r_hat), trajectory slope (d_hat), and exact-answer repetition (rep_hat). The thesis also proposes temporal smoothing via exponential smoothing, but this is not active in V2 (`SMOOTHING_ENABLED = False`). These divergences are tracked in [[Report Sync]].
+
+Academic foundations: Dong et al. (session-level struggle detection), Estey et al. (trajectory metric reducing false-positive rate), Piech et al. (progression path modelling), and LLM-based answer quality assessment (Koutcheme et al.). See [[Ch2 – Background and Requirements]] for the full literature review.
+
 ## Collaborative filtering note
 
 - Collaborative filtering is computed from struggle-model features, but the current UI treats it as a separate diagnostic layer.

@@ -43,6 +43,12 @@ Related: [[Analytics Engine]], [[Student Struggle Logic]], [[Dashboard Pages and
 - Difficulty scores drive the question leaderboard and question header card.
 - Question drill-down also shows attempt counts, student counts, incorrect rate, mistake clusters, a student table, and an attempt timeline.
 
+## Design rationale
+
+The weighted composite was chosen as the baseline because its signals (incorrect rate, time, attempts, incorrectness, first-attempt failure) are directly observable and can be updated during a live session with minimal latency. IRT was added as an alternative because it separates question difficulty from student ability as a latent parameter, offering a more principled estimate when enough data exists. The thesis design chapter defines a 4-component formula; V2 adds a fifth component (p_tilde, first-attempt failure rate). This divergence is tracked in [[Report Sync]].
+
+Academic foundations: Dannath et al. (task-level struggle detection in ITS), Baucks et al. (IRT for course difficulty analysis), Pankiewicz (difficulty measurement in multi-attempt environments). See [[Ch2 – Background and Requirements]] for the full literature review and [[Ch3 – Design and Modelling]] for the thesis model definition.
+
 ## Alternative: IRT difficulty
 
 When improved models are enabled, an IRT-based difficulty estimate is computed alongside the baseline. IRT treats difficulty as a latent parameter estimated via maximum likelihood rather than a weighted sum of observables. See [[IRT Difficulty Logic]] for details.

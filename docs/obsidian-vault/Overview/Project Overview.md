@@ -33,6 +33,14 @@ Related: [[Architecture]], [[Data Pipeline]], [[Dashboard Pages and UI Flow]], [
 - Runtime JSON state: `data/`.
 - Static assets directory: `static/` exists but is not a major behavior driver in the current codebase.
 
+## Academic context
+
+This project is the subject of a Master's thesis: "Online Dashboard For Lab Assistants To Better Support Students in Labs" (Loughborough University, 25COD290). See [[Thesis Overview]] for the full dissertation structure and [[Ch1 – Introduction]] for the problem statement and objectives.
+
+The thesis was initially written against a V1 prototype. The current codebase (Dashboard v3) is the V2 full system, significantly more capable than what the thesis implementation chapter describes. See [[Report Sync]] for a detailed mismatch analysis.
+
+Formal requirements (FR1-FR7, NFR1-NFR6) and their implementation status are tracked in [[Ch2 – Background and Requirements]].
+
 ## Code references
 
 - `app.py`

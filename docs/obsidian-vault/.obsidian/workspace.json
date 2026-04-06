@@ -183,6 +183,14 @@
   },
   "active": "1792228e66db23e5",
   "lastOpenFiles": [
+    "Thesis/Ch5 – Results and Evaluation.md",
+    "Thesis/Ch4 – Implementation.md",
+    "Thesis/Ch3 – Design and Modelling.md",
+    "Thesis/Ch2 – Background and Requirements.md",
+    "Thesis/Ch1 – Introduction.md",
+    "Thesis/Thesis Overview.md",
+    "Thesis/Report Sync.md",
+    "Thesis",
     "Logic/Student Struggle Logic.md",
     "Logic/Improved Struggle Logic.md",
     "Operations/Next Steps.md",
@@ -203,7 +211,6 @@
     "Reference/Glossary.md",
     "Modules/Instructor Dashboard.md",
     "Modules/Data Loading and Session Persistence.md",
-    "Logic/Question Difficulty Logic.md",
-    "Flows/Dashboard Pages and UI Flow.md"
+    "Logic/Question Difficulty Logic.md"
   ]
 }

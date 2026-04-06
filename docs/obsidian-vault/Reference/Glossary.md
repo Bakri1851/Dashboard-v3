@@ -23,6 +23,17 @@ Related: [[Student Struggle Logic]], [[Question Difficulty Logic]], [[Instructor
 - `Session code`: 6-character code that assistants use to join the live lab session.
 - `Assignment status`: either `helping` or `helped` for a student/assistant pairing in shared state.
 
+## Thesis and requirements terms
+
+- `V1`: proof-of-concept prototype described in the thesis implementation chapter (January 2026 milestone).
+- `V2`: full implementation (Dashboard-v3) with all scoring models, lab assistant system, and advanced features.
+- `Functional requirement (FR)`: system capability the dashboard must provide; FR1-FR7 defined in [[Ch2 – Background and Requirements]].
+- `Non-functional requirement (NFR)`: quality attribute the system must satisfy; NFR1-NFR6 defined in [[Ch2 – Background and Requirements]].
+- `MoSCoW`: prioritisation framework (Must/Should/Could/Won't) used to scope implementation phases.
+- `SAM`: early learning analytics dashboard separating at-risk students by time/resource use.
+- `EMODA`: emotion-aware learning dashboard using audio/video/self-reports.
+- `Edsight`: responsive web-based learning analytics dashboard for educators.
+
 ## IRT and improved models
 
 - `IRT`: Item Response Theory — probabilistic framework treating difficulty as a latent parameter estimated from response patterns.

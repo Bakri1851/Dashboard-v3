@@ -1,6 +1,6 @@
 # Home
 
-This vault explains Dashboard-v3 as a working system: how data enters, how scores are computed, how the instructor and assistant apps behave, and where the main risks sit. It is meant to be quick to navigate during development, debugging, or thesis write-up.
+This vault documents Dashboard-v3 as both a working system and a thesis support tool. The Code sections cover how data enters, how scores are computed, and how the apps behave. The Thesis section tracks the dissertation chapter by chapter, flags mismatches between the report and the implementation, and maintains a rewrite queue for final submission.
 
 Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossary]]
 
@@ -45,6 +45,20 @@ Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossa
 - [[Next Steps]]
 - [[Glossary]]
 - [[Academic Period Converter]]
+
+### Thesis
+
+- [[Thesis Overview]]
+- [[Report Sync]]
+- [[Rewrite Queue]]
+- [[Evidence Bank]]
+- [[Figures and Tables]]
+- [[Ch1 – Introduction]]
+- [[Ch2 – Background and Requirements]]
+- [[Ch3 – Design and Modelling]]
+- [[Ch4 – Implementation]]
+- [[Ch5 – Results and Evaluation]]
+- [[Ch6 – Conclusion]]
 
 ## Code references
 
