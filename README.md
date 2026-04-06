@@ -159,6 +159,23 @@ Thresholds:
 Key function:
 - `analytics.compute_question_difficulty_scores`
 
+### IRT difficulty (alternative model)
+
+When `improved_models_enabled` is toggled on in Settings, a 1-Parameter Logistic (Rasch) IRT model estimates question difficulty as a latent parameter alongside the baseline weighted score.
+
+```text
+P(correct | theta_j, b_i) = sigmoid(theta_j - b_i)
+```
+
+- `theta_j` = student ability, `b_i` = question difficulty (both estimated via joint MLE)
+- Raw logit-scale difficulty mapped to [0, 1] via sigmoid for UI compatibility
+- Same threshold labels: Easy / Medium / Hard / Very Hard
+- Requires >= 2 students per question and >= 2 questions per student
+
+Key function:
+
+- `models.irt.compute_irt_difficulty_scores`
+
 ### Mistake clustering
 When a teacher drills into a question, incorrect answers are grouped into clusters so the UI can show dominant mistake types instead of raw answer lists.
 

@@ -130,3 +130,14 @@ FONT_BODY: str = "Share Tech Mono"
 # --- Phase 1: Measurement Confidence ---
 MEASUREMENT_CONFIDENCE_MIN_LENGTH: int = 20
 MEASUREMENT_CONFIDENCE_BASE: float = 0.7
+
+# --- Phase 2: IRT Difficulty ---
+IRT_MIN_ATTEMPTS_PER_QUESTION: int = 2
+IRT_MIN_ATTEMPTS_PER_STUDENT: int = 2
+IRT_MAX_ITER: int = 100
+IRT_DIFFICULTY_THRESHOLDS: list[tuple[float, float, str, str]] = [
+    (0.00, 0.35, "Easy",      "#00ff88"),
+    (0.35, 0.50, "Medium",    "#ffcc00"),
+    (0.50, 0.75, "Hard",      "#ff6600"),
+    (0.75, 1.00, "Very Hard", "#ff2d55"),
+]

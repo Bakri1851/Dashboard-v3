@@ -43,6 +43,10 @@ Related: [[Analytics Engine]], [[Student Struggle Logic]], [[Dashboard Pages and
 - Difficulty scores drive the question leaderboard and question header card.
 - Question drill-down also shows attempt counts, student counts, incorrect rate, mistake clusters, a student table, and an attempt timeline.
 
+## Alternative: IRT difficulty
+
+When improved models are enabled, an IRT-based difficulty estimate is computed alongside the baseline. IRT treats difficulty as a latent parameter estimated via maximum likelihood rather than a weighted sum of observables. See [[IRT Difficulty Logic]] for details.
+
 ## Code references
 
 - `learning_dashboard/analytics.py`: `compute_question_difficulty_scores()`

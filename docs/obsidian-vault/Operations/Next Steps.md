@@ -140,7 +140,7 @@ MEASUREMENT_CONFIDENCE_BASE: float = 0.7
 
 ## Phase 2: IRT-based difficulty model
 
-- [ ] Complete
+- [x] Complete
 
 **Goal:** Add a 1-Parameter Logistic (Rasch) IRT model that estimates question difficulty as a latent parameter, alongside the existing weighted difficulty score.
 

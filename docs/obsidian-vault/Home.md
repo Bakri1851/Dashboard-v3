@@ -35,6 +35,7 @@ Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossa
 - [[Dashboard Pages and UI Flow]]
 - [[Student Struggle Logic]]
 - [[Question Difficulty Logic]]
+- [[IRT Difficulty Logic]]
 
 ### Operations and reference
 

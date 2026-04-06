@@ -23,6 +23,14 @@ Related: [[Student Struggle Logic]], [[Question Difficulty Logic]], [[Instructor
 - `Session code`: 6-character code that assistants use to join the live lab session.
 - `Assignment status`: either `helping` or `helped` for a student/assistant pairing in shared state.
 
+## IRT and improved models
+
+- `IRT`: Item Response Theory — probabilistic framework treating difficulty as a latent parameter estimated from response patterns.
+- `Rasch model`: 1-parameter logistic IRT model estimating question difficulty and student ability jointly via MLE.
+- `irt_difficulty`: IRT-estimated difficulty mapped to [0, 1] via sigmoid; alternative to baseline `difficulty_score`.
+- `improved_models_enabled`: feature flag in session state gating IRT, BKT, and improved struggle models.
+- `Response matrix`: binary student x question matrix used as IRT input; built from best attempt per pair.
+
 ## Code references
 
 - `learning_dashboard/config.py`

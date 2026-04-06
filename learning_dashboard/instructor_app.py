@@ -11,6 +11,7 @@ from streamlit_autorefresh import st_autorefresh
 from learning_dashboard import analytics, config, data_loader, sound
 from learning_dashboard import lab_state as _lab_state
 from learning_dashboard.models import measurement
+from learning_dashboard.models import irt
 from learning_dashboard.ui import theme, views
 
 os.environ.setdefault("OPENAI_API_KEY", st.secrets.get("OPENAI_API_KEY", ""))
@@ -603,10 +604,12 @@ def main() -> None:
     if st.session_state.get("improved_models_enabled", False):
         if st.session_state.get("_improved_models_key") != _analytics_key:
             st.session_state["_measurement_df"] = measurement.compute_incorrectness_with_confidence(df)
+            st.session_state["_irt_difficulty_df"] = irt.compute_irt_difficulty_scores(df)
             st.session_state["_improved_models_key"] = _analytics_key
     else:
         if st.session_state.get("_improved_models_key") is not None:
             st.session_state["_measurement_df"] = None
+            st.session_state["_irt_difficulty_df"] = None
             st.session_state["_improved_models_key"] = None
 
     # Sound: high-struggle student count increased

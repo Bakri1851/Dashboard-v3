@@ -489,6 +489,27 @@ def settings_view(df: pd.DataFrame) -> None:
 
     st.markdown("---")
 
+    st.markdown(
+        f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
+        f'text-transform:uppercase; letter-spacing:2px; font-size:1rem;">Improved Models</h3>',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        "When enabled, alternative scoring models (IRT difficulty, BKT mastery) "
+        "run alongside the baseline. The baseline is never replaced — improved "
+        "models provide a second estimate for comparison.",
+    )
+
+    st.checkbox(
+        "Enable Improved Models",
+        key="improved_models_enabled",
+        help="Run IRT difficulty estimation alongside the baseline model. "
+             "Results are cached in session state for use by future comparison views.",
+    )
+
+    st.markdown("---")
+
 
 def previous_sessions_view(df: pd.DataFrame) -> None:
     """Saved previous sessions view."""

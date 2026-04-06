@@ -26,6 +26,13 @@ Related: [[Student Struggle Logic]], [[Question Difficulty Logic]], [[Instructor
 - Mistake clusters only appear in question detail views.
 - Collaborative filtering is currently shown as a diagnostic panel rather than rewriting the main struggle labels.
 
+## Improved models (`learning_dashboard/models/`)
+
+Alternative and enhanced models live in the `models/` package, gated by the `improved_models_enabled` feature flag in Settings. These never replace the baseline — they provide a second estimate for comparison.
+
+- `measurement.py` (Phase 1): adds confidence metadata to incorrectness scores.
+- `irt.py` (Phase 2): Rasch IRT difficulty estimation as an alternative to the baseline weighted score. See [[IRT Difficulty Logic]].
+
 ## Code references
 
 - `learning_dashboard/analytics.py`: `compute_incorrectness_column()`
