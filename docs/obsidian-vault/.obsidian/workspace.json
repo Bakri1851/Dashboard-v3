@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Thesis/Ch2 – Background and Requirements.md",
+                "file": "Thesis/Figures and Tables.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Ch2 – Background and Requirements"
+              "title": "Figures and Tables"
             }
           }
         ]
@@ -182,10 +182,24 @@
   },
   "active": "7ddde6580fc15493",
   "lastOpenFiles": [
-    "Thesis/Report Sync.md",
-    "Thesis/Rewrite Queue.md",
+    "Thesis/Writing Roadmap.md",
+    "Code/Reference/Libraries/Scikit-learn.md",
+    "Code/Reference/Libraries/OpenAI.md",
+    "Code/Reference/Libraries/Filelock.md",
+    "Code/Reference/Libraries/Streamlit Autorefresh.md",
+    "Code/Reference/Libraries/Requests.md",
+    "Code/Reference/Libraries/NumPy.md",
+    "Code/Reference/Libraries/Pandas.md",
+    "Code/Reference/Libraries/Plotly.md",
+    "Code/Reference/Libraries/Streamlit.md",
+    "Code/Reference/Libraries",
+    "Thesis/Evidence Bank.md",
     "Thesis/Thesis Overview.md",
+    "Thesis/Rewrite Queue.md",
     "Thesis/Ch1 – Introduction.md",
+    "Thesis/Ch2 – Background and Requirements.md",
+    "Code/Overview/Architecture.md",
+    "Thesis/Report Sync.md",
     "Literature/baeres_2020_an.md",
     "Literature/verbert_2020_learning.md",
     "Literature/tzimas_2021_ethical.md",
@@ -197,27 +211,13 @@
     "Code/Logic/IRT Difficulty Logic.md.tmp.11364.1775518307292",
     "Thesis/Ch2 – Background and Requirements.md.tmp.11364.1775518285631",
     "Literature/index.md",
-    "Literature/liu_open.md",
-    "Literature/kiatxin_development.md",
-    "Literature/dasilva_2022_a.md",
-    "Literature/gelan_2018_affordances.md",
     "Literature/gelan_2018_affordances.md.tmp.11364.1775518183732",
-    "Literature/a2023_real.md",
     "Literature/a2023_real.md.tmp.11364.1775518180440",
-    "Literature/a2022_early.md",
-    "Literature/a2020_atrisk.md",
-    "Literature/li_2020_course.md",
-    "Literature/nguyen_2020_data.md",
-    "Literature/marr_2021_what.md",
-    "Literature/leecultura_2023_multimodal.md",
-    "Literature/mustafaayobamiraji_2024_realtime.md",
-    "Literature/govaerts_the.md",
     "Literature",
     "Untitled.base",
     "Home.md.tmp.30260.1775504836197",
     "Code/Reference",
     "Code/Overview",
-    "Code/Operations",
     "Untitled.canvas"
   ]
 }
