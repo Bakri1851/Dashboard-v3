@@ -8,6 +8,12 @@ Related: [[Student Struggle Logic]], [[BKT Mastery Logic]], [[IRT Difficulty Log
 
 The baseline model in `analytics.py` uses seven weighted behavioral signals to produce a struggle score. The improved model reduces the behavioral component to four signals and adds two new signal groups: mastery gap (from BKT) and difficulty-adjusted incorrectness (from IRT). This addresses the known issue where using `1 - mean_mastery` alone caused scores to cluster near 1.0, because mastery is now one signal rather than the sole metric.
 
+## Design rationale
+
+The improved model addresses a limitation of the baseline: all seven behavioral signals measure current-session activity, so the baseline cannot distinguish a student who is struggling despite demonstrated competence from one who has always been weak. By incorporating BKT mastery (a longitudinal signal) and IRT difficulty (a question-level signal), the improved model can detect mastery regression and penalise failures on objectively easy questions — neither of which the baseline captures.
+
+The three-group weighting (behavioral 0.45, mastery gap 0.30, difficulty-adjusted 0.25) was chosen to keep behavioral signals dominant (since they update in real time) while giving meaningful weight to the model-derived signals. Graceful degradation ensures the model remains usable when IRT or BKT data is unavailable, collapsing smoothly to a behavioral-only estimate. This design is not covered in the current thesis draft — see [[Report Sync]] and [[Ch3 – Design and Modelling]] for the mismatch.
+
 ## Three signal groups
 
 ### 1. Behavioral composite (weight 0.45)

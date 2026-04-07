@@ -11,16 +11,17 @@ Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossa
 - Read [[Dashboard Pages and UI Flow]] to follow the instructor and assistant journeys.
 - Read [[Student Struggle Logic]] and [[Question Difficulty Logic]] to understand the scoring model behind the UI.
 - Read [[Known Issues]] before changing analytics, caching, or assistant behavior.
+- Read [[Report Sync]] before revising the dissertation — it tracks mismatches between the thesis and the code.
 
 ## Vault map
 
-### Overview
+### Code — Overview
 
 - [[Project Overview]]
 - [[Architecture]]
 - [[Data Pipeline]]
 
-### Modules
+### Code — Modules
 
 - [[App Entrypoints and Packaging]]
 - [[Configuration and Runtime Paths]]
@@ -30,7 +31,7 @@ Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossa
 - [[Lab Assistant System]]
 - [[UI System]]
 
-### Flows and logic
+### Code — Flows and logic
 
 - [[Dashboard Pages and UI Flow]]
 - [[Student Struggle Logic]]
@@ -38,7 +39,7 @@ Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossa
 - [[IRT Difficulty Logic]]
 - [[BKT Mastery Logic]]
 
-### Operations and reference
+### Code — Operations and reference
 
 - [[Setup and Runbook]]
 - [[Known Issues]]

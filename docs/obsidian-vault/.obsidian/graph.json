@@ -5,55 +5,34 @@
   "showAttachments": false,
   "hideUnresolved": false,
   "showOrphans": true,
-  "collapse-color-groups": true,
+  "collapse-color-groups": false,
   "colorGroups": [
-    {
-      "query": "path:Flows  ",
-      "color": {
-        "a": 1,
-        "rgb": 14701138
-      }
-    },
-    {
-      "query": "path:Logic  ",
-      "color": {
-        "a": 1,
-        "rgb": 14725458
-      }
-    },
-    {
-      "query": "path:Modules  ",
-      "color": {
-        "a": 1,
-        "rgb": 11657298
-      }
-    },
-    {
-      "query": "path:Operations  ",
-      "color": {
-        "a": 1,
-        "rgb": 5431378
-      }
-    },
-    {
-      "query": "path:Overview  ",
-      "color": {
-        "a": 1,
-        "rgb": 5431473
-      }
-    },
     {
       "query": "path:Reference  ",
       "color": {
         "a": 1,
-        "rgb": 5419488
+        "rgb": 9138099
       }
     },
     {
-      "query": "path:",
+      "query": "path:Thesis  ",
       "color": {
         "a": 1,
-        "rgb": 5395168
+        "rgb": 5205718
+      }
+    },
+    {
+      "query": "path:Code  ",
+      "color": {
+        "a": 1,
+        "rgb": 2795641
+      }
+    },
+    {
+      "query": "path:Home",
+      "color": {
+        "a": 1,
+        "rgb": 13211458
       }
     }
   ],
@@ -67,6 +46,6 @@
   "repelStrength": 13.5294117647059,
   "linkStrength": 0.448096885813149,
   "linkDistance": 500,
-  "scale": 0.4541970709305347,
+  "scale": 0.23901940942693864,
   "close": true
 }
