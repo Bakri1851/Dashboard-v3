@@ -85,7 +85,7 @@ The active struggle model is selected via the **Student Struggle Model** selectb
 
 ## Code references
 
-- `learning_dashboard/models/improved_struggle.py`: `compute_improved_struggle_scores()`
-- `learning_dashboard/config.py`: `IMPROVED_STRUGGLE_WEIGHT_BEHAVIORAL`, `IMPROVED_STRUGGLE_WEIGHT_MASTERY_GAP`, `IMPROVED_STRUGGLE_WEIGHT_DIFFICULTY_ADJ`
-- `learning_dashboard/instructor_app.py`: feature-flag integration (~line 695)
-- `learning_dashboard/ui/views.py`: leaderboard toggle (~line 94)
+- `code/learning_dashboard/models/improved_struggle.py`: `compute_improved_struggle_scores()`
+- `code/learning_dashboard/config.py`: `IMPROVED_STRUGGLE_WEIGHT_BEHAVIORAL`, `IMPROVED_STRUGGLE_WEIGHT_MASTERY_GAP`, `IMPROVED_STRUGGLE_WEIGHT_DIFFICULTY_ADJ`
+- `code/learning_dashboard/instructor_app.py`: feature-flag integration (~line 695)
+- `code/learning_dashboard/ui/views.py`: leaderboard toggle (~line 94)

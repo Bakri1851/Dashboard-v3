@@ -81,7 +81,7 @@ BKT computation is gated by `improved_models_enabled` in session state (toggled 
 
 ## Code references
 
-- `learning_dashboard/models/bkt.py`: `bkt_update()`, `compute_student_mastery()`, `compute_all_mastery()`, `compute_student_mastery_summary()`
-- `learning_dashboard/config.py`: `BKT_P_INIT`, `BKT_P_LEARN`, `BKT_P_GUESS`, `BKT_P_SLIP`, `BKT_MASTERY_THRESHOLD`
-- `learning_dashboard/instructor_app.py`: feature-flag integration (~line 680)
-- `learning_dashboard/ui/views.py`: leaderboard toggle and normalization (~line 115)
+- `code/learning_dashboard/models/bkt.py`: `bkt_update()`, `compute_student_mastery()`, `compute_all_mastery()`, `compute_student_mastery_summary()`
+- `code/learning_dashboard/config.py`: `BKT_P_INIT`, `BKT_P_LEARN`, `BKT_P_GUESS`, `BKT_P_SLIP`, `BKT_MASTERY_THRESHOLD`
+- `code/learning_dashboard/instructor_app.py`: feature-flag integration (~line 680)
+- `code/learning_dashboard/ui/views.py`: leaderboard toggle and normalization (~line 115)

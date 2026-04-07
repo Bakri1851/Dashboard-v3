@@ -26,7 +26,7 @@ Related: [[Student Struggle Logic]], [[Question Difficulty Logic]], [[Instructor
 - Mistake clusters only appear in question detail views.
 - Collaborative filtering is currently shown as a diagnostic panel rather than rewriting the main struggle labels.
 
-## Improved models (`learning_dashboard/models/`)
+## Improved models (`code/learning_dashboard/models/`)
 
 Alternative and enhanced models live in the `models/` package, gated by the `improved_models_enabled` feature flag in Settings. These never replace the baseline — they provide a second estimate for comparison.
 
@@ -37,8 +37,8 @@ Alternative and enhanced models live in the `models/` package, gated by the `imp
 
 ## Code references
 
-- `learning_dashboard/analytics.py`: `compute_incorrectness_column()`
-- `learning_dashboard/analytics.py`: `compute_student_struggle_scores()`
-- `learning_dashboard/analytics.py`: `compute_question_difficulty_scores()`
-- `learning_dashboard/analytics.py`: `compute_cf_struggle_scores()`, `get_similar_students()`
-- `learning_dashboard/analytics.py`: `cluster_question_mistakes()`
+- `code/learning_dashboard/analytics.py`: `compute_incorrectness_column()`
+- `code/learning_dashboard/analytics.py`: `compute_student_struggle_scores()`
+- `code/learning_dashboard/analytics.py`: `compute_question_difficulty_scores()`
+- `code/learning_dashboard/analytics.py`: `compute_cf_struggle_scores()`, `get_similar_students()`
+- `code/learning_dashboard/analytics.py`: `cluster_question_mistakes()`

@@ -6,12 +6,12 @@ Related: [[Project Overview]], [[Data Pipeline]], [[Instructor Dashboard]], [[La
 
 ## System shape
 
-- `app.py` -> `learning_dashboard.instructor_app.main()`
-- `lab_app.py` -> `learning_dashboard.assistant_app.main()`
-- `learning_dashboard/data_loader.py` owns ingest, normalization, filters, and saved-session persistence.
-- `learning_dashboard/analytics.py` owns incorrectness scoring, struggle/difficulty scoring, collaborative filtering, and mistake clustering.
-- `learning_dashboard/lab_state.py` owns cross-process assistant/session state through a file lock and JSON file.
-- `learning_dashboard/ui/` owns views, reusable components, CSS, and browser-side sound injection.
+- `code/app.py` -> `learning_dashboard.instructor_app.main()`
+- `code/lab_app.py` -> `learning_dashboard.assistant_app.main()`
+- `code/learning_dashboard/data_loader.py` owns ingest, normalization, filters, and saved-session persistence.
+- `code/learning_dashboard/analytics.py` owns incorrectness scoring, struggle/difficulty scoring, collaborative filtering, and mistake clustering.
+- `code/learning_dashboard/lab_state.py` owns cross-process assistant/session state through a file lock and JSON file.
+- `code/learning_dashboard/ui/` owns views, reusable components, CSS, and browser-side sound injection.
 
 ## State ownership
 
@@ -37,10 +37,10 @@ Related: [[Project Overview]], [[Data Pipeline]], [[Instructor Dashboard]], [[La
 
 ## Code references
 
-- `app.py`
-- `lab_app.py`
-- `learning_dashboard/instructor_app.py`: `main()`, `render_sidebar()`, `init_session_state()`
-- `learning_dashboard/assistant_app.py`: `main()`
-- `learning_dashboard/data_loader.py`: `load_data()`
-- `learning_dashboard/analytics.py`
-- `learning_dashboard/lab_state.py`
+- `code/app.py`
+- `code/lab_app.py`
+- `code/learning_dashboard/instructor_app.py`: `main()`, `render_sidebar()`, `init_session_state()`
+- `code/learning_dashboard/assistant_app.py`: `main()`
+- `code/learning_dashboard/data_loader.py`: `load_data()`
+- `code/learning_dashboard/analytics.py`
+- `code/learning_dashboard/lab_state.py`

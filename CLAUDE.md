@@ -8,18 +8,20 @@ A Streamlit-based learning analytics dashboard for monitoring student struggle a
 
 ## Commands
 
+Run all commands from the repo root (`Dashboard v3/`).
+
 ```bash
 # Install dependencies
-pip install -r requirements.txt
+pip install -r code/requirements.txt
 
 # Run instructor dashboard (port 8501)
-python -m streamlit run app.py
+python -m streamlit run code/app.py
 
 # Run mobile lab assistant app (port 8502)
-streamlit run lab_app.py --server.port 8502
+streamlit run code/lab_app.py --server.port 8502
 
 # Syntax check all source files
-python -m py_compile app.py lab_app.py learning_dashboard/*.py learning_dashboard/ui/*.py
+python -m py_compile code/app.py code/lab_app.py code/learning_dashboard/*.py code/learning_dashboard/ui/*.py
 ```
 
 There are no automated tests. Validation is manual smoke testing (see README.md checklist).
@@ -27,10 +29,10 @@ There are no automated tests. Validation is manual smoke testing (see README.md 
 ## Architecture
 
 ### Two-app system
-- `app.py` and `lab_app.py` are thin wrappers delegating to `learning_dashboard/instructor_app.py` and `learning_dashboard/assistant_app.py`
-- Both share state via `data/lab_session.json`, managed through `learning_dashboard/lab_state.py` with `filelock`
+- `code/app.py` and `code/lab_app.py` are thin wrappers delegating to `code/learning_dashboard/instructor_app.py` and `code/learning_dashboard/assistant_app.py`
+- Both share state via `data/lab_session.json`, managed through `code/learning_dashboard/lab_state.py` with `filelock`
 
-### Package layout (`learning_dashboard/`)
+### Package layout (`code/learning_dashboard/`)
 - `config.py` — all tunable constants (weights, thresholds, colors, API config). Start here for parameter changes.
 - `data_loader.py` — API fetch, JSON/XML parsing, normalization, saved-session persistence
 - `analytics.py` — scoring engine: incorrectness (OpenAI), student struggle, question difficulty, collaborative filtering, mistake clustering

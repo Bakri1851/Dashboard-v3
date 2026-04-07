@@ -38,7 +38,7 @@ Related: [[Instructor Dashboard]], [[Lab Assistant System]], [[UI System]], [[Se
 
 ## Code references
 
-- `learning_dashboard/instructor_app.py`: `_on_dashboard_view_change()`, `render_sidebar()`, `main()`
-- `learning_dashboard/ui/views.py`: `in_class_view()`, `student_detail_view()`, `question_detail_view()`, `data_analysis_view()`, `settings_view()`, `previous_sessions_view()`
-- `learning_dashboard/assistant_app.py`: `render_session_ended()`, `render_join_screen()`, `render_unassigned_view()`, `render_assigned_view()`
-- `learning_dashboard/sound.py`
+- `code/learning_dashboard/instructor_app.py`: `_on_dashboard_view_change()`, `render_sidebar()`, `main()`
+- `code/learning_dashboard/ui/views.py`: `in_class_view()`, `student_detail_view()`, `question_detail_view()`, `data_analysis_view()`, `settings_view()`, `previous_sessions_view()`
+- `code/learning_dashboard/assistant_app.py`: `render_session_ended()`, `render_join_screen()`, `render_unassigned_view()`, `render_assigned_view()`
+- `code/learning_dashboard/sound.py`

@@ -37,9 +37,9 @@ Related: [[Architecture]], [[Dashboard Pages and UI Flow]], [[Data Loading and S
 
 ## Code references
 
-- `learning_dashboard/instructor_app.py`: `init_session_state()`
-- `learning_dashboard/instructor_app.py`: `_render_lab_assignment_panel()`
-- `learning_dashboard/instructor_app.py`: `render_sidebar()`
-- `learning_dashboard/instructor_app.py`: `main()`
-- `learning_dashboard/data_loader.py`: `build_session_record_from_state()`
-- `learning_dashboard/lab_state.py`: `start_lab_session()`, `end_lab_session()`, `assign_student()`, `remove_assistant()`
+- `code/learning_dashboard/instructor_app.py`: `init_session_state()`
+- `code/learning_dashboard/instructor_app.py`: `_render_lab_assignment_panel()`
+- `code/learning_dashboard/instructor_app.py`: `render_sidebar()`
+- `code/learning_dashboard/instructor_app.py`: `main()`
+- `code/learning_dashboard/data_loader.py`: `build_session_record_from_state()`
+- `code/learning_dashboard/lab_state.py`: `start_lab_session()`, `end_lab_session()`, `assign_student()`, `remove_assistant()`

@@ -67,7 +67,7 @@ Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossa
 
 ## Code references
 
-- `app.py` and `lab_app.py` are the stable launch points.
-- `learning_dashboard/instructor_app.py` and `learning_dashboard/assistant_app.py` contain the two Streamlit apps.
-- `learning_dashboard/data_loader.py`, `learning_dashboard/analytics.py`, and `learning_dashboard/lab_state.py` hold the main non-UI logic.
+- `code/app.py` and `code/lab_app.py` are the stable launch points.
+- `code/learning_dashboard/instructor_app.py` and `code/learning_dashboard/assistant_app.py` contain the two Streamlit apps.
+- `code/learning_dashboard/data_loader.py`, `code/learning_dashboard/analytics.py`, and `code/learning_dashboard/lab_state.py` hold the main non-UI logic.
 - `data/saved_sessions.json` and `data/lab_session.json` are the local runtime stores.

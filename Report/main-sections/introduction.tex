@@ -1,0 +1,81 @@
+\section{Introduction} \label{sec: intro}
+\subsection{Problem}
+Modern Computer lab sessions often have many students who come in to work with others on tasks that may involve programming or simply answering questions, especially in this day and age, when more and more students are leaning towards quantitative subjects. During a computer lab session, a vast majority of students are working simultaneously, on different questions at different speeds, as some may pick up questions faster than others or come in with more prior knowledge. It is in our best interest as educators to provide timely, high-quality support to students, monitor their progress, and prioritise those who are struggling most so they do not fall behind. Achieving these goals is difficult in practice, which we aim to address in this paper.
+
+In education, it is key to identify students who are struggling the most so that we can improve their learning outcomes and help them as soon as possible, preventing them from falling behind. Student struggle comprises confusion, impasse, and help-seeking behaviour. By leveraging mathematical modelling, we can gauge which students require the most assistance and attend to them promptly. Having a "student struggle" measure will be vital in computer labs, as it will help educators identify which students need the most assistance. Currently, there are no models to predict which students are struggling most in live sessions, emphasising the need to develop such a model.
+
+
+At present, staff rely on surveying the computer lab to identify struggling students or on students asking for help on their own initiative. This approach has a range of limitations, such as:
+\begin{enumerate}
+    \item Shy Students - some students may be hesitant to ask for help in a lab environment
+    \item Prioritisation - it is harder to identify students who are struggling with this approach
+    \item Lazy Lab Assistants - lab assistants are paid to help out, but may have no interest in actually helping and wish to do their job; because of this, they may walk around. By finding out what students are struggling with, we can make them actually help out by sending them to help
+\end{enumerate}
+
+In practice, we can see that it is currently hard to detect patterns such as repeated failed attempts, long time spent on a question, which questions are actually the hardest and more. In larger modules, we can expect at least 40 students to turn up. Having identified such patterns, we will be able to work more efficiently, making it a win-win scenario for staff and students.
+
+\subsection{Proposed Solution}
+
+In this project, we will address these issues and limitations by proposing a real-time learning analytics dashboard that supports lab teachers and assistants during computer lab sessions. Rather than replacing teachers and assistants with AI feedback and teaching, we will leverage LLMs to complement human support by identifying struggling students and complex questions. We will also leverage mathematical and statistical modelling to identify struggling students and complex questions.
+
+The system will take in live student data from an endpoint. Using this data, we will define a range of useful metrics to aid in providing the best possible dashboard. Metrics include the number of attempts per student, the time spent on questions, and the average number of attempts to complete a question. With these metrics, we will be able to prioritise students and questions efficiently.
+
+Whilst the primary interface of the proposed system is a desktop-based dashboard intended for improving monitoring of computer labs, the design will allow us to extend the functionality to mobile phones so that we can send notifications to the phones of lab assistants to notify them of where they should go to help, this functionality will also have the capability of being able to be extended into smart watches and glasses. This will allow teachers and assistants to receive timely alerts without constantly checking the monitor for relevant information.
+
+By enabling lab teachers and assistants to identify challenging questions and struggling students more quickly during computer lab sessions, we will allow more proactive, practical support. With this solution, we will achieve significantly better learning outcomes.
+
+\subsection{Aims and Objectives}
+
+The primary aim of this project is to design and implement a system that enables lab teachers and assistants to make well-informed, real-time decisions during computer lab sessions to support students and improve learning outcomes more efficiently.
+
+The secondary aim is to extend our system to smart devices. Whilst the core system is a desktop-based dashboard, we can improve usability by sending notifications or messages to smart devices to enable easier communication with assistants.
+
+The aims will be addressed through the following objectives:
+\begin{enumerate}
+    \item \textbf{Identify relevant literature and existing systems} related to learning analytics, real-time data visualisation, and AI in education, to identify existing limitations in current approaches to relevant areas
+    \item \textbf{Formalise system requirements} by defining functional and non-functional requirements for the real-time computer lab support system
+    \item \textbf{Design Data Model} that extracts relevant data provided into meaningful metrics suitable for real-time analysis
+    \item \textbf{Design system architecture} to support live data ingestion, prioritisation and presentation while remaining extensible to smart devices
+    \item \textbf{Develop a struggle and difficulty model} so that we can take the relevant values to produce metrics which will be used in showing the relevant information 
+    \item \textbf{Implement live data analytics dashboard} for real-time data visualisation, prioritisation and intuitive interactivity
+    \item \textbf{Evaluate approach} through functional and non-functional aspects to determine the feasibility and usefulness in a computer lab session
+\end{enumerate}
+
+Together, these objectives will guide the project toward becoming a full-fledged EdTech application that aims to improve learning outcomes by enabling more efficient and targeted support.
+
+\subsection{Risks and Mitigation}
+
+The project involves developing a real-time data analytics system for use during computer lab sessions. As such, potential technical and methodological risks have been identified and will be addressed through deliberate design decisions and extensive testing.
+
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{0.3\textwidth}|p{0.3\textwidth}|p{0.35\textwidth}|}
+        \hline
+        \textbf{Risk Description}  & \textbf{Potential Impact} & \textbf{Mitigation Measures}\\ [0.5ex]
+         \hline \hline
+          Latency in real-time data processing& Delays in updating the dashboard can reduce the usefulness and impact of timeliness of support & Ensure there are lightweight analytics and incremental updates \\
+          \hline
+          Unstable struggle and difficulty estimates due to insufficient data& Irregular interactions may lead to incorrectly identifying struggling students & Establish a baseline for suitable data or use an LLM to identify whether data is suitable \\
+          \hline
+          Overly complicated dashboard&Overcomplicating the dashboard may be more distracting and be unintuitive &  Seek constant feedback on the UI so that we can implement it correctly and focus on main metrics\\
+          \hline
+          Unable to implement smart glasses functionality& Due to technical constraints, we may not be able to fully integrate the dashboard to smart glasses & Explore smartwatch solutions or simplify what goes into the smart glasses \\
+          \hline
+          Limited targeted towards different modules& A model that works well on one model may not work well on another  & Design models over generic interaction patterns rather than specific module indicators \\
+         \hline
+\end{tabular}
+\caption{Identified Risks and Mitigation Strategies}
+\label{tab:risks}
+\end{table}
+
+\subsection{Project Approach}
+This project follows an agile approach that prioritises usefulness, practicality, and user focus for a computer lab setting. Given the reliance on the data endpoint and in-lab use, the strategy emphasises thorough data analysis and early testing.
+
+The project begins with an analysis of relevant literature and existing systems to understand how learning analytics, real-time visualisation and AI-supported tools have been applied in education. The analysis will also allow for the identification of limitations in current approaches. The valuable insights gained from the study of this data will prove to be valuable in developing the functional and non-functional system requirements ensuring that the system to implemented in the best possible way.
+
+Following this, we will then focus on the system design. This will include the development of the high-level system architecture, the design of the data model to extract and process relevant data and prioritisation models for student struggle and question difficulty. These design activities will be conducted to account for noisy data and enable extensibility to implement connectivity to smart devices.
+
+The implementation will be done incrementally, allowing us to focus on data connectivity and processing initially. Afterwards, we will design an initial dashboard to display the data visualisations, ensuring that the data-to-dashboard process is working correctly. Then we will implement core functionality, such as interactive graphs that display important information, including students who need help and complex questions. Thereafter, we will implement connectivity to smart devices, starting with smartphones, to notify lab assistants, then to smart watches and glasses.
+
+Finally, we will evaluate our results by obtaining feedback on our dashboard design to ensure it is feasible for the targeted user, and by carrying out functional and non-functional testing to ensure everything is working correctly. The approach ensures that each phase of the project builds seamlessly on the previous one, resulting in clear project progression in line with the aims, objectives, and identified risks.

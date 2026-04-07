@@ -25,7 +25,7 @@ Related: [[Architecture]], [[Dashboard Pages and UI Flow]], [[Instructor Dashboa
 
 ## Code references
 
-- `learning_dashboard/ui/views.py`
-- `learning_dashboard/ui/components.py`
-- `learning_dashboard/ui/theme.py`: `get_main_css()`, `get_mobile_css()`, `get_plotly_layout_defaults()`
-- `learning_dashboard/sound.py`
+- `code/learning_dashboard/ui/views.py`
+- `code/learning_dashboard/ui/components.py`
+- `code/learning_dashboard/ui/theme.py`: `get_main_css()`, `get_mobile_css()`, `get_plotly_layout_defaults()`
+- `code/learning_dashboard/sound.py`

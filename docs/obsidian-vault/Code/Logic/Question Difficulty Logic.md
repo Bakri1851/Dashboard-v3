@@ -55,7 +55,7 @@ When improved models are enabled, an IRT-based difficulty estimate is computed a
 
 ## Code references
 
-- `learning_dashboard/analytics.py`: `compute_question_difficulty_scores()`
-- `learning_dashboard/analytics.py`: `cluster_question_mistakes()`, `_label_clusters_with_openai()`
-- `learning_dashboard/config.py`: difficulty weights, thresholds, `CORRECT_THRESHOLD`, cluster limits
-- `learning_dashboard/ui/views.py`: `question_detail_view()`
+- `code/learning_dashboard/analytics.py`: `compute_question_difficulty_scores()`
+- `code/learning_dashboard/analytics.py`: `cluster_question_mistakes()`, `_label_clusters_with_openai()`
+- `code/learning_dashboard/config.py`: difficulty weights, thresholds, `CORRECT_THRESHOLD`, cluster limits
+- `code/learning_dashboard/ui/views.py`: `question_detail_view()`

@@ -37,8 +37,8 @@ Related: [[Architecture]], [[Data Loading and Session Persistence]], [[Instructo
 
 ## Code references
 
-- `learning_dashboard/data_loader.py`: `fetch_raw_data()`, `detect_format()`, `parse_json_response()`, `parse_xml_response()`, `normalize_and_clean()`, `load_data()`
-- `learning_dashboard/data_loader.py`: `filter_by_time()`, `filter_by_session_start()`, `filter_by_datetime_window()`
-- `learning_dashboard/paths.py`: `ensure_runtime_data_layout()`, `saved_sessions_path()`, `lab_session_path()`
+- `code/learning_dashboard/data_loader.py`: `fetch_raw_data()`, `detect_format()`, `parse_json_response()`, `parse_xml_response()`, `normalize_and_clean()`, `load_data()`
+- `code/learning_dashboard/data_loader.py`: `filter_by_time()`, `filter_by_session_start()`, `filter_by_datetime_window()`
+- `code/learning_dashboard/paths.py`: `ensure_runtime_data_layout()`, `saved_sessions_path()`, `lab_session_path()`
 - `data/saved_sessions.json`
 - `data/lab_session.json`

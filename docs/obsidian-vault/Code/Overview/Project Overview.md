@@ -21,17 +21,17 @@ Related: [[Architecture]], [[Data Pipeline]], [[Dashboard Pages and UI Flow]], [
 
 ## Runtime modes
 
-- Instructor dashboard: launched from `app.py`, usually on port `8501`.
-- Lab assistant portal: launched from `lab_app.py`, usually on port `8502`.
+- Instructor dashboard: launched from `code/app.py`, usually on port `8501`.
+- Lab assistant portal: launched from `code/lab_app.py`, usually on port `8502`.
 - Live session mode: filters data from the instructor's session start time forward and writes assistant state to disk.
 - Saved session mode: replays a stored start/end window from `data/saved_sessions.json`.
 
 ## Repo shape
 
-- Thin root wrappers: `app.py`, `lab_app.py`.
-- Package code: `learning_dashboard/`.
+- Code: `code/` (entrypoints `app.py`, `lab_app.py` and package `learning_dashboard/`).
+- Report: `Report/` (LaTeX thesis).
 - Runtime JSON state: `data/`.
-- Static assets directory: `static/` exists but is not a major behavior driver in the current codebase.
+- Docs/notes: `docs/`.
 
 ## Academic context
 
@@ -43,10 +43,10 @@ Formal requirements (FR1-FR7, NFR1-NFR6) and their implementation status are tra
 
 ## Code references
 
-- `app.py`
-- `lab_app.py`
-- `learning_dashboard/instructor_app.py`
-- `learning_dashboard/assistant_app.py`
-- `requirements.txt`
+- `code/app.py`
+- `code/lab_app.py`
+- `code/learning_dashboard/instructor_app.py`
+- `code/learning_dashboard/assistant_app.py`
+- `code/requirements.txt`
 - `data/saved_sessions.json`
 - `data/lab_session.json`

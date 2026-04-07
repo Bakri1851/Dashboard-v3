@@ -15,7 +15,7 @@ Related: [[Glossary]], [[Configuration and Runtime Paths]], [[Analytics Engine]]
 
 ## Implementation
 
-The converter lives in `learning_dashboard/academic_calendar.py` and exposes:
+The converter lives in `code/learning_dashboard/academic_calendar.py` and exposes:
 
 - `get_academic_period(date)` — returns the period label for any date
 - `academic_period_sorter(period)` — returns a sort tuple for chronological ordering

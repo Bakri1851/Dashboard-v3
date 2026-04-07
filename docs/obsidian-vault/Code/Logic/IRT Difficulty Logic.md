@@ -63,7 +63,7 @@ IRT computation is gated by `improved_models_enabled` in session state (toggled 
 
 ## Code references
 
-- `learning_dashboard/models/irt.py`: `build_response_matrix()`, `fit_rasch_model()`, `compute_irt_difficulty_scores()`
-- `learning_dashboard/config.py`: `IRT_MIN_ATTEMPTS_PER_QUESTION`, `IRT_MIN_ATTEMPTS_PER_STUDENT`, `IRT_MAX_ITER`, `IRT_DIFFICULTY_THRESHOLDS`
-- `learning_dashboard/instructor_app.py`: feature-flag integration (~line 680)
-- `learning_dashboard/ui/views.py`: leaderboard toggle and normalization (~line 115)
+- `code/learning_dashboard/models/irt.py`: `build_response_matrix()`, `fit_rasch_model()`, `compute_irt_difficulty_scores()`
+- `code/learning_dashboard/config.py`: `IRT_MIN_ATTEMPTS_PER_QUESTION`, `IRT_MIN_ATTEMPTS_PER_STUDENT`, `IRT_MAX_ITER`, `IRT_DIFFICULTY_THRESHOLDS`
+- `code/learning_dashboard/instructor_app.py`: feature-flag integration (~line 680)
+- `code/learning_dashboard/ui/views.py`: leaderboard toggle and normalization (~line 115)

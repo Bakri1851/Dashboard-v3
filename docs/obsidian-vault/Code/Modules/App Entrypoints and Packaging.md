@@ -6,28 +6,28 @@ Related: [[Project Overview]], [[Architecture]], [[Instructor Dashboard]], [[Lab
 
 ## Entry strategy
 
-- `app.py` imports `learning_dashboard.instructor_app.main` and calls it.
-- `lab_app.py` imports `learning_dashboard.assistant_app.main` and calls it.
+- `code/app.py` imports `learning_dashboard.instructor_app.main` and calls it.
+- `code/lab_app.py` imports `learning_dashboard.assistant_app.main` and calls it.
 - This keeps external launch commands simple while centralizing behavior inside package modules.
 
 ## Package layout
 
-- `learning_dashboard/config.py`: tunable constants only.
-- `learning_dashboard/data_loader.py`: ingest, cleanup, filters, saved sessions.
-- `learning_dashboard/analytics.py`: scoring and clustering.
-- `learning_dashboard/lab_state.py`: shared session coordination.
-- `learning_dashboard/ui/`: views, reusable components, CSS, and sound helpers.
+- `code/learning_dashboard/config.py`: tunable constants only.
+- `code/learning_dashboard/data_loader.py`: ingest, cleanup, filters, saved sessions.
+- `code/learning_dashboard/analytics.py`: scoring and clustering.
+- `code/learning_dashboard/lab_state.py`: shared session coordination.
+- `code/learning_dashboard/ui/`: views, reusable components, CSS, and sound helpers.
 
 ## Why the split matters
 
-- Packaging reduces clutter in the repo root.
+- Code lives under `code/`, report under `Report/` — clear separation by artifact type.
 - Testing and refactoring are easier because the real logic is imported from named modules.
 - Documentation can describe responsibilities by subsystem rather than by ad hoc script.
 
 ## Code references
 
-- `app.py`
-- `lab_app.py`
-- `learning_dashboard/__init__.py`
-- `learning_dashboard/instructor_app.py`
-- `learning_dashboard/assistant_app.py`
+- `code/app.py`
+- `code/lab_app.py`
+- `code/learning_dashboard/__init__.py`
+- `code/learning_dashboard/instructor_app.py`
+- `code/learning_dashboard/assistant_app.py`

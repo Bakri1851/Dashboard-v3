@@ -22,8 +22,8 @@ Related: [[Instructor Dashboard]], [[Lab Assistant System]], [[Analytics Engine]
 
 ## Code references
 
-- `learning_dashboard/assistant_app.py`: `_load_student_data()`
-- `learning_dashboard/instructor_app.py`: `init_session_state()`, `main()`
-- `learning_dashboard/ui/views.py`: `in_class_view()`, `student_detail_view()`
-- `learning_dashboard/analytics.py`: `_cluster_cache`, `cluster_question_mistakes()`
-- `learning_dashboard/sound.py`: `play_session_start()`, `play_session_end()`
+- `code/learning_dashboard/assistant_app.py`: `_load_student_data()`
+- `code/learning_dashboard/instructor_app.py`: `init_session_state()`, `main()`
+- `code/learning_dashboard/ui/views.py`: `in_class_view()`, `student_detail_view()`
+- `code/learning_dashboard/analytics.py`: `_cluster_cache`, `cluster_question_mistakes()`
+- `code/learning_dashboard/sound.py`: `play_session_start()`, `play_session_end()`

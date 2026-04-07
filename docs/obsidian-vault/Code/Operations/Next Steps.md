@@ -20,7 +20,7 @@ Related: [[Known Issues]], [[Instructor Dashboard]], [[Lab Assistant System]], [
 
 ## Implementation phases
 
-All new models live in `learning_dashboard/models/` behind a feature flag (`improved_models_enabled` in session state). The baseline in `analytics.py` is never modified — improved models coexist alongside it.
+All new models live in `code/learning_dashboard/models/` behind a feature flag (`improved_models_enabled` in session state). The baseline in `analytics.py` is never modified — improved models coexist alongside it.
 
 ### Dependency graph
 
@@ -37,11 +37,11 @@ Phases 0–3 can be developed in parallel. Each phase is independently deployabl
 
 ### New files created across all phases
 
-- `learning_dashboard/models/__init__.py`
-- `learning_dashboard/models/measurement.py`
-- `learning_dashboard/models/irt.py`
-- `learning_dashboard/models/bkt.py`
-- `learning_dashboard/models/improved_struggle.py`
+- `code/learning_dashboard/models/__init__.py`
+- `code/learning_dashboard/models/measurement.py`
+- `code/learning_dashboard/models/irt.py`
+- `code/learning_dashboard/models/bkt.py`
+- `code/learning_dashboard/models/improved_struggle.py`
 
 ### New dependencies
 
@@ -57,34 +57,34 @@ None beyond what is already installed. `scipy` is available transitively via `sc
 
 ### 0a. Session sound miswiring
 
-- **File:** `learning_dashboard/instructor_app.py` ~lines 456–459
+- **File:** `code/learning_dashboard/instructor_app.py` ~lines 456–459
 - **Fix:** Replace `play_selection()` with `play_session_start()` / `play_session_end()` based on whether session transitioned active→inactive or inactive→active
-- **Ref:** `sound.play_session_start()` and `sound.play_session_end()` already exist in `learning_dashboard/sound.py`
+- **Ref:** `sound.play_session_start()` and `sound.play_session_end()` already exist in `code/learning_dashboard/sound.py`
 
 ### 0b. Analytics cache key weakness
 
-- **File:** `learning_dashboard/instructor_app.py` ~line 582
+- **File:** `code/learning_dashboard/instructor_app.py` ~line 582
 - **Current key:** `(len(df), str(df["timestamp"].min()), str(df["timestamp"].max()))`
 - **Problem:** If contents change while row count and timestamp range stay the same, stale results are reused
 - **Fix:** Add content fingerprint to cache key, e.g. `pd.util.hash_pandas_object(df).sum()` or a column checksum
 
 ### 0c. Cluster cache key too coarse
 
-- **File:** `learning_dashboard/analytics.py` ~line 605
+- **File:** `code/learning_dashboard/analytics.py` ~line 605
 - **Current key:** `(question_id, total_wrong)`
 - **Problem:** Different wrong answers with the same count reuse stale cluster output
 - **Fix:** Include a hash of the actual wrong answer content in the cache key
 
 ### 0d. Assistant data scope mismatch
 
-- **File:** `learning_dashboard/assistant_app.py` ~lines 19–25
+- **File:** `code/learning_dashboard/assistant_app.py` ~lines 19–25
 - **Problem:** `_load_student_data()` calls `data_loader.load_data()` without applying the instructor's active live-session window. Assistants can see students outside the instructor's current teaching scope.
 - **Fix:** Add a `session_start` ISO timestamp field to `lab_session.json` (set in `start_lab_session()`). In the assistant app, read this from lab state and filter the DataFrame to only include submissions after `session_start` before computing struggle scores.
-- **Also touches:** `learning_dashboard/lab_state.py` — add `session_start` to `_default_state()` and `start_lab_session()`
+- **Also touches:** `code/learning_dashboard/lab_state.py` — add `session_start` to `_default_state()` and `start_lab_session()`
 
 ### 0e. Name collision on rejoin
 
-- **File:** `learning_dashboard/lab_state.py` ~lines 192–195
+- **File:** `code/learning_dashboard/lab_state.py` ~lines 192–195
 - **Problem:** When a name matches an existing assistant case-insensitively, `join_session()` returns the old `assistant_id` with potentially stale `assigned_student` state
 - **Fix:** When returning an existing assistant_id on name match, clear `assigned_student` to `None` so the rejoining assistant starts fresh
 
@@ -103,7 +103,7 @@ None beyond what is already installed. `scipy` is available transitively via `sc
 
 **Goal:** Add confidence metadata to incorrectness scores without changing existing values. The project already uses AI-derived incorrectness; this phase makes explicit that it is a measurement signal, not ground truth.
 
-### New file: `learning_dashboard/models/measurement.py`
+### New file: `code/learning_dashboard/models/measurement.py`
 
 **Function:** `compute_incorrectness_with_confidence(df) -> DataFrame`
 - Wraps existing `analytics.compute_incorrectness_column()`
@@ -118,7 +118,7 @@ None beyond what is already installed. `scipy` is available transitively via `sc
 - Scores near 0.5 → lower confidence (ambiguous)
 - Formula: `confidence = base_conf * length_factor * extremity_factor`
 
-### Config additions in `learning_dashboard/config.py`
+### Config additions in `code/learning_dashboard/config.py`
 
 ```python
 MEASUREMENT_CONFIDENCE_MIN_LENGTH: int = 20
@@ -127,8 +127,8 @@ MEASUREMENT_CONFIDENCE_BASE: float = 0.7
 
 ### Integration
 
-- `learning_dashboard/instructor_app.py` ~line 594: call measurement wrapper alongside existing incorrectness computation
-- `learning_dashboard/ui/components.py`: optionally show a confidence indicator (opacity or dot) next to incorrectness values in drill-down views
+- `code/learning_dashboard/instructor_app.py` ~line 594: call measurement wrapper alongside existing incorrectness computation
+- `code/learning_dashboard/ui/components.py`: optionally show a confidence indicator (opacity or dot) next to incorrectness values in drill-down views
 - Existing `incorrectness` column is unchanged — all downstream code is unaffected
 
 ### Verification
@@ -144,7 +144,7 @@ MEASUREMENT_CONFIDENCE_BASE: float = 0.7
 
 **Goal:** Add a 1-Parameter Logistic (Rasch) IRT model that estimates question difficulty as a latent parameter, alongside the existing weighted difficulty score.
 
-### New file: `learning_dashboard/models/irt.py`
+### New file: `code/learning_dashboard/models/irt.py`
 
 Uses `scipy.optimize.minimize` (L-BFGS-B). No new pip dependencies.
 
@@ -166,7 +166,7 @@ where `theta_j` is student ability and `b_i` is question difficulty. Both are la
 - Students who attempted <2 questions → fallback ability 0.0
 - Standard errors computed from inverse Fisher information (diagonal approximation)
 
-### Config additions in `learning_dashboard/config.py`
+### Config additions in `code/learning_dashboard/config.py`
 
 ```python
 IRT_MIN_ATTEMPTS_PER_QUESTION: int = 2
@@ -182,7 +182,7 @@ IRT_DIFFICULTY_THRESHOLDS: list[tuple[float, float, str, str]] = [
 
 ### Integration
 
-- Computed in `learning_dashboard/instructor_app.py` behind a feature flag (`improved_models_enabled`)
+- Computed in `code/learning_dashboard/instructor_app.py` behind a feature flag (`improved_models_enabled`)
 - Stored in `st.session_state["_irt_difficulty_df"]`
 - Consumed by Phase 4 (improved struggle) and Phase 5 (comparison UI)
 
@@ -200,7 +200,7 @@ IRT_DIFFICULTY_THRESHOLDS: list[tuple[float, float, str, str]] = [
 
 **Goal:** Add per-student per-question mastery tracking via Bayesian Knowledge Tracing. Mastery is explicitly distinct from live struggle — it represents accumulated knowledge over time.
 
-### New file: `learning_dashboard/models/bkt.py`
+### New file: `code/learning_dashboard/models/bkt.py`
 
 Pure numpy computation. No new pip dependencies.
 
@@ -228,7 +228,7 @@ Each question is treated as a skill (simplest mapping). Observations derived fro
 - `compute_all_mastery(df) -> DataFrame` — all students, all questions. Columns: `user`, `question`, `mastery`, `n_attempts`
 - `compute_student_mastery_summary(df) -> DataFrame` — per-student aggregate. Columns: `user`, `mean_mastery`, `min_mastery`, `mastered_count`, `total_questions`
 
-### Config additions in `learning_dashboard/config.py`
+### Config additions in `code/learning_dashboard/config.py`
 
 ```python
 BKT_P_INIT: float = 0.3      # prior probability of knowing
@@ -258,7 +258,7 @@ BKT_MASTERY_THRESHOLD: float = 0.95  # P(L) above this = "mastered"
 
 **Goal:** Struggle score that incorporates IRT difficulty and BKT mastery alongside behavioral signals from the baseline. Requires Phase 2 (IRT) and Phase 3 (BKT).
 
-### New file: `learning_dashboard/models/improved_struggle.py`
+### New file: `code/learning_dashboard/models/improved_struggle.py`
 
 **Function:** `compute_improved_struggle_scores(df, mastery_summary=None, irt_difficulty=None) -> DataFrame`
 
@@ -270,7 +270,7 @@ BKT_MASTERY_THRESHOLD: float = 0.95  # P(L) above this = "mastered"
 
 **Graceful degradation:** If BKT mastery is unavailable (too few submissions or feature disabled), the mastery_gap weight is redistributed to behavioral. If IRT difficulty is unavailable, the difficulty-adjusted weight is redistributed. At the extreme of no additional data, the model collapses to a behavioral-only model.
 
-### Config additions in `learning_dashboard/config.py`
+### Config additions in `code/learning_dashboard/config.py`
 
 ```python
 IMPROVED_STRUGGLE_WEIGHT_BEHAVIORAL: float = 0.45
@@ -300,11 +300,11 @@ IMPROVED_STRUGGLE_WEIGHT_DIFFICULTY_ADJ: float = 0.25
 
 ### Modified files
 
-- `learning_dashboard/ui/views.py` — add `comparison_view()` function
-- `learning_dashboard/ui/components.py` — add comparison-specific components
-- `learning_dashboard/instructor_app.py` — add "Model Comparison" to view routing radio + settings toggle for improved models
+- `code/learning_dashboard/ui/views.py` — add `comparison_view()` function
+- `code/learning_dashboard/ui/components.py` — add comparison-specific components
+- `code/learning_dashboard/instructor_app.py` — add "Model Comparison" to view routing radio + settings toggle for improved models
 
-### New components in `learning_dashboard/ui/components.py`
+### New components in `code/learning_dashboard/ui/components.py`
 
 - `render_comparison_scatter(baseline_scores, improved_scores, labels, title)` — scatter plot with baseline on x-axis, improved on y-axis, diagonal reference line. Points above the line: improved model rates higher struggle/difficulty.
 - `render_comparison_table(baseline_df, improved_df, entity_col, score_cols, level_cols)` — table sorted by absolute delta (biggest disagreements first). Columns: Entity, Baseline Score, Baseline Level, Improved Score, Improved Level, Delta.
@@ -396,16 +396,16 @@ Collaborative filtering is already present. It remains:
 
 ## Code references
 
-- instructor app: `learning_dashboard/instructor_app.py`
-- assistant app: `learning_dashboard/assistant_app.py`
-- lab session state: `learning_dashboard/lab_state.py`
-- analytics engine: `learning_dashboard/analytics.py`
+- instructor app: `code/learning_dashboard/instructor_app.py`
+- assistant app: `code/learning_dashboard/assistant_app.py`
+- lab session state: `code/learning_dashboard/lab_state.py`
+- analytics engine: `code/learning_dashboard/analytics.py`
 - baseline struggle model: `analytics.compute_student_struggle_scores()` (lines 181–290)
 - baseline difficulty model: `analytics.compute_question_difficulty_scores()` (lines 437–528)
 - AI-derived incorrectness scoring: `analytics.compute_incorrectness_column()` (lines 68–85)
 - collaborative filtering: `analytics.compute_cf_struggle_scores()` (lines 300–384)
 - mistake clustering: `analytics.cluster_question_mistakes()` (lines 580–706)
-- future IRT-based difficulty: `models/irt.py` (Phase 2)
-- future mastery-aware struggle: `models/improved_struggle.py` (Phase 4)
-- future BKT mastery tracking: `models/bkt.py` (Phase 3)
-- future measurement layer: `models/measurement.py` (Phase 1)
+- future IRT-based difficulty: `code/learning_dashboard/models/irt.py` (Phase 2)
+- future mastery-aware struggle: `code/learning_dashboard/models/improved_struggle.py` (Phase 4)
+- future BKT mastery tracking: `code/learning_dashboard/models/bkt.py` (Phase 3)
+- future measurement layer: `code/learning_dashboard/models/measurement.py` (Phase 1)

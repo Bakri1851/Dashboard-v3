@@ -56,9 +56,9 @@ Related: [[Student Struggle Logic]], [[Question Difficulty Logic]], [[Instructor
 
 ## Code references
 
-- `learning_dashboard/config.py`
-- `learning_dashboard/analytics.py`
-- `learning_dashboard/instructor_app.py`
-- `learning_dashboard/lab_state.py`
+- `code/learning_dashboard/config.py`
+- `code/learning_dashboard/analytics.py`
+- `code/learning_dashboard/instructor_app.py`
+- `code/learning_dashboard/lab_state.py`
 - `data/saved_sessions.json`
 - `data/lab_session.json`

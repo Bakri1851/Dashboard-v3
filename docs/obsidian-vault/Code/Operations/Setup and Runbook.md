@@ -7,28 +7,30 @@ Related: [[Project Overview]], [[Configuration and Runtime Paths]], [[Lab Assist
 ## Prerequisites
 
 - Python `3.11+`
-- Packages from `requirements.txt`
+- Packages from `code/requirements.txt`
 - Network access to the configured retrieval API
 - `OPENAI_API_KEY` in `.streamlit/secrets.toml` for incorrectness scoring and mistake-cluster labels
 
 ## Install
 
 ```bash
-pip install -r requirements.txt
+pip install -r code/requirements.txt
 ```
 
 ## Run
 
+Run all commands from the repo root (`Dashboard v3/`).
+
 Instructor dashboard on port `8501`:
 
 ```bash
-python -m streamlit run app.py
+python -m streamlit run code/app.py
 ```
 
 Lab assistant portal on port `8502`:
 
 ```bash
-streamlit run lab_app.py --server.port 8502
+streamlit run code/lab_app.py --server.port 8502
 ```
 
 ## Runtime files
@@ -55,23 +57,23 @@ streamlit run lab_app.py --server.port 8502
 - If incorrectness or mistake labels seem generic, check `OPENAI_API_KEY`.
 - If assistant state gets stuck, stop both apps and inspect `data/lab_session.json` and `data/lab_session.lock`.
 - If saved sessions reset unexpectedly, inspect backups created from corrupt JSON.
-- If a widget-state mutation error appears, review deferred actions in `learning_dashboard/instructor_app.py`.
+- If a widget-state mutation error appears, review deferred actions in `code/learning_dashboard/instructor_app.py`.
 
 ## Verification command
 
 PowerShell-friendly syntax check:
 
 ```bash
-$files = @('app.py','lab_app.py') + (Get-ChildItem learning_dashboard -File -Filter *.py | ForEach-Object { $_.FullName }) + (Get-ChildItem learning_dashboard/ui -File -Filter *.py | ForEach-Object { $_.FullName }); python -m py_compile @files
+$files = @('code/app.py','code/lab_app.py') + (Get-ChildItem code/learning_dashboard -File -Filter *.py | ForEach-Object { $_.FullName }) + (Get-ChildItem code/learning_dashboard/ui -File -Filter *.py | ForEach-Object { $_.FullName }); python -m py_compile @files
 ```
 
 ## Code references
 
-- `requirements.txt`
-- `app.py`
-- `lab_app.py`
-- `learning_dashboard/config.py`
-- `learning_dashboard/instructor_app.py`
-- `learning_dashboard/lab_state.py`
+- `code/requirements.txt`
+- `code/app.py`
+- `code/lab_app.py`
+- `code/learning_dashboard/config.py`
+- `code/learning_dashboard/instructor_app.py`
+- `code/learning_dashboard/lab_state.py`
 - `data/saved_sessions.json`
 - `data/lab_session.json`

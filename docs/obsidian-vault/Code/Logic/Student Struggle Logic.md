@@ -60,9 +60,9 @@ Academic foundations: [[dong_using|Dong et al.]] (session-level struggle detecti
 
 ## Code references
 
-- `learning_dashboard/analytics.py`: `compute_incorrectness_column()`
-- `learning_dashboard/analytics.py`: `compute_recent_incorrectness()`, `_compute_slope()`
-- `learning_dashboard/analytics.py`: `compute_student_struggle_scores()`, `classify_score()`
-- `learning_dashboard/config.py`: struggle weights and thresholds
-- `learning_dashboard/instructor_app.py`: `_render_lab_assignment_panel()`
-- `learning_dashboard/assistant_app.py`: `render_unassigned_view()`
+- `code/learning_dashboard/analytics.py`: `compute_incorrectness_column()`
+- `code/learning_dashboard/analytics.py`: `compute_recent_incorrectness()`, `_compute_slope()`
+- `code/learning_dashboard/analytics.py`: `compute_student_struggle_scores()`, `classify_score()`
+- `code/learning_dashboard/config.py`: struggle weights and thresholds
+- `code/learning_dashboard/instructor_app.py`: `_render_lab_assignment_panel()`
+- `code/learning_dashboard/assistant_app.py`: `render_unassigned_view()`

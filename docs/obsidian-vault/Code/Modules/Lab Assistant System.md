@@ -35,8 +35,8 @@ Related: [[Architecture]], [[Instructor Dashboard]], [[Dashboard Pages and UI Fl
 
 ## Code references
 
-- `learning_dashboard/lab_state.py`: `_default_state()`, `_normalize_state()`, `read_lab_state()`
-- `learning_dashboard/lab_state.py`: `join_session()`, `assign_student()`, `self_claim_student()`
-- `learning_dashboard/lab_state.py`: `mark_student_helped()`, `unassign_student()`, `leave_session()`, `remove_assistant()`
-- `learning_dashboard/assistant_app.py`: `render_join_screen()`, `render_unassigned_view()`, `render_assigned_view()`
+- `code/learning_dashboard/lab_state.py`: `_default_state()`, `_normalize_state()`, `read_lab_state()`
+- `code/learning_dashboard/lab_state.py`: `join_session()`, `assign_student()`, `self_claim_student()`
+- `code/learning_dashboard/lab_state.py`: `mark_student_helped()`, `unassign_student()`, `leave_session()`, `remove_assistant()`
+- `code/learning_dashboard/assistant_app.py`: `render_join_screen()`, `render_unassigned_view()`, `render_assigned_view()`
 - `data/lab_session.json`

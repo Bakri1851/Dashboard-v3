@@ -1,0 +1,377 @@
+\section{Design and Modelling}
+This section describes the design and architecture of the lab dashboard, highlighting how various components will be implemented. Additionally, we will talk about the data endpoint, defining what data enters the system and in what form. We will then discuss the mathematical models we plan to leverage for the project. Finally, we will discuss how we will expose the analytics to educators to provide an intuitive solution.
+
+\subsection{System Architecture}
+
+The proposed system adopts a layered architecture designed to support real-time learning analytics in computer lab environments. The architecture separates data generation, data ingestion and processing, as well as decision-making and action, into three distinct layers, ensuring each component can evolve independently. Although this focuses on an interval-based approach to the data, an event-driven pipeline is currently under exploration.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/design-and-architecture/architecture-diagram.png}
+    \caption{Diagram showing the architecture of the proposed system}
+    \label{fig: system architecture}
+\end{figure}
+
+\paragraph{Data Generation Layer}
+As seen in Figure \ref{fig: system architecture}, student interactions form the primary source of data. When students submit an attempt or request feedback, the interaction data is recorded at the endpoint and not modified.
+
+\paragraph{Data Ingestion and Processing Layer}
+Data ingestion is performed periodically according to the user-defined refresh rate. Retrieved data will be stored in the raw data store, then parsed and normalised before being used for calculations. The data will be used to determine student struggle, question difficulty, and other required metrics.
+
+\paragraph{Decision and Action Layer}
+Data Analytics will now be sent to the learning dashboard for presentation to the instructor, thereby aiding decision-making. The instructor will identify students who are struggling. More complex questions will also be identified so that the instructor can go through the questions with the whole class. Instructors will use the dashboard to assign tasks to assistants to assist students who need help.
+
+This layered design supports the project's aim of providing timely, targeted support during lab sessions while using the system as a decision-making tool for student support. Later sections build on this architecture.
+
+\subsection{Data Endpoint} \label{sec: data endpoint}
+A data endpoint is a specific URL or address in a web service or API that defines where and how clients can access the service. The proposed system integrates with the existing AI feedback platform through a single external data endpoint. The data endpoint is crucial in our system as it provides access to detailed records of student submissions and feedback interactions generated as students engage with lab questions. As outlined in Figure \ref{fig: system architecture}, the endpoint serves as the entry point to the analytics pipeline, supplying the raw data that will be processed, normalised, and aggregated for data visualisation. The integration is designed to be read-only, ensuring the data and metrics are not tampered with.
+
+The endpoint returns an array in JSON format, where each record corresponds to a specific session based on the session's first submission time. Alongside standard fields such as module, question, timestamp and user, each record has an XML payload. The payload captures the interaction history for a given session, including submissions and AI responses. The design reflects the constraints of the existing system while providing vital information for our analytics.
+
+Interaction data are organised around sessions, where a session represents a continuous period of student engagement from the first submission attempt. Within a session, students may have multiple submissions, getting multiple AI responses. This is beneficial in reflecting how their answers may improve question by question. The structure allows the capture of temporal patterns, repeated attempts, and help-seeking behaviour, which will be vital for identifying short-term struggle and difficult questions in lab sessions.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/design-and-architecture/data-entry.png}
+    \caption{Structure of session-based interaction data returned by feedback system}
+    \label{fig: data entry}
+\end{figure}
+
+From the session-based data, the system derives a set of core metrics for real-time monitoring. These include attempts per question, time between attempts, AI-based indicators of correctness, and the frequency with which students request feedback. By using these, we will enable the system to distinguish among students and identify those who are struggling the most. The derived metrics will form the basis of our two key metrics: student struggle and question difficulty.
+
+It is essential to consider that we may receive incomplete or noisy data during sessions, which could stem from students repeatedly returning to the AI feedback system or from procrastination on their work. Not all indicators of struggle and question difficulty are valuable on their own; hence, they are combined to produce indicators of student struggle and question difficulty.
+
+\subsection{Mathematical Modelling}
+In this section, we will describe what we will measure and what available data will aid in measuring these.
+
+\subsubsection{Modelling Student Struggle} \label{sec: student struggle}
+
+\paragraph{Modelling Objective}
+To model student struggle, let $s$ denote a student and $\sigma$ denote the session. We will denote students who struggle with a scalar function:
+\begin{equation}
+    S(s,\sigma) \in [0,1]
+\end{equation} \label{eq: scalar in range model}
+The student struggle function will allow us to quantify the degree of difficulty that students $s$ are currently experiencing during session $\sigma$, based on the observable data from the endpoint in Section \ref{sec: data endpoint}. The model will support real-time prioritisation in computer labs.
+
+\paragraph{Identified Variables}
+From the session-based interaction data described in Section \ref{sec: data endpoint}. We can derive the following quantities:
+\begin{itemize}
+    \item $n_{s,\sigma}$ - The total number of submissions made by a student s during session $\sigma$
+    \item $t_{s,\sigma}$ - The total active time elapsed during session $\sigma$
+    \item $e_{s,\sigma}$ - The number of incorrect submissions with session $\sigma$
+    \item $f_{s,\sigma}$ - The number of AI feedback requests within the session $\sigma$
+\end{itemize}
+By leveraging metrics linked to student struggle, we can produce a student struggle score
+
+\paragraph{AI-Based Answer Rating}
+Let $A_{s,\sigma,k}$ be the $k$-th submitted answer by student $s$ in session $\sigma$. We will derive an LLM-based scoring function. Where $Q_{\sigma}$ is the current question and $A_{\sigma}$ is the answer, we will define our LLM-based scoring function to be:
+\begin{equation}
+    c_{s,\sigma,k} = C(A_{s,\sigma,k},A_{\sigma},Q_{\sigma}) \in [0,1]
+\end{equation}
+where $c_{s,\sigma,k}$ is the correctness measure that measures the quality of a students answer, where 1 is the correct answer and 0 is completely wrong. We can then define our incorrectness measure:
+\begin{equation}
+    i_{s,\sigma,k} = 1 - c_{s,\sigma,k} \in [0,1]
+\end{equation}
+
+\paragraph{Normalisation}
+We will define maximum and minimum amounts as such:
+\begin{equation*}
+    n_{min} = \min_{s \in S} n_{s,\sigma}, \quad n_{max} = \max_{s \in S} n_{s,\sigma}
+\end{equation*}
+We can apply the same definitions to other metrics where relevant.
+To ensure we can compare the metrics, it is necessary to normalise our quantities:
+\begin{equation*}
+    \begin{aligned}
+        \hat{n_{s,q}} &= \frac{n_{s,\sigma} - n_{min}}{n_{max}-n_{min}},\quad \hat{t_{s,q}} = \frac{t_{s,\sigma} - t_{min}}{t_{max}-t_{min}} \\
+        \hat{e_{s,q}} &= \frac{e_{s,\sigma}}{n_{s,\sigma}},  \quad \hat{f_{s,q}} = \frac{f_{s,\sigma}}{n_{s,\sigma}}
+    \end{aligned}
+\end{equation*}
+Hence,
+\begin{equation*}
+    \hat{n_{s,\sigma}},\hat{t_{s,\sigma}},\hat{e_{s,\sigma}},\hat{f_{s,\sigma}} \in [0,1]
+\end{equation*}
+
+\paragraph{Give recent submissions more importance}
+To reflect that recent submissions are the most relevant thing in the live setting, we will aggregate the most recent $m$ submissions using convex weights $w_i$:
+\begin{equation}
+    A^{raw}(s,\sigma) = \sum^{m-1}_{i=0}w_i i_{s,\sigma,k-i}, \quad w_i \geqslant 0,\sum^{m-1}_{i=0}w_i =1
+\end{equation}
+Since $i_{s,\sigma,k-i} \in [0,1]$, it follows that:
+\begin{equation*}
+    A^{raw}(s,\sigma) \in [0,1]
+\end{equation*}
+    
+\paragraph{Struggle Score Definition}
+Define the raw struggle score as a convex combination of the defined bounded components:
+
+\begin{equation}
+    \label{eq:placeholder_label}
+    \mathbf{S}^{\mathrm{raw}}(s,\sigma)
+    = \alpha \hat{n}_{s,\sigma}
+    + \beta \hat{t}_{s,\sigma}
+    + \gamma \hat{e}_{s,\sigma}
+    + \delta \hat{f}_{s,\sigma}
+    + \eta A^{\mathrm{raw}}(s,\sigma),
+\end{equation}
+where:
+\begin{equation*}
+    \alpha,\beta,\gamma,\delta,\eta  \geqslant 0, \quad \alpha + \beta +\gamma +\delta +\eta = 1
+\end{equation*}
+Since we are using normalised values it follows that:
+\begin{equation*}
+    S^{raw}(s,\sigma) \in [0,1]
+\end{equation*}
+
+\paragraph{Temporal updating for real-time operation}
+To provide a responsive, stable indicator, we will update struggle with exponential smoothing:
+\begin{equation}
+    S_t(s,\sigma) = (1-\lambda)S_{t-1}(s,\sigma) + \lambda S^{raw}(s,\sigma), \quad \lambda \in (0,1]
+\end{equation} \label{eq: temporal sturggle}
+It follows that the update preserves boundaries, giving:
+\begin{equation*}
+    S_t(s,\sigma) \in [0,1], \quad  \forall t
+\end{equation*}
+
+\paragraph{Interpretation of model}
+Higher values of $S_t(s,\sigma)$ indicate that student $s$ is experiencing sustained difficulty in the current session. The metric in Equation \ref{eq: temporal sturggle} will prove to be valuable in real-time prioritisation of help in lab sessions. This measure does not indicate student ability in the cohort but rather in lab struggle.
+
+\subsubsection{Modelling Task Difficulty} \label{sec: task difficulty}
+
+\paragraph{Modelling Objective}
+To model question difficulty, let $q$ denote a question during the lab session, and let $\mathcal{S}_q$ denote the set of student-session pairs associates with task q. We will denote questions that are difficult with a scalar function:
+\begin{equation}
+    D(q) \in [0,1]
+\end{equation}
+The question difficulty function will allow us to quantify the degree of difficulty of a question $q$, that the students in the $\mathcal{S}_q$ set are finding the hardest, based on the observable data from the endpoint in Section \ref{sec: data endpoint}. The model will support real-time prioritisation in computer labs
+
+\paragraph{Identified Variables}
+From the session based interaction data described in Section \ref{sec: data endpoint}. We can derive the following quantities:
+\begin{itemize}
+    \item $n_{q}$ - The total number of attempts on question $q$
+    \item $c_{q}$ - The total number of correct attempts on question $q$
+    \item $t_{q}$ - The average time spent on question $q$
+    \item $a_{q}$ - The average number of attempts spent on question $q$
+    \item $f_{q}$ - Average AI incorrectness measure for $q$, derived from AI-Based answer ratings
+\end{itemize}
+By leveraging metrics linked to question difficulty, we can produce a question difficulty score.
+
+\paragraph{Normalisation}
+To ensure we can compare the metrics, it is necessary to normalise our quantities:
+\begin{equation*}
+    \begin{aligned}
+            \tilde{c_{q}}  &= 1 - \frac{c_{q}}{n_{q}} \\
+            \tilde{t_{q}} &= \frac{t_{q} - t_{min}}{t_{max} - t_{min}} \quad \tilde{a_{q}} = \frac{a_{q} - a_{min}}{a_{max} - a_{min}}
+    \end{aligned}
+\end{equation*}
+$f_{q}$ is already bounded so:
+\begin{equation*}
+    \tilde{f_{q}} = f_{q} \in [0,1]
+\end{equation*}
+
+\paragraph{Difficult Task Definition}
+Define question difficulty as a convex combination of the bounded components:
+\begin{equation}
+    D^{\text{raw}}(q) = \alpha \tilde{c}_{q} + \beta \tilde{t}_{q} + \gamma \tilde{a}_{q} + \delta \tilde{f}_{q}
+    \label{eq:placeholder_label}
+\end{equation}
+where:
+\begin{equation*}
+    \alpha,\beta,\gamma,\delta \geqslant 0 , \quad \alpha + \beta + \gamma + \delta = 1
+\end{equation*}
+Since we are using normalised values it follows that:
+\begin{equation}
+    D^{raw}(q) \in [0,1]
+\end{equation}
+
+\paragraph{Temporal updating for real-time operation}
+To provide a responsive stable indicator, we will update question difficulty with exponential smoothing:
+\begin{equation}
+    D_t(q) = (1-\lambda)D_{t-1}(q) + \lambda D^{raw}(q), \quad \lambda \in (0,1)
+\end{equation}
+
+\paragraph{Interpretation of Model}
+Higher values of $D_t(q)$ indicate that a question is difficult for the class as a whole during the current session. The metric will prove to be valuable in real-time prioritisation of help in lab sessions.
+
+\subsubsection{Alternative Modelling Approach: Collaborative Filtering}
+
+\paragraph{Motivation}
+The parameter-based struggle model defined in Section \ref{sec: student struggle} assigns a score to each student independently base on a weighted combination of normalised interaction features. Whilst this approach is computationally lightweight and interpretable, it depends on the weightings  $\alpha, \beta, \gamma, \delta, \eta$. We can use an alternative modelling approach based on Collaborative Filtering, where rather than scoring each student in isolation, we explore similarity between students.
+
+\paragraph{Student Interaction Matrix}
+
+Let $\mathcal{S} = \{s_1,s_2,\ldots, s_n\}$ denotes the set of students present in sessions $\sigma$. For each student $s_i$, we define a five-dimensional feature vector derived from the normalised interaction quantities introduced in Section \ref{sec: student struggle}:
+
+\begin{equation}
+    \mathbf{x}_{s_i} = 
+    \begin{pmatrix}
+        \hat{n}_{s_i,\sigma},\;
+        \hat{t}_{s_i,\sigma},\;
+        \hat{e}_{s_i,\sigma},\;
+        \hat{f}_{s_i,\sigma},\;
+        A^{\text{raw}}(s_i, \sigma)
+    \end{pmatrix}^{\top}
+    \in [0,1]^5
+\end{equation}
+
+Collecting these vectors row-wise, we define the student interaction matrix:
+
+\begin{equation}
+    \mathbf{X} \in [0,1]^{n \times 5}, \quad \mathbf{X}_{ij} = [\mathbf{x}_{s_i}]_j
+\end{equation}
+
+Each row of $\mathbf{X}$ encodes one student's current behavioural profile during the session. The matrix is updated at each refresh interval as new data arrives from the endpoint.
+
+\paragraph{Student Similarity Measure}
+To quantify how similar two students are, we apply cosine similarity over their feature vectors. Cosine similarity is preferred over Euclidean distance because it measures the angle between two vectors rather than their absolute magnitudes, making it robust to differences in overall activity levels between students.
+
+\begin{equation}
+    \text{sim}(s_i, s_j) =
+    \frac{\mathbf{x}_{s_i}^{\top} \mathbf{x}_{s_j}}
+         {\|\mathbf{x}_{s_i}\|_2 \cdot \|\mathbf{x}_{s_j}\|_2}
+    \in [0, 1]
+\end{equation}
+
+Since all components of $\mathbf{x}_{s_i}$ are normalised to $[0,1]$, the dot product is non-negative, and cosine similarity is bounded to $[0,1]$. This yields a symmetric similarity matrix
+$\mathbf{W} \in [0,1]^{n \times x}$ where $W_{ij} = \text{sim}(s_i,s_j)$ and $W_{ii} = 1$ by definition. A value close to 1 indicates near identical behavioural profiles, whilst a value close to 0 indicates students with very different profiles.
+
+\paragraph{Help-Seeking as a Proxy for Struggle}
+In traditional systems, user ratings serve as the signal across similar users. In the lab setting, no explicit ratings are available, so we define a binary help seeking indicator derived from the parametrix model as a proxy:
+
+\begin{equation}
+    h_{s,\sigma} =
+    \begin{cases}
+        1 & \text{if } S_t(s,\sigma) \geq \tau \\
+        0 & \text{otherwise}
+    \end{cases}
+\end{equation}
+
+where $\tau \in {0,1}$ is a threshold above which a student is considered to be observably struggling based on their score. This allows collaborative filtering to leverage signals from students who are struggling with similar peers who may not have crossed the threshold, enabling earlier intervention.
+
+\paragraph{Predicted Help Need with $k$-Nearest Neighbours}
+For a student $s$ for whom $h_{s,\sigma}$, we estimate their latent help need by aggregating the help-seeking behaviour of their $k$ most similar peers.
+Let $\mathcal{N}_k(s)$ denotes the set of $k$ students with the highest similarity to $s$, excluding $s$:
+
+\begin{equation}
+    \mathcal{N}_k(s) = \underset{
+        s' \in \mathcal{S} \setminus \{s\},\; |\mathcal{N}| = k
+    }{\arg\text{top-}k}\; \text{sim}(s, s')
+\end{equation}
+
+The predicted help-need score is then defined as a similarity-weighted average of the help indicators of the $k$ nearest neighbours.
+
+
+\begin{equation}
+    \hat{h}_{s,\sigma} =
+    \frac{\displaystyle\sum_{s' \in \mathcal{N}_k(s)} \text{sim}(s, s') \cdot h_{s',\sigma}}
+         {\displaystyle\sum_{s' \in \mathcal{N}_k(s)} \text{sim}(s, s')}
+    \in [0, 1]
+\end{equation}
+
+A high value of $\hat{h}_{s,\sigma}$ indicates that student $s$ is similar to peers who required help, suggesting they may benefit from intervention.
+
+\paragraph{Comparison with Parameter-Based Model}
+Table~\ref{tab: model comparison} summarises the key structural differences 
+between the adopted parametric model and the collaborative filtering 
+alternatively, highlighting the properties that informed the choice of 
+primary approach.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{0.25\textwidth}|p{0.33\textwidth}|p{0.33\textwidth}|}
+    \hline
+    \textbf{Property} & \textbf{Parameter-Based Model} & \textbf{Collaborative Filtering} \\
+    \hline
+    Scoring basis & Weighted formula & Peer similarity \\
+    \hline
+    Interpretability & High & Moderate \\
+    \hline
+    Cold start & Immediate & Requires $\geq k+1$ active students \\
+
+    \hline
+    Computational complexity & $O(n)$ per update & $O(n^2)$ per update \\
+    \hline
+    \end{tabular}
+    \caption{Structural comparison of the parametric struggle model and the 
+    collaborative filtering alternative}
+    \label{tab: model comparison}
+\end{table}
+
+\paragraph{Justification for Current Approach}
+The parameter-based model is adopted as the primary approach for several reasons. This approach does not require a minimum class size to be considered viable, making it robust to sessions with few students where the similarity matrix $\mathbf{W}$ would be unreliable. Additionally, it produces more reliable results immediately, whereas a collaborative filtering approach results are not reliable at the start. 
+
+Nevertheless, the collaborative filtering approach is still going to be implemented alongside the parameter-based approach as a secondary indicator, where like the Bloomberg Terminal, we will allow users to toggle whether they would like this feature on or off.
+
+\subsection{Interaction and UI Designs}
+This section describes how the output of our models defined in Section \ref{sec: student struggle} and \ref{sec: task difficulty} is presented to instructors in a way that enables quick dec`ision-making during lab sessions. The design is intended to provide an intuitive view.
+
+\subsubsection{Design Principles}
+The user interface is driven by the requirement to expose the model outputs defined in Sections \ref{sec: student struggle} and \ref{sec: task difficulty} in a form that enables rapid, intuitive interpretation and decision-making. Unlike the previous dashboard we explored, this one will be more intuitive and will be used primarily for computer labs.
+
+The primary objective is to present student struggle and question difficulty as distinct signals. Student struggle indicators are derived from the struggle score $S_t(s,\sigma)$ and question difficulty indicators are derived from the difficulty score $D_t(q)$. These two indicators will prove to be valuable in helping educators improve learning outcomes.
+
+A further objective is to allocate lab assistants to students so they can help promptly. This will send a notification to the lab assistant allocating them to students. Another is avoiding exposure of raw data, which has been mitigated by data normalisation.
+
+Finally, the system focuses on supporting decision-making rather than explanatory analysis. The dashboard is intended to guide instructors towards timely intervention by highlighting students and tasks requiring attention and enabling efficient allocation of lab assistants.
+
+\subsubsection{Instructor Facing Dashboard}
+The dashboard provides a real-time overview of student struggles and question difficulty during the computer labs. The dashboard is will allow the instructor to make quick decisions and aid those in need. To illustrate the proposed interface, a dashboard mock-up was created using Figma. The mock-up represents a conceptual design rather than a fully implemented system.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/design-and-architecture/figma1.png}
+    \caption{Views based off student struggle and question difficulty}
+    \label{fig: figma1}
+\end{figure}
+As shown in Figure \ref{fig: figma1}, our dashboard has two key views: the first shows a list of students whose struggles are at certain thresholds, hence the colour; the second shows a list of questions based on difficulty at a threshold, thus the colour. The values used for comparison against the thresholds are derived from our student struggle and question difficulty equations. The view also allows instructors to go over additional information.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/design-and-architecture/figma2.png}
+    \caption{View of allocation of Lab Assistant}
+    \label{fig: figma2}
+\end{figure}
+In Figure \ref{fig: figma2}, we can select a lab assistant and then press a student to allocate them. This is a simple approach and a very minimal, intuitive design that allows use without training on the system.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/design-and-architecture/figma3.png}
+    \caption{Assistant leaderboard, based on how many students have been help}
+    \label{fig: figma3}
+\end{figure}
+In Figure \ref{fig: figma3}, we can see that lab assistants are displayed based on their contributions. By gamifying the helping process, we can incentivise assistants to help more students.
+
+\subsubsection{Visual Encoding of Metrics}
+
+By deciding on thresholds, we can highlight a student by degree of struggle or highlight a question by degree of difficulty
+
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{0.2\textwidth}||p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|}
+    \hline
+        Degree & None & Low & Medium & High\\
+    \hline
+        Threshold & $0 \leqslant S_t(s,\sigma) \leqslant t_{s1}$ & $t_{s1} < S_t(s,\sigma) \leqslant t_{s2}$&  $t_{s2} < S_t(s,\sigma) \leqslant t_{s3}$ &  $t_{s3} < S_t(s,\sigma) \leqslant 1 $\\
+    \hline
+        Colour & Green & Yellow & Orange & Red\\
+    \hline
+    \end{tabular}
+    \caption{Table Highlighting how thresholds can be indicated for struggle}
+    \label{tab: struggle table}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{0.2\textwidth}||p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|}
+    \hline
+        Degree & Easy & Medium & Hard & Very Hard\\
+    \hline
+        Threshold & $0 \leqslant D_t(q) \leqslant t_{s1}$ & $t_{s1} < D_t(q) \leqslant t_{s2}$&  $t_{s2} < D_t(q) \leqslant t_{s3}$ &  $t_{s3} < D_t(q) \leqslant 1 $\\
+    \hline
+        Colour & Green & Yellow & Orange & Red\\
+    \hline
+    \end{tabular}
+    \caption{Table Highlighting how thresholds can be indicated for difficulty}
+    \label{tab: difficulty table}
+\end{table}

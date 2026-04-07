@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
-PROJECT_ROOT = PACKAGE_ROOT.parent
+PROJECT_ROOT = PACKAGE_ROOT.parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 
 LEGACY_SAVED_SESSIONS_PATH = PROJECT_ROOT / "saved_sessions.json"

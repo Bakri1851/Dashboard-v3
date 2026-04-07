@@ -34,8 +34,8 @@ Related: [[Data Pipeline]], [[Instructor Dashboard]], [[Setup and Runbook]], [[K
 
 ## Code references
 
-- `learning_dashboard/data_loader.py`: `load_data()`
-- `learning_dashboard/data_loader.py`: `load_saved_sessions()`, `save_session_record()`, `delete_session_record()`
-- `learning_dashboard/data_loader.py`: `build_session_record_from_state()`, `apply_saved_session_to_state()`
-- `learning_dashboard/data_loader.py`: `filter_by_module()`, `filter_by_time()`, `filter_by_session_start()`, `filter_by_datetime_window()`
+- `code/learning_dashboard/data_loader.py`: `load_data()`
+- `code/learning_dashboard/data_loader.py`: `load_saved_sessions()`, `save_session_record()`, `delete_session_record()`
+- `code/learning_dashboard/data_loader.py`: `build_session_record_from_state()`, `apply_saved_session_to_state()`
+- `code/learning_dashboard/data_loader.py`: `filter_by_module()`, `filter_by_time()`, `filter_by_session_start()`, `filter_by_datetime_window()`
 - `data/saved_sessions.json`

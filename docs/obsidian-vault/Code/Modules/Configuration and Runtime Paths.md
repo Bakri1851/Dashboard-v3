@@ -27,7 +27,7 @@ Related: [[Architecture]], [[Data Pipeline]], [[Student Struggle Logic]], [[Ques
 
 ## Code references
 
-- `learning_dashboard/config.py`
-- `learning_dashboard/paths.py`
+- `code/learning_dashboard/config.py`
+- `code/learning_dashboard/paths.py`
 - `data/saved_sessions.json`
 - `data/lab_session.json`
