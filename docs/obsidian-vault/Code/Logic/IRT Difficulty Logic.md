@@ -4,6 +4,8 @@ IRT (Item Response Theory) provides an alternative difficulty estimate that trea
 
 Related: [[Question Difficulty Logic]], [[Analytics Engine]], [[Next Steps]], [[Glossary]]
 
+Academic foundations: [[frederikbaucks_2024_gaining|Baucks et al.]] (IRT reveals hidden difficulty patterns), [[pankiewicz_measuring|Pankiewicz]] (multi-attempt difficulty measurement), [[baeres_2020_an|Baeres et al.]] (IRT-based course difficulty analysis). See [[Ch2 – Background and Requirements]] §2.1.5.
+
 ## Relationship to baseline
 
 The baseline difficulty model in `analytics.py` uses a weighted sum of five observable metrics (incorrect rate, time, attempts, mean incorrectness, first-attempt failure). IRT instead models difficulty as an unobserved property inferred from the pattern of correct and incorrect responses across all students. Both models are available when `improved_models_enabled` is toggled on in Settings.

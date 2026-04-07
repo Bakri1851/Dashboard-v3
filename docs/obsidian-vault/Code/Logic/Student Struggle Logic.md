@@ -51,7 +51,7 @@ The weighted parametric model was chosen over collaborative filtering as the pri
 
 The thesis design chapter defines a 5-component struggle formula (n, t, e, f, A_raw). The V2 implementation extends this to 7 components, adding retry rate (r_hat), trajectory slope (d_hat), and exact-answer repetition (rep_hat). The thesis also proposes temporal smoothing via exponential smoothing, but this is not active in V2 (`SMOOTHING_ENABLED = False`). These divergences are tracked in [[Report Sync]].
 
-Academic foundations: Dong et al. (session-level struggle detection), Estey et al. (trajectory metric reducing false-positive rate), Piech et al. (progression path modelling), and LLM-based answer quality assessment (Koutcheme et al.). See [[Ch2 – Background and Requirements]] for the full literature review.
+Academic foundations: [[dong_using|Dong et al.]] (session-level struggle detection), [[estey_2017_automatically|Estey et al.]] (trajectory metric reducing false-positive rate), [[piech_modeling|Piech et al.]] (progression path modelling), [[or_2024_exploring|Or]] (consecutive failure threshold), and LLM-based answer quality assessment ([[koutcheme_using|Koutcheme et al.]], [[pitts_a|Pitts et al.]]). See [[Ch2 – Background and Requirements]] for the full literature review.
 
 ## Collaborative filtering note
 

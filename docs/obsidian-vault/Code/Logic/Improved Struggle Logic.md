@@ -4,6 +4,8 @@ The improved struggle model (Phase 4) combines behavioral signals with BKT maste
 
 Related: [[Student Struggle Logic]], [[BKT Mastery Logic]], [[IRT Difficulty Logic]], [[Analytics Engine]], [[Next Steps]]
 
+Academic foundations: [[piech_modeling|Piech et al.]] (progression path modelling), [[khajah_supercharging|Khajah et al.]] (BKT + IRT combination), [[koutcheme_using|Koutcheme et al.]] (LLM answer quality), [[pitts_a|Pitts et al.]] (human oversight for LLM scoring). See [[Ch2 – Background and Requirements]] §2.1.4–§2.1.5.
+
 ## Relationship to baseline
 
 The baseline model in `analytics.py` uses seven weighted behavioral signals to produce a struggle score. The improved model reduces the behavioral component to four signals and adds two new signal groups: mastery gap (from BKT) and difficulty-adjusted incorrectness (from IRT). This addresses the known issue where using `1 - mean_mastery` alone caused scores to cluster near 1.0, because mastery is now one signal rather than the sole metric.

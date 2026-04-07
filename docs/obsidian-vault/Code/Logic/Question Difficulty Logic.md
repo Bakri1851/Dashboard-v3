@@ -47,7 +47,7 @@ Related: [[Analytics Engine]], [[Student Struggle Logic]], [[Dashboard Pages and
 
 The weighted composite was chosen as the baseline because its signals (incorrect rate, time, attempts, incorrectness, first-attempt failure) are directly observable and can be updated during a live session with minimal latency. IRT was added as an alternative because it separates question difficulty from student ability as a latent parameter, offering a more principled estimate when enough data exists. The thesis design chapter defines a 4-component formula; V2 adds a fifth component (p_tilde, first-attempt failure rate). This divergence is tracked in [[Report Sync]].
 
-Academic foundations: Dannath et al. (task-level struggle detection in ITS), Baucks et al. (IRT for course difficulty analysis), Pankiewicz (difficulty measurement in multi-attempt environments). See [[Ch2 – Background and Requirements]] for the full literature review and [[Ch3 – Design and Modelling]] for the thesis model definition.
+Academic foundations: [[dannath_evaluating|Dannath et al.]] (task-level struggle detection in ITS), [[frederikbaucks_2024_gaining|Baucks et al.]] (IRT for course difficulty analysis), [[pankiewicz_measuring|Pankiewicz]] (difficulty measurement in multi-attempt environments). See [[Ch2 – Background and Requirements]] for the full literature review and [[Ch3 – Design and Modelling]] for the thesis model definition.
 
 ## Alternative: IRT difficulty
 

@@ -32,19 +32,19 @@ Related: [[Thesis Overview]], [[Report Sync]], [[Student Struggle Logic]], [[Que
 - Argument: real-time analytics in labs better than post-session review
 
 #### 2.1.4 Modelling Student Struggle (accurate, good foundation)
-- Dong et al. — session-level struggle detection (77% accuracy vs expert judgement)
-- Or — novice programmer testing behaviour; 4+ consecutive failures as threshold
-- Estey et al. — trajectory metric over 4 semesters; reduced false-positive rate to 11%
-- Piech et al. — graphical model of student progression paths
-- BKT: Khajah shows BKT can be strengthened with IRT-like structure
-- Kim et al. — knowledge tracing with student questions and auto-extracted skills
-- LLMs: Koutcheme (repair quality correlates with explanation quality), Pitts (LLMs best with human oversight)
+- [[dong_using|Dong et al.]] — session-level struggle detection (77% accuracy vs expert judgement)
+- [[or_2024_exploring|Or]] — novice programmer testing behaviour; 4+ consecutive failures as threshold
+- [[estey_2017_automatically|Estey et al.]] — trajectory metric over 4 semesters; reduced false-positive rate to 11%
+- [[piech_modeling|Piech et al.]] — graphical model of student progression paths
+- BKT: [[khajah_supercharging|Khajah]] shows BKT can be strengthened with IRT-like structure
+- [[kim_knowledge|Kim et al.]] — knowledge tracing with student questions and auto-extracted skills
+- LLMs: [[koutcheme_using|Koutcheme]] (repair quality correlates with explanation quality), [[pitts_a|Pitts]] (LLMs best with human oversight)
 - Conclusion: struggle best captured through temporal + correctness + behavioural signals
 
 #### 2.1.5 Modelling Task Difficulty (accurate)
-- Dannath et al. — task-level struggle in ITS; separation from student ability important
-- IRT: Baucks et al. — latent variable models uncover hidden difficulty patterns
-- Pankiewicz — multi-attempt environments complicate difficulty measurement
+- [[dannath_evaluating|Dannath et al.]] — task-level struggle in ITS; separation from student ability important
+- IRT: [[frederikbaucks_2024_gaining|Baucks et al.]] — latent variable models uncover hidden difficulty patterns
+- [[pankiewicz_measuring|Pankiewicz]] — multi-attempt environments complicate difficulty measurement
 - Conclusion: difficulty should combine correctness, time, attempts, and progression
 
 #### 2.1.6 Collaborative Filtering (accurate)

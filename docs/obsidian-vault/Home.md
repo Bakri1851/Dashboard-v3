@@ -47,6 +47,10 @@ Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossa
 - [[Glossary]]
 - [[Academic Period Converter]]
 
+### Literature
+
+- [[Literature/index|Literature Index]]
+
 ### Thesis
 
 - [[Thesis Overview]]

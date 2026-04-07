@@ -4,6 +4,8 @@ Bayesian Knowledge Tracing (BKT) estimates per-student, per-question mastery as 
 
 Related: [[Student Struggle Logic]], [[IRT Difficulty Logic]], [[Analytics Engine]], [[Next Steps]], [[Glossary]]
 
+Academic foundations: [[khajah_supercharging|Khajah et al.]] (strengthening BKT with IRT-like structure), [[kim_knowledge|Kim et al.]] (knowledge tracing with auto-extracted skills). See [[Ch2 – Background and Requirements]] §2.1.4.
+
 ## Relationship to baseline
 
 The baseline struggle model in `analytics.py` captures current-session behavioral signals (recent incorrectness, retry rate, trajectory). BKT adds a longitudinal dimension: how much evidence exists that a student has learned each question's skill, regardless of how they are performing right now. Both are available when `improved_models_enabled` is toggled on in Settings.

@@ -32,20 +32,27 @@
       "query": "path:Home",
       "color": {
         "a": 1,
-        "rgb": 13211458
+        "rgb": 12389632
+      }
+    },
+    {
+      "query": "path:Literature  ",
+      "color": {
+        "a": 1,
+        "rgb": 15241770
       }
     }
   ],
-  "collapse-display": true,
+  "collapse-display": false,
   "showArrow": true,
   "textFadeMultiplier": -3,
   "nodeSizeMultiplier": 1.75311418685121,
   "lineSizeMultiplier": 2.63477508650519,
   "collapse-forces": false,
-  "centerStrength": 0.496539792387543,
-  "repelStrength": 13.5294117647059,
-  "linkStrength": 0.448096885813149,
+  "centerStrength": 0.427083333333333,
+  "repelStrength": 11.5625,
+  "linkStrength": 0.177083333333333,
   "linkDistance": 500,
-  "scale": 0.23901940942693864,
+  "scale": 0.2763964984406804,
   "close": true
 }
