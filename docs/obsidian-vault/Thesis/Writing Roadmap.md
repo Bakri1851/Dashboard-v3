@@ -20,6 +20,7 @@ High-level chapter status and recommended writing order for the final thesis sub
 | Appendix D — References | Done | Nothing needed | — |
 | Appendix E — Formulae | Empty | Collect all model formulas in one reference | Small |
 | Appendix F — Formula Derivations | Empty | Derivation steps for struggle, difficulty, IRT, BKT | Medium |
+| Ch5 — CF Evaluation | Missing | Draft offline evaluation subsection: RMSE, precision@k, coverage using held-out sessions as proxy ground truth | Medium |
 
 ---
 
@@ -93,3 +94,9 @@ Add key code excerpts to support Ch4: incorrectness scoring batch call, struggle
 - [[Evidence Bank]] — what evaluation evidence exists or needs to be collected
 - [[Figures and Tables]] — inventory of figures and their current state
 - [[Thesis Overview]] — full dissertation structure and objectives
+
+---
+
+## Deadline
+
+**Submission deadline: 20 May 2026.** Approximately 6 weeks from now. Ch4, Ch5, and Ch6 are all either empty or require full rewrites. Prioritise in order: Ch4 rewrite → screenshots → test evidence → Ch5 → CF evaluation → Ch6 → remaining Rewrite Queue items.

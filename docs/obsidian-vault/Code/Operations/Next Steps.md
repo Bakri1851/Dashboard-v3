@@ -20,6 +20,17 @@ See [[Coding Roadmap]] for a phase-by-phase status overview.
 
 ---
 
+## Report alignment items
+
+These are implemented features that are not yet documented in the thesis and must be added before submission:
+
+- [ ] **Improvement trajectory** — linear regression slope over time per student. Document in Ch3/Ch4.
+- [ ] **Answer repetition rate** — `rep_hat` signal in 7-component struggle model. Document in Ch3/Ch4.
+- [ ] **Bayesian shrinkage** — applied to all struggle signals. Document in Ch3/Ch4.
+- [ ] **Temporal smoothing** — currently stubbed out (`SMOOTHING_ENABLED = False`). Reconcile with Ch3 design section.
+
+---
+
 ## Implementation phases
 
 All new models live in `code/learning_dashboard/models/` behind a feature flag (`improved_models_enabled` in session state). The baseline in `analytics.py` is never modified — improved models coexist alongside it.
