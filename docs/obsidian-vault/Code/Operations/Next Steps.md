@@ -16,6 +16,8 @@ The next phase is therefore **not** about building these from scratch. It is abo
 
 Related: [[Known Issues]], [[Instructor Dashboard]], [[Lab Assistant System]], [[Analytics Engine]]
 
+See [[Coding Roadmap]] for a phase-by-phase status overview.
+
 ---
 
 ## Implementation phases

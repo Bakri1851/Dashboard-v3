@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.14)  7 APR 2026 20:18
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.14)  7 APR 2026 22:34
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -733,43 +733,43 @@ itecture/figma3.png>] [23]
 \openout2 = `main-sections/implementation.aux'.
 
  (main-sections/implementation.tex
-Underfull \hbox (badness 10000) in paragraph at lines 19--19
+Underfull \hbox (badness 10000) in paragraph at lines 20--20
 []\OT1/cmr/m/n/10 PHP-based HTTP
  []
 
 
-Underfull \hbox (badness 5147) in paragraph at lines 19--20
+Underfull \hbox (badness 5147) in paragraph at lines 20--21
 []\OT1/cmr/m/n/10 Existing lab in-fras-truc-ture ex-poses
  []
 
 
-Underfull \hbox (badness 3792) in paragraph at lines 21--22
+Underfull \hbox (badness 3792) in paragraph at lines 22--23
 []\OT1/cmr/m/n/10 JSON al-lows lightweight trans-port,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 21--22
+Underfull \hbox (badness 10000) in paragraph at lines 22--23
 \OT1/cmr/m/n/10 whilst XML stores struc-tured
  []
 
 
-Underfull \hbox (badness 1292) in paragraph at lines 25--26
+Underfull \hbox (badness 1292) in paragraph at lines 26--27
 []\OT1/cmr/m/n/10 Version 1 has sim-ple in-di-ca-tors for
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 29--30
+Underfull \hbox (badness 10000) in paragraph at lines 30--31
 []\OT1/cmr/m/n/10 Provides in-ter-ac-tive vi-su-al-i-sa-tions
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 31--31
+Underfull \hbox (badness 10000) in paragraph at lines 32--32
 []\OT1/cmr/m/n/10 Deployment
  []
 
 
 LaTeX Warning: Reference `tab: selection table' on page 24 undefined on input l
-ine 38.
+ine 39.
 
 [24
 
@@ -889,7 +889,7 @@ Package rerunfilecheck Info: File `main.out' has not changed.
  ) 
 Here is how much of TeX's memory you used:
  13099 strings out of 467867
- 222275 string characters out of 5418334
+ 225183 string characters out of 5418334
  626020 words of memory out of 5000000
  41527 multiletter control sequences out of 15000+600000
  632844 words of font info for 59 fonts, out of 8000000 for 9000
