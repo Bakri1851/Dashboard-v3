@@ -65,7 +65,8 @@ Describes "a live visual overview of student activity" with "simple, predictable
 - **Improved struggle** — 3-component: behavioral (0.45) + mastery gap (0.30) + difficulty-adjusted (0.25); graceful degradation
 - **Measurement confidence** — length/extremity-based confidence for incorrectness estimates (computed but not displayed)
 
-### Instructor Dashboard (see [[Instructor Dashboard]], [[Dashboard Pages and UI Flow]])
+### Instructor Dashboard (see [[Instructor Dashboard]], [[Lab App/Flows/Pages and UI Flow]])
+
 6 views:
 1. **In Class** — summary cards, student/question leaderboards (max 15), score distributions, CF panel, formula info
 2. **Student Detail** — drill-down with metrics, submission timeline, retry trend, similar students (CF)

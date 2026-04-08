@@ -33,6 +33,34 @@ No content exists.
 - Limitations: no user study conducted, no controlled classroom experiment
 - Reference requirements from [[Ch2 – Background and Requirements]]
 
+---
+
+## Model Evaluation
+
+> ⚠️ **Placeholder — not yet written** (Meeting 3, 2026-04-08)
+
+### Approach: Model Comparison
+
+Mathematical model comparison approach per Dr. Batmaz's guidance.
+Define a "who needs most attention" criterion, apply parametric model and at least
+one alternative, compare identification accuracy. No human subjects required.
+
+### Models to Compare
+
+- **Primary:** Parametric weighted scoring with Bayesian shrinkage (implemented)
+- **Alternative:** TBD — threshold-based baseline or collaborative filtering
+
+### Future Work — Weight Optimisation
+
+Currently α, β, γ, δ, η are set by trial and error. Once labeled ground-truth data
+is available, weights could be trained using supervised ML (logistic regression,
+gradient boosting, or Optuna hyperparameter search) rather than manual tuning.
+Absence of labeled data must be stated as an explicit limitation.
+
+> 📋 See also: [[Code/Lab App/Operations/Evaluation Strategy]]
+
+---
+
 ### 5.2 Functional Testing
 
 Test each functional requirement:

@@ -50,4 +50,4 @@ No separate NLP or recommendation library is needed — everything is available 
 - [[Analytics Engine]]
 - [[Student Struggle Logic]]
 - [[Question Difficulty Logic]]
-- [[Dashboard Pages and UI Flow]]
+- [[Lab App/Flows/Pages and UI Flow]]

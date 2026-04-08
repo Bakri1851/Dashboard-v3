@@ -1,8 +1,10 @@
 # Project Overview
 
+> Covers both [[Lab App]] and [[Assistant App]]
+
 Dashboard-v3 is a Streamlit-based learning analytics dashboard for monitoring student struggle, question difficulty, and live lab support during teaching sessions. It combines remote submission data, OpenAI-derived incorrectness scoring, local aggregation logic, and a second mobile-facing assistant workflow.
 
-Related: [[Architecture]], [[Data Pipeline]], [[Dashboard Pages and UI Flow]], [[Student Struggle Logic]], [[Setup and Runbook]]
+Related: [[Architecture]], [[Data Pipeline]], [[Lab App/Flows/Pages and UI Flow]], [[Student Struggle Logic]], [[Setup and Runbook]]
 
 ## What the project does
 

@@ -1,5 +1,7 @@
 # Data Pipeline
 
+> Covers both [[Lab App]] and [[Assistant App]]
+
 The data pipeline turns raw API payloads into a filtered DataFrame that feeds both score models and all dashboard pages. It also owns local session persistence, so the same module handles both incoming teaching data and locally stored teaching context.
 
 Related: [[Architecture]], [[Data Loading and Session Persistence]], [[Instructor Dashboard]], [[Student Struggle Logic]], [[Question Difficulty Logic]]

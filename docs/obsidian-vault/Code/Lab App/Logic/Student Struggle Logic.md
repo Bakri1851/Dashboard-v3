@@ -2,7 +2,7 @@
 
 Student struggle is a weighted score built from submission volume, time activity, incorrectness, retry behavior, recent trend, trajectory, and exact-answer repetition. The score is continuous, shrinkage-adjusted, and then classified into the labels shown across the instructor and assistant experiences.
 
-Related: [[Analytics Engine]], [[Instructor Dashboard]], [[Dashboard Pages and UI Flow]], [[Question Difficulty Logic]], [[Glossary]]
+Related: [[Analytics Engine]], [[Instructor Dashboard]], [[Lab App/Flows/Pages and UI Flow]], [[Question Difficulty Logic]], [[Glossary]]
 
 ## Foundation: incorrectness
 

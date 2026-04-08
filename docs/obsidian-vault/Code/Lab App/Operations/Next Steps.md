@@ -1,20 +1,10 @@
-# Next Steps
+Part of [[Lab App]] · see also [[Assistant App/Operations/Next Steps]]
 
-The project already has a working baseline system. This includes:
+# Next Steps — Lab App
 
-- a live instructor dashboard
-- a mobile lab assistant app
-- live and saved session support
-- assistant assignment / self-claim / helped-state flows
-- a baseline student struggle model
-- a baseline task difficulty model
-- AI-derived incorrectness scoring
-- collaborative filtering
-- mistake clustering
+Implementation specifications for the instructor dashboard phases. For assistant app phases (Phase 0d, 0e, Phase 6) see [[Assistant App/Operations/Next Steps]].
 
-The next phase is therefore **not** about building these from scratch. It is about adding the new modelling concepts now reflected in the report, while keeping the current system as the baseline for comparison.
-
-Related: [[Known Issues]], [[Instructor Dashboard]], [[Lab Assistant System]], [[Analytics Engine]]
+Related: [[Known Issues]], [[Instructor Dashboard]], [[Analytics Engine]], [[Coding Roadmap]]
 
 See [[Coding Roadmap]] for a phase-by-phase status overview.
 
@@ -62,11 +52,11 @@ None beyond what is already installed. `scipy` is available transitively via `sc
 
 ---
 
-## Phase 0: Bug fixes (from Known Issues)
+## Phase 0: Bug fixes (instructor-side)
 
 - [x] Complete
 
-5 targeted fixes, no architectural changes. All issues are documented in [[Known Issues]].
+Targeted fixes for the instructor app and analytics engine. See [[Assistant App/Operations/Next Steps]] for Phase 0d (assistant data scope) and 0e (name collision on rejoin).
 
 ### 0a. Session sound miswiring
 
@@ -88,25 +78,10 @@ None beyond what is already installed. `scipy` is available transitively via `sc
 - **Problem:** Different wrong answers with the same count reuse stale cluster output
 - **Fix:** Include a hash of the actual wrong answer content in the cache key
 
-### 0d. Assistant data scope mismatch
+### Phase 0 verification (instructor-side)
 
-- **File:** `code/learning_dashboard/assistant_app.py` ~lines 19–25
-- **Problem:** `_load_student_data()` calls `data_loader.load_data()` without applying the instructor's active live-session window. Assistants can see students outside the instructor's current teaching scope.
-- **Fix:** Add a `session_start` ISO timestamp field to `lab_session.json` (set in `start_lab_session()`). In the assistant app, read this from lab state and filter the DataFrame to only include submissions after `session_start` before computing struggle scores.
-- **Also touches:** `code/learning_dashboard/lab_state.py` — add `session_start` to `_default_state()` and `start_lab_session()`
-
-### 0e. Name collision on rejoin
-
-- **File:** `code/learning_dashboard/lab_state.py` ~lines 192–195
-- **Problem:** When a name matches an existing assistant case-insensitively, `join_session()` returns the old `assistant_id` with potentially stale `assigned_student` state
-- **Fix:** When returning an existing assistant_id on name match, clear `assigned_student` to `None` so the rejoining assistant starts fresh
-
-### Verification
-
-- Start session, join as assistant, leave, rejoin with same name — verify fresh state (no inherited assignment)
-- Trigger session start/end — verify correct sounds play (`play_session_start` / `play_session_end`)
 - Modify data while row count stays same — verify analytics recompute (not cached)
-- Check assistant app shows only students within instructor's session window
+- Trigger session start/end — verify correct sounds play (`play_session_start` / `play_session_end`)
 
 ---
 

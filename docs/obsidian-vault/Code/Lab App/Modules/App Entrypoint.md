@@ -1,14 +1,15 @@
-# App Entrypoints and Packaging
+Part of [[Lab App]] · see also [[Assistant App/Modules/App Entrypoint]]
 
-The repo keeps its root entrypoints intentionally thin, while the real implementation lives under `learning_dashboard/`. This gives stable launch commands for Streamlit while letting the internal package evolve without changing how the app is started.
+# Lab App — App Entrypoint
 
-Related: [[Project Overview]], [[Architecture]], [[Instructor Dashboard]], [[Lab Assistant System]]
+The instructor app entrypoint is intentionally thin, while the real implementation lives under `learning_dashboard/`. This gives a stable launch command for Streamlit while letting the internal package evolve without changing how the app is started.
+
+Related: [[Project Overview]], [[Architecture]], [[Instructor Dashboard]]
 
 ## Entry strategy
 
 - `code/app.py` imports `learning_dashboard.instructor_app.main` and calls it.
-- `code/lab_app.py` imports `learning_dashboard.assistant_app.main` and calls it.
-- This keeps external launch commands simple while centralizing behavior inside package modules.
+- This keeps external launch commands simple while centralizing behavior inside the `instructor_app` module.
 
 ## Package layout
 
@@ -27,7 +28,5 @@ Related: [[Project Overview]], [[Architecture]], [[Instructor Dashboard]], [[Lab
 ## Code references
 
 - `code/app.py`
-- `code/lab_app.py`
 - `code/learning_dashboard/__init__.py`
 - `code/learning_dashboard/instructor_app.py`
-- `code/learning_dashboard/assistant_app.py`

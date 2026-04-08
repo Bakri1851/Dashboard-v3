@@ -101,6 +101,25 @@ Threshold tables for struggle (None/Low/Medium/High with Green/Yellow/Orange/Red
 
 ---
 
+## AI Assistant — RAG Design
+
+> ⚠️ **Placeholder — not yet written** (Meeting 3, 2026-04-08)
+
+### Architecture: SQL + ChromaDB Hybrid (Dr. Batmaz)
+
+- Layer 1: SQL pre-filter narrows candidate session records
+- Layer 2: ChromaDB vector search over filtered set for semantic similarity
+- Layer 3: LLM generates contextual recommendation from retrieved context
+
+This reduces pipeline complexity vs standard RAG by using structured metadata
+filtering before invoking the vector store.
+
+> ⚠️ Requires literature review: RAG (Lewis et al., 2020), ChromaDB,
+> hybrid retrieval approaches. Not yet written.
+> 📋 See also: [[Code/Assistant App/Operations/RAG Architecture]]
+
+---
+
 ## Missing from design chapter entirely
 
 These V2 features have no design coverage in the thesis:

@@ -8,7 +8,7 @@ Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossa
 
 - Read [[Project Overview]] for purpose, users, and runtime modes.
 - Read [[Architecture]] and [[Data Pipeline]] to understand control flow and data ownership.
-- Read [[Dashboard Pages and UI Flow]] to follow the instructor and assistant journeys.
+- Read [[Lab App/Flows/Pages and UI Flow]] and [[Assistant App/Flows/UI Flow]] to follow the instructor and assistant journeys.
 - Read [[Student Struggle Logic]] and [[Question Difficulty Logic]] to understand the scoring model behind the UI.
 - Read [[Known Issues]] before changing analytics, caching, or assistant behavior.
 - Read [[Report Sync]] before revising the dissertation — it tracks mismatches between the thesis and the code.
@@ -23,7 +23,7 @@ Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossa
 
 ### Code — Modules
 
-- [[App Entrypoints and Packaging]]
+- [[Lab App/Modules/App Entrypoint]] / [[Assistant App/Modules/App Entrypoint]]
 - [[Configuration and Runtime Paths]]
 - [[Data Loading and Session Persistence]]
 - [[Analytics Engine]]
@@ -33,7 +33,7 @@ Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossa
 
 ### Code — Flows and logic
 
-- [[Dashboard Pages and UI Flow]]
+- [[Lab App/Flows/Pages and UI Flow]] / [[Assistant App/Flows/UI Flow]]
 - [[Student Struggle Logic]]
 - [[Question Difficulty Logic]]
 - [[IRT Difficulty Logic]]

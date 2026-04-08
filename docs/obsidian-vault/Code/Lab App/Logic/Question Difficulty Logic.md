@@ -2,7 +2,7 @@
 
 Question difficulty is a weighted score over correctness, time cost, attempt volume, average incorrectness, and first-attempt failure. It produces the ranked question leaderboard and also gates the mistake-clustering feature in the question drill-down view.
 
-Related: [[Analytics Engine]], [[Student Struggle Logic]], [[Dashboard Pages and UI Flow]], [[Glossary]]
+Related: [[Analytics Engine]], [[Student Struggle Logic]], [[Lab App/Flows/Pages and UI Flow]], [[Glossary]]
 
 ## Foundation: incorrectness
 

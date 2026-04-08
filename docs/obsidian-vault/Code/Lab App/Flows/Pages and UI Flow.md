@@ -1,8 +1,10 @@
-# Dashboard Pages and UI Flow
+Part of [[Lab App]] · see also [[Assistant App/Flows/UI Flow]]
 
-The dashboard is driven by a small set of page states and drill-down targets rather than a large routing system. Understanding the user flow means tracking how `current_view`, `selected_student`, and `selected_question` interact with sidebar actions, chart selections, and auto-refresh.
+# Lab App — Pages and UI Flow
 
-Related: [[Instructor Dashboard]], [[Lab Assistant System]], [[UI System]], [[Setup and Runbook]]
+The instructor dashboard is driven by a small set of page states and drill-down targets rather than a large routing system. Understanding the user flow means tracking how `current_view`, `selected_student`, and `selected_question` interact with sidebar actions, chart selections, and auto-refresh.
+
+Related: [[Instructor Dashboard]], [[UI System]], [[Setup and Runbook]]
 
 ## Instructor app pages
 
@@ -13,13 +15,6 @@ Related: [[Instructor Dashboard]], [[Lab Assistant System]], [[UI System]], [[Se
 - `Settings`: toggles sound, auto-refresh, and collaborative filtering settings.
 - `Previous Sessions`: lists saved sessions and supports load/delete actions.
 
-## Assistant app pages
-
-- `No Active Session`: shown when the shared session is inactive.
-- `Join Session`: shown when there is an active session but no assistant ID in the query string.
-- `Waiting for Assignment`: shown when the assistant is joined but unassigned.
-- `Assigned View`: shown when the assistant has a current student assignment.
-
 ## Main transitions
 
 - Sidebar radio switches between `In Class View` and `Data Analysis View`.
@@ -27,18 +22,15 @@ Related: [[Instructor Dashboard]], [[Lab Assistant System]], [[UI System]], [[Se
 - Back buttons clear the selection and return to the dashboard.
 - Loading a saved session is deferred, then applied before widgets are rebuilt.
 - Returning to live data clears loaded-session state and resets the dashboard to default live mode.
-- Assistant identity survives phone refreshes through the `aid` query parameter.
 
 ## Sound triggers
 
 - Refresh: plays on auto-refresh tick changes.
 - Navigation: plays when the instructor changes between dashboard pages.
 - Selection: plays on student/question selection and also on session start/end transitions in current code.
-- Assistant join and assignment receipt are separate cues.
 
 ## Code references
 
 - `code/learning_dashboard/instructor_app.py`: `_on_dashboard_view_change()`, `render_sidebar()`, `main()`
 - `code/learning_dashboard/ui/views.py`: `in_class_view()`, `student_detail_view()`, `question_detail_view()`, `data_analysis_view()`, `settings_view()`, `previous_sessions_view()`
-- `code/learning_dashboard/assistant_app.py`: `render_session_ended()`, `render_join_screen()`, `render_unassigned_view()`, `render_assigned_view()`
 - `code/learning_dashboard/sound.py`

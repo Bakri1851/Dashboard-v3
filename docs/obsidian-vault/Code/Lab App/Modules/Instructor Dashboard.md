@@ -2,7 +2,7 @@
 
 The instructor dashboard is the orchestration center of the project. It owns session-state initialization, filter precedence, live-session controls, assistant management, analytics caching, and the routing between dashboard pages and drill-down screens.
 
-Related: [[Architecture]], [[Dashboard Pages and UI Flow]], [[Data Loading and Session Persistence]], [[Lab Assistant System]], [[Known Issues]]
+Related: [[Architecture]], [[Lab App/Flows/Pages and UI Flow]], [[Data Loading and Session Persistence]], [[Lab Assistant System]], [[Known Issues]]
 
 ## Main responsibilities
 

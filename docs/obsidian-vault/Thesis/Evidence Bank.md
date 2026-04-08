@@ -95,3 +95,16 @@ Existing test resource: smoke test checklist in [[Setup and Runbook]].
 - No benchmark datasets
 - No performance profiling data
 - No accessibility testing
+
+---
+
+## Meeting 3 — 2026-04-08
+
+**Supervisor-validated design decisions:**
+
+| Decision | Supervisor Guidance | Where to cite |
+|---|---|---|
+| Model evaluation approach | Dr. Batmaz preferred mathematical model comparison over human evaluation | Ch5 methodology |
+| RAG architecture | Dr. Batmaz sketched SQL + ChromaDB hybrid, described as innovative | Ch3 design, Ch4 implementation |
+| No word limit | Avoid waffle, use appendices for bulk content | Report structure |
+| Weight optimisation | Trial-and-error is a known limitation; ML training is future work once labeled data exists | Ch5 limitations and future work |

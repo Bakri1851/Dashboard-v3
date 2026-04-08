@@ -1,5 +1,7 @@
 # Architecture
 
+> Covers both [[Lab App]] and [[Assistant App]]
+
 Dashboard-v3 is split into two Streamlit entrypoints that share analytics logic but differ in responsibility: the instructor app owns filtering, routing, and orchestration, while the assistant app is a mobile client over shared lab-session state. Most behavior lives in the `learning_dashboard` package, with local JSON files used for runtime persistence and cross-process coordination.
 
 Related: [[Project Overview]], [[Data Pipeline]], [[Instructor Dashboard]], [[Lab Assistant System]], [[UI System]]

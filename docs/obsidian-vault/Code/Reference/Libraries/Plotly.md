@@ -38,5 +38,5 @@ The leaderboard charts need to be clickable — a user selects a bar or point to
 ## Related
 
 - [[UI System]]
-- [[Dashboard Pages and UI Flow]]
+- [[Lab App/Flows/Pages and UI Flow]]
 - [[Streamlit]]

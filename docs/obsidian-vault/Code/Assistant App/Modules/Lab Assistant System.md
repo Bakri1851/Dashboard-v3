@@ -2,7 +2,7 @@
 
 The lab assistant system is a lightweight second app that coordinates human helpers during live teaching. Its design is intentionally simple: two Streamlit processes share a single JSON state file on disk, protected by a file lock.
 
-Related: [[Architecture]], [[Instructor Dashboard]], [[Dashboard Pages and UI Flow]], [[Setup and Runbook]], [[Known Issues]]
+Related: [[Architecture]], [[Instructor Dashboard]], [[Assistant App/Flows/UI Flow]], [[Setup and Runbook]], [[Known Issues]]
 
 ## Core model
 

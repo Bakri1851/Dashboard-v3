@@ -183,6 +183,16 @@ The Progress Report (`main sections/Progress Report.tex`) is currently commented
 
 ---
 
+## Recent additions — Meeting 3 (2026-04-08)
+
+| Feature | Code Status | Report Status | Priority | Notes |
+|---|---|---|---|---|
+| Model evaluation | ✅ Model implemented | ❌ Not yet written | 🔴 High | Ch5 placeholder added. Dr. Batmaz flagged Meeting 3. |
+| Weight optimisation | ⚠️ Manual trial and error | ❌ Not in report | 🔴 High | Add as limitation + future work. Optuna/ML training possible once labeled data exists. |
+| RAG / ChromaDB | ❌ Not yet implemented | ❌ Not yet written | 🟡 Planned | Ch3 placeholder added. Dr. Batmaz's design, Meeting 3. |
+
+---
+
 ## Cross-cutting issues
 
 1. **V1/V2 confusion** — The thesis was written at the V1 stage. All implementation-facing content needs updating to V2.
