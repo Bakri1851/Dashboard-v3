@@ -55,6 +55,7 @@ Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossa
 ### Thesis
 
 - [[Thesis Overview]]
+- [[Full Roadmap]]
 - [[Report Sync]]
 - [[Rewrite Queue]]
 - [[Evidence Bank]]

@@ -1,6 +1,6 @@
 {
   "collapse-filter": false,
-  "search": "",
+  "search": "coding roadmap",
   "showTags": true,
   "showAttachments": false,
   "hideUnresolved": false,
@@ -54,5 +54,5 @@
   "linkStrength": 0.177083333333333,
   "linkDistance": 500,
   "scale": 0.24856240420840897,
-  "close": true
+  "close": false
 }

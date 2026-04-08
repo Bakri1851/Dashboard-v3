@@ -11,10 +11,14 @@
             "id": "7ddde6580fc15493",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "markdown",
+              "state": {
+                "file": "Code/Operations/Coding Roadmap.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Coding Roadmap"
             }
           }
         ]
@@ -178,6 +182,7 @@
   },
   "active": "7ddde6580fc15493",
   "lastOpenFiles": [
+    "Code/Operations/Coding Roadmap.md",
     "Home.md",
     "Thesis/Writing Roadmap.md",
     "Thesis/Figures and Tables.md",
@@ -204,7 +209,6 @@
     "Literature/wikipediacontributors_2019_learning.md",
     "Literature/montebello_assisting.md",
     "Literature/kim_knowledge.md",
-    "Literature/frederikbaucks_2024_gaining.md",
     "Code/Logic/IRT Difficulty Logic.md.tmp.11364.1775518307292",
     "Thesis/Ch2 – Background and Requirements.md.tmp.11364.1775518285631",
     "Literature/gelan_2018_affordances.md.tmp.11364.1775518183732",
