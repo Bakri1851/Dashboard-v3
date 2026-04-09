@@ -368,6 +368,141 @@ Collaborative filtering is already present. It remains:
 
 ---
 
+## Phase 10: In-app Help system
+
+- [ ] Complete
+
+**Goal:** Add a Help area under the existing Settings section of the instructor dashboard. The Help area serves two distinct purposes: (1) explain how to operate the dashboard in practice, and (2) explain the metrics and methodology in an interpretable way. Content should be written to accommodate a dashboard that is still evolving — avoid hardcoding implementation details that may change.
+
+### Modified/new files
+
+- `code/learning_dashboard/ui/views.py` — add `help_view()` function
+- `code/learning_dashboard/ui/components.py` — add Help-specific components (tour step renderer, metric card, layered-maths block, tooltip wrapper, reliability badge)
+- `code/learning_dashboard/instructor_app.py` — add "Help" option to the Settings navigation (or as a sidebar/settings sub-panel depending on UI structure at time of implementation)
+- `code/learning_dashboard/ui/theme.py` — any CSS additions needed for Help UI; must match the existing sci-fi neon theme
+
+---
+
+### Sub-task 1: Add Help area under Settings
+
+- [ ] Add a "Help" tab or expandable section within the Settings page in `instructor_app.py` / `views.py`
+- [ ] Decide on UI structure at implementation time: full page, sidebar section, or expandable panel — document the decision
+- [ ] Ensure the Help entry point does not appear in the main view routing radio (it should be accessed via Settings, not as a top-level page)
+
+---
+
+### Sub-task 2: Quick Tour / onboarding walkthrough
+
+- [ ] Add a collapsible or step-through "Quick Tour" component to `help_view()` that walks a first-time user through the dashboard
+- [ ] Tour steps should cover: joining/starting a session, reading the main in-class view, using filters, navigating to student and question detail, and accessing Settings
+- [ ] Keep tour steps short (1–2 sentences each) and anchored to current UI labels — update tour text if UI labels change
+- [ ] Consider whether to show the tour automatically on first load (using session_state flag) or only on demand — decide at implementation time and document
+- [ ] Acceptance criterion: a new user with no prior context can complete the tour and understand the main workflow
+
+---
+
+### Sub-task 3: Help Centre — practical usage guidance
+
+Add a "Help Centre" sub-section within `help_view()` with clearly labelled how-to content. Use expandable `st.expander` blocks or tabs to avoid overwhelming the page. Content to include:
+
+- [ ] **Starting and ending a session** — how to generate a session code, what happens when a session starts/ends, how to find the session code for assistants
+- [ ] **Switching between views** — in-class overview, student detail, question detail, data analysis; how to navigate back
+- [ ] **How filtering works** — module filter, time window filter, live session start filter, saved session window; explain the filter application order
+- [ ] **Refresh, save, and previous sessions** — how auto-refresh works (TTL), how to save a snapshot, how to load a previous session and what data is shown
+- [ ] **Reading top summary metrics** — what the headline cards (struggle counts, difficulty counts) represent; how leaderboard rankings are determined
+- [ ] **Reading leaderboards and charts** — how to click through from a leaderboard entry to a detail view
+- [ ] Acceptance criterion: each item can be read and understood in under 60 seconds by an instructor unfamiliar with the codebase
+
+---
+
+### Sub-task 4: Model Guide — methodology and metrics
+
+Add a "Model Guide" sub-section within `help_view()` explaining the analytical models. Use layered depth (see Sub-task 6 below for the maths layer). Content to include:
+
+- [ ] **Student struggle metric** — what it measures (current-session distress, not overall ability), which signals feed into it, how the score maps to colour bands
+- [ ] **Question difficulty metric** — what it measures (class-level question hardness), which signals feed into it, how IRT difficulty differs from the raw weighted score
+- [ ] **Why recent submissions matter more** — explain exponential time-decay weighting and the recency bias; use plain language (e.g. "a mistake made 5 minutes ago counts more than one made an hour ago")
+- [ ] **What smoothing does** — explain the temporal smoothing stub (`SMOOTHING_ENABLED`); note its current status and what activating it would change
+- [ ] **Thresholds and colour bands** — how the four levels (On Track / Minor Issues / Struggling / Needs Help) are defined; that they are configurable thresholds, not fixed rules
+- [ ] **Limitations in low-data or early-session settings** — minimum submission counts, what happens with 1–2 submissions, why scores become more reliable over time
+- [ ] Acceptance criterion: a non-technical instructor can read the plain-English layer and understand what a score means without reading the code
+
+---
+
+### Sub-task 5: Contextual explanations in the live dashboard
+
+These are inline explanations tied to data currently on screen, not generic documentation. Add alongside existing UI components in `components.py` and the relevant `views.py` sections.
+
+- [ ] **Metric tooltips** — add `help=` parameter (Streamlit native) or a small `ℹ` icon with `st.tooltip`-style popover to key metrics: struggle score, incorrectness %, difficulty score, mastery level, confidence indicator. Tooltip text should be 1–2 sentences max.
+- [ ] **"Why was this flagged?" — student card** — when a student is shown as Struggling or Needs Help, add an expandable explanation block showing which signals contributed (e.g. high recent incorrectness, high retry rate). Pull from the computed struggle score components already in the DataFrame.
+- [ ] **"Why was this flagged?" — question card** — when a question is flagged as Hard or Very Hard, show which inputs drove the rating (e.g. low class-correct rate, high IRT difficulty estimate).
+- [ ] **Mini explanations for current data** — in the data analysis view, add short contextual notes near charts explaining what the chart shows in the context of the current session (e.g. "Most students are on question 3 — difficulty is rated Medium based on X attempts so far")
+- [ ] Acceptance criterion: a user hovering over or expanding any flagged metric can understand why it was flagged without leaving the page
+
+---
+
+### Sub-task 6: Layered maths documentation
+
+Add a "Methodology" or "Under the Hood" expandable block within the Model Guide for each metric. Use three nested layers so users can engage at their preferred depth.
+
+For each metric (struggle, difficulty, incorrectness, mastery):
+
+- [ ] **Layer 1 — Plain English** — 2–4 sentences describing what the model does and why, with no symbols
+- [ ] **Layer 2 — Formula summary** — simplified pseudocode or informal notation showing the key inputs and how they combine (e.g. `struggle ≈ 0.38 × recent_incorrectness + 0.20 × mean_incorrectness + …`)
+- [ ] **Layer 3 — Full notation** — proper mathematical notation with variable definitions; can be rendered as LaTeX via `st.latex()` or as a styled code block if LaTeX is not available in the current Streamlit version
+- [ ] Each layer should be in a collapsible section so the page is not overwhelming by default
+- [ ] Acceptance criterion: a reader who only expands Layer 1 still gets a useful, accurate description; a reader who expands all three layers gets enough detail to reproduce the model
+
+---
+
+### Sub-task 7: Reliability and transparency indicators
+
+Add lightweight in-UI signals that make uncertainty and data limitations visible. Implement in `components.py` as reusable badge/indicator components.
+
+- [ ] **Early session indicator** — show a "Early Session" badge or note when fewer than N submissions exist for a student or question (threshold configurable in `config.py`; suggest `HELP_EARLY_SESSION_MIN_SUBMISSIONS = 5`). Shown on student cards and question cards.
+- [ ] **Limited data warning** — when a metric is computed from a very small sample (e.g. 1–2 students attempted a question for difficulty, or 1–2 submissions for a student's struggle), show a muted "(limited data)" label alongside the metric value
+- [ ] **Confidence indicator** — surface the existing `incorrectness_confidence` value (from `models/measurement.py`, Phase 1) in the UI where incorrectness is displayed. Use a dot or opacity scale rather than a raw number.
+- [ ] **Experimental signal label** — if improved models are enabled (IRT, BKT, improved struggle), label those metrics clearly as "Experimental" in the UI so instructors know they are newer, less validated models
+- [ ] Acceptance criterion: an instructor can see at a glance whether a metric is reliable or should be treated with caution
+
+---
+
+### Sub-task 8: Troubleshooting and help content for confusing states
+
+Add a "Troubleshooting" sub-section in `help_view()` covering states that may confuse users. Use expandable blocks.
+
+- [ ] **No data showing** — what to check (API endpoint, session active, time window filter applied too narrowly, no submissions yet)
+- [ ] **Struggle scores not updating** — cache TTL explanation (`@st.cache_data(ttl=10)`), how to force a refresh
+- [ ] **Lab assistant not appearing in instructor sidebar** — session code mismatch, app not running on port 8502
+- [ ] **Previous session data missing** — where saved sessions are stored, what file format they use, what happens if the file is missing
+- [ ] **All students showing "On Track"** — explain that early in a session this is expected; note minimum submission thresholds
+- [ ] **Improved models toggle has no visible effect** — explain that comparison view must be opened separately; note data volume requirements for IRT/BKT
+- [ ] Acceptance criterion: the most common support questions can be answered by the troubleshooting section without needing to read the code
+
+---
+
+### Sub-task 9: Design and UI consistency
+
+- [ ] Review Help UI against the existing sci-fi neon theme (`ui/theme.py`) before finalising — target the instructor dashboard CSS, not the mobile assistant CSS
+- [ ] Help content must not intrude on the live teaching workflow — it should only appear when the user navigates to Settings → Help
+- [ ] Text contrast, font size, and expandable panel styling should match the rest of the dashboard
+- [ ] If any new icons or visual elements are added for tooltips or reliability badges, ensure they are consistent with existing icon usage in `components.py`
+- [ ] Acceptance criterion: a screenshot of the Help view is visually consistent with a screenshot of the in-class view
+
+---
+
+### Phase 10 verification
+
+- Navigate to Settings → confirm Help area is accessible
+- Open Quick Tour → confirm each step renders and makes sense without prior dashboard knowledge
+- Open Help Centre → confirm each how-to section is present and readable
+- Open Model Guide → confirm all three maths layers render for at least the struggle metric
+- Hover over / expand a flagged student card → confirm "Why was this flagged?" block appears with signal breakdown
+- Toggle improved models on → confirm "Experimental" labels appear on relevant metrics
+- Syntax check: `python -m py_compile code/learning_dashboard/ui/views.py code/learning_dashboard/ui/components.py code/learning_dashboard/instructor_app.py`
+
+---
+
 ## Documentation follow-up
 
 - update vault notes so they clearly mark what is already implemented vs what is being added next
