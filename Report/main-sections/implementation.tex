@@ -38,7 +38,7 @@ Version 1 focused on establishing a working data pipeline capable of processing 
 
 The stack highlighted in Table \ref{tab: selection table} enables a unified development workflow, in which data ingestion, processing and visualisation are implemented within a single Python environment. Whilst Version 1 relies on refreshing, the architecture will be largely consistent with the proposed system.
 
-\subsection{Data Pipeline Implementation}
+\subsection{Data Pipeline}
 Version 1 implements an interval-based data pipeline designed to support near real-time monitoring during lab sessions. The pipeline proceeds as follows:
 \begin{enumerate}
     \item \textbf{Data Retrieval: }At fixed intervals the Python application re-requests the full dataset from the existing PHP endpoint. This refresh is implemented within the Python code. The refresh helps ensure that metrics are up to date.
@@ -49,7 +49,23 @@ Version 1 implements an interval-based data pipeline designed to support near re
 \end{enumerate}
 More advanced modelling described in the Design Chapter is not yet integrated and is reserved for the proposed system.
 
-\subsection{Dashboard Implementation}
+\subsection{Session Management}
+
+\subsection{Analytics Engine}
+
+\subsubsection{Incorrectness Scoring}
+
+\subsubsection{Student Struggle Model}
+
+\subsubsection{Question Difficulty Model}
+
+\subsubsection{Collaborative Filtering}
+
+\subsubsection{IRT, BKT and Improved Struggle Model}
+
+\subsection{Lab Assistant System}
+
+\subsection{Dashboard and UI}
 The Version 1 dashboard provides a live visual overview of student activity. It is implemented as a Streamlit application that integrates data retrieval, metric computation and visualisation in a Python workflow.
 
 The primary aim of the dashboard is to support fast awareness for instructors and lab assistants. Visualisations focus on simple, predictable indicators, some of which are not relevant but are a proof of concept and testing of the data. The indicators are presented through interactive Plotly charts, providing an intuitive user interface.
