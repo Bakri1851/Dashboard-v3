@@ -69,7 +69,7 @@ LEADERBOARD_BAR_COLORS: dict[str, str] = {
 
 # --- Temporal Smoothing ---
 SMOOTHING_ALPHA: float = 0.3
-SMOOTHING_ENABLED: bool = False   # infrastructure only — not activated
+SMOOTHING_ENABLED: bool = True    # EMA across refresh cycles; alpha=0.3
 
 # --- Incorrectness Threshold for "correct" ---
 CORRECT_THRESHOLD: float = 0.5   # incorrectness < this = "correct"

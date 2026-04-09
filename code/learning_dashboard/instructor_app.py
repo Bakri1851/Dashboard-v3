@@ -43,6 +43,7 @@ def init_session_state() -> None:
         "time_filter_enabled": False,
         "today_filter_only": True,
         "previous_scores": {},
+        "smoothing_enabled": config.SMOOTHING_ENABLED,
         "lab_session_code": None,
         "pending_remove_assistant_id": None,
         "_autorefresh_count": None,
@@ -668,6 +669,22 @@ def main() -> None:
                       int(pd.util.hash_pandas_object(df).sum()))
     if st.session_state.get("_analytics_key") != _analytics_key:
         struggle_df = analytics.compute_student_struggle_scores(df)
+        # Apply temporal EMA if enabled
+        if st.session_state.get("smoothing_enabled", True) and not struggle_df.empty:
+            prev = st.session_state.get("previous_scores", {})
+            struggle_df = struggle_df.copy()
+            new_prev = {}
+            for idx, row in struggle_df.iterrows():
+                student = row["user"]
+                smoothed = analytics.apply_temporal_smoothing(
+                    row["struggle_score"], prev.get(student)
+                )
+                struggle_df.at[idx, "struggle_score"] = smoothed
+                level, color = analytics.classify_score(smoothed, config.STRUGGLE_THRESHOLDS)
+                struggle_df.at[idx, "struggle_level"] = level
+                struggle_df.at[idx, "struggle_color"] = color
+                new_prev[student] = smoothed
+            st.session_state["previous_scores"] = new_prev
         difficulty_df = analytics.compute_question_difficulty_scores(df)
         st.session_state["_struggle_df"] = struggle_df
         st.session_state["_difficulty_df"] = difficulty_df

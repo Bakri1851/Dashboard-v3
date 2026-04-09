@@ -18,7 +18,7 @@ Related: [[Next Steps]], [[Known Issues]], [[Writing Roadmap]], [[Analytics Engi
 | 4 | Improved struggle model — behavioral (0.45) + mastery gap (0.30) + difficulty-adjusted (0.25) | Done | `models/improved_struggle.py`, `config.py` | Medium |
 | 5 | Comparison UI — baseline vs improved, scatter + delta table + agreement summary + settings toggles | **Not started** | `ui/views.py`, `ui/components.py`, `instructor_app.py` | Large |
 | 6 | Mobile app refinement — BKT mastery badge, per-question mastery, session timer, helped/struggling counts | **Not started** | `assistant_app.py`, `ui/theme.py` | Medium |
-| 7 | Surface computed-but-hidden data — measurement confidence indicators in UI; temporal smoothing decision | **Not started** | `ui/components.py`, `analytics.py`, `config.py` | Small |
+| 7 | Surface computed-but-hidden data — measurement confidence indicators in UI; temporal smoothing decision | Done | `ui/components.py`, `analytics.py`, `config.py` | Small |
 | 8 | FR6 smart device notifications — push alert when high-struggle student appears (stretch) | Not started | new file TBD | Large |
 | 9 | RAG suggested feedback — ChromaDB + LLM coaching hints surfaced in assistant assigned-student card | **Not started** | `assistant_app.py`, `analytics.py`, `config.py`, `requirements.txt` | Large |
 | 10 | In-app Help system (instructor dashboard) — Help section under Settings: Quick Tour, Help Centre (practical use), Model Guide (methodology), contextual tooltips, reliability indicators, troubleshooting | **Not started** | `ui/views.py`, `ui/components.py`, `instructor_app.py` | Large |

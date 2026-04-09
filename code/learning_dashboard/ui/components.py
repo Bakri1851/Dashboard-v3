@@ -106,6 +106,28 @@ def render_question_detail_metrics(question_data: dict) -> None:
             render_metric_card(label, value, color)
 
 
+def render_confidence_indicator(mean_confidence: float | None) -> None:
+    """Small coloured dot showing mean AI confidence for this question's incorrectness scores."""
+    if mean_confidence is None:
+        return
+    if mean_confidence > 0.7:
+        color, label = config.COLORS["green"], "High"
+    elif mean_confidence >= 0.4:
+        color, label = config.COLORS["yellow"], "Medium"
+    else:
+        color, label = config.COLORS["text_dim"], "Low"
+    st.markdown(
+        f'<div style="display:inline-flex; align-items:center; gap:6px; '
+        f'font-family:\'{config.FONT_BODY}\', monospace; font-size:0.78rem; '
+        f'color:{config.COLORS["text_dim"]}; margin-top:4px;">'
+        f'<span style="width:8px; height:8px; border-radius:50%; '
+        f'background:{color}; display:inline-block; flex-shrink:0;"></span>'
+        f'AI confidence: <span style="color:{color};">{label}</span>'
+        f'&nbsp;({mean_confidence:.0%})</div>',
+        unsafe_allow_html=True,
+    )
+
+
 def render_mistake_clusters(clusters: list[dict]) -> None:
     """
     Render mistake clusters as neon-themed cards in a 2-column grid.

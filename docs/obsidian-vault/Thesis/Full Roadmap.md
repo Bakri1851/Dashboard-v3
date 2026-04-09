@@ -10,6 +10,8 @@ Related: [[Coding Roadmap]], [[Writing Roadmap]], [[Rewrite Queue]], [[Report Sy
 
 Coding must come before screenshots, screenshots before Ch4 figures, Ch4 before Ch5 evaluation framing, and Ch5 before Ch6. The three remaining coding tasks are therefore the first three items regardless of effort.
 
+Phases 9, 10, and 11 are explicitly out of scope for this submission. Each will be documented in Ch6 §6.3 Future Work. Attempting large coding phases with 41 days remaining and Ch4/Ch5/Ch6 unwritten would risk the submission. Phase 6 is stretch only.
+
 ---
 
 ## The order
@@ -18,10 +20,12 @@ Coding must come before screenshots, screenshots before Ch4 figures, Ch4 before 
 
 Quick win. Two features are computed every run but produce no visible output — fix this before screenshots so Appendix B captures the live features.
 
-- [ ] Add confidence indicator next to incorrectness values in question drill-down (`ui/components.py`)
-- [ ] Decide on temporal smoothing: activate `SMOOTHING_ENABLED = True` in `config.py` or remove the stub
+- [x] Add confidence indicator next to incorrectness values in question drill-down (`ui/components.py`)
+  - confidence dot added to question drill-down — green/amber/grey by threshold, mean confidence across question's submissions
+- [x] Decide on temporal smoothing: activate `SMOOTHING_ENABLED = True` in `config.py` or remove the stub
+  - temporal smoothing activated (SMOOTHING_ENABLED = True, α = 0.3); settings toggle added following cf_enabled pattern
 
-*Unblocks: accurate screenshots in step 4.*
+*Unblocks: accurate screenshots in step 3.*
 
 ---
 
@@ -38,33 +42,20 @@ The biggest remaining coding task. Produces the model comparison view needed for
 
 ---
 
-### 3. Phase 6 — Mobile app refinement `Coding · Medium`
-
-Polish the lab assistant app so Appendix B mobile screenshots show the full feature set and Ch5 functional testing covers the assistant flows properly.
-
-- [ ] BKT mastery badge + progress bar on assigned-student card (`render_assigned_view()`)
-- [ ] Per-question mastery labels on the top-3 question list
-- [ ] Session elapsed timer in `_render_session_status_strip()`
-- [ ] Helped-vs-struggling summary header in `render_unassigned_view()`
-
-*Unblocks: complete Appendix B mobile screenshots, Ch5 assistant flow testing.*
-
----
-
-### 4. Appendix B — UI Screenshots `Evidence · Small`
+### 3. Appendix B — UI Screenshots `Evidence · Small`
 
 Take screenshots of every dashboard and mobile view now that the code is stable. Needed for Ch3 mockup replacement, Ch4 figures, and Ch5 evaluation evidence.
 
 - [ ] All 6 instructor views (in-class, student detail, question detail, data analysis, model comparison, settings)
 - [ ] Model comparison view (both student + question tabs)
-- [ ] Lab assistant app (join screen, unassigned view, assigned view with BKT badge)
+- [ ] Lab assistant app (join screen, unassigned view, assigned view)
 - [ ] Session start/end states
 
 *Unblocks: Ch3 figure replacements, Ch4 implementation figures, Ch5 evidence.*
 
 ---
 
-### 5. Appendix C — Test Results `Evidence · Medium`
+### 4. Appendix C — Test Results `Evidence · Medium`
 
 Run the full smoke test checklist from [[Setup and Runbook]] and document outcomes. This is the primary evidence base for Ch5.
 
@@ -76,7 +67,7 @@ Run the full smoke test checklist from [[Setup and Runbook]] and document outcom
 
 ---
 
-### 6. Ch4 — Implementation rewrite `Writing · Large`
+### 5. Ch4 — Implementation rewrite `Writing · Large`
 
 Rewrite the entire chapter — it currently describes V1 only. Cover the full V2 system.
 
@@ -94,7 +85,7 @@ Rewrite the entire chapter — it currently describes V1 only. Cover the full V2
 
 ---
 
-### 7. Appendices E & F — Formulae `Writing · Small–Medium`
+### 6. Appendices E & F — Formulae `Writing · Small–Medium`
 
 Can be written alongside Ch4. Collect all model formulas and derivation notes in one place.
 
@@ -105,7 +96,7 @@ Can be written alongside Ch4. Collect all model formulas and derivation notes in
 
 ---
 
-### 8. Ch5 — Results & Evaluation `Writing · Large`
+### 7. Ch5 — Results & Evaluation `Writing · Large`
 
 Write from scratch using Appendix B screenshots and Appendix C test results as evidence.
 
@@ -119,17 +110,17 @@ Write from scratch using Appendix B screenshots and Appendix C test results as e
 
 ---
 
-### 9. Ch6 — Conclusion `Writing · Medium`
+### 8. Ch6 — Conclusion `Writing · Medium`
 
 Write from scratch once Ch5 is drafted.
 
 - [ ] §6.1 Summary — restate objectives, what was built, what was achieved
 - [ ] §6.2 Contributions — scoring model advances, lab assistant coordination, real-time analytics
-- [ ] §6.3 Future Work — FR6 smart devices, event-driven architecture, temporal smoothing, BKT parameter tuning, larger evaluation study, export/reporting
+- [ ] §6.3 Future Work — FR6 smart devices, Phase 6 mobile refinement, Phase 9 RAG feedback, Phase 10/11 in-app Help, event-driven architecture, temporal smoothing, BKT parameter tuning, larger evaluation study, export/reporting
 
 ---
 
-### 10. Ch3 — Design updates `Writing · Medium`
+### 9. Ch3 — Design updates `Writing · Medium`
 
 Surgical edits — the chapter structure is solid, specific sections need updating.
 
@@ -141,7 +132,7 @@ Surgical edits — the chapter structure is solid, specific sections need updati
 
 ---
 
-### 11. Ch1 & Ch2 — Language and framing `Writing · Small`
+### 10. Ch1 & Ch2 — Language and framing `Writing · Small`
 
 - [ ] Convert future tense in Ch1 §1.2, §1.3, §1.5 to past/present
 - [ ] Update Table 1 risk mitigations with actual decisions made
@@ -150,7 +141,7 @@ Surgical edits — the chapter structure is solid, specific sections need updati
 
 ---
 
-### 12. Appendix A — Code Snippets `Writing · Small`
+### 11. Appendix A — Code Snippets `Writing · Small`
 
 Add key code excerpts to support Ch4.
 
@@ -161,7 +152,7 @@ Add key code excerpts to support Ch4.
 
 ---
 
-### 13. Polish pass `Writing · Small`
+### 12. Polish pass `Writing · Small`
 
 Final consistency check before submission.
 
@@ -172,9 +163,9 @@ Final consistency check before submission.
 
 ---
 
-### 14. FR6 — Smart device notifications `Coding · Large` (stretch)
+### 13. FR6 — Smart device notifications `Coding · Large` (stretch)
 
-Only attempt if time allows after step 9. Otherwise document as future work in Ch6 §6.3.
+Only attempt if time allows after step 8. Otherwise document as future work in Ch6 §6.3.
 
 - [ ] Evaluate feasibility of web push notifications for the assistant app
 - [ ] If viable: implement push alert when a new high-struggle student appears
@@ -182,24 +173,66 @@ Only attempt if time allows after step 9. Otherwise document as future work in C
 
 ---
 
+### 14. Phase 6 — Mobile app refinement (stretch) `Coding · Medium`
+
+Only attempt after Ch6 is written. Ch5 assistant flow testing can use the current app. BKT badges and session timer are thesis-strengthening but not thesis-critical.
+
+- [ ] BKT mastery badge + progress bar on assigned-student card (`render_assigned_view()`)
+- [ ] Per-question mastery labels on the top-3 question list
+- [ ] Session elapsed timer in `_render_session_status_strip()`
+- [ ] Helped-vs-struggling summary header in `render_unassigned_view()`
+
+---
+
+## Out of scope — document as future work
+
+These phases will not be implemented before the May 20 deadline. Each should be documented in Ch6 §6.3 Future Work. Do not attempt coding on these items.
+
+### Phase 9 — RAG suggested feedback
+
+Architecture designed by Dr. Batmaz (Meeting 3). Too large to implement before May 20 deadline. Document fully in Ch6 §6.3 Future Work and retain the Ch3 placeholder as a written design proposal. This is the correct decision — showing deliberate scoping is stronger than a rushed implementation.
+
+- ChromaDB + sentence-transformers RAG pipeline grounding coaching hints in each student's own submission history
+- `generate_assistant_suggestions()` in `analytics.py` — retrieve top-k incorrect Q&A chunks, generate hints via OpenAI, cache in-process
+- Surfaced in assistant assigned-student card with spinner on first load
+
+*Document in Ch6 §6.3 Future Work. See [[RAG Architecture]] for the full design.*
+
+### Phase 10 — In-app Help system (instructor dashboard)
+
+Help section under Settings covering Quick Tour, Help Centre, Model Guide, contextual tooltips, and reliability indicators. Not feasible to implement before deadline given the writing workload.
+
+*Document in Ch6 §6.3 Future Work.*
+
+### Phase 11 — In-app Help system (assistant app)
+
+Lightweight mobile Help panel for lab assistants covering join guide, student card explainer, action button guide, and RAG suggestion explainer.
+
+*Document in Ch6 §6.3 Future Work.*
+
+---
+
 ## At a glance
 
 | Step | Item | Type | Effort | Status |
-|---|---|---|---|---|
-| 1 | Phase 7 — Surface hidden data | Coding | Small | Not started |
+| --- | --- | --- | --- | --- |
+| 1 | Phase 7 — Surface hidden data | Coding | Small | Done |
 | 2 | Phase 5 — Comparison UI | Coding | Large | Not started |
-| 3 | Phase 6 — Mobile app refinement | Coding | Medium | Not started |
-| 4 | Appendix B — Screenshots | Evidence | Small | Not started |
-| 5 | Appendix C — Test Results | Evidence | Medium | Not started |
-| 6 | Ch4 — Implementation rewrite | Writing | Large | Not started |
-| 7 | Appendices E & F — Formulae | Writing | Small–Medium | Not started |
-| 8 | Ch5 — Results & Evaluation | Writing | Large | Not started |
-| 9 | Ch6 — Conclusion | Writing | Medium | Not started |
-| 10 | Ch3 — Design updates | Writing | Medium | Not started |
-| 11 | Ch1 & Ch2 — Language cleanup | Writing | Small | Not started |
-| 12 | Appendix A — Code Snippets | Writing | Small | Not started |
-| 13 | Polish pass | Writing | Small | Not started |
-| 14 | FR6 — Smart devices (stretch) | Coding | Large | Not started |
+| 3 | Appendix B — Screenshots | Evidence | Small | Not started |
+| 4 | Appendix C — Test Results | Evidence | Medium | Not started |
+| 5 | Ch4 — Implementation rewrite | Writing | Large | Not started |
+| 6 | Appendices E & F — Formulae | Writing | Small–Medium | Not started |
+| 7 | Ch5 — Results & Evaluation | Writing | Large | Not started |
+| 8 | Ch6 — Conclusion | Writing | Medium | Not started |
+| 9 | Ch3 — Design updates | Writing | Medium | Not started |
+| 10 | Ch1 & Ch2 — Language cleanup | Writing | Small | Not started |
+| 11 | Appendix A — Code Snippets | Writing | Small | Not started |
+| 12 | Polish pass | Writing | Small | Not started |
+| 13 | FR6 — Smart devices (stretch) | Coding | Large | Not started |
+| 14 | Phase 6 — Mobile app refinement | Coding | Medium | Stretch |
+| — | Phase 9 — RAG suggested feedback | Coding | Large | Out of scope / Future work |
+| — | Phase 10 — In-app Help (instructor) | Coding | Large | Out of scope / Future work |
+| — | Phase 11 — In-app Help (assistant) | Coding | Medium | Out of scope / Future work |
 
 ---
 

@@ -344,6 +344,15 @@ def question_detail_view(df: pd.DataFrame, question_id: str, difficulty_df: pd.D
     # 4 Metric cards
     components.render_question_detail_metrics(question_data)
 
+    # Confidence indicator (only when measurement data available)
+    _mdf = st.session_state.get("_measurement_df")
+    if _mdf is not None and "incorrectness_confidence" in _mdf.columns:
+        q_conf = _mdf[_mdf["question"] == question_id]["incorrectness_confidence"]
+        mean_conf = float(q_conf.mean()) if not q_conf.empty else None
+    else:
+        mean_conf = None
+    components.render_confidence_indicator(mean_conf)
+
     st.markdown("---")
 
     # Mistake Clusters
@@ -610,6 +619,27 @@ def settings_view(df: pd.DataFrame) -> None:
                  "mean incorrectness, first-attempt failure.  \n"
                  "**IRT:** Rasch model latent difficulty estimated via MLE.",
         )
+
+    st.markdown("---")
+
+    st.markdown(
+        f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
+        f'text-transform:uppercase; letter-spacing:2px; font-size:1rem;">Temporal Smoothing</h3>',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        "When enabled, struggle scores are smoothed across refresh cycles using an "
+        "exponential moving average (α = 0.3). This reduces noise from single-submission "
+        "spikes while still responding to genuine changes in student behaviour."
+    )
+
+    _setting_toggle(
+        "Enable Temporal Smoothing",
+        "smoothing_enabled",
+        help="EMA smoothing: S_t = 0.7 · S_prev + 0.3 · S_raw. "
+             "Resets when a new session starts or data is cleared.",
+    )
 
     st.markdown("---")
 
