@@ -12,12 +12,13 @@ Related: [[Instructor Dashboard]], [[UI System]], [[Setup and Runbook]], [[Stude
 - `Student Detail`: opened by selecting a student on the leaderboard; surfaces the baseline struggle score plus collaborative-filtering context. See [[Student Detail]].
 - `Question Detail`: opened by selecting a question on the leaderboard; surfaces the baseline weighted difficulty score, measurement confidence, and mistake clustering. See [[Question Detail]].
 - `Data Analysis View`: secondary charts for module usage, top questions, user activity, activity timeline, and students by module.
-- `Settings`: toggles sound, auto-refresh, and collaborative filtering settings.
+- `Model Comparison`: baseline vs improved model comparison; gated by `improved_models_enabled`; tabbed by Student Struggle and Question Difficulty. See [[UI System]].
+- `Settings`: toggles sound, auto-refresh, collaborative filtering, improved models (master toggle + sub-toggles for IRT / BKT / Improved Struggle), and BKT parameter sliders.
 - `Previous Sessions`: lists saved sessions and supports load/delete actions; see [[Saved Session History]].
 
 ## Main transitions
 
-- Sidebar radio switches between `In Class View` and `Data Analysis View`.
+- Sidebar radio switches between `In Class View`, `Data Analysis View`, and `Model Comparison`.
 - Leaderboard selection sets `selected_student` or `selected_question`.
 - Back buttons clear the selection and return to the dashboard.
 - Loading a saved session is deferred, then applied before widgets are rebuilt.
@@ -40,5 +41,5 @@ Related: [[Instructor Dashboard]], [[UI System]], [[Setup and Runbook]], [[Stude
 ## Code references
 
 - `code/learning_dashboard/instructor_app.py`: `_on_dashboard_view_change()`, `render_sidebar()`, `main()`
-- `code/learning_dashboard/ui/views.py`: `in_class_view()`, `student_detail_view()`, `question_detail_view()`, `data_analysis_view()`, `settings_view()`, `previous_sessions_view()`
+- `code/learning_dashboard/ui/views.py`: `in_class_view()`, `student_detail_view()`, `question_detail_view()`, `data_analysis_view()`, `comparison_view()`, `settings_view()`, `previous_sessions_view()`
 - `code/learning_dashboard/sound.py`

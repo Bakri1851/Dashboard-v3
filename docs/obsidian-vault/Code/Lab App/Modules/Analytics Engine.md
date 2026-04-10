@@ -43,6 +43,7 @@ Alternative and enhanced models live in the `models/` package, gated by the `imp
 - `irt.py` (Phase 2): Rasch IRT difficulty estimation as an alternative to the baseline weighted score. See [[IRT Difficulty Logic]].
 - `bkt.py` (Phase 3): Bayesian Knowledge Tracing for per-student per-question mastery estimation. See [[BKT Mastery Logic]].
 - `improved_struggle.py` (Phase 4): mastery-aware, difficulty-adjusted struggle model combining behavioral signals with BKT and IRT outputs. See [[Improved Struggle Logic]].
+- Phase 5 (Comparison UI): each sub-model is gated individually in `instructor_app.py` via session state toggles (`irt_enabled`, `bkt_enabled`, `improved_struggle_enabled`). `_improved_models_settings_key` fingerprints all toggle + BKT param state so any slider or toggle change triggers automatic recomputation without a manual refresh. The comparison view is in `ui/views.py` `comparison_view()`. See [[UI System]].
 
 ## Code references
 
@@ -51,3 +52,4 @@ Alternative and enhanced models live in the `models/` package, gated by the `imp
 - `code/learning_dashboard/analytics.py`: `compute_question_difficulty_scores()`
 - `code/learning_dashboard/analytics.py`: `compute_cf_struggle_scores()`, `get_similar_students()`
 - `code/learning_dashboard/analytics.py`: `cluster_question_mistakes()`
+- `code/learning_dashboard/config.py`: `IMPROVED_MODELS_ENABLED_DEFAULT`, `IRT_ENABLED_DEFAULT`, `BKT_ENABLED_DEFAULT`, `IMPROVED_STRUGGLE_ENABLED_DEFAULT`

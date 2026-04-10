@@ -46,6 +46,8 @@ Related: [[Architecture]], [[Lab App/Flows/Pages and UI Flow]], [[Instructor Das
 
 **Guard clause:** shows `st.info(...)` and returns early if improved models are disabled.
 
+**Settings sub-panel (implemented):** when `improved_models_enabled` is on, Settings exposes three sub-model toggles (`irt_enabled`, `bkt_enabled`, `improved_struggle_enabled`) and four BKT parameter sliders (`bkt_p_init`, `bkt_p_learn`, `bkt_p_guess`, `bkt_p_slip`). Any change to these controls updates `_improved_models_settings_key` — a fingerprint string that `instructor_app.py` watches to trigger automatic recomputation of all improved-model outputs without a manual refresh.
+
 **Layout:**
 1. `render_info_bar(...)` header
 2. `st.tabs(["Student Struggle Comparison", "Question Difficulty Comparison"])`

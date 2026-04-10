@@ -1,6 +1,6 @@
 {
   "collapse-filter": false,
-  "search": "",
+  "search": "coding road",
   "showTags": true,
   "showAttachments": true,
   "hideUnresolved": false,
@@ -43,16 +43,16 @@
       }
     }
   ],
-  "collapse-display": true,
+  "collapse-display": false,
   "showArrow": false,
   "textFadeMultiplier": -1.5,
   "nodeSizeMultiplier": 0.512577962577963,
-  "lineSizeMultiplier": 0.695945945945946,
+  "lineSizeMultiplier": 0.716320166320166,
   "collapse-forces": false,
   "centerStrength": 0.64968814968815,
   "repelStrength": 12.4116424116424,
   "linkStrength": 0.911642411642412,
   "linkDistance": 30,
-  "scale": 0.440941875829932,
-  "close": true
+  "scale": 0.5081749884715561,
+  "close": false
 }

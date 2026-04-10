@@ -70,6 +70,7 @@ Streamlit cannot mutate `st.session_state` after widget instantiation in the sam
 ## Obsidian Vault
 
 Living documentation lives at `docs/obsidian-vault/`. Start from `Home.md` for the master map.
+When updating look at all notes to see if updates are necessary
 
 **When to read it:**
 
@@ -77,5 +78,24 @@ Living documentation lives at `docs/obsidian-vault/`. Start from `Home.md` for t
 - Adding a feature or tracing a user flow → check `Code/Lab App/Flows/` or `Code/Assistant App/Flows/`
 - Thesis-related tasks → `Thesis/Report Sync.md` is the source of truth for thesis-to-code alignment; `Thesis/Rewrite Queue.md` tracks writing priorities
 - Looking up academic grounding → `Literature/index.md` groups 38 papers by theme (struggle modeling, IRT, BKT, collaborative filtering, etc.)
+
+**Progress / checklist files — always update when relevant work is done:**
+
+| File | Tracks |
+|---|---|
+| `Thesis/Weekly Plan.md` | Week-by-week schedule with step-level checkboxes |
+| `Thesis/Full Roadmap.md` | Master coding + writing order; at-a-glance status table |
+| `Thesis/Rewrite Queue.md` | Granular thesis edit tasks grouped by priority |
+| `Thesis/Ch1 – Introduction.md` | Chapter-specific rewrite items |
+| `Thesis/Ch2 – Background and Requirements.md` | Chapter-specific rewrite items |
+| `Thesis/Ch3 – Design and Modelling.md` | Chapter-specific rewrite items |
+| `Thesis/Ch4 – Implementation.md` | Chapter-specific rewrite items |
+| `Thesis/Ch5 – Results and Evaluation.md` | Chapter-specific rewrite items |
+| `Thesis/Ch6 – Conclusion.md` | Chapter-specific rewrite items |
+| `Code/Lab App/Operations/Coding Roadmap.md` | Phase-by-phase implementation status |
+| `Code/Lab App/Operations/Next Steps.md` | Detailed sub-tasks for each coding phase |
+| `Code/Lab App/Operations/Evaluation Strategy.md` | Model evaluation plan (Meeting 3) |
+| `Code/Assistant App/Operations/Next Steps.md` | Assistant app phase sub-tasks |
+| `Code/Assistant App/Operations/RAG Architecture.md` | RAG design actions |
 
 **Do not edit vault notes** unless the user explicitly asks — they are the user's personal knowledge base.

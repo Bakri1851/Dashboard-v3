@@ -69,6 +69,30 @@ Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossa
 - [[Ch5 – Results and Evaluation]]
 - [[Ch6 – Conclusion]]
 
+## Progress Checkers
+
+All files that contain checklists tracking coding or writing progress. Check these when completing work.
+
+### Thesis writing
+- [[Full Roadmap]] — master coding + writing order; at-a-glance status table
+- [[Weekly Plan]] — week-by-week schedule with step-level checkboxes
+- [[Rewrite Queue]] — granular thesis edit tasks grouped by priority
+- [[Ch1 – Introduction]] — chapter rewrite items
+- [[Ch2 – Background and Requirements]] — chapter rewrite items
+- [[Ch3 – Design and Modelling]] — chapter rewrite items
+- [[Ch4 – Implementation]] — chapter rewrite items
+- [[Ch5 – Results and Evaluation]] — chapter rewrite items
+- [[Ch6 – Conclusion]] — chapter rewrite items
+
+### Code / implementation
+- [[Coding Roadmap]] — phase-by-phase implementation status
+- [[Next Steps]] — detailed sub-tasks for each coding phase (Lab App)
+- [[Lab App/Operations/Evaluation Strategy]] — model evaluation plan (Meeting 3)
+- [[Assistant App/Operations/Next Steps]] — assistant app phase sub-tasks
+- [[Assistant App/Operations/RAG Architecture]] — RAG design actions
+
+---
+
 ## Code references
 
 - `code/app.py` and `code/lab_app.py` are the stable launch points.

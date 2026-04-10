@@ -33,10 +33,10 @@ Quick win. Two features are computed every run but produce no visible output —
 
 The biggest remaining coding task. Produces the model comparison view needed for Ch5 evaluation evidence.
 
-- [ ] `comparison_view()` in `ui/views.py`
-- [ ] `render_comparison_scatter()`, `render_comparison_table()`, `render_agreement_summary()` in `ui/components.py`
-- [ ] "Model Comparison" routing in `instructor_app.py`
-- [ ] Settings sub-panel: `improved_models_enabled` toggle + sub-toggles + BKT sliders
+- [x] `comparison_view()` in `ui/views.py`
+- [x] `render_comparison_scatter()`, `render_comparison_table()`, `render_agreement_summary()` in `ui/components.py`
+- [x] "Model Comparison" routing in `instructor_app.py`
+- [x] Settings sub-panel: `improved_models_enabled` toggle + sub-toggles + BKT sliders
 
 *Unblocks: Ch5 model comparison evidence, Appendix B comparison screenshots.*
 
@@ -217,7 +217,7 @@ Lightweight mobile Help panel for lab assistants covering join guide, student ca
 | Step | Item | Type | Effort | Status |
 | --- | --- | --- | --- | --- |
 | 1 | Phase 7 — Surface hidden data | Coding | Small | Done |
-| 2 | Phase 5 — Comparison UI | Coding | Large | Not started |
+| 2 | Phase 5 — Comparison UI | Coding | Large | **Done** |
 | 3 | Appendix B — Screenshots | Evidence | Small | Not started |
 | 4 | Appendix C — Test Results | Evidence | Medium | Not started |
 | 5 | Ch4 — Implementation rewrite | Writing | Large | Not started |

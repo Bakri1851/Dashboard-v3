@@ -162,7 +162,7 @@ See [[Ch5 – Results and Evaluation]] for full chapter analysis.
 **Future work candidates from unimplemented features:**
 - Smart device integration (FR6)
 - Event-driven architecture (still interval-based)
-- BKT mastery visualization (computed but never displayed in UI)
+- BKT mastery visualization in assistant app (Phase 6, still deferred); BKT parameters now exposed via sliders in Settings
 - Measurement confidence display (computed but never rendered)
 - Temporal smoothing (stub only, not active)
 - Automated evaluation framework

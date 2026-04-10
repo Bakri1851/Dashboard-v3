@@ -16,7 +16,7 @@ Related: [[Next Steps]], [[Known Issues]], [[Writing Roadmap]], [[Analytics Engi
 | 2 | IRT difficulty — Rasch 1PL model via MLE, logit scale mapped to [0,1] | Done | `models/irt.py`, `config.py` | Medium |
 | 3 | BKT mastery tracking — HMM with 4 parameters, per-student per-question | Done | `models/bkt.py`, `config.py` | Medium |
 | 4 | Improved struggle model — behavioral (0.45) + mastery gap (0.30) + difficulty-adjusted (0.25) | Done | `models/improved_struggle.py`, `config.py` | Medium |
-| 5 | Comparison UI — baseline vs improved, scatter + delta table + agreement summary + settings toggles | **Not started** | `ui/views.py`, `ui/components.py`, `instructor_app.py` | Large |
+| 5 | Comparison UI — baseline vs improved, scatter + delta table + agreement summary + settings toggles | **Done** | `ui/views.py`, `ui/components.py`, `instructor_app.py` | Large |
 | 6 | Mobile app refinement — BKT mastery badge, per-question mastery, session timer, helped/struggling counts | **Not started** | `assistant_app.py`, `ui/theme.py` | Medium |
 | 7 | Surface computed-but-hidden data — measurement confidence indicators in UI; temporal smoothing decision | Done | `ui/components.py`, `analytics.py`, `config.py` | Small |
 | 8 | FR6 smart device notifications — push alert when high-struggle student appears (stretch) | Not started | new file TBD | Large |
@@ -34,12 +34,12 @@ Work through this order to minimise rework — each item unblocks the next.
 
 Unblocks Ch5 evaluation evidence and model comparison screenshots (Appendix B). Full spec in [[Next Steps]] § Phase 5.
 
-- [ ] Add `comparison_view()` to `code/learning_dashboard/ui/views.py`
-- [ ] Add `render_comparison_scatter()` to `ui/components.py` — baseline x-axis, improved y-axis, diagonal reference line
-- [ ] Add `render_comparison_table()` to `ui/components.py` — sorted by absolute delta, biggest disagreements first
-- [ ] Add `render_agreement_summary()` to `ui/components.py` — summary cards: agreement %, level-change counts, top disagreements
-- [ ] Add "Model Comparison" option to view routing radio in `instructor_app.py`
-- [ ] Add settings sub-panel: `improved_models_enabled` toggle + per-model sub-toggles + BKT parameter sliders (`P_init`, `P_learn`, `P_guess`, `P_slip`)
+- [x] Add `comparison_view()` to `code/learning_dashboard/ui/views.py`
+- [x] Add `render_comparison_scatter()` to `ui/components.py` — baseline x-axis, improved y-axis, diagonal reference line
+- [x] Add `render_comparison_table()` to `ui/components.py` — sorted by absolute delta, biggest disagreements first
+- [x] Add `render_agreement_summary()` to `ui/components.py` — summary cards: agreement %, level-change counts, top disagreements
+- [x] Add "Model Comparison" option to view routing radio in `instructor_app.py`
+- [x] Add settings sub-panel: `improved_models_enabled` toggle + per-model sub-toggles + BKT parameter sliders (`P_init`, `P_learn`, `P_guess`, `P_slip`)
 
 *Unblocks: Ch5 functional testing, Appendix B screenshots.*
 

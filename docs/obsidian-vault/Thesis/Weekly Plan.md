@@ -49,18 +49,18 @@ The schedule is achievable but carries real risk and leaves no slack. Total esti
 ### Step 2 — Phase 5: Comparison UI `Coding · Large (~16hrs)`
 
 *From Full Roadmap.md:*
-- [ ] `comparison_view()` in `ui/views.py`
-- [ ] `render_comparison_scatter()`, `render_comparison_table()`, `render_agreement_summary()` in `ui/components.py`
-- [ ] "Model Comparison" routing in `instructor_app.py`
-- [ ] Settings sub-panel: `improved_models_enabled` toggle + sub-toggles + BKT sliders
+- [x] `comparison_view()` in `ui/views.py`
+- [x] `render_comparison_scatter()`, `render_comparison_table()`, `render_agreement_summary()` in `ui/components.py`
+- [x] "Model Comparison" routing in `instructor_app.py`
+- [x] Settings sub-panel: `improved_models_enabled` toggle + sub-toggles + BKT sliders
 
 *From Coding Roadmap.md (Phase 5 detailed sub-tasks):*
-- [ ] Add `comparison_view()` to `code/learning_dashboard/ui/views.py`
-- [ ] Add `render_comparison_scatter()` to `ui/components.py` — baseline x-axis, improved y-axis, diagonal reference line
-- [ ] Add `render_comparison_table()` to `ui/components.py` — sorted by absolute delta, biggest disagreements first
-- [ ] Add `render_agreement_summary()` to `ui/components.py` — summary cards: agreement %, level-change counts, top disagreements
-- [ ] Add "Model Comparison" option to view routing radio in `instructor_app.py`
-- [ ] Add settings sub-panel: `improved_models_enabled` toggle + per-model sub-toggles + BKT parameter sliders (`P_init`, `P_learn`, `P_guess`, `P_slip`)
+- [x] Add `comparison_view()` to `code/learning_dashboard/ui/views.py`
+- [x] Add `render_comparison_scatter()` to `ui/components.py` — baseline x-axis, improved y-axis, diagonal reference line
+- [x] Add `render_comparison_table()` to `ui/components.py` — sorted by absolute delta, biggest disagreements first
+- [x] Add `render_agreement_summary()` to `ui/components.py` — summary cards: agreement %, level-change counts, top disagreements
+- [x] Add "Model Comparison" option to view routing radio in `instructor_app.py`
+- [x] Add settings sub-panel: `improved_models_enabled` toggle + per-model sub-toggles + BKT parameter sliders (`P_init`, `P_learn`, `P_guess`, `P_slip`)
 
 *Verification after Phase 5 (from Coding Roadmap.md):*
 - [ ] Enable improved models in Settings → open Model Comparison → verify both Student Struggle and Question Difficulty tabs render
