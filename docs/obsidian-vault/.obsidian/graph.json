@@ -11,35 +11,35 @@
       "query": "path:Thesis  ",
       "color": {
         "a": 1,
-        "rgb": 13666160
+        "rgb": 12597547
       }
     },
     {
       "query": "path:Code/Reference  ",
       "color": {
         "a": 1,
-        "rgb": 15453067
+        "rgb": 15105570
       }
     },
     {
       "query": "path:Home",
       "color": {
         "a": 1,
-        "rgb": 11833005
+        "rgb": 9323693
       }
     },
     {
       "query": "path:Code  ",
       "color": {
         "a": 1,
-        "rgb": 8962256
+        "rgb": 1482885
       }
     },
     {
       "query": "path:Literature  ",
       "color": {
         "a": 1,
-        "rgb": 10731148
+        "rgb": 2719929
       }
     }
   ],

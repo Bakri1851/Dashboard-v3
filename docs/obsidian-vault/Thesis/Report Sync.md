@@ -128,16 +128,28 @@ See [[Ch4 – Implementation]] for full chapter analysis.
 
 **What the project does:** No automated tests exist. No evaluation scripts. No benchmark data. Manual smoke test checklist exists in vault [[Setup and Runbook]].
 
+**Phase 5 complete (2026-04-10):** The Model Comparison view (`comparison_view()` in `ui/views.py`) is now implemented. It provides:
+- Agreement % between baseline and improved models (student struggle + question difficulty)
+- Scatter plots (baseline x vs improved y) with diagonal reference line
+- Comparison tables sorted by biggest disagreement (delta column colour-coded)
+- Sub-model toggles and BKT parameter sliders in Settings
+
+**This view is the primary evaluation evidence for Ch5.** Run it with real session data and capture:
+- Agreement % between baseline struggle and improved struggle
+- Agreement % between baseline difficulty and IRT difficulty
+- Scatter plots showing systematic bias (above/below diagonal)
+- Students/questions with largest delta — analyse why models disagree
+
 **What could go here:**
 - Functional testing against FR1-FR7
 - Performance testing (refresh latency, API response times)
-- Model comparison: baseline vs IRT difficulty, baseline vs improved struggle
+- Model comparison: baseline vs IRT difficulty, baseline vs improved struggle ← **now supported by comparison_view()**
 - CF elevation rate analysis
 - Mistake clustering quality assessment
 - Usability observations
 - Edge case handling (empty data, single student, no AI feedback)
 
-**Evidence needed:** All testing evidence needs to be created from scratch.
+**Evidence needed:** Run comparison view during a live lab session; screenshot all four panels (two tabs × scatter + table).
 
 See [[Ch5 – Results and Evaluation]] for full chapter analysis.
 

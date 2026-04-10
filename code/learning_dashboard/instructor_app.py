@@ -57,12 +57,21 @@ def init_session_state() -> None:
         "_prev_selected_question":   None,
         "_prev_dashboard_view":      "In Class View",
         "_prev_high_struggle_count": 0,
-        "improved_models_enabled": True,
+        "improved_models_enabled": config.IMPROVED_MODELS_ENABLED_DEFAULT,
         "struggle_model": "Baseline",
         "difficulty_model": "Baseline",
         "_measurement_df": None,
         "_improved_models_key": None,
         "_improved_struggle_df": None,
+        # Phase 5: sub-toggles and BKT parameter overrides
+        "irt_enabled":                   config.IRT_ENABLED_DEFAULT,
+        "bkt_enabled":                   config.BKT_ENABLED_DEFAULT,
+        "improved_struggle_enabled":     config.IMPROVED_STRUGGLE_ENABLED_DEFAULT,
+        "bkt_p_init":                    config.BKT_P_INIT,
+        "bkt_p_learn":                   config.BKT_P_LEARN,
+        "bkt_p_guess":                   config.BKT_P_GUESS,
+        "bkt_p_slip":                    config.BKT_P_SLIP,
+        "_improved_models_settings_key": None,
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -316,7 +325,7 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
         st.markdown("---")
 
         # Keep selector and active view aligned before rendering the widget.
-        if st.session_state["current_view"] in {"In Class View", "Data Analysis View"}:
+        if st.session_state["current_view"] in {"In Class View", "Data Analysis View", "Model Comparison"}:
             st.session_state["dashboard_view"] = st.session_state["current_view"]
 
         # --- Dashboard View ---
@@ -327,7 +336,7 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
         )
         st.radio(
             "Dashboard View Selector",
-            ["In Class View", "Data Analysis View"],
+            ["In Class View", "Data Analysis View", "Model Comparison"],
             key="dashboard_view",
             on_change=_on_dashboard_view_change,
             label_visibility="collapsed",
@@ -701,22 +710,53 @@ def main() -> None:
 
     # --- Improved models (Phases 1–4), gated by feature flag ---
     if st.session_state.get("improved_models_enabled", False):
+        _improved_settings_key = (
+            st.session_state.get("irt_enabled", True),
+            st.session_state.get("bkt_enabled", True),
+            st.session_state.get("improved_struggle_enabled", True),
+            st.session_state.get("bkt_p_init", config.BKT_P_INIT),
+            st.session_state.get("bkt_p_learn", config.BKT_P_LEARN),
+            st.session_state.get("bkt_p_guess", config.BKT_P_GUESS),
+            st.session_state.get("bkt_p_slip", config.BKT_P_SLIP),
+        )
         _need_recompute = (
             st.session_state.get("_improved_models_key") != _analytics_key
+            or st.session_state.get("_improved_models_settings_key") != _improved_settings_key
             or st.session_state.get("_mastery_summary_df") is None
         )
         if _need_recompute:
             st.session_state["_measurement_df"] = measurement.compute_incorrectness_with_confidence(df)
-            st.session_state["_irt_difficulty_df"] = irt.compute_irt_difficulty_scores(df)
-            mastery_df = bkt.compute_all_mastery(df)
-            st.session_state["_mastery_df"] = mastery_df
-            st.session_state["_mastery_summary_df"] = bkt.compute_student_mastery_summary(mastery_df)
-            st.session_state["_improved_struggle_df"] = improved_struggle.compute_improved_struggle_scores(
-                df,
-                mastery_summary=st.session_state["_mastery_summary_df"],
-                irt_difficulty=st.session_state["_irt_difficulty_df"],
-            )
+
+            if st.session_state.get("irt_enabled", True):
+                st.session_state["_irt_difficulty_df"] = irt.compute_irt_difficulty_scores(df)
+            else:
+                st.session_state["_irt_difficulty_df"] = None
+
+            if st.session_state.get("bkt_enabled", True):
+                mastery_df = bkt.compute_all_mastery(
+                    df,
+                    p_init=st.session_state.get("bkt_p_init", config.BKT_P_INIT),
+                    p_learn=st.session_state.get("bkt_p_learn", config.BKT_P_LEARN),
+                    p_guess=st.session_state.get("bkt_p_guess", config.BKT_P_GUESS),
+                    p_slip=st.session_state.get("bkt_p_slip", config.BKT_P_SLIP),
+                )
+                st.session_state["_mastery_df"] = mastery_df
+                st.session_state["_mastery_summary_df"] = bkt.compute_student_mastery_summary(mastery_df)
+            else:
+                st.session_state["_mastery_df"] = None
+                st.session_state["_mastery_summary_df"] = None
+
+            if st.session_state.get("improved_struggle_enabled", True):
+                st.session_state["_improved_struggle_df"] = improved_struggle.compute_improved_struggle_scores(
+                    df,
+                    mastery_summary=st.session_state["_mastery_summary_df"],
+                    irt_difficulty=st.session_state["_irt_difficulty_df"],
+                )
+            else:
+                st.session_state["_improved_struggle_df"] = None
+
             st.session_state["_improved_models_key"] = _analytics_key
+            st.session_state["_improved_models_settings_key"] = _improved_settings_key
     else:
         if st.session_state.get("_improved_models_key") is not None:
             st.session_state["_measurement_df"] = None
@@ -725,6 +765,7 @@ def main() -> None:
             st.session_state["_mastery_summary_df"] = None
             st.session_state["_improved_struggle_df"] = None
             st.session_state["_improved_models_key"] = None
+            st.session_state["_improved_models_settings_key"] = None
 
     # Sound: high-struggle student count increased
     if st.session_state["session_active"] and struggle_df is not None and not struggle_df.empty:
@@ -747,6 +788,8 @@ def main() -> None:
         views.previous_sessions_view(df)
     elif st.session_state["current_view"] == "Settings":
         views.settings_view(df)
+    elif st.session_state["current_view"] == "Model Comparison":
+        views.comparison_view(df)
 
 
 if __name__ == "__main__":

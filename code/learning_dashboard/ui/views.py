@@ -620,6 +620,68 @@ def settings_view(df: pd.DataFrame) -> None:
                  "**IRT:** Rasch model latent difficulty estimated via MLE.",
         )
 
+        st.markdown("")
+        st.markdown(
+            f'<p style="color:{config.COLORS["text_dim"]}; font-size:0.85rem; '
+            f'font-family:\'{config.FONT_BODY}\', monospace; margin-bottom:4px;">'
+            f'Sub-model controls</p>',
+            unsafe_allow_html=True,
+        )
+        _setting_toggle(
+            "Enable IRT Difficulty",
+            "irt_enabled",
+            help="Rasch 1-PL IRT model for question difficulty. "
+                 "Required for IRT leaderboard and Model Comparison view.",
+        )
+        _setting_toggle(
+            "Enable BKT Mastery",
+            "bkt_enabled",
+            help="Bayesian Knowledge Tracing per student per question. "
+                 "Required for the Improved Struggle model.",
+        )
+        _setting_toggle(
+            "Enable Improved Struggle",
+            "improved_struggle_enabled",
+            help="Phase 4 struggle model: behavioral + mastery gap + difficulty-adjusted signals.",
+        )
+
+        if st.session_state.get("bkt_enabled", True):
+            st.markdown("")
+            st.markdown(
+                f'<p style="color:{config.COLORS["text_dim"]}; font-size:0.85rem; '
+                f'font-family:\'{config.FONT_BODY}\', monospace; margin-bottom:4px;">'
+                f'BKT parameters</p>',
+                unsafe_allow_html=True,
+            )
+            _setting_slider(
+                "Prior Mastery P(L₀)",
+                "bkt_p_init",
+                min_value=0.0, max_value=1.0, step=0.05,
+                default=config.BKT_P_INIT,
+                help="Initial probability that the student already knows the skill.",
+            )
+            _setting_slider(
+                "Learning Rate P(T)",
+                "bkt_p_learn",
+                min_value=0.0, max_value=1.0, step=0.05,
+                default=config.BKT_P_LEARN,
+                help="Probability of transitioning from not-knowing to knowing per attempt.",
+            )
+            _setting_slider(
+                "Guess Probability P(G)",
+                "bkt_p_guess",
+                min_value=0.0, max_value=0.5, step=0.05,
+                default=config.BKT_P_GUESS,
+                help="Probability of a correct answer despite not knowing the skill.",
+            )
+            _setting_slider(
+                "Slip Probability P(S)",
+                "bkt_p_slip",
+                min_value=0.0, max_value=0.5, step=0.05,
+                default=config.BKT_P_SLIP,
+                help="Probability of an incorrect answer despite knowing the skill.",
+            )
+
     st.markdown("---")
 
     st.markdown(
@@ -642,6 +704,115 @@ def settings_view(df: pd.DataFrame) -> None:
     )
 
     st.markdown("---")
+
+
+def comparison_view(df: pd.DataFrame) -> None:
+    """Model comparison view — baseline vs improved models side by side."""
+    components.render_info_bar(
+        view_name="Model Comparison",
+        total_submissions=len(df),
+        unique_students=df["user"].nunique() if not df.empty else 0,
+        unique_questions=df["question"].nunique() if not df.empty else 0,
+    )
+
+    if not st.session_state.get("improved_models_enabled", False):
+        st.info("Enable Improved Models in Settings to use this view.")
+        return
+
+    struggle_tab, difficulty_tab = st.tabs(
+        ["Student Struggle Comparison", "Question Difficulty Comparison"]
+    )
+
+    with struggle_tab:
+        baseline_df = st.session_state.get("_struggle_df")
+        improved_df = st.session_state.get("_improved_struggle_df")
+
+        if baseline_df is None or baseline_df.empty:
+            st.warning("Baseline struggle scores not available.")
+        elif improved_df is None or improved_df.empty:
+            st.warning(
+                "Improved struggle scores not available. "
+                "Enable Improved Struggle in Settings."
+            )
+        else:
+            merged = baseline_df[["user", "struggle_score", "struggle_level"]].merge(
+                improved_df[["user", "struggle_score", "struggle_level"]],
+                on="user",
+                suffixes=("_baseline", "_improved"),
+            )
+            if merged.empty:
+                st.warning("No overlapping students between the two models.")
+            else:
+                level_order = [label for _, _, label, _ in config.STRUGGLE_THRESHOLDS]
+                components.render_agreement_summary(
+                    merged["struggle_level_baseline"],
+                    merged["struggle_level_improved"],
+                    level_order=level_order,
+                    entity_label="students",
+                )
+                st.markdown("---")
+                left, right = st.columns(2, gap="large")
+                with left:
+                    components.render_comparison_scatter(
+                        merged["struggle_score_baseline"],
+                        merged["struggle_score_improved"],
+                        merged["user"],
+                        title="STUDENT STRUGGLE: BASELINE vs IMPROVED",
+                    )
+                with right:
+                    components.render_comparison_table(
+                        merged,
+                        entity_col="user",
+                        baseline_score_col="struggle_score_baseline",
+                        baseline_level_col="struggle_level_baseline",
+                        improved_score_col="struggle_score_improved",
+                        improved_level_col="struggle_level_improved",
+                    )
+
+    with difficulty_tab:
+        baseline_diff_df = st.session_state.get("_difficulty_df")
+        irt_df = st.session_state.get("_irt_difficulty_df")
+
+        if baseline_diff_df is None or baseline_diff_df.empty:
+            st.warning("Baseline difficulty scores not available.")
+        elif irt_df is None or irt_df.empty:
+            st.warning(
+                "IRT difficulty scores not available. "
+                "Enable IRT in Settings."
+            )
+        else:
+            merged_d = baseline_diff_df[["question", "difficulty_score", "difficulty_level"]].merge(
+                irt_df[["question", "irt_difficulty", "irt_difficulty_level"]],
+                on="question",
+            )
+            if merged_d.empty:
+                st.warning("No overlapping questions between the two models.")
+            else:
+                level_order_d = [label for _, _, label, _ in config.DIFFICULTY_THRESHOLDS]
+                components.render_agreement_summary(
+                    merged_d["difficulty_level"],
+                    merged_d["irt_difficulty_level"],
+                    level_order=level_order_d,
+                    entity_label="questions",
+                )
+                st.markdown("---")
+                left_d, right_d = st.columns(2, gap="large")
+                with left_d:
+                    components.render_comparison_scatter(
+                        merged_d["difficulty_score"],
+                        merged_d["irt_difficulty"],
+                        merged_d["question"],
+                        title="QUESTION DIFFICULTY: BASELINE vs IRT",
+                    )
+                with right_d:
+                    components.render_comparison_table(
+                        merged_d,
+                        entity_col="question",
+                        baseline_score_col="difficulty_score",
+                        baseline_level_col="difficulty_level",
+                        improved_score_col="irt_difficulty",
+                        improved_level_col="irt_difficulty_level",
+                    )
 
 
 def previous_sessions_view(df: pd.DataFrame) -> None:

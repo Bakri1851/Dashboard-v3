@@ -4,17 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "d54ec927eb147a3e",
+        "id": "43718a7492824d18",
         "type": "tabs",
         "children": [
           {
-            "id": "ef50e695352efa62",
+            "id": "f1395c2945b9f2d1",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "markdown",
+              "state": {
+                "file": "Thesis/Full Roadmap.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Full Roadmap"
             }
           }
         ]
@@ -177,11 +181,12 @@
       "3d-graph:3D Graph": false
     }
   },
-  "active": "ef50e695352efa62",
+  "active": "f1395c2945b9f2d1",
   "lastOpenFiles": [
     "Thesis/Future Work Inventory.md",
-    "Thesis/future_work_draft.tex",
     "Thesis/Full Roadmap.md",
+    "Code/Code Index.md",
+    "Thesis/future_work_draft.tex",
     "Code/Lab App/Flows/Question Detail.md",
     "Code/Lab App/Flows/Student Detail.md",
     "Code/Lab App/Flows/Saved Session History.md",

@@ -808,6 +808,146 @@ def render_students_by_module_chart(df: pd.DataFrame) -> None:
     render_bar_chart(counts, x_col="module", y_col="students", title="Students by Module", color=config.COLORS["purple"])
 
 
+# Model Comparison Components (Phase 5)
+
+def render_agreement_summary(
+    baseline_levels: pd.Series,
+    improved_levels: pd.Series,
+    level_order: list,
+    entity_label: str = "students",
+) -> None:
+    """4 metric cards summarising agreement between two model level classifications."""
+    baseline_levels = baseline_levels.reset_index(drop=True)
+    improved_levels = improved_levels.reset_index(drop=True)
+
+    total = len(baseline_levels)
+    if total == 0:
+        st.info(f"No {entity_label} to compare.")
+        return
+
+    ordinal = {label: i for i, label in enumerate(level_order)}
+
+    agreed = int((baseline_levels == improved_levels).sum())
+    agreement_pct = f"{agreed / total * 100:.0f}%"
+
+    upgraded = downgraded = unchanged = 0
+    for b, imp in zip(baseline_levels, improved_levels):
+        b_ord = ordinal.get(b, 0)
+        i_ord = ordinal.get(imp, 0)
+        if i_ord > b_ord:
+            upgraded += 1
+        elif i_ord < b_ord:
+            downgraded += 1
+        else:
+            unchanged += 1
+
+    cols = st.columns(4)
+    with cols[0]:
+        render_metric_card(f"Agreement ({entity_label})", agreement_pct, config.COLORS["cyan"])
+    with cols[1]:
+        render_metric_card("Upgraded", upgraded, config.COLORS["orange"])
+    with cols[2]:
+        render_metric_card("Downgraded", downgraded, config.COLORS["blue"])
+    with cols[3]:
+        render_metric_card("Unchanged", unchanged, config.COLORS["green"])
+
+
+def render_comparison_scatter(
+    baseline_scores: pd.Series,
+    improved_scores: pd.Series,
+    labels: pd.Series,
+    title: str,
+) -> None:
+    """Plotly scatter: baseline (x) vs improved (y) scores with diagonal reference line."""
+    if baseline_scores.empty or improved_scores.empty:
+        st.info("No data available for scatter plot.")
+        return
+
+    score_min = float(min(baseline_scores.min(), improved_scores.min()))
+    score_max = float(max(baseline_scores.max(), improved_scores.max()))
+
+    fig = go.Figure()
+
+    # Diagonal reference line (y = x)
+    fig.add_trace(go.Scatter(
+        x=[score_min, score_max],
+        y=[score_min, score_max],
+        mode="lines",
+        line=dict(color=config.COLORS["text_dim"], dash="dash", width=1),
+        name="Agreement (y=x)",
+        hoverinfo="skip",
+    ))
+
+    # Data points
+    fig.add_trace(go.Scatter(
+        x=baseline_scores,
+        y=improved_scores,
+        mode="markers",
+        text=labels,
+        hovertemplate="%{text}<br>Baseline: %{x:.3f}<br>Improved: %{y:.3f}<extra></extra>",
+        marker=dict(color=config.COLORS["cyan"], size=9, opacity=0.75),
+        name="Entities",
+    ))
+
+    layout = theme.get_plotly_layout_defaults()
+    fig.update_layout(**layout)
+    fig.update_layout(
+        title=dict(
+            text=title,
+            font=dict(family=f"{config.FONT_HEADING}, sans-serif", size=13, color=config.COLORS["cyan"]),
+        ),
+        xaxis=dict(title="Baseline Score", range=[max(0, score_min - 0.05), min(1, score_max + 0.05)]),
+        yaxis=dict(title="Improved Score", range=[max(0, score_min - 0.05), min(1, score_max + 0.05)]),
+        height=400,
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def render_comparison_table(
+    merged_df: pd.DataFrame,
+    entity_col: str,
+    baseline_score_col: str,
+    baseline_level_col: str,
+    improved_score_col: str,
+    improved_level_col: str,
+) -> None:
+    """Comparison table sorted by biggest disagreement first; delta column colour-coded."""
+    if merged_df.empty:
+        st.info("No comparison data available.")
+        return
+
+    display = merged_df[[entity_col, baseline_score_col, baseline_level_col,
+                          improved_score_col, improved_level_col]].copy()
+    display["delta"] = (display[improved_score_col] - display[baseline_score_col]).round(3)
+    display[baseline_score_col] = display[baseline_score_col].round(3)
+    display[improved_score_col] = display[improved_score_col].round(3)
+    display = display.reindex(display["delta"].abs().sort_values(ascending=False).index)
+    display.columns = [
+        "Entity", "Baseline Score", "Baseline Level",
+        "Improved Score", "Improved Level", "Delta",
+    ]
+
+    def _colour_delta(val):
+        if val > 0:
+            return "color: #00ff88"
+        if val < 0:
+            return "color: #ff2d55"
+        return ""
+
+    try:
+        styler = display.style.map(_colour_delta, subset=["Delta"])
+    except AttributeError:
+        # pandas < 2.1 uses applymap
+        styler = display.style.applymap(_colour_delta, subset=["Delta"])  # type: ignore[attr-defined]
+
+    st.markdown(
+        f'<h4 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}, sans-serif; '
+        f'text-transform:uppercase; letter-spacing:2px; font-size:0.95rem;">Score Comparison</h4>',
+        unsafe_allow_html=True,
+    )
+    st.dataframe(styler, use_container_width=True, hide_index=True)
+
+
 # Helpers
 
 def _hex_to_rgb(hex_color: str) -> str:
