@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "df482b0775c0c88d",
+        "id": "d54ec927eb147a3e",
         "type": "tabs",
         "children": [
           {
-            "id": "859d133d7243f296",
+            "id": "ef50e695352efa62",
             "type": "leaf",
             "state": {
               "type": "graph",
@@ -173,10 +173,11 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false
+      "bases:Create new base": false,
+      "3d-graph:3D Graph": false
     }
   },
-  "active": "859d133d7243f296",
+  "active": "ef50e695352efa62",
   "lastOpenFiles": [
     "Code/Lab App/Flows/Question Detail.md",
     "Code/Lab App/Flows/Student Detail.md",

@@ -1,0 +1,36 @@
+{
+  "filters": {
+    "doShowOrphans": true,
+    "doShowAttachments": false
+  },
+  "groups": {
+    "groups": [
+      {
+        "query": "Reference/",
+        "color": "#9800c2"
+      },
+      {
+        "query": "Thesis/",
+        "color": "#3c6cfb"
+      },
+      {
+        "query": "Code/",
+        "color": "#00b868"
+      },
+      {
+        "query": "Home",
+        "color": "#f00000"
+      },
+      {
+        "query": "Literature/",
+        "color": "#ffbb00"
+      }
+    ]
+  },
+  "display": {
+    "nodeSize": 3,
+    "linkThickness": 2,
+    "particleSize": 13,
+    "particleCount": 14
+  }
+}

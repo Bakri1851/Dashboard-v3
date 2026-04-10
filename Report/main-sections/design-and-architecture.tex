@@ -41,10 +41,12 @@ From the session-based data, the system derives a set of core metrics for real-t
 
 It is essential to consider that we may receive incomplete or noisy data during sessions, which could stem from students repeatedly returning to the AI feedback system or from procrastination on their work. Not all indicators of struggle and question difficulty are valuable on their own; hence, they are combined to produce indicators of student struggle and question difficulty.
 
-\subsection{Mathematical Modelling}
+
+
+\subsection{Baseline Analytics Design}
 In this section, we will describe what we will measure and what available data will aid in measuring these.
 
-\subsubsection{Modelling Student Struggle} \label{sec: student struggle}
+\subsubsection{Student Struggle Model} \label{sec: student struggle}
 
 \paragraph{Modelling Objective}
 To model student struggle, let $s$ denote a student and $\sigma$ denote the session. We will denote students who struggle with a scalar function:
@@ -135,7 +137,7 @@ It follows that the update preserves boundaries, giving:
 \paragraph{Interpretation of model}
 Higher values of $S_t(s,\sigma)$ indicate that student $s$ is experiencing sustained difficulty in the current session. The metric in Equation \ref{eq: temporal sturggle} will prove to be valuable in real-time prioritisation of help in lab sessions. This measure does not indicate student ability in the cohort but rather in lab struggle.
 
-\subsubsection{Modelling Task Difficulty} \label{sec: task difficulty}
+\subsubsection{Question Difficulty Model} \label{sec: task difficulty}
 
 \paragraph{Modelling Objective}
 To model question difficulty, let $q$ denote a question during the lab session, and let $\mathcal{S}_q$ denote the set of student-session pairs associates with task q. We will denote questions that are difficult with a scalar function:
@@ -301,7 +303,11 @@ The parameter-based model is adopted as the primary approach for several reasons
 
 Nevertheless, the collaborative filtering approach is still going to be implemented alongside the parameter-based approach as a secondary indicator, where like the Bloomberg Terminal, we will allow users to toggle whether they would like this feature on or off.
 
-\subsubsection{Weight Justification}
+\subsubsection{Mistake Clustering}
+
+\subsection{Advanced Model Design}
+
+\subsubsection{Measurement Confidence}
 
 \subsubsection{Item Response Theory}
 
@@ -321,7 +327,7 @@ A further objective is to allocate lab assistants to students so they can help p
 
 Finally, the system focuses on supporting decision-making rather than explanatory analysis. The dashboard is intended to guide instructors towards timely intervention by highlighting students and tasks requiring attention and enabling efficient allocation of lab assistants.
 
-\subsubsection{Instructor Facing Dashboard}
+\subsubsection{Instructor Views}
 The dashboard provides a real-time overview of student struggles and question difficulty during the computer labs. The dashboard is will allow the instructor to make quick decisions and aid those in need. To illustrate the proposed interface, a dashboard mock-up was created using Figma. The mock-up represents a conceptual design rather than a fully implemented system.
 
 \begin{figure}[H]
@@ -348,6 +354,8 @@ In Figure \ref{fig: figma2}, we can select a lab assistant and then press a stud
     \label{fig: figma3}
 \end{figure}
 In Figure \ref{fig: figma3}, we can see that lab assistants are displayed based on their contributions. By gamifying the helping process, we can incentivise assistants to help more students.
+
+\subsubsection{Lab Assistant View}
 
 \subsubsection{Visual Encoding of Metrics}
 
