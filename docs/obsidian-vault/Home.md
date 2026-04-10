@@ -34,6 +34,8 @@ Related: [[Project Overview]], [[Architecture]], [[Setup and Runbook]], [[Glossa
 ### Code — Flows and logic
 
 - [[Lab App/Flows/Pages and UI Flow]] / [[Assistant App/Flows/UI Flow]]
+- [[Lab App/Flows/Student Detail]] / [[Lab App/Flows/Question Detail]]
+- [[Lab App/Flows/Live Assistant Assignment]] / [[Lab App/Flows/Saved Session History]]
 - [[Student Struggle Logic]]
 - [[Question Difficulty Logic]]
 - [[IRT Difficulty Logic]]

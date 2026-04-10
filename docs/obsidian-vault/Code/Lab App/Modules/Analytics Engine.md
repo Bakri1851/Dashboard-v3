@@ -2,7 +2,7 @@
 
 `analytics.py` is the core scoring module for the project. It converts AI tutor feedback into incorrectness values, rolls those values up into student and question scores, adds a collaborative-filtering diagnostic layer, and clusters wrong answers for question drill-downs.
 
-Related: [[Student Struggle Logic]], [[Question Difficulty Logic]], [[Instructor Dashboard]], [[UI System]], [[Known Issues]]
+Related: [[Student Struggle Logic]], [[Question Difficulty Logic]], [[Instructor Dashboard]], [[UI System]], [[Known Issues]], [[BKT Mastery Logic]], [[IRT Difficulty Logic]], [[Improved Struggle Logic]], [[Scikit-learn]], [[OpenAI]]
 
 ## Responsibilities
 
@@ -11,6 +11,15 @@ Related: [[Student Struggle Logic]], [[Question Difficulty Logic]], [[Instructor
 - Compute per-question difficulty scores from attempt aggregates.
 - Compute collaborative-filtering similarity diagnostics over normalized student features.
 - Cluster incorrect answers for a single question and label those clusters.
+
+## Key Algorithms
+
+- Incorrectness measurement: [[OpenAI]] converts `ai_feedback` text into continuous incorrectness values used throughout the baseline scoring pipeline.
+- Baseline student struggle: a weighted behavioral score over normalized activity and incorrectness features; see [[Student Struggle Logic]].
+- Baseline question difficulty: a weighted aggregate of incorrect rate, time cost, attempts, mean incorrectness, and first-attempt failure; see [[Question Difficulty Logic]].
+- Collaborative filtering: cosine similarity over normalized student features powers the diagnostic CF layer and similar-student lookups; see [[Scikit-learn]] and [[Student Struggle Logic]].
+- Mistake clustering: TF-IDF text features, K-means clustering, silhouette-based cluster-count selection, and centroid-similarity example picking drive the question drill-down clusters; see [[Scikit-learn]] and [[Question Difficulty Logic]].
+- Improved models: the alternative measurement, IRT, BKT, and mastery-aware struggle pipeline live in `models/`; see [[IRT Difficulty Logic]], [[BKT Mastery Logic]], and [[Improved Struggle Logic]].
 
 ## Important implementation details
 

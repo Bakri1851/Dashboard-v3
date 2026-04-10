@@ -9,6 +9,10 @@ Instructor dashboard running on port 8501 (`code/app.py` → `instructor_app.mai
 | Note | Folder | Summary |
 |------|--------|---------|
 | [[Pages and UI Flow]] | Flows | Page list, routing transitions, sound triggers for the instructor app |
+| [[Student Detail]] | Flows | Student drill-down page: baseline struggle score, descriptive charts, and CF cosine-similarity context |
+| [[Question Detail]] | Flows | Question drill-down page: weighted difficulty, confidence heuristic, and TF-IDF/K-means mistake clustering |
+| [[Live Assistant Assignment]] | Flows | Instructor sidebar flow for assigning, releasing, and removing assistants during live sessions |
+| [[Saved Session History]] | Flows | Save/load/delete behavior for live and retroactive session records |
 | [[Analytics Engine]] | Modules | Scoring engine: incorrectness, struggle, difficulty, CF, mistake clustering |
 | [[App Entrypoint]] | Modules | `app.py` → `instructor_app.main()`; package layout; why the two-app split exists |
 | [[Configuration and Runtime Paths]] | Modules | `config.py` weights/thresholds/colors; `paths.py` runtime file locations |
