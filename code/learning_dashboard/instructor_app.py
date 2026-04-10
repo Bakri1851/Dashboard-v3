@@ -420,9 +420,11 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
             default_start = today if has_today else min_date
             default_end = today if has_today else max_date
 
+            if "time_date_range" not in st.session_state:
+                st.session_state["time_date_range"] = (default_start, default_end)
+
             date_range = st.date_input(
                 "Date Range",
-                value=(default_start, default_end),
                 key="time_date_range",
             )
 
