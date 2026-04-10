@@ -1,6 +1,6 @@
 {
   "collapse-filter": false,
-  "search": "coding road",
+  "search": "",
   "showTags": true,
   "showAttachments": true,
   "hideUnresolved": false,
@@ -53,6 +53,6 @@
   "repelStrength": 12.4116424116424,
   "linkStrength": 0.911642411642412,
   "linkDistance": 30,
-  "scale": 0.5081749884715561,
-  "close": false
+  "scale": 0.15006246691905367,
+  "close": true
 }

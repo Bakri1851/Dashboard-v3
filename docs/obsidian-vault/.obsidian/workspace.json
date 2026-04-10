@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Thesis/Weekly Plan.md",
+                "file": "Code/Lab App/Flows/Pages and UI Flow.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Weekly Plan"
+              "title": "Pages and UI Flow"
             }
           }
         ]
@@ -183,11 +183,18 @@
   },
   "active": "f1395c2945b9f2d1",
   "lastOpenFiles": [
+    "Code/Lab App/Modules/UI System.md",
+    "Code/Assistant App/Flows/Assigned View.md",
+    "Code/Assistant App/Flows/Unassigned View.md",
+    "Code/Assistant App/Flows/Join Session.md",
+    "Code/Assistant App/Flows/Join Session.md.tmp.29424.1775842222885",
+    "Code/Assistant App/Flows/No Active Session.md",
+    "Code/Lab App/Modules/Analytics Engine.md",
+    "Thesis/Weekly Plan.md",
     "Home.md",
     "Thesis/Full Roadmap.md",
     "Code/Lab App/Operations/Next Steps.md",
     "Home.md.tmp.29336.1775835637492",
-    "Thesis/Weekly Plan.md",
     "Code/Lab App/Operations/Coding Roadmap.md",
     "Code/Lab App/Operations/Coding Roadmap.md.tmp.29336.1775835094942",
     "Thesis/Writing Roadmap.md",
@@ -207,18 +214,11 @@
     "Code/Reference/Libraries/Scikit-learn.md",
     "Code/Reference/Libraries/Plotly.md",
     "Thesis/Ch4 – Implementation.md",
-    "Code/Reference/Libraries/SHAP.md",
-    "Code/Reference/Libraries/Streamlit Autorefresh.md",
-    "Code/Reference/Libraries/Streamlit.md",
-    "Code/Reference/Libraries/SentenceTransformers.md",
-    "Code/Reference/Libraries/Requests.md",
-    "Code/Reference/Libraries/Polars.md",
     "Code/Lab App/Operations",
     "Code/Assistant App/Flows",
     "Code/Lab App/Flows",
     "Code/Assistant App/Modules",
     "Code/Assistant App",
-    "Code/Lab App/Modules",
     "Untitled.canvas"
   ]
 }

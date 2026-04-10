@@ -84,6 +84,36 @@ Three new functions in `components.py`:
 - Pandas Styler colours delta column: green > 0, red < 0
 - Rendered via `st.dataframe(styler, hide_index=True)`
 
+## Metric Card Tooltips
+
+`render_metric_card(label, value, color, tooltip="")` accepts an optional `tooltip` parameter. When provided, a `data-tooltip` HTML attribute is emitted on the card `<div>`. The matching CSS in `get_main_css()` (`theme.py`) uses a `::after` pseudo-element to show a styled tooltip on hover — dark card background, cyan border glow, mono font, 210 px wide, fades in over 0.18 s.
+
+`_SUMMARY_TOOLTIPS` (module-level dict in `components.py`) holds the four struggle-level summary tooltips.
+
+### All metric cards and their tooltips
+
+| View | Label | Tooltip |
+| --- | --- | --- |
+| In Class | Needs Help | Struggle score > 0.50. Highest combined incorrectness, retry rate, and recent difficulty. Immediate attention recommended. |
+| In Class | Struggling | Struggle score 0.35–0.50. Consistent difficulty signals. Consider checking in soon. |
+| In Class | Minor Issues | Struggle score 0.20–0.35. Some difficulty present. Monitor over upcoming submissions. |
+| In Class | On Track | Struggle score < 0.20. Performing well with low incorrectness and positive trends. |
+| In Class (CF) | CF Elevated | Students whose struggle level was raised by Collaborative Filtering above the parametric model prediction. CF compares incorrectness patterns to similar peers. |
+| In Class (CF) | Parametric Flagged | Students flagged by the baseline parametric model (incorrectness, retry rate, time, trajectory) without CF adjustment. |
+| In Class (CF) | Threshold (τ) | Minimum cosine similarity for two students to be considered similar peers in CF. Lower = broader peer groups; higher = stricter matching. |
+| Student Detail | Total Submissions | Total answer submissions by this student across all questions in the current session window. |
+| Student Detail | Time Active (min) | Minutes between this student's first and last submission in the session window. |
+| Student Detail | Mean Incorrectness (%) | Average AI-scored incorrectness across all submissions. 0 = fully correct, 100 = fully incorrect. |
+| Student Detail | Recent Incorrectness | Time-decayed incorrectness weighting recent submissions more heavily (30-min half-life). |
+| Question Detail | Total Attempts | Total number of times this question was attempted by any student in the current session. |
+| Question Detail | Unique Students | Distinct students who submitted at least one answer to this question. |
+| Question Detail | Avg Attempts/Student | Mean submission attempts per student. High values indicate repeated retries due to difficulty. |
+| Question Detail | Incorrect Rate (%) | Percentage of attempts scored as incorrect (incorrectness ≥ 0.50 by AI model). |
+| Comparison | Agreement (students/questions) | Percentage where both models assigned the same level. Higher = improved model broadly confirms the baseline. |
+| Comparison | Upgraded | Count rated at a higher severity by the improved model — may have been underestimated by the baseline. |
+| Comparison | Downgraded | Count rated at a lower severity by the improved model — may have been overestimated by the baseline. |
+| Comparison | Unchanged | Count where both models agree on the same level — forms the agreement cohort. |
+
 ## Code references
 
 - `code/learning_dashboard/ui/views.py`

@@ -204,6 +204,7 @@ def get_main_css() -> str:
         border-radius: 8px;
         padding: 20px 16px;
         text-align: center;
+        position: relative;
     }}
     .metric-card .metric-value {{
         font-family: '{fh}', sans-serif;
@@ -218,6 +219,34 @@ def get_main_css() -> str:
         text-transform: uppercase;
         letter-spacing: 1px;
         margin-top: 8px;
+    }}
+
+    /* ===== Metric Card Tooltip ===== */
+    .metric-card[data-tooltip]::after {{
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: {c['card_bg']};
+        color: {c['text']};
+        border: 1px solid rgba({accent_rgb}, 0.4);
+        border-radius: 4px;
+        padding: 7px 11px;
+        font-family: '{fb}', monospace;
+        font-size: 0.72rem;
+        line-height: 1.5;
+        white-space: normal;
+        width: 210px;
+        text-align: left;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.18s ease;
+        z-index: 9999;
+        box-shadow: 0 0 14px rgba({accent_rgb}, 0.2);
+    }}
+    .metric-card[data-tooltip]:hover::after {{
+        opacity: 1;
     }}
 
     /* ===== Info Bar ===== */

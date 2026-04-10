@@ -8,10 +8,10 @@ Related: [[Lab Assistant System]], [[Setup and Runbook]]
 
 ## Assistant app pages
 
-- `No Active Session`: shown when the shared session is inactive.
-- `Join Session`: shown when there is an active session but no assistant ID in the query string.
-- `Waiting for Assignment`: shown when the assistant is joined but unassigned.
-- `Assigned View`: shown when the assistant has a current student assignment.
+- [[No Active Session]]: shown when the shared session is inactive.
+- [[Join Session]]: shown when there is an active session but no assistant ID in the query string.
+- [[Unassigned View]]: shown when the assistant is joined but unassigned.
+- [[Assigned View]]: shown when the assistant has a current student assignment.
 
 ## Session lifecycle from assistant perspective
 

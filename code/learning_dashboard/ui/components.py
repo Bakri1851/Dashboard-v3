@@ -53,17 +53,26 @@ def render_info_bar(
 
 # Metric Cards
 
-def render_metric_card(label: str, value, color: str) -> None:
-    """Single metric card with glow border."""
+def render_metric_card(label: str, value, color: str, tooltip: str = "") -> None:
+    """Single metric card with glow border. Pass tooltip for hover explanation."""
+    tooltip_attr = f' data-tooltip="{tooltip}"' if tooltip else ""
     st.markdown(
         f"""
-        <div class="metric-card" style="border: 1px solid {color}; box-shadow: 0 0 12px {color}33;">
+        <div class="metric-card"{tooltip_attr} style="border: 1px solid {color}; box-shadow: 0 0 12px {color}33;">
             <div class="metric-value" style="color: {color};">{value}</div>
             <div class="metric-label">{label}</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
+
+
+_SUMMARY_TOOLTIPS = {
+    "Needs Help": "Struggle score > 0.50. Highest combined incorrectness, retry rate, and recent difficulty. Immediate attention recommended.",
+    "Struggling": "Struggle score 0.35\u20130.50. Consistent difficulty signals. Consider checking in soon.",
+    "Minor Issues": "Struggle score 0.20\u20130.35. Some difficulty present. Monitor over upcoming submissions.",
+    "On Track": "Struggle score < 0.20. Performing well with low incorrectness and positive trends.",
+}
 
 
 def render_summary_cards(struggle_df: pd.DataFrame) -> None:
@@ -75,35 +84,43 @@ def render_summary_cards(struggle_df: pd.DataFrame) -> None:
     for i, (low, high, label, color) in enumerate(level_order):
         count = len(struggle_df[struggle_df["struggle_level"] == label])
         with cols[i]:
-            render_metric_card(label, count, color)
+            render_metric_card(label, count, color, tooltip=_SUMMARY_TOOLTIPS.get(label, ""))
 
 
 def render_student_detail_metrics(student_data: dict) -> None:
     """4 metric cards for student drill-down."""
     cols = st.columns(4)
     metrics = [
-        ("Total Submissions", student_data.get("submission_count", 0), config.COLORS["cyan"]),
-        ("Time Active (min)", student_data.get("time_active_min", 0), config.COLORS["blue"]),
-        ("Mean Incorrectness (%)", student_data.get("mean_incorrectness_pct", 0), config.COLORS["orange"]),
-        ("Recent Incorrectness", student_data.get("recent_incorrectness", 0), config.COLORS["magenta"]),
+        ("Total Submissions", student_data.get("submission_count", 0), config.COLORS["cyan"],
+         "Total answer submissions by this student across all questions in the current session window."),
+        ("Time Active (min)", student_data.get("time_active_min", 0), config.COLORS["blue"],
+         "Minutes between this student's first and last submission in the session window."),
+        ("Mean Incorrectness (%)", student_data.get("mean_incorrectness_pct", 0), config.COLORS["orange"],
+         "Average AI-scored incorrectness across all submissions. 0 = fully correct, 100 = fully incorrect."),
+        ("Recent Incorrectness", student_data.get("recent_incorrectness", 0), config.COLORS["magenta"],
+         "Time-decayed incorrectness weighting recent submissions more heavily (30-min half-life)."),
     ]
-    for col, (label, value, color) in zip(cols, metrics):
+    for col, (label, value, color, tooltip) in zip(cols, metrics):
         with col:
-            render_metric_card(label, value, color)
+            render_metric_card(label, value, color, tooltip=tooltip)
 
 
 def render_question_detail_metrics(question_data: dict) -> None:
     """4 metric cards for question drill-down."""
     cols = st.columns(4)
     metrics = [
-        ("Total Attempts", question_data.get("total_attempts", 0), config.COLORS["cyan"]),
-        ("Unique Students", question_data.get("unique_students", 0), config.COLORS["blue"]),
-        ("Avg Attempts/Student", question_data.get("avg_attempts", 0), config.COLORS["purple"]),
-        ("Incorrect Rate (%)", question_data.get("incorrect_rate_pct", 0), config.COLORS["orange"]),
+        ("Total Attempts", question_data.get("total_attempts", 0), config.COLORS["cyan"],
+         "Total number of times this question was attempted by any student in the current session."),
+        ("Unique Students", question_data.get("unique_students", 0), config.COLORS["blue"],
+         "Distinct students who submitted at least one answer to this question."),
+        ("Avg Attempts/Student", question_data.get("avg_attempts", 0), config.COLORS["purple"],
+         "Mean submission attempts per student. High values indicate repeated retries due to difficulty."),
+        ("Incorrect Rate (%)", question_data.get("incorrect_rate_pct", 0), config.COLORS["orange"],
+         "Percentage of attempts scored as incorrect (incorrectness \u2265 0.50 by AI model)."),
     ]
-    for col, (label, value, color) in zip(cols, metrics):
+    for col, (label, value, color, tooltip) in zip(cols, metrics):
         with col:
-            render_metric_card(label, value, color)
+            render_metric_card(label, value, color, tooltip=tooltip)
 
 
 def render_confidence_indicator(mean_confidence: float | None) -> None:
@@ -843,13 +860,25 @@ def render_agreement_summary(
 
     cols = st.columns(4)
     with cols[0]:
-        render_metric_card(f"Agreement ({entity_label})", agreement_pct, config.COLORS["cyan"])
+        render_metric_card(
+            f"Agreement ({entity_label})", agreement_pct, config.COLORS["cyan"],
+            tooltip=f"Percentage of {entity_label} where both models assigned the same level. Higher = improved model broadly confirms the baseline.",
+        )
     with cols[1]:
-        render_metric_card("Upgraded", upgraded, config.COLORS["orange"])
+        render_metric_card(
+            "Upgraded", upgraded, config.COLORS["orange"],
+            tooltip=f"Count of {entity_label} rated at a higher severity by the improved model. These may have been underestimated by the baseline.",
+        )
     with cols[2]:
-        render_metric_card("Downgraded", downgraded, config.COLORS["blue"])
+        render_metric_card(
+            "Downgraded", downgraded, config.COLORS["blue"],
+            tooltip=f"Count of {entity_label} rated at a lower severity by the improved model. These may have been overestimated by the baseline.",
+        )
     with cols[3]:
-        render_metric_card("Unchanged", unchanged, config.COLORS["green"])
+        render_metric_card(
+            "Unchanged", unchanged, config.COLORS["green"],
+            tooltip=f"Count of {entity_label} where both models agree on the same level \u2014 forms the agreement cohort.",
+        )
 
 
 def render_comparison_scatter(

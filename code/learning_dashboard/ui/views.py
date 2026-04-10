@@ -158,14 +158,17 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
                 with cf_c1:
                     components.render_metric_card(
                         "CF Elevated", cf_diag["n_elevated_cf"], config.COLORS["purple"],
+                        tooltip="Students whose struggle level was raised by Collaborative Filtering above what the parametric model predicted alone. CF compares incorrectness patterns to similar peers.",
                     )
                 with cf_c2:
                     components.render_metric_card(
                         "Parametric Flagged", cf_diag["n_flagged_parametric"], config.COLORS["orange"],
+                        tooltip="Students flagged as struggling by the baseline parametric model (incorrectness, retry rate, time, trajectory) without CF adjustment.",
                     )
                 with cf_c3:
                     components.render_metric_card(
-                        "Threshold (τ)", f"{cf_threshold:.2f}", config.COLORS["cyan"],
+                        "Threshold (\u03c4)", f"{cf_threshold:.2f}", config.COLORS["cyan"],
+                        tooltip="Minimum cosine similarity for two students to be considered similar peers in CF. Lower = broader peer groups; higher = stricter matching.",
                     )
 
                 elevated = cf_diag.get("elevated_students", [])

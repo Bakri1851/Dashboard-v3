@@ -9,10 +9,15 @@ Related: [[Instructor Dashboard]], [[UI System]], [[Setup and Runbook]], [[Stude
 ## Instructor app pages
 
 - `In Class View`: default page with summary cards, student leaderboard, question leaderboard, collaborative-filtering diagnostics, score distributions, and formula panel.
+  - **Metric cards (summary):** Needs Help, Struggling, Minor Issues, On Track — count of students at each struggle level. All cards have hover tooltips explaining the score range.
+  - **Metric cards (CF panel, shown when CF enabled):** CF Elevated, Parametric Flagged, Threshold (τ) — hover tooltips explain CF mechanics.
 - `Student Detail`: opened by selecting a student on the leaderboard; surfaces the baseline struggle score plus collaborative-filtering context. See [[Student Detail]].
+  - **Metric cards:** Total Submissions, Time Active (min), Mean Incorrectness (%), Recent Incorrectness — hover tooltips explain each metric.
 - `Question Detail`: opened by selecting a question on the leaderboard; surfaces the baseline weighted difficulty score, measurement confidence, and mistake clustering. See [[Question Detail]].
+  - **Metric cards:** Total Attempts, Unique Students, Avg Attempts/Student, Incorrect Rate (%) — hover tooltips explain each metric.
 - `Data Analysis View`: secondary charts for module usage, top questions, user activity, activity timeline, and students by module.
 - `Model Comparison`: baseline vs improved model comparison; gated by `improved_models_enabled`; tabbed by Student Struggle and Question Difficulty. See [[UI System]].
+  - **Metric cards:** Agreement (%), Upgraded, Downgraded, Unchanged — hover tooltips explain what each comparison stat means.
 - `Settings`: toggles sound, auto-refresh, collaborative filtering, improved models (master toggle + sub-toggles for IRT / BKT / Improved Struggle), and BKT parameter sliders.
 - `Previous Sessions`: lists saved sessions and supports load/delete actions; see [[Saved Session History]].
 

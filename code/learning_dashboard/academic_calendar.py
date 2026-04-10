@@ -115,6 +115,32 @@ def get_academic_period(date):
     return "Break"
 
 
+def format_academic_period_window(start_dt, end_dt) -> str:
+    """Format a date window as one academic period label or a range."""
+
+    def _safe_period_label(value):
+        if value is None:
+            return None
+        try:
+            return get_academic_period(value)
+        except (TypeError, ValueError):
+            return None
+
+    start_label = _safe_period_label(start_dt)
+    end_label = _safe_period_label(end_dt)
+
+    if start_label and end_label:
+        if start_label == end_label:
+            return start_label
+        return f"{start_label} → {end_label}"
+
+    if start_label:
+        return start_label
+    if end_label:
+        return end_label
+    return "Break"
+
+
 def academic_period_sorter(period):
     """Return a sort tuple for correct chronological ordering of period labels."""
     if "Sem 1" in period:

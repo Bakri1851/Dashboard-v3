@@ -7,8 +7,12 @@ Mobile lab assistant portal running on port 8502 (`code/lab_app.py` → `assista
 ## Notes index
 
 | Note | Folder | Summary |
-|------|--------|---------|
-| [[UI Flow]] | Flows | 4 assistant views (join, unassigned, assigned, session-ended), `?aid=` URL persistence, sound cues |
+| --- | --- | --- |
+| [[UI Flow]] | Flows | Overview of all 4 views, `?aid=` URL persistence, sound cues |
+| [[No Active Session]] | Flows | No-session screen; auto-refreshes until instructor starts a session |
+| [[Join Session]] | Flows | Name + code entry; `?aid=` param set on success |
+| [[Unassigned View]] | Flows | Waiting state; available struggling students; optional self-allocation |
+| [[Assigned View]] | Flows | Student card, top struggling questions, mark-helped and release actions |
 | [[App Entrypoint]] | Modules | `lab_app.py` → `assistant_app.main()`; join-flow routing (join → waiting → assigned) |
 | [[Lab Assistant System]] | Modules | Join/assign/self-claim/mark-helped flows; file-locked `lab_session.json` schema |
 | [[UI System]] | Modules | Mobile CSS (`get_mobile_css()`), 4 `render_*` functions, collapsed sidebar layout |

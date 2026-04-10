@@ -9,6 +9,7 @@ import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 
 from learning_dashboard import analytics, config, data_loader, sound
+from learning_dashboard.academic_calendar import format_academic_period_window
 from learning_dashboard import lab_state as _lab_state
 from learning_dashboard.models import measurement
 from learning_dashboard.models import irt
@@ -16,7 +17,10 @@ from learning_dashboard.models import bkt
 from learning_dashboard.models import improved_struggle
 from learning_dashboard.ui import theme, views
 
-os.environ.setdefault("OPENAI_API_KEY", st.secrets.get("OPENAI_API_KEY", ""))
+try:
+    os.environ.setdefault("OPENAI_API_KEY", st.secrets.get("OPENAI_API_KEY", ""))
+except Exception:
+    pass
 
 # Session State Initialization
 
@@ -76,6 +80,89 @@ def init_session_state() -> None:
     for key, value in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = value
+
+
+def _coerce_datetime(value):
+    """Convert supported date-like values to Python datetimes."""
+    if value is None:
+        return None
+
+    try:
+        ts = pd.Timestamp(value)
+    except (TypeError, ValueError):
+        return None
+
+    if pd.isna(ts):
+        return None
+
+    return ts.to_pydatetime()
+
+
+def _get_dataframe_window(df: pd.DataFrame) -> tuple[datetime | None, datetime | None]:
+    """Return min/max timestamps for the currently displayed dataframe."""
+    if df.empty or "timestamp" not in df.columns:
+        return None, None
+
+    timestamps = df["timestamp"].dropna()
+    if timestamps.empty:
+        return None, None
+
+    return _coerce_datetime(timestamps.min()), _coerce_datetime(timestamps.max())
+
+
+def _resolve_time_filter_window() -> tuple[datetime | None, datetime | None]:
+    """Return the active explicit time-filter window, if any."""
+    if not st.session_state.get("time_filter_enabled"):
+        return None, None
+
+    date_range = st.session_state.get("time_date_range")
+    if not isinstance(date_range, (tuple, list)) or len(date_range) != 2:
+        return None, None
+
+    start_time = st.session_state.get("time_start")
+    end_time = st.session_state.get("time_end")
+
+    if not isinstance(start_time, dt_time):
+        start_time = dt_time(0, 0)
+    if not isinstance(end_time, dt_time):
+        end_time = dt_time(23, 59)
+
+    start_dt = None
+    end_dt = None
+
+    try:
+        if date_range[0] is not None:
+            start_dt = datetime.combine(pd.Timestamp(date_range[0]).date(), start_time)
+        if date_range[1] is not None:
+            end_dt = datetime.combine(pd.Timestamp(date_range[1]).date(), end_time)
+    except (TypeError, ValueError):
+        return None, None
+
+    return start_dt, end_dt
+
+
+def _resolve_display_academic_period(df: pd.DataFrame) -> str:
+    """Resolve the academic period label for the data currently on screen."""
+    loaded_start = _coerce_datetime(st.session_state.get("loaded_session_start"))
+    loaded_end = _coerce_datetime(st.session_state.get("loaded_session_end"))
+    if loaded_start is not None or loaded_end is not None:
+        return format_academic_period_window(loaded_start, loaded_end)
+
+    if st.session_state.get("session_active"):
+        session_start = _coerce_datetime(st.session_state.get("session_start"))
+        if session_start is not None:
+            _, df_end = _get_dataframe_window(df)
+            return format_academic_period_window(session_start, df_end or datetime.now())
+
+    filter_start, filter_end = _resolve_time_filter_window()
+    if filter_start is not None or filter_end is not None:
+        return format_academic_period_window(filter_start, filter_end)
+
+    df_start, df_end = _get_dataframe_window(df)
+    if df_start is not None or df_end is not None:
+        return format_academic_period_window(df_start, df_end)
+
+    return format_academic_period_window(datetime.now(), None)
 
 
 # Lab Assignment Panel
@@ -571,10 +658,6 @@ def main() -> None:
     # Load data
     df, load_error = data_loader.load_data()
 
-    # Current academic period (shown in info bar)
-    from learning_dashboard.academic_calendar import get_academic_period
-    st.session_state["current_academic_period"] = get_academic_period(datetime.now())
-
     if st.session_state["current_view"] not in {"Settings", "Previous Sessions"}:
         if load_error:
             st.error(load_error)
@@ -644,6 +727,8 @@ def main() -> None:
             df = _today_df
     else:
         st.session_state["_today_has_data"] = True
+
+    st.session_state["current_academic_period"] = _resolve_display_academic_period(df)
 
     # Sound: navigation transition
     _prev_view = st.session_state.get("_prev_dashboard_view")
