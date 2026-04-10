@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.14)  10 APR 2026 03:29
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.14)  10 APR 2026 03:57
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -733,43 +733,43 @@ itecture/figma3.png>] [25]
 \openout2 = `main-sections/implementation.aux'.
 
  (main-sections/implementation.tex
-Underfull \hbox (badness 10000) in paragraph at lines 20--20
+Underfull \hbox (badness 10000) in paragraph at lines 26--26
 []\OT1/cmr/m/n/10 PHP-based HTTP
  []
 
 
-Underfull \hbox (badness 5147) in paragraph at lines 20--21
+Underfull \hbox (badness 5147) in paragraph at lines 26--27
 []\OT1/cmr/m/n/10 Existing lab in-fras-truc-ture ex-poses
  []
 
 
-Underfull \hbox (badness 3792) in paragraph at lines 22--23
+Underfull \hbox (badness 3792) in paragraph at lines 28--29
 []\OT1/cmr/m/n/10 JSON al-lows lightweight trans-port,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 22--23
+Underfull \hbox (badness 10000) in paragraph at lines 28--29
 \OT1/cmr/m/n/10 whilst XML stores struc-tured
  []
 
 
-Underfull \hbox (badness 1292) in paragraph at lines 26--27
+Underfull \hbox (badness 1292) in paragraph at lines 32--33
 []\OT1/cmr/m/n/10 Version 1 has sim-ple in-di-ca-tors for
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 30--31
+Underfull \hbox (badness 10000) in paragraph at lines 36--37
 []\OT1/cmr/m/n/10 Provides in-ter-ac-tive vi-su-al-i-sa-tions
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 32--32
+Underfull \hbox (badness 10000) in paragraph at lines 38--38
 []\OT1/cmr/m/n/10 Deployment
  []
 
 
 LaTeX Warning: Reference `tab: selection table' on page 26 undefined on input l
-ine 39.
+ine 45.
 
 [26
 
@@ -913,7 +913,7 @@ msfonts/cm/cmsy5.pfb><C:/Users/Bakri/AppData/Local/Programs/MiKTeX/fonts/type1/
 public/amsfonts/cm/cmsy7.pfb><C:/Users/Bakri/AppData/Local/Programs/MiKTeX/font
 s/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/Bakri/AppData/Local/Programs/Mi
 KTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on main.pdf (39 pages, 1640150 bytes).
+Output written on main.pdf (39 pages, 1640507 bytes).
 PDF statistics:
  1079 PDF objects out of 1200 (max. 8388607)
  265 named destinations out of 1000 (max. 500000)

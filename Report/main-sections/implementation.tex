@@ -1,11 +1,21 @@
 \section{Implementation}
 
-This chapter describes the first implementation (Version 1) of the proposed real-time lab support system. The purpose of Version 1 was to gain an understanding of the relevant tools, data pipeline and validate practical integration. At this stage, the implementation focuses on fundamental indicators rather than the full analytical models. Version 1 therefore serves as the foundation for what the dashboard will eventually become.
+This chapter describes the implemented version of the real-time lab support system.
+Earlier work focused on validating the endpoint, testing the data pipeline, and establishing a working dashboard with basic dashboard prototype.
+The current implementation Version 2 (v2) builds on this foundation, allowing for a live instructor dashboard, a lab assistant application that works with the instructor dashboard, session history as well as both baseline and more advanced models.
+
+The implementation is interval-based rather than event-based.
+However, it provides a full end-to-end workflow, from endpoint ingestion, parsing, normalisation to live scoring, student prioritisation and assistant coordination.
+The system represents a functional tool to support instructors and assistants during labs allowing for improved learning outcomes, with the potential for further refinement and expansion in future iterations.
 
 \subsection{Scope of Implementation}
 The implementation represents Version 1 of the dashboard. Version 1 was implemented to ensure end-to-end functionality worked as planned and to experiment with data visualisation rather than to deploy the whole system proposed.
 
 Version 1 focused on establishing a working data pipeline capable of processing live interaction data during labs, aggregating student activity at the lab level, and presenting indicators in near real time. This provides the foundation for the proposed system. By working on Version 1, I have familiarised myself with the relevant technology and the data pipeline.
+
+The implemented system addresses the core objectives of the project by supporting live monitoring of student progress, prioritisation of students who are struggling, identifications of difficult questions so that lab teachers can go through those questions as a class, and allocation of lab assistants during sessions.
+
+The implementation is made up of a number of components essential to the system's functionality. First 
 
 \subsection{Technology Stack and Software Selection}
 
