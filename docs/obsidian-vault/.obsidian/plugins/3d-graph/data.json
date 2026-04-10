@@ -7,23 +7,23 @@
     "groups": [
       {
         "query": "Reference/",
-        "color": "#9800c2"
+        "color": "#EBCB8B"
       },
       {
         "query": "Thesis/",
-        "color": "#3c6cfb"
+        "color": "#D08770"
       },
       {
         "query": "Code/",
-        "color": "#00b868"
+        "color": "#88C0D0"
       },
       {
         "query": "Home",
-        "color": "#f00000"
+        "color": "#B48EAD"
       },
       {
         "query": "Literature/",
-        "color": "#ffbb00"
+        "color": "#A3BE8C"
       }
     ]
   },

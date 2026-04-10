@@ -11,14 +11,10 @@
             "id": "ef50e695352efa62",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Thesis/Full Roadmap.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Full Roadmap"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -78,8 +74,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "3c0caa2f4bd4d469",
@@ -184,12 +179,14 @@
   },
   "active": "ef50e695352efa62",
   "lastOpenFiles": [
+    "Thesis/Future Work Inventory.md",
+    "Thesis/future_work_draft.tex",
+    "Thesis/Full Roadmap.md",
     "Code/Lab App/Flows/Question Detail.md",
     "Code/Lab App/Flows/Student Detail.md",
     "Code/Lab App/Flows/Saved Session History.md",
     "Code/Lab App/Modules/Instructor Dashboard.md",
     "Code/Lab App/Flows/Live Assistant Assignment.md",
-    "Thesis/Full Roadmap.md",
     "Thesis/Full Roadmap.md.tmp.20568.1775777871895",
     "Thesis/Weekly Plan.md",
     "Thesis/Writing Roadmap.md",
@@ -209,8 +206,6 @@
     "Code/Reference/Libraries/Requests.md",
     "Code/Reference/Libraries/Polars.md",
     "Code/Reference/Libraries/OpenAI.md",
-    "Code/Reference/Libraries/NumPy.md",
-    "Code/Reference/Libraries/Filelock.md",
     "Code/Lab App/Operations",
     "Code/Assistant App/Flows",
     "Code/Lab App/Flows",
@@ -219,7 +214,6 @@
     "Code/Lab App/Modules",
     "Code/Lab App/Logic",
     "Code/Lab App",
-    "Untitled.base",
     "Untitled.canvas"
   ]
 }

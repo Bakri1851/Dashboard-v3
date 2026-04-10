@@ -34,20 +34,24 @@ There are no automated tests. Validation is manual smoke testing (see README.md 
 
 ### Package layout (`code/learning_dashboard/`)
 - `config.py` — all tunable constants (weights, thresholds, colors, API config). Start here for parameter changes.
-- `data_loader.py` — API fetch, JSON/XML parsing, normalization, saved-session persistence
+- `data_loader.py` — API fetch, JSON/XML parsing, normalization, saved-session persistence. API returns newline-delimited JSON where each record has an `xml` field containing embedded XML for submission details.
 - `analytics.py` — scoring engine: incorrectness (OpenAI), student struggle, question difficulty, collaborative filtering, mistake clustering
 - `models/` — alternative/improved models: IRT difficulty (`irt.py`), BKT mastery (`bkt.py`), improved struggle (`improved_struggle.py`), measurement confidence (`measurement.py`). Toggled via `improved_models_enabled` in Settings.
 - `lab_state.py` — file-locked shared lab-session state (no Streamlit imports)
 - `paths.py` — project/runtime paths and legacy-file migration
+- `academic_calendar.py` — maps calendar dates to Loughborough 2025/26 academic week labels (used in data analysis view)
+- `sound.py` — sci-fi sound effects via Web Audio API injected through `st.components.v1.html()` zero-height iframes
 - `ui/views.py` — page-level views (in_class, student_detail, question_detail, data_analysis, settings, previous_sessions)
 - `ui/components.py` — reusable Streamlit UI building blocks
-- `ui/theme.py` — CSS and Plotly theme defaults
+- `ui/theme.py` — CSS and Plotly theme defaults (sci-fi neon dark theme)
 
 ### Key data flow
 1. `instructor_app.main()` initializes session state and applies deferred actions (before widgets)
 2. `data_loader.load_data()` fetches from API with `@st.cache_data(ttl=10)`, parses, normalizes
 3. Sidebar filters applied in order: manual time → live session start → saved session window
 4. Routing sends filtered DataFrame to the appropriate view
+
+The lab assistant app has its own independent `@st.cache_data(ttl=10)` cache on `_load_student_data()` — it does not share the instructor app's cache. Both caches are process-local, so running both apps means two separate fetch cycles.
 
 ### Deferred actions pattern
 Streamlit cannot mutate `st.session_state` after widget instantiation in the same run. This repo uses `pending_*` flags (e.g., `pending_session_load_record`, `pending_return_to_live_data`) applied at the top of `main()` before sidebar widgets render.
@@ -62,3 +66,16 @@ Streamlit cannot mutate `st.session_state` after widget instantiation in the sam
 - Lab assistant identity persisted via URL `?aid=` query param
 - OpenAI API key stored in `.streamlit/secrets.toml`
 - Runtime data lives in `data/` (auto-migrated from repo root on first run)
+
+## Obsidian Vault
+
+Living documentation lives at `docs/obsidian-vault/`. Start from `Home.md` for the master map.
+
+**When to read it:**
+
+- Modifying a model or scoring formula → check the matching Logic note under `Code/Lab App/Logic/` or `Code/Lab App/Modules/` for design rationale
+- Adding a feature or tracing a user flow → check `Code/Lab App/Flows/` or `Code/Assistant App/Flows/`
+- Thesis-related tasks → `Thesis/Report Sync.md` is the source of truth for thesis-to-code alignment; `Thesis/Rewrite Queue.md` tracks writing priorities
+- Looking up academic grounding → `Literature/index.md` groups 38 papers by theme (struggle modeling, IRT, BKT, collaborative filtering, etc.)
+
+**Do not edit vault notes** unless the user explicitly asks — they are the user's personal knowledge base.
