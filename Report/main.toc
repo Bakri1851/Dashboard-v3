@@ -77,16 +77,21 @@
 \contentsline {subsubsection}{\numberline {3.5.3}Lab Assistant View}{24}{subsubsection.3.5.3}%
 \contentsline {subsubsection}{\numberline {3.5.4}Visual Encoding of Metrics}{24}{subsubsection.3.5.4}%
 \contentsline {section}{\numberline {4}Implementation}{26}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Scope of Implementation}{26}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.1}Implementation Overview}{26}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}Technology Stack and Software Selection}{26}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}Data Pipeline}{26}{subsection.4.3}%
-\contentsline {subsection}{\numberline {4.4}Session Management}{28}{subsection.4.4}%
-\contentsline {subsubsection}{\numberline {4.4.1}Live Session Lifecycle}{28}{subsubsection.4.4.1}%
-\contentsline {subsubsection}{\numberline {4.4.2}Saved Session History and Restoration}{28}{subsubsection.4.4.2}%
-\contentsline {subsection}{\numberline {4.5}Analytics Engine}{28}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.3}System Structure}{27}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Instructor System}{27}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Assistant System}{27}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.3}Shared Runtime State}{27}{subsubsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.4}Data Pipeline}{27}{subsection.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.1}Endpoint Retrieval and Parsing}{28}{subsubsection.4.4.1}%
+\contentsline {subsubsection}{\numberline {4.4.2}Data Normalisation and Structuring}{28}{subsubsection.4.4.2}%
+\contentsline {subsubsection}{\numberline {4.4.3}Live Session Lifecycle}{28}{subsubsection.4.4.3}%
+\contentsline {subsubsection}{\numberline {4.4.4}Saved Session History and Restoration}{28}{subsubsection.4.4.4}%
+\contentsline {subsection}{\numberline {4.5}Analytics Implementation}{28}{subsection.4.5}%
 \contentsline {subsubsection}{\numberline {4.5.1}Incorrectness Scoring}{28}{subsubsection.4.5.1}%
-\contentsline {subsubsection}{\numberline {4.5.2}Student Struggle Model}{28}{subsubsection.4.5.2}%
-\contentsline {subsubsection}{\numberline {4.5.3}Question Difficulty Model}{28}{subsubsection.4.5.3}%
+\contentsline {subsubsection}{\numberline {4.5.2}Baseline Student Struggle Model}{28}{subsubsection.4.5.2}%
+\contentsline {subsubsection}{\numberline {4.5.3}Baseline Question Difficulty Model}{28}{subsubsection.4.5.3}%
 \contentsline {subsubsection}{\numberline {4.5.4}Collaborative Filtering}{28}{subsubsection.4.5.4}%
 \contentsline {subsubsection}{\numberline {4.5.5}Mistake Clustering}{28}{subsubsection.4.5.5}%
 \contentsline {subsection}{\numberline {4.6}Advanced Models}{28}{subsection.4.6}%
@@ -94,20 +99,19 @@
 \contentsline {subsubsection}{\numberline {4.6.2}Item Response Theory (IRT) Difficulty}{28}{subsubsection.4.6.2}%
 \contentsline {subsubsection}{\numberline {4.6.3}Bayesian Knowledge Training (BKT) Mastery}{28}{subsubsection.4.6.3}%
 \contentsline {subsubsection}{\numberline {4.6.4}Improved Struggle Model}{28}{subsubsection.4.6.4}%
-\contentsline {subsection}{\numberline {4.7}Instructor Application}{28}{subsection.4.7}%
+\contentsline {subsection}{\numberline {4.7}Lab Instructor System}{28}{subsection.4.7}%
 \contentsline {subsubsection}{\numberline {4.7.1}In Class View}{28}{subsubsection.4.7.1}%
 \contentsline {subsubsection}{\numberline {4.7.2}Student Detail View}{28}{subsubsection.4.7.2}%
 \contentsline {subsubsection}{\numberline {4.7.3}Question Detail View}{28}{subsubsection.4.7.3}%
 \contentsline {subsubsection}{\numberline {4.7.4}Data Analysis View}{28}{subsubsection.4.7.4}%
-\contentsline {subsubsection}{\numberline {4.7.5}Settings View}{28}{subsubsection.4.7.5}%
-\contentsline {subsubsection}{\numberline {4.7.6}Previous Sessions View}{28}{subsubsection.4.7.6}%
+\contentsline {subsubsection}{\numberline {4.7.5}Comparison View}{28}{subsubsection.4.7.5}%
+\contentsline {subsubsection}{\numberline {4.7.6}Settings View}{28}{subsubsection.4.7.6}%
+\contentsline {subsubsection}{\numberline {4.7.7}Previous Sessions View}{28}{subsubsection.4.7.7}%
 \contentsline {subsection}{\numberline {4.8}Lab Assistant System}{28}{subsection.4.8}%
-\contentsline {subsubsection}{\numberline {4.8.1}Shared State and Session Join Flow}{28}{subsubsection.4.8.1}%
-\contentsline {subsubsection}{\numberline {4.8.2}Live Assistant Assignment}{28}{subsubsection.4.8.2}%
-\contentsline {subsubsection}{\numberline {4.8.3}Assistant Mobile Views}{28}{subsubsection.4.8.3}%
-\contentsline {subsection}{\numberline {4.9}User Interface and Interaction Design}{28}{subsection.4.9}%
-\contentsline {subsubsection}{\numberline {4.9.1}Auto Refresh and State Persistence}{28}{subsubsection.4.9.1}%
-\contentsline {subsubsection}{\numberline {4.9.2}Sound Effects and Visual Theme}{28}{subsubsection.4.9.2}%
+\contentsline {subsubsection}{\numberline {4.8.1}Session Join Flow}{28}{subsubsection.4.8.1}%
+\contentsline {subsubsection}{\numberline {4.8.2}Waiting and Assignment States}{28}{subsubsection.4.8.2}%
+\contentsline {subsubsection}{\numberline {4.8.3}Live Assistant Allocation}{28}{subsubsection.4.8.3}%
+\contentsline {subsection}{\numberline {4.9}Problems Encountered and Solutions}{28}{subsection.4.9}%
 \contentsline {section}{\numberline {5}Evaluation}{29}{section.5}%
 \contentsline {subsection}{\numberline {5.1}Evaluation Design}{29}{subsection.5.1}%
 \contentsline {subsubsection}{\numberline {5.1.1}Scope of Evaluation}{29}{subsubsection.5.1.1}%

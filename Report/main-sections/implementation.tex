@@ -8,7 +8,7 @@ The implementation is interval-based rather than event-based.
 However, it provides a full end-to-end workflow, from endpoint ingestion, parsing, normalisation to live scoring, student prioritisation and assistant coordination.
 The system represents a functional tool to support instructors and assistants during labs allowing for improved learning outcomes, with the potential for further refinement and expansion in future iterations.
 
-\subsection{Scope of Implementation}
+\subsection{Implementation Overview}
 The implementation represents Version 1 of the dashboard. Version 1 was implemented to ensure end-to-end functionality worked as planned and to experiment with data visualisation rather than to deploy the whole system proposed.
 
 Version 1 focused on establishing a working data pipeline capable of processing live interaction data during labs, aggregating student activity at the lab level, and presenting indicators in near real time. This provides the foundation for the proposed system. By working on Version 1, I have familiarised myself with the relevant technology and the data pipeline.
@@ -48,6 +48,11 @@ The implementation is made up of a number of components essential to the system'
 
 The stack highlighted in Table \ref{tab: selection table} enables a unified development workflow, in which data ingestion, processing and visualisation are implemented within a single Python environment. Whilst Version 1 relies on refreshing, the architecture will be largely consistent with the proposed system.
 
+\subsection{System Structure}
+\subsubsection{Instructor System}
+\subsubsection{Assistant System}
+\subsubsection{Shared Runtime State}
+
 \subsection{Data Pipeline}
 Version 1 implements an interval-based data pipeline designed to support near real-time monitoring during lab sessions. The pipeline proceeds as follows:
 \begin{enumerate}
@@ -59,25 +64,27 @@ Version 1 implements an interval-based data pipeline designed to support near re
 \end{enumerate}
 More advanced modelling described in the Design Chapter is not yet integrated and is reserved for the proposed system.
 
-\subsection{Session Management}
+\subsubsection{Endpoint Retrieval and Parsing}
+
+\subsubsection{Data Normalisation and Structuring}
 
 \subsubsection{Live Session Lifecycle}
 
 \subsubsection{Saved Session History and Restoration}
 
-\subsection{Analytics Engine}
+\subsection{Analytics Implementation}
 
 \subsubsection{Incorrectness Scoring}
 
-\subsubsection{Student Struggle Model}
+\subsubsection{Baseline Student Struggle Model}
 
-\subsubsection{Question Difficulty Model}
+\subsubsection{Baseline Question Difficulty Model}
 
 \subsubsection{Collaborative Filtering}
 
 \subsubsection{Mistake Clustering}
 
-\subsection{Advanced Models}
+\subsection{Advanced Model Implementation}
 
 \subsubsection{Measurement Confidence}
 
@@ -87,7 +94,7 @@ More advanced modelling described in the Design Chapter is not yet integrated an
 
 \subsubsection{Improved Struggle Model}
 
-\subsection{Instructor Application}
+\subsection{Lab Instructor System}
 
 \subsubsection{In Class View}
 
@@ -97,25 +104,31 @@ More advanced modelling described in the Design Chapter is not yet integrated an
 
 \subsubsection{Data Analysis View}
 
+\subsubsection{Comparison View}
+
 \subsubsection{Settings View}
 
 \subsubsection{Previous Sessions View}
 
 \subsection{Lab Assistant System}
 
-\subsubsection{Shared State and Session Join Flow}
+\subsubsection{Session Join Flow}
 
-\subsubsection{Live Assistant Assignment}
+\subsubsection{Waiting and Assignment States}
 
-\subsubsection{Assistant Mobile Views}
+\subsubsection{Live Assistant Allocation}
 
+
+
+\subsection{Problems Encountered and Solutions}
+
+\begin{comment}
+ 
 \subsection{User Interface and Interaction Design}
 
 \subsubsection{Auto Refresh and State Persistence}
 
 \subsubsection{Sound Effects and Visual Theme}
-
-\begin{comment}
     
 \subsection{Dashboard and UI}
 The Version 1 dashboard provides a live visual overview of student activity. It is implemented as a Streamlit application that integrates data retrieval, metric computation and visualisation in a Python workflow.

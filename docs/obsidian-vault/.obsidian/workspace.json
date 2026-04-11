@@ -11,13 +11,24 @@
             "id": "5c4244bf1c5f6e27",
             "type": "leaf",
             "state": {
+              "type": "3d_graph_view",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "3D-Graph"
+            }
+          },
+          {
+            "id": "e87388ae4c36e5d3",
+            "type": "leaf",
+            "state": {
               "type": "graph",
               "state": {},
               "icon": "lucide-git-fork",
               "title": "Graph view"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -177,8 +188,12 @@
       "3d-graph:3D Graph": false
     }
   },
-  "active": "5c4244bf1c5f6e27",
+  "active": "e87388ae4c36e5d3",
   "lastOpenFiles": [
+    "IRT Difficulty Model (Rasch 1PL).md",
+    "Code/Lab App/Operations/Coding Roadmap.md",
+    "Thesis/Weekly Plan.md",
+    "_COMMUNITY_Advanced Features & RAG Design.md",
     "(x - min)  (max - min), clamped to 0, 1. Returns 0 if min == max..md",
     "1.1 Problem - Student Struggle Detection in Live Labs.md",
     "1.2 Proposed Solution - Real-Time Learning Analytics Dashboard.md",
@@ -201,10 +216,6 @@
     "2.3.3 MoSCoW Requirements Prioritisation Table.md",
     "3-Layer System Architecture Data Generation, Processing, Decision.md",
     "3.1 System Architecture - Three-Layer Design.md",
-    "3.2 Data Endpoint - Session-Based JSONXML API.md",
-    "3.3.1 Student Struggle Model S(s,sigma).md",
-    "4 metric cards for question drill-down..md",
-    "4 metric cards for student drill-down..md",
     "graph.canvas",
     "Untitled.canvas",
     "Code/Assistant App/Flows/Join Session.md.tmp.29424.1775842222885",
