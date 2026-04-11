@@ -8,7 +8,7 @@ Related: [[Coding Roadmap]], [[Writing Roadmap]], [[Rewrite Queue]], [[Report Sy
 
 ## Why this order
 
-Coding must come before screenshots, screenshots before Ch4 figures, Ch4 before Ch5 evaluation framing, and Ch5 before Ch6. The three remaining coding tasks are therefore the first three items regardless of effort.
+Rewrites of existing chapters (Ch3, Ch1&2, Ch4) must come before new chapters (Ch5, Ch6) so the implementation narrative is settled before evaluation is written. Ch4 is placed after Ch3 and Ch1&2 because the code is still subject to minor change — writing Ch4 last among the rewrites means it describes the final system. All appendices are grouped at the end, once chapter content is complete and stable, so screenshots and test evidence capture the truly final state.
 
 Phases 9, 10, and 11 are explicitly out of scope for this submission. Each will be documented in Ch6 §6.3 Future Work. Attempting large coding phases with 41 days remaining and Ch4/Ch5/Ch6 unwritten would risk the submission. Phase 6 is stretch only.
 
@@ -42,34 +42,34 @@ The biggest remaining coding task. Produces the model comparison view needed for
 
 ---
 
-### 3. Appendix B — UI Screenshots `Evidence · Small`
+### 3. Ch3 — Design updates `Writing · Medium`
 
-Take screenshots of every dashboard and mobile view now that the code is stable. Needed for Ch3 mockup replacement, Ch4 figures, and Ch5 evaluation evidence.
+Surgical edits — the chapter structure is solid, specific sections need updating. Where figures reference Appendix B screenshots, insert `[TODO: insert figure]` placeholders; these will be replaced at step 8.
 
-- [ ] All 6 instructor views (in-class, student detail, question detail, data analysis, model comparison, settings)
-- [ ] Model comparison view (both student + question tabs)
-- [ ] Lab assistant app (join screen, unassigned view, assigned view)
-- [ ] Session start/end states
+- [ ] Update struggle formula to 7 components + Bayesian shrinkage (was 5 in thesis)
+- [ ] Update difficulty formula to 5 components (was 4 in thesis)
+- [ ] Mark Figs 8–10 (Figma mockups) for replacement — add `[TODO: replace with screenshot]` annotations
+- [ ] Update CF section — it is implemented, not "to be implemented"
+- [ ] Add sections for IRT, BKT, improved struggle, mistake clustering
 
-*Unblocks: Ch3 figure replacements, Ch4 implementation figures, Ch5 evidence.*
+*Unblocks: Ch1&2 language fixes are easier once Ch3 narrative is settled.*
 
 ---
 
-### 4. Appendix C — Test Results `Evidence · Medium`
+### 4. Ch1 & Ch2 — Language and framing `Writing · Small`
 
-Run the full smoke test checklist from [[Setup and Runbook]] and document outcomes. This is the primary evidence base for Ch5.
+- [ ] Convert future tense in Ch1 §1.2, §1.3, §1.5 to past/present
+- [ ] Update Table 1 risk mitigations with actual decisions made
+- [ ] Fill Ch2 §2.1.7 research gaps (uncomment and revise draft at lines 121–130)
+- [ ] Add implementation status column to FR/NFR tables; clarify FR6 is unimplemented
 
-- [ ] Run every test in the smoke test checklist; record pass/fail
-- [ ] Note any observations or edge-case behaviour
-- [ ] Capture model comparison results for baseline vs IRT difficulty and baseline vs improved struggle
-
-*Unblocks: Ch5 §5.2 Functional Testing and §5.4 Results.*
+*Unblocks: Ch4 — existing chapter framing is now consistent before the implementation chapter is rewritten.*
 
 ---
 
 ### 5. Ch4 — Implementation rewrite `Writing · Large`
 
-Rewrite the entire chapter — it currently describes V1 only. Cover the full V2 system.
+Rewrite the entire chapter — it currently describes V1 only. Cover the full V2 system. Add `[TODO: insert figure]` placeholders for Appendix B screenshots; these will be filled in at step 8.
 
 - [ ] Replace scope/introduction section — remove "proof of concept" framing
 - [ ] Update technology stack table to reflect V2 dependencies (filelock, openai, scipy, streamlit-autorefresh)
@@ -79,26 +79,15 @@ Rewrite the entire chapter — it currently describes V1 only. Cover the full V2
 - [ ] Lab assistant system — join/assign/self-claim/mark-helped flows, shared JSON state
 - [ ] Saved sessions and session lifecycle — CRUD, retroactive save, academic period filtering
 - [ ] Instructor views — all 6 views + settings + sound effects
-- [ ] Add Appendix B screenshots as figures
+- [ ] Mark figure slots for Appendix B screenshots (`[TODO: insert figure]`)
 
 *Unblocks: Ch5 evaluation framing, Appendix A code snippets.*
 
 ---
 
-### 6. Appendices E & F — Formulae `Writing · Small–Medium`
+### 6. Ch5 — Results & Evaluation `Writing · Large`
 
-Can be written alongside Ch4. Collect all model formulas and derivation notes in one place.
-
-- [ ] Appendix E: struggle formula (7 components + weights), difficulty formula (5 components + weights), IRT likelihood, BKT update rule, improved struggle weights, CF cosine similarity
-- [ ] Appendix F: derivation notes for non-obvious formulas (BKT update, IRT MLE gradient, Bayesian shrinkage in struggle)
-
-*Can be written in parallel with Ch4–Ch6.*
-
----
-
-### 7. Ch5 — Results & Evaluation `Writing · Large`
-
-Write from scratch using Appendix B screenshots and Appendix C test results as evidence.
+Write from scratch. Draft structure and prose first; Appendix C evidence slots can be filled in at step 9.
 
 - [ ] §5.1 Evaluation Design — method, scope, what was tested and why
 - [ ] §5.2 Functional Testing — FR1–FR7 mapped to smoke test evidence (Appendix C)
@@ -110,7 +99,7 @@ Write from scratch using Appendix B screenshots and Appendix C test results as e
 
 ---
 
-### 8. Ch6 — Conclusion `Writing · Medium`
+### 7. Ch6 — Conclusion `Writing · Medium`
 
 Write from scratch once Ch5 is drafted.
 
@@ -120,24 +109,39 @@ Write from scratch once Ch5 is drafted.
 
 ---
 
-### 9. Ch3 — Design updates `Writing · Medium`
+### 8. Appendix B — UI Screenshots `Evidence · Small`
 
-Surgical edits — the chapter structure is solid, specific sections need updating.
+Take screenshots of every dashboard and mobile view now that all chapters are written and code is stable.
 
-- [ ] Update struggle formula to 7 components + Bayesian shrinkage (was 5 in thesis)
-- [ ] Update difficulty formula to 5 components (was 4 in thesis)
-- [ ] Replace Figs 8–10 (Figma mockups) with actual screenshots from Appendix B
-- [ ] Update CF section — it is implemented, not "to be implemented"
-- [ ] Add sections for IRT, BKT, improved struggle, mistake clustering
+- [ ] All 6 instructor views (in-class, student detail, question detail, data analysis, model comparison, settings)
+- [ ] Model comparison view (both student + question tabs)
+- [ ] Lab assistant app (join screen, unassigned view, assigned view)
+- [ ] Session start/end states
+- [ ] Replace all `[TODO: insert figure]` placeholders in Ch3 and Ch4 with actual figures
+
+*Unblocks: Appendix C (screenshots confirm system is in final state for smoke testing).*
 
 ---
 
-### 10. Ch1 & Ch2 — Language and framing `Writing · Small`
+### 9. Appendix C — Test Results `Evidence · Medium`
 
-- [ ] Convert future tense in Ch1 §1.2, §1.3, §1.5 to past/present
-- [ ] Update Table 1 risk mitigations with actual decisions made
-- [ ] Fill Ch2 §2.1.7 research gaps (uncomment and revise draft at lines 121–130)
-- [ ] Add implementation status column to FR/NFR tables; clarify FR6 is unimplemented
+Run the full smoke test checklist from [[Setup and Runbook]] and document outcomes. This is the primary evidence base for Ch5.
+
+- [ ] Run every test in the smoke test checklist; record pass/fail
+- [ ] Note any observations or edge-case behaviour
+- [ ] Capture model comparison results for baseline vs IRT difficulty and baseline vs improved struggle
+- [ ] Fill any evidence slots left in Ch5 §5.2 and §5.4
+
+*Unblocks: Appendices E&F and Appendix A (evidence pass confirms formulae and code snippets are final).*
+
+---
+
+### 10. Appendices E & F — Formulae `Writing · Small–Medium`
+
+Collect all model formulas and derivation notes in one place.
+
+- [ ] Appendix E: struggle formula (7 components + weights), difficulty formula (5 components + weights), IRT likelihood, BKT update rule, improved struggle weights, CF cosine similarity
+- [ ] Appendix F: derivation notes for non-obvious formulas (BKT update, IRT MLE gradient, Bayesian shrinkage in struggle)
 
 ---
 
@@ -218,14 +222,14 @@ Lightweight mobile Help panel for lab assistants covering join guide, student ca
 | --- | --- | --- | --- | --- |
 | 1 | Phase 7 — Surface hidden data | Coding | Small | Done |
 | 2 | Phase 5 — Comparison UI | Coding | Large | **Done** |
-| 3 | Appendix B — Screenshots | Evidence | Small | Not started |
-| 4 | Appendix C — Test Results | Evidence | Medium | Not started |
+| 3 | Ch3 — Design updates | Writing | Medium | Not started |
+| 4 | Ch1 & Ch2 — Language cleanup | Writing | Small | Not started |
 | 5 | Ch4 — Implementation rewrite | Writing | Large | Not started |
-| 6 | Appendices E & F — Formulae | Writing | Small–Medium | Not started |
-| 7 | Ch5 — Results & Evaluation | Writing | Large | Not started |
-| 8 | Ch6 — Conclusion | Writing | Medium | Not started |
-| 9 | Ch3 — Design updates | Writing | Medium | Not started |
-| 10 | Ch1 & Ch2 — Language cleanup | Writing | Small | Not started |
+| 6 | Ch5 — Results & Evaluation | Writing | Large | Not started |
+| 7 | Ch6 — Conclusion | Writing | Medium | Not started |
+| 8 | Appendix B — Screenshots | Evidence | Small | Not started |
+| 9 | Appendix C — Test Results | Evidence | Medium | Not started |
+| 10 | Appendices E & F — Formulae | Writing | Small–Medium | Not started |
 | 11 | Appendix A — Code Snippets | Writing | Small | Not started |
 | 12 | Polish pass | Writing | Small | Not started |
 | 13 | FR6 — Smart devices (stretch) | Coding | Large | Not started |

@@ -4,31 +4,24 @@
     "type": "split",
     "children": [
       {
-        "id": "3e415e8a7f935d64",
+        "id": "0024f9ef1ba271da",
         "type": "tabs",
         "children": [
           {
-            "id": "5c4244bf1c5f6e27",
+            "id": "f39d198a9ff92337",
             "type": "leaf",
             "state": {
-              "type": "3d_graph_view",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Home.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "3D-Graph"
-            }
-          },
-          {
-            "id": "e87388ae4c36e5d3",
-            "type": "leaf",
-            "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "title": "Home"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -188,11 +181,12 @@
       "3d-graph:3D Graph": false
     }
   },
-  "active": "e87388ae4c36e5d3",
+  "active": "f39d198a9ff92337",
   "lastOpenFiles": [
+    "Thesis/Writing Roadmap.md",
+    "Thesis/Weekly Plan.md",
     "IRT Difficulty Model (Rasch 1PL).md",
     "Code/Lab App/Operations/Coding Roadmap.md",
-    "Thesis/Weekly Plan.md",
     "_COMMUNITY_Advanced Features & RAG Design.md",
     "(x - min)  (max - min), clamped to 0, 1. Returns 0 if min == max..md",
     "1.1 Problem - Student Struggle Detection in Live Labs.md",
@@ -215,7 +209,6 @@
     "2.3.2 Non-Functional Requirements NFR1-NFR6.md",
     "2.3.3 MoSCoW Requirements Prioritisation Table.md",
     "3-Layer System Architecture Data Generation, Processing, Decision.md",
-    "3.1 System Architecture - Three-Layer Design.md",
     "graph.canvas",
     "Untitled.canvas",
     "Code/Assistant App/Flows/Join Session.md.tmp.29424.1775842222885",
