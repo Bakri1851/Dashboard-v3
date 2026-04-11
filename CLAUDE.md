@@ -67,6 +67,12 @@ Streamlit cannot mutate `st.session_state` after widget instantiation in the sam
 - OpenAI API key stored in `.streamlit/secrets.toml`
 - Runtime data lives in `data/` (auto-migrated from repo root on first run)
 
+## Context Navigation
+
+1. ALWAYS query the knowledge graph first
+2. Only read raw files if I explicitly say so
+3. Use graphify-out/wiki/index.md
+
 ## Obsidian Vault
 
 Living documentation lives at `docs/obsidian-vault/`. Start from `Home.md` for the master map.
@@ -99,3 +105,12 @@ When updating look at all notes to see if updates are necessary
 | `Code/Assistant App/Operations/RAG Architecture.md` | RAG design actions |
 
 **Do not edit vault notes** unless the user explicitly asks — they are the user's personal knowledge base.
+
+## graphify
+
+This project has a graphify knowledge graph at graphify-out/.
+
+Rules:
+- Before answering architecture or codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes and community structure
+- If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
+- After modifying code files in this session, run `python3 -c "from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code(Path('.'))"` to keep the graph current

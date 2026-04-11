@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "43718a7492824d18",
+        "id": "3e415e8a7f935d64",
         "type": "tabs",
         "children": [
           {
-            "id": "f1395c2945b9f2d1",
+            "id": "5c4244bf1c5f6e27",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Code/Lab App/Flows/Pages and UI Flow.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Pages and UI Flow"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -181,44 +177,45 @@
       "3d-graph:3D Graph": false
     }
   },
-  "active": "f1395c2945b9f2d1",
+  "active": "5c4244bf1c5f6e27",
   "lastOpenFiles": [
-    "Code/Lab App/Modules/UI System.md",
-    "Code/Assistant App/Flows/Assigned View.md",
-    "Code/Assistant App/Flows/Unassigned View.md",
-    "Code/Assistant App/Flows/Join Session.md",
+    "(x - min)  (max - min), clamped to 0, 1. Returns 0 if min == max..md",
+    "1.1 Problem - Student Struggle Detection in Live Labs.md",
+    "1.2 Proposed Solution - Real-Time Learning Analytics Dashboard.md",
+    "1.3 Aims and Objectives.md",
+    "1.4 Risks and Mitigation Table.md",
+    "1.5 Project Approach - Agile Incremental Development.md",
+    "2.1.1 Learning Analytics in Higher Education.md",
+    "2.1.2 Dashboards for Learning Analytics (SAM, EMODA, Edsight).md",
+    "2.1.3 Real-Time Data Analytics and Visualisation.md",
+    "2.1.4 Modelling Student Struggle.md",
+    "2.1.5 Modelling Task Difficulty.md",
+    "2.1.6 Collaborative Filtering for Struggle Detection.md",
+    "2.1.7 Summary of Identified Research Gaps.md",
+    "2.2 Existing Systems.md",
+    "2.2.1 Learning Management System (Moodle).md",
+    "2.2.2 Instructor Facing Dashboards (Blocks Progress Bar, MM Dashboard).md",
+    "2.2.3 Early Warning and At-Risk Student Systems (edInsight).md",
+    "2.3.1 Functional Requirements FR1-FR7.md",
+    "2.3.2 Non-Functional Requirements NFR1-NFR6.md",
+    "2.3.3 MoSCoW Requirements Prioritisation Table.md",
+    "3-Layer System Architecture Data Generation, Processing, Decision.md",
+    "3.1 System Architecture - Three-Layer Design.md",
+    "3.2 Data Endpoint - Session-Based JSONXML API.md",
+    "3.3.1 Student Struggle Model S(s,sigma).md",
+    "4 metric cards for question drill-down..md",
+    "4 metric cards for student drill-down..md",
+    "graph.canvas",
+    "Untitled.canvas",
     "Code/Assistant App/Flows/Join Session.md.tmp.29424.1775842222885",
-    "Code/Assistant App/Flows/No Active Session.md",
-    "Code/Lab App/Modules/Analytics Engine.md",
-    "Thesis/Weekly Plan.md",
-    "Home.md",
-    "Thesis/Full Roadmap.md",
-    "Code/Lab App/Operations/Next Steps.md",
     "Home.md.tmp.29336.1775835637492",
-    "Code/Lab App/Operations/Coding Roadmap.md",
     "Code/Lab App/Operations/Coding Roadmap.md.tmp.29336.1775835094942",
-    "Thesis/Writing Roadmap.md",
-    "Thesis/Future Work Inventory.md",
-    "Code/Code Index.md",
     "Thesis/future_work_draft.tex",
-    "Code/Lab App/Flows/Question Detail.md",
-    "Code/Lab App/Flows/Student Detail.md",
-    "Code/Lab App/Flows/Saved Session History.md",
-    "Code/Lab App/Modules/Instructor Dashboard.md",
-    "Code/Lab App/Flows/Live Assistant Assignment.md",
     "Thesis/Full Roadmap.md.tmp.20568.1775777871895",
-    "Thesis/Thesis Overview.md",
-    "Thesis/Rewrite Queue.md",
-    "Code/Reference/Libraries/Optuna.md",
-    "Thesis/Ch2 – Background and Requirements.md",
-    "Code/Reference/Libraries/Scikit-learn.md",
-    "Code/Reference/Libraries/Plotly.md",
-    "Thesis/Ch4 – Implementation.md",
     "Code/Lab App/Operations",
     "Code/Assistant App/Flows",
     "Code/Lab App/Flows",
     "Code/Assistant App/Modules",
-    "Code/Assistant App",
-    "Untitled.canvas"
+    "Code/Assistant App"
   ]
 }
