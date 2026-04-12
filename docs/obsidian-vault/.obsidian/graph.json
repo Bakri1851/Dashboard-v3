@@ -5,7 +5,7 @@
   "showAttachments": true,
   "hideUnresolved": false,
   "showOrphans": true,
-  "collapse-color-groups": false,
+  "collapse-color-groups": true,
   "colorGroups": [
     {
       "query": "path:Thesis  ",
@@ -56,10 +56,10 @@
   "nodeSizeMultiplier": 0.512577962577963,
   "lineSizeMultiplier": 0.716320166320166,
   "collapse-forces": false,
-  "centerStrength": 0.64968814968815,
+  "centerStrength": 0.645530145530146,
   "repelStrength": 12.4116424116424,
-  "linkStrength": 0.911642411642412,
+  "linkStrength": 0.907484407484408,
   "linkDistance": 30,
-  "scale": 0.23718643244998167,
+  "scale": 0.04289170579444038,
   "close": true
 }

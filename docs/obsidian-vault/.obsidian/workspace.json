@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "0024f9ef1ba271da",
+        "id": "98f3e9cc1f9c16d5",
         "type": "tabs",
         "children": [
           {
-            "id": "f39d198a9ff92337",
+            "id": "fe18eb97d3c67547",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Home.md",
+                "file": "Thesis/Ch1 – Introduction.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Home"
+              "title": "Ch1 – Introduction"
             }
           }
         ]
@@ -53,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "tag:#graphify/document",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -175,18 +175,30 @@
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
       "daily-notes:Open today's daily note": false,
-      "templates:Insert template": false,
       "command-palette:Open command palette": false,
+      "templates:Insert template": false,
       "bases:Create new base": false,
       "3d-graph:3D Graph": false
     }
   },
-  "active": "f39d198a9ff92337",
+  "active": "fe18eb97d3c67547",
   "lastOpenFiles": [
     "Thesis/Writing Roadmap.md",
+    "Thesis/Future Work Inventory.md",
+    "Untitled.canvas",
+    "uitheme.py — CSS and Plotly Theme.md",
+    "graphify/obsidian/Li et al. (2020) — Course-Level Analytics.md",
+    "Code/Lab App/Operations/Coding Roadmap.md",
+    "Coding Roadmap.md",
+    "graphify/obsidian/Phase 4 Dashboard Design.md",
+    "graphify/obsidian/Stacked Bar Charts Per Question.md",
+    "Thesis/Full Roadmap.md",
+    "graphify/obsidian",
+    "graphify",
+    "graph.canvas",
+    "Home.md",
     "Thesis/Weekly Plan.md",
     "IRT Difficulty Model (Rasch 1PL).md",
-    "Code/Lab App/Operations/Coding Roadmap.md",
     "_COMMUNITY_Advanced Features & RAG Design.md",
     "(x - min)  (max - min), clamped to 0, 1. Returns 0 if min == max..md",
     "1.1 Problem - Student Struggle Detection in Live Labs.md",
@@ -201,16 +213,6 @@
     "2.1.5 Modelling Task Difficulty.md",
     "2.1.6 Collaborative Filtering for Struggle Detection.md",
     "2.1.7 Summary of Identified Research Gaps.md",
-    "2.2 Existing Systems.md",
-    "2.2.1 Learning Management System (Moodle).md",
-    "2.2.2 Instructor Facing Dashboards (Blocks Progress Bar, MM Dashboard).md",
-    "2.2.3 Early Warning and At-Risk Student Systems (edInsight).md",
-    "2.3.1 Functional Requirements FR1-FR7.md",
-    "2.3.2 Non-Functional Requirements NFR1-NFR6.md",
-    "2.3.3 MoSCoW Requirements Prioritisation Table.md",
-    "3-Layer System Architecture Data Generation, Processing, Decision.md",
-    "graph.canvas",
-    "Untitled.canvas",
     "Code/Assistant App/Flows/Join Session.md.tmp.29424.1775842222885",
     "Home.md.tmp.29336.1775835637492",
     "Code/Lab App/Operations/Coding Roadmap.md.tmp.29336.1775835094942",
@@ -218,8 +220,6 @@
     "Thesis/Full Roadmap.md.tmp.20568.1775777871895",
     "Code/Lab App/Operations",
     "Code/Assistant App/Flows",
-    "Code/Lab App/Flows",
-    "Code/Assistant App/Modules",
-    "Code/Assistant App"
+    "Code/Lab App/Flows"
   ]
 }
