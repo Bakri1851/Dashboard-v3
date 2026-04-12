@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Thesis/Ch1 – Introduction.md",
+                "file": "Thesis/Ch2 – Background and Requirements.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Ch1 – Introduction"
+              "title": "Ch2 – Background and Requirements"
             }
           }
         ]
@@ -184,6 +184,7 @@
   "active": "fe18eb97d3c67547",
   "lastOpenFiles": [
     "Thesis/Writing Roadmap.md",
+    "Thesis/Ch1 – Introduction.md",
     "Thesis/Future Work Inventory.md",
     "Untitled.canvas",
     "uitheme.py — CSS and Plotly Theme.md",
@@ -212,7 +213,6 @@
     "2.1.4 Modelling Student Struggle.md",
     "2.1.5 Modelling Task Difficulty.md",
     "2.1.6 Collaborative Filtering for Struggle Detection.md",
-    "2.1.7 Summary of Identified Research Gaps.md",
     "Code/Assistant App/Flows/Join Session.md.tmp.29424.1775842222885",
     "Home.md.tmp.29336.1775835637492",
     "Code/Lab App/Operations/Coding Roadmap.md.tmp.29336.1775835094942",

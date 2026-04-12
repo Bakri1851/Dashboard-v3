@@ -57,7 +57,6 @@ The report is the main dashboard in Edsight, where teachers can select filters s
 
 Most current approaches to the learning dashboard do not live in lab sessions, as there is more course-level monitoring than session-level monitoring \cite{klerkx_2017_learning,verbert_2020_learning,ahn_2019_the}. This also has many benefits, helping students on the spot and allowing them to get the most out of their computer labs \cite{ahn_2019_the}.
 
-
 \subsubsection{Real-Time Data Analytics and Visualisation}
 
 Real-time analytics refers to the practice of collecting and analysing data as it is generated, with minimal latency between data collection and analysis \cite{a2023_real,marr_2021_what}. When we can process data as it comes in, we can gain insight and understand what is happening within a relevant context almost instantly. Such a practice is used in applications where data timeliness is critical, such as smart pricing and predictive maintenance \cite{a2023_real,marr_2021_what}. Traditional data analysis, where data is captured and stored, and insights are pushed out of storage. In contrast, real-time data analysis allows data to be analysed in real time \cite{a2023_real}. Real-time data analytics have proven to be highly valuable, as evidenced by the success of Netflix, which has perfected the art of predicting its customers' next favourite show \cite{marr_2021_what}.
@@ -100,7 +99,6 @@ More broadly, Pitts et al.\ survey LLM-based applications in programming educati
 
 Together, these works demonstrate different methods for evaluating struggle. These metrics are best captured through a combination of temporal, correctness-based and behavioural signals.
 
-
 \subsubsection{Modelling Task Difficulty}
 
 
@@ -128,12 +126,10 @@ Unlike methods that rely on parameters, Collaborative filtering leverages the co
 A user-based collaborative filtering method identifies a set of $k$ nearest neighbours for a given student based on a similarity measure over their profiles. The behaviour of the neighbours are aggregated to produce a prediction. The approach is shown to be effective in sparse datasets, where explicit ratings are unavailable and implicit signals such as time-on-task and submission frequency must serve as proxies for preference. A known limitation is that when a student has little interaction history, similarity cannot be computed reliably, leading to unstable early-session predictions  
 
 In the context of lab struggle detection, collaborative filtering offers a strong alternative to our scoring approach. Rather than computing a fixed weighted score for each student, it can identify students whose interaction patterns closely resemble peers who need help, inferring that they too may need help. However applying collaborative filtering to a live computer lab comes with its constraints as students who may need help is limited and the start of the session will have very limited data. These constraints backs the use of a scoring approach, whilst the collaborative filtering approach is a strong alternative.
-
-
-
     
 \subsubsection{Summary of Identified Research Gaps}
-[FILL IN]
+
+
 
 \begin{comment}
     
@@ -248,8 +244,7 @@ The system must present relevant analytics for the labs in a suitable, intuitive
 The system must integrate with smart devices such as phones, watches and glasses, in particular the smartphones so that information can be sent swiftly to lab assistants.
 
 \paragraph{FR7: Lab Assistant Ranking System}
-The system will comprise a ranking system of lab assistants to incentivise them to help students. The ranking will be based on the number of students they have helped and the students' satisfaction with their help.
-
+The system will record and display lab assistant contributions during the session so that assistant activity can be monitored and incentivised.
 
 \subsubsection{Non-Functional Requirements}
 In addition to functional requirements, the system must satisfy non-functional requirements to ensure the system operates as intended. These requirements reflect the practical constraints of the live lab sessions and ensure efficient operation.
@@ -304,3 +299,4 @@ For this section, we will use a MosCoW table to highlight the project's requirem
     \caption{MoSCoW table highlighting requirements for proposed software}
     \label{tab: MosCoW}
 \end{table}
+
