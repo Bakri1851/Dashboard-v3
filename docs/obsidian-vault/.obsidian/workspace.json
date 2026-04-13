@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "98f3e9cc1f9c16d5",
+        "id": "b70550ebfc65e07b",
         "type": "tabs",
         "children": [
           {
-            "id": "fe18eb97d3c67547",
+            "id": "be447fca2c261028",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Thesis/Ch2 – Background and Requirements.md",
+                "file": "Code/Reference/Libraries/Optuna.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Ch2 – Background and Requirements"
+              "title": "Optuna"
             }
           }
         ]
@@ -53,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "tag:#graphify/document",
+                "query": "formulas",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -181,10 +181,28 @@
       "3d-graph:3D Graph": false
     }
   },
-  "active": "fe18eb97d3c67547",
+  "active": "be447fca2c261028",
   "lastOpenFiles": [
+    "Code/Overview/Overview Index.md",
+    "Code/Overview/Architecture.md",
+    "Code/Overview/Data Pipeline.md",
+    "graph.canvas",
+    "Code/Reference/Libraries/Optuna.md",
+    "Code/Code Index.md",
+    "Thesis/Ch6 – Conclusion.md",
+    "Code/Lab App/Logic/Algorithms.md",
+    "Code/Lab App/Logic/Formulae and Equations.md",
     "Thesis/Writing Roadmap.md",
+    "Thesis/Ch3 – Design and Modelling.md",
+    "Thesis/Ch4 – Implementation.md",
+    "Thesis/Weekly Plan.md",
     "Thesis/Ch1 – Introduction.md",
+    "AI Check Triggers Submission.md",
+    "Submission XML Element.md",
+    "XML Payload Structure.md",
+    "Thesis/Thesis Overview.md",
+    "Thesis/Ch2 – Background and Requirements.md",
+    "Thesis/Writing Roadmap.md.tmp.18580.1776033216782",
     "Thesis/Future Work Inventory.md",
     "Untitled.canvas",
     "uitheme.py — CSS and Plotly Theme.md",
@@ -196,30 +214,12 @@
     "Thesis/Full Roadmap.md",
     "graphify/obsidian",
     "graphify",
-    "graph.canvas",
-    "Home.md",
-    "Thesis/Weekly Plan.md",
-    "IRT Difficulty Model (Rasch 1PL).md",
-    "_COMMUNITY_Advanced Features & RAG Design.md",
-    "(x - min)  (max - min), clamped to 0, 1. Returns 0 if min == max..md",
-    "1.1 Problem - Student Struggle Detection in Live Labs.md",
-    "1.2 Proposed Solution - Real-Time Learning Analytics Dashboard.md",
-    "1.3 Aims and Objectives.md",
-    "1.4 Risks and Mitigation Table.md",
-    "1.5 Project Approach - Agile Incremental Development.md",
-    "2.1.1 Learning Analytics in Higher Education.md",
-    "2.1.2 Dashboards for Learning Analytics (SAM, EMODA, Edsight).md",
-    "2.1.3 Real-Time Data Analytics and Visualisation.md",
-    "2.1.4 Modelling Student Struggle.md",
-    "2.1.5 Modelling Task Difficulty.md",
-    "2.1.6 Collaborative Filtering for Struggle Detection.md",
     "Code/Assistant App/Flows/Join Session.md.tmp.29424.1775842222885",
     "Home.md.tmp.29336.1775835637492",
     "Code/Lab App/Operations/Coding Roadmap.md.tmp.29336.1775835094942",
     "Thesis/future_work_draft.tex",
     "Thesis/Full Roadmap.md.tmp.20568.1775777871895",
     "Code/Lab App/Operations",
-    "Code/Assistant App/Flows",
-    "Code/Lab App/Flows"
+    "Code/Assistant App/Flows"
   ]
 }

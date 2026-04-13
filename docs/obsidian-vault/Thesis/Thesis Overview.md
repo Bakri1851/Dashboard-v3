@@ -19,10 +19,10 @@ Related: [[Report Sync]], [[Rewrite Queue]], [[Evidence Bank]], [[Home]]
 
 | # | Chapter | Thesis Section | Status | Vault Note |
 |---|---------|---------------|--------|------------|
-| 1 | Introduction | `introduction.tex` | Draft — future-tense, needs review | [[Ch1 – Introduction]] |
-| 2 | Background and Requirements | `requirements specification.tex` | Draft — mostly solid, [FILL IN] placeholder | [[Ch2 – Background and Requirements]] |
-| 3 | Design and Modelling | `design and architecture.tex` | Draft — formulas outdated, Figma needs replacing | [[Ch3 – Design and Modelling]] |
-| 4 | Implementation | `implementation.tex` | Outdated — describes V1 only, needs full rewrite | [[Ch4 – Implementation]] |
+| 1 | Introduction | `introduction.tex` | ✅ Written — small fixes remain (future-tense, risk table) | [[Ch1 – Introduction]] |
+| 2 | Background and Requirements | `requirements specification.tex` | ✅ Written — small fixes remain (uncomment research gaps §2.1.7, FR/NFR status column) | [[Ch2 – Background and Requirements]] |
+| 3 | Design and Modelling | `design and architecture.tex` | Draft — formulas outdated, Figma needs replacing; new skeleton sections added for Mistake Clustering, Advanced Model Design (IRT/BKT/improved struggle/confidence), Lab Assistant View | [[Ch3 – Design and Modelling]] |
+| 4 | Implementation | `implementation.tex` | Outdated — describes V1 only; full skeleton tree now in place (26 new subsections across System Structure, Data Pipeline, Session Management, Analytics, Advanced Models, Instructor Views, Lab Assistant System); rewrite in progress | [[Ch4 – Implementation]] |
 | 5 | Results and Evaluation | `results and evaluation.tex` | Empty — 5 headers, no content | [[Ch5 – Results and Evaluation]] |
 | 6 | Conclusion | `conclusion.tex` | Empty — 2 headers, no content | [[Ch6 – Conclusion]] |
 | - | Progress Report | `Progress Report.tex` | Commented out in main.tex (January milestone) | N/A |

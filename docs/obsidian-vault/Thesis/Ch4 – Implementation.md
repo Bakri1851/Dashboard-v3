@@ -89,20 +89,65 @@ Describes "a live visual overview of student activity" with "simple, predictable
 
 ---
 
-## Rewrite items
+## Rewrite items — mapped to skeleton subsection tree
 
-- [ ] Rewrite 4.1 Scope — describe V2 as the full implementation, acknowledge V1 as prototyping phase
-- [ ] Update 4.2 Technology Stack table — add OpenAI API, filelock, scikit-learn, scipy
-- [ ] Rewrite 4.3 Data Pipeline — describe full normalization, OpenAI scoring, academic period labeling
-- [ ] Rewrite 4.4 Dashboard — describe all 6 instructor views and 4 assistant views
-- [ ] Add new section: Analytics Implementation (struggle, difficulty, CF, clustering)
-- [ ] Add new section: Advanced Models (IRT, BKT, improved struggle)
-- [ ] Add new section: Lab Assistant System (session management, assignment flow, file-locked state)
-- [ ] Add new section: Configuration and Extensibility (model toggles, config-driven thresholds)
-- [ ] Remove all "to be implemented in later iteration" language
-- [ ] Remove "proof of concept" framing
-- [ ] Add code snippets to Appendix A referencing key implementation functions
-- [ ] Add screenshots to Appendix B showing actual dashboard
+### 4.1 – 4.2 Intro + Technology Stack
+
+- [ ] Rewrite 4.1 intro — describe V2 as the full implementation, acknowledge V1 as prototyping phase only; remove "proof of concept" and "to be implemented" language
+- [ ] Update 4.2 Technology Stack table — add OpenAI API (gpt-4o-mini), filelock, scikit-learn (TF-IDF/K-means/silhouette), scipy (L-BFGS-B for IRT)
+
+### 4.x System Structure
+
+- [ ] **Instructor System** — `app.py` → `instructor_app.main()`; session state init; deferred-actions pattern (`pending_*` flags applied before widgets); sidebar filters; routing to 6 views
+- [ ] **Assistant System** — `lab_app.py` → `assistant_app`; URL `?aid=` identity persistence; 5s auto-refresh; 4 view states (no session / join / waiting / assigned)
+- [ ] **Shared Runtime State** — `lab_session.json` managed by `lab_state.py`; filelock + atomic tmp-replace; fields stored (assistants dict, assignments dict, session code, session active flag)
+
+### 4.x Data Pipeline
+
+- [ ] **Endpoint Retrieval and Parsing** — `fetch_raw_data()` with `@st.cache_data(ttl=10)`; GET to PHP endpoint; JSON response with embedded XML; auto-detect JSON vs XML format
+- [ ] **Data Normalisation and Structuring** — module filtering/renaming (excludes AI_TEST, 24COB231, 24WSC701); timestamp parsing; academic period labeling via `academic_calendar.py`; final DataFrame column schema
+
+### 4.x Session Management
+
+- [ ] **Live Session Lifecycle** — session start/end via sidebar; session code generation (6-char alphanumeric, excludes O/0/I/1); how pending flags defer state mutations until top of next run
+- [ ] **Saved Session History and Restoration** — `data/saved_sessions.json` CRUD; save/load/delete via Previous Sessions view; filter by academic period
+
+### 4.x Analytics Implementation
+
+- [ ] **Incorrectness Scoring** — OpenAI gpt-4o-mini batch (size 50); `_incorrectness_cache` in-process dict avoids repeat API calls; fallback to 0.5 on API error; result is per-submission float in [0, 1]
+- [ ] **Baseline Student Struggle Model** — 7 signals: n_hat (submission count), t_hat (time active), i_hat (mean incorrectness), r_hat (retry rate), A_raw (recent incorrectness), d_hat (trajectory slope), rep_hat (answer repetition); weights [0.10, 0.10, 0.20, 0.10, 0.38, 0.05, 0.07]; Bayesian shrinkage `w_n = n/(n+5)`; min-max normalisation; 4-level classification ("On Track / Minor Issues / Struggling / Needs Help")
+- [ ] **Baseline Question Difficulty Model** — 5 signals: c_tilde (error rate), t_tilde (avg time), a_tilde (avg attempts), f_tilde (feedback rate), p_tilde (first-attempt failure rate); same 4-level classification
+- [ ] **Collaborative Filtering** — cosine similarity on 5 normalised behavioral features; k=3 nearest neighbours; elevation detection (student score vs peer mean); toggleable via Settings; cold-start guard requires ≥k+1 active students
+- [ ] **Mistake Clustering** — TF-IDF on raw student answer strings; K-means with auto-k via silhouette scoring; OpenAI labels each cluster; results displayed per-question in Question Detail view
+
+### 4.x Advanced Model Implementation
+
+- [ ] **Measurement Confidence** — length and extremity-based confidence weighting for incorrectness estimates; lives in `analytics.py`; computed but not yet surfaced in UI; mention as future display candidate
+- [ ] **Item Response Theory (IRT) Difficulty** — `models/irt.py`; Rasch 1PL; joint MLE via scipy L-BFGS-B; estimates θ (student ability) and β (question difficulty); replaces baseline difficulty when "improved models" toggle enabled
+- [ ] **Bayesian Knowledge Training (BKT) Mastery** — `models/bkt.py`; HMM with parameters P_init=0.3, P_learn=0.1, P_guess=0.2, P_slip=0.1; per-student per-question mastery sequence; configurable via Settings sliders
+- [ ] **Improved Struggle Model** — `models/improved_struggle.py`; 3-component weighted sum: behavioral (0.45) + mastery gap (0.30) + difficulty-adjusted (0.25); uses BKT mastery gap; graceful degradation to baseline when BKT unavailable
+
+### 4.x Lab Instructor System
+
+- [ ] **In Class View** — summary cards (active students, avg struggle, top struggling student, hardest question); student + question leaderboards (max 15); score distributions; CF diagnostic panel; formula info expander
+- [ ] **Student Detail View** — drill-down with struggle metrics, submission timeline, retry trend chart, similar students list (from CF), BKT mastery chart if improved models enabled
+- [ ] **Question Detail View** — drill-down with mistake clusters, student attempt table, attempt timeline, IRT difficulty score if improved models enabled
+- [ ] **Data Analysis View** — 6 chart types: module usage bar, top questions, user activity scatter, activity timeline, academic week heatmap, students by module
+- [ ] **Comparison View** — model agreement summary cards (% agreement, avg delta); scatter plots baseline vs improved for struggle + difficulty; detailed comparison table; gated by `improved_models_enabled`
+- [ ] **Settings View** — sound toggle, auto-refresh interval slider, CF toggle + k threshold, improved models master toggle, model selectors (IRT / BKT), BKT parameter sliders (P_init, P_learn, P_guess, P_slip)
+- [ ] **Previous Sessions View** — load/delete saved sessions; filter by academic period; session metadata display (date, student count, module)
+
+### 4.x Lab Assistant System
+
+- [ ] **Session Join Flow** — enter session code + name; identity stored in URL `?aid=`; validation against `lab_session.json`; error state if code invalid
+- [ ] **Waiting and Assignment States** — unassigned view (waiting screen); assigned view (student card with struggle summary, help-requested flag); transitions on filelock state change
+- [ ] **Live Assistant Allocation** — instructor assigns via dropdown (any unassigned assistant → any student); assistant self-claim from list (toggleable by instructor); mark-helped clears assignment; all changes sync via filelock
+
+### Cross-cutting
+
+- [ ] Remove all "to be implemented in later iteration" language (line 142 in tex)
+- [ ] Add code snippets to Appendix A: incorrectness batch call, struggle score signature, lab state read/write, deferred actions pattern
+- [ ] Add screenshots to Appendix B: all 6 instructor views + 4 assistant states
 
 ## Open questions
 

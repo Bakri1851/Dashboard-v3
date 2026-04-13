@@ -8,8 +8,8 @@ High-level chapter status and recommended writing order for the final thesis sub
 
 | Section | Status | Work needed | Effort |
 |---|---|---|---|
-| Ch1 — Introduction | Partial | Convert future tense; update risk mitigations | Small |
-| Ch2 — Background & Requirements | Partial | Fill research gaps placeholder; add FR/NFR implementation status | Small |
+| Ch1 — Introduction | ✅ Written | Update risk mitigations table | Small |
+| Ch2 — Background & Requirements | ✅ Written | Uncomment & revise research gaps §2.1.7; add FR/NFR implementation status column | Small |
 | Ch3 — Design & Modelling | Partial | Update formulas (struggle: 5→7 components, difficulty: 4→5); replace Figma mockups with screenshots; update CF section; add IRT/BKT/improved struggle sections | Medium |
 | Ch4 — Implementation | Outdated | Full rewrite — currently describes V1 prototype only; V2 has ~10 new features | Large |
 | Ch5 — Results & Evaluation | Empty | Write from scratch — evaluation design, functional testing, NFR testing, results, discussion | Large |

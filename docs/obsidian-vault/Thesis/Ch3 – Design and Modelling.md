@@ -138,6 +138,38 @@ These V2 features have no design coverage in the thesis:
 
 ---
 
+## New placeholder sections (added 2026-04-12)
+
+Skeleton subsections now exist in the tex file but have no content yet. What to write in each:
+
+### §3.3.x — Mistake Clustering
+
+Design of the mistake clustering pipeline: TF-IDF vectorisation of raw student answer strings → K-means clustering with auto-k via silhouette scoring → OpenAI call to label each cluster with a short description. Justify why clustering surfaces systematic error patterns that per-answer inspection misses. Note that auto-k avoids hardcoding the number of misconceptions per question.
+
+### §3.x — Advanced Model Design (new subsection block)
+
+#### Measurement Confidence
+
+Length and extremity-based confidence weighting for AI incorrectness estimates. Short/vague answers produce less reliable scores — the confidence interval shrinks the effective weight of those estimates. Formula: `conf = min(len(answer)/50, 1.0) * (1 - |score - 0.5| * 0)` (or actual formula from `analytics.py`). Note: computed in V2 but not yet displayed — design intent is to surface it alongside incorrectness scores in a future iteration.
+
+#### Item Response Theory (IRT)
+
+Rasch 1PL model: single difficulty parameter β per question, single ability parameter θ per student. Joint MLE optimisation via scipy L-BFGS-B (`models/irt.py`). Describe when IRT is preferred over the baseline difficulty model (larger class sizes, more submissions per question give more reliable MLE). Reference Rasch (1960) and de Ayala (2009).
+
+#### Bayesian Knowledge Training (BKT)
+
+Hidden Markov Model formulation: latent mastery state (learned / not learned) with 4 parameters — P(L0)=0.3 (prior mastery), P(T)=0.1 (learn transition), P(G)=0.2 (guess), P(S)=0.1 (slip). Per-student per-question mastery sequence updated on each submission. Mastery threshold used to feed mastery-gap signal into improved struggle model. Parameters configurable via Settings sliders (`models/bkt.py`).
+
+#### Improved Struggle Model
+
+3-component weighted sum: behavioral (0.45, same signals as baseline) + mastery gap (0.30, from BKT) + difficulty-adjusted (0.25, struggle scaled by IRT difficulty). Graceful degradation: falls back to baseline if BKT/IRT not available. Include a comparison table vs baseline model (inputs, weights, cold-start behaviour). Source file: `models/improved_struggle.py`.
+
+### §3.4.x — Lab Assistant View
+
+Design intent for the mobile lab assistant app: (1) session join screen — enter 6-char code + name; (2) waiting/unassigned state — holding screen until instructor assigns; (3) assigned student card — shows student name, struggle score classification, submission timeline, help-requested flag; (4) mark-helped action returns assistant to waiting state. Discuss design choices: URL `?aid=` persistence avoids login friction; minimal mobile UI reduces cognitive load during lab.
+
+---
+
 ## Rewrite items
 
 - [ ] Update struggle formula to 7 components with actual weights
@@ -147,9 +179,10 @@ These V2 features have no design coverage in the thesis:
 - [ ] Update CF section — change from "will be implemented" to "is implemented"
 - [ ] Replace 3 Figma mockups (Figs 8-10) with actual dashboard screenshots
 - [ ] Update threshold label names (On Track/Minor Issues/Struggling/Needs Help)
-- [ ] Add design sections for IRT, BKT, improved struggle, mistake clustering
+- [ ] **Write Mistake Clustering section** — see guidance above
+- [ ] **Write Advanced Model Design subsections** (Measurement Confidence, IRT, BKT, Improved Struggle) — see guidance above
+- [ ] **Write Lab Assistant View section** — see guidance above
 - [ ] Address or remove temporal smoothing claims (not active in V2)
-- [ ] Add lab assistant system design (session code, file-locked state, assignment flow)
 - [ ] Remove "event-driven pipeline currently under exploration" or clarify status
 
 ## Open questions

@@ -34,7 +34,7 @@ Related: [[Report Sync]], [[Thesis Overview]], [[Evidence Bank]], [[Figures and 
 
 ## Medium — language and framing improvements
 
-- [ ] **Convert Ch1 future tense to past/present** — §1.2, §1.3, §1.5 use "we will", "the system will" throughout. Should describe completed work.
+- [x] **Convert Ch1 future tense to past/present** — §1.2, §1.3, §1.5 use "we will", "the system will" throughout. Should describe completed work.
 - [ ] **Update Ch1 risk mitigations** — Table 1 mitigations are generic ("seek constant feedback", "explore smartwatch solutions"). Update to describe actual decisions (Bayesian shrinkage for insufficient data, modular design for extensibility, smart devices scoped out).
 - [ ] **Add implementation status to Ch2 requirements** — FR1-FR7 and NFR1-NFR6 need mapping to current implementation state. Could be inline or in Ch5 evaluation.
 - [ ] **Update Ch2 FR6 status** — smart device integration is "Should Have" but completely unimplemented. Either move to "Won't Have" or discuss honestly as future work.
@@ -74,6 +74,68 @@ Related: [[Report Sync]], [[Thesis Overview]], [[Evidence Bank]], [[Figures and 
 - [ ] **Ch5 — Limitation** — state explicitly that α β γ δ η were set by trial and error due to absence of labeled ground truth. #meeting3
 - [ ] **Ch5 — Future Work** — ML-based weight optimisation (Optuna, logistic regression, gradient boosting) once labeled data available. #future-work
 - [ ] **Ch3 — RAG Design** — hybrid SQL + ChromaDB architecture, justification and literature. Placeholder inserted. #meeting3
+
+---
+
+## Phase 6 additions (2026-04-12)
+
+New skeleton subsections added to `implementation.tex` and `design-and-architecture.tex`. Each placeholder needs writing — see [[Ch4 – Implementation]] and [[Ch3 – Design and Modelling]] for content guidance per section.
+
+**Ch3 — new placeholders:**
+
+- [ ] **§3.3.x Mistake Clustering** — TF-IDF + K-means + OpenAI labeling design; justify auto-k via silhouette. See [[Ch3 – Design and Modelling#§3.3.x — Mistake Clustering]]
+- [ ] **§3.x Advanced Model Design — Measurement Confidence** — length/extremity confidence formula; note not yet displayed in UI
+- [ ] **§3.x Advanced Model Design — Item Response Theory** — Rasch 1PL, joint MLE, θ/β interpretation, when preferred over baseline
+- [ ] **§3.x Advanced Model Design — Bayesian Knowledge Training** — HMM formulation, 4 parameters + defaults, mastery threshold, feeds improved struggle
+- [ ] **§3.x Advanced Model Design — Improved Struggle Model** — 3-component weighted sum, graceful degradation, comparison table vs baseline
+- [ ] **§3.4.x Lab Assistant View** — session join screen, waiting state, assigned student card design intent
+
+**Ch4 — new placeholders (System Structure):**
+
+- [ ] **§4.x Instructor System** — `instructor_app.main()`, deferred-actions pattern, sidebar filters, routing to 6 views
+- [ ] **§4.x Assistant System** — `lab_app.py`, URL `?aid=` persistence, 5s auto-refresh, 4 view states
+- [ ] **§4.x Shared Runtime State** — `lab_session.json`, filelock + atomic tmp-replace, fields stored
+
+**Ch4 — new placeholders (Data Pipeline):**
+
+- [ ] **§4.x Endpoint Retrieval and Parsing** — `fetch_raw_data()`, ttl=10 cache, JSON+XML, auto-detect format
+- [ ] **§4.x Data Normalisation and Structuring** — module filter/rename, timestamp parse, academic period labeling, DataFrame schema
+
+**Ch4 — new placeholders (Session Management):**
+
+- [ ] **§4.x Live Session Lifecycle** — start/end flow, session code generation, pending flags
+- [ ] **§4.x Saved Session History and Restoration** — CRUD in `data/saved_sessions.json`, academic period filter
+
+**Ch4 — new placeholders (Analytics Implementation):**
+
+- [ ] **§4.x Incorrectness Scoring** — gpt-4o-mini batch 50, in-process cache, fallback
+- [ ] **§4.x Baseline Student Struggle Model** — 7 signals, weights, Bayesian shrinkage, 4-level classification
+- [ ] **§4.x Baseline Question Difficulty Model** — 5 signals, weights, same classification
+- [ ] **§4.x Collaborative Filtering** — cosine similarity, k=3, elevation detection, cold-start guard
+- [ ] **§4.x Mistake Clustering** — TF-IDF/K-means/silhouette/OpenAI labeling, Question Detail display
+
+**Ch4 — new placeholders (Advanced Model Implementation):**
+
+- [ ] **§4.x Measurement Confidence** — computed not displayed, future surfacing intent
+- [ ] **§4.x IRT Difficulty** — `models/irt.py`, Rasch 1PL, scipy L-BFGS-B
+- [ ] **§4.x BKT Mastery** — `models/bkt.py`, HMM, Settings sliders
+- [ ] **§4.x Improved Struggle Model** — `models/improved_struggle.py`, 3-component, graceful degradation
+
+**Ch4 — new placeholders (Lab Instructor System):**
+
+- [ ] **§4.x In Class View** — summary cards, leaderboards, distributions, CF panel
+- [ ] **§4.x Student Detail View** — metrics, timeline, retry trend, CF similar students, BKT chart
+- [ ] **§4.x Question Detail View** — mistake clusters, attempt table, IRT difficulty
+- [ ] **§4.x Data Analysis View** — 6 chart types
+- [ ] **§4.x Comparison View** — agreement cards, scatter plots, comparison tables; gated by `improved_models_enabled`
+- [ ] **§4.x Settings View** — all toggles, sliders, model selectors
+- [ ] **§4.x Previous Sessions View** — load/delete, academic period filter
+
+**Ch4 — new placeholders (Lab Assistant System):**
+
+- [ ] **§4.x Session Join Flow** — code + name entry, `?aid=` persistence, validation
+- [ ] **§4.x Waiting and Assignment States** — unassigned vs assigned view, transitions
+- [ ] **§4.x Live Assistant Allocation** — dropdown assign, self-claim, mark-helped, filelock sync
 
 ---
 
