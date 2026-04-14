@@ -517,6 +517,15 @@ Add a "Troubleshooting" sub-section in `help_view()` covering states that may co
   - IRT (in `models/irt.py`, Phase 2)
   - collaborative filtering as an alternative method (in `analytics.py`, unchanged)
 
+## Deferred: Data labelling for weight optimisation
+
+- [ ] Collect ~500 hand-labelled submissions with ground-truth struggle assessments
+- [ ] Use labels to fit `STRUGGLE_WEIGHT_*` and `DIFFICULTY_WEIGHT_*` in `config.py:17-48` via supervised ML (logistic regression / Optuna)
+- [ ] Currently weights are hand-tuned by PCA-guided trial-and-error — document this as a known limitation in the dissertation
+- [ ] Cross-referenced in: [[Assistant App/Operations/Next Steps]], [[Thesis/Future Work Inventory]]
+
+---
+
 ## Code references
 
 - instructor app: `code/learning_dashboard/instructor_app.py`

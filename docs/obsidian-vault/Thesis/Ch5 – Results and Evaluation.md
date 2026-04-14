@@ -96,6 +96,18 @@ Potential results to present:
 - Mistake clustering examples with auto-generated labels
 - Performance benchmarks (refresh cycle timing)
 
+### 5.x RAG Suggestion Evaluation (Phase 9)
+
+> ⚠️ Stub — complete after running Phase 9 in a live/test session
+
+- Subjective usefulness: do the 2–3 bullets accurately reflect the student's key problem areas?
+- Latency: first-call latency (includes ~30 s model download on a fresh machine), subsequent calls (cache hit)
+- Cache correctness: confirm OpenAI is called exactly once per student per session under auto-refresh (use temporary print in `generate_assistant_suggestions`)
+- Privacy: confirm prompt contains only the assigned student's data (no cross-student leakage)
+- Graceful degradation: confirm app renders normally when `chromadb`/`sentence-transformers` not installed
+
+See [[Suggested Focus Areas Panel]] for the full verification checklist.
+
 ### 5.5 Discussion
 
 - How well does the system address the original problem?

@@ -30,7 +30,30 @@ Related: [[Architecture]], [[Data Loading and Session Persistence]], [[Instructo
 
 - Saved sessions are stored in `data/saved_sessions.json` with a versioned payload containing `sessions`.
 - Live assistant coordination is stored separately in `data/lab_session.json`.
+- ChromaDB RAG collection is stored in `data/rag_chroma/` (created by `paths.rag_chroma_dir()`). Built lazily on first assistant assignment; persists across restarts.
 - `paths.py` migrates legacy root JSON files into `data/` on first access and keeps a fallback path if migration fails.
+
+## RAG suggestion flow (Phase 9)
+
+After the DataFrame is filtered and struggle scores are computed, the assistant app triggers a parallel enrichment step when a student is assigned:
+
+```
+Filtered DataFrame
+       │
+       ▼
+rag.build_rag_collection(df, session_id)   ← embeds all Q&A + feedback
+       │
+       ▼
+rag.generate_assistant_suggestions(student_id, ...)
+  Layer 1: df[df["user"] == student_id]
+  Layer 2: ChromaDB query with student_id filter
+  Generation: GPT-4o-mini → 2–3 bullets
+       │
+       ▼
+"Suggested Focus Areas" panel in assistant_app.py
+```
+
+See [[RAG Pipeline - Two-Layer Retrieval]] for detail.
 
 ## Why this matters
 

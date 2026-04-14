@@ -1,31 +1,41 @@
 ---
-tags: [library, embeddings, placeholder, unused]
-status: 🔲 Not yet used
+tags: [library, embeddings, rag, phase9]
+status: ✅ Active
+date: 2026-04-14
 ---
 
 # SentenceTransformers
 
-> ⚠️ Not currently used. Required if ChromaDB RAG is implemented without OpenAI embeddings.
+Python library for generating dense sentence embeddings using pre-trained transformer models. Open-source, runs locally, no API cost.
 
-## What it is
+## Version
 
-Python library for generating dense sentence embeddings using pre-trained transformer
-models (e.g. all-MiniLM-L6-v2). Open-source, runs locally, no API cost.
+`sentence-transformers >= 2.2.0`
 
-## Potential use in this project
+## Where used
 
-Generate embeddings for the ChromaDB RAG pipeline — embed student Q&A data,
-AI feedback strings, and struggle score context locally instead of calling the
-OpenAI embeddings API. Reduces cost and latency for the vector store.
+- `code/learning_dashboard/rag.py` — generates document embeddings for the ChromaDB RAG pipeline. Imported lazily so the rest of the app keeps working if this library is not installed.
+
+## Model used
+
+`all-MiniLM-L6-v2` — configured in `config.RAG_EMBEDDING_MODEL`.
 
 ```python
-# Sketch — not implemented
 from sentence_transformers import SentenceTransformer
 model = SentenceTransformer("all-MiniLM-L6-v2")
-embeddings = model.encode(["Student answered incorrectly three times"])
+embeddings = model.encode(documents, show_progress_bar=False)
 ```
 
-## Relevant to report
+## First-run cost
 
-Ch3/Ch4: embedding model choice for RAG pipeline.
-Note trade-off: OpenAI embeddings higher quality, SentenceTransformers free and local.
+~90 MB download from Hugging Face on first use. Cached at `~/.cache/torch/sentence_transformers/` — subsequent runs are instant.
+
+## Trade-off vs OpenAI embeddings
+
+OpenAI embeddings generally have higher quality but incur API cost per token. `all-MiniLM-L6-v2` is free, local, and sufficient for matching Q&A feedback strings within a single lab session. Worth noting in Ch3/Ch4 implementation justification.
+
+## Related
+
+- [[rag.py — RAG Engine and ChromaDB Interface]]
+- [[ChromaDB]]
+- [[RAG Pipeline - Two-Layer Retrieval]]

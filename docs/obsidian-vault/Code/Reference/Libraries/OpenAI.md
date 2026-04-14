@@ -18,7 +18,8 @@ Every submission carries an `ai_feedback` string produced by the upstream backen
 
 ## Where used
 
-- `code/learning_dashboard/analytics.py` — the only file that imports `openai`
+- `code/learning_dashboard/analytics.py` — incorrectness scoring and cluster labelling
+- `code/learning_dashboard/rag.py` — final-step generation (2–3 coaching bullets via GPT-4o-mini); reuses `_get_openai_client()` from analytics, not duplicated. See [[RAG Pipeline - Two-Layer Retrieval]].
 
 ## Key usage
 

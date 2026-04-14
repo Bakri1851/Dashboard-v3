@@ -29,7 +29,7 @@ High-level chapter status and recommended writing order for the final thesis sub
 Work through this order to minimise rework — each item unblocks the next.
 
 ### 1. Ch4 — Implementation rewrite `Large`
-Rewrite the entire chapter for V2. Remove all "proof of concept" and "to be implemented" framing. Cover: OpenAI incorrectness scoring, 7-signal struggle model with Bayesian shrinkage, 5-signal difficulty model, collaborative filtering, mistake clustering, IRT, BKT, improved struggle, lab assistant system, saved sessions, all 6 instructor views, settings, sound effects, academic calendar.
+Rewrite the entire chapter for V2. Remove all "proof of concept" and "to be implemented" framing. Cover: OpenAI incorrectness scoring, 7-signal struggle model with Bayesian shrinkage, 5-signal difficulty model, collaborative filtering, mistake clustering, IRT, BKT, improved struggle, lab assistant system, saved sessions, all 6 instructor views, settings, sound effects, academic calendar, **Phase 9 RAG suggested feedback** (Dr. Batmaz's hybrid design — must be credited).
 
 *Unblocks: Ch5 evaluation framing, Appendix A.*
 

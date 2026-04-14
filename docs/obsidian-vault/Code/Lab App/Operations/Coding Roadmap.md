@@ -20,7 +20,7 @@ Related: [[Next Steps]], [[Known Issues]], [[Writing Roadmap]], [[Analytics Engi
 | 6 | Mobile app refinement — BKT mastery badge, per-question mastery, session timer, helped/struggling counts | **Not started** | `assistant_app.py`, `ui/theme.py` | Medium |
 | 7 | Surface computed-but-hidden data — measurement confidence indicators in UI; temporal smoothing decision | Done | `ui/components.py`, `analytics.py`, `config.py` | Small |
 | 8 | FR6 smart device notifications — push alert when high-struggle student appears (stretch) | Not started | new file TBD | Large |
-| 9 | RAG suggested feedback — ChromaDB + LLM coaching hints surfaced in assistant assigned-student card | **Not started** | `assistant_app.py`, `analytics.py`, `config.py`, `requirements.txt` | Large |
+| 9 | RAG suggested feedback — ChromaDB + LLM coaching hints surfaced in assistant assigned-student card | **Done** | `assistant_app.py`, `rag.py`, `config.py`, `paths.py`, `requirements.txt` | Large |
 | 10 | In-app Help system (instructor dashboard) — Help section under Settings: Quick Tour, Help Centre (practical use), Model Guide (methodology), contextual tooltips, reliability indicators, troubleshooting | **Not started** | `ui/views.py`, `ui/components.py`, `instructor_app.py` | Large |
 | 11 | In-app Help system (assistant app) — lightweight mobile Help panel: join guide, student card explainer, action button guide, RAG suggestion explainer, mobile-friendly design | **Not started** | `assistant_app.py`, `ui/theme.py` | Medium |
 
@@ -71,11 +71,11 @@ Two features are computed every run but produce no visible output:
 
 Surfaces 2–3 LLM-generated coaching bullets in the assistant assigned-student card, grounded in the student's own submission history via a ChromaDB RAG pipeline. Architecture designed by Dr. Batmaz — full spec in [[Assistant App/Operations/Next Steps]] § Phase 9 and [[Assistant App/Operations/RAG Architecture]].
 
-- [ ] Add `chromadb` and `sentence-transformers` to `requirements.txt`
-- [ ] Add RAG config constants to `config.py` (`RAG_EMBEDDING_MODEL`, `RAG_CHROMA_PATH`, `RAG_SUGGESTION_MAX_RESULTS`, `RAG_SUGGESTION_CACHE`)
-- [ ] Implement `build_rag_collection(df, session_id)` in `analytics.py` — embeds Q&A + AI feedback per student row into a persistent ChromaDB collection
-- [ ] Implement `generate_assistant_suggestions(student_id, df, struggle_row) -> list[str]` in `analytics.py` — pre-filter by student_id, retrieve top-k incorrect Q&A chunks, generate suggestions via OpenAI, cache result in-process
-- [ ] Wire into `assistant_app.py` assigned-student view: call once on assignment, cache in `st.session_state`, show spinner on first load, show "Not enough data yet" for < 2 submissions
+- [x] Add `chromadb` and `sentence-transformers` to `requirements.txt`
+- [x] Add RAG config constants to `config.py` (`RAG_EMBEDDING_MODEL`, `RAG_SUGGESTION_MAX_RESULTS`, `RAG_MIN_SUBMISSIONS`, `RAG_ENABLED_DEFAULT`) — note: cache lives in `rag.py` not config
+- [x] Implement `build_rag_collection(df, session_id)` in `rag.py` (isolated new module) — embeds Q&A + AI feedback per student row into a persistent ChromaDB collection
+- [x] Implement `generate_assistant_suggestions(student_id, df, struggle_row, session_id) -> list[str]` in `rag.py` — pre-filter by student_id, retrieve top-k incorrect Q&A chunks, generate suggestions via OpenAI, cache result in-process
+- [x] Wire into `assistant_app.py` assigned-student view: call once on assignment, cache in `st.session_state`, show spinner on first load, show "Not enough data yet" for < 2 submissions
 
 *Feeds: Ch4 advanced feature implementation, dissertation RAG section; requires [[RAG Architecture]] acknowledgement.*
 

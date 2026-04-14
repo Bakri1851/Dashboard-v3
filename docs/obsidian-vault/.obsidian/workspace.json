@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Code/Reference/Libraries/Optuna.md",
+                "file": "Code/Assistant App/Operations/RAG Architecture.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Optuna"
+              "title": "RAG Architecture"
             }
           }
         ]
@@ -53,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "formulas",
+                "query": "",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -181,13 +181,24 @@
       "3d-graph:3D Graph": false
     }
   },
-  "active": "be447fca2c261028",
+  "active": "8f9c42d0c25b9a5b",
   "lastOpenFiles": [
+    "Phase 9 Testing Guide — RAG Suggested Feedback.md",
+    "Thesis/Ch5 – Results and Evaluation.md.tmp.10028.1776169399383",
+    "config.py — Tunable Constants.md.tmp.10028.1776169272705",
+    "Code/Lab App/Modules/Analytics Engine.md.tmp.10028.1776169260841",
+    "Suggested Focus Areas Panel.md",
+    "RAG Pipeline - Two-Layer Retrieval.md",
+    "Code/Reference/Libraries/ChromaDB.md",
+    "rag.py.md",
+    "rag.py — RAG Engine and ChromaDB Interface.md",
+    "Pasted image 20260414004425.png",
+    "Pasted image 20260414004418.png",
+    "Code/Reference/Libraries/Optuna.md",
     "Code/Overview/Overview Index.md",
     "Code/Overview/Architecture.md",
     "Code/Overview/Data Pipeline.md",
     "graph.canvas",
-    "Code/Reference/Libraries/Optuna.md",
     "Code/Code Index.md",
     "Thesis/Ch6 – Conclusion.md",
     "Code/Lab App/Logic/Algorithms.md",
@@ -206,20 +217,11 @@
     "Thesis/Future Work Inventory.md",
     "Untitled.canvas",
     "uitheme.py — CSS and Plotly Theme.md",
-    "graphify/obsidian/Li et al. (2020) — Course-Level Analytics.md",
-    "Code/Lab App/Operations/Coding Roadmap.md",
-    "Coding Roadmap.md",
-    "graphify/obsidian/Phase 4 Dashboard Design.md",
-    "graphify/obsidian/Stacked Bar Charts Per Question.md",
-    "Thesis/Full Roadmap.md",
     "graphify/obsidian",
     "graphify",
     "Code/Assistant App/Flows/Join Session.md.tmp.29424.1775842222885",
     "Home.md.tmp.29336.1775835637492",
     "Code/Lab App/Operations/Coding Roadmap.md.tmp.29336.1775835094942",
-    "Thesis/future_work_draft.tex",
-    "Thesis/Full Roadmap.md.tmp.20568.1775777871895",
-    "Code/Lab App/Operations",
-    "Code/Assistant App/Flows"
+    "Thesis/future_work_draft.tex"
   ]
 }

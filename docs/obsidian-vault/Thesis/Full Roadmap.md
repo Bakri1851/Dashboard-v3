@@ -192,15 +192,18 @@ Only attempt after Ch6 is written. Ch5 assistant flow testing can use the curren
 
 These phases will not be implemented before the May 20 deadline. Each should be documented in Ch6 §6.3 Future Work. Do not attempt coding on these items.
 
-### Phase 9 — RAG suggested feedback
+### Phase 9 — RAG suggested feedback ✅ Implemented (2026-04-14)
 
-Architecture designed by Dr. Batmaz (Meeting 3). Too large to implement before May 20 deadline. Document fully in Ch6 §6.3 Future Work and retain the Ch3 placeholder as a written design proposal. This is the correct decision — showing deliberate scoping is stronger than a rushed implementation.
+Architecture designed by Dr. Batmaz (Meeting 3) — **must be credited in dissertation**.
 
-- ChromaDB + sentence-transformers RAG pipeline grounding coaching hints in each student's own submission history
-- `generate_assistant_suggestions()` in `analytics.py` — retrieve top-k incorrect Q&A chunks, generate hints via OpenAI, cache in-process
-- Surfaced in assistant assigned-student card with spinner on first load
+Implemented as an isolated `rag.py` module:
+- `chromadb.PersistentClient` at `data/rag_chroma/`, collection `session_{session_id}`
+- `all-MiniLM-L6-v2` embeddings via `sentence-transformers` (local, no API cost)
+- Two-layer retrieval: pandas pre-filter by `student_id` + ChromaDB `where=` metadata filter
+- GPT-4o-mini generates 2–3 coaching bullets surfaced in the assistant assigned-student card
+- Graceful no-op if deps missing; cached per student per session
 
-*Document in Ch6 §6.3 Future Work. See [[RAG Architecture]] for the full design.*
+Ch4 and Ch5 sections needed. See [[RAG Pipeline - Two-Layer Retrieval]] and [[Suggested Focus Areas Panel]].
 
 ### Phase 10 — In-app Help system (instructor dashboard)
 
@@ -234,7 +237,7 @@ Lightweight mobile Help panel for lab assistants covering join guide, student ca
 | 12 | Polish pass | Writing | Small | Not started |
 | 13 | FR6 — Smart devices (stretch) | Coding | Large | Not started |
 | 14 | Phase 6 — Mobile app refinement | Coding | Medium | Stretch |
-| — | Phase 9 — RAG suggested feedback | Coding | Large | Out of scope / Future work |
+| — | Phase 9 — RAG suggested feedback | Coding | Large | **Done** (2026-04-14) |
 | — | Phase 10 — In-app Help (instructor) | Coding | Large | Out of scope / Future work |
 | — | Phase 11 — In-app Help (assistant) | Coding | Medium | Out of scope / Future work |
 

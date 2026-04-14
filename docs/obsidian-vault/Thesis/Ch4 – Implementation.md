@@ -143,6 +143,21 @@ Describes "a live visual overview of student activity" with "simple, predictable
 - [ ] **Waiting and Assignment States** — unassigned view (waiting screen); assigned view (student card with struggle summary, help-requested flag); transitions on filelock state change
 - [ ] **Live Assistant Allocation** — instructor assigns via dropdown (any unassigned assistant → any student); assistant self-claim from list (toggleable by instructor); mark-helped clears assignment; all changes sync via filelock
 
+### 4.x RAG Suggested Feedback (Phase 9)
+
+> ⚠️ Stub — write after Phase 9 code is finalized
+
+- [ ] Describe Dr. Batmaz's hybrid two-layer architecture (must credit in dissertation — Meeting 3, 2026-04-08)
+- [ ] Layer 1: pandas pre-filter `df[df["user"] == student_id]` (SQL concept, pandas realisation)
+- [ ] Layer 2: ChromaDB semantic search — `PersistentClient` at `data/rag_chroma/`, collection `session_{id}`, `where={"student_id": ...}` metadata filter
+- [ ] Embedding model: `all-MiniLM-L6-v2` (local, ~90 MB first-run, no API cost)
+- [ ] Generation: GPT-4o-mini, temperature 0, JSON array of 2–3 bullets ≤15 words each
+- [ ] Caching: module-level `_suggestion_cache` + `st.session_state["cached_suggestions"]` — one OpenAI call per student per session
+- [ ] Graceful degradation: missing deps → silent no-op; < 2 submissions → "Not enough data yet"; LLM failure → silent
+- [ ] Privacy argument: two-layer student-scoped filter enforces NFR5
+
+See [[RAG Pipeline - Two-Layer Retrieval]] and [[rag.py — RAG Engine and ChromaDB Interface]].
+
 ### Cross-cutting
 
 - [ ] Remove all "to be implemented in later iteration" language (line 142 in tex)

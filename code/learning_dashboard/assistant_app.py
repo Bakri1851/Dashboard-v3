@@ -7,7 +7,7 @@ import pandas as pd
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 
-from learning_dashboard import analytics, config, data_loader, lab_state, sound
+from learning_dashboard import analytics, config, data_loader, lab_state, rag, sound
 from learning_dashboard.ui import theme
 
 
@@ -306,6 +306,33 @@ def render_assigned_view(
         """,
         unsafe_allow_html=True,
     )
+
+    # --- Suggested Focus Areas (Phase 9 RAG) ---
+    current_session_id = lab_data.get("session_id", "")
+    if st.session_state.get("_rag_session_id") != current_session_id:
+        rag.clear_suggestion_cache()
+        st.session_state["cached_suggestions"] = {}
+        st.session_state["_rag_session_id"] = current_session_id
+
+    suggestion_cache = st.session_state.setdefault("cached_suggestions", {})
+    if student_id in suggestion_cache:
+        bullets = suggestion_cache[student_id]
+    else:
+        with st.spinner("Generating suggestions..."):
+            bullets = rag.generate_assistant_suggestions(
+                student_id, df, student_row, current_session_id
+            )
+        suggestion_cache[student_id] = bullets
+
+    student_submissions = df[df["user"] == student_id] if not df.empty else df
+    if len(student_submissions) < config.RAG_MIN_SUBMISSIONS:
+        st.markdown("**Suggested Focus Areas**")
+        st.caption("Not enough data yet")
+    elif bullets:
+        st.markdown("**Suggested Focus Areas**")
+        for b in bullets:
+            st.markdown(f"• {b}")
+    # silent no-op if bullets == [] and submissions >= min (deps missing or LLM failed)
 
     # Top 3 struggling questions
     st.markdown("---")

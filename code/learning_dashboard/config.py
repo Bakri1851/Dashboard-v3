@@ -159,3 +159,9 @@ IMPROVED_MODELS_ENABLED_DEFAULT: bool = False
 IRT_ENABLED_DEFAULT: bool = True
 BKT_ENABLED_DEFAULT: bool = True
 IMPROVED_STRUGGLE_ENABLED_DEFAULT: bool = True
+
+# --- Phase 9: RAG Suggested Feedback ---
+RAG_ENABLED_DEFAULT: bool = True
+RAG_EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"   # sentence-transformers, local, no API cost
+RAG_SUGGESTION_MAX_RESULTS: int = 5              # top-k chunks retrieved per query
+RAG_MIN_SUBMISSIONS: int = 2                     # min student submissions before RAG is attempted

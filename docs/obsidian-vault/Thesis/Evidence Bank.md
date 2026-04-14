@@ -42,6 +42,7 @@ Evidence that features are built. Code references documented in vault notes.
 | Improved struggle model | `models/improved_struggle.py:compute_improved_struggle_scores()` | Yes — [[Improved Struggle Logic]] |
 | Measurement confidence | `models/measurement.py:compute_incorrectness_with_confidence()` | Yes — [[Analytics Engine]] |
 | Lab assistant system | `lab_state.py`, `assistant_app.py` | Yes — [[Lab Assistant System]] |
+| RAG coaching suggestions (Phase 9) | `rag.py:generate_assistant_suggestions()` | Yes — [[rag.py — RAG Engine and ChromaDB Interface]] |
 | Saved sessions | `data_loader.py:save_session_record()` etc. | Yes — [[Data Loading and Session Persistence]] |
 | Academic calendar | `academic_calendar.py` | Yes — [[Academic Period Converter]] |
 | Config-driven thresholds | `config.py` | Yes — [[Configuration and Runtime Paths]] |
@@ -80,7 +81,7 @@ Manual testing results. Target: Ch5 and Appendix C.
 | NFR2: Interpretability | Walkthrough showing no specialist knowledge needed | Needs documenting |
 | NFR3: Robustness | Test with empty data, single student, no feedback | Needs testing |
 | NFR4: Scalability | Test with varying class sizes | Needs testing |
-| NFR5: Privacy | Confirm read-only API, no PII stored | Needs documenting |
+| NFR5: Privacy | Confirm read-only API, no PII stored; RAG pipeline enforces student-scoped retrieval at both Layer 1 (pandas filter) and Layer 2 (ChromaDB `where=` metadata filter) | Needs documenting |
 | NFR6: Extensibility | Demonstrate model toggles, config-driven thresholds | Needs documenting |
 
 Existing test resource: smoke test checklist in [[Setup and Runbook]].

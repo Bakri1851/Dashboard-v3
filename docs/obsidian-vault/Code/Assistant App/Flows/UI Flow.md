@@ -31,6 +31,14 @@ Related: [[Lab Assistant System]], [[Setup and Runbook]]
 - If `allow_self_allocation` is enabled in the session, the unassigned view shows a list of available struggling students.
 - The assistant can self-claim a student directly without waiting for instructor assignment.
 
+## RAG suggested focus areas (Phase 9)
+
+- On first render of the assigned view, `rag.generate_assistant_suggestions()` is called with a spinner.
+- Returns 2–3 bullet points grounded in the student's own submission history (Dr. Batmaz's hybrid design).
+- Cached in `st.session_state["cached_suggestions"]` — subsequent 5-second auto-refresh cycles return instantly from cache.
+- Shows "Not enough data yet" if the student has fewer than 2 submissions; silent if deps missing or LLM fails.
+- See [[Suggested Focus Areas Panel]] and [[RAG Pipeline - Two-Layer Retrieval]].
+
 ## Mark as helped
 
 - From the assigned view, the assistant taps "Mark as Helped".

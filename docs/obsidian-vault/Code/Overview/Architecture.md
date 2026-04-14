@@ -12,6 +12,7 @@ Related: [[Project Overview]], [[Data Pipeline]], [[Instructor Dashboard]], [[La
 - `code/lab_app.py` -> `learning_dashboard.assistant_app.main()`
 - `code/learning_dashboard/data_loader.py` owns ingest, normalization, filters, and saved-session persistence.
 - `code/learning_dashboard/analytics.py` owns incorrectness scoring, struggle/difficulty scoring, collaborative filtering, and mistake clustering.
+- `code/learning_dashboard/rag.py` owns the Phase 9 RAG pipeline — ChromaDB collection build, semantic retrieval, and GPT-4o-mini coaching suggestion generation for lab assistants. See [[rag.py — RAG Engine and ChromaDB Interface]].
 - `code/learning_dashboard/lab_state.py` owns cross-process assistant/session state through a file lock and JSON file.
 - `code/learning_dashboard/ui/` owns views, reusable components, CSS, and browser-side sound injection.
 
@@ -22,6 +23,7 @@ Related: [[Project Overview]], [[Data Pipeline]], [[Instructor Dashboard]], [[La
 - Shared instructor/assistant coordination state lives in `data/lab_session.json`.
 - Saved session history lives in `data/saved_sessions.json`.
 - API fetch results and analytics outputs are cached in Streamlit session state plus small in-process module caches.
+- ChromaDB collection for RAG lives on disk at `data/rag_chroma/` — persists across restarts within the same session.
 
 ## Control flow
 

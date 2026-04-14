@@ -201,7 +201,8 @@ The Progress Report (`main sections/Progress Report.tex`) is currently commented
 |---|---|---|---|---|
 | Model evaluation | ✅ Model implemented | ❌ Not yet written | 🔴 High | Ch5 placeholder added. Dr. Batmaz flagged Meeting 3. |
 | Weight optimisation | ⚠️ Manual trial and error | ❌ Not in report | 🔴 High | Add as limitation + future work. Optuna/ML training possible once labeled data exists. |
-| RAG / ChromaDB | ❌ Not yet implemented | ❌ Not yet written | 🟡 Planned | Ch3 placeholder added. Dr. Batmaz's design, Meeting 3. |
+| RAG / ChromaDB | ✅ Implemented (Phase 9) | ❌ Not yet written | 🔴 High | `rag.py` built. Dr. Batmaz's hybrid design. Ch3/Ch4 sections needed. See [[RAG Pipeline - Two-Layer Retrieval]]. |
+| Data labelling (weight optimisation) | ⚠️ Manual weights in config.py | ❌ Not in report | 🟡 Planned | ~500 submissions needed to fit `STRUGGLE_WEIGHT_*` / `DIFFICULTY_WEIGHT_*` against ground truth. Add as limitation + future work. |
 
 ---
 

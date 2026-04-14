@@ -62,3 +62,11 @@ def lab_session_lock_path() -> Path:
     if lab_session_path() == LEGACY_LAB_SESSION_PATH:
         return LEGACY_LAB_SESSION_PATH.with_suffix(".lock")
     return LAB_SESSION_LOCK_PATH
+
+
+def rag_chroma_dir() -> Path:
+    """Persistent ChromaDB storage directory for the RAG pipeline."""
+    _ensure_data_dir()
+    p = DATA_DIR / "rag_chroma"
+    p.mkdir(parents=True, exist_ok=True)
+    return p

@@ -33,10 +33,15 @@ Related: [[Architecture]], [[Instructor Dashboard]], [[Assistant App/Flows/UI Fl
 - `_normalize_state()` repairs partial or inconsistent state on every read.
 - Helper functions enforce the one-assistant/one-student rule.
 
+## Phase 9: RAG suggestions in assigned view
+
+When an assistant is assigned a student, `render_assigned_view()` now also calls `rag.generate_assistant_suggestions()` to surface 2–3 coaching bullets beneath the student card. The RAG block is the UI chokepoint — `lab_state.py` remains Streamlit-free and is not touched. Session change clears `rag._suggestion_cache` and `st.session_state["cached_suggestions"]`. See [[Suggested Focus Areas Panel]] and [[rag.py — RAG Engine and ChromaDB Interface]].
+
 ## Code references
 
 - `code/learning_dashboard/lab_state.py`: `_default_state()`, `_normalize_state()`, `read_lab_state()`
 - `code/learning_dashboard/lab_state.py`: `join_session()`, `assign_student()`, `self_claim_student()`
 - `code/learning_dashboard/lab_state.py`: `mark_student_helped()`, `unassign_student()`, `leave_session()`, `remove_assistant()`
 - `code/learning_dashboard/assistant_app.py`: `render_join_screen()`, `render_unassigned_view()`, `render_assigned_view()`
+- `code/learning_dashboard/rag.py`: `generate_assistant_suggestions()`, `clear_suggestion_cache()`
 - `data/lab_session.json`

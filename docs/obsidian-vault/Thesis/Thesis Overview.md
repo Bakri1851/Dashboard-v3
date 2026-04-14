@@ -52,7 +52,8 @@ See [[Figures and Tables]] for full figure/table inventory.
 4. **Formula mismatch** — thesis struggle model has 5 components, code has 7; difficulty has 4 vs 5
 5. **Figma mockups** — 3 mockups in Ch3 should be replaced with actual dashboard screenshots
 6. **Future-tense language** — thesis reads as proposal in many places, not a completed project
-7. **Missing features** — IRT, BKT, improved struggle, mistake clustering, saved sessions, data analysis, lab assistant system — all implemented but not in thesis
+7. **Missing features** — IRT, BKT, improved struggle, mistake clustering, saved sessions, data analysis, lab assistant system, **Phase 9 RAG suggested feedback** — all implemented but not yet in thesis
+8. **Phase 9 dissertation credit** — Dr. Batmaz's hybrid RAG architecture must be acknowledged in Ch4 and the literature review updated to cover ChromaDB + RAG
 
 ## Thesis source structure
 

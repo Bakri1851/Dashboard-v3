@@ -45,8 +45,13 @@ Alternative and enhanced models live in the `models/` package, gated by the `imp
 - `improved_struggle.py` (Phase 4): mastery-aware, difficulty-adjusted struggle model combining behavioral signals with BKT and IRT outputs. See [[Improved Struggle Logic]].
 - Phase 5 (Comparison UI): each sub-model is gated individually in `instructor_app.py` via session state toggles (`irt_enabled`, `bkt_enabled`, `improved_struggle_enabled`). `_improved_models_settings_key` fingerprints all toggle + BKT param state so any slider or toggle change triggers automatic recomputation without a manual refresh. The comparison view is in `ui/views.py` `comparison_view()`. See [[UI System]].
 
+## Phase 9: RAG pipeline reuses analytics internals
+
+`rag.py` (Phase 9) imports `_get_openai_client()` directly from `analytics.py` rather than duplicating it. The `incorrectness` values stored per-document in the ChromaDB collection are the same scores computed here — the RAG pipeline reuses them for ranking retrieved chunks. See [[rag.py — RAG Engine and ChromaDB Interface]].
+
 ## Code references
 
+- `code/learning_dashboard/analytics.py`: `_get_openai_client()` — also imported by `rag.py`
 - `code/learning_dashboard/analytics.py`: `compute_incorrectness_column()`
 - `code/learning_dashboard/analytics.py`: `compute_student_struggle_scores()`
 - `code/learning_dashboard/analytics.py`: `compute_question_difficulty_scores()`
