@@ -593,6 +593,60 @@ def render_back_button(key: str = "back") -> bool:
     return st.button("\u2190 Back to Dashboard", key=key)
 
 
+# Navigation Loader (full-page overlay shown between view transitions)
+
+def render_nav_loader() -> None:
+    """Full-viewport neon loader that hides any lingering deltas from the previous view."""
+    cyan = config.COLORS["cyan"]
+    st.markdown(
+        f"""
+        <style>
+        @keyframes nav-loader-spin {{
+            from {{ transform: rotate(0deg); }}
+            to   {{ transform: rotate(360deg); }}
+        }}
+        @keyframes nav-loader-pulse {{
+            0%, 100% {{ opacity: 0.55; letter-spacing: 4px; }}
+            50%      {{ opacity: 1;    letter-spacing: 8px; }}
+        }}
+        .nav-loader-overlay {{
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            background: #000000;
+        }}
+        .nav-loader-ring {{
+            width: 72px;
+            height: 72px;
+            border: 3px solid {cyan}22;
+            border-top-color: {cyan};
+            border-radius: 50%;
+            animation: nav-loader-spin 0.9s linear infinite;
+            box-shadow: 0 0 24px {cyan}55;
+        }}
+        .nav-loader-text {{
+            color: {cyan};
+            font-family: {config.FONT_HEADING};
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            animation: nav-loader-pulse 1.4s ease-in-out infinite;
+            text-shadow: 0 0 12px {cyan}aa;
+        }}
+        </style>
+        <div class="nav-loader-overlay">
+            <div class="nav-loader-ring"></div>
+            <div class="nav-loader-text">Loading</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 # Entity Header Card (drill-down)
 
 def render_entity_header_card(

@@ -15,6 +15,12 @@ Related: [[Lab Assistant System]], [[Unassigned View]]
   - Student ID
   - Struggle score (3 decimal places, coloured by level)
   - Struggle level badge (e.g. "Needs Help", "Struggling")
+- **"Suggested Focus Areas"** panel (Phase 9 RAG) — appears between the student card and the top-3 questions divider:
+  - On first render: spinner → calls `rag.generate_assistant_suggestions(student_id, df, struggle_row, session_id)` → 2–3 bullet points grounded in the student's own submission history
+  - Cached in `st.session_state["cached_suggestions"]` — auto-refresh cycles return instantly from cache
+  - Shows `"Not enough data yet"` if student has < 2 submissions
+  - Silent (no block shown) if `chromadb`/`sentence-transformers` not installed or LLM fails
+  - See [[Suggested Focus Areas Panel]] and [[RAG Pipeline - Two-Layer Retrieval]]
 - Divider
 - **"Top Struggling Questions"** section — up to 3 questions this student has the highest mean incorrectness on:
   - Question text (truncated to 50 characters)

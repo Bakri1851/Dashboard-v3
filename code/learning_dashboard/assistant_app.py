@@ -22,7 +22,7 @@ def _load_student_data() -> tuple[pd.DataFrame, Optional[pd.DataFrame]]:
     if df.empty:
         return df, None
     # Filter to only include submissions within the instructor's active session window
-    state = lab_state.read_state()
+    state = lab_state.read_lab_state()
     session_start = state.get("session_start")
     if session_start and "timestamp" in df.columns:
         df = df[df["timestamp"] >= session_start].copy()
@@ -308,7 +308,7 @@ def render_assigned_view(
     )
 
     # --- Suggested Focus Areas (Phase 9 RAG) ---
-    current_session_id = lab_data.get("session_id", "")
+    current_session_id = str(lab_data.get("session_code") or "")
     if st.session_state.get("_rag_session_id") != current_session_id:
         rag.clear_suggestion_cache()
         st.session_state["cached_suggestions"] = {}

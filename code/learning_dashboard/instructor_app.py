@@ -15,7 +15,7 @@ from learning_dashboard.models import measurement
 from learning_dashboard.models import irt
 from learning_dashboard.models import bkt
 from learning_dashboard.models import improved_struggle
-from learning_dashboard.ui import theme, views
+from learning_dashboard.ui import components, theme, views
 
 try:
     os.environ.setdefault("OPENAI_API_KEY", st.secrets.get("OPENAI_API_KEY", ""))
@@ -310,6 +310,7 @@ def _on_view_change() -> None:
     st.session_state["selected_question"] = None
     st.session_state.pop("student_leaderboard", None)
     st.session_state.pop("question_leaderboard", None)
+    st.session_state["_nav_loading"] = True
 
 
 def _on_dashboard_view_change() -> None:
@@ -641,6 +642,15 @@ def main() -> None:
     st.markdown(theme.get_google_fonts_import(), unsafe_allow_html=True)
     st.markdown(f"<style>{theme.get_main_css()}</style>", unsafe_allow_html=True)
 
+    # Navigation loader gate: on a user-initiated view change the previous
+    # view's DOM lingers until the new view's deltas arrive. Render a full-page
+    # loader for one render cycle so the old content is visually replaced before
+    # we kick off data loading and analytics.
+    if st.session_state.pop("_nav_loading", False):
+        components.render_nav_loader()
+        time.sleep(0.08)
+        st.rerun()
+
     # Auto-refresh
     if st.session_state["auto_refresh"]:
         refresh_count = st_autorefresh(
@@ -680,6 +690,7 @@ def main() -> None:
             available_modules=available_modules,
         )
         st.session_state["pending_session_load_record"] = None
+        st.session_state["_nav_loading"] = True
         st.rerun()
 
     if st.session_state.get("pending_return_to_live_data"):
@@ -699,6 +710,7 @@ def main() -> None:
         st.session_state["dashboard_view"] = "In Class View"
         st.session_state["current_view"] = "In Class View"
         st.session_state["today_filter_only"] = True
+        st.session_state["_nav_loading"] = True
         st.rerun()
 
     # Cache lab session state — read file at most once per second across all consumers

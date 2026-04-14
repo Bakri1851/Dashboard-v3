@@ -4,7 +4,7 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 
-from learning_dashboard import analytics, config, data_loader
+from learning_dashboard import analytics, config, data_loader, lab_state, rag
 from learning_dashboard.ui import components
 
 
@@ -125,12 +125,14 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
         selected_student = components.render_student_leaderboard(struggle_df)
         if selected_student is not None:
             st.session_state["selected_student"] = selected_student
+            st.session_state["_nav_loading"] = True
             st.rerun()
 
     with right_col:
         selected_question = components.render_question_leaderboard(difficulty_df)
         if selected_question is not None:
             st.session_state["selected_question"] = selected_question
+            st.session_state["_nav_loading"] = True
             st.rerun()
 
     st.markdown("---")
@@ -201,6 +203,7 @@ def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataF
     if components.render_back_button(key="back_student"):
         st.session_state["selected_student"] = None
         st.session_state.pop("student_leaderboard", None)
+        st.session_state["_nav_loading"] = True
         st.rerun()
 
     # Filter to this student
@@ -320,6 +323,7 @@ def question_detail_view(df: pd.DataFrame, question_id: str, difficulty_df: pd.D
     if components.render_back_button(key="back_question"):
         st.session_state["selected_question"] = None
         st.session_state.pop("question_leaderboard", None)
+        st.session_state["_nav_loading"] = True
         st.rerun()
 
     # Filter to this question
@@ -375,6 +379,39 @@ def question_detail_view(df: pd.DataFrame, question_id: str, difficulty_df: pd.D
                 st.info("Could not generate clusters for this question.")
             else:
                 components.render_mistake_clusters(clusters)
+
+                # RAG pedagogical feedback
+                current_session_id = str(
+                    st.session_state.get("loaded_session_id")
+                    or lab_state.read_lab_state().get("session_code")
+                    or ""
+                )
+                if st.session_state.get("_rag_cluster_session_id") != current_session_id:
+                    rag.clear_cluster_suggestion_cache()
+                    st.session_state["cached_cluster_suggestions"] = {}
+                    st.session_state["_rag_cluster_session_id"] = current_session_id
+
+                cluster_cache = st.session_state.setdefault("cached_cluster_suggestions", {})
+                if question_id in cluster_cache:
+                    cluster_bullets = cluster_cache[question_id]
+                else:
+                    with st.spinner("Generating teaching feedback..."):
+                        cluster_bullets = rag.generate_cluster_suggestions(
+                            question_id, df, clusters, current_session_id
+                        )
+                    cluster_cache[question_id] = cluster_bullets
+
+                if cluster_bullets:
+                    st.markdown(
+                        f'<h4 style="color:{config.COLORS["purple"]}; '
+                        f'font-family:{config.FONT_HEADING}, sans-serif; '
+                        f'text-transform:uppercase; letter-spacing:2px; '
+                        f'font-size:0.95rem; margin-top:18px; margin-bottom:10px;">'
+                        f'Suggested Teaching Feedback</h4>',
+                        unsafe_allow_html=True,
+                    )
+                    for b in cluster_bullets:
+                        st.markdown(f"• {b}")
 
     st.markdown("---")
 

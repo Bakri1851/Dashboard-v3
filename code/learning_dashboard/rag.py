@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 # Module-level state (mirrors _incorrectness_cache in analytics.py:26)
 # ---------------------------------------------------------------------------
 _suggestion_cache: dict[str, list[str]] = {}
+_cluster_suggestion_cache: dict[str, list[str]] = {}
 _cached_session_id: str | None = None
 _cached_row_count: int = 0
 _collection: Any = None  # chromadb.Collection once built
@@ -144,6 +145,36 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
         return None
 
 
+def _extract_bullets(parsed: Any) -> list[str]:
+    """Pull a list of short strings out of whatever shape OpenAI returned.
+
+    `response_format={"type": "json_object"}` forces a dict wrapper, and the
+    model chooses the key name (bullets / advice / feedback / etc.), so we
+    accept any key whose value is a list of strings. Falls back to flattening
+    nested lists/dicts if needed.
+    """
+    if isinstance(parsed, list):
+        return [str(b).strip() for b in parsed if isinstance(b, (str, int, float)) and str(b).strip()]
+
+    if isinstance(parsed, dict):
+        # First: any value that is a list of short-ish things
+        for value in parsed.values():
+            if isinstance(value, list) and value:
+                items = [str(v).strip() for v in value if isinstance(v, (str, int, float)) and str(v).strip()]
+                if items:
+                    return items
+        # Next: any value that is itself a dict containing a list (one level of nesting)
+        for value in parsed.values():
+            if isinstance(value, dict):
+                nested = _extract_bullets(value)
+                if nested:
+                    return nested
+        # Last resort: treat all string values as bullets
+        return [str(v).strip() for v in parsed.values() if isinstance(v, str) and v.strip()]
+
+    return []
+
+
 def generate_assistant_suggestions(
     student_id: str,
     df: Any,
@@ -255,19 +286,7 @@ def generate_assistant_suggestions(
         raw = response.choices[0].message.content.strip()
         parsed = json.loads(raw)
 
-        # Accept {"bullets": [...]} or a bare array
-        if isinstance(parsed, list):
-            bullets = [str(b) for b in parsed if b]
-        elif isinstance(parsed, dict):
-            for key in ("bullets", "suggestions", "items", "result"):
-                if key in parsed and isinstance(parsed[key], list):
-                    bullets = [str(b) for b in parsed[key] if b]
-                    break
-            else:
-                bullets = [str(v) for v in parsed.values() if isinstance(v, str) and v]
-        else:
-            bullets = []
-
+        bullets = _extract_bullets(parsed)
         bullets = bullets[:3]  # never more than 3
 
         _suggestion_cache[student_id] = bullets
@@ -278,6 +297,95 @@ def generate_assistant_suggestions(
         return []
 
 
+def generate_cluster_suggestions(
+    question_id: str,
+    df: Any,
+    clusters: list[dict],
+    session_id: str,
+) -> list[str]:
+    """Generate 2–3 pedagogical bullets for an instructor viewing a clustered question.
+
+    Audience is the instructor: focus on misconception diagnosis and corrective class-wide
+    feedback, not one-on-one tutoring. Reuses the shared ChromaDB collection built for the
+    student-side RAG, filtered on the `question` metadata key.
+
+    Returns [] silently on any error. Cached per question_id within a session; cleared on
+    session change via clear_cluster_suggestion_cache().
+    """
+    if question_id in _cluster_suggestion_cache:
+        return _cluster_suggestion_cache[question_id]
+
+    if not clusters:
+        return []
+
+    try:
+        question_df = df[df["question"] == question_id]
+        if len(question_df) < config.RAG_MIN_SUBMISSIONS:
+            return []
+
+        collection = build_rag_collection(df, session_id)
+        if collection is None:
+            return []
+
+        top_clusters = clusters[:3]
+        query_text = f"{question_id} " + " ".join(
+            (c.get("example_answers") or [""])[0] for c in top_clusters
+        )
+
+        results = collection.query(
+            query_texts=[query_text],
+            n_results=config.RAG_SUGGESTION_MAX_RESULTS,
+            where={"question": str(question_id)},
+        )
+        retrieved_docs: list[str] = results.get("documents", [[]])[0] or []
+
+        cluster_lines = []
+        for i, c in enumerate(top_clusters, 1):
+            examples = "; ".join((c.get("example_answers") or [])[:2])
+            cluster_lines.append(
+                f"  [{i}] {c.get('label', '?')} — {c.get('count', 0)} students "
+                f"({c.get('percent_of_wrong', 0):.0f}% of wrong). Examples: {examples}"
+            )
+        clusters_block = "\n".join(cluster_lines)
+        snippets = "\n".join(f"  - {d}" for d in retrieved_docs)
+
+        system_msg = (
+            "You advise a university instructor on how to correct common misconceptions "
+            "about a specific question. Focus on teaching adjustments and corrective "
+            "feedback to give the class — not one-on-one tutoring."
+        )
+        user_msg = (
+            f"Question: {question_id}\n\n"
+            f"Mistake clusters (top 3):\n{clusters_block}\n\n"
+            f"Retrieved Q&A snippets:\n{snippets}\n\n"
+            "Return a JSON array of 2 or 3 short bullet strings (max 15 words each) "
+            "with pedagogical advice: what misconception each cluster reveals and what "
+            "feedback or follow-up the instructor should give. No prose outside the array."
+        )
+
+        client = _get_openai_client()
+        response = client.chat.completions.create(
+            model=config.OPENAI_MODEL,
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": user_msg},
+            ],
+            temperature=0,
+            response_format={"type": "json_object"},
+        )
+        raw = response.choices[0].message.content.strip()
+        parsed = json.loads(raw)
+
+        bullets = _extract_bullets(parsed)
+        bullets = bullets[:3]
+        _cluster_suggestion_cache[question_id] = bullets
+        return bullets
+
+    except Exception as exc:
+        logger.warning("RAG generate_cluster_suggestions failed for %s: %s", question_id, exc, exc_info=True)
+        return []
+
+
 def clear_suggestion_cache() -> None:
     """Clear all module-level RAG state. Call when session_id changes."""
     global _suggestion_cache, _cached_session_id, _cached_row_count, _collection
@@ -285,3 +393,9 @@ def clear_suggestion_cache() -> None:
     _cached_session_id = None
     _cached_row_count = 0
     _collection = None
+
+
+def clear_cluster_suggestion_cache() -> None:
+    """Clear the per-question RAG cache. Call when session_id changes."""
+    global _cluster_suggestion_cache
+    _cluster_suggestion_cache = {}
