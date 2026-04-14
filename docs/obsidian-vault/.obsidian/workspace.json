@@ -11,10 +11,14 @@
             "id": "be447fca2c261028",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "My Notes/Thesis/Ch1 – Introduction.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Ch1 – Introduction"
             }
           }
         ]
@@ -177,8 +181,13 @@
       "3d-graph:3D Graph": false
     }
   },
-  "active": "8f9c42d0c25b9a5b",
+  "active": "be447fca2c261028",
   "lastOpenFiles": [
+    "Absolute path to the local saved-session store..md",
+    "Assistant Leaderboard Full View Mockup (figma3).md",
+    "Code/Assistant App/Operations/RAG Architecture.md",
+    "My Notes/Code/Assistant App/Operations/Pasted image 20260414004425.png",
+    "My Notes/Code/Assistant App/Operations/Pasted image 20260414004418.png",
     "My Notes/Code/Assistant App/Operations/rag.py.md",
     "My Notes/Code/Assistant App/Operations/rag.py — RAG Engine and ChromaDB Interface.md",
     "My Notes/Code/Assistant App/Operations/Suggested Focus Areas Panel.md",
@@ -204,10 +213,7 @@
     "My Notes/Thesis/Ch4 – Implementation.md",
     "My Notes/Thesis/Ch3 – Design and Modelling.md",
     "My Notes/Thesis/Ch2 – Background and Requirements.md",
-    "My Notes/Thesis/Ch1 – Introduction.md",
     "My Notes/Thesis",
-    "My Notes/Literature/wilson_2017_learning.md",
-    "My Notes/Literature/wikipediacontributors_2019_learning.md",
     "My Notes/Literature",
     "My Notes/Code/Reference/Libraries",
     "My Notes/Code/Lab App/Operations",
