@@ -12,6 +12,7 @@ Master index for all vault notes about the Dashboard v3 codebase — a two-app S
 | Assistant App | [[Assistant App]] | Mobile assistant portal (port 8502) — join/assign/helped flows |
 | Overview | [[Overview Index]] | Architecture, data pipeline, project overview (covers both apps) |
 | Reference | [[Reference Index]] | Glossary, academic calendar converter, library notes (current + candidate) |
+| Source Tree | [[Source Tree Index]] | File-by-file reference mirroring `code/` on disk, with a Mermaid diagram |
 
 ---
 
