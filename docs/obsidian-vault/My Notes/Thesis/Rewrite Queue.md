@@ -147,3 +147,12 @@ New skeleton subsections added to `implementation.tex` and `design-and-architect
 - [ ] **Ch5 — write model comparison subsection** — report agreement %, discuss systematic disagreements visible in scatter plots (above/below diagonal), explain what high-delta cases reveal.
 - [ ] **Ch4 — document Phase 5** — describe the Model Comparison view, the three new component functions, and the Settings sub-panel (sub-toggles + BKT sliders).
 - [ ] **Ch6 Future Work — BKT parameter sensitivity** — sliders now exist; mention that formal sensitivity analysis or grid search over P_init/P_learn/P_guess/P_slip is a natural next step once labelled data is available.
+
+---
+
+## Meeting 4 Additions (2026-04-16)
+
+- [ ] **Ch5 §5.5 — IRT/BKT model disagreement discussion** — improved models produce ~0% agreement with baseline (everything collapses to red/max struggle). Write a paragraph explaining possible causes: IRT difficulty collapsing under sparse data per question; BKT mastery threshold sensitivity with default parameters; improved struggle model depending on both. Frame as a known limitation, not a failure. #meeting4
+- [ ] **Ch4 — RAG feedback caching** — the current pipeline regenerates OpenAI feedback on every click. Dr. Batmaz suggested caching by cluster signature (question ID + cluster centroid hash) so repeated identical clusters don't re-call the API. Implement and document the caching design decision in Ch4. #meeting4
+- [ ] **Ch5 — Retrospective evaluation results** — once the evaluation pipeline is implemented, capture results (accuracy vs time cutoff for parametric / CF / hypothesis-based ranking) and write up as §5.4. See [[Evaluation Strategy]]. #meeting4
+- [ ] **Discussion chapter / ethics appendix — guest lecture notes** — Dr. Batmaz suggested recording the MSc ethics class session (Mon 27 Apr) and using the student Q&A as material for the Discussion chapter. Transcribe key questions raised and develop answers collaboratively with Dr. Batmaz. #meeting4

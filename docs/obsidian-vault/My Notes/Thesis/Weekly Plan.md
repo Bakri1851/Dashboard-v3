@@ -78,9 +78,9 @@ The schedule is achievable but carries real risk and leaves no slack. Total esti
 
 **Target:** Complete step 3 (Ch3 design updates). Begin step 4 (Ch1&2). If Phase 5 spilled from Week 1, absorb the overflow before moving to writing.
 
-> **Supervisor checkpoint — Wed 16 Apr, 1pm**
-> Show: Completed comparison UI (live demo). Ch3 updates in progress. Discuss Ch3 formula changes — confirm the updated weights and component counts match what Dr. Batmaz expects. Raise any framing questions before Ch1&2 are touched.
-> Agenda: Demo comparison UI; Ch3 review; confirm Ch1&2 scope.
+> **Supervisor checkpoint — Wed 16 Apr, 1pm** ✅ Done
+> Discussed: RAG pipeline (ChromaDB + K-means clustering + OpenAI feedback). Retrospective evaluation method agreed and made top priority. IRT/BKT disagreement acknowledged — write about it rather than fix it. CF supplementary role confirmed. Guest lecture arranged (Mon 27 Apr, Vanessa's MSc Ethics class). Extension application recommended as safety net.
+> Key decisions: evaluation pipeline before next meeting; RAG caching to be added; guest lecture confirmed.
 
 ---
 
@@ -112,6 +112,22 @@ The schedule is achievable but carries real risk and leaves no slack. Total esti
 - [ ] **Reconcile temporal smoothing (report vs code)** — Ch3 proposes exponential smoothing; `SMOOTHING_ENABLED = False` in config. Either remove from Ch3 design or explain deferral explicitly.
 
 *Unblocks: Step 4 (Ch1&2 language easier once Ch3 narrative is settled); Step 5 (Ch4 references Ch3 design decisions).*
+
+---
+
+### Guest Lecture Prep `Non-thesis · Small (~3hrs)`
+
+- [ ] Prepare 5–6 slides for MSc Ethics class guest talk (Mon 27 Apr, 2pm, Vanessa's module)
+- [ ] Framing: sell the *idea* — smart glasses, AI bubble overlays, assistive not replacing. End with the rosy vision (primary school teachers, accessible education), but leave room for ethical debate
+- [ ] Do NOT explain implementation in depth — show the sci-fi concept, not the code
+- [ ] Optional: one live demo poke if confidence is high
+- [ ] Send slides to Dr. Batmaz for review before the session
+- [ ] Dr. Batmaz will be present; session may be recorded for Discussion chapter material
+
+### Retrospective Evaluation Pipeline `Coding · Medium (~6hrs)` 🔴 Priority
+
+- [ ] Implement retrospective labelling + temporal truncation + model comparison — see [[Evaluation Strategy]] for full spec
+- [ ] Must be ready to show at Wed 23 Apr meeting
 
 ---
 
