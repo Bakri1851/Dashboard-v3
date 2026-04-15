@@ -73,7 +73,8 @@ Related: [[Report Sync]], [[Thesis Overview]], [[Evidence Bank]], [[Figures and 
 - [ ] **Ch5 — Model Evaluation** — mathematical model comparison, parametric vs alternative. Dr. Batmaz priority. #meeting3
 - [ ] **Ch5 — Limitation** — state explicitly that α β γ δ η were set by trial and error due to absence of labeled ground truth. #meeting3
 - [ ] **Ch5 — Future Work** — ML-based weight optimisation (Optuna, logistic regression, gradient boosting) once labeled data available. #future-work
-- [ ] **Ch3 — RAG Design** — hybrid SQL + ChromaDB architecture, justification and literature. Placeholder inserted. #meeting3
+- [ ] **Ch3 — RAG Design** — hybrid SQL + ChromaDB architecture, justification (citations to be inserted once literature review is done). Placeholder inserted. #meeting3
+- [ ] **Ch2 & Ch3 — RAG literature review** — survey retrieval-augmented generation (Lewis et al. 2020), hybrid sparse/dense retrieval, and ChromaDB/embedding choices. Write Ch2 background subsection on RAG; inline citations in Ch3 §3.x RAG Design to justify SQL+ChromaDB hybrid. #meeting3
 
 ---
 

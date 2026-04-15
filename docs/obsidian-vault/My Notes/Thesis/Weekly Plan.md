@@ -105,7 +105,8 @@ The schedule is achievable but carries real risk and leaves no slack. Total esti
 - [ ] **Remove or update "event-driven pipeline under exploration"** — Ch3 §3.1 mentions this; V2 is still interval-based. Either remove claim or discuss as future work.
 
 *From Rewrite Queue.md (Meeting 3 addition):*
-- [ ] **Ch3 — RAG Design** — hybrid SQL + ChromaDB architecture, justification and literature. Placeholder inserted. #meeting3
+- [ ] **Ch3 — RAG Design** — hybrid SQL + ChromaDB architecture, justification (citations to be inserted once literature review is done). Placeholder inserted. #meeting3
+- [ ] **Ch2 & Ch3 — RAG literature review** — gather sources on RAG, hybrid retrieval, ChromaDB; draft Ch2 background paragraph and Ch3 inline justifications. #meeting3
 
 *From Rewrite Queue.md (Supervisor meeting item):*
 - [ ] **Reconcile temporal smoothing (report vs code)** — Ch3 proposes exponential smoothing; `SMOOTHING_ENABLED = False` in config. Either remove from Ch3 design or explain deferral explicitly.
