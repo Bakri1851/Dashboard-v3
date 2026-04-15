@@ -186,120 +186,121 @@ def _render_lab_assignment_panel() -> None:
         st.session_state["pending_remove_assistant_id"] = None
 
     st.markdown("---")
-    st.markdown(
-        f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
-        f'text-transform:uppercase; letter-spacing:2px; font-size:0.9rem;">'
-        f'Lab Assistants ({len(assistants)})</h3>',
-        unsafe_allow_html=True,
-    )
 
-    allow_self = lab_data.get("allow_self_allocation", True)
-    new_allow = st.checkbox(
-        "Allow assistants to self-allocate",
-        value=allow_self,
-        key="allow_self_allocation_toggle",
-        help="When off, assistants must wait for you to assign them a student.",
-    )
-    if new_allow != allow_self:
-        _lab_state.set_allow_self_allocation(new_allow)
-        st.rerun()
+    n_assigned = sum(1 for info in assistants.values() if info.get("assigned_student"))
+    if assistants:
+        summary = f"Lab Assistants ({len(assistants)}) — {n_assigned} assigned"
+    else:
+        summary = "Lab Assistants (0)"
+    expander_default = len(assistants) <= 1
 
-    if not assistants:
-        st.session_state["pending_remove_assistant_id"] = None
-        st.caption("No lab assistants have joined yet.")
-        return
+    with st.expander(summary, expanded=expander_default):
+        allow_self = lab_data.get("allow_self_allocation", False)
+        new_allow = st.checkbox(
+            "Allow assistants to self-allocate",
+            value=allow_self,
+            key="allow_self_allocation_toggle",
+            help="When off, assistants must wait for you to assign them a student.",
+        )
+        if new_allow != allow_self:
+            _lab_state.set_allow_self_allocation(new_allow)
+            st.rerun()
 
-    # Use scores cached from the previous render cycle (at most one rerun stale)
-    struggle_df = st.session_state.get("_struggle_df")
+        if not assistants:
+            st.session_state["pending_remove_assistant_id"] = None
+            st.caption("No lab assistants have joined yet.")
+            return
 
-    # List each assistant with their current assignment
-    unassigned_assistants: list[tuple[str, str]] = []
-    for aid, info in assistants.items():
-        assigned_student = info.get("assigned_student")
-        if assigned_student:
-            entry = assignments.get(assigned_student, {})
-            status = entry.get("status", "helping")
-            status_color = (
-                config.COLORS["green"] if status == "helped" else config.COLORS["yellow"]
-            )
-            st.markdown(
-                f'<div style="font-size:0.8rem; padding:3px 0;">'
-                f'<span style="color:{config.COLORS["cyan"]};">{info["name"]}</span>'
-                f' &rarr; <span style="color:{config.COLORS["text"]};">{assigned_student}</span>'
-                f' <span style="color:{status_color}; font-size:0.65rem;">({status})</span>'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
-            release_col, remove_col = st.columns(2)
-            with release_col:
-                if st.button(f"Release {info['name']}", key=f"release_{aid}"):
-                    _lab_state.unassign_student(assigned_student)
-                    st.rerun()
-            with remove_col:
+        # Use scores cached from the previous render cycle (at most one rerun stale)
+        struggle_df = st.session_state.get("_struggle_df")
+
+        # List each assistant with their current assignment
+        unassigned_assistants: list[tuple[str, str]] = []
+        for aid, info in assistants.items():
+            assigned_student = info.get("assigned_student")
+            if assigned_student:
+                entry = assignments.get(assigned_student, {})
+                status = entry.get("status", "helping")
+                status_color = (
+                    config.COLORS["green"] if status == "helped" else config.COLORS["yellow"]
+                )
+                st.markdown(
+                    f'<div style="font-size:0.8rem; padding:3px 0;">'
+                    f'<span style="color:{config.COLORS["cyan"]};">{info["name"]}</span>'
+                    f' &rarr; <span style="color:{config.COLORS["text"]};">{assigned_student}</span>'
+                    f' <span style="color:{status_color}; font-size:0.65rem;">({status})</span>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+                release_col, remove_col = st.columns(2)
+                with release_col:
+                    if st.button(f"Release {info['name']}", key=f"release_{aid}"):
+                        _lab_state.unassign_student(assigned_student)
+                        st.rerun()
+                with remove_col:
+                    if st.button(f"Remove {info['name']}", key=f"remove_{aid}"):
+                        st.session_state["pending_remove_assistant_id"] = aid
+                        st.rerun()
+            else:
+                unassigned_assistants.append((aid, info["name"]))
+                st.markdown(
+                    f'<div style="font-size:0.8rem; padding:3px 0;">'
+                    f'<span style="color:{config.COLORS["cyan"]};">{info["name"]}</span>'
+                    f' &mdash; <span style="color:{config.COLORS["text_dim"]};">waiting</span>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
                 if st.button(f"Remove {info['name']}", key=f"remove_{aid}"):
                     st.session_state["pending_remove_assistant_id"] = aid
                     st.rerun()
-        else:
-            unassigned_assistants.append((aid, info["name"]))
-            st.markdown(
-                f'<div style="font-size:0.8rem; padding:3px 0;">'
-                f'<span style="color:{config.COLORS["cyan"]};">{info["name"]}</span>'
-                f' &mdash; <span style="color:{config.COLORS["text_dim"]};">waiting</span>'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
-            if st.button(f"Remove {info['name']}", key=f"remove_{aid}"):
-                st.session_state["pending_remove_assistant_id"] = aid
-                st.rerun()
 
-        if st.session_state.get("pending_remove_assistant_id") == aid:
-            st.warning("This will remove the assistant and release their current student.")
-            confirm_col, cancel_col = st.columns(2)
-            with confirm_col:
-                if st.button("Confirm Remove", key=f"confirm_remove_{aid}"):
-                    ok, err = _lab_state.remove_assistant(aid)
-                    st.session_state["pending_remove_assistant_id"] = None
+            if st.session_state.get("pending_remove_assistant_id") == aid:
+                st.warning("This will remove the assistant and release their current student.")
+                confirm_col, cancel_col = st.columns(2)
+                with confirm_col:
+                    if st.button("Confirm Remove", key=f"confirm_remove_{aid}"):
+                        ok, err = _lab_state.remove_assistant(aid)
+                        st.session_state["pending_remove_assistant_id"] = None
+                        if ok:
+                            st.rerun()
+                        st.error(err or "Could not remove assistant.")
+                with cancel_col:
+                    if st.button("Cancel", key=f"cancel_remove_{aid}"):
+                        st.session_state["pending_remove_assistant_id"] = None
+                        st.rerun()
+
+        # Instructor assignment controls
+        if struggle_df is not None and not struggle_df.empty and unassigned_assistants:
+            assigned_student_ids = set(assignments.keys())
+            eligible = struggle_df[
+                (struggle_df["struggle_level"].isin({"Struggling", "Needs Help"}))
+                & (~struggle_df["user"].isin(assigned_student_ids))
+            ]["user"].tolist()
+
+            if eligible:
+                st.markdown(
+                    f'<p style="font-size:0.75rem; color:{config.COLORS["cyan"]}; '
+                    f'text-transform:uppercase; letter-spacing:1px; margin-top:8px;">'
+                    f'Assign a student to an assistant</p>',
+                    unsafe_allow_html=True,
+                )
+                chosen_student = st.selectbox(
+                    "Struggling student",
+                    options=eligible,
+                    key="assign_student_select",
+                )
+                assistant_options = {name: aid for aid, name in unassigned_assistants}
+                chosen_name = st.selectbox(
+                    "Assign to assistant",
+                    options=list(assistant_options.keys()),
+                    key="assign_assistant_select",
+                )
+                if st.button("Assign", key="do_assign"):
+                    ok = _lab_state.assign_student(chosen_student, assistant_options[chosen_name])
                     if ok:
                         st.rerun()
-                    st.error(err or "Could not remove assistant.")
-            with cancel_col:
-                if st.button("Cancel", key=f"cancel_remove_{aid}"):
-                    st.session_state["pending_remove_assistant_id"] = None
-                    st.rerun()
-
-    # Instructor assignment controls
-    if struggle_df is not None and not struggle_df.empty and unassigned_assistants:
-        assigned_student_ids = set(assignments.keys())
-        eligible = struggle_df[
-            (struggle_df["struggle_level"].isin({"Struggling", "Needs Help"}))
-            & (~struggle_df["user"].isin(assigned_student_ids))
-        ]["user"].tolist()
-
-        if eligible:
-            st.markdown(
-                f'<p style="font-size:0.75rem; color:{config.COLORS["cyan"]}; '
-                f'text-transform:uppercase; letter-spacing:1px; margin-top:8px;">Assign</p>',
-                unsafe_allow_html=True,
-            )
-            chosen_student = st.selectbox(
-                "Student",
-                options=eligible,
-                key="assign_student_select",
-                label_visibility="collapsed",
-            )
-            assistant_options = {name: aid for aid, name in unassigned_assistants}
-            chosen_name = st.selectbox(
-                "Assistant",
-                options=list(assistant_options.keys()),
-                key="assign_assistant_select",
-                label_visibility="collapsed",
-            )
-            if st.button("Assign", key="do_assign"):
-                ok = _lab_state.assign_student(chosen_student, assistant_options[chosen_name])
-                if ok:
-                    st.rerun()
-                else:
-                    st.error("Assignment failed — student may already be claimed.")
+                    else:
+                        st.error("Assignment failed — student may already be claimed.")
 
 
 # Sidebar

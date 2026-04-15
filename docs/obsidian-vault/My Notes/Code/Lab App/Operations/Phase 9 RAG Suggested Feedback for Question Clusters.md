@@ -36,35 +36,41 @@ Same two-layer hybrid as [[RAG Architecture — Hybrid SQL+ChromaDB Design]]:
 
 ## Data flow
 
+```mermaid
+flowchart TD
+    qopen["Instructor opens question<br/>question_id"]
+    df["session DataFrame"]
+
+    subgraph prep["Layer 1 — structured pre-filter"]
+        qfilter["df[df['question'] == question_id]<br/>→ question_df"]
+        clusters["analytics.cluster_question_mistakes<br/>→ clusters list<br/>(label, count, percent_of_wrong, example_answers)"]
+        qtext["Build query_text:<br/>question_id + first example_answer of top-3 clusters"]
+    end
+
+    subgraph chroma["Layer 2 — ChromaDB semantic search"]
+        store[("Shared ChromaDB collection<br/>session_{session_id}<br/>built by build_rag_collection")]
+        qquery["collection.query(<br/>  query_texts=[query_text],<br/>  n_results=RAG_SUGGESTION_MAX_RESULTS (5),<br/>  where={'question': question_id})"]
+        docs["retrieved_docs<br/>top-5 Q&A snippets on this question"]
+    end
+
+    subgraph gen["Generation — GPT-4o-mini"]
+        prompt["system: advise instructor, pedagogical, not tutoring<br/>user: question_id + cluster table + retrieved snippets<br/>+ 'return JSON array of 2–3 bullets ≤15 words'"]
+        llm["GPT-4o-mini<br/>temperature=0, response_format=json_object"]
+        bullets["bullets: list[str]<br/>(capped at 3)"]
+    end
+
+    cache["_cluster_suggestion_cache[question_id]<br/>+ session_state['cached_cluster_suggestions']"]
+    ui["Question detail view UI<br/>'Suggested Teaching Feedback'"]
+
+    qopen --> qfilter
+    df --> qfilter --> clusters --> qtext
+    store -.feeds.-> qquery
+    qtext --> qquery --> docs --> prompt --> llm --> bullets
+    bullets -.cached in.-> cache
+    cache --> ui
 ```
-clusters list (from analytics.cluster_question_mistakes)
-   │
-   ├─ top-3 clusters + each cluster's first example_answer
-   │       ─────► query_text
-   │
-   ▼
-collection.query(
-    query_texts=[query_text],
-    n_results=RAG_SUGGESTION_MAX_RESULTS,        # 5
-    where={"question": str(question_id)},
-)
-   │
-   ▼
-retrieved_docs (top-5 similar Q&A snippets on this question)
-   │
-   ▼
-prompt = {system:   "advise instructor, pedagogical, not tutoring"
-          user:     question_id
-                  + cluster table (label, count, %, examples)
-                  + retrieved snippets
-                  + "return JSON array of 2-3 bullets ≤15 words"}
-   │
-   ▼
-GPT-4o-mini (temperature=0, response_format=json_object)
-   │
-   ▼
-bullets: list[str]   (capped at 3, cached on question_id)
-```
+
+Shares the ChromaDB collection with the assistant-side RAG ([[Phase 9 RAG Suggested Feedback for Lab Assistants]]) — only the `where=` filter differs (`question` vs `student_id`). See [[RAG Architecture — Hybrid SQL+ChromaDB Design]] for the combined view of both paths.
 
 ---
 

@@ -292,8 +292,8 @@ def generate_assistant_suggestions(
         _suggestion_cache[student_id] = bullets
         return bullets
 
-    except Exception as exc:
-        logger.debug("RAG generate_assistant_suggestions failed for %s: %s", student_id, exc)
+    except Exception:
+        logger.exception("RAG generate_assistant_suggestions failed for %s", student_id)
         return []
 
 

@@ -29,7 +29,7 @@ def _default_state() -> dict[str, Any]:
         "generated_at": _now_iso(),
         "lab_assistants": {},
         "assignments": {},
-        "allow_self_allocation": True,
+        "allow_self_allocation": False,
     }
 
 
@@ -49,7 +49,7 @@ def _normalize_state(raw_state: Any) -> dict[str, Any]:
         state["session_code"] = session_code.strip().upper()
 
     state["session_active"] = bool(raw_state.get("session_active", False))
-    state["allow_self_allocation"] = bool(raw_state.get("allow_self_allocation", True))
+    state["allow_self_allocation"] = bool(raw_state.get("allow_self_allocation", False))
 
     session_start = raw_state.get("session_start")
     if isinstance(session_start, str) and session_start:

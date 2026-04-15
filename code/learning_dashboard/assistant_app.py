@@ -28,6 +28,10 @@ def _load_student_data() -> tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         df = df[df["timestamp"] >= session_start].copy()
         if df.empty:
             return df, None
+    # Attach incorrectness so downstream consumers (RAG, top-questions) don't KeyError
+    if "ai_feedback" in df.columns and "incorrectness" not in df.columns:
+        df = df.copy()
+        df["incorrectness"] = analytics.compute_incorrectness_column(df)
     struggle_df = analytics.compute_student_struggle_scores(df)
     return df, struggle_df
 
@@ -49,6 +53,50 @@ def _heading(text: str, sub: str = "") -> None:
 def _section_label(text: str) -> None:
     st.markdown(
         f'<p class="section-label">{text}</p>',
+        unsafe_allow_html=True,
+    )
+
+
+def _render_inline_loader(message: str) -> None:
+    """Small neon spinner + message for mobile-friendly in-page loading states."""
+    cyan = config.COLORS["cyan"]
+    safe_msg = html.escape(message)
+    st.markdown(
+        f"""
+        <style>
+        @keyframes assistant-loader-spin {{
+            from {{ transform: rotate(0deg); }}
+            to   {{ transform: rotate(360deg); }}
+        }}
+        .assistant-inline-loader {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            padding: 32px 16px;
+        }}
+        .assistant-inline-loader .ring {{
+            width: 44px;
+            height: 44px;
+            border: 3px solid {cyan}22;
+            border-top-color: {cyan};
+            border-radius: 50%;
+            animation: assistant-loader-spin 0.9s linear infinite;
+            box-shadow: 0 0 18px {cyan}55;
+        }}
+        .assistant-inline-loader .label {{
+            color: {cyan};
+            font-family: {config.FONT_HEADING};
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+        }}
+        </style>
+        <div class="assistant-inline-loader">
+            <div class="ring"></div>
+            <div class="label">{safe_msg}</div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
@@ -200,7 +248,7 @@ def render_unassigned_view(
     _section_label("Available Students")
 
     if struggle_df is None or struggle_df.empty:
-        st.info("No student data available yet. Refreshing…")
+        _render_inline_loader("Waiting for student data…")
         return
 
     eligible_levels = {"Struggling", "Needs Help"}
@@ -213,7 +261,7 @@ def render_unassigned_view(
         struggle_df[~struggle_df["struggle_level"].isin(eligible_levels)]
     )
 
-    allow_self = lab_data.get("allow_self_allocation", True)
+    allow_self = lab_data.get("allow_self_allocation", False)
 
     if available.empty:
         st.success("All struggling students are covered — great work!")
@@ -284,7 +332,7 @@ def render_assigned_view(
             student_row = matches.iloc[0]
 
     if student_row is None:
-        st.warning("Student data not yet available. Refreshing…")
+        _render_inline_loader("Loading student profile…")
         return
 
     color = student_row["struggle_color"]
@@ -325,23 +373,22 @@ def render_assigned_view(
         suggestion_cache[student_id] = bullets
 
     student_submissions = df[df["user"] == student_id] if not df.empty else df
+    st.markdown("**Suggested Focus Areas**")
     if len(student_submissions) < config.RAG_MIN_SUBMISSIONS:
-        st.markdown("**Suggested Focus Areas**")
         st.caption("Not enough data yet")
     elif bullets:
-        st.markdown("**Suggested Focus Areas**")
         for b in bullets:
             st.markdown(f"• {b}")
-    # silent no-op if bullets == [] and submissions >= min (deps missing or LLM failed)
+    else:
+        st.caption("No suggestions available right now.")
 
     # Top 3 struggling questions
     st.markdown("---")
     _section_label("Top Struggling Questions")
 
-    if not df.empty:
+    if not df.empty and "incorrectness" in df.columns:
         student_df = df[df["user"] == student_id].copy()
         if not student_df.empty:
-            student_df["incorrectness"] = analytics.compute_incorrectness_column(student_df)
             q_scores = (
                 student_df.groupby("question")["incorrectness"]
                 .mean()
@@ -449,7 +496,8 @@ def main() -> None:
         if assignment.get("assistant_id") != assistant_id:
             assigned_student = None
 
-    df, struggle_df = _load_student_data()
+    with st.spinner("Loading student data…"):
+        df, struggle_df = _load_student_data()
 
     if assigned_student:
         render_assigned_view(assistant_id, assigned_student, lab_data, df, struggle_df)
