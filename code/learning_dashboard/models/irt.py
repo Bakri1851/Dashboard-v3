@@ -134,6 +134,10 @@ def fit_rasch_model(
         np.add.at(grad_theta, obs_rows, residual)
         np.add.at(grad_b, obs_cols, -residual)
 
+        # Project through the centering used in the loss: θ' = θ − mean(θ),
+        # so ∂L/∂θ_k = ∂L/∂θ'_k − mean(∂L/∂θ'_·). b is not centered.
+        grad_theta = grad_theta - grad_theta.mean()
+
         # Negate because we minimise negative log-likelihood.
         return np.concatenate([-grad_theta, -grad_b])
 

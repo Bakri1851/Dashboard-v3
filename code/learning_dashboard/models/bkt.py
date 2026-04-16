@@ -62,6 +62,9 @@ def compute_student_mastery(
     if student_df.empty:
         return {}
 
+    if "timestamp" in student_df.columns:
+        student_df = student_df.sort_values("timestamp", ascending=True, kind="mergesort")
+
     mastery: dict[str, float] = {}
     for _, row in student_df.iterrows():
         qid = row["question"]
@@ -84,13 +87,21 @@ def compute_all_mastery(
     Returns DataFrame with columns: user, question, mastery, n_attempts.
     """
     empty = pd.DataFrame(columns=_MASTERY_COLUMNS)
-    if df.empty or "incorrectness" not in df.columns:
+    required = {"user", "question", "timestamp", "incorrectness"}
+    if df.empty or not required.issubset(df.columns):
         return empty
 
-    attempt_counts = df.groupby(["user", "question"]).size()
+    # BKT is a sequential HMM; replay order determines the posterior.
+    # Sort with a secondary key so submissions at identical timestamps
+    # (bulk imports, same-second posts) replay in a deterministic order.
+    ordered = df.sort_values(
+        ["timestamp", "question"], ascending=True, kind="mergesort"
+    )
+
+    attempt_counts = ordered.groupby(["user", "question"]).size()
     rows: list[dict] = []
 
-    for user, group in df.groupby("user"):
+    for user, group in ordered.groupby("user", sort=False):
         for qid, p in compute_student_mastery(
             group, p_init=p_init, p_learn=p_learn, p_guess=p_guess, p_slip=p_slip
         ).items():

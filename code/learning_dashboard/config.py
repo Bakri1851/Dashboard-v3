@@ -165,3 +165,31 @@ RAG_ENABLED_DEFAULT: bool = True
 RAG_EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"   # sentence-transformers, local, no API cost
 RAG_SUGGESTION_MAX_RESULTS: int = 5              # top-k chunks retrieved per query
 RAG_MIN_SUBMISSIONS: int = 2                     # min student submissions before RAG is attempted
+
+
+# --- Weight-sum invariants (import-time sanity checks) ---
+_STRUGGLE_WEIGHT_SUM = (
+    STRUGGLE_WEIGHT_N + STRUGGLE_WEIGHT_T + STRUGGLE_WEIGHT_I
+    + STRUGGLE_WEIGHT_R + STRUGGLE_WEIGHT_A + STRUGGLE_WEIGHT_D
+    + STRUGGLE_WEIGHT_REP
+)
+assert abs(_STRUGGLE_WEIGHT_SUM - 1.0) < 1e-9, (
+    f"STRUGGLE_WEIGHT_* must sum to 1.0, got {_STRUGGLE_WEIGHT_SUM}"
+)
+
+_DIFFICULTY_WEIGHT_SUM = (
+    DIFFICULTY_WEIGHT_C + DIFFICULTY_WEIGHT_T + DIFFICULTY_WEIGHT_A
+    + DIFFICULTY_WEIGHT_F + DIFFICULTY_WEIGHT_P
+)
+assert abs(_DIFFICULTY_WEIGHT_SUM - 1.0) < 1e-9, (
+    f"DIFFICULTY_WEIGHT_* must sum to 1.0, got {_DIFFICULTY_WEIGHT_SUM}"
+)
+
+_IMPROVED_STRUGGLE_WEIGHT_SUM = (
+    IMPROVED_STRUGGLE_WEIGHT_BEHAVIORAL
+    + IMPROVED_STRUGGLE_WEIGHT_MASTERY_GAP
+    + IMPROVED_STRUGGLE_WEIGHT_DIFFICULTY_ADJ
+)
+assert abs(_IMPROVED_STRUGGLE_WEIGHT_SUM - 1.0) < 1e-9, (
+    f"IMPROVED_STRUGGLE_WEIGHT_* must sum to 1.0, got {_IMPROVED_STRUGGLE_WEIGHT_SUM}"
+)

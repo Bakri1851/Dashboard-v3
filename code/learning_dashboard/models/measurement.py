@@ -20,14 +20,25 @@ def compute_incorrectness_with_confidence(df: pd.DataFrame) -> pd.DataFrame:
     out["incorrectness"] = scores
 
     feedbacks = df["ai_feedback"].astype(str).str.strip()
-    is_empty = feedbacks.isin(["", "nan", "None"]) | df["ai_feedback"].isna()
+    # Treat common null markers and whitespace-only strings as empty.
+    empty_markers = {"", "nan", "none", "null", "n/a", "na"}
+    is_empty = (
+        feedbacks.str.lower().isin(empty_markers)
+        | df["ai_feedback"].isna()
+        | scores.isna()  # L7: NaN score from upstream → no valid measurement
+    )
 
     # Length factor: ramps linearly from 0 to 1 over MIN_LENGTH characters
     lengths = feedbacks.str.len().fillna(0).astype(float)
     length_factor = np.minimum(1.0, lengths / config.MEASUREMENT_CONFIDENCE_MIN_LENGTH)
 
-    # Extremity factor: 0.0 at score=0.5, 1.0 at score=0 or 1
-    extremity_factor = 2.0 * np.abs(scores - 0.5)
+    # Extremity factor: 0.0 at score=0.5, 1.0 at score=0 or 1.
+    # By design, mid-range incorrectness produces lower confidence — we are
+    # least certain about borderline answers. This is a confidence valley,
+    # not a bug. Fill NaN scores with 0.5 so extremity is 0 before is_empty
+    # zeroes them out below.
+    safe_scores = scores.fillna(0.5)
+    extremity_factor = 2.0 * np.abs(safe_scores - 0.5)
 
     # Combined confidence: base * length * (0.5 + 0.5 * extremity)
     # The 0.5+0.5*extremity term ensures valid feedback with mid-range scores

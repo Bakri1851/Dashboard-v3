@@ -1,4 +1,5 @@
 # analytics.py — Scoring calculations (UI-independent)
+import hashlib
 import json
 import math
 import os
@@ -24,7 +25,7 @@ def _get_openai_client() -> OpenAI:
 # Incorrectness Estimation via OpenAI
 
 _incorrectness_cache: dict[str, float] = {}
-_cluster_cache: dict[tuple[str, int], list[dict] | None] = {}
+_cluster_cache: dict[tuple[str, int, str], list[dict] | None] = {}
 
 
 def _call_openai_batch(feedbacks: list[str]) -> list[float]:
@@ -88,11 +89,16 @@ def compute_incorrectness_column(df: pd.DataFrame) -> pd.Series:
 # Min-Max Normalization
 
 def min_max_normalize(series: pd.Series) -> pd.Series:
-    """(x - min) / (max - min), clamped to [0, 1]. Returns 0 if min == max."""
+    """(x - min) / (max - min), clamped to [0, 1].
+
+    Returns 0.5 if min == max — the neutral midpoint preserves the feature's
+    weight contribution in composite sums when the cohort is degenerate
+    (e.g. all students have A_raw=0). Rankings are unchanged either way.
+    """
     min_val = series.min()
     max_val = series.max()
     if max_val == min_val:
-        return pd.Series(0.0, index=series.index)
+        return pd.Series(0.5, index=series.index)
     result = (series - min_val) / (max_val - min_val)
     return result.clip(0.0, 1.0)
 
@@ -126,12 +132,13 @@ def compute_recent_incorrectness(student_submissions: pd.DataFrame) -> float:
         math.exp(-lam * max(0.0, (t_now - ts).total_seconds()))
         for ts in timestamps
     ]
-    weight_sum = sum(raw_weights)
 
-    # Equal-weight fallback if all timestamps are identical (e.g. bulk import)
-    if weight_sum <= 0 or all(w == raw_weights[0] for w in raw_weights):
+    # Equal-weight fallback if all timestamps are identical (e.g. bulk import).
+    # Exponentials are always positive, so no zero-sum check needed.
+    if all(w == raw_weights[0] for w in raw_weights):
         return sum(scores) / n_actual
 
+    weight_sum = sum(raw_weights)
     weights = [w / weight_sum for w in raw_weights]
     return sum(w * s for w, s in zip(weights, scores))
 
@@ -249,20 +256,26 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
 
     result = pd.DataFrame(rows)
 
-    # Min-max normalize n, t, and trajectory slope across all students
+    # Min-max normalize every composite input so the configured weights match
+    # the effective weights. Raw [0, 1] rates (i_hat, r_hat, A_raw, rep_hat)
+    # are retained for display; the _norm columns feed the weighted sum.
     result["n_hat"] = min_max_normalize(result["n_raw"])
     result["t_hat"] = min_max_normalize(result["t_raw"])
     result["d_hat"] = min_max_normalize(result["d_raw"])  # positive = getting worse
+    result["i_norm"] = min_max_normalize(result["i_hat"])
+    result["r_norm"] = min_max_normalize(result["r_hat"])
+    result["A_norm"] = min_max_normalize(result["A_raw"])
+    result["rep_norm"] = min_max_normalize(result["rep_hat"])
 
     # Compute S_raw
     result["struggle_score"] = (
         config.STRUGGLE_WEIGHT_N * result["n_hat"]
         + config.STRUGGLE_WEIGHT_T * result["t_hat"]
-        + config.STRUGGLE_WEIGHT_I * result["i_hat"]
-        + config.STRUGGLE_WEIGHT_R * result["r_hat"]
-        + config.STRUGGLE_WEIGHT_A * result["A_raw"]
+        + config.STRUGGLE_WEIGHT_I * result["i_norm"]
+        + config.STRUGGLE_WEIGHT_R * result["r_norm"]
+        + config.STRUGGLE_WEIGHT_A * result["A_norm"]
         + config.STRUGGLE_WEIGHT_D * result["d_hat"]
-        + config.STRUGGLE_WEIGHT_REP * result["rep_hat"]
+        + config.STRUGGLE_WEIGHT_REP * result["rep_norm"]
     ).clip(0.0, 1.0)
 
     # Bayesian shrinkage: pull low-n scores toward the class mean to reduce noise.
@@ -294,7 +307,9 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
 # Collaborative Filtering Struggle Detection
 # -----------------------------------------------------------------
 
-CF_FEATURES = ["n_hat", "t_hat", "i_hat", "A_raw", "d_hat"]
+# All CF features must be on the same cohort-relative [0, 1] scale for
+# cosine similarity to be meaningful — use the normalized columns added in M1.
+CF_FEATURES = ["n_hat", "t_hat", "i_norm", "A_norm", "d_hat"]
 
 
 def compute_cf_struggle_scores(
@@ -324,8 +339,11 @@ def compute_cf_struggle_scores(
             diagnostics["reason"] = "fewer than 4 students"
             return struggle_df["struggle_score"].copy(), diagnostics
 
-        # Interaction matrix from normalised features
-        X = struggle_df[CF_FEATURES].values
+        # Interaction matrix from normalised features. Guard against NaN
+        # leaking in from upstream (e.g. min_max_normalize on all-equal
+        # columns in degenerate cohorts) — cosine_similarity returns NaN
+        # rows when fed NaN, which would silently collapse scores to 0.
+        X = np.nan_to_num(struggle_df[CF_FEATURES].values, nan=0.0)
 
         # Pairwise cosine similarity
         W = cosine_similarity(X)
@@ -405,7 +423,7 @@ def get_similar_students(
         if len(idx_match) == 0:
             return None
 
-        X = struggle_df[CF_FEATURES].values
+        X = np.nan_to_num(struggle_df[CF_FEATURES].values, nan=0.0)
         W = cosine_similarity(X)
 
         pos = struggle_df.index.get_loc(idx_match[0])
@@ -499,17 +517,22 @@ def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
 
     result = pd.DataFrame(rows)
 
-    # Min-max normalize t_raw and a_raw
+    # Min-max normalize every composite input so configured weights match
+    # effective weights. Raw rates (c_tilde, f_tilde, p_tilde) are retained
+    # for display (incorrect_rate_pct); _norm columns feed the weighted sum.
     result["t_tilde"] = min_max_normalize(result["t_raw"])
     result["a_tilde"] = min_max_normalize(result["a_raw"])
+    result["c_norm"] = min_max_normalize(result["c_tilde"])
+    result["f_norm"] = min_max_normalize(result["f_tilde"])
+    result["p_norm"] = min_max_normalize(result["p_tilde"])
 
     # Compute D_raw
     result["difficulty_score"] = (
-        config.DIFFICULTY_WEIGHT_C * result["c_tilde"]
+        config.DIFFICULTY_WEIGHT_C * result["c_norm"]
         + config.DIFFICULTY_WEIGHT_T * result["t_tilde"]
         + config.DIFFICULTY_WEIGHT_A * result["a_tilde"]
-        + config.DIFFICULTY_WEIGHT_F * result["f_tilde"]
-        + config.DIFFICULTY_WEIGHT_P * result["p_tilde"]
+        + config.DIFFICULTY_WEIGHT_F * result["f_norm"]
+        + config.DIFFICULTY_WEIGHT_P * result["p_norm"]
     ).clip(0.0, 1.0)
 
     # Classify
@@ -602,7 +625,10 @@ def cluster_question_mistakes(
     if total_wrong < config.CLUSTER_MIN_WRONG:
         return None
 
-    _answer_hash = hash(tuple(sorted(wrong_df["student_answer"].tolist())))
+    # Deterministic digest — Python's built-in hash() is salted per process,
+    # so caching keyed on it collides or misses unpredictably across reruns.
+    _answer_payload = "\0".join(sorted(wrong_df["student_answer"].tolist()))
+    _answer_hash = hashlib.sha1(_answer_payload.encode("utf-8")).hexdigest()
     cache_key = (question_id, total_wrong, _answer_hash)
     if cache_key in _cluster_cache:
         return _cluster_cache[cache_key]
