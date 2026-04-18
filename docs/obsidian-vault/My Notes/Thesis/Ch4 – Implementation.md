@@ -7,6 +7,8 @@ Related: [[Thesis Overview]], [[Report Sync]], [[Analytics Engine]], [[Instructo
 **Source file:** `main sections/implementation.tex`
 **Status:** Outdated (CRITICAL) — describes V1 prototype, not V2 full system
 
+> **Sync note (2026-04-18):** "Current contents" below reflects the thesis state *before* the Phase 6 tex-skeleton additions (2026-04-12) that added 26 new subsection placeholders. For the current tex subsection tree and the active writing backlog, see [[Rewrite Queue#Phase 6 additions (2026-04-12)]] and the toolkit's Status panel §6 Source reconciliation.
+
 ---
 
 ## Current contents

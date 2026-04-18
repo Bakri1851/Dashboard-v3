@@ -7,6 +7,8 @@ Related: [[Thesis Overview]], [[Report Sync]], [[Student Struggle Logic]], [[Que
 **Source file:** `main sections/requirements specification.tex`
 **Status:** Draft — literature review solid, requirements need implementation mapping, research gaps placeholder
 
+> **Sync note (2026-04-18):** "Current contents" below reflects the thesis state *before* the Phase 6 tex-skeleton additions (2026-04-12). For the current tex subsection tree and the active writing backlog, see [[Rewrite Queue#Phase 6 additions (2026-04-12)]] and the toolkit's Status panel §6 Source reconciliation.
+
 ---
 
 ## Current contents

@@ -10,7 +10,7 @@ Related: [[Coding Roadmap]], [[Writing Roadmap]], [[Rewrite Queue]], [[Report Sy
 
 Rewrites of existing chapters (Ch3, Ch1&2, Ch4) must come before new chapters (Ch5, Ch6) so the implementation narrative is settled before evaluation is written. Ch4 is placed after Ch3 and Ch1&2 because the code is still subject to minor change — writing Ch4 last among the rewrites means it describes the final system. All appendices are grouped at the end, once chapter content is complete and stable, so screenshots and test evidence capture the truly final state.
 
-Phases 9, 10, and 11 are explicitly out of scope for this submission. Each will be documented in Ch6 §6.3 Future Work. Attempting large coding phases with 41 days remaining and Ch4/Ch5/Ch6 unwritten would risk the submission. Phase 6 is stretch only.
+Phases 10 and 11 are explicitly out of scope for this submission and will be documented in Ch6 §6.3 Future Work. Phase 9 (RAG + ChromaDB) is a special case — *code* is complete (`rag.py`), so its *written coverage* (Ch4 implementation description + Ch2 RAG literature review subsection) is in scope; only its *empirical evaluation* is deferred to Ch6 §6.3. Attempting large new coding phases with 41 days remaining and Ch4/Ch5/Ch6 unwritten would risk the submission. Phase 6 is stretch only.
 
 ---
 

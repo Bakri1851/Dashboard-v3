@@ -348,6 +348,98 @@ button:hover{border-color:#555;background:#22263a}
 .plan-glance{background:#161923;border:1px solid #2a2d3a;border-radius:8px;padding:12px 16px;margin-top:1rem;font-size:13px;color:#aaa;line-height:1.8}
 .plan-glance strong{color:#e0e0e0}
 .plan-glance .plan-glance-line{font-family:'SF Mono',Consolas,monospace;font-size:12px;color:#7ab8f5}
+
+/* ══════════════════════════════════════════
+   PANEL — SECTION PLAN (per-chapter punch list with subtabs)
+══════════════════════════════════════════ */
+.subtab-bar{display:flex;flex-wrap:wrap;gap:6px;padding:6px 0 14px;border-bottom:1px solid #2a2d3a;margin-bottom:18px}
+.subtab{padding:6px 12px;font-size:12px;cursor:pointer;border-radius:6px;color:#9aa4b2;border:1px solid transparent;transition:all 0.15s;white-space:nowrap;position:relative}
+.subtab:hover{background:#1c2030;color:#e6edf3}
+.subtab.active{background:#1e3a5f;color:#7ab8f5;border-color:#2d5a8e}
+.subtab.crit::after{content:"";position:absolute;top:5px;right:4px;width:6px;height:6px;border-radius:50%;background:#ff7b72}
+.subtab.done::after{content:"";position:absolute;top:5px;right:4px;width:6px;height:6px;border-radius:50%;background:#56d364}
+.subpanel{display:none}
+.subpanel.active{display:block}
+.sp-intro{font-size:13px;color:#bbb;line-height:1.7;margin-bottom:1rem;max-width:880px}
+.sp-intro strong{color:#e0e0e0;font-weight:500}
+.sp-header-strip{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 14px;background:#161923;border:1px solid #2a2d3a;border-radius:8px;margin-bottom:14px;font-size:12px;color:#aaa}
+.sp-header-strip strong{color:#e0e0e0;font-weight:500}
+.sp-header-strip .sp-sep{color:#444;margin:0 4px}
+.sp-header-strip code{font-family:'SF Mono',Consolas,monospace;font-size:11px;background:#1e2231;padding:1px 5px;border-radius:3px;color:#7ab8f5}
+.sp-block{margin-bottom:1.4rem}
+.sp-block-title{font-size:11px;font-weight:500;color:#7ab8f5;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sp-block-title.gap{color:#ff7b72}
+.sp-block-title.action{color:#e3b341}
+.sp-block-title.cite{color:#d2a8ff}
+.sp-block-title.fig{color:#56d364}
+.sp-block-title.decision{color:#7ed4d4}
+.sp-block-title.have{color:#56d364}
+.sp-block-title.want{color:#7ab8f5}
+.sp-list{list-style:none;padding:0;margin:0;font-size:13px;color:#bbb;line-height:1.7}
+.sp-list li{padding:4px 0 4px 16px;position:relative;border-bottom:1px dashed #1e2231}
+.sp-list li:last-child{border-bottom:0}
+.sp-list li::before{content:"·";position:absolute;left:4px;color:#555;font-weight:700}
+.sp-list li code{font-family:'SF Mono',Consolas,monospace;font-size:11px;background:#1e2231;padding:1px 4px;border-radius:3px;color:#c9d1d9}
+.sp-list li strong{color:#e0e0e0;font-weight:500}
+.sp-action{display:flex;gap:10px;padding:6px 0;border-bottom:1px dashed #1e2231;font-size:13px;color:#bbb;line-height:1.6;align-items:flex-start}
+.sp-action:last-child{border-bottom:0}
+.sp-action .sp-prio{flex-shrink:0;font-family:'SF Mono',Consolas,monospace;font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:0.04em;margin-top:2px}
+.sp-prio.crit{background:#3a0d1a;color:#ff7b72;border:1px solid #5a1523}
+.sp-prio.high{background:#3a2a00;color:#e3b341;border:1px solid #7a5800}
+.sp-prio.med{background:#0d2a4a;color:#7ab8f5;border:1px solid #2d5a8e}
+.sp-prio.low{background:#161923;color:#888;border:1px solid #2a2d3a}
+.sp-action .sp-eff{flex-shrink:0;font-family:'SF Mono',Consolas,monospace;font-size:10px;color:#666;padding:2px 6px;border:1px solid #2a2d3a;border-radius:10px;margin-top:2px}
+.sp-action-text{flex:1;min-width:0}
+.sp-action-text code{font-family:'SF Mono',Consolas,monospace;font-size:11px;background:#1e2231;padding:1px 4px;border-radius:3px;color:#c9d1d9}
+.sp-action-text strong{color:#e0e0e0;font-weight:500}
+.sp-table{width:100%;border-collapse:collapse;font-size:12px;background:#12151e;border:1px solid #2a2d3a;border-radius:6px;overflow:hidden;margin-top:6px}
+.sp-table th{text-align:left;padding:8px 12px;background:#1a1d27;font-weight:500;font-size:11px;color:#888;border-bottom:1px solid #2a2d3a}
+.sp-table td{padding:8px 12px;border-top:1px solid #2a2d3a;font-size:12px;color:#bbb;vertical-align:top;line-height:1.55}
+.sp-table td code{font-family:'SF Mono',Consolas,monospace;font-size:11px;background:#1e2231;padding:1px 4px;border-radius:3px;color:#c9d1d9}
+.sp-pill{display:inline-block;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:500;white-space:nowrap}
+.sp-pill.empty{background:#3a0d1a;color:#ff7b72;border:1px solid #5a1523}
+.sp-pill.skel{background:#3a2a00;color:#e3b341;border:1px solid #7a5800}
+.sp-pill.draft{background:#2a2200;color:#e3b341;border:1px solid #4a3800}
+.sp-pill.partial{background:#2a2200;color:#e3b341;border:1px solid #4a3800}
+.sp-pill.outdated{background:#3a0d1a;color:#ff7b72;border:1px solid #5a1523}
+.sp-pill.done{background:#0d3322;color:#56d364;border:1px solid #238636}
+.sp-pill.solid{background:#0d3322;color:#56d364;border:1px solid #238636}
+.sp-pill.future{background:#2a0d3a;color:#d2a8ff;border:1px solid #4a1a5a}
+.sp-overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin:8px 0 1rem}
+.sp-ov-card{background:#161923;border:1px solid #2a2d3a;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all 0.15s}
+.sp-ov-card:hover{border-color:#2d5a8e;background:#1a1f2e}
+.sp-ov-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.sp-ov-card-title{font-size:12px;font-weight:500;color:#e6edf3}
+.sp-ov-card-body{font-size:11px;color:#888;line-height:1.5}
+.sp-ov-card-body strong{color:#aaa}
+.sp-cite-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-top:6px}
+.sp-cite-card{background:#161923;border:1px solid #2a2d3a;border-radius:8px;padding:10px 12px}
+.sp-cite-card h5{font-size:11px;color:#d2a8ff;font-weight:500;text-transform:uppercase;letter-spacing:0.04em;margin:0 0 6px}
+.sp-cite-card ul{list-style:none;padding:0;margin:0;font-size:12px;color:#aaa;line-height:1.7}
+.sp-cite-card li{padding:3px 0 3px 10px;position:relative}
+.sp-cite-card li::before{content:"›";position:absolute;left:0;color:#7ab8f5}
+.sp-cite-card li code{font-family:'SF Mono',Consolas,monospace;font-size:11px;background:#1e2231;padding:1px 4px;border-radius:3px;color:#c9d1d9}
+.sp-cite-card li strong{color:#ccc;font-weight:500}
+.sp-todo-block{background:#161923;border:1px solid #2a2d3a;border-radius:8px;padding:12px 16px}
+.sp-todo-block p.sp-empty-note{font-size:12px;color:#888;line-height:1.65;margin-bottom:8px}
+.sp-todo-block p.sp-empty-note strong{color:#aaa}
+.sp-cp-strip{background:#0f1320;border:1px solid #2a2d3a;border-radius:8px;padding:14px 16px;margin-top:6px;position:relative}
+.sp-cp-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;font-size:12px;color:#888}
+.sp-cp-head .sp-cp-days{font-family:'SF Mono',Consolas,monospace;color:#ff7b72;font-weight:500;font-size:14px}
+.sp-cp-rail{position:relative;height:6px;background:#1e2231;border-radius:3px;margin:18px 0 8px}
+.sp-cp-tick{position:absolute;top:-4px;width:2px;height:14px;background:#444}
+.sp-cp-tick-label{position:absolute;top:14px;font-size:10px;color:#666;font-family:'SF Mono',Consolas,monospace;transform:translateX(-50%);white-space:nowrap}
+.sp-cp-bars{display:flex;flex-direction:column;gap:5px;margin-top:1.4rem}
+.sp-cp-bar-row{display:flex;align-items:center;gap:8px;font-size:11px;color:#aaa}
+.sp-cp-bar-label{flex:0 0 130px;font-family:'SF Mono',Consolas,monospace}
+.sp-cp-bar-track{flex:1;position:relative;height:10px;background:#1e2231;border-radius:5px}
+.sp-cp-bar{position:absolute;height:10px;border-radius:5px;background:linear-gradient(90deg,#1f6feb 0%,#ff7b72 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.04)}
+.sp-cp-bar.done-cp{background:#238636}
+.sp-parity-table th{font-family:'SF Mono',Consolas,monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.04em}
+.sp-parity-table td.sp-parity-gap{color:#ff7b72;font-family:'SF Mono',Consolas,monospace;font-size:11px}
+.sp-parity-table td.sp-parity-ok{color:#56d364;font-family:'SF Mono',Consolas,monospace;font-size:11px}
+.sp-link{color:#7ab8f5;cursor:pointer;text-decoration:none;border-bottom:1px dotted #2d5a8e}
+.sp-link:hover{color:#a8d4ff;border-bottom-style:solid}
 </style>
 </head>
 <body>
@@ -363,6 +455,7 @@ button:hover{border-color:#555;background:#22263a}
   <div class="top-tab" data-panel="dive" onclick="switchPanel('dive',this)">Deep dive</div>
   <div class="top-tab" data-panel="road" onclick="switchPanel('road',this)">Roadmap</div>
   <div class="top-tab" data-panel="plan" onclick="switchPanel('plan',this)">Plan</div>
+  <div class="top-tab" data-panel="sectionplan" onclick="switchPanel('sectionplan',this)">Section Plan</div>
   <div class="top-tab" data-panel="report" onclick="switchPanel('report',this)">Report guide</div>
 </div>
 
@@ -913,6 +1006,45 @@ button:hover{border-color:#555;background:#22263a}
     </tr>
   </table>
   <div class="note-box" style="margin-top:10px"><strong>Starter prompts to mine from the vault:</strong> V1 → V2 rewrite reasons · struggle formula component count drift (5 in thesis vs 7 in code) · hand-tuned weights vs absent labelled data · deferred-actions pattern for Streamlit session-state mutation · filelock choice over database · RAG first-call latency (~30 s model download) · cache-invalidation edge cases.</div>
+</div>
+
+<div class="status-section">
+  <h3>§6 — Source reconciliation</h3>
+  <p class="status-intro">Six sources describe this project: <strong>code</strong>, <strong>thesis</strong>, <strong>vault trackers</strong>, this <strong>toolkit</strong>, <strong>CLAUDE.md</strong>, and the Claude-session <strong>MEMORY.md</strong>. When they disagree, the table below names the winner so reconciliation doesn't get re-argued every time. Live inventory of current disagreements follows.</p>
+
+  <h4 style="margin-top:14px;color:#7ab8f5;text-transform:uppercase;font-size:11px;letter-spacing:0.05em">Table A — Authoritative source rule</h4>
+  <table class="status-table">
+    <tr><th style="width:30%">Claim type</th><th style="width:32%">Authoritative source</th><th>If another source drifts, fix by</th></tr>
+    <tr><td>Runtime behaviour (formulas, weights, default params)</td><td><code>code/learning_dashboard/</code> — <code>config.py</code>, <code>models/</code>, <code>analytics.py</code></td><td>Update vault trackers + this toolkit to match. Never edit code to match a stale write-up.</td></tr>
+    <tr><td>TOC &amp; chapter structure</td><td><code>Report/main.tex</code> + vault <strong>Full Roadmap.md</strong> consensus</td><td>Sync toolkit Report-guide panel and Thesis Overview.</td></tr>
+    <tr><td>Final academic record (facts in dissertation prose)</td><td><code>Report/main-sections/*.tex</code></td><td>Update via <strong>Rewrite Queue.md</strong> — the single writing backlog. Not a side-channel job.</td></tr>
+    <tr><td>Project conventions (file layout, patterns)</td><td><code>CLAUDE.md</code> at repo root</td><td>Edit CLAUDE.md first, then sync MEMORY.md. Don't let MEMORY.md diverge.</td></tr>
+    <tr><td>Claude session context</td><td><code>~/.claude/projects/.../memory/MEMORY.md</code></td><td>Rewrite when stale — see row 10–11 below.</td></tr>
+    <tr><td>Writing strategy &amp; priority queue</td><td><strong>vault Rewrite Queue.md</strong></td><td>Keep vault as the single source of truth for the backlog; mirror urgency in §3 of this panel and in Table B below.</td></tr>
+  </table>
+
+  <h4 style="margin-top:18px;color:#7ab8f5;text-transform:uppercase;font-size:11px;letter-spacing:0.05em">Table B — Current disagreement inventory</h4>
+  <p class="status-intro" style="margin-top:6px">Pills: <span class="status-pill needed">Queued</span> = thesis-side fix tracked in Rewrite Queue · <span class="status-pill outdated">Stale</span> = non-thesis record needs refresh · <span class="status-pill done">Resolved</span> = closed by a non-thesis action logged here.</p>
+  <table class="status-table">
+    <tr><th style="width:3%">#</th><th style="width:24%">What disagrees</th><th style="width:22%">Authoritative</th><th>Resolution</th><th style="width:10%">Status</th></tr>
+    <tr><td>1</td><td>"Bayesian Knowledge <strong>Training</strong>" typo</td><td>Literature (Corbett &amp; Anderson 1995) → "Tracing"</td><td>Fix <code>design-and-architecture.tex:314</code> + <code>implementation.tex:95</code>. Tracked in Rewrite Queue.</td><td><span class="status-pill needed">Queued</span></td></tr>
+    <tr><td>2</td><td>Struggle formula: thesis has 5 components, code has 7</td><td>Code <code>config.py:18–25</code> — weights [0.10, 0.10, 0.20, 0.10, 0.38, 0.05, 0.07]</td><td>Thesis update per Rewrite Queue "Update Ch3 §3.3.1".</td><td><span class="status-pill needed">Queued</span></td></tr>
+    <tr><td>3</td><td>Difficulty formula: thesis has 4 components, code has 5</td><td>Code <code>config.py:45–49</code> — adds <code>p̃</code> first-attempt failure</td><td>Thesis update per Rewrite Queue "Update Ch3 §3.3.2".</td><td><span class="status-pill needed">Queued</span></td></tr>
+    <tr><td>4</td><td>Threshold labels: "None/Low/Medium/High" vs code's "On Track/Minor Issues/Struggling/Needs Help"</td><td>Code <code>config.py:37–42</code></td><td>Thesis update per Rewrite Queue.</td><td><span class="status-pill needed">Queued</span></td></tr>
+    <tr><td>5</td><td>Temporal smoothing stated as deferred/stub in thesis and vault</td><td>Code — <code>SMOOTHING_ENABLED=True</code>, α=0.3 as of 2026-04-10 (Full Roadmap step 1)</td><td>Thesis update (Rewrite Queue). Vault Rewrite Queue lines 42 and 54 rewritten to reflect active state (this session).</td><td><span class="status-pill done">Resolved (vault)</span></td></tr>
+    <tr><td>6</td><td>"Feedback requests" (thesis) vs <code>retry_rate</code> (code)</td><td>Different signals: feedback-requests dropped, retry-rate replaced it</td><td>Thesis: document the swap explicitly. Don't rename — the signal itself changed.</td><td><span class="status-pill needed">Queued</span></td></tr>
+    <tr><td>7</td><td>FR6 (smart devices) listed "Should Have" but unimplemented</td><td>Code — absent; Vault — confirms unimplemented</td><td>Thesis: move FR6 to "Won't Have" or Ch6 future work.</td><td><span class="status-pill needed">Queued</span></td></tr>
+    <tr><td>8</td><td>RAG (<code>rag.py</code>) fully built but absent from thesis</td><td>Code — live, <code>RAG_ENABLED_DEFAULT=True</code></td><td>Thesis: Ch2 §2.1.9 lit review + Ch3 design section + Ch4 implementation section. Phase 9 language reconciled in Full Roadmap &amp; Report Sync this session.</td><td><span class="status-pill needed">Queued</span></td></tr>
+    <tr><td>9</td><td>IRT, BKT, improved-struggle, mistake-clustering, measurement-confidence all missing from thesis prose</td><td>Code — all live under <code>models/</code> and <code>analytics.py</code></td><td>Thesis: Ch3 §3.4 subsections + Ch4 content (Rewrite Queue "Phase 6 additions").</td><td><span class="status-pill needed">Queued</span></td></tr>
+    <tr><td>10</td><td>MEMORY.md claims "flat layout with 10 Python source files"</td><td>CLAUDE.md + actual tree: <code>code/learning_dashboard/</code> package with <code>models/</code> and <code>ui/</code> subpackages</td><td>Rewrite MEMORY.md in a fresh Claude session when prompted.</td><td><span class="status-pill outdated">Stale</span></td></tr>
+    <tr><td>11</td><td>MEMORY.md missing modules: <code>models/</code>, <code>ui/</code>, <code>rag.py</code>, <code>sound.py</code>, <code>academic_calendar.py</code>, <code>instructor_app.py</code>, <code>assistant_app.py</code>, <code>paths.py</code></td><td>Actual tree</td><td>Same as #10 — rewrite together.</td><td><span class="status-pill outdated">Stale</span></td></tr>
+    <tr><td>12</td><td>Toolkit Deep-dive panel may lack cards for newer modules</td><td>Code</td><td>Add cards as features land — routine maintenance, not urgent.</td><td><span class="status-pill outdated">Stale</span></td></tr>
+    <tr><td>13</td><td>Phase 9 status: "out of scope" (Full Roadmap) vs "must be credited" (Report Sync)</td><td>Reconciled: <em>code</em> complete · <em>Ch4 description + Ch2 lit review</em> in scope · <em>evaluation</em> deferred to Ch6 §6.3</td><td>Clarifying sentence added to both vault files this session.</td><td><span class="status-pill done">Resolved (vault)</span></td></tr>
+    <tr><td>14</td><td>Vault Ch1–Ch6 notes' "Current contents" pre-date Phase 6 tex-skeleton additions (2026-04-12)</td><td>Actual tex state; Rewrite Queue "Phase 6 additions" section</td><td>Sync-date banner added to each Ch-note this session, pointing readers at the Rewrite Queue Phase 6 block instead of rewriting the duplicate content.</td><td><span class="status-pill done">Resolved (vault)</span></td></tr>
+    <tr><td>15</td><td>Ch2 research-gap <code>[FILL IN]</code> placeholder at <code>requirements-specification.tex:119</code></td><td>Draft exists commented out at lines 121–130</td><td>Uncomment and polish. Tracked in Rewrite Queue.</td><td><span class="status-pill needed">Queued</span></td></tr>
+  </table>
+
+  <div class="note-box" style="margin-top:14px"><strong>How to reconcile a new disagreement:</strong> (1) classify the claim using Table A, (2) pick the authoritative source, (3) add a row to Table B with a concrete resolution action, (4) when closed, flip the pill to <span class="status-pill done">Resolved</span> and leave the row as a historical record — don't delete. Future Claude sessions should be able to see the full reconciliation history from this one pane.</div>
 </div>
 </div>
 
@@ -2216,6 +2348,20 @@ function switchPanelByName(id){
   switchPanel(id,btn);
   window.scrollTo({top:0,behavior:'smooth'});
 }
+/* ── Subpanel switcher (nested tabs inside a panel) ── */
+function switchSubpanel(panelId,subId,btn){
+  const panel=document.getElementById('panel-'+panelId);
+  if(!panel)return;
+  panel.querySelectorAll('.subpanel').forEach(p=>p.classList.remove('active'));
+  panel.querySelectorAll('.subtab').forEach(t=>t.classList.remove('active'));
+  const sub=document.getElementById('subpanel-'+panelId+'-'+subId);
+  if(sub)sub.classList.add('active');
+  if(btn)btn.classList.add('active');
+  else{const tab=panel.querySelector('.subtab[data-sub="'+subId+'"]');if(tab)tab.classList.add('active');}
+  STATE.subtabs=STATE.subtabs||{};
+  STATE.subtabs[panelId]=subId;
+  saveState();
+}
 
 /* ══════════════════════════════════════════
    CODE REFERENCE JS
@@ -2580,9 +2726,24 @@ function resetProgress(){
   });
   /* Active top-level tab */
   if(STATE.tab){
-    const validIds=['overview','ref','glossary','literature','ops','status','dive','road','plan','report'];
+    const validIds=['overview','ref','glossary','literature','ops','status','dive','road','plan','sectionplan','report'];
     if(validIds.indexOf(STATE.tab)>=0&&STATE.tab!=='overview')switchPanel(STATE.tab);
   }
+  /* Restore subpanel selections */
+  const subs=STATE.subtabs||{};
+  Object.keys(subs).forEach(panelId=>{
+    const subId=subs[panelId];
+    if(!subId)return;
+    const panel=document.getElementById('panel-'+panelId);
+    if(!panel)return;
+    const sub=document.getElementById('subpanel-'+panelId+'-'+subId);
+    const tab=panel.querySelector('.subtab[data-sub="'+subId+'"]');
+    if(sub&&tab){
+      panel.querySelectorAll('.subpanel').forEach(p=>p.classList.remove('active'));
+      panel.querySelectorAll('.subtab').forEach(t=>t.classList.remove('active'));
+      sub.classList.add('active');tab.classList.add('active');
+    }
+  });
   /* Active deep-dive section */
   if(STATE.ddSection){
     const sec=document.getElementById(STATE.ddSection);

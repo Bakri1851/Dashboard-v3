@@ -99,6 +99,8 @@ More broadly, Pitts et al.\ survey LLM-based applications in programming educati
 
 Together, these works demonstrate different methods for evaluating struggle. These metrics are best captured through a combination of temporal, correctness-based and behavioural signals.
 
+\subsubsection{Knowledge Tracing and Bayesian Student Models}
+
 \subsubsection{Modelling Task Difficulty}
 
 
@@ -126,7 +128,12 @@ Unlike methods that rely on parameters, Collaborative filtering leverages the co
 A user-based collaborative filtering method identifies a set of $k$ nearest neighbours for a given student based on a similarity measure over their profiles. The behaviour of the neighbours are aggregated to produce a prediction. The approach is shown to be effective in sparse datasets, where explicit ratings are unavailable and implicit signals such as time-on-task and submission frequency must serve as proxies for preference. A known limitation is that when a student has little interaction history, similarity cannot be computed reliably, leading to unstable early-session predictions  
 
 In the context of lab struggle detection, collaborative filtering offers a strong alternative to our scoring approach. Rather than computing a fixed weighted score for each student, it can identify students whose interaction patterns closely resemble peers who need help, inferring that they too may need help. However applying collaborative filtering to a live computer lab comes with its constraints as students who may need help is limited and the start of the session will have very limited data. These constraints backs the use of a scoring approach, whilst the collaborative filtering approach is a strong alternative.
-    
+
+
+\subsubsection{Text Mining and Mistake Pattern Recovery}
+
+\subsubsection{Retrieval-Augmented Generation for Instructor and Assistant Feedback}
+
 \subsubsection{Summary of Identified Research Gaps}
 
 

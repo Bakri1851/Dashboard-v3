@@ -4,6 +4,8 @@ Master's thesis for the Dashboard v3 project. This note tracks the overall state
 
 Related: [[Report Sync]], [[Rewrite Queue]], [[Evidence Bank]], [[Home]]
 
+> **Source reconciliation:** when code, thesis, vault, toolkit, CLAUDE.md, and MEMORY.md disagree, the canonical rule and live disagreement inventory live in the toolkit's Status panel **§6 Source reconciliation** (`docs/recap_toolkit/dashboard_v3_toolkit.html`).
+
 ## Metadata
 
 - **Title:** Online Dashboard For Lab Assistants To Better Support Students in Labs
