@@ -88,4 +88,28 @@ Rules:
 
 ## HTML Recap Toolkit
 
-After every change update the html in the  rehab toolkit folder so it is up to date
+`docs/recap_toolkit/dashboard_v3_toolkit.html` is the canonical unified reference. It mirrors the code, the thesis, AND the vault — it is the primary intuitive navigation surface, more flexible than the Obsidian vault for exploring how methods work.
+
+Panels (10 tabs):
+
+- **Overview** — what the system does, who uses it, architecture
+- **Code reference** — searchable function list
+- **Glossary** — project + math terms, tagged
+- **Literature** — bibtex keys + grouping, mirrors `Literature/index.md`; ⚠ flags citations still needed
+- **Operations** — install / run / smoke test / troubleshooting (mirrors `Setup and Runbook.md`)
+- **Status** — implementation status + evidence gaps + report-alignment + figure audit (mirrors `Evidence Bank.md`, `Report Sync.md`, `Figures and Tables.md`)
+- **Deep dive** — per-method walkthroughs with citation footers
+- **Roadmap** — CODE-LEARNING stages 1–6 ending with Stage 6 defence-prep Q&A. Distinct from Plan.
+- **Plan** — SUBMISSION roadmap (14 steps, mirrors `Full Roadmap.md`) + 6-week schedule (mirrors `Weekly Plan.md`). Distinct from Roadmap.
+- **Report guide** — per-chapter writing guide
+
+Keep it in sync after any of the following:
+
+- **Code change** — method names, default parameter values in `config.py`, new signals/models, removed features.
+- **Thesis change** — new Ch2 citations, Ch3 design decisions, Ch4 implementation details, Appendix E/F formulae, Ch5 evaluation framing.
+- **Literature change** — new bibtex entry, new grouping in `docs/obsidian-vault/My Notes/Literature/index.md`.
+- **Vault change** — updates to `Setup and Runbook.md`, `Evidence Bank.md`, `Report Sync.md`, `Figures and Tables.md`, `Full Roadmap.md`, or `Weekly Plan.md` — the toolkit mirrors these; update the corresponding panel.
+
+Every deep-dive carries a citation footer: `Cite: [bibkeys] · Thesis: [section, appendix] · Code: [file:lines]`. Every glossary formula has a 1:1 mapping to an Appendix E entry. When a method lacks a citation, the toolkit is the first place to flag it (Literature panel shows "citation needed").
+
+The Obsidian vault remains the long-form writing workspace; the toolkit is the reference surface. Update both, but prioritise toolkit freshness.

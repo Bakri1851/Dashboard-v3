@@ -270,6 +270,84 @@ button:hover{border-color:#555;background:#22263a}
 .sn6{background:#0d2a2a;color:#7ed4d4}
 .sn7{background:#2a1a0d;color:#e3a571}
 .sn8{background:#1a0d2a;color:#a892d4}
+
+/* ══════════════════════════════════════════
+   CITATION FOOTER (attached to every deep-dive that covers a cited method)
+══════════════════════════════════════════ */
+.citation-footer{margin-top:1.25rem;padding:10px 14px;background:#0f1320;border:1px solid #2a2d3a;border-left:3px solid #7ab8f5;border-radius:6px;font-family:'SF Mono',Consolas,monospace;font-size:11px;color:#888;line-height:1.7;word-break:break-word}
+.citation-footer .cf-label{color:#7ab8f5;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;font-size:10px;display:inline-block;min-width:46px}
+.citation-footer .cf-sep{color:#444;margin:0 8px}
+.citation-footer .cf-needed{color:#e3b341}
+
+/* ══════════════════════════════════════════
+   PANEL — LITERATURE (mirror of Literature/index.md groupings)
+══════════════════════════════════════════ */
+.lit-intro{font-size:14px;color:#bbb;line-height:1.7;margin-bottom:1.25rem;max-width:880px}
+.lit-intro strong{color:#e0e0e0}
+.lit-legend{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 1.25rem;font-size:11px;color:#888}
+.lit-legend span{display:inline-flex;align-items:center;gap:4px}
+.lit-legend .lit-mark{font-family:'SF Mono',Consolas,monospace;font-weight:500}
+.lit-mark.ok{color:#56d364}
+.lit-mark.todo{color:#e3b341}
+.lit-group{margin-bottom:1.5rem;border:1px solid #2a2d3a;border-radius:10px;overflow:hidden;background:#12151e}
+.lit-group-head{padding:10px 14px;background:#161923;border-bottom:1px solid #2a2d3a}
+.lit-group-title{font-size:13px;font-weight:500;color:#e3b341;letter-spacing:0.02em;margin-bottom:2px}
+.lit-group-sub{font-size:11px;color:#666;font-family:'SF Mono',Consolas,monospace}
+.lit-entry{display:flex;gap:12px;padding:8px 14px;border-top:1px dashed #1e2231;align-items:flex-start;font-size:12px;line-height:1.6}
+.lit-entry:first-of-type{border-top:0}
+.lit-entry .lit-mark{flex-shrink:0;width:14px;text-align:center;padding-top:1px}
+.lit-entry .lit-key{font-family:'SF Mono',Consolas,monospace;font-size:11px;color:#7ab8f5;min-width:190px;flex-shrink:0;word-break:break-word}
+.lit-entry .lit-desc{flex:1;color:#aaa;min-width:0}
+.lit-entry .lit-desc strong{color:#ccc;font-weight:500}
+.lit-entry .lit-xref{font-family:'SF Mono',Consolas,monospace;font-size:10px;color:#666;display:block;margin-top:3px}
+
+/* ══════════════════════════════════════════
+   PANEL — OPERATIONS (mirrors Setup and Runbook.md)
+══════════════════════════════════════════ */
+.ops-section{margin-bottom:1.5rem}
+.ops-section h3{font-size:13px;color:#e3b341;font-weight:500;margin:0 0 10px;letter-spacing:0.02em}
+.ops-cmd{background:#0d1020;border:1px solid #2d5a8e;border-radius:6px;padding:10px 14px;font-family:'SF Mono',Consolas,monospace;font-size:12px;color:#7ab8f5;margin:6px 0;overflow-x:auto;white-space:nowrap}
+.ops-list{font-size:13px;color:#aaa;line-height:1.8;padding-left:1.2rem;margin:6px 0}
+.ops-list li code{font-family:'SF Mono',Consolas,monospace;font-size:11px;background:#1e2231;padding:1px 5px;border-radius:3px;color:#c9d1d9}
+
+/* ══════════════════════════════════════════
+   PANEL — STATUS (mirrors Evidence Bank + Report Sync + Figures and Tables)
+══════════════════════════════════════════ */
+.status-section{margin-bottom:2rem}
+.status-section h3{font-size:13px;color:#7ab8f5;font-weight:500;margin:0 0 10px;letter-spacing:0.02em}
+.status-section .status-intro{font-size:12px;color:#888;line-height:1.65;margin-bottom:10px}
+.status-table{width:100%;border-collapse:collapse;font-size:12px;background:#12151e;border:1px solid #2a2d3a;border-radius:6px;overflow:hidden;margin-top:6px}
+.status-table th{text-align:left;padding:8px 12px;background:#1a1d27;font-weight:500;font-size:11px;color:#888;border-bottom:1px solid #2a2d3a}
+.status-table td{padding:8px 12px;border-top:1px solid #2a2d3a;font-size:12px;color:#bbb;vertical-align:top;line-height:1.55}
+.status-table td code{font-family:'SF Mono',Consolas,monospace;font-size:11px;background:#1e2231;padding:1px 4px;border-radius:3px;color:#c9d1d9}
+.status-pill{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:500;white-space:nowrap}
+.status-pill.done{background:#0d3322;color:#56d364;border:1px solid #238636}
+.status-pill.partial{background:#2a2200;color:#e3b341;border:1px solid #4a3800}
+.status-pill.needed{background:#3a2a00;color:#e3b341;border:1px solid #7a5800}
+.status-pill.empty{background:#3a0d1a;color:#ff7b72;border:1px solid #5a1523}
+.status-pill.outdated{background:#3a0d1a;color:#ff7b72;border:1px solid #5a1523}
+.status-pill.future{background:#2a0d3a;color:#d2a8ff;border:1px solid #4a1a5a}
+.fig-audit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:6px}
+.fig-audit-card{background:#12151e;border:1px solid #2a2d3a;border-radius:8px;padding:10px 12px}
+.fig-audit-card h4{font-size:11px;color:#7ab8f5;font-weight:500;text-transform:uppercase;letter-spacing:0.04em;margin:0 0 8px}
+.fig-audit-card ul{list-style:none;padding:0;margin:0}
+.fig-audit-card li{font-size:12px;color:#aaa;line-height:1.65;padding-left:12px;position:relative}
+.fig-audit-card li::before{content:"·";position:absolute;left:0;color:#555;font-weight:700}
+
+/* ══════════════════════════════════════════
+   PANEL — PLAN (mirrors Full Roadmap.md + Weekly Plan.md)
+══════════════════════════════════════════ */
+.plan-section{margin-bottom:2rem}
+.plan-section h3{font-size:13px;color:#e3b341;font-weight:500;margin:0 0 10px;letter-spacing:0.02em}
+.plan-section .plan-intro{font-size:13px;color:#888;line-height:1.65;margin-bottom:1rem}
+.plan-week{background:#12151e;border:1px solid #2a2d3a;border-radius:6px;overflow:hidden;margin-top:6px}
+.plan-week th{text-align:left;padding:8px 12px;background:#1a1d27;font-weight:500;font-size:11px;color:#888;border-bottom:1px solid #2a2d3a}
+.plan-week td{padding:8px 12px;border-top:1px solid #2a2d3a;font-size:12px;color:#bbb;vertical-align:top;line-height:1.55}
+.plan-week td.week-num{font-family:'SF Mono',Consolas,monospace;color:#7ab8f5;white-space:nowrap}
+.plan-week td.week-hours{color:#e3b341;white-space:nowrap;text-align:right}
+.plan-glance{background:#161923;border:1px solid #2a2d3a;border-radius:8px;padding:12px 16px;margin-top:1rem;font-size:13px;color:#aaa;line-height:1.8}
+.plan-glance strong{color:#e0e0e0}
+.plan-glance .plan-glance-line{font-family:'SF Mono',Consolas,monospace;font-size:12px;color:#7ab8f5}
 </style>
 </head>
 <body>
@@ -279,8 +357,12 @@ button:hover{border-color:#555;background:#22263a}
   <div class="top-tab active" data-panel="overview" onclick="switchPanel('overview',this)">Overview</div>
   <div class="top-tab" data-panel="ref" onclick="switchPanel('ref',this)">Code reference</div>
   <div class="top-tab" data-panel="glossary" onclick="switchPanel('glossary',this)">Glossary</div>
+  <div class="top-tab" data-panel="literature" onclick="switchPanel('literature',this)">Literature</div>
+  <div class="top-tab" data-panel="ops" onclick="switchPanel('ops',this)">Operations</div>
+  <div class="top-tab" data-panel="status" onclick="switchPanel('status',this)">Status</div>
   <div class="top-tab" data-panel="dive" onclick="switchPanel('dive',this)">Deep dive</div>
   <div class="top-tab" data-panel="road" onclick="switchPanel('road',this)">Roadmap</div>
+  <div class="top-tab" data-panel="plan" onclick="switchPanel('plan',this)">Plan</div>
   <div class="top-tab" data-panel="report" onclick="switchPanel('report',this)">Report guide</div>
 </div>
 
@@ -373,9 +455,13 @@ button:hover{border-color:#555;background:#22263a}
 <h3 style="font-size:13px;color:#e3b341;margin:1rem 0 10px;letter-spacing:0.02em">Where to go next</h3>
 <div class="nav-hints">
   <div class="nav-chip" onclick="switchPanelByName('glossary')">📖 Glossary — decode the jargon</div>
+  <div class="nav-chip" onclick="switchPanelByName('literature')">📚 Literature — citations &amp; gaps</div>
   <div class="nav-chip" onclick="switchPanelByName('ref')">🔍 Code reference — function lookup</div>
-  <div class="nav-chip" onclick="switchPanelByName('dive')">🧮 Deep dive — math & design</div>
-  <div class="nav-chip" onclick="switchPanelByName('road')">🎯 Roadmap — 8-hour study plan</div>
+  <div class="nav-chip" onclick="switchPanelByName('dive')">🧮 Deep dive — math &amp; design</div>
+  <div class="nav-chip" onclick="switchPanelByName('ops')">⚙️ Operations — install &amp; smoke test</div>
+  <div class="nav-chip" onclick="switchPanelByName('status')">📊 Status — what's done vs missing</div>
+  <div class="nav-chip" onclick="switchPanelByName('road')">🎯 Roadmap — learn the code</div>
+  <div class="nav-chip" onclick="switchPanelByName('plan')">📅 Plan — submission timeline</div>
 </div>
 </div>
 
@@ -400,18 +486,452 @@ button:hover{border-color:#555;background:#22263a}
 </div>
 
 <!-- ══════════════════════════════════════════
+     PANEL — LITERATURE (mirrors docs/obsidian-vault/My Notes/Literature/index.md)
+══════════════════════════════════════════ -->
+<div id="panel-literature" class="panel">
+<p class="lit-intro">Every non-trivial mathematical method in the codebase should be grounded in a published source. This panel mirrors <strong>docs/obsidian-vault/My Notes/Literature/index.md</strong> and flags which citations are already in place (cited ✓) versus which still need a note added (cite needed ⚠). Keep in sync when a new bibtex entry is added to the thesis.</p>
+
+<div class="lit-legend">
+  <span><span class="lit-mark ok">✓</span> cited — entry exists in Literature/index.md and `\cite{}` calls in the thesis</span>
+  <span><span class="lit-mark todo">⚠</span> cite needed — method used in code but no note yet (see Rewrite Queue "Methods lit-review backlog")</span>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Learning Analytics — Foundations</div>
+    <div class="lit-group-sub">Core definitions and surveys of the LA field · Ch2 §2.1.1</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">verbert_2020_learning</div><div class="lit-desc">Verbert et al. (2020) — dashboard design principles; interpretability as key requirement.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">wilson_2017_learning</div><div class="lit-desc">Wilson et al. (2017) — LA in higher education; privacy and scalability concerns.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">klerkx_2017_learning</div><div class="lit-desc">Klerkx et al. (2017) — dashboard taxonomy; course-level vs session-level gap.</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Dashboards and Visualisation</div>
+    <div class="lit-group-sub">Prior systems and visual-analytics approaches · Ch2 §2.1.2</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">govaerts_the</div><div class="lit-desc">Govaerts et al. — SAM dashboard; separates at-risk from on-track students.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">vieira_2018_visual</div><div class="lit-desc">Vieira et al. (2018) — visual analytics in education.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">leecultura_2023_multimodal</div><div class="lit-desc">Lee &amp; Cultura (2023) — EMODA multimodal dashboard.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">mustafaayobamiraji_2024_realtime</div><div class="lit-desc">Mustafa, Ayobami &amp; Raji (2024) — real-time analytics feasibility.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">gelan_2018_affordances</div><div class="lit-desc">Gelan et al. (2018) — affordances of analytics tools.</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Student Struggle Modelling</div>
+    <div class="lit-group-sub">Ch2 §2.1.4 — extensions needed for composite scoring, time-decay, shrinkage, regression</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">dong_using</div><div class="lit-desc">Dong et al. — session-level struggle detection (77% accuracy).</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">or_2024_exploring</div><div class="lit-desc">Or (2024) — novice programmer testing; 4+ consecutive failures threshold.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">estey_2017_automatically</div><div class="lit-desc">Estey et al. (2017) — trajectory metric; 11% false-positive rate.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">piech_modeling</div><div class="lit-desc">Piech et al. — graphical model of student progression paths.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">ahn_2019_the</div><div class="lit-desc">Ahn (2019) — learning progression framework.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">kim_knowledge</div><div class="lit-desc">Kim et al. — knowledge tracing with student questions.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">koutcheme_using</div><div class="lit-desc">Koutcheme et al. — LLM-based answer quality; repair correlates with explanation.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">pitts_a</div><div class="lit-desc">Pitts et al. — LLMs best with human oversight.</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Composite Scoring &amp; Indicators <span class="lit-mark todo">(new group)</span></div>
+    <div class="lit-group-sub">Weighted-sum methodology behind struggle &amp; difficulty models · Ch2 §2.1.4 extension, Ch3 §3.3.1/3.3.2/3.3.4</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">oecd_2008_composite</div><div class="lit-desc"><strong>OECD/JRC (2008)</strong> — <em>Handbook on Constructing Composite Indicators</em>. Seminal reference for weighted-sum composite metrics.<span class="lit-xref">Used in: <a href="#" onclick="switchPanel('dive');ddShow('dd-struggle');return false">dd-struggle</a>, dd-difficulty (weighted sum)</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">nardo_2005_handbook</div><div class="lit-desc"><strong>Nardo et al. (2005)</strong> — handbook companion to OECD 2008. Normalisation + weighting methodology.</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Memory &amp; Time-Decay Models <span class="lit-mark todo">(new group)</span></div>
+    <div class="lit-group-sub">Justification for A_raw exponential decay and EWMA smoothing · Ch2 §2.1.4</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">ebbinghaus_1885_memory</div><div class="lit-desc"><strong>Ebbinghaus (1885)</strong> — <em>Memory: A Contribution to Experimental Psychology</em>. Seminal forgetting-curve work.<span class="lit-xref">Used in: analytics.py:173-206 (A_raw), config.DECAY_HALFLIFE_SECONDS=1800</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">wixted_2007_spacing</div><div class="lit-desc"><strong>Wixted &amp; Carpenter (2007)</strong> — modern forgetting-curve psychometrics.</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Bayesian Shrinkage &amp; Missing-Data Methods <span class="lit-mark todo">(new group)</span></div>
+    <div class="lit-group-sub">Low-n stabilisation + mean imputation · Ch2 §2.1.4, Ch3 §3.3.1/3.4.4</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">efron_1977_stein</div><div class="lit-desc"><strong>Efron &amp; Morris (1977)</strong> — <em>Stein's Estimation Rule and Its Competitors</em>. Foundation for empirical-Bayes shrinkage.<span class="lit-xref">Used in: analytics.py:344-350 and improved_struggle.py:178-184 (n/(n+K) shrinkage)</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">morris_1983_parametric</div><div class="lit-desc"><strong>Morris (1983)</strong> — parametric empirical-Bayes estimation.</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">little_rubin_2002</div><div class="lit-desc"><strong>Little &amp; Rubin (2002)</strong> — <em>Statistical Analysis with Missing Data</em>. Citation for mean-imputation of missing BKT mastery.<span class="lit-xref">Used in: improved_struggle.py:151-152</span></div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Knowledge Tracing &amp; Bayesian Student Models</div>
+    <div class="lit-group-sub">Ch2 §2.1.5 (NEW subsection) · Ch3 §3.4.3</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">corbett_1995_bkt</div><div class="lit-desc"><strong>Corbett &amp; Anderson (1995)</strong> — seminal BKT paper. HMM-based latent mastery model.<span class="lit-xref">Used in: models/bkt.py:37-49 (posterior + transition)</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">yudelson_2013_individualised</div><div class="lit-desc"><strong>Yudelson, Koedinger &amp; Gordon (2013)</strong> — individualised BKT parameters.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">khajah_supercharging</div><div class="lit-desc">Khajah et al. — strengthening BKT with IRT-like structure (already cited).</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Task and Question Difficulty (IRT)</div>
+    <div class="lit-group-sub">Ch2 §2.1.6 (renumbered) · Ch3 §3.4.2</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">rasch_1960_probabilistic</div><div class="lit-desc"><strong>Rasch (1960)</strong> — <em>Probabilistic Models for Some Intelligence and Attainment Tests</em>. Foundational 1PL.<span class="lit-xref">Used in: models/irt.py:67-163</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">lord_novick_1968</div><div class="lit-desc"><strong>Lord &amp; Novick (1968)</strong> — <em>Statistical Theories of Mental Test Scores</em>. Classical test theory + IRT.</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">wright_stone_1979</div><div class="lit-desc"><strong>Wright &amp; Stone (1979)</strong> — <em>Best Test Design</em>. Rasch model practice.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">frederikbaucks_2024_gaining</div><div class="lit-desc">Baucks et al. (2024) — IRT reveals hidden difficulty patterns.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">pankiewicz_measuring</div><div class="lit-desc">Pankiewicz — multi-attempt environments complicate difficulty.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">baeres_2020_an</div><div class="lit-desc">Baeres et al. (2020) — IRT-based course difficulty.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">dannath_evaluating</div><div class="lit-desc">Dannath et al. — task-level struggle in ITS.</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Collaborative Filtering</div>
+    <div class="lit-group-sub">Ch2 §2.1.7 (renumbered) · Ch3 §3.3.3</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">schafer_2007_collaborative</div><div class="lit-desc">Schafer et al. (2007) — k-NN CF with cosine similarity.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">deschnes_2020_recommender</div><div class="lit-desc">Deschnes (2020) — recommender systems for education.</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">herlocker_1999_algorithmic</div><div class="lit-desc"><strong>Herlocker et al. (1999)</strong> — seminal algorithmic CF paper.<span class="lit-xref">Used in: analytics.py:378-471 (user-user k-NN)</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">resnick_1994_grouplens</div><div class="lit-desc"><strong>Resnick et al. (1994)</strong> — GroupLens collaborative filtering architecture.</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Text Clustering &amp; Similarity <span class="lit-mark todo">(new group)</span></div>
+    <div class="lit-group-sub">Ch2 §2.1.7 (NEW subsection — Text Mining and Mistake Pattern Discovery) · Ch3 §3.3.x Mistake Clustering</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">salton_mcgill_1983</div><div class="lit-desc"><strong>Salton &amp; McGill (1983)</strong> — <em>Introduction to Modern Information Retrieval</em>. TF-IDF weighting.<span class="lit-xref">Used in: analytics.py:719-730</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">macqueen_1967_kmeans</div><div class="lit-desc"><strong>MacQueen (1967)</strong> — original k-means formulation.<span class="lit-xref">Used in: analytics.py:747-799</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">lloyd_1982_pcm</div><div class="lit-desc"><strong>Lloyd (1982)</strong> — PCM in PCM algorithm (k-means variant).</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">arthur_2007_kmeanspp</div><div class="lit-desc"><strong>Arthur &amp; Vassilvitskii (2007)</strong> — k-means++ initialisation (scikit-learn default).</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">rousseeuw_1987_silhouette</div><div class="lit-desc"><strong>Rousseeuw (1987)</strong> — silhouette score for cluster validation.<span class="lit-xref">Used in: analytics.py:745-759 (auto-k)</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">salton_lesk_1968</div><div class="lit-desc"><strong>Salton &amp; Lesk (1968)</strong> — cosine similarity in IR.</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Retrieval-Augmented Generation &amp; Embeddings <span class="lit-mark todo">(new group)</span></div>
+    <div class="lit-group-sub">Ch2 §2.1.8 (NEW subsection) · Ch3 §3.x RAG Design</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">lewis_2020_rag</div><div class="lit-desc"><strong>Lewis et al. (2020)</strong> — seminal RAG paper.<span class="lit-xref">Used in: rag.py (two-layer retrieval)</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">reimers_2019_sbert</div><div class="lit-desc"><strong>Reimers &amp; Gurevych (2019)</strong> — Sentence-BERT. Basis for all-MiniLM-L6-v2.</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">malkov_2020_hnsw</div><div class="lit-desc"><strong>Malkov &amp; Yashunin (2020)</strong> — HNSW approximate nearest neighbour, underpins ChromaDB.</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">LLM-as-Judge Scoring <span class="lit-mark todo">(new group)</span></div>
+    <div class="lit-group-sub">Entry point for incorrectness scoring · Ch2 §2.1.X (NEW) or extend §2.1.4 · Ch4 §4.7.1</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">zheng_2023_llm_judge</div><div class="lit-desc"><strong>Zheng et al. (2023)</strong> — <em>Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena</em>. Methodology citation for gpt-4o-mini incorrectness scoring.<span class="lit-xref">Used in: analytics.py (compute_incorrectness_column) — batch 50, 0.5 fallback</span></div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Estimation &amp; Optimisation <span class="lit-mark todo">(new group)</span></div>
+    <div class="lit-group-sub">Referenced from Ch3 §3.4.2/3.4.3 footnotes + Appendix F — not a Ch2 subsection</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">fisher_1922_mle</div><div class="lit-desc"><strong>Fisher (1922)</strong> — <em>On the Mathematical Foundations of Theoretical Statistics</em>. MLE justification.<span class="lit-xref">Used in: models/irt.py, models/bkt.py (fit_* via MLE)</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">byrd_1995_lbfgsb</div><div class="lit-desc"><strong>Byrd, Lu, Nocedal &amp; Zhu (1995)</strong> — L-BFGS-B bounded optimiser (scipy backend).</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Evaluation Metrics <span class="lit-mark todo">(new group)</span></div>
+    <div class="lit-group-sub">Referenced from Ch5 §5.1 — model-quality diagnostics</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">fawcett_2006_roc</div><div class="lit-desc"><strong>Fawcett (2006)</strong> — <em>An Introduction to ROC Analysis</em>.<span class="lit-xref">Used in: bkt.py:317-323 (BKT fit AUC diagnostic)</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">hanley_1982_auc</div><div class="lit-desc"><strong>Hanley &amp; McNeil (1982)</strong> — AUC statistical properties.</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">cohen_1960_kappa</div><div class="lit-desc"><strong>Cohen (1960)</strong> — chance-corrected agreement. Decision point for comparison view (currently raw %).<span class="lit-xref">See: dd-comparison</span></div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Classical Test &amp; Measurement Theory <span class="lit-mark todo">(new group)</span></div>
+    <div class="lit-group-sub">Referenced from Ch3 §3.4.1 only — not a Ch2 subsection</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">lord_novick_1968_ctt</div><div class="lit-desc"><strong>Lord &amp; Novick (1968)</strong> — classical test theory (cross-referenced from IRT group).<span class="lit-xref">Used in: models/measurement.py:9-58</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">crocker_algina_1986</div><div class="lit-desc"><strong>Crocker &amp; Algina (1986)</strong> — <em>Introduction to Classical and Modern Test Theory</em>.</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Ethics, Real-Time, Early Warning &amp; Other</div>
+    <div class="lit-group-sub">Existing entries in Literature/index.md — no methods backlog items here</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">marr_2021_what · nguyen_2020_data · li_2020_course</div><div class="lit-desc">Real-time analytics literature (Ch2 §2.1.3).</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">a2020_atrisk · a2022_early · a2023_real</div><div class="lit-desc">Early warning / at-risk framework surveys.</div></div>
+  <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">tzimas_2021_ethical · dasilva_2022_a · montebello_assisting · kiatxin_development · liu_open</div><div class="lit-desc">Ethics, architecture, educational-technology context.</div></div>
+</div>
+
+<p class="lit-intro" style="margin-top:2rem;font-size:12px;color:#666;max-width:none">Source of truth for the backlog: <strong>docs/obsidian-vault/My Notes/Thesis/Rewrite Queue.md</strong> — see "Methods lit-review backlog (2026-04-18)". Source of truth for the index: <strong>docs/obsidian-vault/My Notes/Literature/index.md</strong>. When a ⚠ entry is written up, update Literature/index.md and change the mark to ✓ here in the next toolkit sync.</p>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PANEL — OPERATIONS (mirrors Setup and Runbook.md)
+══════════════════════════════════════════ -->
+<div id="panel-ops" class="panel">
+<p class="ov-lead">Run the instructor dashboard and the lab-assistant portal. Two Streamlit processes, one shared JSON state, one OpenAI key. This mirrors <strong>docs/obsidian-vault/My Notes/Code/Lab App/Operations/Setup and Runbook.md</strong>.</p>
+
+<div class="ops-section">
+  <h3>Prerequisites</h3>
+  <ul class="ops-list">
+    <li>Python <code>3.11+</code></li>
+    <li>Packages from <code>code/requirements.txt</code></li>
+    <li>Network access to the configured retrieval API</li>
+    <li><code>OPENAI_API_KEY</code> in <code>.streamlit/secrets.toml</code> for incorrectness scoring and mistake-cluster labels</li>
+  </ul>
+</div>
+
+<div class="ops-section">
+  <h3>Install</h3>
+  <div class="ops-cmd">pip install -r code/requirements.txt</div>
+</div>
+
+<div class="ops-section">
+  <h3>Run</h3>
+  <p style="font-size:12px;color:#888;margin-bottom:6px">Run all commands from the repo root (<code>Dashboard v3/</code>).</p>
+  <p style="font-size:12px;color:#aaa;margin-top:10px;margin-bottom:2px">Instructor dashboard on port <code>8501</code>:</p>
+  <div class="ops-cmd">python -m streamlit run code/app.py</div>
+  <p style="font-size:12px;color:#aaa;margin-top:10px;margin-bottom:2px">Lab assistant portal on port <code>8502</code>:</p>
+  <div class="ops-cmd">streamlit run code/lab_app.py --server.port 8502</div>
+</div>
+
+<div class="ops-section">
+  <h3>Runtime files</h3>
+  <ul class="ops-list">
+    <li><code>data/saved_sessions.json</code> — saved session history</li>
+    <li><code>data/lab_session.json</code> — active shared assistant state</li>
+    <li><code>data/lab_session.lock</code> — file lock for shared assistant state</li>
+    <li>Legacy root JSON files may still exist, but runtime prefers <code>data/</code></li>
+  </ul>
+</div>
+
+<div class="ops-section">
+  <h3>Quick smoke test</h3>
+  <p style="font-size:12px;color:#888;margin-bottom:8px">8-step checklist from the vault runbook. Run through in order; each step gates the next.</p>
+  <div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-text">Launch the instructor app and confirm the dashboard loads data.</div></div></div>
+  <div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-text">Start a lab session and confirm a session code appears.</div></div></div>
+  <div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-text">Launch the assistant app, join with the code, and confirm the assistant appears in the instructor sidebar.</div></div></div>
+  <div class="step-row"><div class="step-num">4</div><div class="step-body"><div class="step-text">Assign a struggling student from the instructor view or self-claim from the assistant view.</div></div></div>
+  <div class="step-row"><div class="step-num">5</div><div class="step-body"><div class="step-text">Mark the student as helped and confirm the status syncs across both apps.</div></div></div>
+  <div class="step-row"><div class="step-num">6</div><div class="step-body"><div class="step-text">End the session and confirm a saved-session record is created.</div></div></div>
+  <div class="step-row"><div class="step-num">7</div><div class="step-body"><div class="step-text">Open <strong>Previous Sessions</strong>, load a saved session, and confirm the data is time-windowed.</div></div></div>
+  <div class="step-row"><div class="step-num">8</div><div class="step-body"><div class="step-text">Return to live data and confirm the dashboard resets to default live mode.</div></div></div>
+</div>
+
+<div class="ops-section">
+  <h3>Test result capture template <span style="font-weight:normal;font-size:11px;color:#888">— fill during testing phase</span></h3>
+  <p style="font-size:12px;color:#888;margin-bottom:8px">Pattern from F221611.pdf §6.3 (Ottoman Exchange). Duplicate the empty table below once per view (In Class, Student Detail, Question Detail, Data Analysis, Settings, Previous Sessions, Lab Assistant). Fill each row when you run the smoke test against a live session. Feeds Appendix C (Detailed Test Results) and Ch5 §5.2 Functional Testing.</p>
+  <table class="status-table">
+    <tr>
+      <th style="width:6%">#</th>
+      <th style="width:20%">Action</th>
+      <th style="width:18%">Test</th>
+      <th style="width:22%">Expected result</th>
+      <th style="width:14%">Method</th>
+      <th style="width:10%">Met result</th>
+      <th style="width:10%">Solution (if failed)</th>
+    </tr>
+    <tr><td>1</td><td style="color:#888"><em>(e.g., click Student X row)</em></td><td style="color:#888"><em>(what this verifies)</em></td><td style="color:#888"><em>(what should happen)</em></td><td style="color:#888"><em>(how tested)</em></td><td><span class="status-pill needed">—</span></td><td style="color:#888">—</td></tr>
+    <tr><td>2</td><td style="color:#ccc">—</td><td style="color:#ccc">—</td><td style="color:#ccc">—</td><td style="color:#ccc">—</td><td style="color:#ccc">—</td><td style="color:#ccc">—</td></tr>
+    <tr><td>3</td><td style="color:#ccc">—</td><td style="color:#ccc">—</td><td style="color:#ccc">—</td><td style="color:#ccc">—</td><td style="color:#ccc">—</td><td style="color:#ccc">—</td></tr>
+  </table>
+  <div class="note-box" style="margin-top:10px"><strong>Pass-result convention:</strong> use a Pass / Fail pill in the "Met result" column (mirror the <code>status-pill done</code> / <code>status-pill needed</code> styles). On Fail, the Solution column records what was changed to make it pass.</div>
+</div>
+
+<div class="ops-section">
+  <h3>Troubleshooting</h3>
+  <div class="note-box" style="margin:8px 0">If the instructor dashboard shows an API error, check the retrieval endpoint in <code>config.py</code> and network access.</div>
+  <div class="note-box" style="margin:8px 0">If incorrectness or mistake labels seem generic, check <code>OPENAI_API_KEY</code> in <code>.streamlit/secrets.toml</code>.</div>
+  <div class="note-box" style="margin:8px 0">If assistant state gets stuck, stop both apps and inspect <code>data/lab_session.json</code> and <code>data/lab_session.lock</code>.</div>
+  <div class="note-box" style="margin:8px 0">If saved sessions reset unexpectedly, inspect backups created from corrupt JSON.</div>
+  <div class="note-box" style="margin:8px 0">If a widget-state mutation error appears, review deferred actions in <code>code/learning_dashboard/instructor_app.py</code>.</div>
+</div>
+
+<div class="ops-section">
+  <h3>Verification command (PowerShell-friendly syntax check)</h3>
+  <div class="ops-cmd">$files = @('code/app.py','code/lab_app.py') + (Get-ChildItem code/learning_dashboard -File -Filter *.py | ForEach-Object { $_.FullName }) + (Get-ChildItem code/learning_dashboard/ui -File -Filter *.py | ForEach-Object { $_.FullName }); python -m py_compile @files</div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PANEL — STATUS (mirrors Evidence Bank + Report Sync + Figures and Tables)
+══════════════════════════════════════════ -->
+<div id="panel-status" class="panel">
+<p class="ov-lead">Single-pane project status: what's implemented, what evidence is missing, how the thesis aligns with the code, and which figures/tables need work. Sources: <strong>Evidence Bank.md</strong>, <strong>Report Sync.md</strong>, <strong>Figures and Tables.md</strong>.</p>
+
+<div class="status-section">
+  <h3>§1 — Implementation status</h3>
+  <p class="status-intro">14 V2 features that exist in the codebase. Green = production-ready feature backed by a function you can point an examiner at.</p>
+  <table class="status-table">
+    <tr><th style="width:28%">Feature</th><th>Code location</th><th style="width:12%">Status</th></tr>
+    <tr><td>7-signal student struggle</td><td><code>analytics.py · compute_student_struggle_scores()</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>5-signal question difficulty</td><td><code>analytics.py · compute_question_difficulty_scores()</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>LLM-as-judge incorrectness</td><td><code>analytics.py · compute_incorrectness_column()</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Collaborative filtering</td><td><code>analytics.py · compute_cf_struggle_scores()</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Mistake clustering</td><td><code>analytics.py · cluster_question_mistakes()</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>IRT difficulty (Rasch 1PL)</td><td><code>models/irt.py · compute_irt_difficulty_scores()</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>BKT mastery tracking</td><td><code>models/bkt.py · compute_all_mastery()</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Improved struggle model</td><td><code>models/improved_struggle.py</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Measurement confidence</td><td><code>models/measurement.py</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Lab assistant system</td><td><code>lab_state.py · assistant_app.py</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>RAG coaching suggestions</td><td><code>rag.py · generate_assistant_suggestions()</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Saved sessions</td><td><code>data_loader.py · save_session_record()</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Academic calendar mapping</td><td><code>academic_calendar.py</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Config-driven thresholds</td><td><code>config.py</code></td><td><span class="status-pill done">Done</span></td></tr>
+  </table>
+</div>
+
+<div class="status-section">
+  <h3>§2 — Evidence gaps (for Ch5)</h3>
+  <p class="status-intro">What still needs to be <em>produced</em> — screenshots to capture, comparisons to run, tests to walk through. Amber = action required.</p>
+  <table class="status-table">
+    <tr><th style="width:32%">Evidence</th><th>How to generate</th><th style="width:12%">Status</th></tr>
+    <tr><td>All 11 UI screenshots (Appendix B)</td><td>Run dashboard with real data, capture each of the 6 instructor views + 3 assistant views + CF panel + sidebar</td><td><span class="status-pill needed">Needed</span></td></tr>
+    <tr><td>Baseline vs IRT difficulty</td><td>Enable both models, open Model Comparison view, screenshot side-by-side scores</td><td><span class="status-pill needed">Needed</span></td></tr>
+    <tr><td>Baseline vs improved struggle</td><td>Same view, student-struggle tab</td><td><span class="status-pill needed">Needed</span></td></tr>
+    <tr><td>CF elevation examples</td><td>Enable CF, capture diagnostic panel with elevated students</td><td><span class="status-pill needed">Needed</span></td></tr>
+    <tr><td>Mistake cluster examples</td><td>Session with &gt;3 incorrect answers on one question, screenshot clusters</td><td><span class="status-pill needed">Needed</span></td></tr>
+    <tr><td>BKT mastery evolution</td><td>Extract from <code>mastery_df</code> session state for a student across multiple attempts</td><td><span class="status-pill needed">Needed</span></td></tr>
+    <tr><td>Score distributions</td><td>Histograms of struggle/difficulty across a real session — In Class view</td><td><span class="status-pill needed">Needed</span></td></tr>
+    <tr><td>FR1–FR7 walkthroughs</td><td>Smoke-test checklist in Operations panel, recorded pass/fail per requirement</td><td><span class="status-pill needed">Needed</span></td></tr>
+    <tr><td>NFR performance measurement</td><td>Time the refresh cycle end-to-end</td><td><span class="status-pill needed">Needed</span></td></tr>
+  </table>
+  <div class="note-box" style="margin-top:12px"><strong>What's structurally missing:</strong> no automated test suite, no benchmark datasets, no user studies, no performance profiling data, no accessibility testing. Document these as limitations + future work in Ch6.</div>
+</div>
+
+<div class="status-section">
+  <h3>§3 — Report ↔ code alignment</h3>
+  <p class="status-intro">Chapter-by-chapter sync status. Source: <strong>Report Sync.md</strong>.</p>
+  <table class="status-table">
+    <tr><th style="width:22%">Chapter</th><th style="width:12%">Status</th><th>Biggest mismatch</th></tr>
+    <tr><td>Ch1 Introduction</td><td><span class="status-pill partial">Partial</span></td><td>Future-tense framing throughout; risk table mitigations are generic, not tied to actual decisions.</td></tr>
+    <tr><td>Ch2 Background &amp; Requirements</td><td><span class="status-pill partial">Partial</span></td><td><code>[FILL IN]</code> placeholder at §2.1.7 research gaps. FR/NFR have no implementation-status mapping.</td></tr>
+    <tr><td>Ch3 Design &amp; Modelling</td><td><span class="status-pill partial">Partial</span></td><td>Struggle formula has 5 components in thesis, 7 in code. Difficulty has 4 vs 5. IRT, BKT, improved struggle, mistake clustering — none mentioned.</td></tr>
+    <tr><td>Ch4 Implementation</td><td><span class="status-pill outdated">Outdated</span></td><td>Describes V1 prototype. OpenAI scoring, 7-signal struggle, CF, IRT, BKT, RAG, lab assistant system, saved sessions — none present. Full rewrite required.</td></tr>
+    <tr><td>Ch5 Results &amp; Evaluation</td><td><span class="status-pill empty">Empty</span></td><td>Header-only. Model Comparison view is built but evaluation not written.</td></tr>
+    <tr><td>Ch6 Conclusion</td><td><span class="status-pill empty">Empty</span></td><td>Header-only.</td></tr>
+    <tr><td>Appendix A Code Snippets</td><td><span class="status-pill empty">Empty</span></td><td>—</td></tr>
+    <tr><td>Appendix B Screenshots</td><td><span class="status-pill empty">Empty</span></td><td>—</td></tr>
+    <tr><td>Appendix C Test Results</td><td><span class="status-pill empty">Empty</span></td><td>—</td></tr>
+    <tr><td>Appendix D Themes &amp; Refs</td><td><span class="status-pill done">Accurate</span></td><td>36 citations mapped to research themes — complete.</td></tr>
+    <tr><td>Appendix E Formulae</td><td><span class="status-pill empty">Empty</span></td><td>—</td></tr>
+    <tr><td>Appendix F Derivations</td><td><span class="status-pill empty">Empty</span></td><td>—</td></tr>
+  </table>
+  <div class="note-box" style="margin-top:12px">Actionable backlog for every "Partial / Outdated / Empty" row lives in <strong>docs/obsidian-vault/My Notes/Thesis/Rewrite Queue.md</strong>.</div>
+</div>
+
+<div class="status-section">
+  <h3>§4 — Figure &amp; table audit</h3>
+  <p class="status-intro">11 figures + 9 tables in the current thesis. Source: <strong>Figures and Tables.md</strong>.</p>
+  <div class="fig-audit-grid">
+    <div class="fig-audit-card">
+      <h4>Keep as-is</h4>
+      <ul>
+        <li>Figs 1–5 (literature dashboards)</li>
+        <li>Fig 7 (data entry diagram)</li>
+        <li>Tbl 2 (grade scoring)</li>
+        <li>Tbl 7 (difficulty thresholds)</li>
+        <li>Tbl 9 (Appendix D themes)</li>
+      </ul>
+    </div>
+    <div class="fig-audit-card">
+      <h4>Update</h4>
+      <ul>
+        <li>Fig 6 (architecture diagram)</li>
+        <li>Tbl 1 (risk mitigations)</li>
+        <li>Tbl 3 (MoSCoW — FR6 status)</li>
+        <li>Tbl 4 (tech stack — add OpenAI/filelock/scipy)</li>
+        <li>Tbl 5 (CF comparison — now implemented)</li>
+        <li>Tbl 6 (struggle thresholds — new label names)</li>
+      </ul>
+    </div>
+    <div class="fig-audit-card">
+      <h4>Replace with screenshot</h4>
+      <ul>
+        <li>Fig 8 (Figma — struggle view)</li>
+        <li>Fig 9 (Figma — allocation)</li>
+        <li>Fig 10 (Figma — leaderboard)</li>
+      </ul>
+    </div>
+    <div class="fig-audit-card">
+      <h4>Remove if Progress Report stays excluded</h4>
+      <ul>
+        <li>Fig 11 (Gantt chart)</li>
+        <li>Tbl 8 (Gantt summary)</li>
+      </ul>
+    </div>
+    <div class="fig-audit-card">
+      <h4>Add — new screenshots</h4>
+      <ul>
+        <li>In Class view</li>
+        <li>Student detail</li>
+        <li>Question detail</li>
+        <li>Data analysis</li>
+        <li>Settings</li>
+        <li>Lab assistant views (3)</li>
+        <li>V2 architecture diagram</li>
+      </ul>
+    </div>
+    <div class="fig-audit-card">
+      <h4>Add — new tables</h4>
+      <ul>
+        <li>Requirements traceability (FR/NFR → status)</li>
+        <li>Model comparison results</li>
+        <li>Struggle formula components (all 7)</li>
+        <li>Difficulty formula components (all 5)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="status-section">
+  <h3>§5 — Development log <span style="font-weight:normal;font-size:11px;color:#888">— to fill</span></h3>
+  <p class="status-intro">Pattern from F221611.pdf §5.6 (Ottoman Exchange). Three-column problem-solution log. Fill as issues arise during the build / testing phase; mine <strong>Meeting Log.md</strong>, <strong>Report Sync.md</strong>, and <strong>Rewrite Queue.md</strong> for historic entries when you write Ch5 §5.6 Limitations. Entries here feed the <em>Project Challenges</em> bucket of the Ch5 Limitations split (see Report guide → Ch5 evaluation patterns).</p>
+  <table class="status-table">
+    <tr>
+      <th style="width:24%">Problem</th>
+      <th style="width:46%">Description</th>
+      <th>Resolution</th>
+    </tr>
+    <tr>
+      <td style="color:#888"><em>(short label, e.g. "Struggle formula drift")</em></td>
+      <td style="color:#888"><em>(what happened, where, what it broke)</em></td>
+      <td style="color:#888"><em>(what was changed to resolve it, or "unresolved — see future work")</em></td>
+    </tr>
+    <tr>
+      <td style="color:#ccc">—</td>
+      <td style="color:#ccc">—</td>
+      <td style="color:#ccc">—</td>
+    </tr>
+    <tr>
+      <td style="color:#ccc">—</td>
+      <td style="color:#ccc">—</td>
+      <td style="color:#ccc">—</td>
+    </tr>
+  </table>
+  <div class="note-box" style="margin-top:10px"><strong>Starter prompts to mine from the vault:</strong> V1 → V2 rewrite reasons · struggle formula component count drift (5 in thesis vs 7 in code) · hand-tuned weights vs absent labelled data · deferred-actions pattern for Streamlit session-state mutation · filelock choice over database · RAG first-call latency (~30 s model download) · cache-invalidation edge cases.</div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════
      PANEL 2 — DEEP DIVE
 ══════════════════════════════════════════ -->
 <div id="panel-dive" class="panel">
 <div class="dd-nav">
   <button class="dd-btn active" onclick="ddShow('dd-data',this)">Data pipeline</button>
+  <button class="dd-btn" onclick="ddShow('dd-scoring',this)">LLM-as-judge scoring</button>
   <button class="dd-btn" onclick="ddShow('dd-struggle',this)">Struggle scoring</button>
   <button class="dd-btn" onclick="ddShow('dd-difficulty',this)">Difficulty scoring</button>
   <button class="dd-btn" onclick="ddShow('dd-irt',this)">IRT model</button>
   <button class="dd-btn" onclick="ddShow('dd-bkt',this)">BKT model</button>
   <button class="dd-btn" onclick="ddShow('dd-improved',this)">Improved struggle</button>
   <button class="dd-btn" onclick="ddShow('dd-cf',this)">Collaborative filtering</button>
+  <button class="dd-btn" onclick="ddShow('dd-clustering',this)">Mistake clustering</button>
   <button class="dd-btn" onclick="ddShow('dd-rag',this)">RAG pipeline</button>
+  <button class="dd-btn" onclick="ddShow('dd-comparison',this)">Model comparison</button>
   <button class="dd-btn" onclick="ddShow('dd-session',this)">Session coordination</button>
   <button class="dd-btn" onclick="ddShow('dd-ui',this)">UI routing</button>
   <button class="dd-btn" onclick="ddShow('dd-views',this)">Views &amp; features</button>
@@ -429,6 +949,18 @@ button:hover{border-color:#555;background:#22263a}
 <div class="step-row"><div class="step-num">6</div><div class="step-body"><div class="step-title">load_data() — double caching</div><div class="step-text">Calls fetch → detect → parse → clean. Second caching layer: hashes the raw response string and stores the DataFrame in <code>st.session_state["_df"]</code>. If hash matches on next rerun, skips parse+clean entirely. Returns <code>(DataFrame, error_msg)</code> on any error returns empty DataFrame with correct schema.</div></div></div>
 <div class="step-row"><div class="step-num">7</div><div class="step-body"><div class="step-title">Sidebar filters</div><div class="step-text">Applied in order: (1) <code>filter_by_module()</code>. (2) <code>filter_by_time()</code>. (3) <code>filter_by_session_start()</code> — in live mode, keep only rows since "Start Session". (4) <code>filter_by_datetime_window()</code> — when a saved session is loaded.</div></div></div>
 <div class="flow-chain"><div class="flow-box">API</div><div class="flow-arrow">→</div><div class="flow-box">fetch_raw_data()</div><div class="flow-arrow">→</div><div class="flow-box">detect_format()</div><div class="flow-arrow">→</div><div class="flow-box">parse_json/xml()</div><div class="flow-arrow">→</div><div class="flow-box">normalize_and_clean()</div><div class="flow-arrow">→</div><div class="flow-box">sidebar filters</div><div class="flow-arrow">→</div><div class="flow-box">filtered DataFrame</div></div>
+</div>
+
+<div id="dd-scoring" class="dd-section">
+<p class="section-intro">Every downstream signal depends on <code>incorrectness</code> — a continuous [0,1] score of how wrong a submission is. An LLM (gpt-4o-mini) judges <code>ai_feedback</code> text and returns the number. This is <strong>LLM-as-judge methodology</strong>: use a language model as the scorer when no labelled ground truth is available.</p>
+<div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">compute_incorrectness_column(df) — gather candidates</div><div class="step-text">Scan the DataFrame's <code>ai_feedback</code> column. Skip rows already in <code>_incorrectness_cache</code>. Skip empty/whitespace feedback (those get 0.5 fallback without an API call). Collect unique non-empty strings.</div></div></div>
+<div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">Batch to GPT-4o-mini</div><div class="step-text">Chunk to batches of 50. Per batch: one system prompt + user prompt with numbered feedback list. Model returns a JSON array of floats in [0,1]. Response parsed, cached by feedback hash.</div></div></div>
+<div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-title">Failure modes — safe defaults</div>
+<div class="formula-box">empty feedback         → 0.5 (no API call)<br>OpenAI parse failure   → 0.5 × batch_size<br>OpenAI timeout         → 0.5 × batch_size</div>
+<div class="step-text">0.5 is deliberate: it is the most "uncertain" point. A 0.5 fallback treats the submission as neither clearly correct nor clearly wrong, so it contributes equal weight to both sides of the CORRECT_THRESHOLD cliff. Downstream code treats a flood of 0.5s as a signal that scoring has failed (BKT/IRT refuse to fit on single-class data for this reason).</div></div></div>
+<div class="step-row"><div class="step-num">4</div><div class="step-body"><div class="step-title">Why LLM-as-judge is defensible here</div><div class="step-text">Labelled ground truth (instructor-graded correctness) does not exist for this dataset. The LLM replaces a rubric-based human grader. This is the <strong>Zheng et al. (2023)</strong> methodology from <em>Judging LLM-as-a-Judge with MT-Bench</em>. Known calibration risks: the model can be overconfident at the extremes; the 0.5 fallback masks silent failures; the score is not interpretable per-token. These are documented limitations — not bugs.</div></div></div>
+<div class="note-box">Thesis Ch5 §5 reliability subsection: report the fraction of rows at 0.5 fallback. A &gt;80% fallback rate indicates OpenAI is failing silently or <code>ai_feedback</code> is mostly empty — check <code>.streamlit/secrets.toml</code> and data-pipeline parsing.</div>
+<div class="citation-footer"><span class="cf-label">Cite:</span>Zheng et al. (2023)<span class="cf-sep">·</span><span class="cf-label">Thesis:</span>Ch2 §2.1.X (NEW — LLM-as-Judge) or extend §2.1.4<span class="cf-sep">·</span>Ch3 §3.3.0<span class="cf-sep">·</span>Ch4 §4.7.1<span class="cf-sep">·</span><span class="cf-label">Code:</span>code/learning_dashboard/analytics.py (compute_incorrectness_column, _openai_batch_score)<span class="cf-sep">·</span><span class="cf-needed">⚠ citation not yet in thesis</span></div>
 </div>
 
 <div id="dd-struggle" class="dd-section">
@@ -449,6 +981,9 @@ button:hover{border-color:#555;background:#22263a}
 <div class="step-text" style="margin-bottom:6px">min_max_normalize() returns 0.5 (not 0.0) when all values are equal — preserves weight contribution rather than silently zeroing it.</div>
 <div class="formula-box">w_n = n / (n + 5)<br>S_final = w_n × S + (1 − w_n) × class_mean</div>
 <div class="step-text">Shrinkage is the final transform. n=2: 71% pulled toward mean. n=10: 33%. n=50: barely affected.</div></div></div>
+<div class="step-row"><div class="step-num">4</div><div class="step-body"><div class="step-title">EWMA temporal smoothing (distinct from A_raw decay)</div>
+<div class="formula-box">S_smooth(t) = α · S(t) + (1 − α) · S_smooth(t − Δt)   with α = 0.3</div>
+<div class="step-text">Enabled by <code>config.SMOOTHING_ENABLED=True</code> with <code>SMOOTHING_ALPHA=0.3</code>. Applied <strong>across snapshot refreshes</strong> — damps second-by-second jitter when the dashboard auto-reruns. This is a different technique from A_raw's per-submission exponential time decay (Ebbinghaus), which weights individual submissions by their age. Two time scales: A_raw lives inside a single score computation (older submissions contribute less); EWMA lives across score computations (this minute's score blends with last minute's).</div></div></div>
 <div class="result-row"><div class="result-pill on-track">0.00–0.20 On Track</div><div class="result-pill minor">0.20–0.35 Minor Issues</div><div class="result-pill struggling">0.35–0.50 Struggling</div><div class="result-pill needs-help">0.50–1.00 Needs Help</div></div>
 <hr class="dd-divider">
 <div class="demo"><div class="demo-title">Interactive: explore the formula (sliders represent cohort-normalised values)</div>
@@ -462,6 +997,7 @@ button:hover{border-color:#555;background:#22263a}
   <div class="slider-row"><label>n raw count (shrinkage)</label><input type="range" min="1" max="50" step="1" value="8" id="srawN" oninput="calcStruggle()"><span id="srawN-v">8</span></div>
   <div class="result-line">Raw: <strong id="raw-score">—</strong> &nbsp;|&nbsp; After shrinkage (mean=0.40): <strong id="shrunk-score">—</strong> &nbsp;|&nbsp; <span id="level-badge" class="result-pill">—</span></div>
 </div>
+<div class="citation-footer"><span class="cf-label">Cite:</span>OECD/JRC (2008); Nardo et al. (2005); Ebbinghaus (1885); Wixted &amp; Carpenter (2007); Efron &amp; Morris (1977); Morris (1983); Draper &amp; Smith (1998); Han/Kamber/Pei (2011)<span class="cf-sep">·</span><span class="cf-label">Thesis:</span>Ch2 §2.1.4 (extension); Ch3 §3.3.1; Appendix E<span class="cf-sep">·</span><span class="cf-label">Code:</span>code/learning_dashboard/analytics.py:103-366 (compute_struggle_scores, A_raw decay, shrinkage)<span class="cf-sep">·</span><span class="cf-needed">⚠ all foundational citations still missing from thesis</span></div>
 </div>
 
 <div id="dd-difficulty" class="dd-section">
@@ -476,6 +1012,7 @@ button:hover{border-color:#555;background:#22263a}
 <div class="formula-box">D = 0.28·c_norm + 0.12·t̃ + 0.20·ã + 0.20·f_norm + 0.20·p_norm</div>
 <div class="result-row"><div class="result-pill on-track">0.00–0.35 Easy</div><div class="result-pill minor">0.35–0.50 Medium</div><div class="result-pill struggling">0.50–0.75 Hard</div><div class="result-pill needs-help">0.75–1.00 Very Hard</div></div>
 <div class="note-box">No Bayesian shrinkage here. Difficulty represents the class, not an individual — no cold-start problem.</div>
+<div class="citation-footer"><span class="cf-label">Cite:</span>OECD/JRC (2008); Nardo et al. (2005); Han/Kamber/Pei (2011)<span class="cf-sep">·</span><span class="cf-label">Thesis:</span>Ch2 §2.1.6 (renumbered); Ch3 §3.3.2; Appendix E<span class="cf-sep">·</span><span class="cf-label">Code:</span>code/learning_dashboard/analytics.py:400-640 (compute_question_difficulty_scores)<span class="cf-sep">·</span><span class="cf-needed">⚠ composite-indicator citations missing from thesis</span></div>
 </div>
 
 <div id="dd-irt" class="dd-section">
@@ -492,6 +1029,7 @@ button:hover{border-color:#555;background:#22263a}
   <div class="result-line">logit (θ−b): <strong id="irt-logit">0.0</strong> &nbsp;|&nbsp; P(correct): <strong id="irt-prob">50.0%</strong> &nbsp;|&nbsp; IRT difficulty: <strong id="irt-diff">0.50</strong> &nbsp;|&nbsp; <span id="irt-level" class="result-pill">—</span></div>
 </div>
 <div class="note-box">IRT requires ≥2 students per question and ≥2 questions per student. Also requires &gt;1 distinct difficulty value — with a single value the normalised difficulty is a constant 0.5 and adds no discriminative information. The improved model degrades gracefully if IRT is unavailable.</div>
+<div class="citation-footer"><span class="cf-label">Cite:</span>Rasch (1960); Lord &amp; Novick (1968); Wright &amp; Stone (1979); Fisher (1922) — MLE; Byrd et al. (1995) — L-BFGS-B<span class="cf-sep">·</span><span class="cf-label">Thesis:</span>Ch2 §2.1.6 (renumbered); Ch3 §3.4.2; Ch4 §4.9.2; Appendix F<span class="cf-sep">·</span><span class="cf-label">Code:</span>code/learning_dashboard/models/irt.py:67-163<span class="cf-sep">·</span><span class="cf-needed">⚠ foundational Rasch + MLE + L-BFGS-B citations all missing</span></div>
 </div>
 
 <div id="dd-bkt" class="dd-section">
@@ -520,6 +1058,7 @@ button:hover{border-color:#555;background:#22263a}
   <div class="bkt-history" id="bkt-history">P(L_0) = 0.300 — starting prior</div>
   <div class="result-line">Current mastery: <strong id="bkt-mastery">0.300</strong> &nbsp;|&nbsp; <span id="bkt-status" style="font-size:12px;color:#888">Not yet mastered (threshold: 0.95)</span></div>
 </div>
+<div class="citation-footer"><span class="cf-label">Cite:</span>Corbett &amp; Anderson (1995); Yudelson, Koedinger &amp; Gordon (2013); Khajah et al. (already cited); Fawcett (2006); Hanley &amp; McNeil (1982) — AUC<span class="cf-sep">·</span><span class="cf-label">Thesis:</span>Ch2 §2.1.5 (NEW — Knowledge Tracing); Ch3 §3.4.3; Ch5 §5.4; Appendix F.2<span class="cf-sep">·</span><span class="cf-label">Code:</span>code/learning_dashboard/models/bkt.py:37-49 (bkt_update), :195-337 (fit_bkt_parameters)<span class="cf-sep">·</span><span class="cf-needed">⚠ Corbett &amp; Anderson seminal paper not yet in Literature/index.md</span></div>
 </div>
 
 <div id="dd-improved" class="dd-section">
@@ -537,6 +1076,13 @@ button:hover{border-color:#555;background:#22263a}
 <div class="formula-box">difficulty_adjusted = coverage·user_mean + (1−coverage)·cohort_mean</div>
 <div class="step-text">Coverage = n_covered / n_recent (last 5 subs). A student with 1-of-5 covered leans 80% on the cohort mean. Failing easy questions (low IRT difficulty) scores higher than failing hard ones.</div></div></div>
 <div class="step-row"><div class="step-num">5</div><div class="step-body"><div class="step-title">Post-assembly: Bayesian shrinkage only</div><div class="step-text">Bayesian shrinkage is the final transform. The previous min-max normalisation step was removed — it was fighting the shrinkage (shrinkage pulls low-n students toward the mean; normalisation spread them back out).</div></div></div>
+<div class="step-row"><div class="step-num">6</div><div class="step-body"><div class="step-title">Three design mechanics to cite in Ch3 §3.4.4</div>
+<div class="signal-grid">
+  <div class="signal-card"><div class="signal-name">Coverage-weighted shrinkage</div><div class="signal-desc">In <code>_compute_difficulty_adjusted</code>: <code>score = coverage·user_mean + (1−coverage)·cohort_mean</code>. Distinct from n/(n+K) classical shrinkage — the weight is data coverage, not sample size. Low IRT-coverage students lean on the cohort mean.</div></div>
+  <div class="signal-card"><div class="signal-name">Mean imputation of missing mastery</div><div class="signal-desc"><code>mean_mastery</code> absent → imputed to class mean, not 0.0. "Unknown" should not read as "zero mastery" (which would silently zero the mastery-gap contribution). Cite <strong>Little &amp; Rubin (2002)</strong>.</div></div>
+  <div class="signal-card"><div class="signal-name">Graceful-degradation redistribution</div><div class="signal-desc">BKT unavailable → w_mg → w_beh (0.75/0.00/0.25). IRT unavailable → w_da → w_beh (0.70/0.30/0.00). Both → w_beh = 1.0. A runtime <code>assert abs((w_beh + w_mg + w_da) - 1.0) &lt; 1e-9</code> at <code>improved_struggle.py:168</code> guarantees the invariant.</div></div>
+</div>
+</div></div>
 <div class="demo"><div class="demo-title">Interactive: improved model components</div>
   <div class="slider-row"><label>A_raw (recent incorrect)</label><input type="range" min="0" max="1" step="0.01" value="0.6" id="imp_a" oninput="calcImproved()"><span id="imp_a-v">0.60</span></div>
   <div class="slider-row"><label>r̂ (retry rate)</label><input type="range" min="0" max="1" step="0.01" value="0.3" id="imp_r" oninput="calcImproved()"><span id="imp_r-v">0.30</span></div>
@@ -546,6 +1092,7 @@ button:hover{border-color:#555;background:#22263a}
   <div class="slider-row"><label>norm IRT difficulty</label><input type="range" min="0" max="1" step="0.01" value="0.3" id="imp_irt" oninput="calcImproved()"><span id="imp_irt-v">0.30</span></div>
   <div class="result-line">Behavioral: <strong id="imp-beh">—</strong> &nbsp;|&nbsp; Mastery gap: <strong id="imp-mg">—</strong> &nbsp;|&nbsp; Diff-adjusted: <strong id="imp-da">—</strong> &nbsp;|&nbsp; Combined: <strong id="imp-total">—</strong></div>
 </div>
+<div class="citation-footer"><span class="cf-label">Cite:</span>Efron &amp; Morris (1977) — shrinkage; Little &amp; Rubin (2002) — mean imputation<span class="cf-sep">·</span><span class="cf-label">Thesis:</span>Ch3 §3.4.4; Ch4 §4.9.4<span class="cf-sep">·</span><span class="cf-label">Code:</span>code/learning_dashboard/models/improved_struggle.py (three-component weighted sum + coverage-weighted shrinkage + mean imputation + graceful-degradation redistribution)<span class="cf-sep">·</span><span class="cf-needed">⚠ design mechanics of §3.4.4 not yet documented</span></div>
 </div>
 
 <div id="dd-cf" class="dd-section">
@@ -555,6 +1102,22 @@ button:hover{border-color:#555;background:#22263a}
 <div class="formula-box">h[i] = 1 if parametric_score[i] ≥ τ (default 0.5), else 0<br>cf_score[i] = Σ(w_pos × h_pos) / Σ(w_pos)  [unflagged students only]</div>
 <div class="step-text">Finds k=3 nearest neighbours per unflagged student. CF is a diagnostic overlay — does NOT rewrite the main struggle labels.</div></div></div>
 <div class="note-box">Needs ≥4 students and at least one above threshold. Falls back gracefully otherwise.</div>
+<div class="citation-footer"><span class="cf-label">Cite:</span>Schafer et al. (2007) (already cited); Herlocker et al. (1999); Resnick et al. (1994); Salton &amp; Lesk (1968) — cosine similarity<span class="cf-sep">·</span><span class="cf-label">Thesis:</span>Ch2 §2.1.7 (renumbered); Ch3 §3.3.3; Appendix E<span class="cf-sep">·</span><span class="cf-label">Code:</span>code/learning_dashboard/analytics.py:378-471 (compute_cf_scores)<span class="cf-sep">·</span><span class="cf-needed">⚠ Herlocker/Resnick foundational CF citations missing</span></div>
+</div>
+
+<div id="dd-clustering" class="dd-section">
+<p class="section-intro">Mistake clustering groups students' wrong answers by surface similarity so instructors see representative misconception patterns instead of a raw table. Classical text-mining pipeline: TF-IDF → K-means (auto-k via silhouette) → pick exemplars.</p>
+<div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">Filter to wrong answers on a single question</div><div class="step-text">Per-question view. Keep submissions with <code>incorrectness &gt; CORRECT_THRESHOLD</code>. Each student contributes their <code>student_answer</code> string. Needs ≥3 wrong answers to cluster; otherwise the component skips.</div></div></div>
+<div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">TF-IDF vectorisation</div>
+<div class="formula-box">tfidf(t, d, D) = tf(t, d) · log(|D| / (1 + df(t)))</div>
+<div class="step-text">Sklearn <code>TfidfVectorizer(max_features=500, sublinear_tf=True, min_df=1)</code>. Sublinear TF dampens repeat-word dominance. Stop words kept (student answers are short, every token matters).</div></div></div>
+<div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-title">K-means + silhouette auto-k</div>
+<div class="formula-box">For k in [2, min(5, n_answers-1)]:<br>  fit KMeans(n_clusters=k, random_state=42, n_init=10)<br>  s(k) = silhouette_score(X, labels, metric='cosine')<br>k* = argmax_k s(k)</div>
+<div class="step-text">k-means++ initialisation (sklearn default, Arthur &amp; Vassilvitskii 2007). Silhouette score (Rousseeuw 1987) ∈ [-1, +1]: +1 means tight within-cluster and well-separated between clusters.</div></div></div>
+<div class="step-row"><div class="step-num">4</div><div class="step-body"><div class="step-title">Pick exemplars by cosine-to-centroid</div><div class="step-text">For each cluster, score every member by cosine similarity to the cluster centroid; take the top N as display exemplars. Cosine similarity (Salton &amp; Lesk 1968) — angular distance rather than magnitude — because TF-IDF vectors vary in L2 norm with answer length.</div></div></div>
+<div class="flow-chain"><div class="flow-box">wrong answers</div><div class="flow-arrow">→</div><div class="flow-box">TF-IDF (500 feats)</div><div class="flow-arrow">→</div><div class="flow-box">K-means × k ∈ [2, 5]</div><div class="flow-arrow">→</div><div class="flow-box">silhouette pick</div><div class="flow-arrow">→</div><div class="flow-box">cosine-to-centroid</div><div class="flow-arrow">→</div><div class="flow-box">3 exemplars/cluster</div></div>
+<div class="note-box">Auto-k removes the brittle hard-coded cluster count. Degenerate data (all identical answers) produces silhouette ≈ 0 at every k; the UI surfaces the raw table rather than pretending clusters exist.</div>
+<div class="citation-footer"><span class="cf-label">Cite:</span>Salton &amp; McGill (1983); MacQueen (1967); Lloyd (1982); Arthur &amp; Vassilvitskii (2007); Rousseeuw (1987); Salton &amp; Lesk (1968)<span class="cf-sep">·</span><span class="cf-label">Thesis:</span>Ch2 §2.1.7 (NEW — Text Mining)<span class="cf-sep">·</span>Ch3 §3.3.x Mistake Clustering<span class="cf-sep">·</span>Ch4 §4.7.5<span class="cf-sep">·</span><span class="cf-label">Code:</span>code/learning_dashboard/analytics.py:719-799<span class="cf-sep">·</span><span class="cf-needed">⚠ none of these citations currently in thesis</span></div>
 </div>
 
 <div id="dd-rag" class="dd-section">
@@ -565,6 +1128,21 @@ button:hover{border-color:#555;background:#22263a}
 <div class="step-row"><div class="step-num">4</div><div class="step-body"><div class="step-title">GPT-4o-mini → _extract_bullets()</div><div class="step-text">Prompt: struggle score, top-3 questions, retrieved snippets. Returns JSON array of 2–3 bullets. <code>_extract_bullets()</code> handles any key name the model uses. Cached per student_id.</div></div></div>
 <div class="step-row"><div class="step-num">5</div><div class="step-body"><div class="step-title">generate_cluster_suggestions() — instructor path</div><div class="step-text">Same collection, filter: <code>where={"question": str(question_id)}</code>. Class-wide misconceptions and pedagogical adjustments, not individual tutoring. Cached per question_id.</div></div></div>
 <div class="flow-chain"><div class="flow-box">student_id</div><div class="flow-arrow">→</div><div class="flow-box">pandas filter</div><div class="flow-arrow">→</div><div class="flow-box">worst question</div><div class="flow-arrow">→</div><div class="flow-box">ChromaDB + filter</div><div class="flow-arrow">→</div><div class="flow-box">GPT-4o-mini</div><div class="flow-arrow">→</div><div class="flow-box">2–3 bullets</div></div>
+<div class="citation-footer"><span class="cf-label">Cite:</span>Lewis et al. (2020) — RAG; Reimers &amp; Gurevych (2019) — Sentence-BERT; Malkov &amp; Yashunin (2020) — HNSW<span class="cf-sep">·</span><span class="cf-label">Thesis:</span>Ch2 §2.1.8 (NEW); Ch3 §3.x RAG Design; Ch4 §4.x RAG Pipeline<span class="cf-sep">·</span><span class="cf-label">Code:</span>code/learning_dashboard/rag.py<span class="cf-sep">·</span><span class="cf-needed">⚠ RAG literature flagged in Rewrite Queue #meeting3 — not yet written</span></div>
+</div>
+
+<div id="dd-comparison" class="dd-section">
+<p class="section-intro">The model comparison view scatters baseline vs improved scores for the same students (and baseline vs IRT for the same questions), so you can see at a glance where the models disagree. Agreement is currently reported as a raw percentage; Cohen's κ is the supervisor-grade upgrade.</p>
+<div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">Scatter: x = baseline, y = alternative</div><div class="step-text">Points on the diagonal → models agree on the score. Points above the diagonal → the alternative model rates higher. Points below → lower. The colour of each point = the alternative model's classification level pill, so you can see disagreement type (level flip vs score drift within the same level).</div></div></div>
+<div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">Agreement summary — raw %</div>
+<div class="formula-box">agreement = |{i : baseline_level(i) == alternative_level(i)}| / N</div>
+<div class="step-text">Simple same-level count divided by total. Implemented in <code>render_agreement_summary()</code>. Intuitive but <strong>not chance-corrected</strong>: if both models always returned "Minor Issues" agreement would be 100% without either model being useful.</div></div></div>
+<div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-title">Cohen's κ — chance-corrected agreement (suggested upgrade)</div>
+<div class="formula-box">κ = (p_o − p_e) / (1 − p_e)<br>p_o = observed agreement (raw %)<br>p_e = expected agreement under independent random classification</div>
+<div class="step-text">κ discounts agreement that would happen by chance alone. Guidelines: κ &lt; 0.20 poor, 0.21–0.40 fair, 0.41–0.60 moderate, 0.61–0.80 substantial, &gt;0.80 almost perfect. Not yet implemented in the comparison view.</div></div></div>
+<div class="step-row"><div class="step-num">4</div><div class="step-body"><div class="step-title">Disagreement table — sorted by |Δ|</div><div class="step-text">Below the scatter: a table of the N biggest score differences between the two models, for instructor review. Colour-coded by delta magnitude. This is where unusual cases (systematic disagreement, outliers) become visible.</div></div></div>
+<div class="note-box">Ch5 §5.4 writing guidance: report raw agreement and explicitly flag that it is not chance-corrected. If time allows before submission, add κ to <code>render_agreement_summary()</code> and report both; κ is a one-liner over the same classification arrays (<code>sklearn.metrics.cohen_kappa_score</code>).</div>
+<div class="citation-footer"><span class="cf-label">Cite:</span>Cohen (1960)<span class="cf-sep">·</span><span class="cf-label">Thesis:</span>Ch5 §5.4 Model Comparison<span class="cf-sep">·</span><span class="cf-label">Code:</span>code/learning_dashboard/ui/components.py:884-1050 (render_agreement_summary, render_comparison_scatter, render_comparison_table)<span class="cf-sep">·</span><span class="cf-needed">⚠ decision pending on whether to implement κ</span></div>
 </div>
 
 <div id="dd-session" class="dd-section">
@@ -887,11 +1465,226 @@ button:hover{border-color:#555;background:#22263a}
     </div>
   </div></div>
 
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rs14')"><div class="stage-num sn6">6</div><div class="stage-title">Stage 6 — Thesis connections &amp; defence prep</div><div class="stage-meta">~1 hr &nbsp;·&nbsp; Ch2 → Ch3 → Ch4 → Ch5 mapping</div><div class="stage-chevron" id="rsc-s14">▸</div></div>
+  <div class="stage-body" id="rs14">
+    <div class="rm-files"><span class="rm-file">Ch2 §2.1.4–2.1.8</span><span class="rm-file">Ch3 §3.3, §3.4</span><span class="rm-file">Ch4 §4.7, §4.9</span><span class="rm-file">Ch5 §5.1, §5.4</span><span class="rm-file">Appendix E, F</span></div>
+    <div class="tasks">
+      <p style="font-size:12px;color:#888;margin-bottom:10px;line-height:1.6">Now that the code stages are clear, trace every technique back to a citation and a thesis section. Use the <strong>Literature</strong> panel as the source of truth for which citations are still needed (⚠) vs already in place (✓).</p>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Open the <strong>Literature</strong> panel. Count how many ⚠ entries remain vs ✓. That is the thesis-citation backlog.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">For every deep-dive you've studied (struggle, difficulty, IRT, BKT, improved, CF, clustering, RAG, comparison, scoring), read its <code>citation-footer</code>. It names the exact Ch2/Ch3/Ch4/Ch5/Appendix sections the method must appear in.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Follow the Rewrite Queue item <strong>"Methods lit-review backlog (2026-04-18)"</strong> top-to-bottom. Each checkbox pins one technique to one target section.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">After the Ch2 §2.1.5/2.1.7/2.1.8 new subsections are drafted, update Literature/index.md (add new groups) and flip ⚠ → ✓ in the toolkit Literature panel.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Decide the Cohen's κ question for Ch5 §5.4: implement it (<code>sklearn.metrics.cohen_kappa_score</code> is one line) or explicitly flag raw % agreement as uncorrected. Either is defensible — silence is not.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Rehearse defence answers using the quiz below. Examiner's favourite question: "why this method over alternatives?"</div></div>
+    </div>
+    <div class="quiz-section">
+      <div class="quiz-label">Defence prep — why this method?</div>
+      <div class="quiz-q"><strong>Q1.</strong> An examiner asks: "Why is BKT appropriate here when DKT (Deep KT) has higher reported AUC in the literature?"</div>
+      <button class="reveal-btn" onclick="rmReveal('rt1')">Reveal answer</button>
+      <div class="answer" id="rt1">BKT has interpretable parameters (P(L₀), P(T), P(G), P(S)) and a closed-form Bayesian update. A lab instructor needs to know <em>why</em> mastery is 0.4 and what it would take to move it — not just a softmax output. DKT needs thousands of sequences to train; a single lab session has dozens to low hundreds of attempts per skill. BKT also fits in seconds via L-BFGS-B and degrades gracefully when a skill has few observations. Cite Corbett &amp; Anderson (1995) for BKT; acknowledge Piech et al. (2015) DKT as the modern alternative in Ch6 Future Work.</div>
+      <div class="quiz-q"><strong>Q2.</strong> "Your composite struggle score has seven signals with weights you set by hand. How is that not arbitrary?"</div>
+      <button class="reveal-btn" onclick="rmReveal('rt2')">Reveal answer</button>
+      <div class="answer" id="rt2">Three defences. (1) <strong>OECD/JRC (2008) composite-indicator framework</strong>: every signal is min-max-normalised across the cohort so weights reflect relative importance rather than scale artefacts; a weight-sum invariant is asserted at import time. (2) <strong>Bayesian shrinkage</strong> (Efron &amp; Morris 1977) pulls low-n students toward the class mean, so noise on the first 3-5 submissions cannot flip a classification. (3) The weights are a documented limitation, not a hidden choice: Ch5 §5.5 states they were set by trial and error in the absence of labelled ground truth, and Ch6 proposes ML-based optimisation once labels exist.</div>
+      <div class="quiz-q"><strong>Q3.</strong> "Why LLM-as-judge for incorrectness instead of a rule-based scorer?"</div>
+      <button class="reveal-btn" onclick="rmReveal('rt3')">Reveal answer</button>
+      <div class="answer" id="rt3">No labelled ground truth exists for this dataset. A rule-based scorer would need a hand-crafted rubric per question; the platform generates feedback text dynamically, so per-question rules do not transfer. Zheng et al. (2023) show LLM-as-judge agrees with human raters at ≥80% on reasoning tasks when prompted carefully. Limitations are named explicitly in Ch5: calibration is not perfect; 0.5 fallback masks silent failures; BKT and IRT both refuse to fit on single-class data as a tripwire for exactly this.</div>
+      <div class="quiz-q"><strong>Q4.</strong> "Agreement % between baseline and improved struggle is 0% in your comparison view. Isn't that a bug?"</div>
+      <button class="reveal-btn" onclick="rmReveal('rt4')">Reveal answer</button>
+      <div class="answer" id="rt4">No — it is a known limitation documented in Ch5 §5.5. Improved struggle collapses everything to max struggle under sparse session data because (a) IRT difficulty is near-constant with few questions per student, so the difficulty-adjusted component saturates, and (b) BKT mastery sits near P(L₀) without enough opportunities to transition. Framed as a data-coverage problem, not a model failure: the dashboard handles this with graceful degradation (w_mg redistributed when coverage &lt; 0.5), but the comparison view surfaces the structural disagreement honestly rather than hiding it.</div>
+      <div class="quiz-q"><strong>Q5.</strong> "Your clustering uses silhouette to auto-pick k. Why not elbow method?"</div>
+      <button class="reveal-btn" onclick="rmReveal('rt5')">Reveal answer</button>
+      <div class="answer" id="rt5">Elbow method plots within-cluster inertia vs k and picks the visual "elbow" — subjective and unstable for small n. Silhouette (Rousseeuw 1987) is bounded in [-1, +1], has an explicit trade-off between cohesion and separation, and produces a scalar that is straightforward to argmax. For the mistake-clustering use case with 3–30 wrong answers per question, silhouette is more robust.</div>
+    </div>
+  </div></div>
+
   <div style="padding:0.5rem 0 1rem">
-    <p style="font-size:13px;color:#666;margin-bottom:6px">When you can answer every question without revealing — you know this codebase inside out.</p>
-    <p style="font-size:12px;color:#555">Total time: ~8 hours across 3–4 sessions. Work through stages in order.</p>
+    <p style="font-size:13px;color:#666;margin-bottom:6px">When you can answer every question without revealing — you know this codebase inside out. Stage 6 is where the code understanding meets the thesis — open the <strong>Literature</strong> and <strong>Report guide</strong> panels together.</p>
+    <p style="font-size:12px;color:#555">Total time: ~9 hours across 3–5 sessions. Stages 1–5 build the code; Stage 6 maps it to the thesis.</p>
   </div>
 </div><!-- end panel-road -->
+
+<!-- ══════════════════════════════════════════
+     PANEL — PLAN (mirrors Full Roadmap.md + Weekly Plan.md)
+══════════════════════════════════════════ -->
+<div id="panel-plan" class="panel">
+<p class="ov-lead">Submission timeline — what work remains between here and the thesis deadline (<strong>20 May 2026</strong>). <em>Distinct from the Roadmap tab, which walks the codebase for study/defence prep.</em> Source: <strong>Full Roadmap.md</strong> (14 numbered steps) + <strong>Weekly Plan.md</strong> (6-week schedule).</p>
+
+<div class="plan-section">
+  <h3>§ Submission roadmap — 14 steps</h3>
+  <p class="plan-intro">Work top-to-bottom; each step unblocks the next. Tick as you go — progress persists in <code>localStorage</code> and rolls up into the global roadmap progress bar.</p>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsub1')"><div class="stage-num sn1">1</div><div class="stage-title">Step 1 — Phase 7: Surface hidden data</div><div class="stage-meta">Coding · Small · ~4hrs · ui/components.py + config.py</div><div class="stage-chevron" id="rsc-ssub1">▸</div></div>
+  <div class="stage-body" id="rsub1">
+    <div class="tasks">
+      <div class="task"><div class="task-check done" style="background:#0d3322;border-color:#238636" onclick="rmTick(this)">✓</div><div class="task-text done-text">Add confidence indicator next to incorrectness values in question drill-down</div></div>
+      <div class="task"><div class="task-check done" style="background:#0d3322;border-color:#238636" onclick="rmTick(this)">✓</div><div class="task-text done-text">Decide on temporal smoothing (activated: <code>SMOOTHING_ENABLED = True</code>, α=0.3)</div></div>
+      <p style="font-size:11px;color:#666;margin-top:10px;font-style:italic">Unblocks step 8 screenshots capturing live confidence indicator.</p>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsub2')"><div class="stage-num sn2">2</div><div class="stage-title">Step 2 — Phase 5: Comparison UI</div><div class="stage-meta">Coding · Large · ~16hrs · ui/views.py + ui/components.py + instructor_app.py</div><div class="stage-chevron" id="rsc-ssub2">▸</div></div>
+  <div class="stage-body" id="rsub2">
+    <div class="tasks">
+      <div class="task"><div class="task-check done" style="background:#0d3322;border-color:#238636" onclick="rmTick(this)">✓</div><div class="task-text done-text"><code>comparison_view()</code> in views.py</div></div>
+      <div class="task"><div class="task-check done" style="background:#0d3322;border-color:#238636" onclick="rmTick(this)">✓</div><div class="task-text done-text"><code>render_comparison_scatter()</code>, <code>render_comparison_table()</code>, <code>render_agreement_summary()</code></div></div>
+      <div class="task"><div class="task-check done" style="background:#0d3322;border-color:#238636" onclick="rmTick(this)">✓</div><div class="task-text done-text">Model Comparison routing in instructor_app.py</div></div>
+      <div class="task"><div class="task-check done" style="background:#0d3322;border-color:#238636" onclick="rmTick(this)">✓</div><div class="task-text done-text">Settings sub-panel: toggle + sub-toggles + BKT sliders</div></div>
+      <p style="font-size:11px;color:#666;margin-top:10px;font-style:italic">Unblocks Ch5 model-comparison evidence + Appendix B comparison screenshots.</p>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsub3')"><div class="stage-num sn3">3</div><div class="stage-title">Step 3 — Ch3: Design updates</div><div class="stage-meta">Writing · Medium · ~8hrs · design-and-architecture.tex</div><div class="stage-chevron" id="rsc-ssub3">▸</div></div>
+  <div class="stage-body" id="rsub3">
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Update struggle formula to 7 components + Bayesian shrinkage (was 5)</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Update difficulty formula to 5 components (was 4)</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Mark Figs 8–10 Figma mockups for replacement</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Update CF section — it is implemented, not "to be implemented"</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Add sections for IRT, BKT, improved struggle, mistake clustering</div></div>
+      <p style="font-size:11px;color:#666;margin-top:10px;font-style:italic">Unblocks Ch1&amp;2 language fixes (easier once Ch3 narrative is settled) + Ch4 references.</p>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsub4')"><div class="stage-num sn4">4</div><div class="stage-title">Step 4 — Ch1 &amp; Ch2: Language and framing</div><div class="stage-meta">Writing · Small · ~6hrs</div><div class="stage-chevron" id="rsc-ssub4">▸</div></div>
+  <div class="stage-body" id="rsub4">
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Convert future tense in Ch1 §1.2, §1.3, §1.5 to past/present</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Update Table 1 risk mitigations with actual decisions made</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Fill Ch2 §2.1.7 research gaps (uncomment and revise draft at lines 121–130)</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Add implementation status column to FR/NFR tables; clarify FR6 unimplemented</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Add three new Ch2 subsections (Knowledge Tracing, Text Mining, RAG) — see Rewrite Queue "Methods lit-review backlog"</div></div>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsub5')"><div class="stage-num sn5">5</div><div class="stage-title">Step 5 — Ch4: Implementation rewrite</div><div class="stage-meta">Writing · Large · ~22hrs · implementation.tex</div><div class="stage-chevron" id="rsc-ssub5">▸</div></div>
+  <div class="stage-body" id="rsub5">
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Replace scope/intro — remove "proof of concept" framing</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Update technology stack (filelock, openai, scipy, streamlit-autorefresh)</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Data pipeline section — polling, JSON+XML parsing, normalization</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Analytics section — OpenAI scoring, 7-signal struggle, 5-signal difficulty, CF, mistake clustering</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Models section — IRT, BKT, improved struggle, measurement confidence</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Lab assistant system — join/assign/self-claim/mark-helped, shared JSON state</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Saved sessions and session lifecycle — CRUD, retroactive save, academic period filter</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Instructor views — all 6 views + settings + sound effects</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Mark figure slots for Appendix B screenshots</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Insert L-BFGS-B / MLE / ROC-AUC citation footnotes — see Rewrite Queue methods backlog</div></div>
+      <p style="font-size:11px;color:#666;margin-top:10px;font-style:italic">Unblocks Ch5 evaluation framing + Appendix A code snippets.</p>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsub6')"><div class="stage-num sn6">6</div><div class="stage-title">Step 6 — Ch5: Results &amp; Evaluation</div><div class="stage-meta">Writing · Large · ~12hrs · results-and-evaluation.tex</div><div class="stage-chevron" id="rsc-ssub6">▸</div></div>
+  <div class="stage-body" id="rsub6">
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">§5.1 Evaluation Design — method, scope, what was tested and why</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">§5.2 Functional Testing — FR1–FR7 mapped to smoke test (Appendix C)</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">§5.3 Non-Functional Testing — NFR1–NFR6</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">§5.4 Results — baseline vs IRT, baseline vs improved struggle</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">§5.5 Discussion — limitations, manual-weight limitation, model-disagreement framing</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Decide Cohen's κ vs raw agreement for §5.4 — see Rewrite Queue</div></div>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsub7')"><div class="stage-num sn7">7</div><div class="stage-title">Step 7 — Ch6: Conclusion</div><div class="stage-meta">Writing · Medium · ~8hrs · conclusion.tex</div><div class="stage-chevron" id="rsc-ssub7">▸</div></div>
+  <div class="stage-body" id="rsub7">
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">§6.1 Summary — restate objectives, what was built, what was achieved</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">§6.2 Contributions — scoring-model advances, lab-assistant coordination, real-time analytics</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">§6.3 Future Work — FR6 smart devices, Phase 6/9/10/11, event-driven architecture, ML weight optimisation, BKT tuning, evaluation study, export</div></div>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsub8')"><div class="stage-num sn8">8</div><div class="stage-title">Step 8 — Appendix B: UI screenshots</div><div class="stage-meta">Evidence · Small · ~6hrs · figures/</div><div class="stage-chevron" id="rsc-ssub8">▸</div></div>
+  <div class="stage-body" id="rsub8">
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">All 6 instructor views (in-class, student detail, question detail, data analysis, model comparison, settings)</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Model Comparison view — both student + question tabs</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Lab assistant app — join, unassigned, assigned views</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Session start/end states</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Replace <code>[TODO: insert figure]</code> placeholders in Ch3 and Ch4</div></div>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsub9')"><div class="stage-num sn1">9</div><div class="stage-title">Step 9 — Appendix C: Test results</div><div class="stage-meta">Evidence · Medium · ~4hrs</div><div class="stage-chevron" id="rsc-ssub9">▸</div></div>
+  <div class="stage-body" id="rsub9">
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Run every test in the Operations-panel smoke checklist; record pass/fail</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Note observations + edge-case behaviour</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Capture model comparison results for baseline vs IRT, baseline vs improved struggle</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Fill evidence slots in Ch5 §5.2 and §5.4</div></div>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsub10')"><div class="stage-num sn2">10</div><div class="stage-title">Step 10 — Appendices E &amp; F: Formulae</div><div class="stage-meta">Writing · Small–Medium · ~2hrs</div><div class="stage-chevron" id="rsc-ssub10">▸</div></div>
+  <div class="stage-body" id="rsub10">
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Appendix E: struggle formula (7+shrinkage), difficulty (5), BKT (a)–(e), Rasch 1PL, TF-IDF, cosine, silhouette, measurement confidence, EWMA</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Appendix F: BKT (b)(c) from Bayes, Rasch MLE gradient, Bayesian-shrinkage posterior, Bernoulli LL</div></div>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsub11')"><div class="stage-num sn3">11</div><div class="stage-title">Step 11 — Appendix A: Code snippets</div><div class="stage-meta">Writing · Small · ~2hrs</div><div class="stage-chevron" id="rsc-ssub11">▸</div></div>
+  <div class="stage-body" id="rsub11">
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Incorrectness scoring batch call</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Struggle score function signature</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Lab state read/write pattern</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Deferred actions example</div></div>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsub12')"><div class="stage-num sn4">12</div><div class="stage-title">Step 12 — Polish pass</div><div class="stage-meta">Writing · Small · ~4hrs</div><div class="stage-chevron" id="rsc-ssub12">▸</div></div>
+  <div class="stage-body" id="rsub12">
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Terminology consistency ("incorrectness", "struggle score", "On Track / Minor Issues / Struggling / Needs Help")</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Update bibliography for IRT/BKT/improved struggle + Methods-backlog citations</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Review figure/table numbering after all additions</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">LaTeX compile check — <code>main.tex</code> with no errors or warnings</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Confirm Progress Report stays excluded</div></div>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsub13')"><div class="stage-num sn5">13</div><div class="stage-title">Step 13 — FR6 smart-device notifications (stretch)</div><div class="stage-meta">Coding · Large · only if 1–12 done by 17 May</div><div class="stage-chevron" id="rsc-ssub13">▸</div></div>
+  <div class="stage-body" id="rsub13">
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Evaluate feasibility of web push notifications for the assistant app</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">If viable: implement push alert when a new high-struggle student appears</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Document the decision in Ch6 regardless of outcome</div></div>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsub14')"><div class="stage-num sn6">14</div><div class="stage-title">Step 14 — Phase 6 mobile refinement (stretch)</div><div class="stage-meta">Coding · Medium · stretch</div><div class="stage-chevron" id="rsc-ssub14">▸</div></div>
+  <div class="stage-body" id="rsub14">
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">BKT mastery badge + progress bar on assigned-student card</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Per-question mastery labels on the top-3 question list</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Session elapsed timer</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Helped-vs-struggling summary header in unassigned view</div></div>
+    </div>
+  </div></div>
+</div>
+
+<div class="plan-section">
+  <h3>§ Weekly schedule — 6 weeks (9 Apr – 20 May)</h3>
+  <p class="plan-intro">Cumulative effort ≈98–110 hours across 41 days (~17 hrs/week). Critical path: Phase 5 → Appendix B → Ch4 → Ch5. A two- or three-day slip on any step is absorbable; a full-week slip on Phase 5 or Ch4 is not.</p>
+  <table class="status-table plan-week">
+    <tr><th>Week</th><th>Dates</th><th>Targets</th><th>Supervisor</th><th style="text-align:right">Hours</th></tr>
+    <tr><td class="week-num">1</td><td>Apr 9–15</td><td>Step 1 (Phase 7) + Step 2 (Phase 5)</td><td>Wed 9 Apr — kickoff</td><td class="week-hours">~20</td></tr>
+    <tr><td class="week-num">2</td><td>Apr 16–22</td><td>Step 3 (Ch3) + begin Step 4 (Ch1&amp;2) + guest-lecture prep + retrospective evaluation</td><td>Wed 16 Apr ✅</td><td class="week-hours">~16</td></tr>
+    <tr><td class="week-num">3</td><td>Apr 23–29</td><td>Complete Step 4 · begin Step 5 (Ch4 intro / tech stack / data pipeline)</td><td>Wed 23 Apr</td><td class="week-hours">~22</td></tr>
+    <tr><td class="week-num">4</td><td>Apr 30–May 6</td><td>Complete Step 5 · begin Step 6 §5.1</td><td>Wed 30 Apr</td><td class="week-hours">~20</td></tr>
+    <tr><td class="week-num">5</td><td>May 7–13</td><td>Complete Step 6 · Step 7 (Ch6) · begin Step 8 screenshots</td><td>Wed 7 May</td><td class="week-hours">~24</td></tr>
+    <tr><td class="week-num">6</td><td>May 14–20</td><td>Complete Steps 9 (App C) · 10 (App E/F) · 11 (App A) · 12 (polish) · buffer · stretch</td><td>Wed 14 May — final</td><td class="week-hours">~12</td></tr>
+  </table>
+  <div class="note-box" style="margin-top:14px">Stretch items (Steps 13, 14) only begin on 17 May if Steps 1–12 are cleanly done. Otherwise they become Ch6 Future Work entries.</div>
+</div>
+
+<div class="plan-glance">
+  <div class="plan-glance-line"><strong>Status glance:</strong></div>
+  <div style="font-size:12px;margin-top:4px">Week-1 coding (Steps 1+2) <span class="status-pill done">Done</span> · Ch3+Ch1&amp;2 writing <span class="status-pill partial">In progress</span> · Ch4/Ch5/Ch6 <span class="status-pill empty">Not started</span> · Appendices A–F (except D) <span class="status-pill empty">Empty</span></div>
+  <div style="font-size:11px;color:#666;margin-top:8px">Backlog actions per step: <strong>docs/obsidian-vault/My Notes/Thesis/Rewrite Queue.md</strong>. Canonical schedule: <strong>Weekly Plan.md</strong>. Tick-boxes above persist across sessions; reset via <em>Roadmap → Reset progress</em>.</div>
+</div>
+</div>
 
 <!-- ══════════════════════════════════════════
      PANEL — REPORT GUIDE
@@ -924,6 +1717,113 @@ button:hover{border-color:#555;background:#22263a}
     </ul>
   </div>
 
+  <!-- ══════════ THESIS AT A GLANCE ══════════ -->
+  <div class="rg-section-title" style="margin:18px 0 8px">Thesis at a glance — 40–60 pages, ~25 refs, 9 figures, 6 tables</div>
+  <p class="section-intro" style="font-size:12px;color:#888;max-width:860px;margin:0 0 10px">One card per chapter. Click the card title to jump to its accordion. The four scaffolds directly below (<em>Notation · Citations · Figures &amp; tables · Code-to-chapter map</em>) are the reference blocks you will re-open constantly while writing.</p>
+  <div class="signal-grid">
+    <div class="signal-card" onclick="stageToggle('rs6')" style="cursor:pointer"><div class="signal-name">Ch 0 — Front matter</div><div class="weight-bar"><div class="weight-fill" style="width:4%"></div></div><div class="signal-desc">~2 pages · 4 subsections · no figures · abstract is the page everyone re-reads.</div></div>
+    <div class="signal-card" onclick="stageToggle('rs7')" style="cursor:pointer"><div class="signal-name">Ch 1 — Introduction</div><div class="weight-bar"><div class="weight-fill" style="width:10%"></div></div><div class="signal-desc">~4–6 pages · 5 subsections · 1 figure (fwd-ref architecture) · aims here must map to §6.2.</div></div>
+    <div class="signal-card" onclick="stageToggle('rs8')" style="cursor:pointer"><div class="signal-name">Ch 2 — Literature</div><div class="weight-bar"><div class="weight-fill" style="width:22%"></div></div><div class="signal-desc">~8–12 pages · 9 subsections · 1 comparison table · ~25 refs minimum · ends with gap analysis.</div></div>
+    <div class="signal-card" onclick="stageToggle('rs9')" style="cursor:pointer"><div class="signal-name">Ch 3 — Design</div><div class="weight-bar"><div class="weight-fill" style="width:14%"></div></div><div class="signal-desc">~6–8 pages · 7 subsections · architecture figure + FR/NFR MoSCoW tables · no code.</div></div>
+    <div class="signal-card" onclick="stageToggle('rs10')" style="cursor:pointer"><div class="signal-name">Ch 4 — Implementation</div><div class="weight-bar"><div class="weight-fill" style="width:26%"></div></div><div class="signal-desc">~10–14 pages · 10 subsections · 1 code snippet per subsystem · formulas from Ch 2 reappear here.</div></div>
+    <div class="signal-card" onclick="stageToggle('rs11')" style="cursor:pointer"><div class="signal-name">Ch 5 — Evaluation</div><div class="weight-bar"><div class="weight-fill" style="width:18%"></div></div><div class="signal-desc">~8–12 pages · 6 subsections · ≥4 tables + 2 figures · every number paired with a baseline.</div></div>
+    <div class="signal-card" onclick="stageToggle('rs12')" style="cursor:pointer"><div class="signal-name">Ch 6 — Conclusion</div><div class="weight-bar"><div class="weight-fill" style="width:6%"></div></div><div class="signal-desc">~3–5 pages · 4 subsections · no new material · 4–6 specific future-work items.</div></div>
+    <div class="signal-card" onclick="stageToggle('rs13')" style="cursor:pointer"><div class="signal-name">Back matter</div><div class="weight-bar"><div class="weight-fill" style="width:0%"></div></div><div class="signal-desc">Refs + 3 appendices · install manual, selected code, settings lookup table.</div></div>
+  </div>
+
+  <!-- ══════════ CROSS-CHAPTER SCAFFOLD 1 — NOTATION ══════════ -->
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsR1')"><div class="stage-num sn1">N</div><div class="stage-title">Notation reference — use these symbols consistently in Ch 2, 3, 4, 5</div><div class="stage-meta"><span class="rg-pagebadge">all chapters</span>17 symbols · single source of truth</div><div class="stage-chevron" id="rsc-sR1">▸</div></div>
+  <div class="stage-body" id="rsR1">
+    <div class="rg-block"><p>Copy these symbols verbatim. If you deviate — e.g. writing <code>struggle_score</code> in Ch 4 after Ch 2 introduced <code>S</code> — examiners notice immediately and the checklist-7 mapping fails. The <code>Glossary</code> tab of this toolkit is the canonical source; this block extracts the subset that crosses multiple chapters.</p></div>
+    <div class="signal-grid">
+      <div class="signal-card"><div class="signal-name">S, S_final</div><div class="signal-desc">Raw and shrunk student struggle score (§2.5, §3.6, §4.3, §5.3). Range [0, 1].</div></div>
+      <div class="signal-card"><div class="signal-name">n̂, t̂, î, r̂, A, d̂, rep̂</div><div class="signal-desc">The 7 behavioural sub-signals (§2.2, §4.3). Lower-case hat = cohort-normalised.</div></div>
+      <div class="signal-card"><div class="signal-name">w_n, K</div><div class="signal-desc">Shrinkage weight w_n = n/(n+K), K = 5 (§2.5, §4.3). Controls cold-start pull toward class mean.</div></div>
+      <div class="signal-card"><div class="signal-name">θᵢ, bⱼ</div><div class="signal-desc">IRT ability (student i) and difficulty (question j). Rasch 1PL (§2.4, §4.5).</div></div>
+      <div class="signal-card"><div class="signal-name">P(L), P(T), P(S), P(G)</div><div class="signal-desc">BKT init-learned / transition / slip / guess (§2.3, §4.5). Defaults 0.3 / 0.1 / 0.1 / 0.2.</div></div>
+      <div class="signal-card"><div class="signal-name">D, c̃, t̃, ã, f̃, p̃</div><div class="signal-desc">Question difficulty composite + 5 sub-signals (§3.6, §4.4). Tilde = cohort-normalised.</div></div>
+      <div class="signal-card"><div class="signal-name">m_iⱼ</div><div class="signal-desc">Posterior mastery of student i on question (or cluster) j after BKT replay (§4.5).</div></div>
+      <div class="signal-card"><div class="signal-name">S_improved</div><div class="signal-desc">Three-component improved struggle: 0.45·behavioural + 0.30·mastery_gap + 0.25·difficulty_adj (§4.5, §5.3).</div></div>
+    </div>
+    <div class="note-box">The Greek letters above must also appear in Appendix E (formulae). If a symbol is in the thesis body but not in Appendix E, or vice versa, the checklist-item-5 (notation consistency) fails.</div>
+  </div></div>
+
+  <!-- ══════════ CROSS-CHAPTER SCAFFOLD 2 — CITATION INVENTORY ══════════ -->
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsR2')"><div class="stage-num sn2">C</div><div class="stage-title">Citation inventory — the ~25 primary sources for Ch 2</div><div class="stage-meta"><span class="rg-pagebadge">mostly Ch 2</span>8 topic buckets · flag missing bibkeys</div><div class="stage-chevron" id="rsc-sR2">▸</div></div>
+  <div class="stage-body" id="rsR2">
+    <div class="rg-block"><p>Group references by topic, not by alphabetical order. Each card lists the canonical primary sources — cite these, not paraphrases. The <span class="cf-needed">⚠</span> badge marks a citation the Deep-dive tab expected but your current thesis doesn't yet contain (cross-check against <code>Literature/index.md</code> in the vault).</p></div>
+    <div class="signal-grid">
+      <div class="signal-card"><div class="signal-name">Learning analytics (§2.1)</div><div class="signal-desc">Siemens &amp; Long (2011) — <em>Penetrating the Fog</em>. Baker &amp; Inventado (2014) — EDM &amp; LA. Clow (2013) — LA cycle. <span class="cf-needed">⚠ verify all three in bib</span></div></div>
+      <div class="signal-card"><div class="signal-name">Struggle signals (§2.2)</div><div class="signal-desc">Baker (2007) — gaming the system. Beck &amp; Gong (2013) — wheel-spinning. Aleven et al. (2016) — help-seeking.</div></div>
+      <div class="signal-card"><div class="signal-name">BKT (§2.3)</div><div class="signal-desc">Corbett &amp; Anderson (1995) — foundational. Yudelson et al. (2013) — individualised BKT. Khajah et al. (2016) — vs DKT. <span class="cf-needed">⚠ Corbett &amp; Anderson missing from index.md</span></div></div>
+      <div class="signal-card"><div class="signal-name">IRT / Rasch (§2.4)</div><div class="signal-desc">Rasch (1960) — foundational 1PL. Lord &amp; Novick (1968) — modern treatment. Wright &amp; Stone (1979) — practical. Byrd et al. (1995) — L-BFGS-B.</div></div>
+      <div class="signal-card"><div class="signal-name">Shrinkage (§2.5)</div><div class="signal-desc">Efron &amp; Morris (1977) — James-Stein. Morris (1983) — empirical Bayes. Gelman et al. (2013) — hierarchical models.</div></div>
+      <div class="signal-card"><div class="signal-name">Collaborative filtering (§2.6)</div><div class="signal-desc">Herlocker et al. (1999) — kNN CF. Koren &amp; Bell (2015) — modern review. Thai-Nghe et al. (2010) — CF in education.</div></div>
+      <div class="signal-card"><div class="signal-name">RAG (§2.7)</div><div class="signal-desc">Lewis et al. (2020) — RAG foundational. Zheng et al. (2023) — LLM-as-judge. Gao et al. (2024) — RAG survey.</div></div>
+      <div class="signal-card"><div class="signal-name">Related systems (§2.8)</div><div class="signal-desc">Heffernan &amp; Heffernan (2014) — ASSISTments. Koedinger et al. (1997) — Cognitive Tutor. Arnold &amp; Pistilli (2012) — Course Signals.</div></div>
+    </div>
+    <div class="note-box">Minimum: 3 primary references per subsection. Target: 5. Avoid dumping 10+ — examiners read the density, not the count. If you cannot find the primary source from memory, Google Scholar the concept name verbatim and sort by citation count.</div>
+  </div></div>
+
+  <!-- ══════════ CROSS-CHAPTER SCAFFOLD 3 — FIGURES & TABLES PLAN ══════════ -->
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsR3')"><div class="stage-num sn3">F</div><div class="stage-title">Figures &amp; tables plan — every visual the thesis needs</div><div class="stage-meta"><span class="rg-pagebadge">Ch 1–5</span>9 figures · 6 tables · source + capture method</div><div class="stage-chevron" id="rsc-sR3">▸</div></div>
+  <div class="stage-body" id="rsR3">
+    <div class="rg-block"><p>Every figure must be numbered, captioned, and referenced in the prose (<em>checklist item 2</em>). If a figure is not referenced with "<code>Figure N shows…</code>" somewhere in the body, the examiner treats it as decoration. Tables follow the same rule.</p></div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;color:#aaa;margin:0 16px">
+      <thead><tr style="color:#7ab8f5;text-transform:uppercase;font-size:10px;letter-spacing:0.05em">
+        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid #2a2d3a">#</th>
+        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid #2a2d3a">Visual</th>
+        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid #2a2d3a">Chapter</th>
+        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid #2a2d3a">Source / capture</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Fig 1</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">System architecture (two-app + state + API)</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§1.2 fwd-ref, §3.4 main</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Redraw from Overview tab diagram.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Fig 2</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Data pipeline flow (API → cache → DataFrame → scoring → view)</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§4.2</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Redraw from Deep dive → Data pipeline flow-chain.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Fig 3</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">7-signal weight bar chart</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§3.6, §4.3</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Generate from <code>config.STRUGGLE_WEIGHT_*</code>.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Fig 4</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Density plot: S before and after Bayesian shrinkage</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§5.3</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Capture from saved session replay — compute S twice, overlay KDEs.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Fig 5</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Scatter: IRT <code>bⱼ</code> vs empirical wrong-rate per question</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§5.3</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Correlation subplot from Model Comparison view.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Fig 6</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Screenshot: instructor in-class view + leaderboard</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§4.9, §5.4</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Screenshot at 1440×900, mask student names.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Fig 7</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Screenshot: lab-assistant mobile UI with coaching bullets</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§4.8, §4.10</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Device toolbar screenshot (iPhone 12 viewport).</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Fig 8</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">RAG pipeline: embed → retrieve → ground → generate</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§4.7</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Redraw from Deep dive → RAG section.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Fig 9</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Sequence diagram: session start → assistant join → assignment → help</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§4.8</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Hand-draw in draw.io; export SVG.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Tbl 1</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">FR1–FR7 MoSCoW table</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§3.2</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Mirror <code>Ch 2 – Background and Requirements.md</code>.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Tbl 2</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">NFR1–NFR6 table</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§3.3</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Mirror requirements vault doc.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Tbl 3</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Related systems comparison (real-time? signals? OSS?)</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§2.8</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Hand-build matrix.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Tbl 4</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Spearman ρ — parametric vs improved top-10</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§5.3</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Compute across N saved sessions.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Tbl 5</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Pearson r — IRT <code>bⱼ</code> vs empirical wrong-rate</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§5.3</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">From Model Comparison view; report N, CI.</td></tr>
+        <tr><td style="padding:5px 8px">Tbl 6</td><td style="padding:5px 8px">p50 / p95 refresh latency (cache-hit vs miss)</td><td style="padding:5px 8px">§5.3</td><td style="padding:5px 8px">Instrument <code>load_data()</code> with <code>time.perf_counter()</code> → CSV.</td></tr>
+      </tbody>
+    </table>
+    <div class="note-box" style="margin-top:14px">Mask all student names and user IDs before screenshotting (<em>NFR5 privacy</em>). Crop tightly — no OS chrome, no personal browser tabs.</div>
+  </div></div>
+
+  <!-- ══════════ CROSS-CHAPTER SCAFFOLD 4 — CODE-TO-CHAPTER MAP ══════════ -->
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rsR4')"><div class="stage-num sn4">M</div><div class="stage-title">Code-to-chapter map — which file belongs in which thesis subsection</div><div class="stage-meta"><span class="rg-pagebadge">Ch 3–4</span>file → subsection · no guessing</div><div class="stage-chevron" id="rsc-sR4">▸</div></div>
+  <div class="stage-body" id="rsR4">
+    <div class="rg-block"><p>When writing Ch 4, jump directly to the right file instead of spelunking. Every subsection pairs with exactly one code location.</p></div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;color:#aaa;margin:0 16px">
+      <thead><tr style="color:#7ab8f5;text-transform:uppercase;font-size:10px;letter-spacing:0.05em">
+        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid #2a2d3a">Thesis subsection</th>
+        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid #2a2d3a">Code location</th>
+        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid #2a2d3a">Key functions</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§3.5 Data model</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>config.py</code>, <code>lab_state.py</code></td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Constants, <code>LabState</code> schema.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§4.1 Environment</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>code/requirements.txt</code></td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Pinned deps.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§4.2 Data pipeline</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>data_loader.py</code></td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>fetch_raw_data</code>, <code>parse_json_response</code>, <code>normalize_and_clean</code>, <code>load_data</code>.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§4.3 7-signal struggle</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>analytics.py</code></td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>compute_incorrectness_column</code>, <code>compute_student_struggle_scores</code>, <code>_min_max_normalize</code>.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§4.4 Question difficulty</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>analytics.py</code></td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>compute_question_difficulty_scores</code>.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§4.5 Advanced models</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>models/irt.py</code>, <code>models/bkt.py</code>, <code>models/improved_struggle.py</code></td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>fit_rasch_model</code>, <code>bkt_update</code>, <code>fit_bkt_parameters</code>, <code>compute_improved_struggle</code>.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§4.6 Collaborative filtering</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>analytics.py</code></td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>compute_cf_struggle_scores</code>.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§4.7 RAG coaching</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>analytics.py</code> (+ ChromaDB)</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>generate_assistant_suggestions</code>, <code>generate_cluster_suggestions</code>, collection-rebuild guard.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§4.8 Lab coordination</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>lab_state.py</code>, <code>assistant_app.py</code></td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">File-lock read/write, <code>generate_session_code</code>, <code>?aid=</code> recovery.</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§4.9 UI + routing</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231"><code>instructor_app.py</code>, <code>ui/views.py</code>, <code>ui/components.py</code></td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Deferred-actions pattern, view routing, Plotly click-select.</td></tr>
+        <tr><td style="padding:5px 8px">§4.10 Sound + mobile</td><td style="padding:5px 8px"><code>sound.py</code>, <code>ui/theme.py</code></td><td style="padding:5px 8px"><code>play_sound</code>, <code>get_mobile_css</code>.</td></tr>
+      </tbody>
+    </table>
+    <div class="note-box" style="margin-top:14px">Each row corresponds to exactly one <code>Deep dive</code> section of the same name. When you are about to start a Ch 4 subsection, open the Deep dive tab's matching section in parallel — it has the design rationale you need to quote.</div>
+  </div></div>
+
   <!-- CH 0 — Front matter -->
   <div class="stage"><div class="stage-header" onclick="stageToggle('rs6')"><div class="stage-num sn1">0</div><div class="stage-title">Chapter 0 — Front matter</div><div class="stage-meta"><span class="rg-pagebadge">~2 pages</span>Title · Abstract · Acknowledgements · ToC</div><div class="stage-chevron" id="rsc-s6">▸</div></div>
   <div class="stage-body" id="rs6">
@@ -950,6 +1850,7 @@ button:hover{border-color:#555;background:#22263a}
 
     <div class="rg-section-title excerpt">Example opener (pattern, not content to copy)</div>
     <div class="rg-excerpt"><div class="rg-excerpt-label">Pattern from "Desktop SQL Editor for Lab Tutorials"</div>"The universities current software solution that is used to teach SQL is outdated and limited in functionality, wasting a wealth of potentially useful data. The goal of this project was to develop a replacement system that gives the databases lecturer access to this information. A web-based solution was developed, improving upon the functionality of the old system while providing an insight into the progress of students during the SQL tutorials…"</div>
+    <div class="rg-excerpt"><div class="rg-excerpt-label">Abstract skeleton — fill the four beats (200–300 words total)</div>"[PROBLEM — 2 sentences. State the real-world setting and the visibility gap, in plain English, no jargon. Example frame: 'In a university programming lab of [N] students served by [M] demonstrators, help is reactive: struggling students who do not raise a hand remain invisible to the instructor for the duration of the session.']  [SYSTEM — 2–3 sentences. Name what was built without naming the libraries. Example frame: 'This thesis presents [NAME], a live learning-analytics system comprising an instructor dashboard and a mobile lab-assistant companion, coordinated through a shared state store.']  [METHOD &amp; EVALUATION — 2 sentences. Name the 2–3 things you measured, not the 20 things you could have measured. Example frame: 'The system was evaluated by comparing agreement between a parametric 7-signal composite and an improved three-component model across [N] saved lab sessions, by correlating IRT-fitted question difficulty with empirical wrong-rates, and through qualitative feedback from a live lab session.']  [IMPACT — 1 sentence. What it means, not what you did. Example frame: 'Results indicate that cohort-normalised behavioural signals combined with Bayesian shrinkage can identify struggling students in near-real-time with rank stability comparable to more expensive latent-trait models.']"</div>
   </div></div>
 
   <!-- CH 1 — Introduction -->
@@ -979,6 +1880,7 @@ button:hover{border-color:#555;background:#22263a}
 
     <div class="rg-section-title excerpt">Example opener (pattern, not content to copy)</div>
     <div class="rg-excerpt"><div class="rg-excerpt-label">Pattern from "Mathematical Model of Football"</div>"With the constant threat of … events around the world, it is important to try to find ways to combat these incidents using technology that is available to us. With the rise in computational power that has occurred over the past few years, several techniques have become available… If a machine system can be created to … then we can show that these systems can be used to help us deal with these events in the future."</div>
+    <div class="rg-excerpt"><div class="rg-excerpt-label">§1.3 aims + objectives skeleton — 1–2 aims, 4–6 objectives</div>"<strong>Aim.</strong> [ONE-SENTENCE AIM. Use an action verb and include the three ingredients: what, for whom, under what constraint. Example frame: 'To design, implement, and evaluate a live learning-analytics system that ranks struggling students in near-real-time and coordinates lab-assistant handoffs with grounded coaching suggestions.']<br><br><strong>Objectives.</strong><br>1. [DESIGN OBJECTIVE — articulate the shape of the solution. e.g. 'Design a two-app architecture with a shared state store that supports a desktop instructor view and a mobile lab-assistant view.']<br>2. [DATA OBJECTIVE — the pipeline. e.g. 'Implement a live data pipeline that ingests AI-tutored submissions, parses embedded XML, and normalises per-module.']<br>3. [SCORING OBJECTIVE — the core algorithm. e.g. 'Implement a 7-signal cohort-normalised struggle composite with Bayesian shrinkage for cold-start stability.']<br>4. [ADVANCED-MODELS OBJECTIVE. e.g. 'Add IRT, BKT, and an improved three-component struggle model as runtime-toggleable alternatives.']<br>5. [COORDINATION OBJECTIVE. e.g. 'Provide a session-coding and assistant-assignment mechanism with filelock-synchronised shared state.']<br>6. [EVALUATION OBJECTIVE. e.g. 'Evaluate the system through model-agreement, IRT-empirical correlation, refresh-latency, and qualitative lab feedback.']"</div>
   </div></div>
 
   <!-- CH 2 — Literature Review -->
@@ -1002,6 +1904,16 @@ button:hover{border-color:#555;background:#22263a}
     <div class="rg-section-title specifics">Dashboard V3 specifics — where to draw from</div>
     <div class="rg-block"><p>Every algorithm defined here must reappear in Chapter 4 as an implemented thing. Keep notation consistent — if §2.5 calls it <code>S</code>, §4.3 calls it <code>S</code> (not <code>struggle_score</code>). The <code>Glossary</code> tab of this toolkit is your canonical notation source; copy its symbols directly. The <code>Deep dive → IRT / BKT / Improved struggle</code> sections give you the exact formulas you'll derive here.</p></div>
 
+    <div class="rg-section-title">Key formulas — copy verbatim into §2.3–§2.5 (each gets ≥1 sentence of prose above)</div>
+    <div class="rg-block">
+      <div class="step-text" style="margin-bottom:4px">§2.4 — IRT 1PL (Rasch). Probability that student <em>i</em> answers question <em>j</em> correctly, parameterised by student ability <code>θᵢ</code> and question difficulty <code>bⱼ</code>:</div>
+      <div class="formula-box">P(correct | θᵢ, bⱼ) = σ(θᵢ − bⱼ) = 1 / (1 + exp(−(θᵢ − bⱼ)))</div>
+      <div class="step-text" style="margin:10px 0 4px">§2.3 — BKT posterior update after one observation, followed by the transition to the next opportunity:</div>
+      <div class="formula-box">If correct: P(L|obs) = P(L)·(1 − P(S)) / [ P(L)·(1 − P(S)) + (1 − P(L))·P(G) ]<br>If wrong:   P(L|obs) = P(L)·P(S)       / [ P(L)·P(S)       + (1 − P(L))·(1 − P(G)) ]<br>Transition: P(L<sub>next</sub>) = P(L|obs) + (1 − P(L|obs))·P(T)</div>
+      <div class="step-text" style="margin:10px 0 4px">§2.5 — Bayesian shrinkage (empirical Bayes). The shrunk score <code>S_final</code> pulls a student's raw composite toward the class mean by a factor that decays as the sample size <code>n</code> grows; <code>K = 5</code>:</div>
+      <div class="formula-box">w_n = n / (n + K)<br>S_final = w_n · S + (1 − w_n) · class_mean</div>
+    </div>
+
     <div class="rg-section-title pitfall">Pitfalls to avoid</div>
     <div class="rg-pitfalls"><ul>
       <li>Paraphrasing Wikipedia. Cite the primary source (Corbett &amp; Anderson 1995, not "Wikipedia: BKT").</li>
@@ -1013,6 +1925,7 @@ button:hover{border-color:#555;background:#22263a}
 
     <div class="rg-section-title excerpt">Example opener (pattern, not content to copy)</div>
     <div class="rg-excerpt"><div class="rg-excerpt-label">Pattern from "NLP for Disaster Detection"</div>"… is an increasingly important field of computer science that has been greatly developed over the last few decades. Human languages are extremely complex and have evolved over thousands of years, so creating methods for machines to understand, analyse and recreate human language is no easy task. … is actually an older concept than most people think, with research on … beginning in earnest in the 1950s. An example of its first applications was …"</div>
+    <div class="rg-excerpt"><div class="rg-excerpt-label">§2.9 gap-analysis skeleton — the single most important paragraph of Ch 2</div>"[ACKNOWLEDGE THE LANDSCAPE — 1 sentence. 'The systems reviewed in §2.8 represent mature, widely-deployed approaches to learning analytics at different points in the stack.']  [SURFACE THE THREE AXES OF THE GAP — 2–3 sentences, each naming a dimension. 'However, three limitations recur across these systems. First, [POST-HOC vs LIVE]: most published evaluations aggregate behavioural signals over weeks or semesters, not minutes, and therefore cannot support in-session triage. Second, [SINGLE-SIGNAL vs COMPOSITE]: systems that do operate live typically rely on a single dimension (time-on-task or error count) rather than a cohort-normalised composite. Third, [INSTRUCTOR-ONLY vs COORDINATED]: the question of how flagged students are handed off to human demonstrators is rarely treated as a first-class system concern.']  [POSITION THE CONTRIBUTION — 2 sentences. Do not over-claim. 'This thesis does not introduce a new machine-learning algorithm. Its contribution is the combination of a multi-signal live-scoring engine with an explicit instructor-assistant coordination layer, and an evaluation that surfaces the agreement between parametric and improved model variants on the same live dataset.']"</div>
   </div></div>
 
   <!-- CH 3 — Requirements & Design -->
@@ -1033,6 +1946,16 @@ button:hover{border-color:#555;background:#22263a}
 
     <div class="rg-section-title specifics">Dashboard V3 specifics — where to draw from</div>
     <div class="rg-block"><p>The <code>Overview → System architecture</code> diagram is the centrepiece figure. The <code>Deep dive → Struggle scoring</code> section gives you the exact rationale for the 7-signal weight split you'll justify in §3.6. The <code>Deep dive → Settings reference</code> section shows every toggle that §3.7 names.</p></div>
+
+    <div class="rg-section-title">MoSCoW row template — clone once per FR / NFR</div>
+    <div class="note-box" style="font-family:'SF Mono',Consolas,monospace;font-size:11px;line-height:1.9">
+      <strong>FR3 — Live struggle leaderboard</strong> · <em>Must</em><br>
+      <strong>Rationale:</strong> Core deliverable; without it the instructor cannot triage in real time (RQ1, §1.2).<br>
+      <strong>Acceptance:</strong> Leaderboard refreshes ≤ 10 s after a new submission arrives from the API.<br>
+      <strong>Evidence:</strong> §5.3 refresh-latency table (Tbl 6).<br>
+      <strong>Dependencies:</strong> FR1 (data pipeline), FR2 (struggle scoring engine).
+    </div>
+    <div class="rg-block"><p style="font-size:12px;color:#888">Each FR/NFR row should carry exactly these five fields. The <em>Evidence</em> column is the one examiners read first — if a requirement has no matching §5.x reference, either the requirement is aspirational (move it to Future Work) or the evaluation is incomplete.</p></div>
 
     <div class="rg-section-title pitfall">Pitfalls to avoid</div>
     <div class="rg-pitfalls"><ul>
@@ -1067,6 +1990,34 @@ button:hover{border-color:#555;background:#22263a}
 
     <div class="rg-section-title specifics">Dashboard V3 specifics — where to draw from</div>
     <div class="rg-block"><p>Every subsection maps to a <code>Deep dive</code> tab section of the same name. For each subsystem, include <em>one</em> code snippet (ideally ≤12 lines), referenced by filename and line range. Do not paste 50-line functions — either summarise, or break them up. The <code>Code reference</code> tab is the cheapest way to find the right function to quote.</p></div>
+
+    <div class="rg-section-title">7-signal composite — exact weights from <code>config.py</code> (display-mode equation for §4.3)</div>
+    <div class="rg-block">
+      <div class="formula-box">S = 0.10·n̂ + 0.10·t̂ + 0.20·î + 0.10·r̂ + 0.38·A + 0.05·d̂ + 0.07·rep̂</div>
+      <div class="signal-grid">
+        <div class="signal-card"><div class="signal-name">n̂ — submissions (10%)</div><div class="weight-bar"><div class="weight-fill" style="width:10%"></div></div><div class="signal-desc">Min-max normalised across cohort. Proxy for engagement volume.</div></div>
+        <div class="signal-card"><div class="signal-name">t̂ — time active (10%)</div><div class="weight-bar"><div class="weight-fill" style="width:10%"></div></div><div class="signal-desc">Minutes between first and last submission. Cohort-normalised.</div></div>
+        <div class="signal-card"><div class="signal-name">î — mean incorrectness (20%)</div><div class="weight-bar"><div class="weight-fill" style="width:20%"></div></div><div class="signal-desc">LLM-judged [0,1] score averaged across all their submissions.</div></div>
+        <div class="signal-card"><div class="signal-name">r̂ — retry rate (10%)</div><div class="weight-bar"><div class="weight-fill" style="width:10%"></div></div><div class="signal-desc">1 − (unique_questions / submissions). High when stuck on one.</div></div>
+        <div class="signal-card"><div class="signal-name">A — recent incorrectness (38%)</div><div class="weight-bar"><div class="weight-fill" style="width:38%"></div></div><div class="signal-desc">Exponentially time-decayed mean of last 5 submissions; 30-min half-life. Dominant signal.</div></div>
+        <div class="signal-card"><div class="signal-name">d̂ — trajectory (5%)</div><div class="weight-bar"><div class="weight-fill" style="width:5%"></div></div><div class="signal-desc">np.polyfit slope of incorrectness over submission order. Positive = getting worse.</div></div>
+        <div class="signal-card"><div class="signal-name">rep̂ — repetition (7%)</div><div class="weight-bar"><div class="weight-fill" style="width:7%"></div></div><div class="signal-desc">Exact-answer repeat rate. Picks up retry-without-reading patterns.</div></div>
+      </div>
+      <div class="step-text" style="margin-top:6px">Weights sum to 1.00 — the assertion at <code>config.py:170–177</code> fails import if this ever drifts. §4.3 should cite that invariant as evidence of defensive programming.</div>
+    </div>
+
+    <div class="rg-section-title">Subsystem cards — one per §4.x (what to include, what to leave out)</div>
+    <div class="signal-grid">
+      <div class="signal-card"><div class="signal-name">§4.2 Data pipeline</div><div class="signal-desc"><strong>In:</strong> API shape, cache TTL reasoning, XML embedding. <strong>Out:</strong> HTTP retry specifics. <strong>Snippet:</strong> 10-line extract of <code>parse_json_response</code>.</div></div>
+      <div class="signal-card"><div class="signal-name">§4.3 Struggle engine</div><div class="signal-desc"><strong>In:</strong> 7-signal formula (above), cohort-normalisation, shrinkage. <strong>Out:</strong> Every signal's mini-function. <strong>Snippet:</strong> the weighted-sum line + shrinkage line.</div></div>
+      <div class="signal-card"><div class="signal-name">§4.4 Difficulty</div><div class="signal-desc"><strong>In:</strong> <code>c̃</code> vs <code>f̃</code> distinction + why both. <strong>Out:</strong> Full 5-signal formula (it mirrors §4.3). <strong>Snippet:</strong> divergence example.</div></div>
+      <div class="signal-card"><div class="signal-name">§4.5 IRT / BKT / Improved</div><div class="signal-desc"><strong>In:</strong> L-BFGS-B + centering projection (IRT), replay-order determinism (BKT), three-component degradation (improved). <strong>Out:</strong> Textbook derivations. <strong>Snippet:</strong> <code>bkt_update</code> (8 lines).</div></div>
+      <div class="signal-card"><div class="signal-name">§4.6 CF fallback</div><div class="signal-desc"><strong>In:</strong> Why fallback, feature choice, threshold logic. <strong>Out:</strong> Full cosine-similarity derivation. <strong>Snippet:</strong> fallback branch only.</div></div>
+      <div class="signal-card"><div class="signal-name">§4.7 RAG</div><div class="signal-desc"><strong>In:</strong> 3-condition rebuild guard, per-student vs per-question suggestion split. <strong>Out:</strong> Chroma API tour. <strong>Snippet:</strong> the guard predicate.</div></div>
+      <div class="signal-card"><div class="signal-name">§4.8 Lab coordination</div><div class="signal-desc"><strong>In:</strong> File-lock choice, 6-char code design (O/0/I/1 exclusion), <code>?aid=</code> recovery. <strong>Out:</strong> Full JSON schema. <strong>Snippet:</strong> <code>generate_session_code</code>.</div></div>
+      <div class="signal-card"><div class="signal-name">§4.9 UI + routing</div><div class="signal-desc"><strong>In:</strong> Deferred-actions pattern, Plotly click-select. <strong>Out:</strong> Every widget. <strong>Snippet:</strong> the <code>pending_*</code> pattern (6 lines).</div></div>
+      <div class="signal-card"><div class="signal-name">§4.10 Sound + mobile</div><div class="signal-desc"><strong>In:</strong> Zero-height iframe reasoning, mobile CSS reflow. <strong>Out:</strong> Full sound map. <strong>Snippet:</strong> Web-Audio injection wrapper.</div></div>
+    </div>
 
     <div class="rg-section-title pitfall">Pitfalls to avoid</div>
     <div class="rg-pitfalls"><ul>
@@ -1107,6 +2058,19 @@ button:hover{border-color:#555;background:#22263a}
     <div class="rg-section-title specifics">Dashboard V3 specifics — where to draw from</div>
     <div class="rg-block"><p>You already built the <em>Model Comparison</em> view — its screenshots <em>are</em> Figures in §5.3. The <code>data/saved_sessions.json</code> format lets you freeze a session at the moment of submission and replay it deterministically — describe this as your experimental harness in §5.2. For refresh latency, instrument with <code>time.perf_counter()</code> around <code>load_data()</code> and log to a CSV (don't eyeball it).</p></div>
 
+    <div class="rg-section-title">Evaluation patterns from prior thesis (template — not content)</div>
+    <div class="rg-block"><p><em>Reusable scaffolding from F221611.pdf (Ottoman Exchange, June 2025). Apply the patterns; write the content yourself.</em></p>
+      <ul>
+        <li><strong>3-point Functional Evaluation lens</strong> (F221611 §7.1). For each feature, answer three questions: (1) Is the function working as designed? (2) Does it ensure a smooth transition to the next state/stage? (3) Were edge cases successfully handled? This wraps around the planned FR1–FR7 and NFR1–NFR6 tables — adds a narrative paragraph per requirement rather than replacing the table.</li>
+        <li><strong>Limitations split</strong> (F221611 §8). Two buckets in §5.6: <em>Technical / Functional Limitations</em> — what the built system can't do (e.g., no automated tests, hand-tuned weights, FR6 unimplemented, interval polling rather than event-driven) — vs <em>Project Challenges</em> — obstacles encountered during development, sourced from your Development Log. Keeping them separate prevents future-work creep into the limitations discussion.</li>
+        <li><strong>Performance measurement table</strong> (F221611 §7.2). Two-column table (<em>Function / Wait time (approx)</em>) per measured path. Applies to NFR1 — cover at least <code>load_data()</code> cache-hit vs cache-miss, <code>generate_assistant_suggestions()</code> first-call vs cached, and one struggle/difficulty scoring pass.</li>
+      </ul>
+    </div>
+
+    <div class="rg-section-title excerpt">Sample results paragraph — claim → number → figure → comparison</div>
+    <div class="rg-excerpt"><div class="rg-excerpt-label">Pattern to clone per result — fill the [brackets]</div>"[CLAIM: the improved and parametric struggle scores identified broadly the same top-risk students across N sessions.] Across [N = 6] saved lab sessions, the Spearman rank correlation between the parametric <code>S</code> and the improved <code>S_improved</code> top-10 rankings was [ρ = 0.82, 95% CI 0.74–0.88] ([Table 4]). [FIGURE: Figure 4 shows the pre- and post-shrinkage score distributions for one representative session, confirming that low-n students are pulled toward the class mean without flattening the high-risk tail.] [COMPARISON: a baseline that drops shrinkage entirely yields ρ = 0.71 for the same sessions, indicating that cohort normalisation contributes meaningfully to rank stability.]"</div>
+    <div class="rg-block"><p style="font-size:12px;color:#888">Every results paragraph should contain these four moves in order: (1) a one-sentence <em>claim</em>; (2) a <em>number</em> with N / CI or equivalent; (3) a pointer to a <em>figure or table</em>; (4) a <em>comparison</em> to a baseline, a prior result, or an alternative. Paragraphs missing any of these four read as unsupported assertions.</p></div>
+
     <div class="rg-section-title pitfall">Pitfalls to avoid</div>
     <div class="rg-pitfalls"><ul>
       <li>Presenting a single number with no comparison. Always pair it with a baseline or a distribution.</li>
@@ -1145,6 +2109,28 @@ button:hover{border-color:#555;background:#22263a}
     <div class="rg-section-title specifics">Dashboard V3 specifics — where to draw from</div>
     <div class="rg-block"><p>The <code>Deep dive → Design decisions (FAQ)</code> section captures decisions where you chose between two alternatives — the path not taken often becomes future work. Anything there marked "deferred" or "simpler alternative" is a future-work candidate.</p></div>
 
+    <div class="rg-section-title">§6.2 aims-revisited mapping — one row per §1.3 aim</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;color:#aaa;margin:0 16px">
+      <thead><tr style="color:#7ab8f5;text-transform:uppercase;font-size:10px;letter-spacing:0.05em">
+        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid #2a2d3a">§1.3 Aim / objective</th>
+        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid #2a2d3a">Status</th>
+        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid #2a2d3a">Evidence section</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Build a live learning-analytics system ranking struggling students in near-real-time</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Met</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§5.3 refresh-latency table; §5.4 qualitative</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Design and implement a multi-signal struggle scoring engine</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Met</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§5.3 parametric-vs-improved agreement (ρ)</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Add advanced models (IRT, BKT, improved struggle) as toggles</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Met</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§5.3 IRT <code>bⱼ</code>–empirical-wrong-rate correlation</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Provide a CF fallback for cold-start students</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Met (limited)</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§5.5 robustness; §5.6 limitations (small cohort)</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Coordinate instructor/assistant handoffs via a shared state store</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Met</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§5.4 lab-session feedback; §5.5 filelock reliability</td></tr>
+        <tr><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Generate grounded RAG coaching bullets per student</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">Met</td><td style="padding:5px 8px;border-bottom:1px dashed #1e2231">§5.4 qualitative assessment of bullet relevance</td></tr>
+        <tr><td style="padding:5px 8px">Evaluate the system against a functional baseline</td><td style="padding:5px 8px">Met</td><td style="padding:5px 8px">§5.3 model comparison; §5.5 failure-mode table</td></tr>
+      </tbody>
+    </table>
+    <div class="rg-block" style="margin-top:10px"><p style="font-size:12px;color:#888">Every <em>Met</em> / <em>Partly met</em> / <em>Not met</em> claim needs a § pointer on the same row. If a row cannot name an evidence section, you have either an unmet aim (move to §6.4 Future Work) or missing evaluation (reopen Ch 5).</p></div>
+
+    <div class="rg-section-title">Scoping note from prior thesis</div>
+    <div class="rg-block"><p><em>Pattern from F221611.pdf §9 (Ottoman Exchange).</em> Scope Ch6 narrowly: only <strong>Summary / Aims revisited / Reflections / Future work</strong>. Limitations live in Ch5 §5.6 (per the Ch5 evaluation-patterns block). In the old thesis, conflating limitations with future work produced a weaker Ch9 — keep them in separate chapters so "what the system can't do now" (Ch5) is distinct from "what someone could build next" (Ch6).</p></div>
+
     <div class="rg-section-title pitfall">Pitfalls to avoid</div>
     <div class="rg-pitfalls"><ul>
       <li>Introducing new material (new results, new claims) in the conclusion.</li>
@@ -1155,6 +2141,7 @@ button:hover{border-color:#555;background:#22263a}
 
     <div class="rg-section-title excerpt">Example opener (pattern, not content to copy)</div>
     <div class="rg-excerpt"><div class="rg-excerpt-label">Pattern from "Mathematical Model of Football"</div>"As was discussed and observed in chapter 5, we were able to develop a working software implementation of our mathematical model devised for the representation of the game of football, alongside a game theoretical approach to action selection in an attempt to maximise the resulting payoff and thus positional value of the player agents. While our models performed well in comparison to the non-game theoretical benchmarks developed …"</div>
+    <div class="rg-excerpt"><div class="rg-excerpt-label">§6.1 summary skeleton — restate only, no new claims</div>"[RESTATE THE PROBLEM — 1 sentence, echo §1.2. 'This thesis set out to address the absence of real-time struggle visibility and coordinated instructor–assistant handoffs in university programming labs.']  [RESTATE THE APPROACH — 2 sentences, echo Ch 3–4 at high level. 'A two-app system was designed around a shared state store, with a cohort-normalised 7-signal struggle composite and optional IRT, BKT, and improved-struggle models. A RAG pipeline grounded coaching suggestions in per-session content.']  [RESTATE THE EVIDENCE — 1 sentence, point to Ch 5 without re-quoting numbers. 'Evaluation across [N] saved sessions supported the core claims: parametric and improved scores agreed on top-risk students (§5.3), refresh latency stayed within the 10-second target (§5.3), and qualitative feedback confirmed the handoff flow was usable in a live lab (§5.4).']  [CONTRIBUTION SENTENCE — 1 sentence, the one claim you want the examiner to remember. 'The primary contribution is an open, toggleable scoring stack that lets an instructor compare a defensible parametric baseline against latent-trait alternatives on the same live data, rather than choosing one model blind.']"</div>
   </div></div>
 
   <!-- Back matter -->
@@ -1330,7 +2317,41 @@ const GLOSSARY=[
   {term:"Academic period",tags:["system"],summary:"Loughborough 2025/26 calendar label attached to every row during normalisation.",detail:`<p>"Sem 1 - Wk 3", "Christmas 2", "Inter Semester Week", "Easter 1", etc. Driven by <code>academic_calendar.py</code>. Used for the "Current/Last Academic Week" time-filter preset and the Previous Sessions grouping.</p>`},
   {term:"Graceful degradation",tags:["technique"],summary:"Redistribute weights of unavailable components instead of failing.",detail:`<p>Improved-struggle example: BKT unavailable → mastery-gap weight added to behavioural (now 0.75). IRT also unavailable → both redistributed (behavioural 1.0 minus residual). A runtime assert checks weights still sum to 1.0.</p>`},
   {term:"File lock + atomic write",tags:["system"],summary:"OS-level lock + .tmp + replace, so two Streamlit processes never corrupt lab_session.json.",detail:`<p><code>filelock.FileLock(timeout=5)</code> serialises access. Writes go to a <code>.tmp</code> file first, then <code>Path.replace()</code> swaps it in — atomic on Unix. File is always either old-valid or new-valid, never half-written.</p>`},
-  {term:"Measurement confidence",tags:["model","technique"],summary:"Per-submission confidence score [0,1] attached to an incorrectness measurement.",detail:`<p>Confidence = base(0.7) × length_factor × (0.5 + 0.5·extremity_factor). Questions with low mean confidence get a flag in the question-detail view — reader should trust those scores less.</p>`},
+  {term:"Measurement confidence",tags:["model","technique"],summary:"Per-submission confidence score [0,1] attached to an incorrectness measurement.",detail:`<p>Confidence = base(0.7) × length_factor × (0.5 + 0.5·extremity_factor). Questions with low mean confidence get a flag in the question-detail view — reader should trust those scores less.</p><p><strong>Cite:</strong> Lord &amp; Novick (1968); Crocker &amp; Algina (1986) — classical test theory.</p>`},
+  {term:"LLM-as-judge scoring",tags:["technique","model"],summary:"Using a language model as the scorer when no labelled ground truth exists.",detail:`<p>Methodology citation: <strong>Zheng et al. (2023)</strong> <em>Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena</em>. Used here to score <code>ai_feedback</code> → incorrectness via gpt-4o-mini (batch 50, in-process cache, 0.5 fallback on empty/failure). Known calibration risks: overconfidence at extremes, silent-failure fallback, non-interpretable per-token. Document as limitations in Ch5.</p>`},
+  {term:"EWMA smoothing",tags:["technique"],summary:"Exponentially weighted moving average across snapshot refreshes. α = 0.3.",detail:`<div class="formula-box">S_smooth(t) = α·S(t) + (1 − α)·S_smooth(t − Δt)</div><p>Enabled by <code>config.SMOOTHING_ENABLED=True</code>, <code>SMOOTHING_ALPHA=0.3</code>. Distinct from A_raw's per-submission exponential decay (Ebbinghaus): EWMA dampens jitter between auto-refresh reruns; A_raw weights individual submissions by their age within one computation. Two time scales, two techniques.</p>`},
+  {term:"Cohen's κ (kappa)",tags:["technique","metric"],summary:"Chance-corrected agreement between two classifiers. Not yet implemented in the comparison view.",detail:`<div class="formula-box">κ = (p_o − p_e) / (1 − p_e)</div><p>p_o = observed agreement; p_e = expected under independent random. Guidelines: &lt;0.20 poor, 0.21–0.40 fair, 0.41–0.60 moderate, 0.61–0.80 substantial. <strong>Cite:</strong> Cohen (1960). The comparison view currently reports raw <code>agreed / total</code>; supervisor-grade review expects κ discussion in Ch5 §5.4.</p>`},
+  {term:"Agreement %",tags:["metric"],summary:"Raw same-level count divided by total in model comparison view.",detail:`<div class="formula-box">agreement = |{ i : baseline_level(i) == alternative_level(i) }| / N</div><p>Implemented in <code>render_agreement_summary()</code>. Intuitive but not chance-corrected — see <strong>Cohen's κ</strong>.</p>`},
+  {term:"Cosine similarity",tags:["technique"],summary:"Angular similarity between two vectors — insensitive to magnitude.",detail:`<div class="formula-box">sim(u, v) = (u · v) / (‖u‖ · ‖v‖)</div><p>Used in CF (<code>cosine_similarity(X)</code> across the 5-feature student matrix) and in mistake clustering (cosine-to-centroid for exemplar selection). <strong>Cite:</strong> Salton &amp; Lesk (1968); Singhal (2001).</p>`},
+  {term:"TF-IDF",tags:["technique"],summary:"Term-frequency × inverse-document-frequency weighting for text features.",detail:`<div class="formula-box">tfidf(t, d, D) = tf(t, d) · log(|D| / (1 + df(t)))</div><p>Sklearn <code>TfidfVectorizer(max_features=500, sublinear_tf=True, min_df=1)</code>. Used in mistake clustering to vectorise wrong answers. <strong>Cite:</strong> Salton &amp; McGill (1983); Robertson (2004).</p>`},
+  {term:"K-means clustering",tags:["technique","model"],summary:"Unsupervised partitioning that minimises within-cluster L2 variance.",detail:`<p>Sklearn <code>KMeans(random_state=42, n_init=10)</code> with k-means++ initialisation (<strong>Arthur &amp; Vassilvitskii 2007</strong>). Used in mistake clustering with auto-k ∈ [2, 5] selected by silhouette score. <strong>Cite:</strong> MacQueen (1967); Lloyd (1982); Arthur &amp; Vassilvitskii (2007).</p>`},
+  {term:"Silhouette score",tags:["technique","metric"],summary:"Cluster-validation metric in [−1, +1]. +1 = tight within-cluster and well-separated.",detail:`<p>Used to auto-select k in mistake clustering. For each answer: silhouette = (b − a) / max(a, b) where a = mean distance to own cluster, b = mean distance to nearest other cluster. Dataset-level score = mean over points. <strong>Cite:</strong> Rousseeuw (1987).</p>`},
+  {term:"Sigmoid / logistic function",tags:["technique"],summary:"Link function σ(x) = 1 / (1 + exp(−x)). Maps ℝ → (0, 1).",detail:`<div class="formula-box">σ(x) = 1 / (1 + exp(−x))</div><p>The 1PL IRT model is σ(θ − b). Also used to map fitted b_j back to an irt_difficulty in [0, 1]. Implemented via <code>scipy.special.expit</code>.</p>`},
+  {term:"L-BFGS-B",tags:["technique"],summary:"Bounded quasi-Newton optimiser used by both IRT and BKT parameter fitting.",detail:`<p>Limited-memory BFGS with box bounds. <code>scipy.optimize.minimize(method="L-BFGS-B")</code>. BKT bounds <code>[(0,1), (0,1), (0,0.5), (0,0.5)]</code> enforce the identifiability constraint P(G)+P(S)&lt;1. IRT uses unbounded MLE with analytical gradient + centering projection. <strong>Cite:</strong> Byrd, Lu, Nocedal &amp; Zhu (1995).</p>`},
+  {term:"Bernoulli log-likelihood",tags:["technique"],summary:"Objective maximised by the IRT fit. Standard binary classification LL.",detail:`<div class="formula-box">LL(θ, b) = Σ_ij y_ij · log p_ij + (1 − y_ij) · log(1 − p_ij)   where p_ij = σ(θ_i − b_j)</div><p>Implemented at <code>irt.py:121</code>. Negated for minimisation. <strong>Cite:</strong> Fisher (1922) for MLE principle.</p>`},
+  {term:"ROC-AUC",tags:["technique","metric"],summary:"Probability the model ranks a random positive above a random negative.",detail:`<p>Used at <code>bkt.py:317-323</code> as the BKT fit diagnostic. AUC = 0.5 means no discrimination; AUC &gt; 0.7 is the KT-literature threshold for "the model explains correctness well". Computed via <code>sklearn.metrics.roc_auc_score</code>. <strong>Cite:</strong> Fawcett (2006); Hanley &amp; McNeil (1982).</p>`},
+  {term:"Composite indicator",tags:["technique"],summary:"Weighted linear combination of normalised sub-signals — the design pattern behind struggle and difficulty.",detail:`<p>Framework: OECD/JRC handbook methodology — normalise, weight, aggregate, validate. Struggle uses 7 signals; difficulty uses 5. Weight-sum invariants asserted at import time in <code>config.py</code>. <strong>Cite:</strong> OECD/JRC (2008); Nardo et al. (2005).</p>`},
+  {term:"V1",tags:["system"],summary:"Proof-of-concept prototype described in the thesis implementation chapter (January 2026 milestone).",detail:`<p>V1 was a lightweight Streamlit + Plotly prototype with simple threshold indicators and no alternative models. The current thesis Ch4 still describes V1 — see the <strong>Status</strong> panel §3 Report ↔ code alignment for the rewrite backlog.</p>`},
+  {term:"V2",tags:["system"],summary:"Full implementation (Dashboard v3) with all scoring models, lab assistant system, and advanced features.",detail:`<p>V2 adds OpenAI incorrectness scoring, 7-signal struggle, 5-signal difficulty, CF, mistake clustering, IRT, BKT, improved struggle, measurement confidence, the lab assistant system, saved sessions, RAG, and six instructor views. See <strong>Status</strong> panel §1 for the full feature list.</p>`},
+  {term:"FR (Functional Requirement)",tags:["system"],summary:"System capability the dashboard must provide. FR1–FR7 defined in Ch2.",detail:`<p>FR1 data loads · FR2 struggle scoring · FR3 difficulty scoring · FR4 prioritisation · FR5 analytics views · FR6 smart devices (unimplemented — stretch / future work) · FR7 assistant ranking (partial — assistant coordination exists, satisfaction-based ranking does not).</p>`},
+  {term:"NFR (Non-Functional Requirement)",tags:["system"],summary:"Quality attribute the system must satisfy. NFR1–NFR6 defined in Ch2.",detail:`<p>NFR1 performance · NFR2 interpretability · NFR3 robustness · NFR4 scalability · NFR5 privacy · NFR6 extensibility. See <strong>Status</strong> panel §2 for evidence gaps against each.</p>`},
+  {term:"MoSCoW",tags:["system"],summary:"Must / Should / Could / Won't prioritisation framework used to scope implementation.",detail:`<p>FR1–FR5 are Must. FR6 (smart devices) is Should Have but completely unimplemented — flag as Won't or discuss as future work. FR7 (assistant ranking) is Should, partially implemented.</p>`},
+  {term:"improved_models_enabled",tags:["system"],summary:"Session-state flag gating IRT, BKT, and improved struggle models.",detail:`<p>Toggle lives in Settings. When off, the Model Comparison view hides and only baseline scoring runs. When on, the three alternative models are computed alongside the baseline and the comparison view becomes available.</p>`},
+  {term:"SAM (dashboard)",tags:["system"],summary:"Early learning-analytics dashboard separating at-risk students by time/resource use.",detail:`<p>Prior art surveyed in Ch2 §2.1.2 Dashboards. See Literature panel for full citation.</p>`},
+  {term:"EMODA",tags:["system"],summary:"Emotion-aware learning dashboard using audio/video/self-reports.",detail:`<p>Multimodal approach contrasted with this system's question-answer-level signals in Ch2. Lee &amp; Cultura (2023).</p>`},
+  {term:"Edsight",tags:["system"],summary:"Responsive web-based learning analytics dashboard for educators.",detail:`<p>Referenced in Ch2 with Overview/Report/Activity List modes. The grade-scoring system (Table 2 in thesis) comes from this.</p>`},
+  {term:"Live session",tags:["system"],summary:"Instructor-started time window that begins at session_start and coordinates assistants through a shared code.",detail:`<p>Session_active = True, session_start timestamp set, lab_session_code generated (6-char alphanumeric). Lab assistants can join via the code, claim students, mark-helped.</p>`},
+  {term:"Saved session",tags:["system"],summary:"Persisted record with a fixed start/end time, reloaded from data/saved_sessions.json.",detail:`<p>CRUD via <code>data_loader.save_session_record()</code> / <code>load_session_record()</code>. Grouped by academic period in the Previous Sessions view. Loading a saved session bypasses live filters and replays the snapshot.</p>`},
+  {term:"Session code",tags:["system"],summary:"6-character alphanumeric code assistants use to join the live lab session. Excludes O/0/I/1.",detail:`<p>Excludes ambiguous characters to avoid verbal confusion ("is that an O or a 0?"). Instructor generates by clicking <strong>Start Session</strong>; assistants enter on the mobile app's join screen.</p>`},
+  {term:"Self-allocation",tags:["system"],summary:"Assistant ability to claim a student without instructor assignment, when enabled.",detail:`<p>Toggle in Settings. When on, the assistant's unassigned view lists struggling students and each assistant can pick one. When off, only the instructor can assign.</p>`},
+  {term:"Assignment status",tags:["system"],summary:"Either 'helping' or 'helped' for a student/assistant pairing in shared state.",detail:`<p>Schema: <code>assignments[student_id] = {assistant_id, status}</code>. Progresses <code>helping → helped</code>. Cleared on <strong>Mark Helped</strong> or when the assistant leaves the session.</p>`},
+  {term:"Dashboard filter state",tags:["system"],summary:"General UI filters — time filter, today-only scope, secondary module filter.",detail:`<p>Keys include <code>time_filter</code>, <code>today_only</code>, <code>module_filter</code>, <code>secondary_module_filter</code>. Persisted in <code>st.session_state</code> across rerenders within a single Streamlit session.</p>`},
+  {term:"Live session state",tags:["system"],summary:"Session-specific runtime keys — session_active, session_start, lab_session_code.",detail:`<p>Separate from dashboard filter state because these are set by the session lifecycle (Start/End Session buttons) rather than by user filtering.</p>`},
+  {term:"Saved session state",tags:["system"],summary:"Keys holding the currently-loaded saved session — loaded_session_id, loaded_session_start, loaded_session_end.",detail:`<p>Set when a saved session is loaded from Previous Sessions. Cleared on <strong>Return to Live Data</strong>.</p>`},
+  {term:"Response matrix",tags:["model"],summary:"Binary student × question matrix used as IRT input.",detail:`<p>Built from best attempt per (student, question) pair. Codes 1 (correct) if incorrectness &lt; 0.5. Iteratively drops questions with &lt;2 students and students with &lt;2 questions until stable. See <strong>Deep dive → IRT model</strong>.</p>`},
+  {term:"mastery_df",tags:["model","system"],summary:"Per-student per-question BKT mastery DataFrame cached in session state.",detail:`<p>Columns: <code>user, question, mastery, n_attempts</code>. One row per (student, question) pair the student has attempted. Computed by <code>compute_all_mastery()</code> and cached until the filtered input DataFrame changes.</p>`},
+  {term:"mastery_summary_df",tags:["model","system"],summary:"Per-student aggregate BKT mastery statistics.",detail:`<p>Columns: <code>user, mean_mastery, min_mastery, mastered_count, total_questions</code>. Computed by <code>compute_student_mastery_summary()</code> from mastery_df. Feeds the Improved struggle model's mastery-gap component.</p>`},
+  {term:"BKT_MASTERY_THRESHOLD",tags:["model","system"],summary:"P(L) cutoff above which a student-question pair counts as 'mastered'. Default 0.95.",detail:`<p>Used for the <code>mastered_count</code> column in mastery_summary_df and for the "Mastered!" badge in the interactive BKT demo. Not tuned per student — a single threshold applied globally.</p>`},
 ];
 const GLTAGS=[{id:'all',label:'All'},{id:'metric',label:'Metrics'},{id:'model',label:'Models'},{id:'technique',label:'Techniques'},{id:'system',label:'System'}];
 let glActiveTag=STATE.glTag||'all',glQuery=STATE.glQuery||'';
@@ -1559,7 +2580,7 @@ function resetProgress(){
   });
   /* Active top-level tab */
   if(STATE.tab){
-    const validIds=['overview','ref','glossary','dive','road','report'];
+    const validIds=['overview','ref','glossary','literature','ops','status','dive','road','plan','report'];
     if(validIds.indexOf(STATE.tab)>=0&&STATE.tab!=='overview')switchPanel(STATE.tab);
   }
   /* Active deep-dive section */

@@ -59,6 +59,34 @@ Related: [[Report Sync]], [[Thesis Overview]], [[Evidence Bank]], [[Figures and 
 
 ---
 
+## Methods lit-review backlog (2026-04-18)
+
+Mathematical / ML techniques used in the codebase that currently have no corresponding citation in the lit review. Each item names the exact target section(s); most Ch3 subsections already exist and just need `\cite{}` calls, but Ch2 needs three brand-new subsections. See the full audit table at `C:\Users\Bakri\.claude\plans\alright-for-our-lit-indexed-hamming.md`.
+
+**Editorial rule for notation:** Ch2 gets one core equation per technique + citation; Ch3 gets the equations actually used with default parameters from `config.py`; Appendix E holds the consolidated formula reference; Appendix F holds derivations. Do not bloat Ch2 with full notation.
+
+- [ ] **Ch2 §2.1.5 (NEW) — Knowledge Tracing and Bayesian Student Models** — create the subsection between current §2.1.4 Struggle and §2.1.5 Task Difficulty; renumber §2.1.5–§2.1.7 accordingly. ~400 words framing KT as latent-trait + HMM. Cite Corbett & Anderson (1995) and Yudelson, Koedinger & Gordon (2013). Show BKT equation (d) — posterior + transition update — as the single representative equation.
+- [ ] **Ch2 §2.1.7 (NEW) — Text Mining and Mistake Pattern Discovery** — create the subsection after renumbered CF, before research-gaps summary. Cite Salton & McGill (1983), MacQueen (1967) / Lloyd (1982), Arthur & Vassilvitskii (2007), Rousseeuw (1987), Salton & Lesk (1968).
+- [ ] **Ch2 §2.1.8 (NEW) — Retrieval-Augmented Generation for Instructor Feedback** — merges with / supersedes the existing `#meeting3` RAG literature-review item. Cite Lewis et al. (2020), Reimers & Gurevych (2019), Malkov & Yashunin (2020).
+- [ ] **Ch2 §2.1.X (NEW — LLM-as-Judge Scoring) OR extend §2.1.4** — gpt-4o-mini is the entry point of the whole pipeline but has zero citations. Cite Zheng et al. (2023) *Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena*; discuss calibration + fallback behaviour (0.5 default on parse failure). Ch3 §3.3.0 / Ch4 §4.7.1 get matching `\cite{}`.
+- [ ] **Ch2 §2.1.4 extension — composite + temporal + shrinkage + regression paragraphs** — insert four short method paragraphs within the existing struggle-modelling subsection. Cite OECD/JRC (2008), Nardo et al. (2005), Ebbinghaus (1885), Wixted & Carpenter (2007), Efron & Morris (1977), Morris (1983), Draper & Smith (1998), Han/Kamber/Pei (2011). Closes the citation half of three existing supervisor items (improvement trajectory / answer repetition / shrinkage).
+- [ ] **Ch2 §2.1.6 (renumbered) Task Difficulty extension** — add Rasch (1960), Lord & Novick (1968), Wright & Stone (1979) alongside existing Baucks / Pankiewicz / Baeres.
+- [ ] **Ch2 §2.1.7 (renumbered) Collaborative Filtering extension** — add Herlocker et al. (1999), Resnick et al. (1994) alongside existing Schafer 2007.
+- [ ] **Ch3 §3.3.1 / §3.3.2 / §3.3.3 / §3.3.x — insert missing `\cite{}` calls** for the references introduced in Ch2 §2.1.4 and the new §2.1.7.
+- [ ] **Ch3 §3.3.x (NEW — Temporal Smoothing) OR paragraph in §3.3.1** — distinguish EWMA across snapshot refreshes (`SMOOTHING_ENABLED=True`, α=0.3) from per-submission exponential decay in A_raw. Two different techniques currently conflated. Appendix E lists both recurrences.
+- [ ] **Ch3 §3.4.1 Measurement Confidence — add Lord & Novick (1968), Crocker & Algina (1986)** as the classical-test-theory basis for the 3-factor confidence formula.
+- [ ] **Ch3 §3.4.2 IRT — add Rasch (1960), Fisher (1922) footnote, Byrd et al. (1995) footnote** for 1PL derivation, MLE justification, and L-BFGS-B bounded optimisation.
+- [ ] **Ch3 §3.4.3 BKT — add Corbett & Anderson (1995), Yudelson et al. (2013); display equation (d) inline** with default parameter annotation from `config.py` (`BKT_P_INIT`, `BKT_P_LEARN`, `BKT_P_GUESS`, `BKT_P_SLIP`).
+- [ ] **Ch3 §3.4.4 Improved Struggle — document three design mechanics**: (a) coverage-weighted shrinkage in `_compute_difficulty_adjusted` (distinct from classical `n/(n+K)` shrinkage); (b) mean-imputation of missing mastery (cite Little & Rubin 2002); (c) graceful-degradation weight redistribution with the weight-sum invariant assertion at [improved_struggle.py:168-171](code/learning_dashboard/models/improved_struggle.py#L168-L171). None currently appear in the thesis.
+- [ ] **Ch4 §4.9.2 / §4.9.3 — one-line cite of L-BFGS-B (Byrd et al. 1995)** at each call-site narration.
+- [ ] **Ch5 §5.1 Evaluation Design — cite Fawcett (2006), Hanley & McNeil (1982)** when introducing ROC-AUC as the BKT discrimination metric.
+- [ ] **Ch5 §5.4 Model Comparison — agreement metric decision**: currently uses raw `agreed/total` percentage. Decide: (a) keep raw and acknowledge it as uncorrected, or (b) implement Cohen's κ (Cohen 1960) for chance-corrected agreement and report both. Supervisor-grade review will expect the discussion either way.
+- [ ] **Appendix E — formulae table must list** struggle (weighted sum + shrinkage), difficulty, BKT equations (a)–(e), Rasch 1PL, TF-IDF, cosine, silhouette, measurement-confidence 3-factor formula, EWMA recurrence.
+- [ ] **Appendix F — derivations must derive** BKT (b) and (c) from Bayes' rule, Rasch MLE gradient, Bayesian-shrinkage posterior, Bernoulli log-likelihood for IRT.
+- [ ] **Literature/index.md — add new groupings** once the individual notes are written: Composite Scoring & Indicators; Memory & Time-Decay Models; Bayesian Shrinkage; Text Clustering & Similarity; Estimation & Optimisation; Evaluation Metrics; Retrieval-Augmented Generation & Embeddings; Classical Test & Measurement Theory. Extend existing groups "BKT and Knowledge Tracing", "Task and Question Difficulty", and "Collaborative Filtering" with the new foundational citations.
+
+---
+
 ## Low — polish and consistency
 
 - [ ] **Terminology consistency check** — ensure thesis terms match codebase terms (e.g., "incorrectness" not "wrongness", "struggle score" not "struggle metric").

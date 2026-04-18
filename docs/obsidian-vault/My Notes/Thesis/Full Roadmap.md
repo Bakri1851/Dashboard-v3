@@ -62,6 +62,7 @@ Surgical edits — the chapter structure is solid, specific sections need updati
 - [ ] Update Table 1 risk mitigations with actual decisions made
 - [ ] Fill Ch2 §2.1.7 research gaps (uncomment and revise draft at lines 121–130)
 - [ ] Add implementation status column to FR/NFR tables; clarify FR6 is unimplemented
+- [ ] **Add three new Ch2 subsections (Knowledge Tracing, Text Mining, RAG) + citation extensions to §2.1.4/§2.1.6/§2.1.7** — see "Methods lit-review backlog (2026-04-18)" in [[Rewrite Queue]].
 
 *Unblocks: Ch4 — existing chapter framing is now consistent before the implementation chapter is rewritten.*
 
@@ -80,6 +81,7 @@ Rewrite the entire chapter — it currently describes V1 only. Cover the full V2
 - [ ] Saved sessions and session lifecycle — CRUD, retroactive save, academic period filtering
 - [ ] Instructor views — all 6 views + settings + sound effects
 - [ ] Mark figure slots for Appendix B screenshots (`[TODO: insert figure]`)
+- [ ] **Insert L-BFGS-B / MLE / ROC-AUC citation footnotes in Ch4 §4.9.x and Ch5 §5.1** — see "Methods lit-review backlog (2026-04-18)" in [[Rewrite Queue]].
 
 *Unblocks: Ch5 evaluation framing, Appendix A code snippets.*
 
