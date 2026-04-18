@@ -12,13 +12,13 @@ The baseline struggle model in `analytics.py` captures current-session behaviora
 
 ## Mathematical model (standard BKT)
 
-Each question is treated as a single skill. The hidden state is binary: "learned" (L) vs "not learned" (~L). Four parameters govern the model:
+Each question is treated as a single skill. The hidden state is binary: "learned" (L) vs "not learned" (~L). Four parameters govern the model. The values below are textbook defaults (Corbett & Anderson); the Settings panel exposes a **Fit from data** action (see [[#Parameter fitting (MLE)]]) that replaces them with MLE estimates from the current filtered submissions.
 
 ```
-P(L_0) = 0.3    prior probability of knowing the skill
-P(T)   = 0.1    probability of learning on each opportunity
-P(G)   = 0.2    probability of guessing correctly without knowing
-P(S)   = 0.1    probability of slipping (wrong despite knowing)
+P(L_0) = 0.3    prior probability of knowing the skill     (default)
+P(T)   = 0.1    probability of learning on each opportunity (default)
+P(G)   = 0.2    probability of guessing correctly without knowing (default)
+P(S)   = 0.1    probability of slipping (wrong despite knowing)   (default)
 ```
 
 ### Update rule
@@ -32,6 +32,37 @@ P(L_next)      = P(L|obs)     + (1 - P(L|obs)) * P(T)
 ```
 
 Submissions are processed chronologically per student per question. A submission is coded as correct when `incorrectness < CORRECT_THRESHOLD` (0.5).
+
+## Parameter fitting (MLE)
+
+The four BKT parameters are no longer tied to textbook defaults. `fit_bkt_parameters(df)` maximises the forward-algorithm log-likelihood of the observed submission sequences over `(P(L_0), P(T), P(G), P(S))` using `scipy.optimize.minimize` with L-BFGS-B and bounds `[(0,1), (0,1), (0,0.5), (0,0.5)]`. The upper bounds on P(G) and P(S) enforce the standard BKT identifiability constraint `P(G) + P(S) < 1` — without them the likelihood surface has degenerate "flipped" maxima where guessing and slipping swap roles.
+
+The fit uses the same `[timestamp, question]` mergesort ordering as `compute_all_mastery()`, so the parameters fitted by MLE and the mastery values produced at inference are consistent — both replay the identical sequences.
+
+### Fit quality diagnostic — next-attempt AUC
+
+For each attempt `t` in a student-question sequence, the model's predicted `P(correct)` *before* the attempt is observed is
+
+```
+P(correct) = mastery_t * (1 - P(S)) + (1 - mastery_t) * P(G)
+```
+
+These predictions paired with actual correctness give a ROC-AUC via `sklearn.metrics.roc_auc_score`. KT-literature convention: **AUC > 0.70** means the model explains next-attempt correctness well enough to be useful; **AUC ≈ 0.5** means the parameters are no better than chance.
+
+### UI entry point
+
+Settings → Model Toggle → *(struggle_model = Improved)* → **Fit from data** button, directly under the four BKT sliders. On click: the fitter runs on the currently-filtered DataFrame, sliders snap to the fitted values, a caption shows `n_observations`, AUC, and log-likelihood, and the Improved Struggle leaderboard recomputes on the next rerun via the existing `_improved_settings_key` cache invalidation.
+
+### Honest framing (for Ch5 §5.5)
+
+MLE fitting is the standard unsupervised approach in the KT literature; it replaces arbitrary defaults with values grounded in this cohort's data. But it maximises **next-attempt correctness prediction**, not "struggle identification":
+
+- BKT estimates `P(knows skill)`, one input to struggle — not struggle itself.
+- BKT assumes one skill per question, monotonic learning, and independent questions. Real learning violates all three.
+- The `incorrectness` labels come from the OpenAI grader, not humans — parameter fit quality is upper-bounded by grader accuracy.
+- Defensible claim: *"BKT parameters fitted by MLE on submission sequences, validated via next-attempt correctness AUC."* Not *"the dashboard accurately identifies struggling students."*
+
+This also gives **Meeting 4 action item "IRT/BKT disagreement (Ch5 §5.5)"** a concrete angle: the ~0% agreement between improved and baseline models partly reflected using textbook BKT defaults that didn't match the dataset. Re-running comparison with fitted parameters is the cleanest thing to report alongside the disagreement paragraph.
 
 ## Output
 
@@ -81,7 +112,7 @@ BKT computation is gated by `improved_models_enabled` in session state (toggled 
 
 ## Code references
 
-- `code/learning_dashboard/models/bkt.py`: `bkt_update()`, `compute_student_mastery()`, `compute_all_mastery()`, `compute_student_mastery_summary()`
-- `code/learning_dashboard/config.py`: `BKT_P_INIT`, `BKT_P_LEARN`, `BKT_P_GUESS`, `BKT_P_SLIP`, `BKT_MASTERY_THRESHOLD`
+- `code/learning_dashboard/models/bkt.py`: `bkt_update()`, `compute_student_mastery()`, `compute_all_mastery()`, `compute_student_mastery_summary()`, `fit_bkt_parameters()`, `_build_sequences()`, `_walk_and_score()`
+- `code/learning_dashboard/config.py`: `BKT_P_INIT`, `BKT_P_LEARN`, `BKT_P_GUESS`, `BKT_P_SLIP`, `BKT_MASTERY_THRESHOLD`, `BKT_FIT_MIN_OBSERVATIONS`, `BKT_FIT_MAX_ITER`
 - `code/learning_dashboard/instructor_app.py`: feature-flag integration (~line 680)
-- `code/learning_dashboard/ui/views.py`: leaderboard toggle and normalization (~line 115)
+- `code/learning_dashboard/ui/views.py`: leaderboard toggle and normalization (~line 115); `_render_bkt_fit_controls()` + **Fit from data** button in `settings_view()`

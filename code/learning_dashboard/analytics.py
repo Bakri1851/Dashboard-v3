@@ -1,8 +1,10 @@
 # analytics.py — Scoring calculations (UI-independent)
 import hashlib
 import json
+import logging
 import math
 import os
+import re
 from typing import Optional
 
 import numpy as np
@@ -16,6 +18,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from learning_dashboard import config
 
+logger = logging.getLogger(__name__)
+
 
 def _get_openai_client() -> OpenAI:
     key = st.secrets.get("OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY", "")
@@ -28,10 +32,52 @@ _incorrectness_cache: dict[str, float] = {}
 _cluster_cache: dict[tuple[str, int, str], list[dict] | None] = {}
 
 
-def _call_openai_batch(feedbacks: list[str]) -> list[float]:
+_JSON_ARRAY_RE = re.compile(r"\[[^\[\]]*\]", re.DOTALL)
+
+
+def _parse_scores_response(text: str, expected_len: int) -> Optional[list[float]]:
+    """Extract a JSON array of floats from a model response.
+
+    Handles markdown code fences (``` ```json ... ``` ```) and prose wrapping
+    that gpt-4o-mini tends to add despite instructions to the contrary.
+    Returns None when no valid float list of ``expected_len`` can be recovered.
     """
-    Send a batch of feedback texts to OpenAI and return incorrectness scores [0, 1].
-    Returns [0.5] * len(feedbacks) on any error.
+    if not text:
+        return None
+    cleaned = text.strip()
+    # Strip markdown fences: ```json ... ``` or ``` ... ```
+    if cleaned.startswith("```"):
+        cleaned = re.sub(r"^```[a-zA-Z0-9]*\s*", "", cleaned)
+        cleaned = re.sub(r"\s*```$", "", cleaned)
+        cleaned = cleaned.strip()
+
+    candidates = [cleaned]
+    # Fallback — pull the first [...] block out of whatever prose wraps it.
+    match = _JSON_ARRAY_RE.search(cleaned)
+    if match and match.group(0) != cleaned:
+        candidates.append(match.group(0))
+
+    for candidate in candidates:
+        try:
+            parsed = json.loads(candidate)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        if not isinstance(parsed, list) or len(parsed) != expected_len:
+            continue
+        try:
+            return [float(max(0.0, min(1.0, float(s)))) for s in parsed]
+        except (TypeError, ValueError):
+            continue
+    return None
+
+
+def _call_openai_batch(feedbacks: list[str]) -> Optional[list[float]]:
+    """Send a batch of feedback texts to OpenAI and return incorrectness scores.
+
+    Returns a list of floats in [0, 1] on success, or ``None`` on any failure
+    (API error, empty response, unparseable response, wrong-length response).
+    Callers are responsible for deciding the fallback — typically 0.5 without
+    caching so a transient failure doesn't poison the cache.
     """
     numbered = "\n".join(f"{i + 1}. {text}" for i, text in enumerate(feedbacks))
     prompt = (
@@ -48,28 +94,44 @@ def _call_openai_batch(feedbacks: list[str]) -> list[float]:
             messages=[{"role": "user", "content": prompt}],
             temperature=0,
         )
-        scores = json.loads(response.choices[0].message.content.strip())
-        if isinstance(scores, list) and len(scores) == len(feedbacks):
-            return [float(max(0.0, min(1.0, s))) for s in scores]
-    except Exception:
-        pass
-    return [0.5] * len(feedbacks)
+    except Exception as exc:
+        logger.warning("OpenAI batch call failed (%s): %s", type(exc).__name__, exc)
+        return None
+
+    raw = (response.choices[0].message.content or "") if response.choices else ""
+    scores = _parse_scores_response(raw, len(feedbacks))
+    if scores is None:
+        logger.warning(
+            "OpenAI response did not parse to %d floats; raw=%r",
+            len(feedbacks),
+            raw[:200],
+        )
+    return scores
 
 
 def estimate_incorrectness(feedback: Optional[str]) -> float:
-    """Score a single feedback string via OpenAI. Returns float in [0, 1]."""
+    """Score a single feedback string via OpenAI. Returns float in [0, 1].
+
+    On API failure, returns 0.5 without caching so the next call retries.
+    """
     if not feedback or not str(feedback).strip():
         return 0.5
     key = str(feedback).strip()
-    if key not in _incorrectness_cache:
-        _incorrectness_cache[key] = _call_openai_batch([key])[0]
-    return _incorrectness_cache[key]
+    if key in _incorrectness_cache:
+        return _incorrectness_cache[key]
+    scores = _call_openai_batch([key])
+    if scores is None:
+        return 0.5
+    _incorrectness_cache[key] = scores[0]
+    return scores[0]
 
 
 def compute_incorrectness_column(df: pd.DataFrame) -> pd.Series:
     """
     Score all ai_feedback values via OpenAI, batched for efficiency.
-    Results are cached in-process to avoid repeat API calls across reruns.
+    Successful batches are cached in-process to avoid repeat API calls.
+    Failed batches leave the cache untouched so the next call retries —
+    this prevents transient API errors from poisoning downstream analytics.
     Empty/null feedback → 0.5 without an API call.
     """
     feedbacks = df["ai_feedback"].astype(str).str.strip()
@@ -77,11 +139,12 @@ def compute_incorrectness_column(df: pd.DataFrame) -> pd.Series:
     # Collect unique non-empty texts not yet cached
     uncached = [t for t in feedbacks.unique() if t and t not in _incorrectness_cache]
 
-    # Fetch in batches
+    # Fetch in batches — only cache successful responses.
     for i in range(0, len(uncached), config.OPENAI_BATCH_SIZE):
         batch = uncached[i : i + config.OPENAI_BATCH_SIZE]
         scores = _call_openai_batch(batch)
-        _incorrectness_cache.update(zip(batch, scores))
+        if scores is not None:
+            _incorrectness_cache.update(zip(batch, scores))
 
     return feedbacks.map(lambda t: _incorrectness_cache.get(t, 0.5))
 
@@ -337,6 +400,12 @@ def compute_cf_struggle_scores(
         if n_students < 4:
             diagnostics["fallback"] = True
             diagnostics["reason"] = "fewer than 4 students"
+            return struggle_df["struggle_score"].copy(), diagnostics
+
+        missing = [c for c in CF_FEATURES if c not in struggle_df.columns]
+        if missing:
+            diagnostics["fallback"] = True
+            diagnostics["reason"] = f"missing baseline feature columns: {missing}"
             return struggle_df["struggle_score"].copy(), diagnostics
 
         # Interaction matrix from normalised features. Guard against NaN

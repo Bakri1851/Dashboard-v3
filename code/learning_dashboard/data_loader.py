@@ -391,7 +391,8 @@ def build_session_record_from_state(now: datetime) -> Optional[dict]:
     if not session_name:
         session_name = f"Lab Session {session_start.strftime('%Y-%m-%d %H:%M')}"
 
-    time_filter_enabled = bool(st.session_state.get("time_filter_enabled", False))
+    time_filter_preset = st.session_state.get("time_filter_preset", "Today")
+    is_custom = time_filter_preset == "Custom"
 
     date_range_value = st.session_state.get("time_date_range")
     start_date_iso = None
@@ -425,14 +426,14 @@ def build_session_record_from_state(now: datetime) -> Optional[dict]:
             "secondary_module_filter": st.session_state.get(
                 "secondary_module_filter", "All Modules"
             ),
-            "time_filter_enabled": time_filter_enabled,
+            "time_filter_preset": time_filter_preset,
             "time_date_range": (
                 [start_date_iso, end_date_iso]
-                if time_filter_enabled and start_date_iso and end_date_iso
+                if is_custom and start_date_iso and end_date_iso
                 else None
             ),
-            "time_start": start_time_iso if time_filter_enabled else None,
-            "time_end": end_time_iso if time_filter_enabled else None,
+            "time_start": start_time_iso if is_custom else None,
+            "time_end": end_time_iso if is_custom else None,
         },
         "notes": "",
     }
@@ -473,7 +474,7 @@ def build_retroactive_session_record(
             "secondary_module_filter": st.session_state.get(
                 "secondary_module_filter", "All Modules"
             ),
-            "time_filter_enabled": True,
+            "time_filter_preset": "Custom",
             "time_date_range": [start_date.isoformat(), end_date.isoformat()],
             "time_start": start_time.isoformat() if start_time else None,
             "time_end": end_time.isoformat() if end_time else None,
@@ -507,7 +508,10 @@ def apply_saved_session_to_state(
             "Saved module filter is no longer available. Fallback applied: All Modules."
         )
 
-    time_filter_enabled = bool(context.get("time_filter_enabled", False))
+    saved_preset = context.get("time_filter_preset")
+    if saved_preset is None:
+        # Backward-compat: derive preset from old time_filter_enabled flag.
+        saved_preset = "Custom" if context.get("time_filter_enabled") else "Today"
     date_range_value = context.get("time_date_range")
     saved_start_time = _parse_iso_time(context.get("time_start"))
     saved_end_time = _parse_iso_time(context.get("time_end"))
@@ -527,14 +531,14 @@ def apply_saved_session_to_state(
     st.session_state["selected_question"] = None
     st.session_state["loaded_session_id"] = record.get("id")
     st.session_state["session_name_draft"] = record.get("name", "")
-    st.session_state["time_filter_enabled"] = time_filter_enabled
+    st.session_state["time_filter_preset"] = saved_preset
     st.session_state["loaded_session_start"] = session_start
     st.session_state["loaded_session_end"] = session_end
     st.session_state["session_load_warning"] = (
         " ".join(warning_messages) if warning_messages else None
     )
 
-    if time_filter_enabled:
+    if saved_preset == "Custom":
         if isinstance(date_range_value, (list, tuple)) and len(date_range_value) == 2:
             start_date = _parse_iso_date(date_range_value[0])
             end_date = _parse_iso_date(date_range_value[1])

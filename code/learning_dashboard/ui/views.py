@@ -42,28 +42,6 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
         unique_questions=df["question"].nunique() if not df.empty else 0,
     )
 
-    # Scope toggle — only shown when no session/time filter is controlling the data
-    _session_controlled = (
-        st.session_state.get("time_filter_enabled")
-        or st.session_state.get("session_active")
-        or st.session_state.get("loaded_session_id") is not None
-    )
-    if not _session_controlled:
-        today_only = st.session_state.get("today_filter_only", True)
-        no_today_data = not st.session_state.get("_today_has_data", True)
-        _scope_cols = st.columns([7, 3])
-        with _scope_cols[1]:
-            if today_only:
-                if no_today_data:
-                    st.caption("No data for today — showing all")
-                elif st.button("View All Data →", use_container_width=True, key="scope_all"):
-                    st.session_state["today_filter_only"] = False
-                    st.rerun()
-            else:
-                if st.button("← Today Only", use_container_width=True, key="scope_today"):
-                    st.session_state["today_filter_only"] = True
-                    st.rerun()
-
     # Secondary module filter (in main content area, NOT sidebar)
     modules = ["All Modules"] + sorted(df["module"].unique().tolist()) if not df.empty else ["All Modules"]
     secondary_module = st.selectbox(
@@ -90,6 +68,10 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
         else:
             struggle_df = st.session_state["_sec_struggle_df"]
             difficulty_df = st.session_state["_sec_difficulty_df"]
+
+    # Keep a handle on the baseline frame — CF features (n_hat, t_hat, i_norm,
+    # A_norm, d_hat) only exist on the baseline struggle DataFrame.
+    baseline_struggle_df = struggle_df
 
     # --- Model selection (driven by Settings toggles) ---
     if st.session_state.get("improved_models_enabled", False):
@@ -142,7 +124,7 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
         try:
             cf_threshold = st.session_state.get("cf_threshold", 0.6)
             _cf_scores, cf_diag = analytics.compute_cf_struggle_scores(
-                struggle_df, threshold=cf_threshold,
+                baseline_struggle_df, threshold=cf_threshold,
             )
 
             if cf_diag.get("fallback", False):
@@ -625,102 +607,68 @@ def settings_view(df: pd.DataFrame) -> None:
 
     st.markdown(
         f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
-        f'text-transform:uppercase; letter-spacing:2px; font-size:1rem;">Improved Models</h3>',
+        f'text-transform:uppercase; letter-spacing:2px; font-size:1rem;">Model Toggle</h3>',
         unsafe_allow_html=True,
     )
 
     st.markdown(
-        "When enabled, alternative scoring models (IRT difficulty, BKT mastery, "
-        "improved struggle) run alongside the baseline. Use the selectors below "
-        "to choose which model powers each leaderboard.",
+        "Choose which scoring model powers each leaderboard. Baseline uses the "
+        "original behavioural and weighted-sum models; the alternatives run "
+        "additional IRT, BKT, and composite computations.",
     )
 
-    _setting_toggle(
-        "Enable Improved Models",
-        "improved_models_enabled",
-        help="Compute IRT difficulty, BKT mastery, and improved struggle scores "
-             "alongside the baseline. Must be enabled to use non-baseline models.",
+    _setting_selectbox(
+        "Student Struggle Model",
+        "struggle_model",
+        ["Baseline", "Improved"],
+        help="**Baseline:** 7-signal weighted behavioral score.  \n"
+             "**Improved:** behavioral + BKT mastery gap + IRT difficulty adjustment.",
+    )
+    _setting_selectbox(
+        "Question Difficulty Model",
+        "difficulty_model",
+        ["Baseline", "IRT"],
+        help="**Baseline:** weighted sum of incorrect rate, time, attempts, "
+             "mean incorrectness, first-attempt failure.  \n"
+             "**IRT:** Rasch model latent difficulty estimated via MLE.",
     )
 
-    if st.session_state.get("improved_models_enabled", False):
-        st.markdown("")
-        _setting_selectbox(
-            "Student Struggle Model",
-            "struggle_model",
-            ["Baseline", "Improved"],
-            help="**Baseline:** 7-signal weighted behavioral score.  \n"
-                 "**Improved:** behavioral + BKT mastery gap + IRT difficulty adjustment.",
-        )
-        _setting_selectbox(
-            "Question Difficulty Model",
-            "difficulty_model",
-            ["Baseline", "IRT"],
-            help="**Baseline:** weighted sum of incorrect rate, time, attempts, "
-                 "mean incorrectness, first-attempt failure.  \n"
-                 "**IRT:** Rasch model latent difficulty estimated via MLE.",
-        )
-
+    if st.session_state.get("struggle_model") == "Improved":
         st.markdown("")
         st.markdown(
             f'<p style="color:{config.COLORS["text_dim"]}; font-size:0.85rem; '
             f'font-family:\'{config.FONT_BODY}\', monospace; margin-bottom:4px;">'
-            f'Sub-model controls</p>',
+            f'BKT parameters</p>',
             unsafe_allow_html=True,
         )
-        _setting_toggle(
-            "Enable IRT Difficulty",
-            "irt_enabled",
-            help="Rasch 1-PL IRT model for question difficulty. "
-                 "Required for IRT leaderboard and Model Comparison view.",
+        _setting_slider(
+            "Prior Mastery P(L₀)",
+            "bkt_p_init",
+            min_value=0.0, max_value=1.0, step=0.05,
+            default=config.BKT_P_INIT,
+            help="Initial probability that the student already knows the skill.",
         )
-        _setting_toggle(
-            "Enable BKT Mastery",
-            "bkt_enabled",
-            help="Bayesian Knowledge Tracing per student per question. "
-                 "Required for the Improved Struggle model.",
+        _setting_slider(
+            "Learning Rate P(T)",
+            "bkt_p_learn",
+            min_value=0.0, max_value=1.0, step=0.05,
+            default=config.BKT_P_LEARN,
+            help="Probability of transitioning from not-knowing to knowing per attempt.",
         )
-        _setting_toggle(
-            "Enable Improved Struggle",
-            "improved_struggle_enabled",
-            help="Phase 4 struggle model: behavioral + mastery gap + difficulty-adjusted signals.",
+        _setting_slider(
+            "Guess Probability P(G)",
+            "bkt_p_guess",
+            min_value=0.0, max_value=0.5, step=0.05,
+            default=config.BKT_P_GUESS,
+            help="Probability of a correct answer despite not knowing the skill.",
         )
-
-        if st.session_state.get("bkt_enabled", True):
-            st.markdown("")
-            st.markdown(
-                f'<p style="color:{config.COLORS["text_dim"]}; font-size:0.85rem; '
-                f'font-family:\'{config.FONT_BODY}\', monospace; margin-bottom:4px;">'
-                f'BKT parameters</p>',
-                unsafe_allow_html=True,
-            )
-            _setting_slider(
-                "Prior Mastery P(L₀)",
-                "bkt_p_init",
-                min_value=0.0, max_value=1.0, step=0.05,
-                default=config.BKT_P_INIT,
-                help="Initial probability that the student already knows the skill.",
-            )
-            _setting_slider(
-                "Learning Rate P(T)",
-                "bkt_p_learn",
-                min_value=0.0, max_value=1.0, step=0.05,
-                default=config.BKT_P_LEARN,
-                help="Probability of transitioning from not-knowing to knowing per attempt.",
-            )
-            _setting_slider(
-                "Guess Probability P(G)",
-                "bkt_p_guess",
-                min_value=0.0, max_value=0.5, step=0.05,
-                default=config.BKT_P_GUESS,
-                help="Probability of a correct answer despite not knowing the skill.",
-            )
-            _setting_slider(
-                "Slip Probability P(S)",
-                "bkt_p_slip",
-                min_value=0.0, max_value=0.5, step=0.05,
-                default=config.BKT_P_SLIP,
-                help="Probability of an incorrect answer despite knowing the skill.",
-            )
+        _setting_slider(
+            "Slip Probability P(S)",
+            "bkt_p_slip",
+            min_value=0.0, max_value=0.5, step=0.05,
+            default=config.BKT_P_SLIP,
+            help="Probability of an incorrect answer despite knowing the skill.",
+        )
 
     st.markdown("---")
 
@@ -919,14 +867,16 @@ def previous_sessions_view(df: pd.DataFrame) -> None:
         duration = _format_duration(record.get("duration_seconds", 0))
         dashboard_view = context.get("dashboard_view", "In Class View")
         module_filter = context.get("secondary_module_filter", "All Modules")
-        time_filter_state = "Enabled" if context.get("time_filter_enabled") else "Disabled"
+        time_filter_state = context.get("time_filter_preset") or (
+            "Custom" if context.get("time_filter_enabled") else "Today"
+        )
 
         with st.container(border=True):
             loaded_note = " | LOADED" if is_loaded else ""
             st.markdown(f"**{session_name}**{loaded_note}")
             st.caption(
                 f"Start: {start_at} | End: {end_at} | Duration: {duration} | "
-                f"View: {dashboard_view} | Module: {module_filter} | Time Filter: {time_filter_state}"
+                f"View: {dashboard_view} | Module: {module_filter} | Range: {time_filter_state}"
             )
 
             action_col_1, action_col_2, action_col_3 = st.columns([1, 1, 6])

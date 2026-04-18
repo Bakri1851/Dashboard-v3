@@ -1,5 +1,5 @@
 # app.py — Main entry point: sidebar, routing, state, auto-refresh
-from datetime import datetime, time as dt_time
+from datetime import datetime, time as dt_time, timedelta
 import html
 import os
 import time
@@ -9,7 +9,12 @@ import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 
 from learning_dashboard import analytics, config, data_loader, sound
-from learning_dashboard.academic_calendar import format_academic_period_window
+from learning_dashboard.academic_calendar import (
+    ALL_PERIOD_LABELS,
+    format_academic_period_window,
+    get_academic_week_window,
+    get_period_date_range,
+)
 from learning_dashboard import lab_state as _lab_state
 from learning_dashboard.models import measurement
 from learning_dashboard.models import irt
@@ -44,8 +49,7 @@ def init_session_state() -> None:
         "auto_refresh": config.AUTO_REFRESH_DEFAULT,
         "refresh_interval": config.AUTO_REFRESH_INTERVAL_DEFAULT,
         "last_refresh": None,
-        "time_filter_enabled": False,
-        "today_filter_only": True,
+        "time_filter_preset": "Today",
         "previous_scores": {},
         "smoothing_enabled": config.SMOOTHING_ENABLED,
         "lab_session_code": None,
@@ -61,16 +65,12 @@ def init_session_state() -> None:
         "_prev_selected_question":   None,
         "_prev_dashboard_view":      "In Class View",
         "_prev_high_struggle_count": 0,
-        "improved_models_enabled": config.IMPROVED_MODELS_ENABLED_DEFAULT,
         "struggle_model": "Baseline",
         "difficulty_model": "Baseline",
         "_measurement_df": None,
         "_improved_models_key": None,
         "_improved_struggle_df": None,
-        # Phase 5: sub-toggles and BKT parameter overrides
-        "irt_enabled":                   config.IRT_ENABLED_DEFAULT,
-        "bkt_enabled":                   config.BKT_ENABLED_DEFAULT,
-        "improved_struggle_enabled":     config.IMPROVED_STRUGGLE_ENABLED_DEFAULT,
+        # BKT parameter overrides (used when struggle_model == "Improved")
         "bkt_p_init":                    config.BKT_P_INIT,
         "bkt_p_learn":                   config.BKT_P_LEARN,
         "bkt_p_guess":                   config.BKT_P_GUESS,
@@ -110,35 +110,78 @@ def _get_dataframe_window(df: pd.DataFrame) -> tuple[datetime | None, datetime |
     return _coerce_datetime(timestamps.min()), _coerce_datetime(timestamps.max())
 
 
-def _resolve_time_filter_window() -> tuple[datetime | None, datetime | None]:
-    """Return the active explicit time-filter window, if any."""
-    if not st.session_state.get("time_filter_enabled"):
-        return None, None
+TIME_FILTER_PRESETS = [
+    "All Time",
+    "Live Session",
+    "Today",
+    "Past Hour",
+    "Past 24 Hours",
+    "Current Academic Week",
+    "Last Academic Week",
+    "Custom",
+]
 
+
+def _resolve_custom_window() -> tuple[datetime | None, datetime | None]:
+    """Combine the Custom date_range + time_start/end widgets into a datetime window."""
     date_range = st.session_state.get("time_date_range")
     if not isinstance(date_range, (tuple, list)) or len(date_range) != 2:
         return None, None
 
     start_time = st.session_state.get("time_start")
     end_time = st.session_state.get("time_end")
-
     if not isinstance(start_time, dt_time):
         start_time = dt_time(0, 0)
     if not isinstance(end_time, dt_time):
         end_time = dt_time(23, 59)
 
-    start_dt = None
-    end_dt = None
-
     try:
-        if date_range[0] is not None:
-            start_dt = datetime.combine(pd.Timestamp(date_range[0]).date(), start_time)
-        if date_range[1] is not None:
-            end_dt = datetime.combine(pd.Timestamp(date_range[1]).date(), end_time)
+        start_dt = datetime.combine(pd.Timestamp(date_range[0]).date(), start_time) if date_range[0] else None
+        end_dt = datetime.combine(pd.Timestamp(date_range[1]).date(), end_time) if date_range[1] else None
     except (TypeError, ValueError):
         return None, None
-
     return start_dt, end_dt
+
+
+def _resolve_time_filter_window() -> tuple[datetime | None, datetime | None]:
+    """Return the active explicit time-filter window based on the preset, if any."""
+    preset = st.session_state.get("time_filter_preset", "Today")
+    now = datetime.now()
+
+    if preset == "All Time":
+        return None, None
+
+    if preset == "Live Session":
+        session_start = _coerce_datetime(st.session_state.get("session_start"))
+        if session_start is not None and st.session_state.get("session_active"):
+            return session_start, None
+        return None, None
+
+    if preset == "Today":
+        today = now.date()
+        return datetime.combine(today, dt_time(0, 0)), datetime.combine(today, dt_time(23, 59))
+
+    if preset == "Past Hour":
+        return now - timedelta(hours=1), now
+
+    if preset == "Past 24 Hours":
+        return now - timedelta(hours=24), now
+
+    if preset == "Current Academic Week":
+        window = get_academic_week_window(now)
+        if window is None:
+            return None, None
+        start_d, end_d = window
+        return datetime.combine(start_d, dt_time(0, 0)), datetime.combine(end_d, dt_time(23, 59))
+
+    if preset == "Last Academic Week":
+        window = get_academic_week_window(now, offset=-1)
+        if window is None:
+            return None, None
+        start_d, end_d = window
+        return datetime.combine(start_d, dt_time(0, 0)), datetime.combine(end_d, dt_time(23, 59))
+
+    return _resolve_custom_window()
 
 
 def _resolve_display_academic_period(df: pd.DataFrame) -> str:
@@ -471,88 +514,71 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
             unsafe_allow_html=True,
         )
 
-        # Time filter
-        _w_tf = st.checkbox(
-            "Enable Time Filter",
-            value=st.session_state.get("time_filter_enabled", False),
-            key="_w_time_filter_enabled",
-        )
-        st.session_state["time_filter_enabled"] = _w_tf
+        # Loaded saved session overrides the preset entirely
+        loaded_start = st.session_state.get("loaded_session_start")
+        loaded_end = st.session_state.get("loaded_session_end")
+        viewing_saved_session = loaded_start is not None and loaded_end is not None
 
-        if _w_tf:
-            from learning_dashboard.academic_calendar import (
-                ALL_PERIOD_LABELS, get_period_date_range,
-            )
-
-            if not df.empty and "academic_period" in df.columns:
-                data_periods = set(df["academic_period"].unique())
-                available_labels = [p for p in ALL_PERIOD_LABELS if p in data_periods]
-            else:
-                available_labels = []
-            period_options = ["Custom"] + available_labels
-
-            def _on_period_change():
-                picked = st.session_state.get("time_filter_period", "Custom")
-                if picked != "Custom":
-                    pr = get_period_date_range(picked)
-                    if pr:
-                        st.session_state["time_date_range"] = pr
-
-            st.selectbox(
-                "Academic Period",
-                period_options,
-                key="time_filter_period",
-                on_change=_on_period_change,
-            )
-
-            today = datetime.now().date()
-            if not df.empty:
-                min_date = df["timestamp"].min().date()
-                max_date = df["timestamp"].max().date()
-                has_today = min_date <= today <= max_date
-            else:
-                min_date = today
-                max_date = today
-                has_today = False
-
-            default_start = today if has_today else min_date
-            default_end = today if has_today else max_date
-
-            if "time_date_range" not in st.session_state:
-                st.session_state["time_date_range"] = (default_start, default_end)
-
-            date_range = st.date_input(
-                "Date Range",
-                key="time_date_range",
-            )
-
-            start_time = st.time_input("Start Time", value=dt_time(0, 0), key="time_start")
-            end_time = st.time_input("End Time", value=dt_time(23, 59), key="time_end")
-
-            if isinstance(date_range, tuple) and len(date_range) == 2:
-                df = data_loader.filter_by_time(
-                    df,
-                    start_date=date_range[0],
-                    end_date=date_range[1],
-                    start_time=start_time,
-                    end_time=end_time,
-                )
-
-            st.caption(f"Filtered records: {len(df):,}")
-
-        # Session-based filtering (live session or loaded saved session)
-        elif st.session_state["session_active"] and st.session_state["session_start"]:
-            df = data_loader.filter_by_session_start(df, st.session_state["session_start"])
-        elif (
-            st.session_state.get("loaded_session_start") is not None
-            and st.session_state.get("loaded_session_end") is not None
-        ):
-            df = data_loader.filter_by_datetime_window(
-                df,
-                st.session_state.get("loaded_session_start"),
-                st.session_state.get("loaded_session_end"),
-            )
+        if viewing_saved_session:
+            df = data_loader.filter_by_datetime_window(df, loaded_start, loaded_end)
             st.caption(f"Filtered records: {len(df):,} (loaded saved session)")
+        else:
+            current_preset = st.session_state.get("time_filter_preset", "Today")
+            if current_preset not in TIME_FILTER_PRESETS:
+                st.session_state["time_filter_preset"] = "Today"
+                current_preset = "Today"
+
+            preset = st.selectbox(
+                "Date range",
+                TIME_FILTER_PRESETS,
+                key="time_filter_preset",
+            )
+
+            if preset == "Custom":
+                today = datetime.now().date()
+                if "time_date_range" not in st.session_state:
+                    if not df.empty:
+                        min_date = df["timestamp"].min().date()
+                        max_date = df["timestamp"].max().date()
+                        default_start = today if min_date <= today <= max_date else min_date
+                        default_end = today if min_date <= today <= max_date else max_date
+                    else:
+                        default_start = default_end = today
+                    st.session_state["time_date_range"] = (default_start, default_end)
+
+                st.date_input("Date range", key="time_date_range")
+                st.time_input("Start time", value=dt_time(0, 0), key="time_start")
+                st.time_input("End time", value=dt_time(23, 59), key="time_end")
+
+                if not df.empty and "academic_period" in df.columns:
+                    data_periods = set(df["academic_period"].unique())
+                    available_labels = [p for p in ALL_PERIOD_LABELS if p in data_periods]
+                else:
+                    available_labels = []
+                if available_labels:
+                    def _on_week_pick():
+                        picked = st.session_state.get("time_custom_week")
+                        if picked and picked != "—":
+                            pr = get_period_date_range(picked)
+                            if pr:
+                                st.session_state["time_date_range"] = pr
+
+                    st.selectbox(
+                        "Pick academic week",
+                        ["—"] + available_labels,
+                        key="time_custom_week",
+                        on_change=_on_week_pick,
+                    )
+
+            start_dt, end_dt = _resolve_time_filter_window()
+
+            if preset == "Live Session" and not (
+                st.session_state.get("session_active") and st.session_state.get("session_start")
+            ):
+                st.caption("No live session — showing all records.")
+            elif preset != "All Time":
+                df = data_loader.filter_by_datetime_window(df, start_dt, end_dt)
+                st.caption(f"Filtered records: {len(df):,}")
 
         st.markdown("")
 
@@ -581,19 +607,14 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
                 max_chars=80,
             )
             if st.button("Confirm Save", key="confirm_retro_session"):
-                date_range = st.session_state.get("time_date_range")
-                has_time_filter = (
-                    st.session_state.get("time_filter_enabled")
-                    and isinstance(date_range, (tuple, list))
-                    and len(date_range) == 2
-                )
-                if has_time_filter:
+                filter_start, filter_end = _resolve_time_filter_window()
+                if filter_start is not None and filter_end is not None:
                     record = data_loader.build_retroactive_session_record(
                         name=retro_name,
-                        start_date=date_range[0],
-                        end_date=date_range[1],
-                        start_time=st.session_state.get("time_start"),
-                        end_time=st.session_state.get("time_end"),
+                        start_date=filter_start.date(),
+                        end_date=filter_end.date(),
+                        start_time=filter_start.time(),
+                        end_time=filter_end.time(),
                     )
                 else:
                     today = datetime.now().date()
@@ -704,13 +725,12 @@ def main() -> None:
         st.session_state["pending_delete_session_id"] = None
         st.session_state["pending_session_load_record"] = None
         st.session_state["pending_remove_assistant_id"] = None
-        st.session_state["time_filter_enabled"] = False
+        st.session_state["time_filter_preset"] = "Today"
         st.session_state["secondary_module_filter"] = "All Modules"
         st.session_state["selected_student"] = None
         st.session_state["selected_question"] = None
         st.session_state["dashboard_view"] = "In Class View"
         st.session_state["current_view"] = "In Class View"
-        st.session_state["today_filter_only"] = True
         st.session_state["_nav_loading"] = True
         st.rerun()
 
@@ -720,26 +740,9 @@ def main() -> None:
         st.session_state["_lab_state_cache"] = _lab_state.read_lab_state()
         st.session_state["_lab_state_ts"] = _now
 
-    # Sidebar controls and filtering
+    # Sidebar controls and filtering (preset-driven — see render_sidebar)
     df = render_sidebar(df)
-
-    # Today-only filter — active when no session/time filter overrides it.
-    # Applied here (after render_sidebar, after the empty-df guard) so that an
-    # empty today result never triggers the st.stop() safety check.
-    _today_filter_controlling = (
-        st.session_state.get("today_filter_only", True)
-        and not st.session_state.get("time_filter_enabled")
-        and not st.session_state.get("session_active")
-        and st.session_state.get("loaded_session_id") is None
-    )
-    if _today_filter_controlling:
-        _today = datetime.now().date()
-        _today_df = data_loader.filter_by_time(df, start_date=_today, end_date=_today)
-        st.session_state["_today_has_data"] = not _today_df.empty
-        if not _today_df.empty:
-            df = _today_df
-    else:
-        st.session_state["_today_has_data"] = True
+    st.session_state["_today_has_data"] = True
 
     st.session_state["current_academic_period"] = _resolve_display_academic_period(df)
 
@@ -806,12 +809,20 @@ def main() -> None:
 
     df["incorrectness"] = analytics.compute_incorrectness_column(df)
 
-    # --- Improved models (Phases 1–4), gated by feature flag ---
-    if st.session_state.get("improved_models_enabled", False):
+    # --- Improved models (Phases 1–4), gated by the Settings dropdowns ---
+    _struggle_model = st.session_state.get("struggle_model", "Baseline")
+    _difficulty_model = st.session_state.get("difficulty_model", "Baseline")
+    _improved_struggle_active = _struggle_model == "Improved"
+    _irt_active = _difficulty_model == "IRT" or _improved_struggle_active
+    _bkt_active = _improved_struggle_active
+    st.session_state["improved_models_enabled"] = (
+        _improved_struggle_active or _difficulty_model == "IRT"
+    )
+
+    if st.session_state["improved_models_enabled"]:
         _improved_settings_key = (
-            st.session_state.get("irt_enabled", True),
-            st.session_state.get("bkt_enabled", True),
-            st.session_state.get("improved_struggle_enabled", True),
+            _struggle_model,
+            _difficulty_model,
             st.session_state.get("bkt_p_init", config.BKT_P_INIT),
             st.session_state.get("bkt_p_learn", config.BKT_P_LEARN),
             st.session_state.get("bkt_p_guess", config.BKT_P_GUESS),
@@ -825,12 +836,12 @@ def main() -> None:
         if _need_recompute:
             st.session_state["_measurement_df"] = measurement.compute_incorrectness_with_confidence(df)
 
-            if st.session_state.get("irt_enabled", True):
+            if _irt_active:
                 st.session_state["_irt_difficulty_df"] = irt.compute_irt_difficulty_scores(df)
             else:
                 st.session_state["_irt_difficulty_df"] = None
 
-            if st.session_state.get("bkt_enabled", True):
+            if _bkt_active:
                 mastery_df = bkt.compute_all_mastery(
                     df,
                     p_init=st.session_state.get("bkt_p_init", config.BKT_P_INIT),
@@ -844,7 +855,7 @@ def main() -> None:
                 st.session_state["_mastery_df"] = None
                 st.session_state["_mastery_summary_df"] = None
 
-            if st.session_state.get("improved_struggle_enabled", True):
+            if _improved_struggle_active:
                 st.session_state["_improved_struggle_df"] = improved_struggle.compute_improved_struggle_scores(
                     df,
                     mastery_summary=st.session_state["_mastery_summary_df"],

@@ -167,6 +167,21 @@ def academic_period_sorter(period):
     return 8, 0
 
 
+def get_academic_week_window(ref_date, offset=0):
+    """Return (start_date, end_date) inclusive for the academic week containing ref_date,
+    shifted by `offset` entries in ACADEMIC_PERIODS (e.g. -1 for 'last week').
+    Returns None if ref_date is outside the calendar or the offset is out of bounds."""
+    ref = pd.Timestamp(ref_date).date()
+    for idx, (start, end, _label) in enumerate(ACADEMIC_PERIODS):
+        if start <= ref <= end:
+            target = idx + offset
+            if 0 <= target < len(ACADEMIC_PERIODS):
+                t_start, t_end, _ = ACADEMIC_PERIODS[target]
+                return t_start, t_end
+            return None
+    return None
+
+
 def add_academic_period_column(df, col="timestamp"):
     """Add an 'academic_period' column derived from the timestamp column."""
     if df.empty or col not in df.columns:

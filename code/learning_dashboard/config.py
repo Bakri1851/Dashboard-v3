@@ -10,8 +10,9 @@ EXCLUDED_MODULES: list[str] = ["AI_TEST", "24COB231", "24WSC701"]
 MODULE_RENAME_MAP: dict[str, str] = {"25COA504": "25COP504"}
 
 # --- OpenAI Configuration ---
-OPENAI_MODEL: str = "gpt-4o-mini"
-OPENAI_BATCH_SIZE: int = 50       # max feedback items per API call
+OPENAI_MODEL: str = "gpt-5.4-mini"  # local, no API cost; "gpt-
+OPENAI_BATCH_SIZE: int = 20       # max (question, answer) pairs per API call — smaller batches parse more reliably
+SCORING_PER_RUN_CAP: int = 500    # max new pairs scored per Streamlit rerun; rest fall back to 0.5 and get scored on subsequent runs (keeps UI responsive on cold-start)
 
 # --- Student Struggle Score Weights ---
 STRUGGLE_WEIGHT_N: float = 0.10   # submission count (min-max normalised)
@@ -34,7 +35,7 @@ SHRINKAGE_K: int = 5  # students with n >> K are unaffected; n << K pulled towar
 
 # --- Student Struggle Thresholds: (low, high, label, color) ---
 STRUGGLE_THRESHOLDS: list[tuple[float, float, str, str]] = [
-    (0.00, 0.20, "On Track",     "#00ff88"),
+    (0.00, 0.20, "On Track",     "#10a15d"),
     (0.20, 0.35, "Minor Issues", "#ffcc00"),
     (0.35, 0.50, "Struggling",   "#ff6600"),
     (0.50, 1.00, "Needs Help",   "#ff2d55"),
@@ -149,16 +150,14 @@ BKT_P_GUESS: float = 0.2      # P(G):   probability of guessing correctly
 BKT_P_SLIP: float = 0.1       # P(S):   probability of slipping (wrong despite knowing)
 BKT_MASTERY_THRESHOLD: float = 0.95  # P(L) above this = "mastered"
 
+# BKT parameter fitting (MLE via forward algorithm, L-BFGS-B)
+BKT_FIT_MIN_OBSERVATIONS: int = 50  # refuse to fit on fewer attempts than this
+BKT_FIT_MAX_ITER: int = 200          # matches IRT_MAX_ITER spirit
+
 # --- Phase 4: Improved Struggle Model ---
 IMPROVED_STRUGGLE_WEIGHT_BEHAVIORAL: float = 0.45
 IMPROVED_STRUGGLE_WEIGHT_MASTERY_GAP: float = 0.30
 IMPROVED_STRUGGLE_WEIGHT_DIFFICULTY_ADJ: float = 0.25
-
-# --- Phase 5: Model Comparison ---
-IMPROVED_MODELS_ENABLED_DEFAULT: bool = False
-IRT_ENABLED_DEFAULT: bool = True
-BKT_ENABLED_DEFAULT: bool = True
-IMPROVED_STRUGGLE_ENABLED_DEFAULT: bool = True
 
 # --- Phase 9: RAG Suggested Feedback ---
 RAG_ENABLED_DEFAULT: bool = True

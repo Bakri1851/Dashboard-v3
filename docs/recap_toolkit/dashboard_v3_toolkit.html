@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard V3 — Study Toolkit</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e0e0e0;font-size:14px;line-height:1.7}
+/* ── Top-level tab bar ── */
+.top-bar{display:flex;align-items:center;gap:0;border-bottom:1px solid #2a2d3a;padding:0 1.5rem;background:#0d1020;position:sticky;top:0;z-index:100}
+.top-title{font-size:13px;font-weight:500;color:#555;padding:14px 20px 14px 0;border-right:1px solid #2a2d3a;margin-right:16px;white-space:nowrap}
+.top-tab{padding:14px 18px;font-size:13px;cursor:pointer;color:#888;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap}
+.top-tab:hover{color:#ccc}
+.top-tab.active{color:#7ab8f5;border-bottom-color:#7ab8f5}
+.panel{display:none;padding:1.5rem}
+.panel.active{display:block}
+/* ── Shared components ── */
+code{font-family:'SF Mono',Consolas,monospace;font-size:12px;background:#1e2231;padding:1px 5px;border-radius:3px;color:#c9d1d9}
+strong{color:#ccc;font-weight:500}
+button{padding:6px 14px;font-size:13px;border:1px solid #333;border-radius:6px;background:#1a1d27;color:#ccc;cursor:pointer;margin-right:6px;transition:all 0.15s}
+button:hover{border-color:#555;background:#22263a}
+
+/* ══════════════════════════════════════════
+   PANEL 1 — CODE REFERENCE
+══════════════════════════════════════════ */
+.search-bar{width:100%;padding:8px 12px;border:1px solid #333;border-radius:8px;font-size:14px;background:#1a1d27;color:#e0e0e0;margin-bottom:1rem;outline:none}
+.search-bar:focus{border-color:#555}
+.file-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem}
+.ftab{padding:4px 12px;border:1px solid #333;border-radius:6px;font-size:12px;cursor:pointer;background:#1a1d27;color:#aaa;transition:all 0.15s;white-space:nowrap}
+.ftab:hover{border-color:#555;color:#ccc}
+.ftab.active{background:#1e3a5f;color:#7ab8f5;border-color:#2d5a8e}
+.ref-count{font-size:12px;color:#666;margin-bottom:10px}
+.fn-list{display:flex;flex-direction:column;gap:6px}
+.fn-card{border:1px solid #2a2d3a;border-radius:8px;overflow:hidden}
+.fn-header{padding:10px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;background:#161923;user-select:none}
+.fn-header:hover{background:#1c2030}
+.fn-name{font-size:13px;font-family:'SF Mono',Consolas,monospace;font-weight:500;color:#e0e0e0;flex:0 0 auto;max-width:320px;word-break:break-all}
+.fn-desc{font-size:12px;color:#888;line-height:1.4;flex:1;min-width:0}
+.fn-file{font-size:11px;color:#555;white-space:nowrap;margin-bottom:3px}
+.fn-body{padding:12px 16px;font-size:13px;line-height:1.7;color:#aaa;border-top:1px solid #2a2d3a;background:#12151e;display:none}
+.fn-body.open{display:block}
+.fn-body p{margin-bottom:6px}
+.fn-left{flex:0 0 auto;min-width:0;width:310px}
+.fn-right{flex:1;min-width:0;padding-left:10px;border-left:1px solid #2a2d3a}
+.rtag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:500}
+.rtag-api{background:#0d2a4a;color:#7ab8f5}
+.rtag-model{background:#0d3322;color:#56d364}
+.rtag-ui{background:#3a2a00;color:#e3b341}
+.rtag-state{background:#3a0d1a;color:#ff7b72}
+.rchevron{font-size:11px;color:#555;flex-shrink:0;margin-top:2px}
+.rtags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+
+/* ══════════════════════════════════════════
+   PANEL 2 — DEEP DIVE
+══════════════════════════════════════════ */
+.dd-nav{display:flex;flex-wrap:wrap;gap:6px;padding:0 0 1.25rem}
+.dd-btn{padding:5px 14px;border:1px solid #333;border-radius:6px;font-size:12px;cursor:pointer;background:#1a1d27;color:#aaa;transition:all 0.15s;white-space:nowrap}
+.dd-btn:hover{border-color:#555;color:#ccc}
+.dd-btn.active{background:#1e3a5f;color:#7ab8f5;border-color:#2d5a8e}
+.dd-section{display:none}.dd-section.active{display:block}
+.step-row{display:flex;gap:0;margin-bottom:2rem}
+.step-num{flex-shrink:0;width:32px;height:32px;border-radius:50%;background:#1e3a5f;color:#7ab8f5;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;margin-top:2px}
+.step-body{flex:1;padding-left:14px}
+.step-title{font-size:14px;font-weight:500;margin-bottom:4px;color:#e0e0e0}
+.step-text{font-size:13px;color:#999;line-height:1.7}
+.step-text code{font-family:'SF Mono',Consolas,monospace;font-size:12px;background:#1e2231;padding:1px 5px;border-radius:3px;color:#c9d1d9}
+.formula-box{background:#1a1d27;border:1px solid #2a2d3a;border-radius:6px;padding:12px 16px;font-family:'SF Mono',Consolas,monospace;font-size:13px;margin:10px 0;line-height:2;color:#c9d1d9}
+.signal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:12px 0}
+.signal-card{background:#1a1d27;border-radius:6px;padding:10px 12px;border:1px solid #2a2d3a}
+.signal-name{font-family:'SF Mono',Consolas,monospace;font-size:12px;font-weight:500;color:#7ab8f5}
+.signal-desc{font-size:12px;color:#888;margin-top:4px}
+.weight-bar{height:5px;background:#2a2d3a;border-radius:3px;margin:4px 0}
+.weight-fill{height:5px;border-radius:3px;background:#2d5a8e}
+.dd-divider{border:none;border-top:1px solid #2a2d3a;margin:1.5rem 0}
+.result-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.result-pill{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;display:inline-block}
+.on-track{background:#dcfce7;color:#166534}
+.minor{background:#fef9c3;color:#854d0e}
+.struggling{background:#ffedd5;color:#9a3412}
+.needs-help{background:#fee2e2;color:#991b1b}
+.flow-chain{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:10px 0}
+.flow-box{background:#1a1d27;border:1px solid #2a2d3a;border-radius:6px;padding:4px 10px;font-size:12px;font-family:'SF Mono',Consolas,monospace;color:#c9d1d9}
+.flow-arrow{color:#555;font-size:12px}
+.bkt-table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0}
+.bkt-table th{text-align:left;padding:6px 10px;background:#1a1d27;font-weight:500;font-size:11px;color:#888;border-bottom:1px solid #2a2d3a}
+.bkt-table td{padding:6px 10px;border-top:1px solid #2a2d3a;font-family:'SF Mono',Consolas,monospace;font-size:12px;color:#ccc}
+.section-intro{font-size:13px;color:#888;line-height:1.7;margin-bottom:1.25rem}
+.note-box{background:#2a2200;border:1px solid #4a3800;border-radius:6px;padding:10px 14px;font-size:13px;color:#e3b341;margin:12px 0}
+.demo{background:#161923;border:1px solid #2a2d3a;border-radius:10px;padding:1rem 1.25rem;margin:1rem 0}
+.demo-title{font-size:13px;font-weight:500;margin-bottom:12px;color:#ccc}
+.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.slider-row label{font-size:12px;color:#888;min-width:160px}
+.slider-row input[type=range]{flex:1;accent-color:#2d5a8e}
+.slider-row span{font-size:13px;font-weight:500;min-width:40px;text-align:right;color:#ccc}
+.result-line{margin-top:8px;font-size:13px;color:#aaa}
+.result-line strong{color:#e0e0e0}
+.bkt-history{font-size:12px;font-family:'SF Mono',Consolas,monospace;line-height:2;color:#888;white-space:pre-wrap;margin-bottom:8px;min-height:24px}
+
+/* ══════════════════════════════════════════
+   PANEL 3 — ROADMAP
+══════════════════════════════════════════ */
+.rm-progress-label{font-size:12px;color:#666;margin-bottom:6px}
+.rm-progress-wrap{background:#1a1d27;border-radius:4px;height:6px;margin-bottom:1.25rem;overflow:hidden}
+.rm-progress-fill{height:6px;border-radius:4px;background:#238636;transition:width 0.3s}
+.stage{border:1px solid #2a2d3a;border-radius:10px;margin-bottom:1rem;overflow:hidden}
+.stage-header{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;background:#161923;user-select:none}
+.stage-header:hover{background:#1c2030}
+.stage-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0}
+.stage-title{font-size:14px;font-weight:500;flex:1;color:#e0e0e0}
+.stage-meta{font-size:12px;color:#666}
+.stage-chevron{font-size:11px;color:#555;flex-shrink:0}
+.stage-body{display:none;border-top:1px solid #2a2d3a}
+.stage-body.open{display:block}
+.rm-files{display:flex;flex-wrap:wrap;gap:6px;padding:14px 16px 0}
+.rm-file{font-size:11px;font-family:'SF Mono',Consolas,monospace;padding:3px 8px;border-radius:4px;background:#1e2231;color:#888;border:1px solid #2a2d3a}
+.tasks{padding:12px 16px}
+.task{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+.task-check{width:18px;height:18px;border-radius:4px;border:1px solid #444;flex-shrink:0;cursor:pointer;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;background:#1a1d27;color:#56d364}
+.task-check.done{background:#0d3322;border-color:#238636}
+.task-text{font-size:13px;color:#999;line-height:1.6}
+.task-text code{font-family:'SF Mono',Consolas,monospace;font-size:11px;background:#1e2231;padding:1px 4px;border-radius:3px;color:#c9d1d9}
+.task-text.done-text{color:#444;text-decoration:line-through}
+.quiz-section{border-top:1px solid #2a2d3a;padding:14px 16px}
+.quiz-label{font-size:11px;font-weight:500;color:#666;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px}
+.quiz-q{font-size:13px;color:#999;margin-bottom:8px;line-height:1.6}
+.quiz-q strong{color:#ccc;font-weight:500}
+.reveal-btn{font-size:12px;padding:4px 12px;border:1px solid #333;border-radius:6px;background:#1a1d27;color:#888;cursor:pointer;margin-top:4px;margin-bottom:12px}
+.reveal-btn:hover{background:#22263a;color:#ccc}
+.answer{font-size:12px;color:#999;background:#161923;border-radius:6px;padding:8px 12px;margin-bottom:12px;line-height:1.6;display:none;border:1px solid #2a2d3a}
+.answer.shown{display:block}
+.answer code{font-family:'SF Mono',Consolas,monospace;font-size:11px;background:#1e2231;padding:1px 4px;border-radius:3px;color:#c9d1d9}
+.sn1{background:#0d2a4a;color:#7ab8f5}
+.sn2{background:#0d3322;color:#56d364}
+.sn3{background:#3a2a00;color:#e3b341}
+.sn4{background:#3a0d1a;color:#ff7b72}
+.sn5{background:#2a0d3a;color:#d2a8ff}
+
+/* ══════════════════════════════════════════
+   PANEL — OVERVIEW
+══════════════════════════════════════════ */
+.ov-lead{font-size:14px;color:#bbb;line-height:1.7;margin-bottom:1.25rem;max-width:780px}
+.ov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:1.5rem}
+.ov-card{background:#161923;border:1px solid #2a2d3a;border-radius:10px;padding:14px 16px}
+.ov-card h3{font-size:13px;color:#7ab8f5;font-weight:500;margin-bottom:8px;letter-spacing:0.02em}
+.ov-card p{font-size:13px;color:#999;line-height:1.65}
+.ov-card code{font-family:'SF Mono',Consolas,monospace;font-size:12px;background:#1e2231;padding:1px 5px;border-radius:3px;color:#c9d1d9}
+.ov-persona{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+.ov-persona:last-child{margin-bottom:0}
+.ov-icon{width:34px;height:34px;border-radius:8px;background:#1e2231;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:1px solid #2a2d3a}
+.ov-persona-body strong{display:block;color:#ccc;font-size:13px;margin-bottom:2px}
+.ov-persona-body span{font-size:12px;color:#888;line-height:1.55}
+.arch-diagram{background:#12151e;border:1px solid #2a2d3a;border-radius:10px;padding:20px;margin:0.5rem 0 1.5rem;display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center}
+.arch-col{display:flex;flex-direction:column;gap:10px;align-items:center}
+.arch-node{background:#1a1d27;border:1px solid #2d5a8e;border-radius:8px;padding:10px 14px;font-size:12px;color:#7ab8f5;text-align:center;min-width:160px;font-family:'SF Mono',Consolas,monospace}
+.arch-node.alt{border-color:#4a3800;color:#e3b341}
+.arch-node.shared{border-color:#238636;color:#56d364;background:#0d1820}
+.arch-label{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px}
+.arch-middle{display:flex;flex-direction:column;align-items:center;gap:6px;color:#555;font-size:11px;text-align:center}
+.arch-arrow{color:#2d5a8e;font-size:14px}
+.flow-numbered{counter-reset:flowstep;margin:12px 0}
+.flow-step{counter-increment:flowstep;display:flex;gap:12px;margin-bottom:10px;align-items:flex-start}
+.flow-step::before{content:counter(flowstep);flex-shrink:0;width:24px;height:24px;border-radius:50%;background:#1e3a5f;color:#7ab8f5;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500}
+.flow-step-body{font-size:13px;color:#999;line-height:1.6;padding-top:3px}
+.flow-step-body strong{color:#ccc}
+.flow-step-body code{font-family:'SF Mono',Consolas,monospace;font-size:12px;background:#1e2231;padding:1px 5px;border-radius:3px;color:#c9d1d9}
+.case-study{background:#12151e;border:1px solid #2a2d3a;border-radius:10px;padding:16px 18px;margin:0.5rem 0 1.25rem}
+.case-title{font-size:13px;color:#e3b341;font-weight:500;margin-bottom:10px}
+.case-line{font-size:13px;color:#aaa;line-height:1.75;margin-bottom:4px;font-family:'SF Mono',Consolas,monospace}
+.case-line code{font-family:inherit;font-size:12px;background:#1e2231;padding:1px 5px;border-radius:3px;color:#c9d1d9}
+.case-line .case-arrow{color:#555;margin:0 6px}
+.nav-hints{display:flex;flex-wrap:wrap;gap:8px;margin-top:1rem}
+.nav-chip{padding:6px 14px;border:1px solid #2d5a8e;border-radius:20px;background:#0d2a4a;color:#7ab8f5;font-size:12px;cursor:pointer;transition:all 0.15s}
+.nav-chip:hover{background:#1e3a5f}
+
+/* ══════════════════════════════════════════
+   PANEL — GLOSSARY
+══════════════════════════════════════════ */
+.gl-card{border:1px solid #2a2d3a;border-radius:8px;overflow:hidden}
+.gl-header{padding:10px 14px;cursor:pointer;background:#161923;user-select:none;display:flex;gap:12px;align-items:flex-start}
+.gl-header:hover{background:#1c2030}
+.gl-term{font-family:'SF Mono',Consolas,monospace;font-size:13px;color:#e0e0e0;font-weight:500;min-width:220px;flex-shrink:0}
+.gl-summary{flex:1;font-size:12px;color:#888;line-height:1.5;min-width:0}
+.gl-tags{display:flex;gap:4px;flex-shrink:0}
+.gl-body{display:none;padding:12px 16px;border-top:1px solid #2a2d3a;background:#12151e;font-size:13px;color:#aaa;line-height:1.7}
+.gl-body.open{display:block}
+.gl-body .formula-box{margin:8px 0}
+.gl-body code{font-family:'SF Mono',Consolas,monospace;font-size:12px;background:#1e2231;padding:1px 5px;border-radius:3px;color:#c9d1d9}
+
+/* ══════════════════════════════════════════
+   SETTINGS REFERENCE
+══════════════════════════════════════════ */
+.cfg-group{margin-bottom:1.25rem}
+.cfg-group-title{font-size:13px;font-weight:500;color:#e3b341;margin-bottom:8px;letter-spacing:0.02em}
+.cfg-table{width:100%;border-collapse:collapse;font-size:12px;background:#12151e;border:1px solid #2a2d3a;border-radius:6px;overflow:hidden}
+.cfg-table th{text-align:left;padding:8px 12px;background:#1a1d27;font-weight:500;font-size:11px;color:#888;border-bottom:1px solid #2a2d3a}
+.cfg-table td{padding:8px 12px;border-top:1px solid #2a2d3a;font-size:12px;color:#bbb;vertical-align:top}
+.cfg-table td.cfg-key{font-family:'SF Mono',Consolas,monospace;color:#7ab8f5;white-space:nowrap}
+.cfg-table td.cfg-val{font-family:'SF Mono',Consolas,monospace;color:#ccc;white-space:nowrap}
+
+/* ══════════════════════════════════════════
+   FAQ
+══════════════════════════════════════════ */
+.faq-card{border:1px solid #2a2d3a;border-radius:8px;overflow:hidden;margin-bottom:8px}
+.faq-q{padding:12px 14px;cursor:pointer;background:#161923;user-select:none;display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#e0e0e0}
+.faq-q:hover{background:#1c2030}
+.faq-q-mark{color:#7ab8f5;font-weight:500;flex-shrink:0}
+.faq-q-text{flex:1;line-height:1.55}
+.faq-chev{color:#555;font-size:11px;flex-shrink:0}
+.faq-a{display:none;padding:12px 16px 14px 40px;border-top:1px solid #2a2d3a;background:#12151e;font-size:13px;color:#aaa;line-height:1.7}
+.faq-a.open{display:block}
+.faq-a code{font-family:'SF Mono',Consolas,monospace;font-size:12px;background:#1e2231;padding:1px 5px;border-radius:3px;color:#c9d1d9}
+
+/* ══════════════════════════════════════════
+   RESET PROGRESS
+══════════════════════════════════════════ */
+.rm-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:2px}
+.rm-reset{font-size:11px;padding:4px 10px;border:1px solid #3a0d1a;border-radius:6px;background:#2a0d15;color:#ff7b72;cursor:pointer;transition:all 0.15s}
+.rm-reset:hover{background:#3a0d1a;border-color:#5a1523}
+
+/* ══════════════════════════════════════════
+   PANEL — REPORT GUIDE
+══════════════════════════════════════════ */
+.rg-intro{font-size:14px;color:#bbb;line-height:1.7;margin-bottom:1rem;max-width:860px}
+.rg-intro p{margin-bottom:8px}
+.rg-intro strong{color:#e0e0e0;font-weight:500}
+.rg-anchors{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 1rem}
+.rg-anchor{padding:4px 12px;border:1px solid #2d5a8e;border-radius:20px;background:#0d2a4a;color:#7ab8f5;font-size:11px;cursor:pointer;transition:all 0.15s;font-family:'SF Mono',Consolas,monospace}
+.rg-anchor:hover{background:#1e3a5f}
+.rg-principles{background:#161923;border:1px solid #2a2d3a;border-radius:10px;padding:12px 16px;margin:0 0 1.5rem;max-width:860px}
+.rg-principles-title{font-size:12px;color:#e3b341;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px}
+.rg-principles ul{list-style:none;padding:0;margin:0}
+.rg-principles li{font-size:12px;color:#999;line-height:1.7;padding-left:14px;position:relative}
+.rg-principles li::before{content:"•";position:absolute;left:0;color:#555}
+.rg-principles li strong{color:#ccc;font-weight:500}
+.rg-principles li code{font-family:'SF Mono',Consolas,monospace;font-size:11px;background:#1e2231;padding:1px 4px;border-radius:3px;color:#c9d1d9}
+.rg-pagebadge{font-size:11px;color:#7ab8f5;background:#0d2a4a;border:1px solid #2d5a8e;padding:1px 8px;border-radius:10px;font-family:'SF Mono',Consolas,monospace;white-space:nowrap;margin-right:6px}
+.rg-section-title{font-size:11px;color:#7ab8f5;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;margin:14px 16px 6px}
+.rg-section-title.pitfall{color:#ff7b72}
+.rg-section-title.specifics{color:#56d364}
+.rg-section-title.excerpt{color:#e3b341}
+.rg-subsec{padding:2px 16px 10px}
+.rg-subsec ol{list-style:none;counter-reset:subsec;padding:0;margin:0}
+.rg-subsec li{counter-increment:subsec;display:flex;gap:10px;padding:5px 0;font-size:13px;color:#aaa;line-height:1.7;border-top:1px dashed transparent}
+.rg-subsec li:not(:first-child){border-top-color:#1e2231}
+.rg-subsec li::before{content:counter(subsec,decimal-leading-zero);flex-shrink:0;font-family:'SF Mono',Consolas,monospace;font-size:11px;color:#555;padding-top:3px;min-width:22px}
+.rg-subsec li code{font-family:'SF Mono',Consolas,monospace;font-size:11px;background:#1e2231;padding:1px 4px;border-radius:3px;color:#c9d1d9}
+.rg-subsec li strong{color:#ccc;font-weight:500}
+.rg-block{padding:2px 16px 12px}
+.rg-block p{font-size:13px;color:#999;line-height:1.7;margin-bottom:6px}
+.rg-block p:last-child{margin-bottom:0}
+.rg-block p strong{color:#ccc}
+.rg-block code{font-family:'SF Mono',Consolas,monospace;font-size:11px;background:#1e2231;padding:1px 4px;border-radius:3px;color:#c9d1d9}
+.rg-excerpt{background:#12151e;border-left:3px solid #2d5a8e;padding:8px 14px;margin:4px 16px 12px;font-size:12px;color:#bbb;line-height:1.65;font-style:italic}
+.rg-excerpt-label{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:#7ab8f5;margin-bottom:4px;font-style:normal;font-weight:500}
+.rg-pitfalls{background:#1a0a10;border:1px solid #3a0d1a;border-radius:6px;padding:8px 14px;margin:4px 16px 12px;font-size:12px;color:#e0a8a8;line-height:1.7}
+.rg-pitfalls ul{margin:0;padding-left:16px;list-style:none}
+.rg-pitfalls li{margin-bottom:4px;position:relative;padding-left:10px}
+.rg-pitfalls li::before{content:"✗";position:absolute;left:-6px;color:#ff7b72;font-size:11px}
+.rg-pitfalls li:last-child{margin-bottom:0}
+.rg-pitfalls li code{font-family:'SF Mono',Consolas,monospace;font-size:11px;background:#1e2231;padding:1px 4px;border-radius:3px;color:#c9d1d9}
+.rg-checklist{background:#161923;border:1px solid #2a2d3a;border-radius:10px;padding:14px 18px;margin:1rem 0 0}
+.rg-checklist-title{font-size:12px;color:#7ab8f5;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px}
+.rg-checklist ul{list-style:none;padding:0;margin:0}
+.rg-checklist li{font-size:13px;color:#aaa;line-height:1.9;display:flex;gap:10px}
+.rg-checklist li::before{content:"☐";color:#7ab8f5;flex-shrink:0;font-size:14px}
+.rg-checklist li code{font-family:'SF Mono',Consolas,monospace;font-size:11px;background:#1e2231;padding:1px 4px;border-radius:3px;color:#c9d1d9}
+.rg-closing{font-size:12px;color:#666;line-height:1.7;margin-top:1rem;padding:10px 16px;border-left:3px solid #2a2d3a}
+.rg-closing strong{color:#aaa}
+.sn6{background:#0d2a2a;color:#7ed4d4}
+.sn7{background:#2a1a0d;color:#e3a571}
+.sn8{background:#1a0d2a;color:#a892d4}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-title">Dashboard V3</div>
+  <div class="top-tab active" data-panel="overview" onclick="switchPanel('overview',this)">Overview</div>
+  <div class="top-tab" data-panel="ref" onclick="switchPanel('ref',this)">Code reference</div>
+  <div class="top-tab" data-panel="glossary" onclick="switchPanel('glossary',this)">Glossary</div>
+  <div class="top-tab" data-panel="dive" onclick="switchPanel('dive',this)">Deep dive</div>
+  <div class="top-tab" data-panel="road" onclick="switchPanel('road',this)">Roadmap</div>
+  <div class="top-tab" data-panel="report" onclick="switchPanel('report',this)">Report guide</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PANEL — OVERVIEW
+══════════════════════════════════════════ -->
+<div id="panel-overview" class="panel active">
+<p class="ov-lead">Dashboard V3 is a live learning-analytics system for university lab sessions. Two Streamlit apps — an instructor dashboard and a mobile lab-assistant app — poll a shared API, score student struggle and question difficulty in real time, and coordinate instructor-to-assistant handoffs through a file-locked JSON state store. This toolkit is a single-file tour of how every piece works.</p>
+
+<div class="ov-grid">
+  <div class="ov-card">
+    <h3>What it does</h3>
+    <p>Watches a live cohort during a lab. Flags students who need help using a 7-signal composite score, surfaces which questions are hard, and hands struggling students off to lab assistants for 1-to-1 coaching — augmented with AI-generated coaching bullets.</p>
+  </div>
+  <div class="ov-card">
+    <h3>Who uses it</h3>
+    <div class="ov-persona"><div class="ov-icon">🖥️</div><div class="ov-persona-body"><strong>Instructor</strong><span>Desktop dashboard on port 8501. Starts the session, watches leaderboards, assigns assistants, closes the session.</span></div></div>
+    <div class="ov-persona"><div class="ov-icon">📱</div><div class="ov-persona-body"><strong>Lab assistant</strong><span>Mobile app on port 8502. Joins via 6-char code, gets paged with an assigned student, receives RAG coaching bullets, marks "helped".</span></div></div>
+  </div>
+  <div class="ov-card">
+    <h3>Tech stack</h3>
+    <p>Streamlit · pandas · NumPy · SciPy (L-BFGS-B) · scikit-learn (cosine sim, TF-IDF, K-means) · ChromaDB · OpenAI GPT-4o-mini · sentence-transformers (all-MiniLM-L6-v2) · filelock. Everything runs locally — no server needed.</p>
+  </div>
+  <div class="ov-card">
+    <h3>Where state lives</h3>
+    <p><code>data/lab_session.json</code> (shared session + assignments, file-locked) · <code>data/saved_sessions.json</code> (replayable session snapshots) · <code>data/rag_chroma/</code> (ChromaDB embeddings) · <code>st.session_state</code> (in-process UI state) · process-local caches (<code>_incorrectness_cache</code>, <code>_df</code> hash).</p>
+  </div>
+</div>
+
+<h3 style="font-size:13px;color:#e3b341;margin-bottom:10px;letter-spacing:0.02em">System architecture</h3>
+<div class="arch-diagram">
+  <div class="arch-col">
+    <div class="arch-label">Instructor · :8501</div>
+    <div class="arch-node">instructor_app.py</div>
+    <div class="arch-node">views.py</div>
+    <div class="arch-node">analytics.py</div>
+    <div class="arch-node alt">models/irt.py · bkt.py</div>
+    <div class="arch-node alt">models/improved_struggle.py</div>
+  </div>
+  <div class="arch-middle">
+    <div class="arch-arrow">⇄</div>
+    <div class="arch-node shared">data/lab_session.json</div>
+    <div style="font-size:10px;color:#555">file-locked<br>atomic writes</div>
+    <div class="arch-arrow">⇄</div>
+    <div class="arch-node shared">AI tutor API</div>
+    <div style="font-size:10px;color:#555">10s cache</div>
+    <div class="arch-arrow">⇄</div>
+    <div class="arch-node shared">rag.py · ChromaDB<br>OpenAI</div>
+  </div>
+  <div class="arch-col">
+    <div class="arch-label">Lab assistant · :8502</div>
+    <div class="arch-node">assistant_app.py</div>
+    <div class="arch-node">lab_state.py</div>
+    <div class="arch-node">components.py</div>
+    <div class="arch-node alt">sound.py (shared)</div>
+    <div class="arch-node alt">theme.py (shared)</div>
+  </div>
+</div>
+
+<h3 style="font-size:13px;color:#e3b341;margin:1rem 0 10px;letter-spacing:0.02em">End-to-end flow (live session)</h3>
+<div class="flow-numbered">
+  <div class="flow-step"><div class="flow-step-body"><strong>Student submits an answer</strong> to the AI tutor platform — outside this system. The AI returns feedback text.</div></div>
+  <div class="flow-step"><div class="flow-step-body"><strong>Dashboard polls the API</strong> via <code>fetch_raw_data()</code> every 10s (Streamlit cache TTL). Newline-delimited JSON with embedded XML per submission.</div></div>
+  <div class="flow-step"><div class="flow-step-body"><strong>Parse + normalise → DataFrame.</strong> Drop test modules, parse timestamps, tag academic period. Cached by SHA1 hash of the raw response.</div></div>
+  <div class="flow-step"><div class="flow-step-body"><strong>Incorrectness scoring.</strong> Unique feedback strings batch-sent to GPT-4o-mini — returns [0,1] floats. Cached per process.</div></div>
+  <div class="flow-step"><div class="flow-step-body"><strong>7 struggle signals computed per student, cohort-normalised, weighted-summed, Bayesian-shrunk</strong> toward class mean. Output: <code>S_final</code> and a label pill.</div></div>
+  <div class="flow-step"><div class="flow-step-body"><strong>Leaderboard renders.</strong> Instructor spots a struggling student, clicks the bar → detail view with RAG-generated coaching bullets.</div></div>
+  <div class="flow-step"><div class="flow-step-body"><strong>Instructor assigns a lab assistant</strong> from a dropdown. Write lands in <code>lab_session.json</code> under filelock.</div></div>
+  <div class="flow-step"><div class="flow-step-body"><strong>Assistant's phone picks up the assignment</strong> on its next 5s auto-refresh. Sees the student's detail card and coaching bullets.</div></div>
+  <div class="flow-step"><div class="flow-step-body"><strong>Assistant taps "Mark as Helped"</strong> → assignment cleared → back to waiting view. Instructor sees the assistant free again.</div></div>
+</div>
+
+<h3 style="font-size:13px;color:#e3b341;margin:1rem 0 10px;letter-spacing:0.02em">Case study — Alice's journey through the pipeline</h3>
+<div class="case-study">
+  <div class="case-title">Scenario: Alice submits an off-track answer during minute 18 of a 50-minute lab.</div>
+  <div class="case-line">Submission<span class="case-arrow">→</span> AI feedback: <code>"Your integral bounds are swapped…"</code></div>
+  <div class="case-line">GPT-4o-mini<span class="case-arrow">→</span> incorrectness = <code>0.72</code></div>
+  <div class="case-line">Add to A_raw (last 5, 30-min decay)<span class="case-arrow">→</span> <code>A_raw = 0.68</code></div>
+  <div class="case-line">Cohort-normalise 7 signals<span class="case-arrow">→</span> <code>A_norm=0.81</code>, <code>i_norm=0.65</code>, <code>r_norm=0.40</code>, …</div>
+  <div class="case-line">Weighted sum<span class="case-arrow">→</span> <code>S_raw = 0.58</code></div>
+  <div class="case-line">Shrinkage (n=7, K=5)<span class="case-arrow">→</span> <code>w_n = 7/12 = 0.58</code>  ·  <code>S_final = 0.58·0.58 + 0.42·0.40 = 0.50</code></div>
+  <div class="case-line">Classify<span class="case-arrow">→</span> <code>0.50 → "Needs Help"</code> (red pill)</div>
+  <div class="case-line">Instructor clicks Alice<span class="case-arrow">→</span> RAG queries ChromaDB for her worst question, ships 3 retrieved snippets + scores to GPT-4o-mini</div>
+  <div class="case-line">GPT returns<span class="case-arrow">→</span> 3 coaching bullets ("check bound order", "re-read setup", "try substitution")</div>
+  <div class="case-line">Assign to "Ben" (lab assistant)<span class="case-arrow">→</span> <code>lab_session.json</code> updated under filelock</div>
+  <div class="case-line">Ben's phone refreshes (5s)<span class="case-arrow">→</span> sees Alice's detail card + the 3 bullets → walks over</div>
+  <div class="case-line">Ben taps "Mark Helped"<span class="case-arrow">→</span> assignment cleared, back to waiting view, instructor sees Ben free</div>
+</div>
+
+<h3 style="font-size:13px;color:#e3b341;margin:1rem 0 10px;letter-spacing:0.02em">Where to go next</h3>
+<div class="nav-hints">
+  <div class="nav-chip" onclick="switchPanelByName('glossary')">📖 Glossary — decode the jargon</div>
+  <div class="nav-chip" onclick="switchPanelByName('ref')">🔍 Code reference — function lookup</div>
+  <div class="nav-chip" onclick="switchPanelByName('dive')">🧮 Deep dive — math & design</div>
+  <div class="nav-chip" onclick="switchPanelByName('road')">🎯 Roadmap — 8-hour study plan</div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PANEL 1 — CODE REFERENCE
+══════════════════════════════════════════ -->
+<div id="panel-ref" class="panel">
+  <input class="search-bar" type="text" id="ref-search" placeholder="Search functions, files, or keywords..." />
+  <div class="file-tabs" id="ref-tabs"></div>
+  <div class="ref-count" id="ref-count"></div>
+  <div class="fn-list" id="ref-list"></div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PANEL — GLOSSARY
+══════════════════════════════════════════ -->
+<div id="panel-glossary" class="panel">
+  <input class="search-bar" type="text" id="gl-search" placeholder="Search terms, formulas, or keywords..." />
+  <div class="file-tabs" id="gl-tabs"></div>
+  <div class="ref-count" id="gl-count"></div>
+  <div class="fn-list" id="gl-list"></div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PANEL 2 — DEEP DIVE
+══════════════════════════════════════════ -->
+<div id="panel-dive" class="panel">
+<div class="dd-nav">
+  <button class="dd-btn active" onclick="ddShow('dd-data',this)">Data pipeline</button>
+  <button class="dd-btn" onclick="ddShow('dd-struggle',this)">Struggle scoring</button>
+  <button class="dd-btn" onclick="ddShow('dd-difficulty',this)">Difficulty scoring</button>
+  <button class="dd-btn" onclick="ddShow('dd-irt',this)">IRT model</button>
+  <button class="dd-btn" onclick="ddShow('dd-bkt',this)">BKT model</button>
+  <button class="dd-btn" onclick="ddShow('dd-improved',this)">Improved struggle</button>
+  <button class="dd-btn" onclick="ddShow('dd-cf',this)">Collaborative filtering</button>
+  <button class="dd-btn" onclick="ddShow('dd-rag',this)">RAG pipeline</button>
+  <button class="dd-btn" onclick="ddShow('dd-session',this)">Session coordination</button>
+  <button class="dd-btn" onclick="ddShow('dd-ui',this)">UI routing</button>
+  <button class="dd-btn" onclick="ddShow('dd-views',this)">Views &amp; features</button>
+  <button class="dd-btn" onclick="ddShow('dd-settings',this)">Settings reference</button>
+  <button class="dd-btn" onclick="ddShow('dd-faq',this)">Design decisions (FAQ)</button>
+</div>
+
+<div id="dd-data" class="dd-section active">
+<p class="section-intro">Everything starts here. The external AI tutoring platform records student submissions and generates feedback. Your dashboard polls that data, parses it, cleans it, and builds a DataFrame that every other system reads from.</p>
+<div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">Student submits an answer (external system)</div><div class="step-text">The AI tutoring platform stores: the student's answer (<code>student_answer</code>), AI feedback text (<code>ai_feedback</code>), question ID, module code, session ID, user ID, and timestamp. Your code never sees this happen in real time — you only see it when you poll.</div></div></div>
+<div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">fetch_raw_data() — GET request to the API</div><div class="step-text">Decorated with <code>@st.cache_data(ttl=10)</code>. Streamlit stores the response and reuses it for 10 seconds. If the app reruns within 10s, it returns the cached string without touching the network. After 10s the cache expires. Returns raw text — either JSON or XML.</div></div></div>
+<div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-title">detect_format(raw) — JSON or XML?</div><div class="step-text">Takes the first line, tries <code>json.loads()</code>. Success → JSON path. <code>JSONDecodeError</code> → XML path.</div></div></div>
+<div class="step-row"><div class="step-num">4</div><div class="step-body"><div class="step-title">parse_json_response(raw) — the tricky one</div><div class="step-text">Newline-delimited JSON — one object per line. Each object has top-level fields PLUS an <code>xml</code> field containing an embedded XML string. Wraps it in <code>&lt;root&gt;</code>, parses with xml.etree, walks <code>.//submission</code> elements — each has <code>&lt;srep&gt;</code> (answer) and <code>&lt;feedback&gt;&lt;response&gt;</code> (AI feedback). One submission element → one record dict. Falls back gracefully on parse errors.</div></div></div>
+<div class="step-row"><div class="step-num">5</div><div class="step-body"><div class="step-title">normalize_and_clean(records) — build the DataFrame</div><div class="step-text">1. Convert to DataFrame. 2. Drop rows in <code>EXCLUDED_MODULES</code> (AI_TEST, 24COB231, 24WSC701). 3. Apply <code>MODULE_RENAME_MAP</code>. 4. Parse timestamps — invalid → NaT → dropped. 5. Sort ascending. 6. Add <code>academic_period</code> column.</div></div></div>
+<div class="step-row"><div class="step-num">6</div><div class="step-body"><div class="step-title">load_data() — double caching</div><div class="step-text">Calls fetch → detect → parse → clean. Second caching layer: hashes the raw response string and stores the DataFrame in <code>st.session_state["_df"]</code>. If hash matches on next rerun, skips parse+clean entirely. Returns <code>(DataFrame, error_msg)</code> on any error returns empty DataFrame with correct schema.</div></div></div>
+<div class="step-row"><div class="step-num">7</div><div class="step-body"><div class="step-title">Sidebar filters</div><div class="step-text">Applied in order: (1) <code>filter_by_module()</code>. (2) <code>filter_by_time()</code>. (3) <code>filter_by_session_start()</code> — in live mode, keep only rows since "Start Session". (4) <code>filter_by_datetime_window()</code> — when a saved session is loaded.</div></div></div>
+<div class="flow-chain"><div class="flow-box">API</div><div class="flow-arrow">→</div><div class="flow-box">fetch_raw_data()</div><div class="flow-arrow">→</div><div class="flow-box">detect_format()</div><div class="flow-arrow">→</div><div class="flow-box">parse_json/xml()</div><div class="flow-arrow">→</div><div class="flow-box">normalize_and_clean()</div><div class="flow-arrow">→</div><div class="flow-box">sidebar filters</div><div class="flow-arrow">→</div><div class="flow-box">filtered DataFrame</div></div>
+</div>
+
+<div id="dd-struggle" class="dd-section">
+<p class="section-intro">The core of your project. All 7 signals are cohort-normalised before the weighted sum so configured weights match effective weights.</p>
+<div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">compute_incorrectness_column(df) — the foundation signal</div><div class="step-text">Collects unique non-empty <code>ai_feedback</code> strings not in <code>_incorrectness_cache</code>. Sends to GPT-4o-mini in batches of 50. Returns JSON array of [0,1] floats. Empty feedback → 0.5 without API call. OpenAI failure → [0.5]*batch_size.</div></div></div>
+<div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">The 7 signals — all cohort-normalised</div></div></div>
+<div class="signal-grid">
+  <div class="signal-card"><div class="signal-name">n → n̂ (10%)</div><div class="weight-bar"><div class="weight-fill" style="width:10%"></div></div><div class="signal-desc">Submission count. Min-max normalised across all students.</div></div>
+  <div class="signal-card"><div class="signal-name">t → t̂ (10%)</div><div class="weight-bar"><div class="weight-fill" style="width:10%"></div></div><div class="signal-desc">Time active in minutes. Min-max normalised.</div></div>
+  <div class="signal-card"><div class="signal-name">î → i_norm (20%)</div><div class="weight-bar"><div class="weight-fill" style="width:20%"></div></div><div class="signal-desc">Mean incorrectness across all submissions. Cohort-normalised so weight means what it says.</div></div>
+  <div class="signal-card"><div class="signal-name">r̂ → r_norm (10%)</div><div class="weight-bar"><div class="weight-fill" style="width:10%"></div></div><div class="signal-desc">Retry rate = 1 − (unique_questions / n). Cohort-normalised.</div></div>
+  <div class="signal-card"><div class="signal-name">A_raw → A_norm (38%)</div><div class="weight-bar"><div class="weight-fill" style="width:38%"></div></div><div class="signal-desc">Heaviest weight. Exponentially time-decayed mean of last 5 submissions. 30-min half-life. Cohort-normalised before formula.</div></div>
+  <div class="signal-card"><div class="signal-name">d → d̂ (5%)</div><div class="weight-bar"><div class="weight-fill" style="width:5%"></div></div><div class="signal-desc">np.polyfit slope of incorrectness vs submission order. Positive = getting worse. Min-max normalised.</div></div>
+  <div class="signal-card"><div class="signal-name">rep̂ → rep_norm (7%)</div><div class="weight-bar"><div class="weight-fill" style="width:7%"></div></div><div class="signal-desc">Exact-answer repetition rate. Cohort-normalised.</div></div>
+</div>
+<div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-title">Formula and Bayesian shrinkage</div>
+<div class="formula-box">S = 0.10·n̂ + 0.10·t̂ + 0.20·i_norm + 0.10·r_norm + 0.38·A_norm + 0.05·d̂ + 0.07·rep_norm</div>
+<div class="step-text" style="margin-bottom:6px">min_max_normalize() returns 0.5 (not 0.0) when all values are equal — preserves weight contribution rather than silently zeroing it.</div>
+<div class="formula-box">w_n = n / (n + 5)<br>S_final = w_n × S + (1 − w_n) × class_mean</div>
+<div class="step-text">Shrinkage is the final transform. n=2: 71% pulled toward mean. n=10: 33%. n=50: barely affected.</div></div></div>
+<div class="result-row"><div class="result-pill on-track">0.00–0.20 On Track</div><div class="result-pill minor">0.20–0.35 Minor Issues</div><div class="result-pill struggling">0.35–0.50 Struggling</div><div class="result-pill needs-help">0.50–1.00 Needs Help</div></div>
+<hr class="dd-divider">
+<div class="demo"><div class="demo-title">Interactive: explore the formula (sliders represent cohort-normalised values)</div>
+  <div class="slider-row"><label>n̂</label><input type="range" min="0" max="1" step="0.01" value="0.5" id="sn" oninput="calcStruggle()"><span id="sn-v">0.50</span></div>
+  <div class="slider-row"><label>t̂</label><input type="range" min="0" max="1" step="0.01" value="0.4" id="st" oninput="calcStruggle()"><span id="st-v">0.40</span></div>
+  <div class="slider-row"><label>i_norm</label><input type="range" min="0" max="1" step="0.01" value="0.6" id="si" oninput="calcStruggle()"><span id="si-v">0.60</span></div>
+  <div class="slider-row"><label>r_norm</label><input type="range" min="0" max="1" step="0.01" value="0.3" id="sr" oninput="calcStruggle()"><span id="sr-v">0.30</span></div>
+  <div class="slider-row"><label>A_norm</label><input type="range" min="0" max="1" step="0.01" value="0.7" id="sa" oninput="calcStruggle()"><span id="sa-v">0.70</span></div>
+  <div class="slider-row"><label>d̂</label><input type="range" min="0" max="1" step="0.01" value="0.5" id="sd" oninput="calcStruggle()"><span id="sd-v">0.50</span></div>
+  <div class="slider-row"><label>rep_norm</label><input type="range" min="0" max="1" step="0.01" value="0.2" id="srep" oninput="calcStruggle()"><span id="srep-v">0.20</span></div>
+  <div class="slider-row"><label>n raw count (shrinkage)</label><input type="range" min="1" max="50" step="1" value="8" id="srawN" oninput="calcStruggle()"><span id="srawN-v">8</span></div>
+  <div class="result-line">Raw: <strong id="raw-score">—</strong> &nbsp;|&nbsp; After shrinkage (mean=0.40): <strong id="shrunk-score">—</strong> &nbsp;|&nbsp; <span id="level-badge" class="result-pill">—</span></div>
+</div>
+</div>
+
+<div id="dd-difficulty" class="dd-section">
+<p class="section-intro">Question difficulty is computed from how the whole class performs — 5 signals, all cohort-normalised before the weighted sum.</p>
+<div class="signal-grid">
+  <div class="signal-card"><div class="signal-name">c̃ → c_norm (28%)</div><div class="weight-bar"><div class="weight-fill" style="width:28%"></div></div><div class="signal-desc">Fraction of submissions with incorrectness ≥ 0.5. Cohort-normalised. Most direct measure of class-wide difficulty.</div></div>
+  <div class="signal-card"><div class="signal-name">t̃ (12%) — avg time</div><div class="weight-bar"><div class="weight-fill" style="width:12%"></div></div><div class="signal-desc">Per student: time from first to last attempt. Averaged across all students. Min-max normalised.</div></div>
+  <div class="signal-card"><div class="signal-name">ã (20%) — avg attempts</div><div class="weight-bar"><div class="weight-fill" style="width:20%"></div></div><div class="signal-desc">Total attempts / unique students. Min-max normalised.</div></div>
+  <div class="signal-card"><div class="signal-name">f̃ → f_norm (20%)</div><div class="weight-bar"><div class="weight-fill" style="width:20%"></div></div><div class="signal-desc">Mean of continuous incorrectness scores. Cohort-normalised. Captures degree of wrongness, not just binary.</div></div>
+  <div class="signal-card"><div class="signal-name">p̃ → p_norm (20%)</div><div class="weight-bar"><div class="weight-fill" style="width:20%"></div></div><div class="signal-desc">First-attempt failure rate — each student's very first submission. Cohort-normalised.</div></div>
+</div>
+<div class="formula-box">D = 0.28·c_norm + 0.12·t̃ + 0.20·ã + 0.20·f_norm + 0.20·p_norm</div>
+<div class="result-row"><div class="result-pill on-track">0.00–0.35 Easy</div><div class="result-pill minor">0.35–0.50 Medium</div><div class="result-pill struggling">0.50–0.75 Hard</div><div class="result-pill needs-help">0.75–1.00 Very Hard</div></div>
+<div class="note-box">No Bayesian shrinkage here. Difficulty represents the class, not an individual — no cold-start problem.</div>
+</div>
+
+<div id="dd-irt" class="dd-section">
+<p class="section-intro">IRT estimates a latent difficulty parameter b_j per question by maximising the likelihood of the observed response matrix.</p>
+<div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">build_response_matrix(df)</div><div class="step-text">Best attempt per (student, question) pair. Codes 1 (correct) if incorrectness &lt; 0.5. Pivots to student×question matrix. Iteratively drops questions with &lt;2 students and students with &lt;2 questions until stable.</div></div></div>
+<div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">The Rasch model</div>
+<div class="formula-box">P(correct | θ_i, b_j) = sigmoid(θ_i − b_j) = 1 / (1 + exp(−(θ_i − b_j)))</div>
+<div class="step-text">θ_i = student ability. b_j = question difficulty. Student succeeds when ability exceeds difficulty.</div></div></div>
+<div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-title">fit_rasch_model() — joint MLE via L-BFGS-B</div><div class="step-text">Minimises negative log-likelihood (binary cross-entropy). Analytical gradient with centering projection: grad_θ = grad_θ − mean(grad_θ) so the optimiser and the centering constraint are geometrically consistent. After fitting: θ = θ − mean(θ) for identifiability.</div></div></div>
+<div class="step-row"><div class="step-num">4</div><div class="step-body"><div class="step-title">Mapping to [0,1]</div><div class="step-text"><code>irt_difficulty = sigmoid(b_j)</code>. Maps logit scale → (0,1). Comparable to baseline difficulty score.</div></div></div>
+<div class="demo"><div class="demo-title">Interactive: Rasch probability</div>
+  <div class="slider-row"><label>Student ability θ</label><input type="range" min="-3" max="3" step="0.1" value="0" id="theta" oninput="calcIRT()"><span id="theta-v">0.0</span></div>
+  <div class="slider-row"><label>Question difficulty b</label><input type="range" min="-3" max="3" step="0.1" value="0" id="bparam" oninput="calcIRT()"><span id="b-v">0.0</span></div>
+  <div class="result-line">logit (θ−b): <strong id="irt-logit">0.0</strong> &nbsp;|&nbsp; P(correct): <strong id="irt-prob">50.0%</strong> &nbsp;|&nbsp; IRT difficulty: <strong id="irt-diff">0.50</strong> &nbsp;|&nbsp; <span id="irt-level" class="result-pill">—</span></div>
+</div>
+<div class="note-box">IRT requires ≥2 students per question and ≥2 questions per student. Also requires &gt;1 distinct difficulty value — with a single value the normalised difficulty is a constant 0.5 and adds no discriminative information. The improved model degrades gracefully if IRT is unavailable.</div>
+</div>
+
+<div id="dd-bkt" class="dd-section">
+<p class="section-intro">BKT models learning as a Hidden Markov Model. Hidden state = whether the student knows the skill. Observed = correct/wrong. Bayes' rule updates the belief after each submission.</p>
+<table class="bkt-table">
+  <tr><th>Parameter</th><th>Symbol</th><th>Default</th><th>Meaning</th></tr>
+  <tr><td>P(L_0)</td><td>BKT_P_INIT</td><td>0.3</td><td>Prior: 30% chance student already knows skill</td></tr>
+  <tr><td>P(T)</td><td>BKT_P_LEARN</td><td>0.1</td><td>10% chance of learning on each opportunity</td></tr>
+  <tr><td>P(G)</td><td>BKT_P_GUESS</td><td>0.2</td><td>20% chance of correct answer without knowing</td></tr>
+  <tr><td>P(S)</td><td>BKT_P_SLIP</td><td>0.1</td><td>10% chance of wrong answer despite knowing</td></tr>
+</table>
+<div class="note-box">Defaults are textbook values (Corbett &amp; Anderson). Settings → Model Toggle exposes a <strong>Fit from data</strong> action that replaces them with MLE estimates from the current filtered view.</div>
+<div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">bkt_update() — the core equation</div>
+<div class="formula-box">If correct: P(L|obs) = P(L)·(1−P(S)) / [ P(L)·(1−P(S)) + (1−P(L))·P(G) ]<br>If wrong:   P(L|obs) = P(L)·P(S)     / [ P(L)·P(S)     + (1−P(L))·(1−P(G)) ]<br>Transition: P(L_next) = P(L|obs) + (1 − P(L|obs)) × P(T)</div>
+<div class="step-text">Runs once per submission per question per student. Result clipped to [0,1].</div></div></div>
+<div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">compute_all_mastery() — replay with deterministic sort</div><div class="step-text">BKT is a sequential HMM — replay order determines the posterior. Explicitly sorts by [timestamp, question] using mergesort before grouping. Secondary key on question ensures deterministic output when submissions share identical timestamps (bulk imports).</div></div></div>
+<div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-title">fit_bkt_parameters() — MLE from submission history</div>
+<div class="formula-box">L(θ) = Σ<sub>seq</sub> Σ<sub>t</sub> log P(obs<sub>t</sub> | obs<sub>1..t−1</sub>, θ)<br>θ* = argmax<sub>θ</sub> L(θ),  θ = (P(L₀), P(T), P(G), P(S))</div>
+<div class="step-text">Forward-algorithm log-likelihood of the 2-state BKT HMM, optimised with L-BFGS-B. Bounds <code>[(0,1), (0,1), (0,0.5), (0,0.5)]</code> enforce the identifiability constraint P(G)+P(S)&lt;1. Same <code>[timestamp, question]</code> ordering as inference, so the fit sees the exact sequences <code>compute_all_mastery()</code> will replay. Reports next-attempt ROC-AUC on the observed data as a fit-quality diagnostic — AUC&nbsp;&gt;&nbsp;0.70 is the standard KT-literature threshold for "the model explains correctness well". Refuses to run on fewer than <code>BKT_FIT_MIN_OBSERVATIONS</code> attempts. Triggered by the <strong>Fit from data</strong> button under the BKT sliders in Settings.</div></div></div>
+<div class="demo"><div class="demo-title">Interactive: trace a student's mastery</div>
+  <div style="display:flex;gap:0;margin-bottom:12px">
+    <button onclick="bktSubmit(true)">Correct answer</button>
+    <button onclick="bktSubmit(false)">Wrong answer</button>
+    <button onclick="bktReset()">Reset</button>
+  </div>
+  <div class="bkt-history" id="bkt-history">P(L_0) = 0.300 — starting prior</div>
+  <div class="result-line">Current mastery: <strong id="bkt-mastery">0.300</strong> &nbsp;|&nbsp; <span id="bkt-status" style="font-size:12px;color:#888">Not yet mastered (threshold: 0.95)</span></div>
+</div>
+</div>
+
+<div id="dd-improved" class="dd-section">
+<p class="section-intro">Three-component model: behavioral + BKT mastery gap + IRT difficulty-adjusted. Is the student performing below what they should know? Are they failing easy questions?</p>
+<div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">Three components with graceful degradation</div>
+<div class="formula-box">S_improved = 0.45·behavioral + 0.30·mastery_gap + 0.25·difficulty_adjusted</div>
+<div class="step-text">BKT unavailable → w_mg to w_beh (behavioral=0.75). IRT unavailable → w_da to w_beh (behavioral=0.70). Coverage guard: if &lt;50% of students have mastery records, w_mg redistributed entirely. Weight-sum invariant asserted at runtime.</div></div></div>
+<div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">Component 1: behavioral composite (45%)</div>
+<div class="formula-box">behavioral = (A_norm + r_norm + d̂ + rep_norm) / 4</div>
+<div class="step-text">All sub-signals cohort-normalised before averaging so equal weighting is genuinely equal.</div></div></div>
+<div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-title">Component 2: mastery gap (30%)</div>
+<div class="formula-box">recent_performance = 1 − A_raw<br>mastery_gap = max(0, mean_mastery − recent_performance)</div>
+<div class="step-text">How far below demonstrated knowledge is the student performing right now? Missing mastery imputed to class_mean (not 0.0) — unknown should read as average, not zero.</div></div></div>
+<div class="step-row"><div class="step-num">4</div><div class="step-body"><div class="step-title">Component 3: difficulty-adjusted incorrectness (25%)</div>
+<div class="formula-box">difficulty_adjusted = coverage·user_mean + (1−coverage)·cohort_mean</div>
+<div class="step-text">Coverage = n_covered / n_recent (last 5 subs). A student with 1-of-5 covered leans 80% on the cohort mean. Failing easy questions (low IRT difficulty) scores higher than failing hard ones.</div></div></div>
+<div class="step-row"><div class="step-num">5</div><div class="step-body"><div class="step-title">Post-assembly: Bayesian shrinkage only</div><div class="step-text">Bayesian shrinkage is the final transform. The previous min-max normalisation step was removed — it was fighting the shrinkage (shrinkage pulls low-n students toward the mean; normalisation spread them back out).</div></div></div>
+<div class="demo"><div class="demo-title">Interactive: improved model components</div>
+  <div class="slider-row"><label>A_raw (recent incorrect)</label><input type="range" min="0" max="1" step="0.01" value="0.6" id="imp_a" oninput="calcImproved()"><span id="imp_a-v">0.60</span></div>
+  <div class="slider-row"><label>r̂ (retry rate)</label><input type="range" min="0" max="1" step="0.01" value="0.3" id="imp_r" oninput="calcImproved()"><span id="imp_r-v">0.30</span></div>
+  <div class="slider-row"><label>d̂ (trajectory)</label><input type="range" min="0" max="1" step="0.01" value="0.4" id="imp_d" oninput="calcImproved()"><span id="imp_d-v">0.40</span></div>
+  <div class="slider-row"><label>rep̂ (repetition)</label><input type="range" min="0" max="1" step="0.01" value="0.2" id="imp_rep" oninput="calcImproved()"><span id="imp_rep-v">0.20</span></div>
+  <div class="slider-row"><label>mean_mastery (BKT)</label><input type="range" min="0" max="1" step="0.01" value="0.7" id="imp_m" oninput="calcImproved()"><span id="imp_m-v">0.70</span></div>
+  <div class="slider-row"><label>norm IRT difficulty</label><input type="range" min="0" max="1" step="0.01" value="0.3" id="imp_irt" oninput="calcImproved()"><span id="imp_irt-v">0.30</span></div>
+  <div class="result-line">Behavioral: <strong id="imp-beh">—</strong> &nbsp;|&nbsp; Mastery gap: <strong id="imp-mg">—</strong> &nbsp;|&nbsp; Diff-adjusted: <strong id="imp-da">—</strong> &nbsp;|&nbsp; Combined: <strong id="imp-total">—</strong></div>
+</div>
+</div>
+
+<div id="dd-cf" class="dd-section">
+<p class="section-intro">CF adds a second detection layer. Unflagged students behaviourally similar to flagged ones may also be struggling.</p>
+<div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">Feature vector and cosine similarity</div><div class="step-text">5 cohort-normalised signals: <code>n_hat, t_hat, i_norm, A_norm, d_hat</code>. Normalised versions used so cosine similarity operates on a consistent scale. NaN values filled with 0.0 to prevent silent score collapse. <code>W = cosine_similarity(X)</code> — W[i,j] = similarity between student i and j.</div></div></div>
+<div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">Binary labels and CF score</div>
+<div class="formula-box">h[i] = 1 if parametric_score[i] ≥ τ (default 0.5), else 0<br>cf_score[i] = Σ(w_pos × h_pos) / Σ(w_pos)  [unflagged students only]</div>
+<div class="step-text">Finds k=3 nearest neighbours per unflagged student. CF is a diagnostic overlay — does NOT rewrite the main struggle labels.</div></div></div>
+<div class="note-box">Needs ≥4 students and at least one above threshold. Falls back gracefully otherwise.</div>
+</div>
+
+<div id="dd-rag" class="dd-section">
+<p class="section-intro">Two-layer retrieval architecture designed by Dr. Batmaz: pandas pre-filter + ChromaDB semantic search → GPT-4o-mini → 2–3 coaching bullets.</p>
+<div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">build_rag_collection(df, session_id)</div><div class="step-text">Embeds <code>"{question} | {student_answer} | {ai_feedback}"</code> using <code>all-MiniLM-L6-v2</code> (local, no API cost). Stores in ChromaDB at <code>data/rag_chroma/</code>. Rebuild guard: if session_id and len(df) match cache, returns existing collection.</div></div></div>
+<div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">Layer 1 — pandas pre-filter</div><div class="step-text"><code>df[df["user"] == student_id]</code>. Check ≥2 submissions. Find question with highest mean incorrectness. Use its latest ai_feedback as query text.</div></div></div>
+<div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-title">Layer 2 — ChromaDB semantic search</div><div class="step-text"><code>collection.query(query_texts=[query], n_results=5, where={"student_id": str(student_id)})</code>. Structured filter + semantic similarity. Results sorted by incorrectness descending.</div></div></div>
+<div class="step-row"><div class="step-num">4</div><div class="step-body"><div class="step-title">GPT-4o-mini → _extract_bullets()</div><div class="step-text">Prompt: struggle score, top-3 questions, retrieved snippets. Returns JSON array of 2–3 bullets. <code>_extract_bullets()</code> handles any key name the model uses. Cached per student_id.</div></div></div>
+<div class="step-row"><div class="step-num">5</div><div class="step-body"><div class="step-title">generate_cluster_suggestions() — instructor path</div><div class="step-text">Same collection, filter: <code>where={"question": str(question_id)}</code>. Class-wide misconceptions and pedagogical adjustments, not individual tutoring. Cached per question_id.</div></div></div>
+<div class="flow-chain"><div class="flow-box">student_id</div><div class="flow-arrow">→</div><div class="flow-box">pandas filter</div><div class="flow-arrow">→</div><div class="flow-box">worst question</div><div class="flow-arrow">→</div><div class="flow-box">ChromaDB + filter</div><div class="flow-arrow">→</div><div class="flow-box">GPT-4o-mini</div><div class="flow-arrow">→</div><div class="flow-box">2–3 bullets</div></div>
+</div>
+
+<div id="dd-session" class="dd-section">
+<p class="section-intro">Instructor and assistants share a JSON file. Two separate Streamlit processes use a file lock to prevent corruption.</p>
+<div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">data/lab_session.json</div>
+<div class="formula-box" style="font-size:11px;line-height:1.8">{"session_code":"X7KQ2M","session_active":true,
+"lab_assistants":{"alice_4821":{"name":"Alice","assigned_student":"s123"}},
+"assignments":{"s123":{"assistant_id":"alice_4821","status":"helping"}}}</div></div></div>
+<div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">File locking and atomic writes</div><div class="step-text"><code>filelock.FileLock(timeout=5)</code> — OS-level locking. All writes: write to <code>.tmp</code> file first, then <code>tmp.replace(path)</code>. On Unix rename() is atomic — file is always either old or new, never partial.</div></div></div>
+<div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-title">State machine: start → join → assign → helped</div><div class="step-text">start: 6-char code, reset state, session_active=True.<br>join: reuses existing ID if name matches (handles page refresh); otherwise generates "alice_4821". URL <code>?aid=</code> param survives refreshes.<br>assign: idempotent, checks all constraints.<br>get_assignment: polled every rerun, self-heals stale cached state.<br>mark_helped: status="helped", frees assistant → back to waiting view.</div></div></div>
+</div>
+
+<div id="dd-ui" class="dd-section">
+<p class="section-intro">Streamlit reruns the entire script on every interaction. State persists in st.session_state. Routing is based on that state.</p>
+<div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">main() — orchestration order</div><div class="step-text">(1) st.set_page_config(). (2) Inject CSS. (3) ensure_runtime_data_layout(). (4) init_session_state(). (5) Apply deferred actions BEFORE any widgets. (6) load_data(). (7) render_sidebar() → filtered df. (8) Compute analytics. (9) Route to view. (10) If auto_refresh: inject JS timer.</div></div></div>
+<div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">View routing — priority order</div><div class="step-text">1. selected_student → student_detail_view()<br>2. selected_question → question_detail_view()<br>3. "Data Analysis View" → data_analysis_view()<br>4. "Model Comparison" + improved enabled → comparison_view()<br>5. "Settings" → settings_view()<br>6. "Previous Sessions" → previous_sessions_view()<br>7. Default → in_class_view()</div></div></div>
+<div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-title">Deferred actions and auto-refresh</div><div class="step-text">Saved-session loads stored as intent flags, processed at top of main() before any widgets — ensures state is set before widgets read it.<br><br>Auto-refresh: <code>components.html('&lt;script&gt;setTimeout(()=&gt;location.reload(), ms)&lt;/script&gt;', height=0)</code>. Zero-height iframe timer → page reload → full rerun → new submissions picked up.</div></div></div>
+</div>
+
+<div id="dd-views" class="dd-section">
+<p class="section-intro">Seven views — plus the mobile assistant's two screens — cover every user interaction. View routing is priority-ordered by <code>st.session_state</code> flags. This is what your users actually see.</p>
+
+<div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">In-class view (default)</div><div class="step-text">The landing page. Summary cards (total students, high-struggle count, hardest question, avg incorrectness), side-by-side <strong>student leaderboard</strong> + <strong>question leaderboard</strong>, <strong>CF overlay panel</strong> (unflagged students similar to flagged ones), struggle + difficulty <strong>distribution histograms</strong>, collapsible <strong>formula panel</strong>. Secondary module selectbox recomputes scores for a module subset.</div></div></div>
+
+<div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">Student detail view</div><div class="step-text">Triggered by clicking a leaderboard bar. Shows: entity card (name, score pill, n submissions, active time), <strong>4 metric cards</strong> (struggle, incorrectness, retry rate, trajectory), <strong>timeline</strong> of submissions coloured by incorrectness, <strong>retry trend</strong>, <strong>top questions attempted</strong> with difficulty pills, <strong>similar students</strong> panel (CF neighbours), <strong>2–3 RAG coaching bullets</strong> generated by GPT-4o-mini.</div></div></div>
+
+<div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-title">Question detail view</div><div class="step-text">Entity card, <strong>4 metric cards</strong> (difficulty, incorrect rate, avg attempts, avg time), <strong>confidence indicator</strong> (from measurement.py — low-confidence questions flagged), <strong>mistake clusters</strong> (TF-IDF + K-means on wrong answers, 3 representative examples per cluster), <strong>class-wide RAG suggestions</strong> (misconceptions + pedagogical adjustments), students-by-struggle table.</div></div></div>
+
+<div class="step-row"><div class="step-num">4</div><div class="step-body"><div class="step-title">Data analysis view</div><div class="step-text">6 chart types selectable via radio: <strong>Module usage</strong> (submissions per module), <strong>Top questions</strong>, <strong>User activity</strong>, <strong>Activity timeline</strong> (hourly/daily), <strong>Academic week breakdown</strong> (uses <code>academic_calendar.py</code>), <strong>Students by module</strong>. Historical analysis rather than live monitoring.</div></div></div>
+
+<div class="step-row"><div class="step-num">5</div><div class="step-body"><div class="step-title">Model comparison view</div><div class="step-text">Gated by <code>improved_models_enabled</code>. Two scatter plots + agreement tables: <strong>baseline struggle vs improved struggle</strong> and <strong>baseline difficulty vs IRT difficulty</strong>. Useful for sanity-checking the improved models on real data before relying on them.</div></div></div>
+
+<div class="step-row"><div class="step-num">6</div><div class="step-body"><div class="step-title">Previous sessions view</div><div class="step-text">Lists saved session snapshots from <code>data/saved_sessions.json</code>, grouped by academic period. Each entry: start/end time, duration, stored context (view, module filter, time range preset). <strong>Load</strong> replays the snapshot (bypasses live filters). <strong>Delete</strong> removes with confirm.</div></div></div>
+
+<div class="step-row"><div class="step-num">7</div><div class="step-body"><div class="step-title">Settings view</div><div class="step-text">Toggles: sound on/off, auto-refresh interval (5/10/15/30/60/120/300s), CF threshold τ, improved-struggle enable, IRT enable, BKT enable. <strong>BKT parameter sliders</strong> (P_INIT, P_LEARN, P_GUESS, P_SLIP) with a <strong>Fit from data</strong> button (MLE via L-BFGS-B, reports ROC-AUC diagnostic). Clears RAG cache. Shows known mismatches.</div></div></div>
+
+<hr class="dd-divider">
+
+<div class="step-row"><div class="step-num">8</div><div class="step-body"><div class="step-title">Assistant — unassigned view</div><div class="step-text">Mobile page shown after joining the session. Lists currently-struggling students (cohort-filtered). Assistant can self-claim from the list (if enabled) or waits for the instructor to assign. Auto-refreshes every 5s.</div></div></div>
+
+<div class="step-row"><div class="step-num">9</div><div class="step-body"><div class="step-title">Assistant — assigned view</div><div class="step-text">Triggered when the instructor (or self-claim) sets <code>assignments[student_id] = assistant_id</code>. Shows: student name + struggle badge, top-3 hardest questions for that student, submission timeline, <strong>2–3 RAG coaching bullets</strong>, big <strong>Mark as Helped</strong> button that clears the assignment.</div></div></div>
+
+<hr class="dd-divider">
+
+<div class="step-row"><div class="step-num">10</div><div class="step-body"><div class="step-title">Sidebar (persistent across views)</div><div class="step-text"><strong>Module filter</strong> (multi-select or All Modules). <strong>Time preset</strong> — All Time, Live Session (since Start), Today, Past Hour, Past 24h, Current/Last Academic Week, Custom (date-range + times). <strong>Start / End Session</strong> buttons — starts a 6-char code, resets lab state. <strong>Lab assistant panel</strong> — shows joined assistants, pending assignments, assign-dropdown per struggling student. <strong>Refresh Now</strong> — clears cache + reruns.</div></div></div>
+
+<div class="flow-chain"><div class="flow-box">selected_student</div><div class="flow-arrow">→</div><div class="flow-box">student_detail</div></div>
+<div class="flow-chain"><div class="flow-box">selected_question</div><div class="flow-arrow">→</div><div class="flow-box">question_detail</div></div>
+<div class="flow-chain"><div class="flow-box">view radio</div><div class="flow-arrow">→</div><div class="flow-box">data_analysis / comparison / settings / previous_sessions</div></div>
+<div class="flow-chain"><div class="flow-box">default</div><div class="flow-arrow">→</div><div class="flow-box">in_class_view</div></div>
+</div>
+
+<div id="dd-settings" class="dd-section">
+<p class="section-intro">All tunable knobs live in <code>config.py</code>. Change a weight or threshold here, re-run the app, see the effect. Weight-sum asserts fire at import time so you can't accidentally break normalisation.</p>
+
+<div class="cfg-group">
+  <div class="cfg-group-title">API &amp; caching</div>
+  <table class="cfg-table"><tr><th>Key</th><th>Default</th><th>What it does</th></tr>
+  <tr><td class="cfg-key">API_URL</td><td class="cfg-val">(tutor endpoint)</td><td>Where <code>fetch_raw_data()</code> polls.</td></tr>
+  <tr><td class="cfg-key">API_TIMEOUT</td><td class="cfg-val">30</td><td>Seconds before the HTTP GET gives up.</td></tr>
+  <tr><td class="cfg-key">CACHE_TTL</td><td class="cfg-val">10</td><td>Streamlit <code>@st.cache_data</code> TTL on raw fetch. Controls live-latency vs API load.</td></tr>
+  </table>
+</div>
+
+<div class="cfg-group">
+  <div class="cfg-group-title">Struggle signal weights (must sum to 1.0)</div>
+  <table class="cfg-table"><tr><th>Key</th><th>Default</th><th>Signal</th></tr>
+  <tr><td class="cfg-key">STRUGGLE_WEIGHT_N</td><td class="cfg-val">0.10</td><td>Submission count (n̂)</td></tr>
+  <tr><td class="cfg-key">STRUGGLE_WEIGHT_T</td><td class="cfg-val">0.10</td><td>Active time (t̂)</td></tr>
+  <tr><td class="cfg-key">STRUGGLE_WEIGHT_I</td><td class="cfg-val">0.20</td><td>Mean incorrectness (i_norm)</td></tr>
+  <tr><td class="cfg-key">STRUGGLE_WEIGHT_R</td><td class="cfg-val">0.10</td><td>Retry rate (r_norm)</td></tr>
+  <tr><td class="cfg-key">STRUGGLE_WEIGHT_A</td><td class="cfg-val">0.38</td><td>Recent incorrectness (A_norm) — heaviest</td></tr>
+  <tr><td class="cfg-key">STRUGGLE_WEIGHT_D</td><td class="cfg-val">0.05</td><td>Trajectory slope (d̂)</td></tr>
+  <tr><td class="cfg-key">STRUGGLE_WEIGHT_REP</td><td class="cfg-val">0.07</td><td>Exact-answer repetition (rep_norm)</td></tr>
+  </table>
+</div>
+
+<div class="cfg-group">
+  <div class="cfg-group-title">Shrinkage &amp; decay</div>
+  <table class="cfg-table"><tr><th>Key</th><th>Default</th><th>What it does</th></tr>
+  <tr><td class="cfg-key">SHRINKAGE_K</td><td class="cfg-val">5</td><td>Bayesian shrinkage pseudo-count. <code>w_n = n/(n+K)</code>. Low-n students pulled toward class mean.</td></tr>
+  <tr><td class="cfg-key">RECENT_SUBMISSION_COUNT</td><td class="cfg-val">5</td><td>Window size for A_raw.</td></tr>
+  <tr><td class="cfg-key">DECAY_HALFLIFE_SECONDS</td><td class="cfg-val">1800</td><td>30-minute half-life for exponential time weighting of A_raw.</td></tr>
+  </table>
+</div>
+
+<div class="cfg-group">
+  <div class="cfg-group-title">Difficulty signal weights (must sum to 1.0)</div>
+  <table class="cfg-table"><tr><th>Key</th><th>Default</th><th>Signal</th></tr>
+  <tr><td class="cfg-key">DIFFICULTY_WEIGHT_C</td><td class="cfg-val">0.28</td><td>Incorrect rate (c_norm)</td></tr>
+  <tr><td class="cfg-key">DIFFICULTY_WEIGHT_T</td><td class="cfg-val">0.12</td><td>Avg time per student (t̃)</td></tr>
+  <tr><td class="cfg-key">DIFFICULTY_WEIGHT_A</td><td class="cfg-val">0.20</td><td>Avg attempts (ã)</td></tr>
+  <tr><td class="cfg-key">DIFFICULTY_WEIGHT_F</td><td class="cfg-val">0.20</td><td>Mean incorrectness (f_norm)</td></tr>
+  <tr><td class="cfg-key">DIFFICULTY_WEIGHT_P</td><td class="cfg-val">0.20</td><td>First-attempt failure rate (p_norm)</td></tr>
+  </table>
+</div>
+
+<div class="cfg-group">
+  <div class="cfg-group-title">Classification thresholds</div>
+  <table class="cfg-table"><tr><th>Key</th><th>Default</th><th>What it does</th></tr>
+  <tr><td class="cfg-key">CORRECT_THRESHOLD</td><td class="cfg-val">0.5</td><td>Used in 4 places to split correct / incorrect. Changing this is a big deal.</td></tr>
+  <tr><td class="cfg-key">STRUGGLE_THRESHOLDS</td><td class="cfg-val">[(0,0.20,…), …]</td><td>(low, high, label, color) tuples — drives the pill colours.</td></tr>
+  <tr><td class="cfg-key">DIFFICULTY_THRESHOLDS</td><td class="cfg-val">[(0,0.35,…), …]</td><td>Same pattern for question difficulty.</td></tr>
+  </table>
+</div>
+
+<div class="cfg-group">
+  <div class="cfg-group-title">BKT parameters</div>
+  <table class="cfg-table"><tr><th>Key</th><th>Default</th><th>Meaning</th></tr>
+  <tr><td class="cfg-key">BKT_P_INIT</td><td class="cfg-val">0.3</td><td>P(L₀) — prior probability student already knows skill</td></tr>
+  <tr><td class="cfg-key">BKT_P_LEARN</td><td class="cfg-val">0.1</td><td>P(T) — probability of learning on each opportunity</td></tr>
+  <tr><td class="cfg-key">BKT_P_GUESS</td><td class="cfg-val">0.2</td><td>P(G) — correct without knowing</td></tr>
+  <tr><td class="cfg-key">BKT_P_SLIP</td><td class="cfg-val">0.1</td><td>P(S) — wrong despite knowing</td></tr>
+  <tr><td class="cfg-key">BKT_MASTERY_THRESHOLD</td><td class="cfg-val">0.95</td><td>P(L) cutoff for "mastered"</td></tr>
+  <tr><td class="cfg-key">BKT_FIT_MIN_OBSERVATIONS</td><td class="cfg-val">50</td><td>Refuses to MLE-fit on fewer attempts</td></tr>
+  </table>
+</div>
+
+<div class="cfg-group">
+  <div class="cfg-group-title">IRT bounds</div>
+  <table class="cfg-table"><tr><th>Key</th><th>Default</th><th>What it does</th></tr>
+  <tr><td class="cfg-key">IRT_MIN_ATTEMPTS_PER_QUESTION</td><td class="cfg-val">2</td><td>Drop questions with fewer in response matrix</td></tr>
+  <tr><td class="cfg-key">IRT_MIN_ATTEMPTS_PER_STUDENT</td><td class="cfg-val">2</td><td>Drop students with fewer</td></tr>
+  <tr><td class="cfg-key">IRT_MAX_ITER</td><td class="cfg-val">100</td><td>L-BFGS-B iteration cap</td></tr>
+  </table>
+</div>
+
+<div class="cfg-group">
+  <div class="cfg-group-title">Improved model weights (must sum to 1.0)</div>
+  <table class="cfg-table"><tr><th>Key</th><th>Default</th><th>Component</th></tr>
+  <tr><td class="cfg-key">IMPROVED_STRUGGLE_WEIGHT_BEHAVIORAL</td><td class="cfg-val">0.45</td><td>Mean of A_norm, r_norm, d̂, rep_norm</td></tr>
+  <tr><td class="cfg-key">IMPROVED_STRUGGLE_WEIGHT_MASTERY_GAP</td><td class="cfg-val">0.30</td><td>max(0, mean_mastery − recent_performance)</td></tr>
+  <tr><td class="cfg-key">IMPROVED_STRUGGLE_WEIGHT_DIFFICULTY_ADJ</td><td class="cfg-val">0.25</td><td>Coverage-weighted, failing easy questions ≫ failing hard ones</td></tr>
+  </table>
+</div>
+
+<div class="cfg-group">
+  <div class="cfg-group-title">OpenAI &amp; RAG</div>
+  <table class="cfg-table"><tr><th>Key</th><th>Default</th><th>What it does</th></tr>
+  <tr><td class="cfg-key">OPENAI_MODEL</td><td class="cfg-val">gpt-4o-mini</td><td>Scoring + RAG generation model</td></tr>
+  <tr><td class="cfg-key">OPENAI_BATCH_SIZE</td><td class="cfg-val">20</td><td>Feedbacks per incorrectness-scoring batch</td></tr>
+  <tr><td class="cfg-key">SCORING_PER_RUN_CAP</td><td class="cfg-val">500</td><td>Max new feedbacks scored per run</td></tr>
+  <tr><td class="cfg-key">RAG_EMBEDDING_MODEL</td><td class="cfg-val">all-MiniLM-L6-v2</td><td>Local sentence-transformer (~90MB)</td></tr>
+  <tr><td class="cfg-key">RAG_SUGGESTION_MAX_RESULTS</td><td class="cfg-val">5</td><td>Top-k retrieved snippets fed to GPT</td></tr>
+  <tr><td class="cfg-key">RAG_MIN_SUBMISSIONS</td><td class="cfg-val">2</td><td>Minimum student submissions before RAG runs</td></tr>
+  </table>
+</div>
+
+<div class="cfg-group">
+  <div class="cfg-group-title">UI, clustering, auto-refresh</div>
+  <table class="cfg-table"><tr><th>Key</th><th>Default</th><th>What it does</th></tr>
+  <tr><td class="cfg-key">LEADERBOARD_MAX_ITEMS</td><td class="cfg-val">15</td><td>Top-N on the leaderboards</td></tr>
+  <tr><td class="cfg-key">STUDENT_DETAIL_TOP_QUESTIONS</td><td class="cfg-val">10</td><td>Rows in student-detail questions table</td></tr>
+  <tr><td class="cfg-key">QUESTION_DETAIL_TOP_STUDENTS</td><td class="cfg-val">15</td><td>Rows in question-detail students table</td></tr>
+  <tr><td class="cfg-key">HISTOGRAM_BINS</td><td class="cfg-val">20</td><td>Distribution chart granularity</td></tr>
+  <tr><td class="cfg-key">CLUSTER_MIN_WRONG</td><td class="cfg-val">3</td><td>Below this: no clustering</td></tr>
+  <tr><td class="cfg-key">CLUSTER_MAX_K</td><td class="cfg-val">5</td><td>Silhouette search upper bound</td></tr>
+  <tr><td class="cfg-key">AUTO_REFRESH_INTERVAL_DEFAULT</td><td class="cfg-val">300</td><td>Default refresh cadence (seconds)</td></tr>
+  <tr><td class="cfg-key">AUTO_REFRESH_OPTIONS</td><td class="cfg-val">[5,10,15,30,60,120,300]</td><td>Interval dropdown choices</td></tr>
+  </table>
+</div>
+
+<div class="note-box">Known mismatch: <code>SMOOTHING_ENABLED = True</code> exists in config but <code>apply_temporal_smoothing()</code> is never called in the pipeline. Flag does nothing today.</div>
+</div>
+
+<div id="dd-faq" class="dd-section">
+<p class="section-intro">Why the code looks the way it does. Each answer is the real reason, not the textbook one.</p>
+
+<div class="faq-card"><div class="faq-q" onclick="faqToggle('faq1')"><span class="faq-q-mark">Q</span><span class="faq-q-text">Why 0.5 as the fallback incorrectness value, not 0.0 or random?</span><span class="faq-chev" id="faqc-faq1">▸</span></div><div class="faq-a" id="faq1">0.5 is the neutral midpoint — neither biasing toward "correct" nor "incorrect" — and preserves the feature's contribution in downstream weighted sums without introducing artificial signal. An empty feedback string is a <em>missing measurement</em>, not evidence of correctness. Same logic applies to <code>min_max_normalize()</code> returning 0.5 on a degenerate cohort.</div></div>
+
+<div class="faq-card"><div class="faq-q" onclick="faqToggle('faq2')"><span class="faq-q-mark">Q</span><span class="faq-q-text">Why a 30-minute half-life for recent incorrectness decay?</span><span class="faq-chev" id="faqc-faq2">▸</span></div><div class="faq-a" id="faq2">30 minutes balances recency (catching acute struggle within a lab session) with robustness to momentary lapses. Shorter half-lives over-weight single mistakes; longer ones miss real-time trends. Exposed in <code>DECAY_HALFLIFE_SECONDS</code> for tuning.</div></div>
+
+<div class="faq-card"><div class="faq-q" onclick="faqToggle('faq3')"><span class="faq-q-mark">Q</span><span class="faq-q-text">Why SHRINKAGE_K = 5 specifically?</span><span class="faq-chev" id="faqc-faq3">▸</span></div><div class="faq-a" id="faq3">Students with 1–2 submissions produce very noisy struggle scores. Shrinkage pulls them toward the class mean, reducing false positives. <code>w_n = n/(n+5)</code> means a student needs ~5 submissions before their individual score gets 50% weight — a pragmatic threshold matching typical lab-session engagement in the first 5–10 minutes.</div></div>
+
+<div class="faq-card"><div class="faq-q" onclick="faqToggle('faq4')"><span class="faq-q-mark">Q</span><span class="faq-q-text">Why three separate weights in the improved model — why not learn one combined metric?</span><span class="faq-chev" id="faqc-faq4">▸</span></div><div class="faq-a" id="faq4">Three interpretable signal groups let an instructor understand <em>which dimension</em> drove a score ("struggling on easy questions" vs "underperforming vs demonstrated mastery"). Learned weights would be black-box and harder to defend in a thesis. The fixed weights also prioritize behavioural signals (real-time) over model-derived signals (longitudinal) for session-scale responsiveness.</div></div>
+
+<div class="faq-card"><div class="faq-q" onclick="faqToggle('faq5')"><span class="faq-q-mark">Q</span><span class="faq-q-text">Why graceful degradation instead of requiring all models to be available?</span><span class="faq-chev" id="faqc-faq5">▸</span></div><div class="faq-a" id="faq5">Cold-start and missing-data are unavoidable in live sessions — IRT needs ≥2 distinct difficulty values, BKT needs observation history, improved-struggle needs ≥50% mastery coverage. If a prerequisite is missing, redistributing that component's weight to the remaining components keeps the model producing useful output. Instructor gets partial insight rather than none, and the weight-sum invariant still holds.</div></div>
+
+<div class="faq-card"><div class="faq-q" onclick="faqToggle('faq6')"><span class="faq-q-mark">Q</span><span class="faq-q-text">Why ChromaDB for RAG instead of simpler keyword search?</span><span class="faq-chev" id="faqc-faq6">▸</span></div><div class="faq-a" id="faq6">Semantic search via embeddings captures conceptual similarity (e.g. "I divided wrong" ↔ "arithmetic error") that keyword search misses. <code>all-MiniLM-L6-v2</code> is local (no API cost or latency), compact (~90MB), and good enough for short feedback strings. ChromaDB adds metadata filtering so the two-layer architecture can enforce per-student privacy cheaply.</div></div>
+
+<div class="faq-card"><div class="faq-q" onclick="faqToggle('faq7')"><span class="faq-q-mark">Q</span><span class="faq-q-text">Why two-layer RAG (pandas filter + ChromaDB)?</span><span class="faq-chev" id="faqc-faq7">▸</span></div><div class="faq-a" id="faq7">Layer 1 (pandas) enforces privacy and identifies the student's worst question. Layer 2 (ChromaDB <code>where</code> filter + semantic query) finds the most relevant snippets within that student's own history only. Pure-semantic search without a structured pre-filter could surface another student's feedback. Architecture credited to Dr. Batmaz.</div></div>
+
+<div class="faq-card"><div class="faq-q" onclick="faqToggle('faq8')"><span class="faq-q-mark">Q</span><span class="faq-q-text">Why SHA1 in <code>data_loader</code>, not Python's built-in <code>hash()</code>?</span><span class="faq-chev" id="faqc-faq8">▸</span></div><div class="faq-a" id="faq8">Python's <code>hash()</code> is seeded randomly per-process for security (<code>PYTHONHASHSEED</code>). That means the same string gives a different hash across reruns, breaking any cache key that depends on cross-process reproducibility. SHA1 is deterministic and — for non-adversarial cache use — fine on performance.</div></div>
+
+<div class="faq-card"><div class="faq-q" onclick="faqToggle('faq9')"><span class="faq-q-mark">Q</span><span class="faq-q-text">Why a 6-char session code instead of URLs or login?</span><span class="faq-chev" id="faqc-faq9">▸</span></div><div class="faq-a" id="faq9">Codes are human-readable, shareable (instructor says the code out loud or writes it on the board), and decouple session identity from any web auth. Characters exclude <code>O/0/I/1</code> to avoid confusion when read aloud. Prevents accidental cross-session state leakage on a shared disk.</div></div>
+
+<div class="faq-card"><div class="faq-q" onclick="faqToggle('faq10')"><span class="faq-q-mark">Q</span><span class="faq-q-text">Why disk-backed lab-session state (<code>lab_session.json</code> + filelock) instead of a server DB?</span><span class="faq-chev" id="faqc-faq10">▸</span></div><div class="faq-a" id="faq10">No server infrastructure needed — the entire system deploys as two <code>streamlit run</code> commands. Matches Streamlit's stateless architecture (UI state is disposable; shared state is on disk). Trade-off: correctness depends on the file-locking backend being reliable and on the 5s polling cadence — fine for tens of users, wouldn't scale to hundreds.</div></div>
+
+<div class="faq-card"><div class="faq-q" onclick="faqToggle('faq11')"><span class="faq-q-mark">Q</span><span class="faq-q-text">Why <code>mastery_gap = max(0, mean_mastery − recent_performance)</code> clamped at zero?</span><span class="faq-chev" id="faqc-faq11">▸</span></div><div class="faq-a" id="faq11">A negative gap means the student is currently <em>outperforming</em> their demonstrated mastery — they're on a hot streak. That's not a struggle signal. Without the clamp, "good day" students would actively <em>reduce</em> their struggle score, which is the wrong direction. Clamping to zero means the mastery-gap component can only add to struggle, never subtract.</div></div>
+
+<div class="faq-card"><div class="faq-q" onclick="faqToggle('faq12')"><span class="faq-q-mark">Q</span><span class="faq-q-text">Why cohort-normalise every signal before the weighted sum?</span><span class="faq-chev" id="faqc-faq12">▸</span></div><div class="faq-a" id="faq12">Configured weights have to match <em>effective</em> weights. i_hat, r_hat, A_raw, rep_hat are already in [0,1] but not on the same cohort-relative scale — A_raw=0.8 could be the top student in one cohort and the median in another. Without normalisation, the 38% weight on A_norm could contribute 60% or 15% of the final score depending on class distribution. Cohort normalisation makes the weights do what they say.</div></div>
+
+<div class="faq-card"><div class="faq-q" onclick="faqToggle('faq13')"><span class="faq-q-mark">Q</span><span class="faq-q-text">Why sort BKT observations by [timestamp, question] using mergesort?</span><span class="faq-chev" id="faqc-faq13">▸</span></div><div class="faq-a" id="faq13">BKT is a sequential HMM — the posterior depends on replay order. Identical timestamps happen during bulk imports. Mergesort is stable, so ties fall back to the secondary key (question), producing deterministic output every run. Without this, the same data could produce different mastery scores on consecutive reloads.</div></div>
+</div>
+</div><!-- end panel-dive -->
+
+<!-- ══════════════════════════════════════════
+     PANEL 3 — ROADMAP
+══════════════════════════════════════════ -->
+<div id="panel-road" class="panel">
+  <div class="rm-head">
+    <div class="rm-progress-label" id="rm-prog-label">0 of 26 tasks complete</div>
+    <button class="rm-reset" onclick="resetProgress()" title="Clear all saved progress (ticks, reveals, slider state, tab history)">Reset progress</button>
+  </div>
+  <div class="rm-progress-wrap"><div class="rm-progress-fill" id="rm-prog-bar" style="width:0%"></div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rs1')"><div class="stage-num sn1">1</div><div class="stage-title">Stage 1 — The data layer</div><div class="stage-meta">~1 hr &nbsp;·&nbsp; data_loader.py + config.py</div><div class="stage-chevron" id="rsc-s1">▸</div></div>
+  <div class="stage-body" id="rs1">
+    <div class="rm-files"><span class="rm-file">config.py</span><span class="rm-file">data_loader.py</span><span class="rm-file">paths.py</span><span class="rm-file">academic_calendar.py</span></div>
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>config.py</code> top to bottom. Explain SHRINKAGE_K, DECAY_HALFLIFE_SECONDS, and CORRECT_THRESHOLD without looking.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>fetch_raw_data()</code> — understand exactly what happens on first call vs within 10 seconds vs after 10 seconds.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>parse_json_response()</code>. Draw on paper what one line of the API response looks like and trace how it becomes a 7-field record dict.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>normalize_and_clean()</code>. List the 4 transformations it applies in order.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>load_data()</code>. Understand the second caching layer. Trace what the caller receives when the API is down.</div></div>
+    </div>
+    <div class="quiz-section"><div class="quiz-label">Self-test</div>
+      <div class="quiz-q"><strong>Q1.</strong> The app has been running for 8 seconds. A student submits an answer. The instructor's browser auto-refreshes. Does the new submission appear immediately? Why or why not?</div>
+      <button class="reveal-btn" onclick="rmReveal('ra1')">Reveal answer</button>
+      <div class="answer" id="ra1">No. <code>fetch_raw_data()</code> is cached with ttl=10s. The 8-second rerun returns the cached raw string. The new submission only appears on a rerun after the 10s TTL expires.</div>
+      <div class="quiz-q"><strong>Q2.</strong> The API returns a response where one line has malformed JSON. What happens to that line, and what happens to all the other lines?</div>
+      <button class="reveal-btn" onclick="rmReveal('ra2')">Reveal answer</button>
+      <div class="answer" id="ra2">The bad line is silently skipped with <code>continue</code> inside a try/except. All other lines are processed normally. The function never raises — it returns whatever records it managed to parse.</div>
+      <div class="quiz-q"><strong>Q3.</strong> What is CORRECT_THRESHOLD=0.5 used for and in how many different places does it appear?</div>
+      <button class="reveal-btn" onclick="rmReveal('ra3')">Reveal answer</button>
+      <div class="answer" id="ra3">Used in: (1) <code>compute_question_difficulty_scores()</code> to compute c_tilde, (2) <code>build_response_matrix()</code> in IRT to code binary correct/wrong, (3) <code>bkt_update()</code> calls, (4) <code>cluster_question_mistakes()</code> to filter wrong answers.</div>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rs2')"><div class="stage-num sn2">2</div><div class="stage-title">Stage 2 — The scoring engine</div><div class="stage-meta">~2 hrs &nbsp;·&nbsp; analytics.py</div><div class="stage-chevron" id="rsc-s2">▸</div></div>
+  <div class="stage-body" id="rs2">
+    <div class="rm-files"><span class="rm-file">analytics.py</span></div>
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>compute_incorrectness_column()</code>. Trace a feedback string already in cache vs a brand new one.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>compute_recent_incorrectness()</code>. On paper: 3 submissions with incorrectness [0.8, 0.5, 0.2], timestamps 0s, 600s, 1800s ago. Compute A_raw manually.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read the full <code>compute_student_struggle_scores()</code>. Understand why ALL 7 signals are normalised after the per-student loop rather than inside it.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>compute_question_difficulty_scores()</code>. Understand the difference between c_tilde and f_tilde.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>cluster_question_mistakes()</code>. Understand why SHA1 is used instead of Python's <code>hash()</code> for the cache key.</div></div>
+    </div>
+    <div class="quiz-section"><div class="quiz-label">Self-test</div>
+      <div class="quiz-q"><strong>Q1.</strong> A student has 3 submissions in the last 2 minutes, all incorrectness=1.0. After shrinkage with K=5, what happens and why does this matter?</div>
+      <button class="reveal-btn" onclick="rmReveal('rb1')">Reveal answer</button>
+      <div class="answer" id="rb1">w_n = 3/(3+5) = 0.375. S_final = 0.375×S_raw + 0.625×class_mean. With only 3 submissions, 62.5% of the score is pulled toward the class mean. 3 submissions in 2 minutes is not enough evidence to confidently label someone "Needs Help".</div>
+      <div class="quiz-q"><strong>Q2.</strong> A question has c_tilde=0.9 but f_tilde=0.3. What does this tell you, and is it possible?</div>
+      <button class="reveal-btn" onclick="rmReveal('rb2')">Reveal answer</button>
+      <div class="answer" id="rb2">Yes — it means most submissions score just above the 0.5 CORRECT_THRESHOLD (so they count as "incorrect" for c_tilde) but the continuous incorrectness scores are mostly around 0.3 (so f_tilde is low). Students are getting nearly-correct answers. The binary threshold creates a cliff the continuous score does not.</div>
+      <div class="quiz-q"><strong>Q3.</strong> Why are ALL 7 signals normalised across students after the per-student loop rather than computing each signal pre-normalised?</div>
+      <button class="reveal-btn" onclick="rmReveal('rb3')">Reveal answer</button>
+      <div class="answer" id="rb3">All 7 signals must be cohort-normalised so configured weights match effective weights. i_hat, r_hat, A_raw, and rep_hat were already in [0,1] but not on the same cohort-relative scale — a student with A_raw=0.8 might be top 10% or median. Without cohort normalisation, the 38% weight on A_norm could effectively contribute far more or far less depending on the class distribution. Normalising after the loop means you normalise across the full class, which is only possible once all students are computed.</div>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rs3')"><div class="stage-num sn3">3</div><div class="stage-title">Stage 3 — The advanced models</div><div class="stage-meta">~2 hrs &nbsp;·&nbsp; models/</div><div class="stage-chevron" id="rsc-s3">▸</div></div>
+  <div class="stage-body" id="rs3">
+    <div class="rm-files"><span class="rm-file">models/measurement.py</span><span class="rm-file">models/irt.py</span><span class="rm-file">models/bkt.py</span><span class="rm-file">models/improved_struggle.py</span></div>
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>measurement.py</code>. Explain why a 0.5 score from empty feedback gets confidence=0 while a 0.5 from long feedback gets low but non-zero confidence.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>irt.py</code>. Derive on paper why grad_b_j = −Σ residuals (not +Σ). Understand what the gradient centering projection does.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>bkt.py</code>. Work through <code>bkt_update()</code>: start P(L)=0.3, wrong answer, compute posterior manually, then apply transition. Verify with the BKT demo.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>improved_struggle.py</code>. Trace the graceful degradation when has_mastery=False and has_irt=False. Verify weights still sum to 1.0.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Understand why min-max normalisation was removed from the end of <code>compute_improved_struggle_scores()</code> and what problem it was causing.</div></div>
+    </div>
+    <div class="quiz-section"><div class="quiz-label">Self-test</div>
+      <div class="quiz-q"><strong>Q1.</strong> A question has IRT difficulty b=2.0. What is its sigmoid-mapped irt_difficulty score and what classification does it receive?</div>
+      <button class="reveal-btn" onclick="rmReveal('rc1')">Reveal answer</button>
+      <div class="answer" id="rc1">sigmoid(2.0) = 1/(1+exp(-2)) ≈ 0.880. Applying IRT_DIFFICULTY_THRESHOLDS: 0.880 ≥ 0.75 → "Very Hard".</div>
+      <div class="quiz-q"><strong>Q2.</strong> A student has mean_mastery=0.8 and A_raw=0.2 (doing well recently). What is their mastery_gap?</div>
+      <button class="reveal-btn" onclick="rmReveal('rc2')">Reveal answer</button>
+      <div class="answer" id="rc2">recent_performance = 1 - 0.2 = 0.8. mastery_gap = max(0, 0.8 - 0.8) = 0.0. The student is performing exactly at their demonstrated mastery level — no gap. The mastery_gap component contributes 0 to this student's improved score.</div>
+      <div class="quiz-q"><strong>Q3.</strong> Why was min-max normalisation removed from the end of the improved struggle model?</div>
+      <button class="reveal-btn" onclick="rmReveal('rc3')">Reveal answer</button>
+      <div class="answer" id="rc3">It was fighting the Bayesian shrinkage: shrinkage pulls low-n students toward the class mean, then normalisation spread them back out, undoing the pull. The clustering problem it was meant to fix is now solved at source — all behavioral sub-signals are cohort-normalised before the equal-weight average, so scores naturally spread across the range without needing a final normalisation step.</div>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rs4')"><div class="stage-num sn4">4</div><div class="stage-title">Stage 4 — CF, RAG, and coordination</div><div class="stage-meta">~1.5 hrs &nbsp;·&nbsp; analytics.py (CF) + rag.py + lab_state.py</div><div class="stage-chevron" id="rsc-s4">▸</div></div>
+  <div class="stage-body" id="rs4">
+    <div class="rm-files"><span class="rm-file">analytics.py (CF)</span><span class="rm-file">rag.py</span><span class="rm-file">lab_state.py</span></div>
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>compute_cf_struggle_scores()</code>. Note the CF_FEATURES now use i_norm and A_norm. Understand the NaN guard and why it matters.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>rag.py</code>. Understand the rebuild guard — what two conditions must both be true for the collection to be reused?</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Trace the difference between <code>generate_assistant_suggestions()</code> and <code>generate_cluster_suggestions()</code> — same collection, different filter, different audience.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>lab_state.py</code> in full. Draw the state machine: what fields change when (1) session starts, (2) assistant joins, (3) student assigned, (4) mark helped, (5) session ends.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Find every place <code>_write_state_unlocked()</code> is called. Confirm every write goes through <code>_normalize_state()</code> first.</div></div>
+    </div>
+    <div class="quiz-section"><div class="quiz-label">Self-test</div>
+      <div class="quiz-q"><strong>Q1.</strong> CF enabled, τ=0.5, class has 6 students, none above 0.5. What does CF return and why?</div>
+      <button class="reveal-btn" onclick="rmReveal('rd1')">Reveal answer</button>
+      <div class="answer" id="rd1">Falls back immediately. n_flagged_parametric=0. Returns the parametric scores unchanged. diagnostics["fallback"]=True, reason="no students above threshold". CF needs at least one reference "struggling" student.</div>
+      <div class="quiz-q"><strong>Q2.</strong> 50 new submissions arrived during the last refresh cycle. Will the RAG collection be rebuilt?</div>
+      <button class="reveal-btn" onclick="rmReveal('rd2')">Reveal answer</button>
+      <div class="answer" id="rd2">Yes. The rebuild guard checks: (1) _collection not None, (2) session_id == _cached_session_id, (3) len(df) == _cached_row_count. Condition 3 fails. New embeddings are computed for all rows (upserted), _cached_row_count updated.</div>
+      <div class="quiz-q"><strong>Q3.</strong> An assistant crashes and reloads the page. What happens?</div>
+      <button class="reveal-btn" onclick="rmReveal('rd3')">Reveal answer</button>
+      <div class="answer" id="rd3">The URL still has <code>?aid=alice_4821</code>. The app reads this query param, calls <code>get_assignment_for_assistant("alice_4821")</code>, finds the assignment in lab_session.json (persisted on disk), and routes directly to the assigned student view. Completely transparent.</div>
+    </div>
+  </div></div>
+
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rs5')"><div class="stage-num sn5">5</div><div class="stage-title">Stage 5 — The UI and full system</div><div class="stage-meta">~1.5 hrs &nbsp;·&nbsp; instructor_app.py + assistant_app.py + views.py</div><div class="stage-chevron" id="rsc-s5">▸</div></div>
+  <div class="stage-body" id="rs5">
+    <div class="rm-files"><span class="rm-file">instructor_app.py</span><span class="rm-file">assistant_app.py</span><span class="rm-file">ui/views.py</span><span class="rm-file">ui/components.py</span><span class="rm-file">sound.py</span></div>
+    <div class="tasks">
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Before coding anything, skim the <strong>Overview</strong> and <strong>Glossary</strong> tabs in this toolkit. If any term is still opaque after reading its glossary entry, flag it — that's where your mental model is thinnest.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>instructor_app.main()</code> top to bottom. Map every function call in order. Understand why deferred actions must be before any widget is built.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>render_sidebar()</code>. Trace what <code>_resolve_time_filter_window()</code> returns for each value of <code>time_filter_preset</code> (All Time, Live Session, Today, Past Hour, Past 24 Hours, Current/Last Academic Week, Custom) and verify that a loaded saved session bypasses the preset entirely.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read the view routing block. Know the priority order. Then read <code>in_class_view()</code>, <code>student_detail_view()</code>, and <code>question_detail_view()</code>.</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>assistant_app.main()</code>. Trace the full journey from opening the URL for the first time through to clicking "Mark as Helped".</div></div>
+      <div class="task"><div class="task-check" onclick="rmTick(this)"></div><div class="task-text">Read <code>sound.py</code>. Understand why sound injection uses a zero-height iframe rather than a regular <code>st.markdown()</code> script tag.</div></div>
+    </div>
+    <div class="quiz-section"><div class="quiz-label">Self-test</div>
+      <div class="quiz-q"><strong>Q1.</strong> An instructor loads a saved session where the module filter no longer exists. What exactly happens?</div>
+      <button class="reveal-btn" onclick="rmReveal('re1')">Reveal answer</button>
+      <div class="answer" id="re1"><code>apply_saved_session_to_state()</code> checks if saved module_filter is in available_modules. If not: falls back to "All Modules" and sets session_state["session_load_warning"]. Instructor sees a warning banner; dashboard loads showing all modules.</div>
+      <div class="quiz-q"><strong>Q2.</strong> Improved models enabled. Instructor opens Model Comparison view. What analytics have already run?</div>
+      <button class="reveal-btn" onclick="rmReveal('re2')">Reveal answer</button>
+      <div class="answer" id="re2">In order: (1) compute_student_struggle_scores(), (2) compute_question_difficulty_scores(), (3) compute_irt_difficulty_scores() if irt_enabled, (4) compute_all_mastery() then compute_student_mastery_summary() if bkt_enabled, (5) compute_improved_struggle_scores() if improved_struggle_enabled. All run in main() before routing.</div>
+      <div class="quiz-q"><strong>Q3.</strong> A student clicks a bar in the leaderboard. Walk through exactly what happens in Streamlit from click to detail view rendering.</div>
+      <button class="reveal-btn" onclick="rmReveal('re3')">Reveal answer</button>
+      <div class="answer" id="re3">Plotly registers the click as a chart selection event. Streamlit detects this and triggers a rerun. In the rerun, <code>render_student_leaderboard()</code> reads the selection, extracts student_id from the clicked bar's label, calls <code>sound.play_selection()</code>, sets <code>st.session_state["selected_student"] = student_id</code>. The rerun continues to routing. selected_student is now set, so routing hits case 1 and calls <code>student_detail_view()</code>.</div>
+    </div>
+  </div></div>
+
+  <div style="padding:0.5rem 0 1rem">
+    <p style="font-size:13px;color:#666;margin-bottom:6px">When you can answer every question without revealing — you know this codebase inside out.</p>
+    <p style="font-size:12px;color:#555">Total time: ~8 hours across 3–4 sessions. Work through stages in order.</p>
+  </div>
+</div><!-- end panel-road -->
+
+<!-- ══════════════════════════════════════════
+     PANEL — REPORT GUIDE
+══════════════════════════════════════════ -->
+<div id="panel-report" class="panel">
+
+  <div class="rg-intro">
+    <p><strong>Section-by-section guide to writing the thesis.</strong> Each chapter below expands to show: what the chapter proves, how long it should be, the required subsections, which parts of this toolkit to draw from, and the pitfalls the example theses reveal. The structure is a hybrid of the two supplied reports that best match Dashboard V3 — <em>Desktop SQL Editor</em> (two-app system, dataset, evaluation) and <em>NLP for Disaster Detection</em> (algorithm breakdown, model comparison, accuracy tables).</p>
+    <p>Target total length: <strong>40–60 pages</strong> for a typical Loughborough CS masters thesis (front + back matter excluded). Work chapters roughly in order, but <em>draft the abstract and the conclusion last</em>.</p>
+  </div>
+
+  <div class="rg-anchors">
+    <div class="rg-anchor" onclick="switchPanelByName('overview')">→ Overview tab</div>
+    <div class="rg-anchor" onclick="switchPanelByName('dive')">→ Deep dive tab</div>
+    <div class="rg-anchor" onclick="switchPanelByName('glossary')">→ Glossary tab</div>
+    <div class="rg-anchor" onclick="switchPanelByName('ref')">→ Code reference tab</div>
+    <div class="rg-anchor" onclick="switchPanelByName('road')">→ Roadmap tab</div>
+  </div>
+
+  <div class="rg-principles">
+    <div class="rg-principles-title">Writing principles</div>
+    <ul>
+      <li><strong>Past tense</strong> for what you did (<code>"I implemented…"</code>), <strong>present tense</strong> for what the system does (<code>"The scoring engine normalises…"</code>).</li>
+      <li><strong>Third-person or passive</strong> in the abstract and conclusion (<code>"A live learning-analytics system was built…"</code>). <strong>First-person</strong> ("I") is acceptable in Loughborough CS theses in reflection/implementation sections.</li>
+      <li><strong>Every figure</strong> must have a number, caption, and be referenced in the prose (<code>"Figure 4 shows…"</code>). Don't drop unexplained figures.</li>
+      <li><strong>Every formula</strong> must be explained in the line before or after. Don't dump LaTeX at the reader.</li>
+      <li><strong>Every design choice</strong> must be justified — either by citation, by a requirement, or by an experiment you ran.</li>
+      <li><strong>Consistency of notation</strong> — if the literature review calls it <code>S</code>, implementation and evaluation also call it <code>S</code>. Don't switch to <code>struggle_score</code> halfway through.</li>
+      <li><strong>Cite the primary source</strong>, not Wikipedia. Use Google Scholar to find the original paper.</li>
+    </ul>
+  </div>
+
+  <!-- CH 0 — Front matter -->
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rs6')"><div class="stage-num sn1">0</div><div class="stage-title">Chapter 0 — Front matter</div><div class="stage-meta"><span class="rg-pagebadge">~2 pages</span>Title · Abstract · Acknowledgements · ToC</div><div class="stage-chevron" id="rsc-s6">▸</div></div>
+  <div class="stage-body" id="rs6">
+    <div class="rg-block"><p><strong>Purpose.</strong> Prove to the examiner, in one glance, that you know what you built, why it matters, and what you measured. The abstract is the single most re-read page of the whole thesis — spend disproportionate effort on it.</p></div>
+
+    <div class="rg-section-title">Required subsections</div>
+    <div class="rg-subsec"><ol>
+      <li><strong>Title page</strong> — project title, your name, student ID, supervisor, module code (<code>24COC255</code> or whichever you're on), Department of Computer Science, Loughborough University, submission date. Match the exact template your module leader circulates.</li>
+      <li><strong>Abstract</strong> (200–300 words, single paragraph or four short ones). Four beats: <em>(1) the problem</em> — in a lab of 30+ students, instructors have no real-time visibility into who is struggling; <em>(2) what was built</em> — a two-app Streamlit system (instructor + lab-assistant) with a 7-signal struggle score, BKT/IRT advanced models, a CF fallback, and RAG-grounded coaching suggestions; <em>(3) what was evaluated</em> — agreement between parametric and improved scores, IRT–empirical-difficulty correlation, refresh latency, qualitative lab feedback; <em>(4) what it means</em> — evidence that cohort-normalised behavioural signals plus Bayesian shrinkage can identify struggling students live. Past tense. No citations. No formulas.</li>
+      <li><strong>Acknowledgements</strong> (½ page). Supervisor first, module leader, lab colleagues who tested the app, family. Examiners skip this — keep it sincere and short.</li>
+      <li><strong>Contents / List of Figures / List of Tables</strong> — auto-generate. Do not hand-maintain.</li>
+    </ol></div>
+
+    <div class="rg-section-title specifics">Dashboard V3 specifics — where to draw from</div>
+    <div class="rg-block"><p>Draft the abstract by compressing the <code>Overview</code> tab — the four "What it does / Who uses it / Tech stack / Where state lives" cards give you the raw material. Strip implementation detail aggressively: "filelock-synchronised JSON state store" → "a shared state store coordinating the two apps". The examiner reading the abstract does not yet know what a filelock is.</p></div>
+
+    <div class="rg-section-title pitfall">Pitfalls to avoid</div>
+    <div class="rg-pitfalls"><ul>
+      <li>Citing papers inside the abstract — it's a summary, not a literature review.</li>
+      <li>Describing code (function names, ports, libraries) inside the abstract.</li>
+      <li>Writing the abstract first — you don't know what you've built until you've written chapters 4 and 5.</li>
+      <li>Hand-typing the table of contents — use your word processor's automatic TOC feature.</li>
+    </ul></div>
+
+    <div class="rg-section-title excerpt">Example opener (pattern, not content to copy)</div>
+    <div class="rg-excerpt"><div class="rg-excerpt-label">Pattern from "Desktop SQL Editor for Lab Tutorials"</div>"The universities current software solution that is used to teach SQL is outdated and limited in functionality, wasting a wealth of potentially useful data. The goal of this project was to develop a replacement system that gives the databases lecturer access to this information. A web-based solution was developed, improving upon the functionality of the old system while providing an insight into the progress of students during the SQL tutorials…"</div>
+  </div></div>
+
+  <!-- CH 1 — Introduction -->
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rs7')"><div class="stage-num sn2">1</div><div class="stage-title">Chapter 1 — Introduction</div><div class="stage-meta"><span class="rg-pagebadge">~4–6 pages</span>Motivation · Problem · Aims · Contributions</div><div class="stage-chevron" id="rsc-s7">▸</div></div>
+  <div class="stage-body" id="rs7">
+    <div class="rg-block"><p><strong>Purpose.</strong> Convince the examiner that (a) the problem is real and worth solving, (b) the scope is defined precisely enough to succeed, and (c) you know what you're going to claim by the end.</p></div>
+
+    <div class="rg-section-title">Required subsections</div>
+    <div class="rg-subsec"><ol>
+      <li><strong>1.1 Background &amp; motivation</strong> (~1 page). The human problem: in a 30-student lab with two lab assistants, help is reactive — whoever raises a hand first gets attention. Students silently struggling for 40 minutes go unnoticed. Post-hoc dashboards see the problem on Monday; the lab was on Friday. Cite 2–3 primary papers on learning analytics and the real-time-vs-post-hoc distinction.</li>
+      <li><strong>1.2 Problem definition</strong> (~½ page). State the concrete problem: given a stream of AI-tutored student submissions, <em>rank students live by their probability of needing help</em>, <em>flag which questions are hard</em>, and <em>hand off flagged students to lab assistants with AI-generated per-student coaching bullets</em>. Define the inputs (submissions with AI feedback), outputs (leaderboard + assignments + coaching text), and constraints (near-real-time, single-site, instructor-in-the-loop).</li>
+      <li><strong>1.3 Aims &amp; objectives</strong> (~½ page). One or two aims. Then 4–6 objectives, each a concrete deliverable. Example phrasing: <em>"To design a live learning-analytics system that ranks struggling students in near-real-time and coordinates lab-assistant handoffs with AI-grounded coaching."</em> Then objectives: data pipeline, 7-signal scoring engine, advanced models (IRT, BKT, improved), collaborative-filtering fallback, lab-assistant app + shared state, RAG coaching, evaluation.</li>
+      <li><strong>1.4 Contributions</strong> (½ page, bullet list). For the examiner who skims. Five to seven items. Pull directly from the <code>Overview → What it does</code> card.</li>
+      <li><strong>1.5 Report outline</strong> (¼ page). One sentence per remaining chapter.</li>
+    </ol></div>
+
+    <div class="rg-section-title specifics">Dashboard V3 specifics — where to draw from</div>
+    <div class="rg-block"><p>The <code>Overview</code> tab's four cards (<em>What it does · Who uses it · Tech stack · Where state lives</em>) map almost one-to-one to subsections here. The architecture diagram from the <code>Overview</code> tab should be re-drawn (or reused at high resolution) and cited as Figure 1 of the report, referenced here as a forward pointer into Chapter 3.</p></div>
+
+    <div class="rg-section-title pitfall">Pitfalls to avoid</div>
+    <div class="rg-pitfalls"><ul>
+      <li>Listing every feature in 1.4 — pick the 3–5 most defensible claims. Anything you cannot back up in Chapter 5 should be dropped.</li>
+      <li>Blurring aims with objectives — aims are big-picture ("what this thesis is for"); objectives are concrete ("what you built to achieve it").</li>
+      <li>Conflating motivation (§1.1) with literature review (Ch 2). §1.1 is <em>"here's a problem"</em>; Ch 2 is <em>"here's what's been tried"</em>.</li>
+      <li>Claiming novelty that isn't novel. Safer: "combines X and Y in a live lab setting" rather than "introduces a new algorithm".</li>
+    </ul></div>
+
+    <div class="rg-section-title excerpt">Example opener (pattern, not content to copy)</div>
+    <div class="rg-excerpt"><div class="rg-excerpt-label">Pattern from "Mathematical Model of Football"</div>"With the constant threat of … events around the world, it is important to try to find ways to combat these incidents using technology that is available to us. With the rise in computational power that has occurred over the past few years, several techniques have become available… If a machine system can be created to … then we can show that these systems can be used to help us deal with these events in the future."</div>
+  </div></div>
+
+  <!-- CH 2 — Literature Review -->
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rs8')"><div class="stage-num sn3">2</div><div class="stage-title">Chapter 2 — Literature Review &amp; Background</div><div class="stage-meta"><span class="rg-pagebadge">~8–12 pages</span>Theory · Related systems · Gap analysis</div><div class="stage-chevron" id="rsc-s8">▸</div></div>
+  <div class="stage-body" id="rs8">
+    <div class="rg-block"><p><strong>Purpose.</strong> The biggest chapter. Prove you know the field well enough to judge what has and hasn't been done, define the vocabulary the rest of the thesis uses, and end with a gap that specifically your project fills. Aim for ~25 references minimum.</p></div>
+
+    <div class="rg-section-title">Required subsections</div>
+    <div class="rg-subsec"><ol>
+      <li><strong>2.1 Learning analytics — overview</strong> (~1 page). Definition, the real-time vs post-hoc distinction, why live matters for formative feedback. Cite Siemens &amp; Long (<em>Penetrating the Fog</em>, 2011), Baker &amp; Inventado (<em>Educational Data Mining and Learning Analytics</em>, 2014).</li>
+      <li><strong>2.2 Student struggle &amp; behavioural signals</strong> (~1–1½ pages). What behavioural signals have been correlated with struggle in the literature: submission volume, time-on-task, error patterns, retry rate, help-seeking, hint abuse. Reference Baker's "gaming the system" work, the EDM literature's struggle-detection tradition.</li>
+      <li><strong>2.3 Knowledge tracing — Bayesian Knowledge Tracing</strong> (~1–2 pages). Corbett &amp; Anderson (1995). The four parameters (P(L₀), P(T), P(S), P(G)), the posterior update, the transition to next opportunity. Why it fits sparse lab data better than deep knowledge tracing.</li>
+      <li><strong>2.4 Item Response Theory — 1PL / Rasch</strong> (~1 page). The 1-parameter logistic model: <code>P(correct) = σ(θᵢ − bⱼ)</code>. Why you estimate θ per student and b per question. Why 1PL and not 2PL or 3PL for this dataset size.</li>
+      <li><strong>2.5 Cohort normalisation &amp; Bayesian shrinkage</strong> (~1 page). James-Stein, empirical Bayes, hierarchical models. The core intuition: with n=2 submissions you shouldn't trust a student's raw mean — shrink it toward the class mean until evidence accumulates.</li>
+      <li><strong>2.6 Collaborative filtering in education</strong> (~½–1 page). User-user kNN, cosine similarity, the "students like you were flagged" pattern. Why CF is a <em>fallback</em> here, not primary.</li>
+      <li><strong>2.7 Retrieval-augmented generation for coaching</strong> (~1 page). Lewis et al. RAG (2020). Why LLMs ungrounded in class context hallucinate. The embed → retrieve → ground → generate pattern.</li>
+      <li><strong>2.8 Related systems</strong> (~1–2 pages). ASSISTments, Cognitive Tutor / Carnegie, iTalk2Learn, Knewton, Course Signals at Purdue. End with a table comparing: real-time? signals used? teacher-facing? handoff mechanism? open source?</li>
+      <li><strong>2.9 Gap analysis</strong> (~½ page). Existing systems are either <em>post-hoc</em>, <em>single-signal</em>, or <em>lack instructor-assistant coordination</em>. Dashboard V3 addresses all three. This is the single most important paragraph of the chapter.</li>
+    </ol></div>
+
+    <div class="rg-section-title specifics">Dashboard V3 specifics — where to draw from</div>
+    <div class="rg-block"><p>Every algorithm defined here must reappear in Chapter 4 as an implemented thing. Keep notation consistent — if §2.5 calls it <code>S</code>, §4.3 calls it <code>S</code> (not <code>struggle_score</code>). The <code>Glossary</code> tab of this toolkit is your canonical notation source; copy its symbols directly. The <code>Deep dive → IRT / BKT / Improved struggle</code> sections give you the exact formulas you'll derive here.</p></div>
+
+    <div class="rg-section-title pitfall">Pitfalls to avoid</div>
+    <div class="rg-pitfalls"><ul>
+      <li>Paraphrasing Wikipedia. Cite the primary source (Corbett &amp; Anderson 1995, not "Wikipedia: BKT").</li>
+      <li>Dumping formulas without prose explanations. Every equation gets at least one sentence of context.</li>
+      <li>Writing 10 pages of background with <em>no</em> gap analysis. The gap is what justifies the project.</li>
+      <li>Citing 3 papers per topic. Aim for 3–6 <em>primary, well-chosen</em> references per sub-topic, not a citation avalanche.</li>
+      <li>Introducing notation here that Chapter 4 then silently renames.</li>
+    </ul></div>
+
+    <div class="rg-section-title excerpt">Example opener (pattern, not content to copy)</div>
+    <div class="rg-excerpt"><div class="rg-excerpt-label">Pattern from "NLP for Disaster Detection"</div>"… is an increasingly important field of computer science that has been greatly developed over the last few decades. Human languages are extremely complex and have evolved over thousands of years, so creating methods for machines to understand, analyse and recreate human language is no easy task. … is actually an older concept than most people think, with research on … beginning in earnest in the 1950s. An example of its first applications was …"</div>
+  </div></div>
+
+  <!-- CH 3 — Requirements & Design -->
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rs9')"><div class="stage-num sn4">3</div><div class="stage-title">Chapter 3 — Requirements &amp; Design</div><div class="stage-meta"><span class="rg-pagebadge">~6–8 pages</span>Users · Reqs · Architecture · Data model</div><div class="stage-chevron" id="rsc-s9">▸</div></div>
+  <div class="stage-body" id="rs9">
+    <div class="rg-block"><p><strong>Purpose.</strong> Describe the <em>shape</em> of the system and <em>why</em> it's that shape, before showing any code. The examiner should leave this chapter able to sketch the architecture on a whiteboard.</p></div>
+
+    <div class="rg-section-title">Required subsections</div>
+    <div class="rg-subsec"><ol>
+      <li><strong>3.1 User personas</strong> (~½ page). Two personas: the <em>instructor</em> (desktop, port 8501, sees full cohort, starts/ends session, assigns help) and the <em>lab assistant</em> (mobile, port 8502, joins with a 6-char code, sees only their assigned student, gets RAG coaching bullets). Pull from <code>Overview → Who uses it</code>.</li>
+      <li><strong>3.2 Functional requirements</strong> (~1 page, MoSCoW-prioritised). <em>Must</em>: live leaderboard, session start/end, code-based assistant join, student assignment, RAG coaching, mark-as-helped. <em>Should</em>: replayable saved sessions, parametric-vs-improved model comparison view, sound cues, module-level filtering. <em>Could</em>: mobile push notifications, multi-instructor support. <em>Won't</em> (scope-limit): grade prediction, automated content generation.</li>
+      <li><strong>3.3 Non-functional requirements</strong> (~½ page). Latency target (&lt; 10 s from submission to leaderboard update, dictated by the API cache TTL). Robustness (API outage → show last good data, OpenAI outage → fallback incorrectness=0.5). Concurrency (single instructor + up to 4 assistants). Privacy (all data stays local, no cloud upload of student work). Platform (Windows 10/11 + Python 3.11).</li>
+      <li><strong>3.4 System architecture</strong> (~1–2 pages with figure). The two-app diagram. Cache boundaries (per-process Streamlit cache vs cross-process file-locked JSON state). The API → cache → DataFrame → scoring → view pipeline. Redraw from <code>Overview → System architecture</code>.</li>
+      <li><strong>3.5 Data model</strong> (~1 page). The submission record fields, the derived metric fields (<code>incorrectness</code>, <code>S_final</code>, <code>mean_mastery</code>, <code>b_j</code>), the <code>lab_session.json</code> schema (session_id, code, start_time, status, joined_assistants[], assignments{}, active_students[]).</li>
+      <li><strong>3.6 Scoring-engine design rationale</strong> (~1 page). Why 7 signals and not 3. Why cohort-normalise <em>before</em> the weighted sum. Why Bayesian shrinkage is applied <em>after</em> the weighted sum. Why the weights are hand-set rather than learned (and what would change if you had labelled data).</li>
+      <li><strong>3.7 Extension points</strong> (~½ page). Why improved models are a Settings toggle (not a hard-coded path) — so the parametric baseline remains available for comparison, and so the evaluation chapter can show both side by side.</li>
+    </ol></div>
+
+    <div class="rg-section-title specifics">Dashboard V3 specifics — where to draw from</div>
+    <div class="rg-block"><p>The <code>Overview → System architecture</code> diagram is the centrepiece figure. The <code>Deep dive → Struggle scoring</code> section gives you the exact rationale for the 7-signal weight split you'll justify in §3.6. The <code>Deep dive → Settings reference</code> section shows every toggle that §3.7 names.</p></div>
+
+    <div class="rg-section-title pitfall">Pitfalls to avoid</div>
+    <div class="rg-pitfalls"><ul>
+      <li>Putting code in this chapter. No <code>def</code> statements until Chapter 4.</li>
+      <li>Justifying choices with "because it's easy" or "because I know it". Every choice traces back to a requirement or a literature result.</li>
+      <li>Skipping non-functional requirements — these are the questions examiners ask first in the viva.</li>
+      <li>Merging 3.4 and 4.1. Architecture is about <em>shape</em>; implementation is about <em>the actual files</em>.</li>
+    </ul></div>
+
+    <div class="rg-section-title excerpt">Example opener (pattern, not content to copy)</div>
+    <div class="rg-excerpt"><div class="rg-excerpt-label">Pattern from "Desktop SQL Editor for Lab Tutorials"</div>"Restrictions imposed by the University required that the solution did not require the installation of new software on the Universities computers. This restriction left only a few options: … It was found after research, that the best option would be to create an external web-based system which would allow for the complete control over how the system functioned and would be unrestricted by the limitations of the Learn system."</div>
+  </div></div>
+
+  <!-- CH 4 — Implementation -->
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rs10')"><div class="stage-num sn5">4</div><div class="stage-title">Chapter 4 — Implementation</div><div class="stage-meta"><span class="rg-pagebadge">~10–14 pages</span>Pipeline · Scoring · Models · CF · RAG · Coordination · UI</div><div class="stage-chevron" id="rsc-s10">▸</div></div>
+  <div class="stage-body" id="rs10">
+    <div class="rg-block"><p><strong>Purpose.</strong> Your longest chapter. Walk through each subsystem: what it does, the hard design decisions, one short code snippet per subsystem as evidence, and a brief explanation of what was tricky. Think of each section as answering <em>"what would I need to explain if I handed this code to a new developer?"</em></p></div>
+
+    <div class="rg-section-title">Required subsections</div>
+    <div class="rg-subsec"><ol>
+      <li><strong>4.1 Environment &amp; tooling</strong> (~½ page). Python 3.11, Streamlit, pandas, numpy, scipy (L-BFGS-B for IRT), scikit-learn (cosine similarity, K-means, TF-IDF), ChromaDB, OpenAI API (GPT-4o-mini), sentence-transformers (all-MiniLM-L6-v2), filelock, plotly. One paragraph justifying Streamlit specifically (rapid UI, zero-deployment friction, session-state model fits the reactive dashboard pattern).</li>
+      <li><strong>4.2 Data pipeline</strong> (~1½ pages). <code>fetch_raw_data()</code> with <code>@st.cache_data(ttl=10)</code>, format auto-detection, <code>parse_json_response()</code> handling newline-delimited JSON with embedded XML, <code>normalize_and_clean()</code> applying EXCLUDED_MODULES, MODULE_RENAME_MAP, timestamp parsing, <code>load_data()</code> with the hash-based second cache layer. Draw the flow as a figure. Lift from <code>Deep dive → Data pipeline</code>.</li>
+      <li><strong>4.3 Scoring engine — the 7-signal composite</strong> (~2 pages). Define each signal (n, t, î, r̂, A_raw, d, rep̂). Include the weighted sum formula (0.10·n̂ + 0.10·t̂ + 0.20·i_norm + 0.10·r_norm + 0.38·A_norm + 0.05·d̂ + 0.07·rep_norm) in a display-style equation. Explain the cohort-normalisation step. Give the Bayesian-shrinkage formula (<code>w_n = n/(n+K); S_final = w_n·S + (1-w_n)·class_mean</code>) with K=5. Describe the OpenAI-based incorrectness signal and its process-local cache.</li>
+      <li><strong>4.4 Question difficulty</strong> (~½ page). The <code>c_tilde</code> vs <code>f_tilde</code> distinction — one is the fraction of submissions below CORRECT_THRESHOLD (binary), the other is the mean incorrectness (continuous). Why both are surfaced (they can diverge, and that divergence is itself informative).</li>
+      <li><strong>4.5 Advanced models</strong> (~1½–2 pages). <em>IRT:</em> L-BFGS-B on the 1PL log-likelihood, with gradient-centering projection to handle the identifiability constraint. <em>BKT:</em> 4-parameter update with posterior + transition, per student per question-cluster. <em>Improved struggle:</em> combines behavioural sub-signals with mastery gap and IRT-difficulty-weighted error, with graceful degradation when a component is unavailable.</li>
+      <li><strong>4.6 Collaborative-filtering fallback</strong> (~½–1 page). Why CF is a fallback and not primary. The <code>CF_FEATURES = [i_norm, A_norm]</code> feature set. Cosine similarity + k-NN. The threshold-and-fallback logic in <code>compute_cf_struggle_scores()</code>.</li>
+      <li><strong>4.7 RAG pipeline</strong> (~1 page). ChromaDB as the embedding store, the 3-condition rebuild guard (collection exists, session_id matches, row_count matches). <code>generate_assistant_suggestions()</code> (per-student, produces coaching bullets for one student) vs <code>generate_cluster_suggestions()</code> (per-question, produces common-mistake summaries).</li>
+      <li><strong>4.8 Lab-session coordination</strong> (~1 page). <code>lab_session.json</code> as the single source of truth. Why a file lock (<code>filelock.FileLock</code>) was chosen over a database (two local processes, no server). Why 6-char codes exclude O/0/I/1 (visual ambiguity). How <code>?aid=</code> URL param persists assistant identity across refreshes and crashes.</li>
+      <li><strong>4.9 UI, routing, deferred actions</strong> (~1 page). Streamlit's single-page-rerun model, why you can't mutate <code>st.session_state</code> after widgets are built, the <code>pending_*</code> deferred-action pattern. View routing priority (selected_question &gt; selected_student &gt; current_view). Plotly click-to-select via <code>on_select="rerun"</code> and <code>point_index</code>.</li>
+      <li><strong>4.10 Sound &amp; mobile ergonomics</strong> (~½ page). Web Audio API injected through zero-height <code>st.components.v1.html()</code> iframes. Why a regular <code>st.markdown()</code> script tag doesn't work. The mobile assistant app's single-column reflow and auto-refresh cadence.</li>
+    </ol></div>
+
+    <div class="rg-section-title specifics">Dashboard V3 specifics — where to draw from</div>
+    <div class="rg-block"><p>Every subsection maps to a <code>Deep dive</code> tab section of the same name. For each subsystem, include <em>one</em> code snippet (ideally ≤12 lines), referenced by filename and line range. Do not paste 50-line functions — either summarise, or break them up. The <code>Code reference</code> tab is the cheapest way to find the right function to quote.</p></div>
+
+    <div class="rg-section-title pitfall">Pitfalls to avoid</div>
+    <div class="rg-pitfalls"><ul>
+      <li>Dumping every function. Select the 1–2 most pedagogically interesting per subsystem.</li>
+      <li>Describing code line-by-line. Describe the <em>intent</em>, show the code as evidence.</li>
+      <li>Forgetting to say <em>what was hard</em>. Examiners reward reflection: "the tricky part was X; I solved it with Y".</li>
+      <li>Pasting config constants without context (<code>SHRINKAGE_K=5</code> alone is noise; "K=5 balances per-student evidence against the class prior — with K=5, a student with 5 submissions gets 50% personal weight" is signal).</li>
+      <li>Claiming the code "works" without any evidence. Evidence lives in Chapter 5.</li>
+    </ul></div>
+
+    <div class="rg-section-title excerpt">Example opener (pattern, not content to copy)</div>
+    <div class="rg-excerpt"><div class="rg-excerpt-label">Pattern from "NLP for Disaster Detection"</div>"I will be implementing my Long-Short Term Memory (LSTM) Network using a Python script, which will be hosted by a C# Form application to simplify the usage from the user's point of view. I have a dataset of Tweets that will be used to train the network. I will also implement a separate Python script to go through the dataset and 'clean' it so that the text is more useable."</div>
+  </div></div>
+
+  <!-- CH 5 — Evaluation -->
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rs11')"><div class="stage-num sn6">5</div><div class="stage-title">Chapter 5 — Evaluation</div><div class="stage-meta"><span class="rg-pagebadge">~8–12 pages</span>Methodology · Quantitative · Qualitative · Robustness · Limitations</div><div class="stage-chevron" id="rsc-s11">▸</div></div>
+  <div class="stage-body" id="rs11">
+    <div class="rg-block"><p><strong>Purpose.</strong> Prove the system worked, using a mix of quantitative results (tables and figures) and qualitative reflection. This is where examiners decide whether the claims in Chapter 1 were defensible.</p></div>
+
+    <div class="rg-section-title">Required subsections</div>
+    <div class="rg-subsec"><ol>
+      <li><strong>5.1 Evaluation methodology</strong> (~1 page). State the four measurements: (a) agreement between parametric and improved struggle rankings, (b) correlation between IRT-fitted <code>b_j</code> and empirical wrong-rate per question, (c) refresh-latency distribution (cache-hit vs miss), (d) qualitative feedback from a real lab session. Explicitly note what you're <em>not</em> measuring (no controlled A/B study, no ground-truth "actually struggling" label).</li>
+      <li><strong>5.2 Datasets &amp; experimental setup</strong> (~1 page). Describe the live lab session(s) you used — module, number of students, number of submissions, duration. Describe the saved-sessions mechanism as your reproducibility affordance (any result can be re-run by loading the snapshot).</li>
+      <li><strong>5.3 Quantitative results</strong> (~3–5 pages, heaviest subsection):
+        <ul style="list-style:none;padding-left:0;margin-top:4px">
+          <li style="margin-top:4px">• Table: Spearman ρ between parametric-S and improved-S top-10 rankings across N sessions.</li>
+          <li>• Table: Pearson r between IRT <code>b_j</code> and empirical wrong-rate per question.</li>
+          <li>• Figure: density plots of S before and after Bayesian shrinkage, demonstrating the "pull low-n toward the mean without flattening the top tail" behaviour.</li>
+          <li>• Table: p50 / p95 refresh latency, cache-hit vs cache-miss.</li>
+          <li>• Case study: one student where improved-S flagged them but parametric-S did not (or vice versa). Walk through the signals to explain the disagreement.</li>
+        </ul>
+      </li>
+      <li><strong>5.4 Qualitative evaluation</strong> (~1 page). What your own experience (and any friend/lab-assistant tester) surfaced. Any false positives ("flagged but actually fine") or false negatives ("ignored but actually stuck"). Pin the instructor's intuition against the leaderboard.</li>
+      <li><strong>5.5 Robustness &amp; failure modes</strong> (~1 page). API goes down — the 10 s cache serves the last good response, user sees a stale-data banner. OpenAI rate-limits — incorrectness falls back to 0.5 per submission. Assistant crashes — <code>?aid=</code> URL param recovers identity on reload. Concurrent writes — filelock serialises; no corruption observed across N sessions.</li>
+      <li><strong>5.6 Limitations</strong> (~½–1 page). Small cohort, single institution, single module family, no ground truth, hand-tuned weights, no controlled A/B experiment, no longitudinal tracking.</li>
+    </ol></div>
+
+    <div class="rg-section-title specifics">Dashboard V3 specifics — where to draw from</div>
+    <div class="rg-block"><p>You already built the <em>Model Comparison</em> view — its screenshots <em>are</em> Figures in §5.3. The <code>data/saved_sessions.json</code> format lets you freeze a session at the moment of submission and replay it deterministically — describe this as your experimental harness in §5.2. For refresh latency, instrument with <code>time.perf_counter()</code> around <code>load_data()</code> and log to a CSV (don't eyeball it).</p></div>
+
+    <div class="rg-section-title pitfall">Pitfalls to avoid</div>
+    <div class="rg-pitfalls"><ul>
+      <li>Presenting a single number with no comparison. Always pair it with a baseline or a distribution.</li>
+      <li>Claiming more than the evaluation supports. "The system works well" is unjustified; "improved-S and parametric-S agree on 8 of 10 top-flagged students, ρ=0.82" is defensible.</li>
+      <li>Dropping figures without referencing them in the prose.</li>
+      <li>Mixing methodology (§5.1) with results (§5.3). State what you'll measure <em>then</em> measure it.</li>
+      <li>Treating §5.6 as an apology. Limitations are a mark of honest science — frame them as future-work hooks.</li>
+    </ul></div>
+
+    <div class="rg-section-title excerpt">Example opener (pattern, not content to copy)</div>
+    <div class="rg-excerpt"><div class="rg-excerpt-label">Pattern from "NLP for Disaster Detection"</div>"For my evaluation, I will be defining LSTM Networks with different parameters to test their accuracies and find a most efficient model. Testing each model will consist of two stages: testing against the … dataset, and testing on … The first evaluation stage will test the model's accuracy against …"</div>
+  </div></div>
+
+  <!-- CH 6 — Conclusion & Future Work -->
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rs12')"><div class="stage-num sn7">6</div><div class="stage-title">Chapter 6 — Conclusion &amp; Future Work</div><div class="stage-meta"><span class="rg-pagebadge">~3–5 pages</span>Summary · Aims revisited · Reflection · Future work</div><div class="stage-chevron" id="rsc-s12">▸</div></div>
+  <div class="stage-body" id="rs12">
+    <div class="rg-block"><p><strong>Purpose.</strong> Close the loop. Restate what you set out to do, show that you did it (with pointers to Chapter 5), reflect, and point at the next step.</p></div>
+
+    <div class="rg-section-title">Required subsections</div>
+    <div class="rg-subsec"><ol>
+      <li><strong>6.1 Summary</strong> (~1 page, 2–3 paragraphs). Restate the problem, the approach, and the key results — no new material. End with a one-sentence contribution statement.</li>
+      <li><strong>6.2 Aims revisited</strong> (~½–1 page). Take each aim from §1.3 and pair it with the evidence section. <em>"Aim: build a live learning-analytics system — met, as demonstrated by §5.3 refresh-latency results and §5.4 qualitative feedback."</em></li>
+      <li><strong>6.3 Reflections</strong> (~½–1 page). What surprised you? What would you do differently? Examiners reward honest reflection. Example: "Cohort normalisation made a bigger difference than expected — the pre-normalisation version placed 80% of students below the leaderboard threshold."</li>
+      <li><strong>6.4 Future work</strong> (~1 page, 4–6 items, bullet list). Each with 2–3 sentences of justification.
+        <ul style="list-style:none;padding-left:0;margin-top:4px">
+          <li>• Multi-cohort validation across multiple institutions.</li>
+          <li>• Learned weight tuning via a labelled instructor-flag dataset (currently hand-set).</li>
+          <li>• Embed the coaching output as hints for the <em>student</em>, not the assistant — closing the human loop.</li>
+          <li>• A controlled A/B study vs a no-dashboard control group.</li>
+          <li>• Mobile push notifications so assistants don't have to poll.</li>
+          <li>• Cross-semester longitudinal tracking of per-student mastery trajectories.</li>
+        </ul>
+      </li>
+    </ol></div>
+
+    <div class="rg-section-title specifics">Dashboard V3 specifics — where to draw from</div>
+    <div class="rg-block"><p>The <code>Deep dive → Design decisions (FAQ)</code> section captures decisions where you chose between two alternatives — the path not taken often becomes future work. Anything there marked "deferred" or "simpler alternative" is a future-work candidate.</p></div>
+
+    <div class="rg-section-title pitfall">Pitfalls to avoid</div>
+    <div class="rg-pitfalls"><ul>
+      <li>Introducing new material (new results, new claims) in the conclusion.</li>
+      <li>Over-claiming — conclusion statements must be backed by Chapter 5 evidence.</li>
+      <li>Listing 20 future-work items. Four to six, each defensible in one paragraph.</li>
+      <li>Writing future work that boils down to "make it better" or "more data". Be specific: <em>which</em> data, <em>which</em> metric, <em>which</em> experiment.</li>
+    </ul></div>
+
+    <div class="rg-section-title excerpt">Example opener (pattern, not content to copy)</div>
+    <div class="rg-excerpt"><div class="rg-excerpt-label">Pattern from "Mathematical Model of Football"</div>"As was discussed and observed in chapter 5, we were able to develop a working software implementation of our mathematical model devised for the representation of the game of football, alongside a game theoretical approach to action selection in an attempt to maximise the resulting payoff and thus positional value of the player agents. While our models performed well in comparison to the non-game theoretical benchmarks developed …"</div>
+  </div></div>
+
+  <!-- Back matter -->
+  <div class="stage"><div class="stage-header" onclick="stageToggle('rs13')"><div class="stage-num sn8">7</div><div class="stage-title">Back matter — References &amp; Appendices</div><div class="stage-meta"><span class="rg-pagebadge">open-ended</span>Bibliography · User manual · Code listings</div><div class="stage-chevron" id="rsc-s13">▸</div></div>
+  <div class="stage-body" id="rs13">
+    <div class="rg-block"><p><strong>Purpose.</strong> Anything the examiner needs to verify, install, or look up — but not in the main flow. Appendices are <em>optional reading</em>, so don't hide load-bearing argumentation here.</p></div>
+
+    <div class="rg-section-title">Required subsections</div>
+    <div class="rg-subsec"><ol>
+      <li><strong>References / Bibliography</strong>. IEEE or Harvard — pick one and stay consistent throughout (the module handbook usually specifies). Aim for ~25 refs minimum for a masters thesis. If using LaTeX, use BibTeX. Tool: Zotero + the Better BibTeX plugin makes this almost automatic.</li>
+      <li><strong>Appendix A — Installation &amp; user manual</strong> (~1–2 pages). Clone the repo, install Python 3.11, <code>pip install -r code/requirements.txt</code>, populate <code>.streamlit/secrets.toml</code> with <code>OPENAI_API_KEY</code>, run <code>python -m streamlit run code/app.py</code> (port 8501) and <code>streamlit run code/lab_app.py --server.port 8502</code> in two terminals, start a session, join as an assistant, walk through the typical flow.</li>
+      <li><strong>Appendix B — Selected code listings</strong>. Only the <em>most</em> pedagogically valuable functions. Candidates: <code>compute_student_struggle_scores()</code>, <code>bkt_update()</code>, <code>fit_irt_1pl()</code>, <code>generate_session_code()</code>, the deferred-actions pattern in <code>instructor_app.main()</code>. Do <em>not</em> paste the entire codebase.</li>
+      <li><strong>Appendix C — Settings reference table</strong>. Copy from <code>Deep dive → Settings reference</code>. This is the single lookup table for every configurable parameter.</li>
+    </ol></div>
+
+    <div class="rg-section-title pitfall">Pitfalls to avoid</div>
+    <div class="rg-pitfalls"><ul>
+      <li>Putting essential evidence in appendices. If it's load-bearing, it goes in Chapter 4 or 5.</li>
+      <li>Inconsistent citation style — fix this early with a reference manager, not the night before submission.</li>
+      <li>Missing a reference you cited in the text. Use <code>\cite</code> in LaTeX or field-codes in Word; never manually type (Author, Year).</li>
+      <li>Appendix B being 40 pages of code. Be surgical — 5–8 functions is enough to prove pedagogical depth.</li>
+    </ul></div>
+  </div></div>
+
+  <div class="rg-checklist">
+    <div class="rg-checklist-title">Pre-submission checklist</div>
+    <ul>
+      <li>All chapters drafted, read end-to-end in one sitting without stopping.</li>
+      <li>All figures numbered, captioned, referenced in prose, and legible at print resolution.</li>
+      <li>All tables numbered, captioned, and referenced.</li>
+      <li>Every citation in the text appears in the bibliography, and vice versa.</li>
+      <li>Notation is consistent — <code>S</code> means the same thing in Chapters 2, 3, 4, and 5.</li>
+      <li>Abstract reads as a self-contained summary — someone who stops reading after page 1 knows what you did.</li>
+      <li>Introduction's §1.3 aims map one-to-one to Conclusion's §6.2 aims-revisited.</li>
+      <li>No code in Chapter 3; no appendix-level code pasted into Chapter 4.</li>
+      <li>Page count within the module's specified range.</li>
+      <li>Supervisor has read at least one full draft and signed off.</li>
+      <li>Plagiarism/similarity report run (Turnitin or similar) and within university thresholds.</li>
+      <li>Proofread for spelling, punctuation, and tense consistency — at least two passes, one at least 24 h after writing.</li>
+      <li>Final PDF exports cleanly with all fonts embedded; test on a different machine.</li>
+    </ul>
+  </div>
+
+  <div class="rg-closing"><strong>Viva preparation.</strong> If you can answer every quiz question across all five Roadmap stages without clicking "Reveal answer", and explain any section from the Deep dive tab at a whiteboard, you will defend this thesis comfortably. The best possible answer to a viva question is: "Yes, I considered that — here's why I chose X over Y, and here's the experiment or source that backs it."</div>
+
+</div><!-- end panel-report -->
+
+<script>
+/* ══════════════════════════════════════════
+   PERSISTENCE LAYER
+══════════════════════════════════════════ */
+const STORAGE_KEY='dashboardV3Toolkit.v1';
+let STATE=(()=>{ try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch(e){return {};} })();
+let _saveTimer=null;
+function saveState(){
+  if(_saveTimer)clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(()=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify(STATE));}catch(e){}},150);
+}
+function saveNow(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(STATE));}catch(e){}}
+
+/* ── Top-level panel switcher ── */
+function switchPanel(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.top-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  else{const tab=document.querySelector('.top-tab[data-panel="'+id+'"]');if(tab)tab.classList.add('active');}
+  STATE.tab=id;saveState();
+}
+function switchPanelByName(id){
+  const btn=document.querySelector('.top-tab[data-panel="'+id+'"]');
+  switchPanel(id,btn);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══════════════════════════════════════════
+   CODE REFERENCE JS
+══════════════════════════════════════════ */
+const ALL=[
+  {file:"config.py",name:"(constants)",tags:["api"],desc:"All tunable parameters. No functions — pure constants.",detail:`<p>Key groups:<br><code>STRUGGLE_WEIGHT_*</code> — 7 weights (N,T,I,R,A,D,REP) summing to 1.0.<br><code>DECAY_HALFLIFE_SECONDS=1800</code> — 30-min half-life for A_raw exponential decay.<br><code>SHRINKAGE_K=5</code> — Bayesian shrinkage; students with n&lt;&lt;5 pulled toward class mean.<br><code>CORRECT_THRESHOLD=0.5</code> — used in 4 places to define "correct".<br><code>BKT_P_INIT/LEARN/GUESS/SLIP</code> — 4 BKT parameters.<br><code>SMOOTHING_ENABLED=True</code> — flag is True but apply_temporal_smoothing() is never called. Known mismatch.<br>Weight-sum asserts now fire at import time.</p>`},
+  {file:"paths.py",name:"ensure_runtime_data_layout()",tags:["state"],desc:"Creates data/ dir, migrates legacy root-level JSON files.",detail:`<p>Moves <code>saved_sessions.json</code> and <code>lab_session.json</code> from project root into <code>data/</code> if they exist. Safe to call multiple times.</p>`},
+  {file:"paths.py",name:"saved_sessions_path() / lab_session_path() / rag_chroma_dir()",tags:["state"],desc:"Runtime path helpers with legacy fallback.",detail:`<p>All prefer the <code>data/</code> subdirectory, fall back to legacy root-level paths if migration failed. <code>rag_chroma_dir()</code> creates the directory if it doesn't exist.</p>`},
+  {file:"data_loader.py",name:"fetch_raw_data()",tags:["api"],desc:"GET request to the AI tutor API. Cached for CACHE_TTL=10 seconds.",detail:`<p><code>@st.cache_data(ttl=10)</code> — repeated renders within 10s use the cached string. Returns raw text (JSON or XML).</p>`},
+  {file:"data_loader.py",name:"detect_format(raw) / parse_json_response(raw) / parse_xml_response(raw)",tags:["api"],desc:"Format detection and parsing. JSON has embedded XML inside the 'xml' field.",detail:`<p>detect_format: tries json.loads() on the first line.<br>parse_json: iterates lines, parses outer JSON, then parses the embedded XML string using xml.etree to extract submission elements.<br>parse_xml: walks .//Payload → .//submission. Both return identical list-of-dicts structure.</p>`},
+  {file:"data_loader.py",name:"normalize_and_clean(records)",tags:["api"],desc:"Converts records to DataFrame, excludes test modules, parses timestamps, adds academic_period.",detail:`<p>Drops EXCLUDED_MODULES. Applies MODULE_RENAME_MAP. Coerces timestamps (invalid → NaT → dropped). Sorts ascending. Calls add_academic_period_column().</p>`},
+  {file:"data_loader.py",name:"load_data()",tags:["api"],desc:"Top-level fetch → detect → parse → clean. Double-cached. Returns (DataFrame, error_msg).",detail:`<p>Second cache layer: hashes raw response, stores DataFrame in st.session_state["_df"]. If hash matches, skips parse+clean entirely. Returns empty DataFrame with correct schema on any error.</p>`},
+  {file:"data_loader.py",name:"filter_by_module / filter_by_time / filter_by_session_start / filter_by_datetime_window()",tags:["api"],desc:"Four filter helpers applied in the sidebar in order.",detail:`<p>Applied: module → time → session_start → datetime_window (saved sessions). Each returns a filtered copy of the DataFrame.</p>`},
+  {file:"data_loader.py",name:"save_session_record / load_saved_sessions / delete_session_record / apply_saved_session_to_state()",tags:["state"],desc:"CRUD and restore for data/saved_sessions.json.",detail:`<p>All writes use atomic .tmp → replace. load_saved_sessions deduplicates by ID, returns newest-first. apply_saved_session_to_state validates module filter against current data and warns if stale.</p>`},
+  {file:"analytics.py",name:"_call_openai_batch(feedbacks) / compute_incorrectness_column(df)",tags:["api","model"],desc:"Batch-scores ai_feedback via GPT-4o-mini. Results cached in _incorrectness_cache.",detail:`<p>Batches of 50. Prompt: return JSON array of [0,1] floats. Empty feedback → 0.5 without API call. Failure → [0.5]*batch. Cache persists across reruns in the same process.</p>`},
+  {file:"analytics.py",name:"min_max_normalize(series)",tags:["model"],desc:"(x-min)/(max-min) clamped to [0,1]. Returns 0.5 if min==max (degenerate cohort).",detail:`<p>Used for ALL 7 struggle signals and ALL 5 difficulty signals. Returns 0.5 (not 0.0) when all values are equal — preserves the weight contribution rather than silently zeroing it.</p>`},
+  {file:"analytics.py",name:"compute_recent_incorrectness(student_submissions)",tags:["model"],desc:"Exponentially time-decayed mean over last 5 submissions. This is A_raw.",detail:`<p>λ = log(2)/1800. w_i = exp(-λ × Δt_i). Weights normalised to sum to 1. Falls back to equal weights if all timestamps identical. Returns float in [0,1].</p>`},
+  {file:"analytics.py",name:"_compute_slope(student_submissions)",tags:["model"],desc:"Linear regression slope of incorrectness vs submission order. Positive = getting worse.",detail:`<p>np.polyfit(range(n), scores, 1)[0]. Returns 0.0 if &lt;2 submissions. Feeds d_hat.</p>`},
+  {file:"analytics.py",name:"compute_student_struggle_scores(df)",tags:["model"],desc:"THE main scoring function. All 7 signals cohort-normalised. Shrinkage is final transform.",detail:`<p>Per student: n, t, i_hat, r_hat, A_raw, d_raw, rep_hat computed.<br>All 7 normalised: n→n_hat, t→t_hat, i_hat→i_norm, r_hat→r_norm, A_raw→A_norm, d_raw→d_hat, rep_hat→rep_norm.<br>Formula: S = 0.10·n̂ + 0.10·t̂ + 0.20·i_norm + 0.10·r_norm + 0.38·A_norm + 0.05·d̂ + 0.07·rep_norm<br>Shrinkage: w_n = n/(n+5); S_final = w_n·S + (1-w_n)·class_mean. Shrinkage is the final transform.</p>`},
+  {file:"analytics.py",name:"compute_cf_struggle_scores(struggle_df, threshold, k)",tags:["model"],desc:"CF layer. Features: n_hat, t_hat, i_norm, A_norm, d_hat. NaN guard before cosine_similarity.",detail:`<p>Builds cosine similarity matrix W. For each unflagged student: k=3 nearest neighbours, CF score = weighted mean of whether neighbours are flagged. Falls back if &lt;4 students or 0 above threshold. Diagnostic overlay only — does NOT rewrite struggle labels.</p>`},
+  {file:"analytics.py",name:"compute_question_difficulty_scores(df)",tags:["model"],desc:"5 signals all cohort-normalised. Formula: D = 0.28·c_norm + 0.12·t̃ + 0.20·ã + 0.20·f_norm + 0.20·p_norm",detail:`<p>c_tilde = incorrect rate. t_raw = avg time per student. a_raw = avg attempts. f_tilde = mean incorrectness. p_tilde = first-attempt failure rate. c, f, p now cohort-normalised alongside t and a.</p>`},
+  {file:"analytics.py",name:"cluster_question_mistakes(question_df, question_id)",tags:["model"],desc:"TF-IDF + K-means on wrong answers. Silhouette picks k. SHA1 cache key.",detail:`<p>Filters to incorrectness ≥ 0.5. TF-IDF vectorise (max 500 features). Try k=2..5, pick best cosine silhouette. Cache key uses SHA1 digest (not Python hash(), which is salted per-process and would break the cache across reruns).</p>`},
+  {file:"analytics.py",name:"apply_temporal_smoothing()",tags:["model"],desc:"EMA stub. SMOOTHING_ENABLED=True in config but never called in the pipeline.",detail:`<p>Known code/report mismatch. The flag is True; the function is not wired into compute_student_struggle_scores().</p>`},
+  {file:"models/measurement.py",name:"compute_incorrectness_with_confidence(df)",tags:["model"],desc:"Wraps incorrectness scoring with a confidence value [0,1] per submission.",detail:`<p>Confidence = base(0.7) × length_factor × (0.5 + 0.5·extremity_factor). length_factor ramps 0→1 over MIN_LENGTH=20 chars. extremity_factor = 2·|score-0.5|. Empty feedback or NaN score → confidence=0.0.</p>`},
+  {file:"models/irt.py",name:"build_response_matrix() / fit_rasch_model() / compute_irt_difficulty_scores()",tags:["model"],desc:"Full Rasch 1PL IRT pipeline.",detail:`<p>build_response_matrix: best attempt per pair, binary coding, iterative filtering.<br>fit_rasch_model: joint MLE via L-BFGS-B, analytical gradient with centering projection (grad_θ = grad_θ - mean(grad_θ)), centres θ after fitting.<br>compute_irt_difficulty_scores: maps b_j → sigmoid → [0,1]. Requires &gt;1 distinct difficulty value.</p>`},
+  {file:"models/bkt.py",name:"bkt_update() / compute_all_mastery() / compute_student_mastery_summary()",tags:["model"],desc:"BKT Hidden Markov Model. Explicit sort before replay.",detail:`<p>bkt_update: Bayes update + learning transition. Result clipped to [0,1].<br>compute_all_mastery: sorts by [timestamp, question] using mergesort before grouping — BKT is sequential, order determines posterior. Secondary key on question for deterministic output with identical timestamps.<br>mastery_summary: mean_mastery, min_mastery, mastered_count (≥0.95), total_questions.</p>`},
+  {file:"models/improved_struggle.py",name:"compute_improved_struggle_scores()",tags:["model"],desc:"S = 0.45·behavioral + 0.30·mastery_gap + 0.25·difficulty_adjusted. Min-max removed. Shrinkage is final.",detail:`<p>Behavioral = (A_norm+r_norm+d̂+rep_norm)/4 — all sub-signals cohort-normalised.<br>Mastery gap = max(0, mean_mastery-(1-A_raw)). Missing mastery imputed to class_mean (not 0.0). Coverage guard: if &lt;50% have mastery records, w_mg redistributed to w_beh.<br>Difficulty-adjusted: coverage shrinkage toward cohort mean. IRT needs &gt;1 distinct value.<br>Bayesian shrinkage is the final transform. Min-max was removed — it was fighting shrinkage.</p>`},
+  {file:"lab_state.py",name:"read/write/start/end/join/assign/mark_helped()",tags:["state"],desc:"Full session state machine over data/lab_session.json with filelock.",detail:`<p>All mutations go through FileLock(timeout=5). All writes: .tmp → replace (atomic on Unix). _normalize_state() called on every read. join_session reuses existing ID if name matches (handles page refresh). get_assignment self-heals stale cached state.</p>`},
+  {file:"rag.py",name:"build_rag_collection() / generate_assistant_suggestions() / generate_cluster_suggestions()",tags:["api","model"],desc:"Two-layer RAG: pandas pre-filter + ChromaDB → GPT-4o-mini.",detail:`<p>build_rag_collection: embeds question|answer|feedback docs with all-MiniLM-L6-v2. Rebuild guard: session_id AND len(df) must match cache.<br>generate_assistant_suggestions: Layer 1 = pandas filter by student_id. Layer 2 = ChromaDB where={student_id}. Cached per student_id.<br>generate_cluster_suggestions: same collection, where={question}. Instructor audience. Cached per question_id.</p>`},
+  {file:"instructor_app.py",name:"main() / render_sidebar() / _render_lab_assignment_panel()",tags:["ui","state"],desc:"Streamlit orchestration: load → filter → score → route → render.",detail:`<p>main(): set_page_config → CSS → ensure_layout → init_state → deferred_actions → load_data → render_sidebar → compute_analytics → route.<br>Deferred actions MUST run before any widget is built.<br>Routing priority: selected_student → selected_question → Data Analysis → Model Comparison → Settings → Previous Sessions → in_class_view.</p>`},
+  {file:"assistant_app.py",name:"main() / render_join/unassigned/assigned_view()",tags:["ui"],desc:"Mobile assistant app. Routes via ?aid= URL param.",detail:`<p>Restores assistant_id from ?aid= query param on every load. Routes: no session → ended screen; not joined → join screen; joined+assigned → assigned view; joined+unassigned → waiting view.<br>render_assigned_view shows: struggle badge, top-3 questions, timeline, RAG bullets, Mark Helped button.</p>`},
+  {file:"ui/views.py",name:"in_class_view / student_detail_view / question_detail_view / comparison_view / settings_view",tags:["ui"],desc:"All dashboard pages.",detail:`<p>in_class_view: summary cards, leaderboards, CF panel, distributions, formula panel.<br>student_detail: 4 cards, timeline, retry trend, top questions, similar students (CF).<br>question_detail: 4 cards, confidence indicator, mistake clusters, RAG cluster suggestions.<br>comparison_view: scatter + table, baseline vs IRT/improved. Gated by improved_models_enabled.</p>`},
+  {file:"sound.py",name:"8 Web Audio API sound effects",tags:["ui"],desc:"Zero-height iframe injection — bypasses Streamlit's CSP on script tags.",detail:`<p>Each function calls components.html('&lt;script&gt;...&lt;/script&gt;', height=0). Can't use st.markdown() for scripts — Streamlit sanitises them. The iframe is a separate browsing context that executes JS freely.</p><p><strong>The 8 sounds:</strong><br><code>play_session_start()</code> — sawtooth sweep + chord (~1.8s, boot)<br><code>play_session_end()</code> — falling sweep (~1.2s, shutdown)<br><code>play_selection()</code> — double beep (~0.15s, leaderboard click)<br><code>play_navigation()</code> — triangle sweep (~0.4s, page nav)<br><code>play_refresh()</code> — sine ping (~0.25s, data scan)<br><code>play_assistant_join()</code> — 4-note arpeggio (~0.6s, assistant joined)<br><code>play_assignment_received()</code> — two square pings (~0.2s, new assignment on phone)<br><code>play_high_struggle()</code> — pulsing two-tone alarm (~1.1s, warning)</p>`},
+  {file:"academic_calendar.py",name:"get_academic_period(date) / add_academic_period_column(df) / academic_period_sorter() / get_academic_week_window()",tags:["api","state"],desc:"Maps calendar dates to Loughborough 2025/26 academic labels. Drives week-level filtering and grouping.",detail:`<p>49-week timeline: Semester 1 weeks, Christmas breaks, Inter-Semester Week, Semester 2 weeks, Easter breaks. <code>get_academic_period(date)</code> returns a human label ("Sem 1 - Wk 3", "Christmas 2", etc.). <code>add_academic_period_column()</code> attaches the label as a DataFrame column during normalization. <code>academic_period_sorter()</code> returns a sort key that orders periods chronologically rather than alphabetically. <code>get_academic_week_window()</code> returns (start_dt, end_dt) for the "Current Academic Week" / "Last Academic Week" time-filter presets.</p>`},
+  {file:"models/measurement.py",name:"MEASUREMENT_CONFIDENCE_BASE / MIN_LENGTH / compute_incorrectness_with_confidence()",tags:["model"],desc:"Per-submission confidence score. Used to flag low-confidence questions in the question detail view.",detail:`<p>confidence = base(0.7) × length_factor × (0.5 + 0.5·extremity_factor)<br>length_factor ramps 0→1 over <code>MIN_LENGTH</code>=20 characters of feedback.<br>extremity_factor = 2·|score−0.5| — scores near 0 or 1 get full extremity, scores near the midpoint get less.<br>Empty feedback or NaN score → confidence=0.0. A 0.5 score from long feedback gets low but non-zero confidence; a 0.5 from empty feedback gets exactly 0.</p>`},
+  {file:"lab_state.py",name:"_read_state_unlocked / _write_state_unlocked / _normalize_state / _lock",tags:["state"],desc:"Internal state primitives. Every public mutation goes through _lock() + _normalize_state().",detail:`<p><code>_lock()</code> returns <code>filelock.FileLock(timeout=5)</code>. <code>_normalize_state()</code> ensures the state dict has all required keys (backfills missing fields for forward compatibility). <code>_write_state_unlocked()</code> writes to <code>.tmp</code> then atomic replaces. Graph god-nodes — if you need to reason about concurrency, these three are the centre of the graph.</p>`},
+];
+const RTAGS=[{id:'all',label:'All'},{id:'model',label:'Model'},{id:'api',label:'API / Data'},{id:'state',label:'State'},{id:'ui',label:'UI'}];
+let rActiveTag=STATE.refTag||'all',rQuery=STATE.refQuery||'';
+function refRender(){
+  const q=rQuery.toLowerCase();
+  const filtered=ALL.filter(f=>{
+    const tm=rActiveTag==='all'||f.tags.includes(rActiveTag);
+    const tx=!q||f.name.toLowerCase().includes(q)||f.desc.toLowerCase().includes(q)||f.file.toLowerCase().includes(q)||(f.detail||'').toLowerCase().includes(q);
+    return tm&&tx;
+  });
+  document.getElementById('ref-count').textContent=filtered.length+' of '+ALL.length+' entries shown';
+  document.getElementById('ref-list').innerHTML=filtered.map((f,i)=>{
+    const tg=f.tags.map(t=>`<span class="rtag rtag-${t}">${t}</span>`).join('');
+    return `<div class="fn-card"><div class="fn-header" onclick="refToggle('rb${i}','rc${i}')"><div class="fn-left"><div class="fn-file">${f.file}</div><div class="fn-name">${f.name}</div><div class="rtags">${tg}</div></div><div class="fn-right"><div class="fn-desc">${f.desc}</div></div><div class="rchevron" id="rc${i}">▸</div></div><div class="fn-body" id="rb${i}">${f.detail||''}</div></div>`;
+  }).join('');
+}
+function refToggle(bid,cid){
+  const b=document.getElementById(bid),c=document.getElementById(cid);
+  if(b.classList.contains('open')){b.classList.remove('open');c.textContent='▸';}
+  else{b.classList.add('open');c.textContent='▾';}
+}
+const rtabsEl=document.getElementById('ref-tabs');
+RTAGS.forEach(t=>{
+  const el=document.createElement('div');
+  el.className='ftab'+(t.id===rActiveTag?' active':'');
+  el.textContent=t.label;
+  el.dataset.tagid=t.id;
+  el.onclick=()=>{rActiveTag=t.id;document.querySelectorAll('#ref-tabs .ftab').forEach(e=>e.classList.remove('active'));el.classList.add('active');STATE.refTag=t.id;saveState();refRender();};
+  rtabsEl.appendChild(el);
+});
+const refSearch=document.getElementById('ref-search');
+refSearch.value=rQuery;
+refSearch.addEventListener('input',e=>{rQuery=e.target.value;STATE.refQuery=rQuery;saveState();refRender();});
+refRender();
+
+/* ══════════════════════════════════════════
+   GLOSSARY JS
+══════════════════════════════════════════ */
+const GLOSSARY=[
+  {term:"Incorrectness",tags:["metric"],summary:"Continuous [0,1] score of how wrong a submission is, derived from ai_feedback via GPT-4o-mini.",detail:`<p>Lower = more correct. The foundation signal for every downstream struggle/difficulty calculation. Empty feedback → 0.5 fallback (not 0.0 — see <strong>Design decisions</strong> FAQ). Cached per-process in <code>_incorrectness_cache</code>.</p>`},
+  {term:"A_raw",tags:["metric"],summary:"Recent incorrectness — exponentially time-decayed mean of last 5 submissions.",detail:`<p>Window = <code>RECENT_SUBMISSION_COUNT=5</code>. Half-life = <code>DECAY_HALFLIFE_SECONDS=1800</code> (30 min). A 30-minute-old submission contributes half the weight of a fresh one.</p><div class="formula-box">λ = ln(2)/1800<br>w_i = exp(−λ × Δt_i)<br>A_raw = Σ(w_i · incorrectness_i) / Σw_i</div>`},
+  {term:"A_norm",tags:["metric"],summary:"Cohort-normalised A_raw in [0,1]. Heaviest weight (38%) in the struggle formula.",detail:`<p>A_raw min-max-normalised across the whole cohort. Means a student's A_norm=0.8 actually means "top 20% most-recently-struggling". Without this, raw A_raw=0.6 could be high or median depending on class distribution.</p>`},
+  {term:"Retry rate (r̂ / r_norm)",tags:["metric"],summary:"Fraction of attempts on already-seen questions. Cohort-normalised to r_norm.",detail:`<p><code>r̂ = 1 − (unique_questions / n_submissions)</code>. High when a student is hammering the same question without moving on.</p>`},
+  {term:"Repetition rate (rep̂ / rep_norm)",tags:["metric"],summary:"Exact-answer repetition on the same question. Catches copy-paste attempts.",detail:`<p>Counts identical submissions (character-for-character) on the same question. Strong signal of frustration or giving up rather than learning.</p>`},
+  {term:"Trajectory (d̂)",tags:["metric"],summary:"Slope of incorrectness vs submission order. Positive = getting worse.",detail:`<p><code>d_raw = np.polyfit(range(n), scores, 1)[0]</code>. Min-max normalised across the cohort to d̂. Small weight (5%) — trajectory is noisy with low n.</p>`},
+  {term:"Cohort normalisation",tags:["technique"],summary:"Min-max scaling across the whole class so configured weights equal effective weights.",detail:`<p>Every signal that feeds a weighted sum is first <code>min_max_normalize()</code>'d across the cohort. Degenerate case (min==max) returns 0.5, not 0.0, to preserve weight contribution. See <strong>Design decisions</strong> for why this matters.</p>`},
+  {term:"Bayesian shrinkage",tags:["technique"],summary:"Final transform that pulls low-n students toward the class mean.",detail:`<div class="formula-box">w_n = n / (n + K)   where K=5<br>S_final = w_n · S_raw + (1 − w_n) · class_mean</div><p>n=2 → 71% pulled to mean. n=10 → 33%. n=50 → barely affected. Prevents noise on a student's first few submissions from triggering "Needs Help".</p>`},
+  {term:"SHRINKAGE_K",tags:["technique","system"],summary:"Pseudo-count K=5 in the shrinkage formula. Empirically chosen.",detail:`<p>With K=5, a student reaches 50% individual weight at n=5 submissions. Matches typical lab-session engagement after the first 5-10 minutes.</p>`},
+  {term:"CORRECT_THRESHOLD",tags:["system"],summary:"0.5 cutoff between correct and incorrect. Used in 4 places.",detail:`<p>Used by: <code>compute_question_difficulty_scores()</code> (c_tilde), <code>build_response_matrix()</code> (IRT binary coding), <code>bkt_update()</code> calls (BKT observation type), <code>cluster_question_mistakes()</code> (wrong-answer filter).</p>`},
+  {term:"BKT — Bayesian Knowledge Tracing",tags:["model"],summary:"2-state Hidden Markov Model: does the student know the skill or not?",detail:`<p>Hidden state = learned/not. Observed = correct/wrong. Four parameters:</p><div class="formula-box">P(L₀) = 0.3  (prior)<br>P(T)  = 0.1  (transition: learning rate)<br>P(G)  = 0.2  (guess when not learned)<br>P(S)  = 0.1  (slip when learned)</div><p>Defaults are textbook (Corbett &amp; Anderson). Can be MLE-fitted from data via <code>fit_bkt_parameters()</code>.</p>`},
+  {term:"Mastery",tags:["model"],summary:"Posterior P(L) for a (student, question) pair after replaying all their submissions.",detail:`<p>Computed by <code>compute_all_mastery()</code> — sorts by [timestamp, question] using mergesort, then applies <code>bkt_update()</code> sequentially. <code>BKT_MASTERY_THRESHOLD=0.95</code> defines "mastered".</p>`},
+  {term:"IRT / Rasch model",tags:["model"],summary:"1-parameter Item Response Theory: estimate latent student ability θ and question difficulty b.",detail:`<div class="formula-box">P(correct | θ_i, b_j) = sigmoid(θ_i − b_j)</div><p>Joint MLE via L-BFGS-B with analytical gradient and centering projection. After fit, <code>irt_difficulty = sigmoid(b_j)</code> maps to [0,1].</p>`},
+  {term:"θ (theta)",tags:["model"],summary:"Latent student ability parameter in IRT. Higher = more capable.",detail:`<p>Centred after fitting (θ = θ − mean(θ)) for identifiability. Shared across all questions a student has attempted.</p>`},
+  {term:"b_j",tags:["model"],summary:"Latent question difficulty parameter in IRT. Higher = harder.",detail:`<p>One per question. Mapped to irt_difficulty via sigmoid. Requires &gt;1 distinct b value across the response matrix, else degrades gracefully to constant 0.5.</p>`},
+  {term:"Mastery gap",tags:["metric"],summary:"Component of the improved struggle score. Positive = underperforming vs demonstrated ability.",detail:`<div class="formula-box">recent_performance = 1 − A_raw<br>mastery_gap = max(0, mean_mastery − recent_performance)</div><p>Clamped at zero because "outperforming your mastery" is not a struggle signal. Missing mastery imputed to class_mean.</p>`},
+  {term:"Difficulty-adjusted incorrectness",tags:["metric"],summary:"Component of improved struggle. Failing easy questions counts more than failing hard ones.",detail:`<p>Coverage-weighted blend of user and cohort mean. Uses IRT difficulty to reweight per submission. If &lt;50% of a student's recent submissions have IRT coverage, leans heavily on the cohort mean.</p>`},
+  {term:"Coverage",tags:["technique"],summary:"Fraction of a student's recent submissions with valid model data.",detail:`<p>In improved struggle: n_covered / n_recent. Used as a graceful-degradation dial. Coverage &lt; 0.5 for BKT → mastery-gap weight redistributed. Coverage &lt; 0.5 for IRT → difficulty-adjusted component leans on cohort mean.</p>`},
+  {term:"Collaborative filtering (CF)",tags:["model","technique"],summary:"Second-layer detection. Unflagged students similar to flagged ones get a CF score.",detail:`<p>Cosine similarity on 5 cohort-normalised features (n̂, t̂, i_norm, A_norm, d̂). For each unflagged student, k=3 nearest neighbours; CF score = weighted mean of whether they're flagged. Diagnostic overlay — does NOT rewrite struggle labels.</p>`},
+  {term:"RAG — Retrieval-Augmented Generation",tags:["model","technique"],summary:"Two-layer retrieval: pandas pre-filter + ChromaDB semantic → GPT-4o-mini → 2–3 coaching bullets.",detail:`<p>Layer 1: pandas filter by student_id (privacy). Layer 2: ChromaDB cosine-similarity over all-MiniLM-L6-v2 embeddings. Top-5 snippets + struggle context → GPT-4o-mini → JSON array of bullets. Cached per (student_id or question_id).</p>`},
+  {term:"Session code",tags:["system"],summary:"6-char alphanumeric identifier for joining a live lab session.",detail:`<p>Excludes O/0/I/1 to avoid verbal confusion. Instructor generates by clicking Start Session; assistants enter it on the mobile app's join screen.</p>`},
+  {term:"Assignment",tags:["system"],summary:"A pairing of one lab assistant to one student, held in lab_session.json.",detail:`<p>Schema: <code>assignments[student_id] = {assistant_id, status}</code>. Status progresses: helping → helped. Cleared on Mark Helped or when the assistant leaves.</p>`},
+  {term:"Deferred actions",tags:["system"],summary:"Streamlit pattern: queued state mutations applied at the top of main() before any widget is built.",detail:`<p>Streamlit cannot mutate <code>st.session_state</code> for a widget <em>after</em> that widget has rendered in the same run. Flags like <code>pending_session_load_record</code> and <code>pending_return_to_live_data</code> are set by event handlers and consumed at the next rerun's start.</p>`},
+  {term:"Academic period",tags:["system"],summary:"Loughborough 2025/26 calendar label attached to every row during normalisation.",detail:`<p>"Sem 1 - Wk 3", "Christmas 2", "Inter Semester Week", "Easter 1", etc. Driven by <code>academic_calendar.py</code>. Used for the "Current/Last Academic Week" time-filter preset and the Previous Sessions grouping.</p>`},
+  {term:"Graceful degradation",tags:["technique"],summary:"Redistribute weights of unavailable components instead of failing.",detail:`<p>Improved-struggle example: BKT unavailable → mastery-gap weight added to behavioural (now 0.75). IRT also unavailable → both redistributed (behavioural 1.0 minus residual). A runtime assert checks weights still sum to 1.0.</p>`},
+  {term:"File lock + atomic write",tags:["system"],summary:"OS-level lock + .tmp + replace, so two Streamlit processes never corrupt lab_session.json.",detail:`<p><code>filelock.FileLock(timeout=5)</code> serialises access. Writes go to a <code>.tmp</code> file first, then <code>Path.replace()</code> swaps it in — atomic on Unix. File is always either old-valid or new-valid, never half-written.</p>`},
+  {term:"Measurement confidence",tags:["model","technique"],summary:"Per-submission confidence score [0,1] attached to an incorrectness measurement.",detail:`<p>Confidence = base(0.7) × length_factor × (0.5 + 0.5·extremity_factor). Questions with low mean confidence get a flag in the question-detail view — reader should trust those scores less.</p>`},
+];
+const GLTAGS=[{id:'all',label:'All'},{id:'metric',label:'Metrics'},{id:'model',label:'Models'},{id:'technique',label:'Techniques'},{id:'system',label:'System'}];
+let glActiveTag=STATE.glTag||'all',glQuery=STATE.glQuery||'';
+function glRender(){
+  const q=glQuery.toLowerCase();
+  const filtered=GLOSSARY.filter(g=>{
+    const tm=glActiveTag==='all'||g.tags.includes(glActiveTag);
+    const tx=!q||g.term.toLowerCase().includes(q)||g.summary.toLowerCase().includes(q)||(g.detail||'').toLowerCase().includes(q);
+    return tm&&tx;
+  });
+  const sorted=filtered.slice().sort((a,b)=>a.term.localeCompare(b.term));
+  document.getElementById('gl-count').textContent=sorted.length+' of '+GLOSSARY.length+' terms shown';
+  document.getElementById('gl-list').innerHTML=sorted.map((g,i)=>{
+    const tg=g.tags.map(t=>`<span class="rtag rtag-${t==='metric'?'model':(t==='technique'?'state':(t==='system'?'ui':'api'))}">${t}</span>`).join('');
+    return `<div class="gl-card"><div class="gl-header" onclick="glToggle('glb${i}','glc${i}')"><div class="gl-term">${g.term}</div><div class="gl-summary">${g.summary}</div><div class="gl-tags">${tg}</div><div class="rchevron" id="glc${i}">▸</div></div><div class="gl-body" id="glb${i}">${g.detail||''}</div></div>`;
+  }).join('');
+}
+function glToggle(bid,cid){
+  const b=document.getElementById(bid),c=document.getElementById(cid);
+  if(b.classList.contains('open')){b.classList.remove('open');c.textContent='▸';}
+  else{b.classList.add('open');c.textContent='▾';}
+}
+const gltabsEl=document.getElementById('gl-tabs');
+GLTAGS.forEach(t=>{
+  const el=document.createElement('div');
+  el.className='ftab'+(t.id===glActiveTag?' active':'');
+  el.textContent=t.label;
+  el.dataset.tagid=t.id;
+  el.onclick=()=>{glActiveTag=t.id;document.querySelectorAll('#gl-tabs .ftab').forEach(e=>e.classList.remove('active'));el.classList.add('active');STATE.glTag=t.id;saveState();glRender();};
+  gltabsEl.appendChild(el);
+});
+const glSearch=document.getElementById('gl-search');
+glSearch.value=glQuery;
+glSearch.addEventListener('input',e=>{glQuery=e.target.value;STATE.glQuery=glQuery;saveState();glRender();});
+glRender();
+
+/* ══════════════════════════════════════════
+   DEEP DIVE JS
+══════════════════════════════════════════ */
+function ddShow(id,btn){
+  document.querySelectorAll('.dd-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.dd-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  else{const b=document.querySelector('.dd-btn[onclick*="\''+id+'\'"]');if(b)b.classList.add('active');}
+  STATE.ddSection=id;saveState();
+}
+function faqToggle(id){
+  const el=document.getElementById(id);
+  const chev=document.getElementById('faqc-'+id);
+  const open=el.classList.toggle('open');
+  if(chev)chev.textContent=open?'▾':'▸';
+  STATE.faqOpen=STATE.faqOpen||{};
+  if(open)STATE.faqOpen[id]=true;else delete STATE.faqOpen[id];
+  saveState();
+}
+function getLevel(s){
+  if(s<0.20)return['On Track','on-track'];
+  if(s<0.35)return['Minor Issues','minor'];
+  if(s<0.50)return['Struggling','struggling'];
+  return['Needs Help','needs-help'];
+}
+const STRUGGLE_SLIDERS=['sn','st','si','sr','sa','sd','srep','srawN'];
+const IRT_SLIDERS=['theta','bparam'];
+const IMP_SLIDERS=['imp_a','imp_r','imp_d','imp_rep','imp_m','imp_irt'];
+function persistSliders(group,ids){
+  STATE[group]=STATE[group]||{};
+  ids.forEach(id=>{const el=document.getElementById(id);if(el)STATE[group][id]=+el.value;});
+  saveState();
+}
+function calcStruggle(){
+  const n=+document.getElementById('sn').value,t=+document.getElementById('st').value;
+  const i=+document.getElementById('si').value,r=+document.getElementById('sr').value;
+  const a=+document.getElementById('sa').value,d=+document.getElementById('sd').value;
+  const rep=+document.getElementById('srep').value,rawN=+document.getElementById('srawN').value;
+  ['sn','st','si','sr','sa','sd','srep'].forEach((id,idx)=>{
+    document.getElementById(id+'-v').textContent=[n,t,i,r,a,d,rep][idx].toFixed(2);
+  });
+  document.getElementById('srawN-v').textContent=rawN;
+  const raw=Math.min(1,Math.max(0,0.10*n+0.10*t+0.20*i+0.10*r+0.38*a+0.05*d+0.07*rep));
+  const wn=rawN/(rawN+5);
+  const shrunk=Math.min(1,Math.max(0,wn*raw+(1-wn)*0.40));
+  document.getElementById('raw-score').textContent=raw.toFixed(3);
+  document.getElementById('shrunk-score').textContent=shrunk.toFixed(3);
+  const[lbl,cls]=getLevel(shrunk);
+  const badge=document.getElementById('level-badge');
+  badge.textContent=lbl;badge.className='result-pill '+cls;
+  persistSliders('struggleSliders',STRUGGLE_SLIDERS);
+}
+function calcIRT(){
+  const theta=+document.getElementById('theta').value,b=+document.getElementById('bparam').value;
+  document.getElementById('theta-v').textContent=theta.toFixed(1);
+  document.getElementById('b-v').textContent=b.toFixed(1);
+  const logit=theta-b,prob=1/(1+Math.exp(-logit)),irtDiff=1/(1+Math.exp(-b));
+  document.getElementById('irt-logit').textContent=logit.toFixed(2);
+  document.getElementById('irt-prob').textContent=(prob*100).toFixed(1)+'%';
+  document.getElementById('irt-diff').textContent=irtDiff.toFixed(3);
+  let lbl,cls;
+  if(irtDiff<0.35){lbl='Easy';cls='on-track';}else if(irtDiff<0.50){lbl='Medium';cls='minor';}else if(irtDiff<0.75){lbl='Hard';cls='struggling';}else{lbl='Very Hard';cls='needs-help';}
+  const badge=document.getElementById('irt-level');badge.textContent=lbl;badge.className='result-pill '+cls;
+  persistSliders('irtSliders',IRT_SLIDERS);
+}
+let bktMastery=(typeof STATE.bktMastery==='number')?STATE.bktMastery:0.3;
+let bktSteps=Array.isArray(STATE.bktSteps)?STATE.bktSteps.slice():[];
+function bktUpdate(pL,correct){
+  const pG=0.2,pS=0.1,pT=0.1;let pObs,pPost;
+  if(correct){pObs=pL*(1-pS)+(1-pL)*pG;pPost=pL*(1-pS)/Math.max(1e-12,pObs);}
+  else{pObs=pL*pS+(1-pL)*(1-pG);pPost=pL*pS/Math.max(1e-12,pObs);}
+  return Math.min(1,Math.max(0,pPost+(1-pPost)*pT));
+}
+function bktSubmit(correct){bktMastery=bktUpdate(bktMastery,correct);bktSteps.push({correct,mastery:bktMastery});STATE.bktMastery=bktMastery;STATE.bktSteps=bktSteps;saveState();renderBKT();}
+function bktReset(){bktMastery=0.3;bktSteps=[];STATE.bktMastery=0.3;STATE.bktSteps=[];saveState();renderBKT();}
+function renderBKT(){
+  let lines='P(L_0) = 0.300 — starting prior';
+  bktSteps.forEach((s,i)=>{lines+='\nAttempt '+(i+1)+': '+(s.correct?'correct':'wrong')+' → P(L) = '+s.mastery.toFixed(3);});
+  document.getElementById('bkt-history').textContent=lines;
+  document.getElementById('bkt-mastery').textContent=bktMastery.toFixed(3);
+  document.getElementById('bkt-status').textContent=bktMastery>=0.95?'Mastered!':'Not yet mastered (threshold: 0.95)';
+}
+function calcImproved(){
+  const a=+document.getElementById('imp_a').value,r=+document.getElementById('imp_r').value;
+  const d=+document.getElementById('imp_d').value,rep=+document.getElementById('imp_rep').value;
+  const m=+document.getElementById('imp_m').value,irt=+document.getElementById('imp_irt').value;
+  document.getElementById('imp_a-v').textContent=a.toFixed(2);document.getElementById('imp_r-v').textContent=r.toFixed(2);
+  document.getElementById('imp_d-v').textContent=d.toFixed(2);document.getElementById('imp_rep-v').textContent=rep.toFixed(2);
+  document.getElementById('imp_m-v').textContent=m.toFixed(2);document.getElementById('imp_irt-v').textContent=irt.toFixed(2);
+  const beh=(a+r+d+rep)/4,mg=Math.max(0,m-(1-a)),da=a*(1-irt);
+  const total=Math.min(1,0.45*beh+0.30*mg+0.25*da);
+  document.getElementById('imp-beh').textContent=beh.toFixed(3);document.getElementById('imp-mg').textContent=mg.toFixed(3);
+  document.getElementById('imp-da').textContent=da.toFixed(3);document.getElementById('imp-total').textContent=total.toFixed(3);
+  persistSliders('impSliders',IMP_SLIDERS);
+}
+/* Restore slider positions from saved state, then compute */
+function restoreSliderGroup(group,ids){
+  const saved=STATE[group];if(!saved)return;
+  ids.forEach(id=>{const el=document.getElementById(id);if(el&&typeof saved[id]==='number')el.value=saved[id];});
+}
+restoreSliderGroup('struggleSliders',STRUGGLE_SLIDERS);calcStruggle();
+restoreSliderGroup('irtSliders',IRT_SLIDERS);calcIRT();
+restoreSliderGroup('impSliders',IMP_SLIDERS);calcImproved();
+renderBKT();
+
+/* ══════════════════════════════════════════
+   ROADMAP JS
+══════════════════════════════════════════ */
+let rmDone=0;
+const _allTaskChecks=Array.from(document.querySelectorAll('.task-check'));
+_allTaskChecks.forEach((el,i)=>{el.dataset.taskId='t'+i;});
+const rmTotal=_allTaskChecks.length;
+function rmUpdateProgress(){
+  const pct=rmTotal?Math.round(rmDone/rmTotal*100):0;
+  document.getElementById('rm-prog-bar').style.width=pct+'%';
+  document.getElementById('rm-prog-label').textContent=rmDone+' of '+rmTotal+' tasks complete';
+}
+function rmTick(el){
+  const isDone=el.classList.contains('done');
+  const id=el.dataset.taskId;
+  if(isDone){el.classList.remove('done');el.textContent='';rmDone=Math.max(0,rmDone-1);}
+  else{el.classList.add('done');el.textContent='✓';rmDone++;}
+  const txt=el.closest('.task').querySelector('.task-text');
+  if(isDone)txt.classList.remove('done-text');else txt.classList.add('done-text');
+  rmUpdateProgress();
+  STATE.roadmapTicks=STATE.roadmapTicks||{};
+  if(isDone)delete STATE.roadmapTicks[id];else STATE.roadmapTicks[id]=true;
+  saveState();
+}
+function stageToggle(id){
+  const body=document.getElementById(id);
+  const num=id.replace('rs','');
+  const chev=document.getElementById('rsc-s'+num);
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  chev.textContent=isOpen?'▸':'▾';
+  STATE.stagesOpen=STATE.stagesOpen||{};
+  if(isOpen)delete STATE.stagesOpen[id];else STATE.stagesOpen[id]=true;
+  saveState();
+}
+function rmReveal(id){
+  const el=document.getElementById(id),btn=el.previousElementSibling;
+  const shown=el.classList.toggle('shown');
+  btn.textContent=shown?'Hide answer':'Reveal answer';
+  STATE.quizReveals=STATE.quizReveals||{};
+  if(shown)STATE.quizReveals[id]=true;else delete STATE.quizReveals[id];
+  saveState();
+}
+function resetProgress(){
+  if(!window.confirm('Clear all saved progress? This wipes ticks, revealed answers, slider positions, BKT history, and current tab — then reloads the page.'))return;
+  try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
+  location.reload();
+}
+
+/* ══════════════════════════════════════════
+   RESTORE STATE ON LOAD
+══════════════════════════════════════════ */
+(function restoreState(){
+  /* Roadmap ticks */
+  const ticks=STATE.roadmapTicks||{};
+  _allTaskChecks.forEach(el=>{
+    if(ticks[el.dataset.taskId]){
+      el.classList.add('done');el.textContent='✓';rmDone++;
+      const txt=el.closest('.task').querySelector('.task-text');
+      if(txt)txt.classList.add('done-text');
+    }
+  });
+  rmUpdateProgress();
+  /* Stages open */
+  const stages=STATE.stagesOpen||{};
+  Object.keys(stages).forEach(id=>{
+    const body=document.getElementById(id);if(!body)return;
+    body.classList.add('open');
+    const num=id.replace('rs','');const chev=document.getElementById('rsc-s'+num);if(chev)chev.textContent='▾';
+  });
+  /* Quiz reveals */
+  const reveals=STATE.quizReveals||{};
+  Object.keys(reveals).forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.classList.add('shown');
+    const btn=el.previousElementSibling;if(btn)btn.textContent='Hide answer';
+  });
+  /* FAQ reveals */
+  const faqs=STATE.faqOpen||{};
+  Object.keys(faqs).forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.classList.add('open');
+    const chev=document.getElementById('faqc-'+id);if(chev)chev.textContent='▾';
+  });
+  /* Active top-level tab */
+  if(STATE.tab){
+    const validIds=['overview','ref','glossary','dive','road','report'];
+    if(validIds.indexOf(STATE.tab)>=0&&STATE.tab!=='overview')switchPanel(STATE.tab);
+  }
+  /* Active deep-dive section */
+  if(STATE.ddSection){
+    const sec=document.getElementById(STATE.ddSection);
+    if(sec)ddShow(STATE.ddSection);
+  }
+})();
+</script>
+</body>
+</html>

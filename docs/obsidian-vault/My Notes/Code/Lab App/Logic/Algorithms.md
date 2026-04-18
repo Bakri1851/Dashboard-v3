@@ -177,11 +177,42 @@ Estimates per-student, per-question mastery as a latent probability that updates
 
 **Convergence reference:** 5 consecutive correct answers → mastery > 0.99. All wrong → mastery ≈ 0.11 after 5 attempts.
 
-**Key parameters:** `BKT_P_INIT = 0.3`, `BKT_P_LEARN = 0.1`, `BKT_P_GUESS = 0.2`, `BKT_P_SLIP = 0.1`, `BKT_MASTERY_THRESHOLD = 0.95`
+**Key parameters:** `BKT_P_INIT = 0.3`, `BKT_P_LEARN = 0.1`, `BKT_P_GUESS = 0.2`, `BKT_P_SLIP = 0.1`, `BKT_MASTERY_THRESHOLD = 0.95` — all four BKT parameters are *defaults* that the fitter in §7a replaces when the user clicks **Fit from data**.
 
 **Code references:**
 - `code/learning_dashboard/models/bkt.py` — `bkt_update()`, `compute_student_mastery()`, `compute_all_mastery()`, `compute_student_mastery_summary()`
 - `code/learning_dashboard/config.py` — `BKT_P_INIT`, `BKT_P_LEARN`, `BKT_P_GUESS`, `BKT_P_SLIP`, `BKT_MASTERY_THRESHOLD`
+
+---
+
+## 7a. BKT Parameter Fitting — Forward-algorithm MLE
+
+Fits the four BKT parameters (P(L₀), P(T), P(G), P(S)) by maximum likelihood on observed submission sequences, replacing the textbook defaults with values grounded in the current dataset. Mirrors the IRT fitting pattern.
+
+**Input:** filtered submissions DataFrame with `user`, `question`, `timestamp`, `incorrectness`  
+**Output:** dict of `{p_init, p_learn, p_guess, p_slip, log_likelihood, auc, convergence, n_observations, message}`
+
+**Steps:**
+1. **Build sequences:** sort submissions by `[timestamp, question]` (mergesort), group by `(user, question)`, binarise `incorrectness < CORRECT_THRESHOLD` → 0/1 sequences. Same ordering the inference path uses.
+2. **Refuse if too sparse:** return current defaults with `convergence=False` when total attempts < `BKT_FIT_MIN_OBSERVATIONS` (50).
+3. **Objective (forward-algorithm log-likelihood):** for each sequence, walk chronologically; at each step `t` predict `P(correct) = mastery · (1 − S) + (1 − mastery) · G`, add `log P(obs_t | history)` to the total, then apply the standard BKT Bayes-update + transition to get `mastery_{t+1}`.
+4. **Optimise via L-BFGS-B** on the negative log-likelihood, with bounds `[(0,1), (0,1), (0,0.5), (0,0.5)]`. The upper bounds on P(G) and P(S) enforce the identifiability constraint `P(G) + P(S) < 1` (without it, the likelihood has a degenerate flipped-roles maximum).
+5. **Score next-attempt AUC:** re-walk sequences with fitted parameters, collect `(predicted P(correct), actual correctness)` pairs, compute ROC-AUC via `sklearn.metrics.roc_auc_score`.
+6. **Return** fitted parameters + diagnostics. The UI caller writes them into `st.session_state["bkt_p_*"]` so the sliders snap and `compute_all_mastery()` re-runs via the existing `_improved_settings_key` cache invalidation.
+
+**Interpretation of AUC:**
+- `AUC > 0.75` — strong fit, parameters explain observed correctness well
+- `0.65 ≤ AUC ≤ 0.75` — typical for well-fit BKT in the KT literature
+- `AUC ≈ 0.5` — parameters no better than chance; likely too little data or model mismatch
+
+**Key parameters:** `BKT_FIT_MIN_OBSERVATIONS = 50`, `BKT_FIT_MAX_ITER = 200`
+
+**Code references:**
+- `code/learning_dashboard/models/bkt.py` — `fit_bkt_parameters()`, `_build_sequences()`, `_walk_and_score()`
+- `code/learning_dashboard/config.py` — `BKT_FIT_MIN_OBSERVATIONS`, `BKT_FIT_MAX_ITER`
+- `code/learning_dashboard/ui/views.py` — `_render_bkt_fit_controls()` (the **Fit from data** button in Settings)
+
+See [[BKT Mastery Logic#Parameter fitting (MLE)]] for the honest-framing discussion.
 
 ---
 

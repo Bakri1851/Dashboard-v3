@@ -17,7 +17,7 @@ Related: [[Architecture]], [[Lab App/Flows/Pages and UI Flow]], [[Data Loading a
 - Navigation: `current_view`, `dashboard_view`, `selected_student`, `selected_question`.
 - Live session: `session_active`, `session_start`, `session_name_draft`, `lab_session_code`.
 - Saved session: `loaded_session_id`, `loaded_session_start`, `loaded_session_end`, `pending_session_load_record`.
-- Filters: `time_filter_enabled`, `time_date_range`, `time_start`, `time_end`, `secondary_module_filter`, `today_filter_only`.
+- Filters: `time_filter_preset` (default `"Today"`; one of `All Time | Live Session | Today | Past Hour | Past 24 Hours | Current Academic Week | Last Academic Week | Custom`), `time_date_range`, `time_start`, `time_end`, `time_custom_week`, `secondary_module_filter`. The sidebar shows a single "Date range" preset selector; Custom reveals inline date + time inputs plus an optional academic-week quick-pick.
 - Diagnostics and caching: `_df`, `_struggle_df`, `_difficulty_df`, `_analytics_key`, `_lab_state_cache`.
 - UX toggles: `cf_enabled`, `cf_threshold`, `sounds_enabled`, `auto_refresh`, `refresh_interval`.
 
