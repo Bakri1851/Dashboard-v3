@@ -212,4 +212,17 @@ The Progress Report (`main sections/Progress Report.tex`) is currently commented
 2. **Future tense** — Many sections use "will be", "we will" — these should become past/present tense for a final dissertation.
 3. **Proposal framing** — Sections read like a project proposal rather than a completed project report.
 4. **Missing features in thesis** — IRT, BKT, improved struggle, mistake clustering, saved sessions, data analysis views, sound effects, academic calendar, settings — none appear in the thesis at all.
+
+---
+
+## Alternative React (Vite) frontend — `code2/` shadow workspace
+
+Added during the final sprint as an **additive** second frontend — `code/` remains untouched and is the defence-day fallback. Relevant to two places in the thesis:
+
+| Chapter | Treatment | Status |
+|---|---|---|
+| Ch4 Implementation | Brief §4.x paragraph: "Alternative presentation layer (React + FastAPI) built in `code2/` while keeping `code/` as a byte-identical Streamlit fallback. Only two analytics files were changed in `code2/`: `analytics.py:25` (OpenAI key guard) and `data_loader.py:16` (cached/uncached split). The backend is FastAPI with 8 routers (`live`, `student`, `question`, `analysis`, `lab` ×11 actions, `sessions`, `settings`, `models_cmp`, `rag`), the frontend is Vite + React + TypeScript with 7 swappable themes extracted from the design mockup. All processes share `data/lab_session.json` via the same `FileLock` lab_state primitive, so the alternative frontend coordinates with the Streamlit apps automatically." | ❌ Not yet written |
+| Ch6 §6.3 Future Work | Frame the Vite/FastAPI stack as the production-path migration story: it proves the analytics layer is framework-agnostic, opens the door to mobile / multi-user deployments, and gives a recognisable npm+uvicorn toolchain without requiring the defence demo to leave `code/`. | ❌ Not yet written |
+
+**Scope guard.** This is infrastructure, not a new algorithmic contribution — no new literature citations expected. Evaluation section (Ch5) doesn't change: both frontends read the same analytics, so any results from `code/` apply unchanged.
 5. **Formula divergence** — Struggle (5 vs 7 components) and difficulty (4 vs 5 components) formulas differ between thesis and code.

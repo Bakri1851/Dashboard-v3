@@ -483,6 +483,10 @@ button:hover{border-color:#555;background:#22263a}
     <h3>Where state lives</h3>
     <p><code>data/lab_session.json</code> (shared session + assignments, file-locked) · <code>data/saved_sessions.json</code> (replayable session snapshots) · <code>data/rag_chroma/</code> (ChromaDB embeddings) · <code>st.session_state</code> (in-process UI state) · process-local caches (<code>_incorrectness_cache</code>, <code>_df</code> hash).</p>
   </div>
+  <div class="ov-card">
+    <h3>Alternative frontend · <code>code2/</code></h3>
+    <p>Additive second frontend — React + Vite + TypeScript served by a FastAPI backend on port <code>8000</code>. Built in a <code>code2/</code> shadow copy so <code>code/</code> stays untouched (defence-day fallback). Same <code>data/lab_session.json</code> + <code>FileLock</code> coordinates all four processes. 7 swappable themes (paper / newsprint / solar / scifi / blueprint / matrix / cyberpunk) matching the editorial mockup. Plan file: <code>~/.claude/plans/c-users-bakri-downloads-alternative-das-majestic-garden.md</code> · Execution log: <code>code2/CHECKLIST.md</code>.</p>
+  </div>
 </div>
 
 <h3 style="font-size:13px;color:#e3b341;margin-bottom:10px;letter-spacing:0.02em">System architecture</h3>
@@ -799,6 +803,23 @@ button:hover{border-color:#555;background:#22263a}
     <li><code>data/lab_session.lock</code> — file lock for shared assistant state</li>
     <li>Legacy root JSON files may still exist, but runtime prefers <code>data/</code></li>
   </ul>
+</div>
+
+<div class="ops-section">
+  <h3>Alternative frontend (<code>code2/</code>) · optional, additive</h3>
+  <p style="font-size:12px;color:#888;margin-bottom:6px">React + Vite + TypeScript served by FastAPI on port <code>8000</code>. <code>code/</code> stays untouched — this is a shadow <code>code2/</code> workspace that coexists with it. All four processes share <code>data/lab_session.json</code>.</p>
+  <p style="font-size:12px;color:#aaa;margin-top:10px;margin-bottom:2px">Extra install:</p>
+  <div class="ops-cmd">pip install -r code2/requirements.txt &amp;&amp; cd code2/frontend &amp;&amp; npm install &amp;&amp; cd ../..</div>
+  <p style="font-size:12px;color:#aaa;margin-top:10px;margin-bottom:2px">Cross-check Streamlit (optional, mirrors <code>code/</code>):</p>
+  <div class="ops-cmd">streamlit run code2/app.py --server.port 8503</div>
+  <div class="ops-cmd">streamlit run code2/lab_app.py --server.port 8504</div>
+  <p style="font-size:12px;color:#aaa;margin-top:10px;margin-bottom:2px">FastAPI backend (serves React + REST API):</p>
+  <div class="ops-cmd">uvicorn backend.main:app --app-dir code2 --port 8000 --reload</div>
+  <p style="font-size:12px;color:#aaa;margin-top:10px;margin-bottom:2px">Vite dev server (HMR, proxies <code>/api</code> to port 8000):</p>
+  <div class="ops-cmd">cd code2/frontend &amp;&amp; npm run dev</div>
+  <p style="font-size:12px;color:#aaa;margin-top:10px;margin-bottom:2px">Production build (then visit <code>http://localhost:8000/</code>):</p>
+  <div class="ops-cmd">cd code2/frontend &amp;&amp; npm run build</div>
+  <p style="font-size:12px;color:#888;margin-top:8px">First <code>/api/struggle</code> or <code>/api/live</code> call takes ~2 min (34k records × 203 students). A <code>lifespan</code> hook prewarms at server start; subsequent calls hit the 5-minute analytics cache at ~250 ms. First RAG call builds ChromaDB (several minutes, runs in a worker thread so other endpoints stay responsive).</p>
 </div>
 
 <div class="ops-section">
@@ -1640,6 +1661,17 @@ button:hover{border-color:#555;background:#22263a}
 ══════════════════════════════════════════ -->
 <div id="panel-plan" class="panel">
 <p class="ov-lead">Submission timeline — what work remains between here and the thesis deadline (<strong>20 May 2026</strong>). <em>Distinct from the Roadmap tab, which walks the codebase for study/defence prep.</em> Source: <strong>Full Roadmap.md</strong> (14 numbered steps) + <strong>Weekly Plan.md</strong> (6-week schedule).</p>
+
+<div class="plan-section">
+  <h3>§ Alternative React (Vite) frontend track — <code>code2/</code> shadow workspace</h3>
+  <p class="plan-intro">Additive second frontend shipped over one working session (2026-04-19). <strong><code>code/</code> stays untouched</strong> throughout; everything happens in a <code>code2/</code> copy. Reason for the track: demonstrate that the analytics layer is framework-agnostic and give the defence a visually polished modern alternative while keeping the Streamlit demo as a fallback.</p>
+  <ul class="ops-list">
+    <li><strong>Phases 0–6</strong> done (shadow copy · FastAPI backend with 8 routers / 20+ endpoints · Vite + React + TypeScript frontend with 7 themes + 8 views · lab-state parity through the existing <code>FileLock</code> · RAG via <code>asyncio.to_thread</code> so it doesn't block · <code>dist/</code> served at <code>http://localhost:8000/</code> · <code>/docs</code> Swagger UI · custom favicon).</li>
+    <li><strong>Phase 7</strong> in progress — documentation sync (this panel, Evidence Bank, Report Sync, Figures and Tables, Full Roadmap, Weekly Plan, Setup and Runbook) + graphify regen.</li>
+    <li><strong>Phase 8</strong> — defence rehearsal (5-process smoke test, 7-theme screenshot gallery, demo script). Cold-start note: start FastAPI ~2 minutes before the demo so the analytics prewarm is done before the first click.</li>
+  </ul>
+  <p style="font-size:12px;color:#888;margin-top:10px">Plan file (resumable across context loss): <code>~/.claude/plans/c-users-bakri-downloads-alternative-das-majestic-garden.md</code> · Execution log with decision history: <code>code2/CHECKLIST.md</code>.</p>
+</div>
 
 <div class="plan-section">
   <h3>§ Submission roadmap — 14 steps</h3>

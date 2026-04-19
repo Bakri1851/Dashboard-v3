@@ -70,3 +70,24 @@ New figures needed for the rewritten Ch4 and Ch5:
 - **Replace:** 3 Figma mockups (8-10) with actual screenshots
 - **Remove:** Gantt chart (11) and Gantt summary table (8) if Progress Report excluded
 - **Add:** ~7 new screenshots + ~4 new tables
+
+---
+
+## Alternative React (Vite) frontend — figures / tables to add (optional, Ch4 or Ch6)
+
+Only needed if the thesis names the alternative frontend explicitly. All screenshots captured from `http://localhost:8000/` after the FastAPI backend is running.
+
+| Proposed | Description | Source | Destination |
+|----------|-------------|--------|-------------|
+| V3 architecture diagram | 3 frontends + 1 shared core + 1 shared state file, drawn as ASCII block in `code2/CHECKLIST.md` or redrawn in draw.io | Plan §4 (at `~/.claude/plans/c-users-bakri-downloads-alternative-das-majestic-garden.md`) | Ch4 Implementation |
+| V3 In Class (paper theme) | Default editorial theme — leaderboards + hero stats + distribution histograms + 24h timeline | Screenshot | Ch4 |
+| V3 theme gallery | Single figure, 7 thumbnails: paper / newsprint / solar / scifi / blueprint / matrix / cyberpunk | Screenshots (7, cropped) | Ch4 or Appendix |
+| V3 Student detail | Trajectory sparkline + score components HBar + top questions | Screenshot | Ch4 |
+| V3 Question detail | Mistake clusters + top strugglers (new section) + RAG suggestions | Screenshot | Ch4 |
+| V3 Lab coordination | Session banner + dispatch queue + active assignments, showing the same state mirrored on a Streamlit tab | Side-by-side screenshot | Ch4 or Ch6 |
+| Swagger UI | `/docs` view listing all endpoints grouped by tag | Screenshot | Appendix |
+
+| Proposed table | Description | Destination |
+|----------------|-------------|-------------|
+| V3 endpoint map | 20+ REST endpoints with the `learning_dashboard.*` function each delegates to | Ch4 or Appendix |
+| V3 refactor log | 2 lines: `analytics.py:25` and `data_loader.py:16`, with before/after | Ch4 — demonstrates minimal blast radius |

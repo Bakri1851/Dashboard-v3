@@ -391,6 +391,18 @@ These items are thesis-strengthening but not thesis-critical. Do not begin eithe
 
 ---
 
+## Alternative React (Vite) frontend — compressed track
+
+3-week slice of additive work on a shadow `code2/` workspace, parallel to (not replacing) the Streamlit roadmap above. `code/` stays untouched throughout so the defence-day fallback is always safe.
+
+- **Week of 2026-04-19 (completed in one working session):** phases 0–6 shipped — shadow-copy scaffold, FastAPI backend (8 routers, 20+ endpoints), Vite + React + TypeScript frontend (7 themes, 8 views, client-side routing + zustand store), lab-state parity through the existing `FileLock` primitive, RAG handlers made non-blocking via `asyncio.to_thread`. Build artefact at `code2/frontend/dist/` (≈260 KB / 74 KB gzipped) served by FastAPI at `http://localhost:8000/`.
+- **Week of 2026-04-20 (now):** Phase 7 — documentation sync (this note, Evidence Bank, Report Sync, Figures and Tables, Full Roadmap, Setup and Runbook, recap toolkit panels) and graphify regeneration.
+- **Pre-defence week:** Phase 8 — 5-process smoke test, capture 7-theme gallery + per-view screenshots for the thesis, rehearse the demo script. **Bring-up cost:** start FastAPI ~2 minutes before the demo so the analytics prewarm is done before the first click.
+
+Details: plan file at `C:\Users\Bakri\.claude\plans\c-users-bakri-downloads-alternative-das-majestic-garden.md`; execution log at `code2/CHECKLIST.md`; runbook at [[Setup and Runbook]].
+
+---
+
 ## Useful links
 
 - [[Full Roadmap]] — canonical step order and scope decisions

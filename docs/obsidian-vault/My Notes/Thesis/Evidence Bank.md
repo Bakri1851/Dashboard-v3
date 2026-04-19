@@ -109,3 +109,33 @@ Existing test resource: smoke test checklist in [[Setup and Runbook]].
 | RAG architecture | Dr. Batmaz sketched SQL + ChromaDB hybrid, described as innovative | Ch3 design, Ch4 implementation |
 | No word limit | Avoid waffle, use appendices for bulk content | Report structure |
 | Weight optimisation | Trial-and-error is a known limitation; ML training is future work once labeled data exists | Ch5 limitations and future work |
+
+---
+
+## Alternative React (Vite) frontend — Status: Exists in `code2/` (additive, never touches `code/`)
+
+Evidence that the thesis could claim a second, modernised frontend without scope-creeping the evaluation (backend and analytics are byte-identical to `code/`, only the presentation layer changes).
+
+| Feature | Code location | Notes |
+|---------|---------------|-------|
+| Shadow-copy strategy | `code2/` (full clone of `code/`) | 2 tiny refactors (`analytics.py:25`, `data_loader.py:16`) applied only inside `code2/` so `code/` stays pristine |
+| FastAPI backend (8 routers) | `code2/backend/` | `/api/live`, `/api/struggle`, `/api/difficulty`, `/api/student/{id}`, `/api/question/{id}`, `/api/analysis`, `/api/sessions`, `/api/settings`, `/api/models/compare`, 11× `/api/lab/*`, `/api/rag/{student,question}/{id}` |
+| Shared state with Streamlit | same `data/lab_session.json` + `FileLock` — coordinates all 4+ processes without any new infrastructure | Verified end-to-end: join → assign → mark-helped → remove via curl against FastAPI → picked up by Streamlit apps on 8501/8502 |
+| React + Vite + TypeScript | `code2/frontend/` | 7 themes (paper / newsprint / solar / scifi / blueprint / matrix / cyberpunk), all extracted verbatim from the design mockup |
+| Cold-start mitigation | `code2/backend/cache.py` + FastAPI `lifespan` hook | 5-min analytics cache (on top of the existing 10 s raw-data cache) + server-boot prewarm — turns a 2-minute cold click into a ~250 ms warm one |
+| RAG suggestions | `code2/backend/routers/rag.py` + `src/components/RagPanel.tsx` | `async def` + `asyncio.to_thread` so the first-time ChromaDB build doesn't block the event loop |
+
+### Screenshots — Status: To capture (Phase 8)
+
+| View | Demo path |
+|---|---|
+| In Class (paper theme) | `http://localhost:8000/` → default landing |
+| In Class (all 7 themes) | Click through theme selector in top-right |
+| Student detail | Click a student row in the left leaderboard |
+| Question detail | Click a question row in the right leaderboard (surfaces mistake clusters + top strugglers + RAG) |
+| Data analysis | Sidebar → "04 Data Analysis" |
+| Model comparison | Sidebar → "05 Model Comparison" (baseline vs improved, Spearman ρ, top-10 overlap) |
+| Previous sessions | Sidebar → "06 Previous Sessions" |
+| Lab assistants | Sidebar → "07 Lab Assistants" (session banner + dispatch queue) |
+| Settings | Sidebar → "08 Settings" (theme picker + read-only config) |
+| Swagger UI | `http://localhost:8000/docs` — professional API surface for the defence
