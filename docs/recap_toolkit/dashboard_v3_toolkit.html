@@ -483,6 +483,10 @@ button:hover{border-color:#555;background:#22263a}
     <h3>Where state lives</h3>
     <p><code>data/lab_session.json</code> (shared session + assignments, file-locked) · <code>data/saved_sessions.json</code> (replayable session snapshots) · <code>data/rag_chroma/</code> (ChromaDB embeddings) · <code>st.session_state</code> (in-process UI state) · process-local caches (<code>_incorrectness_cache</code>, <code>_df</code> hash).</p>
   </div>
+  <div class="ov-card">
+    <h3>Alternative frontend · <code>code2/</code></h3>
+    <p>Additive second frontend — React + Vite + TypeScript served by a FastAPI backend on port <code>8000</code>. Built in a <code>code2/</code> shadow copy so <code>code/</code> stays untouched (defence-day fallback). Same <code>data/lab_session.json</code> + <code>FileLock</code> coordinates all four processes. 7 swappable themes (paper / newsprint / solar / scifi / blueprint / matrix / cyberpunk) matching the editorial mockup. Plan file: <code>~/.claude/plans/c-users-bakri-downloads-alternative-das-majestic-garden.md</code> · Execution log: <code>code2/CHECKLIST.md</code>.</p>
+  </div>
 </div>
 
 <h3 style="font-size:13px;color:#e3b341;margin-bottom:10px;letter-spacing:0.02em">System architecture</h3>
@@ -799,6 +803,23 @@ button:hover{border-color:#555;background:#22263a}
     <li><code>data/lab_session.lock</code> — file lock for shared assistant state</li>
     <li>Legacy root JSON files may still exist, but runtime prefers <code>data/</code></li>
   </ul>
+</div>
+
+<div class="ops-section">
+  <h3>Alternative frontend (<code>code2/</code>) · optional, additive</h3>
+  <p style="font-size:12px;color:#888;margin-bottom:6px">React + Vite + TypeScript served by FastAPI on port <code>8000</code>. <code>code/</code> stays untouched — this is a shadow <code>code2/</code> workspace that coexists with it. All four processes share <code>data/lab_session.json</code>.</p>
+  <p style="font-size:12px;color:#aaa;margin-top:10px;margin-bottom:2px">Extra install:</p>
+  <div class="ops-cmd">pip install -r code2/requirements.txt &amp;&amp; cd code2/frontend &amp;&amp; npm install &amp;&amp; cd ../..</div>
+  <p style="font-size:12px;color:#aaa;margin-top:10px;margin-bottom:2px">Cross-check Streamlit (optional, mirrors <code>code/</code>):</p>
+  <div class="ops-cmd">streamlit run code2/app.py --server.port 8503</div>
+  <div class="ops-cmd">streamlit run code2/lab_app.py --server.port 8504</div>
+  <p style="font-size:12px;color:#aaa;margin-top:10px;margin-bottom:2px">FastAPI backend (serves React + REST API):</p>
+  <div class="ops-cmd">uvicorn backend.main:app --app-dir code2 --port 8000 --reload</div>
+  <p style="font-size:12px;color:#aaa;margin-top:10px;margin-bottom:2px">Vite dev server (HMR, proxies <code>/api</code> to port 8000):</p>
+  <div class="ops-cmd">cd code2/frontend &amp;&amp; npm run dev</div>
+  <p style="font-size:12px;color:#aaa;margin-top:10px;margin-bottom:2px">Production build (then visit <code>http://localhost:8000/</code>):</p>
+  <div class="ops-cmd">cd code2/frontend &amp;&amp; npm run build</div>
+  <p style="font-size:12px;color:#888;margin-top:8px">First <code>/api/struggle</code> or <code>/api/live</code> call takes ~2 min (34k records × 203 students). A <code>lifespan</code> hook prewarms at server start; subsequent calls hit the 5-minute analytics cache at ~250 ms. First RAG call builds ChromaDB (several minutes, runs in a worker thread so other endpoints stay responsive).</p>
 </div>
 
 <div class="ops-section">
@@ -1642,6 +1663,17 @@ button:hover{border-color:#555;background:#22263a}
 <p class="ov-lead">Submission timeline — what work remains between here and the thesis deadline (<strong>20 May 2026</strong>). <em>Distinct from the Roadmap tab, which walks the codebase for study/defence prep.</em> Source: <strong>Full Roadmap.md</strong> (14 numbered steps) + <strong>Weekly Plan.md</strong> (6-week schedule).</p>
 
 <div class="plan-section">
+  <h3>§ Alternative React (Vite) frontend track — <code>code2/</code> shadow workspace</h3>
+  <p class="plan-intro">Additive second frontend shipped over one working session (2026-04-19). <strong><code>code/</code> stays untouched</strong> throughout; everything happens in a <code>code2/</code> copy. Reason for the track: demonstrate that the analytics layer is framework-agnostic and give the defence a visually polished modern alternative while keeping the Streamlit demo as a fallback.</p>
+  <ul class="ops-list">
+    <li><strong>Phases 0–6</strong> done (shadow copy · FastAPI backend with 8 routers / 20+ endpoints · Vite + React + TypeScript frontend with 7 themes + 8 views · lab-state parity through the existing <code>FileLock</code> · RAG via <code>asyncio.to_thread</code> so it doesn't block · <code>dist/</code> served at <code>http://localhost:8000/</code> · <code>/docs</code> Swagger UI · custom favicon).</li>
+    <li><strong>Phase 7</strong> in progress — documentation sync (this panel, Evidence Bank, Report Sync, Figures and Tables, Full Roadmap, Weekly Plan, Setup and Runbook) + graphify regen.</li>
+    <li><strong>Phase 8</strong> — defence rehearsal (5-process smoke test, 7-theme screenshot gallery, demo script). Cold-start note: start FastAPI ~2 minutes before the demo so the analytics prewarm is done before the first click.</li>
+  </ul>
+  <p style="font-size:12px;color:#888;margin-top:10px">Plan file (resumable across context loss): <code>~/.claude/plans/c-users-bakri-downloads-alternative-das-majestic-garden.md</code> · Execution log with decision history: <code>code2/CHECKLIST.md</code>.</p>
+</div>
+
+<div class="plan-section">
   <h3>§ Submission roadmap — 14 steps</h3>
   <p class="plan-intro">Work top-to-bottom; each step unblocks the next. Tick as you go — progress persists in <code>localStorage</code> and rolls up into the global roadmap progress bar.</p>
 
@@ -2320,6 +2352,907 @@ button:hover{border-color:#555;background:#22263a}
   <div class="rg-closing"><strong>Viva preparation.</strong> If you can answer every quiz question across all five Roadmap stages without clicking "Reveal answer", and explain any section from the Deep dive tab at a whiteboard, you will defend this thesis comfortably. The best possible answer to a viva question is: "Yes, I considered that — here's why I chose X over Y, and here's the experiment or source that backs it."</div>
 
 </div><!-- end panel-report -->
+
+<!-- ══════════════════════════════════════════
+     PANEL — SECTION PLAN (per-chapter punch list with subtabs)
+══════════════════════════════════════════ -->
+<div id="panel-sectionplan" class="panel">
+
+  <p class="sp-intro">
+    <strong>Per-section playbook.</strong> For each chapter and appendix: status, what's currently in the <code>.tex</code>, what should be there, the concrete gaps, prioritised action items, required figures, citations still needed, and the design-decision log for defence prep.
+    Distinct from <span class="sp-link" onclick="switchPanelByName('report')">Report guide</span> (writing template) and <span class="sp-link" onclick="switchPanelByName('plan')">Plan</span> (submission roadmap) — this is the execution view.
+    Last refreshed against <code>Report Sync.md</code> + <code>Rewrite Queue.md</code> on <strong>2026-04-18</strong>.
+  </p>
+
+  <div class="subtab-bar" data-panel="sectionplan">
+    <div class="subtab active" data-sub="overview" onclick="switchSubpanel('sectionplan','overview',this)">Overview</div>
+    <div class="subtab" data-sub="ch1" onclick="switchSubpanel('sectionplan','ch1',this)">Ch1 · Introduction</div>
+    <div class="subtab" data-sub="ch2" onclick="switchSubpanel('sectionplan','ch2',this)">Ch2 · Background &amp; Reqs</div>
+    <div class="subtab" data-sub="ch3" onclick="switchSubpanel('sectionplan','ch3',this)">Ch3 · Design</div>
+    <div class="subtab crit" data-sub="ch4" onclick="switchSubpanel('sectionplan','ch4',this)">Ch4 · Implementation</div>
+    <div class="subtab crit" data-sub="ch5" onclick="switchSubpanel('sectionplan','ch5',this)">Ch5 · Evaluation</div>
+    <div class="subtab crit" data-sub="ch6" onclick="switchSubpanel('sectionplan','ch6',this)">Ch6 · Conclusion</div>
+    <div class="subtab" data-sub="appA" onclick="switchSubpanel('sectionplan','appA',this)">App A · Code</div>
+    <div class="subtab crit" data-sub="appB" onclick="switchSubpanel('sectionplan','appB',this)">App B · Screenshots</div>
+    <div class="subtab crit" data-sub="appC" onclick="switchSubpanel('sectionplan','appC',this)">App C · Test results</div>
+    <div class="subtab done" data-sub="appD" onclick="switchSubpanel('sectionplan','appD',this)">App D · References</div>
+    <div class="subtab" data-sub="appE" onclick="switchSubpanel('sectionplan','appE',this)">App E · Formulae</div>
+    <div class="subtab" data-sub="appF" onclick="switchSubpanel('sectionplan','appF',this)">App F · Derivations</div>
+  </div>
+
+  <!-- ─── Overview subpanel ─── -->
+  <div id="subpanel-sectionplan-overview" class="subpanel active">
+
+    <div class="sp-block">
+      <div class="sp-block-title">Status at a glance — click a card to jump</div>
+      <div class="sp-overview-grid">
+        <div class="sp-ov-card" onclick="switchSubpanel('sectionplan','ch1',document.querySelector('#panel-sectionplan .subtab[data-sub=ch1]'))"><div class="sp-ov-card-head"><div class="sp-ov-card-title">Ch1 Introduction</div><span class="sp-pill partial">Partial</span></div><div class="sp-ov-card-body"><strong>Top blocker:</strong> future tense + generic risk-mitigation table. <strong>Effort:</strong> S.</div></div>
+        <div class="sp-ov-card" onclick="switchSubpanel('sectionplan','ch2',document.querySelector('#panel-sectionplan .subtab[data-sub=ch2]'))"><div class="sp-ov-card-head"><div class="sp-ov-card-title">Ch2 Background &amp; Requirements</div><span class="sp-pill partial">Partial</span></div><div class="sp-ov-card-body"><strong>Top blocker:</strong> §2.1.7 research-gaps placeholder + many <code>\cite</code> calls missing in new lit subsections. <strong>Effort:</strong> M.</div></div>
+        <div class="sp-ov-card" onclick="switchSubpanel('sectionplan','ch3',document.querySelector('#panel-sectionplan .subtab[data-sub=ch3]'))"><div class="sp-ov-card-head"><div class="sp-ov-card-title">Ch3 Design &amp; Modelling</div><span class="sp-pill partial">Partial</span></div><div class="sp-ov-card-body"><strong>Top blocker:</strong> outdated struggle (5→7) and difficulty (4→5) formulas; Figma mockups; advanced-model placeholders empty. <strong>Effort:</strong> L.</div></div>
+        <div class="sp-ov-card" onclick="switchSubpanel('sectionplan','ch4',document.querySelector('#panel-sectionplan .subtab[data-sub=ch4]'))"><div class="sp-ov-card-head"><div class="sp-ov-card-title">Ch4 Implementation ◉</div><span class="sp-pill skel">Skeleton</span></div><div class="sp-ov-card-body"><strong>Top blocker:</strong> 26 Phase-6 placeholder subsections empty; V1 prototype framing must go. <strong>Effort:</strong> L (single highest-impact rewrite).</div></div>
+        <div class="sp-ov-card" onclick="switchSubpanel('sectionplan','ch5',document.querySelector('#panel-sectionplan .subtab[data-sub=ch5]'))"><div class="sp-ov-card-head"><div class="sp-ov-card-title">Ch5 Evaluation ◉</div><span class="sp-pill skel">Skeleton</span></div><div class="sp-ov-card-body"><strong>Top blocker:</strong> all 18 subsubsection headers empty; needs Model Comparison view screenshots + smoke-test results. <strong>Effort:</strong> L.</div></div>
+        <div class="sp-ov-card" onclick="switchSubpanel('sectionplan','ch6',document.querySelector('#panel-sectionplan .subtab[data-sub=ch6]'))"><div class="sp-ov-card-head"><div class="sp-ov-card-title">Ch6 Conclusion ◉</div><span class="sp-pill skel">Skeleton</span></div><div class="sp-ov-card-body"><strong>Top blocker:</strong> Summary / Contributions / Future Work all empty. <strong>Effort:</strong> M.</div></div>
+        <div class="sp-ov-card" onclick="switchSubpanel('sectionplan','appA',document.querySelector('#panel-sectionplan .subtab[data-sub=appA]'))"><div class="sp-ov-card-head"><div class="sp-ov-card-title">Appendix A · Code Snippets</div><span class="sp-pill empty">Empty</span></div><div class="sp-ov-card-body"><strong>Top blocker:</strong> 5–8 surgical excerpts needed to back Ch4 narrative. <strong>Effort:</strong> S.</div></div>
+        <div class="sp-ov-card" onclick="switchSubpanel('sectionplan','appB',document.querySelector('#panel-sectionplan .subtab[data-sub=appB]'))"><div class="sp-ov-card-head"><div class="sp-ov-card-title">Appendix B · Screenshots ◉</div><span class="sp-pill empty">Empty</span></div><div class="sp-ov-card-body"><strong>Top blocker:</strong> screenshot campaign across 6 instructor views + 4 assistant views. <strong>Effort:</strong> M (after dashboard is stable).</div></div>
+        <div class="sp-ov-card" onclick="switchSubpanel('sectionplan','appC',document.querySelector('#panel-sectionplan .subtab[data-sub=appC]'))"><div class="sp-ov-card-head"><div class="sp-ov-card-title">Appendix C · Test Results ◉</div><span class="sp-pill empty">Empty</span></div><div class="sp-ov-card-body"><strong>Top blocker:</strong> run smoke-test checklist; capture pass/fail per FR/NFR. <strong>Effort:</strong> S–M.</div></div>
+        <div class="sp-ov-card" onclick="switchSubpanel('sectionplan','appD',document.querySelector('#panel-sectionplan .subtab[data-sub=appD]'))"><div class="sp-ov-card-head"><div class="sp-ov-card-title">Appendix D · Themes &amp; References</div><span class="sp-pill done">Done</span></div><div class="sp-ov-card-body">36 citations mapped to research themes. Re-review after Ch2 backlog adds new bibkeys.</div></div>
+        <div class="sp-ov-card" onclick="switchSubpanel('sectionplan','appE',document.querySelector('#panel-sectionplan .subtab[data-sub=appE]'))"><div class="sp-ov-card-head"><div class="sp-ov-card-title">Appendix E · Formulae</div><span class="sp-pill empty">Empty</span></div><div class="sp-ov-card-body"><strong>Top blocker:</strong> consolidate every formula referenced in Ch3/Ch4 into one reference. <strong>Effort:</strong> S.</div></div>
+        <div class="sp-ov-card" onclick="switchSubpanel('sectionplan','appF',document.querySelector('#panel-sectionplan .subtab[data-sub=appF]'))"><div class="sp-ov-card-head"><div class="sp-ov-card-title">Appendix F · Derivations</div><span class="sp-pill empty">Empty</span></div><div class="sp-ov-card-body"><strong>Top blocker:</strong> derive BKT update, Rasch MLE gradient, Bernoulli LL, shrinkage. <strong>Effort:</strong> M.</div></div>
+      </div>
+    </div>
+
+    <div class="sp-block">
+      <div class="sp-block-title">Critical-path countdown</div>
+      <div class="sp-cp-strip">
+        <div class="sp-cp-head">
+          <span><strong style="color:#e0e0e0">2026-04-18 → 2026-05-20</strong> · ~32 working days to submission</span>
+          <span class="sp-cp-days">32d</span>
+        </div>
+        <div class="sp-cp-rail">
+          <div class="sp-cp-tick" style="left:0%"><div class="sp-cp-tick-label" style="left:0">Today</div></div>
+          <div class="sp-cp-tick" style="left:25%"><div class="sp-cp-tick-label">Wk1</div></div>
+          <div class="sp-cp-tick" style="left:50%"><div class="sp-cp-tick-label">Wk2</div></div>
+          <div class="sp-cp-tick" style="left:75%"><div class="sp-cp-tick-label">Wk3</div></div>
+          <div class="sp-cp-tick" style="left:100%"><div class="sp-cp-tick-label" style="left:auto;right:0;transform:none">Submit</div></div>
+        </div>
+        <div class="sp-cp-bars">
+          <div class="sp-cp-bar-row"><div class="sp-cp-bar-label">Ch3 finalise</div><div class="sp-cp-bar-track"><div class="sp-cp-bar" style="left:0%;width:18%"></div></div></div>
+          <div class="sp-cp-bar-row"><div class="sp-cp-bar-label">Ch4 rewrite ★</div><div class="sp-cp-bar-track"><div class="sp-cp-bar" style="left:8%;width:38%"></div></div></div>
+          <div class="sp-cp-bar-row"><div class="sp-cp-bar-label">Ch5 write ★</div><div class="sp-cp-bar-track"><div class="sp-cp-bar" style="left:32%;width:36%"></div></div></div>
+          <div class="sp-cp-bar-row"><div class="sp-cp-bar-label">Ch6 write ★</div><div class="sp-cp-bar-track"><div class="sp-cp-bar" style="left:55%;width:18%"></div></div></div>
+          <div class="sp-cp-bar-row"><div class="sp-cp-bar-label">App B screenshots</div><div class="sp-cp-bar-track"><div class="sp-cp-bar" style="left:60%;width:20%"></div></div></div>
+          <div class="sp-cp-bar-row"><div class="sp-cp-bar-label">App C tests</div><div class="sp-cp-bar-track"><div class="sp-cp-bar" style="left:65%;width:15%"></div></div></div>
+          <div class="sp-cp-bar-row"><div class="sp-cp-bar-label">App E/F formulae</div><div class="sp-cp-bar-track"><div class="sp-cp-bar" style="left:70%;width:18%"></div></div></div>
+          <div class="sp-cp-bar-row"><div class="sp-cp-bar-label">Proofread + PDF</div><div class="sp-cp-bar-track"><div class="sp-cp-bar" style="left:88%;width:12%"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sp-block">
+      <div class="sp-block-title cite">Citations needed — cross-section rollup</div>
+      <p class="sp-empty-note" style="font-size:12px;color:#888;line-height:1.65;margin-bottom:8px">Sourced from <code>Rewrite Queue.md</code> "Methods lit-review backlog (2026-04-18)". Each entry names the target chapter and the bibkey to insert.</p>
+      <div class="sp-cite-grid">
+        <div class="sp-cite-card"><h5>Knowledge Tracing &amp; BKT</h5><ul>
+          <li><strong>Ch2 §2.1.5 (NEW)</strong> — <code>Corbett &amp; Anderson (1995)</code>, <code>Yudelson, Koedinger &amp; Gordon (2013)</code></li>
+          <li><strong>Ch3 §3.4.3</strong> — same pair; show BKT equation (d) inline with config defaults</li>
+        </ul></div>
+        <div class="sp-cite-card"><h5>IRT / Rasch</h5><ul>
+          <li><strong>Ch2 §2.1.6</strong> — <code>Rasch (1960)</code>, <code>Lord &amp; Novick (1968)</code>, <code>Wright &amp; Stone (1979)</code></li>
+          <li><strong>Ch3 §3.4.2</strong> — <code>Rasch (1960)</code>, <code>Fisher (1922)</code> footnote, <code>Byrd, Lu, Nocedal &amp; Zhu (1995)</code> for L-BFGS-B</li>
+          <li><strong>Ch4 §4.9.2</strong> — one-line <code>Byrd et al. (1995)</code> at call-site</li>
+        </ul></div>
+        <div class="sp-cite-card"><h5>RAG &amp; embeddings</h5><ul>
+          <li><strong>Ch2 §2.1.8 (NEW)</strong> — <code>Lewis et al. (2020)</code>, <code>Reimers &amp; Gurevych (2019)</code>, <code>Malkov &amp; Yashunin (2020)</code></li>
+          <li><strong>Ch3 §3.x RAG Design</strong> — same trio inline</li>
+        </ul></div>
+        <div class="sp-cite-card"><h5>Text mining &amp; clustering</h5><ul>
+          <li><strong>Ch2 §2.1.7 (NEW)</strong> — <code>Salton &amp; McGill (1983)</code>, <code>MacQueen (1967)</code> / <code>Lloyd (1982)</code>, <code>Arthur &amp; Vassilvitskii (2007)</code>, <code>Rousseeuw (1987)</code>, <code>Salton &amp; Lesk (1968)</code></li>
+        </ul></div>
+        <div class="sp-cite-card"><h5>Composite, decay, shrinkage</h5><ul>
+          <li><strong>Ch2 §2.1.4 ext.</strong> — <code>OECD/JRC (2008)</code>, <code>Nardo et al. (2005)</code>, <code>Ebbinghaus (1885)</code>, <code>Wixted &amp; Carpenter (2007)</code>, <code>Efron &amp; Morris (1977)</code>, <code>Morris (1983)</code>, <code>Draper &amp; Smith (1998)</code>, <code>Han/Kamber/Pei (2011)</code></li>
+        </ul></div>
+        <div class="sp-cite-card"><h5>LLM-as-judge</h5><ul>
+          <li><strong>Ch2 §2.1.4 (or new §2.1.X)</strong> — <code>Zheng et al. (2023)</code></li>
+          <li><strong>Ch3 §3.3.0 / Ch4 §4.7.1</strong> — same key inline at the OpenAI scoring narration</li>
+        </ul></div>
+        <div class="sp-cite-card"><h5>Measurement &amp; classical test theory</h5><ul>
+          <li><strong>Ch3 §3.4.1</strong> — <code>Lord &amp; Novick (1968)</code>, <code>Crocker &amp; Algina (1986)</code></li>
+          <li><strong>Ch3 §3.4.4</strong> — <code>Little &amp; Rubin (2002)</code> for mean-imputation of mastery</li>
+        </ul></div>
+        <div class="sp-cite-card"><h5>Evaluation metrics</h5><ul>
+          <li><strong>Ch5 §5.1</strong> — <code>Fawcett (2006)</code>, <code>Hanley &amp; McNeil (1982)</code> for ROC-AUC</li>
+          <li><strong>Ch5 §5.4</strong> — <code>Cohen (1960)</code> for κ if implemented</li>
+        </ul></div>
+        <div class="sp-cite-card"><h5>Collaborative filtering</h5><ul>
+          <li><strong>Ch2 §2.1.7 (renumbered)</strong> — <code>Herlocker et al. (1999)</code>, <code>Resnick et al. (1994)</code> alongside existing Schafer 2007</li>
+        </ul></div>
+      </div>
+    </div>
+
+    <div class="sp-block">
+      <div class="sp-block-title action">Rewrite-queue snapshot — top action items</div>
+      <p class="sp-empty-note">No <code>\todo{}</code> markers exist in the <code>Report/</code> tree. The live action queue lives in <code>docs/obsidian-vault/My Notes/Thesis/Rewrite Queue.md</code>; the highest-priority items are mirrored here.</p>
+      <div class="sp-todo-block">
+        <div class="sp-action"><span class="sp-prio crit">crit</span><span class="sp-eff">L</span><div class="sp-action-text"><strong>Rewrite Ch4 Implementation for V2</strong> — replace V1 prototype framing across the entire chapter. <code>main-sections/implementation.tex</code></div></div>
+        <div class="sp-action"><span class="sp-prio crit">crit</span><span class="sp-eff">L</span><div class="sp-action-text"><strong>Write Ch5 Evaluation</strong> — all 5 subsections (Design, Functional, Non-Functional, Results, Discussion) currently header-only. <code>results-and-evaluation.tex</code></div></div>
+        <div class="sp-action"><span class="sp-prio crit">crit</span><span class="sp-eff">M</span><div class="sp-action-text"><strong>Write Ch6 Conclusion</strong> — Summary / Key Findings / Future Work all empty. <code>conclusion.tex</code></div></div>
+        <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text"><strong>Update Ch3 §3.3.1 struggle formula</strong> — thesis 5 components → code 7 (add <code>r_hat</code>, <code>d_hat</code>, <code>rep_hat</code>); add Bayesian shrinkage paragraph. See model-parity table in Ch3 subtab.</div></div>
+        <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text"><strong>Update Ch3 §3.3.2 difficulty formula</strong> — thesis 4 components → code 5 (add <code>p_tilde</code> first-attempt failure rate).</div></div>
+        <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text"><strong>Replace Figma mockups in Ch3 §3.4.2</strong> — Figs 8/9/10 are conceptual; swap with actual dashboard screenshots and remove the "conceptual design" caveat.</div></div>
+        <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text"><strong>Add missing V2 features to Ch3/Ch4</strong> — IRT, BKT, improved struggle, mistake clustering, measurement confidence, saved sessions, data analysis views, lab assistant system, settings page, sound effects, academic calendar.</div></div>
+        <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text"><strong>Fill Ch2 §2.1.7 research-gaps placeholder</strong> — commented-out draft exists at lines 121–130 of <code>requirements-specification.tex</code>. Review and uncomment.</div></div>
+        <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text"><strong>Populate Appendix B (UI Screenshots)</strong> — entire screenshot campaign across 6 instructor + 4 assistant views.</div></div>
+        <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text"><strong>Populate Appendix C (Test Results)</strong> — run smoke-test checklist from <code>Setup and Runbook.md</code>; capture pass/fail per FR/NFR.</div></div>
+        <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text"><strong>Update Ch1 risk mitigations table</strong> — generic mitigations → describe actual decisions (Bayesian shrinkage, modular design, smart devices scoped out).</div></div>
+        <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text"><strong>Add FR/NFR implementation status column to Ch2</strong> — readers cannot currently tell which requirements are done. Be honest about FR6 (smart devices) and FR7 (assistant ranking).</div></div>
+        <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text"><strong>Reconcile temporal smoothing</strong> across Ch3 §3.3.x — <code>SMOOTHING_ENABLED=True</code>, α=0.3 since 2026-04-10. Describe as active in baseline; cite EWMA recurrence in App E.</div></div>
+        <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text"><strong>Update Ch3 threshold label names</strong> — None/Low/Medium/High → On Track/Minor Issues/Struggling/Needs Help.</div></div>
+        <div class="sp-action"><span class="sp-prio low">low</span><span class="sp-eff">S</span><div class="sp-action-text"><strong>Confirm Progress Report exclusion</strong> — <code>Progress-Report.tex</code> is commented out in <code>main.tex</code>; verify it stays excluded.</div></div>
+      </div>
+    </div>
+
+  </div><!-- end overview subpanel -->
+
+  <!-- ─── Ch1 subpanel ─── -->
+  <div id="subpanel-sectionplan-ch1" class="subpanel">
+    <div class="sp-header-strip">
+      <span class="sp-pill partial">Partial</span>
+      <span class="sp-sep">·</span>
+      <code>Report/main-sections/introduction.tex</code>
+      <span class="sp-sep">·</span>
+      <span><strong>Target:</strong> ~5 pages</span>
+      <span class="sp-sep">·</span>
+      <span><strong>Vault:</strong> <code>Ch1 – Introduction.md</code></span>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title have">What's there now</div>
+      <ul class="sp-list">
+        <li>§1.1 Problem — shy students, prioritisation gap, passive assistants</li>
+        <li>§1.2 Proposed Solution — real-time analytics dashboard</li>
+        <li>§1.3 Aims and Objectives — 7 numbered objectives</li>
+        <li>§1.4 Risks and Mitigation — Table 1, 5 risks with generic mitigations</li>
+        <li>§1.5 Project Approach — incremental, implementation-focused</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title want">What should be there</div>
+      <ul class="sp-list">
+        <li>Same five subsections, rewritten in <strong>past/present</strong> tense as a description of a built system, not a proposal</li>
+        <li>Risk table updated to describe what was actually done (Bayesian shrinkage for low-n noise, modular design for extensibility, smart devices scoped out as future work)</li>
+        <li>§1.3 Objective 7 (evaluate approach) explicitly tied to the now-written Ch5</li>
+        <li>One-paragraph signpost at the end pointing to chapter map</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title gap">Gaps &amp; mismatches</div>
+      <ul class="sp-list">
+        <li><strong>Future tense</strong> across §1.2, §1.3, §1.5 ("we will", "the system will") — reads as proposal</li>
+        <li><strong>Generic mitigations</strong> in Table 1 ("seek constant feedback", "explore smartwatch solutions")</li>
+        <li><strong>Objective 7</strong> claims an evaluation will be done; Ch5 was empty when this was written</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title action">Action items</div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">Sweep §1.2/§1.3/§1.5 for future-tense verbs and rewrite as past/present.</div></div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">Rewrite Table 1 mitigations to describe actual decisions: shrinkage, modularity, FR6 deferral.</div></div>
+      <div class="sp-action"><span class="sp-prio low">low</span><span class="sp-eff">S</span><div class="sp-action-text">After Ch5 is written, revisit §1.3 Objective 7 wording so it points forward consistently.</div></div>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title fig">Required figures &amp; tables</div>
+      <table class="sp-table"><thead><tr><th>Item</th><th>Source</th><th>Status</th></tr></thead><tbody>
+        <tr><td>Table 1 — Risks &amp; Mitigations</td><td>Hand-written, current state</td><td><span class="sp-pill partial">Update</span></td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title cite">Citations needed</div>
+      <ul class="sp-list"><li>None new — Ch1 is framing prose, not literature.</li></ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title">Linked code &amp; vault</div>
+      <ul class="sp-list">
+        <li><code>docs/obsidian-vault/My Notes/Thesis/Ch1 – Introduction.md</code></li>
+        <li><code>docs/obsidian-vault/My Notes/Thesis/Thesis Overview.md</code> — overall framing</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title decision">Decision log (defence prep)</div>
+      <ul class="sp-list">
+        <li><strong>Why dashboard, not LMS analytics?</strong> Real-time, lab-session-scoped, signal-rich. <span class="sp-link" onclick="switchPanelByName('road')">→ Roadmap Stage 6 Q&amp;A</span></li>
+        <li><strong>Why interval refresh, not event-driven?</strong> Implementation simplicity at lab scale (~30 students). Event-driven is Future Work in Ch6.</li>
+      </ul>
+    </div>
+  </div><!-- end ch1 -->
+
+  <!-- ─── Ch2 subpanel ─── -->
+  <div id="subpanel-sectionplan-ch2" class="subpanel">
+    <div class="sp-header-strip">
+      <span class="sp-pill partial">Partial</span>
+      <span class="sp-sep">·</span>
+      <code>Report/main-sections/requirements-specification.tex</code>
+      <span class="sp-sep">·</span>
+      <span><strong>Target:</strong> ~14 pages</span>
+      <span class="sp-sep">·</span>
+      <span><strong>Vault:</strong> <code>Ch2 – Background and Requirements.md</code></span>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title have">What's there now</div>
+      <ul class="sp-list">
+        <li>§2.1.1 Learning Analytics in Higher Education</li>
+        <li>§2.1.2 Dashboards for Learning Analytics — SAM, EMODA, Edsight</li>
+        <li>§2.1.3 Real-Time Data Analytics and Visualisation</li>
+        <li>§2.1.4 Modelling Student Struggle</li>
+        <li>§2.1.5 Knowledge Tracing and Bayesian Student Models <em>(skeleton — header only)</em></li>
+        <li>§2.1.6 Modelling Task Difficulty</li>
+        <li>§2.1.7 Collaborative Filtering</li>
+        <li>§2.1.8 Text Mining and Mistake Pattern Recovery <em>(skeleton)</em></li>
+        <li>§2.1.9 Retrieval-Augmented Generation for Instructor and Assistant Feedback <em>(skeleton)</em></li>
+        <li>§2.1.10 Summary of Identified Research Gaps <em>(<code>[FILL IN]</code> placeholder; commented-out draft below)</em></li>
+        <li>§2.2 Existing Systems — LMS, Instructor Dashboards, Early Warning Systems</li>
+        <li>§2.3 Requirements — FR1–FR7, NFR1–NFR6, MoSCoW table</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title want">What should be there</div>
+      <ul class="sp-list">
+        <li>Skeleton subsections (KT, Text Mining, RAG) <strong>fully written</strong> with the citations listed below</li>
+        <li>§2.1.4 extended with composite-indicator / time-decay / shrinkage / regression paragraphs</li>
+        <li>§2.1.10 research-gaps written (uncomment the draft + tighten)</li>
+        <li>FR1–FR7 and NFR1–NFR6 each with an <strong>Implementation Status</strong> column (Done / Partial / Not implemented)</li>
+        <li>FR6 (smart devices) honestly framed — either downgrade to Won't Have or move discussion to Ch6 Future Work</li>
+        <li>FR7 (assistant ranking) flagged Partial — coordination yes, satisfaction-ranking no</li>
+        <li>One-paragraph rationale for the chosen evaluation framework introducing terms used in Ch5</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title gap">Gaps &amp; mismatches</div>
+      <ul class="sp-list">
+        <li><strong>§2.1.7 Research-gaps placeholder</strong> still says <code>[FILL IN]</code>; draft exists at lines 121–130</li>
+        <li>New skeleton subsections (KT, Text Mining, RAG) <strong>have headers but no prose</strong></li>
+        <li>No <code>\cite</code> calls in the new subsections</li>
+        <li>FR/NFR tables have <strong>no implementation-status column</strong> — readers can't tell which are done</li>
+        <li>FR6 listed as "Should Have" but completely unimplemented</li>
+        <li>"Feedback requests" (Ch3) vs "retry rate" (code) terminology drift originates here</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title action">Action items</div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Uncomment + tighten the §2.1.10 research-gaps draft. Remove the <code>[FILL IN]</code> token.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text">Write §2.1.5 Knowledge Tracing prose (~400 words) with Corbett &amp; Anderson + Yudelson et al.; show BKT update as the representative equation.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text">Write §2.1.8 Text Mining + Mistake Pattern Discovery; cite Salton/MacQueen/Lloyd/Arthur &amp; Vassilvitskii/Rousseeuw.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text">Write §2.1.9 RAG; cite Lewis et al. 2020, Reimers &amp; Gurevych 2019, Malkov &amp; Yashunin 2020.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Extend §2.1.4 with four short method paragraphs: composite indicator, time-decay/EWMA, Bayesian shrinkage, improvement-trajectory regression.</div></div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">Add Implementation-Status column to FR + NFR tables.</div></div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">Pick a single term — "feedback requests" or "retry rate" — and apply across Ch2 / Ch3 / Ch4 / config comments.</div></div>
+      <div class="sp-action"><span class="sp-prio low">low</span><span class="sp-eff">S</span><div class="sp-action-text">Sanity-check that every cited bibkey from this chapter exists in <code>docs/obsidian-vault/My Notes/Literature/</code> and the bibtex file.</div></div>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title fig">Required figures &amp; tables</div>
+      <table class="sp-table"><thead><tr><th>Item</th><th>Source</th><th>Status</th></tr></thead><tbody>
+        <tr><td>FR table — with Implementation Status column</td><td>Author</td><td><span class="sp-pill partial">Update</span></td></tr>
+        <tr><td>NFR table — with Implementation Status column</td><td>Author</td><td><span class="sp-pill partial">Update</span></td></tr>
+        <tr><td>MoSCoW prioritisation table</td><td>Author</td><td><span class="sp-pill done">Done</span></td></tr>
+        <tr><td>Comparison table — surveyed dashboards (SAM/EMODA/Edsight) vs this work</td><td>Author</td><td><span class="sp-pill needed">Add</span></td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title cite">Citations needed (this chapter)</div>
+      <ul class="sp-list">
+        <li><strong>§2.1.4</strong> — <code>OECD/JRC (2008)</code>, <code>Nardo et al. (2005)</code>, <code>Ebbinghaus (1885)</code>, <code>Wixted &amp; Carpenter (2007)</code>, <code>Efron &amp; Morris (1977)</code>, <code>Morris (1983)</code>, <code>Draper &amp; Smith (1998)</code>, <code>Han/Kamber/Pei (2011)</code>, <code>Zheng et al. (2023)</code></li>
+        <li><strong>§2.1.5</strong> — <code>Corbett &amp; Anderson (1995)</code>, <code>Yudelson, Koedinger &amp; Gordon (2013)</code></li>
+        <li><strong>§2.1.6</strong> — <code>Rasch (1960)</code>, <code>Lord &amp; Novick (1968)</code>, <code>Wright &amp; Stone (1979)</code></li>
+        <li><strong>§2.1.7</strong> — <code>Herlocker et al. (1999)</code>, <code>Resnick et al. (1994)</code></li>
+        <li><strong>§2.1.8</strong> — <code>Salton &amp; McGill (1983)</code>, <code>MacQueen (1967)</code> / <code>Lloyd (1982)</code>, <code>Arthur &amp; Vassilvitskii (2007)</code>, <code>Rousseeuw (1987)</code>, <code>Salton &amp; Lesk (1968)</code></li>
+        <li><strong>§2.1.9</strong> — <code>Lewis et al. (2020)</code>, <code>Reimers &amp; Gurevych (2019)</code>, <code>Malkov &amp; Yashunin (2020)</code></li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title">Linked code &amp; vault</div>
+      <ul class="sp-list">
+        <li><code>docs/obsidian-vault/My Notes/Thesis/Ch2 – Background and Requirements.md</code></li>
+        <li><code>docs/obsidian-vault/My Notes/Literature/index.md</code> — bibkey groupings</li>
+        <li>Plan: <code>~/.claude/plans/alright-for-our-lit-indexed-hamming.md</code> (lit-review audit table)</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title decision">Decision log</div>
+      <ul class="sp-list">
+        <li><strong>FR6 status</strong> — keep listed but explicitly flag as Future Work in Ch6 (NOT downgraded to Won't Have, because it remains a desirable extension).</li>
+        <li><strong>FR7 status</strong> — partial: assistant coordination implemented; satisfaction-based ranking deferred (no labelled satisfaction data exists).</li>
+        <li><strong>Ch2 / Ch3 / App E split</strong> — Ch2 = one core equation per technique + cite; Ch3 = equations actually used + default params; App E = consolidated reference; App F = derivations. Don't bloat Ch2.</li>
+      </ul>
+    </div>
+  </div><!-- end ch2 -->
+
+  <!-- ─── Ch3 subpanel ─── -->
+  <div id="subpanel-sectionplan-ch3" class="subpanel">
+    <div class="sp-header-strip">
+      <span class="sp-pill partial">Partial</span>
+      <span class="sp-sep">·</span>
+      <code>Report/main-sections/design-and-architecture.tex</code>
+      <span class="sp-sep">·</span>
+      <span><strong>Target:</strong> ~18 pages</span>
+      <span class="sp-sep">·</span>
+      <span><strong>Vault:</strong> <code>Ch3 – Design and Modelling.md</code></span>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title have">What's there now</div>
+      <ul class="sp-list">
+        <li>§3.1 System Architecture (3-layer)</li>
+        <li>§3.2 Data Endpoint (JSON+XML)</li>
+        <li>§3.3 Baseline Analytics Design — §3.3.1 Struggle (5 components, outdated), §3.3.x Temporal Smoothing, §3.3.2 Difficulty (4 components, outdated), §3.3.x CF (framed as future), §3.3.x Mistake Clustering <em>(skeleton)</em></li>
+        <li>§3.4 Advanced Model Design — Measurement Confidence / IRT / BKT / Improved Struggle <em>(all skeletons)</em></li>
+        <li>§3.5 RAG Feedback Design <em>(skeleton)</em></li>
+        <li>§3.6 Interaction and UI Designs — Principles, Instructor Views, Lab Assistant View <em>(skeleton)</em>, Visual Encoding</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title want">What should be there</div>
+      <ul class="sp-list">
+        <li>Struggle formula updated to <strong>7 components</strong> with weights from <code>config.py</code> (0.10, 0.10, 0.20, 0.10, 0.38, 0.05, 0.07) and a Bayesian-shrinkage paragraph (<code>w_n = n/(n+5)</code>)</li>
+        <li>Difficulty formula updated to <strong>5 components</strong> (add <code>p_tilde</code> first-attempt failure)</li>
+        <li>Temporal smoothing reframed as <strong>active</strong> (EWMA across snapshots, α=0.3) — distinct from per-submission decay in <code>A_raw</code></li>
+        <li>CF reframed as <strong>live secondary feature</strong>, not "to be implemented"</li>
+        <li>Each Advanced Model Design subsection (Measurement / IRT / BKT / Improved Struggle) written with citations from §2.1</li>
+        <li>RAG Design subsection written: pandas-prefilter + ChromaDB hybrid; cache-by-cluster-signature decision</li>
+        <li>Mistake Clustering subsection written with TF-IDF/K-means + silhouette auto-k</li>
+        <li>Lab Assistant View design intent written; threshold colour names updated to On Track/Minor Issues/Struggling/Needs Help</li>
+        <li>Figs 8–10 (Figma) replaced with actual dashboard screenshots</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title gap">Model parity — thesis vs code</div>
+      <table class="sp-table sp-parity-table"><thead>
+        <tr><th>Component</th><th>Thesis (current)</th><th>Code (V2)</th><th>Gap</th></tr>
+      </thead><tbody>
+        <tr><td><strong>Struggle</strong> n_hat — submission count</td><td class="sp-parity-ok">present, w=0.10</td><td class="sp-parity-ok">present, w=0.10</td><td class="sp-parity-ok">OK</td></tr>
+        <tr><td>t_hat — time on session</td><td class="sp-parity-ok">present, w=0.10</td><td class="sp-parity-ok">present, w=0.10</td><td class="sp-parity-ok">OK</td></tr>
+        <tr><td>i_norm — mean incorrectness</td><td class="sp-parity-ok">present, w=0.20</td><td class="sp-parity-ok">present, w=0.20</td><td class="sp-parity-ok">OK</td></tr>
+        <tr><td>r_norm — retry rate</td><td class="sp-parity-gap">missing</td><td class="sp-parity-ok">present, w=0.10</td><td class="sp-parity-gap">add</td></tr>
+        <tr><td>A_norm — recent decayed incorrectness</td><td class="sp-parity-ok">present (called f), w=0.40</td><td class="sp-parity-ok">present, w=0.38</td><td class="sp-parity-gap">rename + reweight</td></tr>
+        <tr><td>d̂ — improvement trajectory slope</td><td class="sp-parity-gap">missing</td><td class="sp-parity-ok">present, w=0.05</td><td class="sp-parity-gap">add (supervisor item)</td></tr>
+        <tr><td>rep_norm — answer repetition rate</td><td class="sp-parity-gap">missing</td><td class="sp-parity-ok">present, w=0.07</td><td class="sp-parity-gap">add (supervisor item)</td></tr>
+        <tr><td>Bayesian shrinkage <code>n/(n+5)</code></td><td class="sp-parity-gap">missing</td><td class="sp-parity-ok">applied as final transform</td><td class="sp-parity-gap">add (supervisor item)</td></tr>
+        <tr><td>Temporal smoothing (EWMA, α=0.3)</td><td class="sp-parity-gap">proposed but ambiguous</td><td class="sp-parity-ok">SMOOTHING_ENABLED=True</td><td class="sp-parity-gap">reframe as active</td></tr>
+        <tr><td><strong>Difficulty</strong> c_norm — incorrect rate</td><td class="sp-parity-ok">present, w=0.30</td><td class="sp-parity-ok">present, w=0.28</td><td class="sp-parity-gap">reweight</td></tr>
+        <tr><td>t̃ — avg time per student</td><td class="sp-parity-ok">present, w=0.20</td><td class="sp-parity-ok">present, w=0.12</td><td class="sp-parity-gap">reweight</td></tr>
+        <tr><td>ã — avg attempts</td><td class="sp-parity-ok">present, w=0.30</td><td class="sp-parity-ok">present, w=0.20</td><td class="sp-parity-gap">reweight</td></tr>
+        <tr><td>f_norm — mean incorrectness</td><td class="sp-parity-ok">present, w=0.20</td><td class="sp-parity-ok">present, w=0.20</td><td class="sp-parity-ok">OK</td></tr>
+        <tr><td>p_norm — first-attempt failure rate</td><td class="sp-parity-gap">missing</td><td class="sp-parity-ok">present, w=0.20</td><td class="sp-parity-gap">add</td></tr>
+        <tr><td><strong>CF</strong> framing</td><td class="sp-parity-gap">"is still going to be implemented"</td><td class="sp-parity-ok">live, k=3, enabled by default</td><td class="sp-parity-gap">reframe as implemented</td></tr>
+        <tr><td><strong>Threshold labels</strong></td><td class="sp-parity-gap">None / Low / Medium / High</td><td class="sp-parity-ok">On Track / Minor Issues / Struggling / Needs Help</td><td class="sp-parity-gap">rename</td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title action">Action items</div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text">Rewrite §3.3.1 — 7 signals with weights from <code>config.py</code>, define each signal, add Bayesian-shrinkage paragraph and EWMA paragraph (distinct from A_raw decay).</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Rewrite §3.3.2 — 5 signals with updated weights; describe <code>p_tilde</code>.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Reframe CF subsection as <strong>live</strong>; describe k=3, cosine, threshold-driven elevation, cold-start guard.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text">Write §3.4.1 Measurement Confidence (3-factor formula, length + extremity, base 0.7) — cite Lord &amp; Novick + Crocker &amp; Algina.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text">Write §3.4.2 IRT (Rasch 1PL, joint MLE, θ/b interpretation, sigmoid mapping) — cite Rasch + Fisher footnote + Byrd et al. for L-BFGS-B.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text">Write §3.4.3 BKT (HMM, 4 params, P(L) update, transition, mastery threshold 0.95) — cite Corbett &amp; Anderson + Yudelson.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text">Write §3.4.4 Improved Struggle — three components, coverage-weighted shrinkage in <code>_compute_difficulty_adjusted</code>, mean-imputation of mastery, graceful-degradation weight redistribution. Cite Little &amp; Rubin (2002).</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text">Write §3.5 RAG Design — hybrid pandas + ChromaDB, embedding choice (all-MiniLM-L6-v2), cache-by-cluster-signature decision (Meeting 4).</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text">Replace Figma figs 8/9/10 with actual dashboard screenshots; remove "conceptual design rather than fully implemented" caveat.</div></div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">Update §3.6 threshold names → On Track / Minor Issues / Struggling / Needs Help.</div></div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">Either remove "event-driven pipeline under exploration" line in §3.1 or move to Ch6 Future Work.</div></div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">Add §3.6.x Lab Assistant View design intent — join screen, waiting state, assigned student card.</div></div>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title fig">Required figures &amp; tables</div>
+      <table class="sp-table"><thead><tr><th>Item</th><th>Source</th><th>Status</th></tr></thead><tbody>
+        <tr><td>Fig — 3-layer system architecture</td><td>diagram (existing or redrawn)</td><td><span class="sp-pill partial">Refresh</span></td></tr>
+        <tr><td>Fig 8–10 — replace Figma mockups</td><td>screenshots from running dashboard</td><td><span class="sp-pill empty">Replace</span></td></tr>
+        <tr><td>Eq — struggle composite (7 signals)</td><td>derived from <code>config.py</code></td><td><span class="sp-pill needed">Add</span></td></tr>
+        <tr><td>Eq — Bayesian shrinkage <code>n/(n+5)</code></td><td>App E mirror</td><td><span class="sp-pill needed">Add</span></td></tr>
+        <tr><td>Eq — difficulty composite (5 signals)</td><td>derived from <code>config.py</code></td><td><span class="sp-pill needed">Add</span></td></tr>
+        <tr><td>Eq — BKT update (a)+(b)+(c)</td><td>App E mirror</td><td><span class="sp-pill needed">Add</span></td></tr>
+        <tr><td>Eq — Rasch 1PL <code>σ(θ−b)</code></td><td>App E mirror</td><td><span class="sp-pill needed">Add</span></td></tr>
+        <tr><td>Eq — Improved struggle 3-component</td><td>App E mirror</td><td><span class="sp-pill needed">Add</span></td></tr>
+        <tr><td>Eq — EWMA recurrence (α=0.3)</td><td>App E mirror</td><td><span class="sp-pill needed">Add</span></td></tr>
+        <tr><td>Table — threshold labels &amp; colours</td><td>from <code>config.py</code> thresholds</td><td><span class="sp-pill partial">Update</span></td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title cite">Citations needed</div>
+      <ul class="sp-list">
+        <li><strong>§3.3.1</strong> — composite indicator (OECD/JRC), shrinkage (Efron &amp; Morris, Morris), trajectory regression (Draper &amp; Smith)</li>
+        <li><strong>§3.3.2</strong> — IRT difficulty (Rasch, Lord &amp; Novick, Wright &amp; Stone)</li>
+        <li><strong>§3.3.x CF</strong> — Schafer 2007 (existing) + Herlocker 1999, Resnick 1994</li>
+        <li><strong>§3.3.x Mistake Clustering</strong> — Salton &amp; McGill, MacQueen, Lloyd, Arthur &amp; Vassilvitskii, Rousseeuw</li>
+        <li><strong>§3.4.1</strong> — Lord &amp; Novick (1968), Crocker &amp; Algina (1986)</li>
+        <li><strong>§3.4.2</strong> — Rasch (1960), Fisher (1922), Byrd et al. (1995)</li>
+        <li><strong>§3.4.3</strong> — Corbett &amp; Anderson (1995), Yudelson et al. (2013)</li>
+        <li><strong>§3.4.4</strong> — Little &amp; Rubin (2002)</li>
+        <li><strong>§3.5 RAG</strong> — Lewis et al. (2020), Reimers &amp; Gurevych (2019), Malkov &amp; Yashunin (2020)</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title">Linked code &amp; vault</div>
+      <ul class="sp-list">
+        <li><code>code/learning_dashboard/config.py</code> — weights, thresholds, smoothing flag</li>
+        <li><code>code/learning_dashboard/analytics.py</code> — struggle / difficulty / CF / clustering</li>
+        <li><code>code/learning_dashboard/models/{irt,bkt,improved_struggle,measurement}.py</code></li>
+        <li><code>code/learning_dashboard/rag.py</code></li>
+        <li><code>docs/obsidian-vault/My Notes/Thesis/Ch3 – Design and Modelling.md</code></li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title decision">Decision log</div>
+      <ul class="sp-list">
+        <li><strong>Cohort min-max returns 0.5 (not 0.0) when min==max</strong> — preserves weight contribution; degenerate cohort doesn't silently zero a signal.</li>
+        <li><strong>Shrinkage K=5</strong> — empirically chosen so a student at n=5 reaches 50% individual weight; matches typical lab engagement.</li>
+        <li><strong>CF as overlay, not relabeller</strong> — CF tags add a diagnostic banner but never rewrite struggle labels (avoids feedback loops).</li>
+        <li><strong>Improved struggle: min-max removed</strong> — was fighting Bayesian shrinkage. Shrinkage is the final transform.</li>
+        <li><strong>EWMA vs A_raw decay</strong> — different time scales: EWMA dampens snapshot-to-snapshot jitter; A_raw weights individual submissions by age within one snapshot.</li>
+      </ul>
+    </div>
+  </div><!-- end ch3 -->
+
+  <!-- ─── Ch4 subpanel ─── -->
+  <div id="subpanel-sectionplan-ch4" class="subpanel">
+    <div class="sp-header-strip">
+      <span class="sp-pill skel">Skeleton ◉ critical path</span>
+      <span class="sp-sep">·</span>
+      <code>Report/main-sections/implementation.tex</code>
+      <span class="sp-sep">·</span>
+      <span><strong>Target:</strong> ~22 pages</span>
+      <span class="sp-sep">·</span>
+      <span><strong>Vault:</strong> <code>Ch4 – Implementation.md</code></span>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title have">What's there now</div>
+      <ul class="sp-list">
+        <li>Phase-6 skeleton with 26 placeholder subsections across 8 sections (Overview, Tech Stack, System Structure, Data Pipeline, Session Mgmt, Analytics, RAG, Advanced Models, Lab Instructor System, Lab Assistant System, Problems Encountered, UI/Interaction)</li>
+        <li>V1 prototype framing: "proof of concept", "to be implemented in the later iteration", "foundation for what the dashboard will eventually become"</li>
+        <li>Tech Stack table referencing V1 simplicity</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title want">What should be there</div>
+      <ul class="sp-list">
+        <li>All 26 placeholders <strong>written</strong> as final-system narrative (past/present tense)</li>
+        <li>OpenAI scoring described: gpt-4o-mini, batch 50, in-process cache, 0.5 fallback on parse failure</li>
+        <li>Each baseline + advanced model with file:line ref and a one-line excerpt to App A</li>
+        <li>Lab assistant system: join flow, ?aid= URL persistence, 5s auto-refresh, 4 view states, filelock + atomic tmp-replace</li>
+        <li>Six instructor views walked through with screenshot ref to App B</li>
+        <li>Problems Encountered + Solutions: deferred-actions pattern, Streamlit script-tag CSP (sound iframe trick), BKT replay ordering bug fix</li>
+        <li>Phase-5 Model Comparison view + Settings sub-toggles + BKT sliders documented</li>
+        <li>RAG: pandas-prefilter + ChromaDB hybrid, all-MiniLM-L6-v2, cache-by-cluster-signature (Meeting 4 outcome)</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title gap">Gaps &amp; mismatches</div>
+      <ul class="sp-list">
+        <li>Entire chapter currently V1 framing — nearly every claim is wrong about V2</li>
+        <li>"Assistant allocation … to be implemented" line is stale — assistant allocation IS implemented; only smart devices remain deferred</li>
+        <li>26 Phase-6 placeholder subsections have headers but no prose</li>
+        <li>No mention of: deferred-actions pattern, file lock / atomic write, sound-effects CSP workaround, academic calendar, Phase-5 comparison view, Settings sub-toggles, BKT mastery sliders</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title action">Action items</div>
+      <div class="sp-action"><span class="sp-prio crit">crit</span><span class="sp-eff">L</span><div class="sp-action-text">Strip all V1 framing language across the chapter — search/replace "proof of concept", "to be implemented in the later iteration", "foundation for what the dashboard will eventually become".</div></div>
+      <div class="sp-action"><span class="sp-prio crit">crit</span><span class="sp-eff">L</span><div class="sp-action-text">Write all 26 placeholder subsections (System Structure ×3, Data Pipeline ×2, Session Mgmt ×2, Analytics ×5, RAG ×5, Advanced Models ×4, Lab Instructor Views ×7, Lab Assistant Flows ×3, UI/Interaction ×2).</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Document Phase-5 — Model Comparison view, three new components, Settings sub-toggles + BKT sliders.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Document RAG cache-by-cluster-signature decision (Meeting 4 — Dr Batmaz suggested).</div></div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">Add "Problems Encountered" subsection: deferred actions, sound-effects iframe CSP, BKT timestamp ordering, OpenAI batch fallback.</div></div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">For each model, drop a one-line <code>file.py:line</code> reference to keep narrative anchored to source.</div></div>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title fig">Required figures &amp; tables</div>
+      <table class="sp-table"><thead><tr><th>Item</th><th>Source</th><th>Status</th></tr></thead><tbody>
+        <tr><td>Fig — System architecture (V2)</td><td>redraw</td><td><span class="sp-pill needed">Add</span></td></tr>
+        <tr><td>Fig — Data pipeline flow (5 stages)</td><td>redraw</td><td><span class="sp-pill needed">Add</span></td></tr>
+        <tr><td>Fig — Lab assistant state diagram</td><td>redraw</td><td><span class="sp-pill needed">Add</span></td></tr>
+        <tr><td>Fig — RAG two-layer retrieval</td><td>redraw</td><td><span class="sp-pill needed">Add</span></td></tr>
+        <tr><td>Screenshots — 6 instructor views</td><td>App B</td><td><span class="sp-pill empty">Capture</span></td></tr>
+        <tr><td>Screenshots — 4 assistant view states</td><td>App B</td><td><span class="sp-pill empty">Capture</span></td></tr>
+        <tr><td>Table — Tech stack (revised)</td><td>Author</td><td><span class="sp-pill partial">Update</span></td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title cite">Citations needed</div>
+      <ul class="sp-list">
+        <li><strong>§4.9.2/§4.9.3</strong> — <code>Byrd, Lu, Nocedal &amp; Zhu (1995)</code> at L-BFGS-B call-sites</li>
+        <li><strong>§4.7.1 OpenAI scoring</strong> — <code>Zheng et al. (2023)</code> LLM-as-judge framing</li>
+        <li><strong>§4.x RAG</strong> — <code>Lewis et al. (2020)</code>, <code>Reimers &amp; Gurevych (2019)</code></li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title">Linked code &amp; vault</div>
+      <ul class="sp-list">
+        <li><code>code/learning_dashboard/instructor_app.py</code>, <code>assistant_app.py</code></li>
+        <li><code>code/learning_dashboard/{data_loader,analytics,lab_state,sound,academic_calendar,paths,rag}.py</code></li>
+        <li><code>code/learning_dashboard/models/*.py</code></li>
+        <li><code>code/learning_dashboard/ui/{views,components,theme}.py</code></li>
+        <li><code>docs/obsidian-vault/My Notes/Thesis/Ch4 – Implementation.md</code></li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title decision">Decision log</div>
+      <ul class="sp-list">
+        <li><strong>Streamlit + Plotly</strong> over Dash/Panel — fastest iteration; auto-refresh built in; Python-only.</li>
+        <li><strong>File-locked JSON</strong> over a DB for shared state — zero-config, auditable, two-process scale is enough.</li>
+        <li><strong>Sound effects via 0-height iframe</strong> — Streamlit sanitises script tags from <code>st.markdown</code>; <code>components.html(height=0)</code> bypasses CSP.</li>
+        <li><strong>Deferred actions pattern</strong> — Streamlit forbids mutating <code>st.session_state</code> after a widget renders; queue mutations as <code>pending_*</code> flags applied at top of <code>main()</code>.</li>
+        <li><strong>OpenAI batching</strong> — batch 50 cuts API spend ~50× vs per-row; in-process cache prevents repeat calls within a session.</li>
+        <li><strong>BKT replay sort</strong> — sort by [timestamp, question] using mergesort before grouping; sequential update means order determines posterior.</li>
+      </ul>
+    </div>
+  </div><!-- end ch4 -->
+
+  <!-- ─── Ch5 subpanel ─── -->
+  <div id="subpanel-sectionplan-ch5" class="subpanel">
+    <div class="sp-header-strip">
+      <span class="sp-pill skel">Skeleton ◉ critical path</span>
+      <span class="sp-sep">·</span>
+      <code>Report/main-sections/results-and-evaluation.tex</code>
+      <span class="sp-sep">·</span>
+      <span><strong>Target:</strong> ~14 pages</span>
+      <span class="sp-sep">·</span>
+      <span><strong>Vault:</strong> <code>Ch5 – Results and Evaluation.md</code></span>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title have">What's there now</div>
+      <ul class="sp-list">
+        <li>§5.1 Evaluation Design — Scope / Evidence Sources / Retrospective Protocol / Limitations <em>(headers only)</em></li>
+        <li>§5.2 Functional Testing — Data Ingestion / Analytics / Instructor Dashboard / Assistant Workflow <em>(headers only)</em></li>
+        <li>§5.3 Non-Functional Testing — Performance / Usability / Robustness <em>(headers only)</em></li>
+        <li>§5.4 Results — Baseline / Advanced Comparison / Strengths and Weaknesses <em>(headers only)</em></li>
+        <li>§5.5 Discussion — Model Disagreement / Limitations <em>(headers only)</em></li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title want">What should be there</div>
+      <ul class="sp-list">
+        <li>§5.1 — explicit retrospective scope (no live user study), evidence sources (smoke test + comparison view + manual observations), evaluation rubric tied to FR/NFR</li>
+        <li>§5.2 — pass/fail row per FR1–FR7, with link to App C</li>
+        <li>§5.3 — refresh latency, API response, robustness with empty/single-student/no-AI-feedback inputs</li>
+        <li>§5.4 — agreement % from Phase-5 Model Comparison view (baseline vs improved struggle, baseline vs IRT difficulty); scatter plot screenshots; comparison-table excerpts; CF elevation rate; mistake-clustering quality</li>
+        <li>§5.5 — Meeting 4 finding: improved models collapse to ~0% agreement (frame as known limitation, not failure); weight-justification absence (manual trial-and-error); CF cold-start handling</li>
+        <li>One paragraph stating <strong>α/β/γ/δ/η were set by trial-and-error</strong> due to lack of labelled ground truth (Meeting 3 supervisor item)</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title gap">Gaps &amp; mismatches</div>
+      <ul class="sp-list">
+        <li>Whole chapter is empty</li>
+        <li>No automated tests in repo — must be honest about this; smoke-test checklist is the evidence base</li>
+        <li>No labelled ground truth → no CF precision@k yet</li>
+        <li>Cohen's κ not implemented (currently raw agreement %); decide whether to add or to discuss as limitation</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title action">Action items</div>
+      <div class="sp-action"><span class="sp-prio crit">crit</span><span class="sp-eff">M</span><div class="sp-action-text">Run a live or saved-session capture of the Model Comparison view; screenshot the four panels (struggle scatter, struggle table, difficulty scatter, difficulty table).</div></div>
+      <div class="sp-action"><span class="sp-prio crit">crit</span><span class="sp-eff">M</span><div class="sp-action-text">Run smoke test from <code>Setup and Runbook.md</code> end-to-end; populate App C with pass/fail evidence.</div></div>
+      <div class="sp-action"><span class="sp-prio crit">crit</span><span class="sp-eff">L</span><div class="sp-action-text">Write all five subsections; aim for ~14 pages.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Decide on Cohen's κ — implement (Cohen 1960) or discuss as limitation.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Draft CF evaluation methodology — held-out historical sessions as proxy ground truth; report RMSE, precision@k, coverage. (Dr Batmaz open question.)</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Discuss IRT/BKT improved-model collapse to ~0% agreement (Meeting 4) — frame causes (sparse data per question for IRT, BKT mastery threshold sensitivity).</div></div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">State manual weight-tuning explicitly as limitation; future-work hook in Ch6.</div></div>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title fig">Required figures &amp; tables</div>
+      <table class="sp-table"><thead><tr><th>Item</th><th>Source</th><th>Status</th></tr></thead><tbody>
+        <tr><td>Fig — Agreement summary cards (struggle)</td><td>screenshot from comparison view</td><td><span class="sp-pill empty">Capture</span></td></tr>
+        <tr><td>Fig — Scatter plot baseline vs improved struggle</td><td>screenshot</td><td><span class="sp-pill empty">Capture</span></td></tr>
+        <tr><td>Fig — Scatter plot baseline vs IRT difficulty</td><td>screenshot</td><td><span class="sp-pill empty">Capture</span></td></tr>
+        <tr><td>Table — comparison rows by largest delta</td><td>screenshot or LaTeX table</td><td><span class="sp-pill empty">Capture</span></td></tr>
+        <tr><td>Table — FR1–FR7 functional pass/fail</td><td>App C</td><td><span class="sp-pill empty">Author</span></td></tr>
+        <tr><td>Table — NFR1–NFR6 non-functional results</td><td>App C</td><td><span class="sp-pill empty">Author</span></td></tr>
+        <tr><td>Fig — Refresh latency over a session</td><td>manual measurement</td><td><span class="sp-pill needed">Add</span></td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title cite">Citations needed</div>
+      <ul class="sp-list">
+        <li><strong>§5.1</strong> — <code>Fawcett (2006)</code>, <code>Hanley &amp; McNeil (1982)</code> for ROC-AUC framing</li>
+        <li><strong>§5.4</strong> — <code>Cohen (1960)</code> for κ if implemented; otherwise cite anyway when discussing limitation</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title">Linked code &amp; vault</div>
+      <ul class="sp-list">
+        <li><code>code/learning_dashboard/ui/views.py</code> — <code>comparison_view()</code></li>
+        <li><code>code/learning_dashboard/ui/components.py</code> — agreement cards, scatter, table</li>
+        <li><code>docs/obsidian-vault/My Notes/Thesis/Ch5 – Results and Evaluation.md</code></li>
+        <li><code>docs/obsidian-vault/My Notes/Thesis/Setup and Runbook.md</code> — smoke-test source</li>
+        <li><code>docs/obsidian-vault/My Notes/Thesis/Evaluation Strategy.md</code></li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title decision">Decision log</div>
+      <ul class="sp-list">
+        <li><strong>Retrospective evaluation, not user study</strong> — no IRB cleared classroom data collection in scope; defer real-user evaluation to Future Work.</li>
+        <li><strong>Raw agreement % (not κ) by default</strong> — interpretable for non-stats audience; document Cohen's κ as the chance-corrected alternative either way.</li>
+        <li><strong>Improved-model collapse framed as known limitation</strong> — IRT sparsity + BKT default-parameter sensitivity, not implementation bug.</li>
+      </ul>
+    </div>
+  </div><!-- end ch5 -->
+
+  <!-- ─── Ch6 subpanel ─── -->
+  <div id="subpanel-sectionplan-ch6" class="subpanel">
+    <div class="sp-header-strip">
+      <span class="sp-pill skel">Skeleton ◉ critical path</span>
+      <span class="sp-sep">·</span>
+      <code>Report/main-sections/conclusion.tex</code>
+      <span class="sp-sep">·</span>
+      <span><strong>Target:</strong> ~5 pages</span>
+      <span class="sp-sep">·</span>
+      <span><strong>Vault:</strong> <code>Ch6 – Conclusion.md</code></span>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title have">What's there now</div>
+      <ul class="sp-list">
+        <li>§6.1 Summary of the Project <em>(empty)</em></li>
+        <li>§6.2 Key Findings &amp; Contributions <em>(empty)</em></li>
+        <li>§6.3 Future Work <em>(empty)</em></li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title want">What should be there</div>
+      <ul class="sp-list">
+        <li>§6.1 — recap problem, approach, and built system in 1 page</li>
+        <li>§6.2 — map back one-to-one to Ch1 §1.3 objectives; honest about Objective 7 (evaluation done, retrospective)</li>
+        <li>§6.3 — Future Work list:
+          <ul class="sp-list">
+            <li>FR6 smart-device integration</li>
+            <li>Event-driven architecture (replace interval-based pipeline)</li>
+            <li>BKT mastery visualisation in assistant app (still deferred; sliders exist in Settings)</li>
+            <li>Surface measurement-confidence in question-detail view</li>
+            <li>Fully wire temporal smoothing (currently flag exists, behaviour partial)</li>
+            <li>Automated evaluation framework + classroom user study (IRB)</li>
+            <li>ML-based weight optimisation (Optuna / logistic regression / gradient boosting) once labelled ground truth exists</li>
+            <li>Predictive alerts / forward-looking risk prediction</li>
+            <li>Export &amp; reporting (CSV / PDF)</li>
+            <li>BKT parameter sensitivity / grid search (sliders exist; needs labelled data)</li>
+            <li>RAG empirical evaluation (deferred from Phase 9)</li>
+            <li>Discussion-chapter material from Dr Batmaz's MSc ethics class Q&amp;A (Mon 27 Apr)</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title gap">Gaps</div>
+      <ul class="sp-list"><li>Whole chapter empty.</li></ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title action">Action items</div>
+      <div class="sp-action"><span class="sp-prio crit">crit</span><span class="sp-eff">M</span><div class="sp-action-text">Write all three subsections.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Ensure §6.2 maps 1:1 to Ch1 §1.3 — reader should be able to scan both side-by-side.</div></div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">Add ML-based weight optimisation explicitly as future work (Meeting 3 supervisor item).</div></div>
+      <div class="sp-action"><span class="sp-prio low">low</span><span class="sp-eff">S</span><div class="sp-action-text">Decide whether ethics-class Q&amp;A material lives in Ch6 or in a Discussion appendix.</div></div>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title fig">Required figures &amp; tables</div>
+      <ul class="sp-list"><li>Typically none; a single summary diagram is optional.</li></ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title cite">Citations needed</div>
+      <ul class="sp-list"><li>None new for §6.1/§6.2. §6.3 may cite Optuna or relevant survey if Future Work names specific tools.</li></ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title">Linked code &amp; vault</div>
+      <ul class="sp-list">
+        <li><code>docs/obsidian-vault/My Notes/Thesis/Ch6 – Conclusion.md</code></li>
+        <li><code>docs/obsidian-vault/My Notes/Thesis/Thesis Overview.md</code></li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title decision">Decision log</div>
+      <ul class="sp-list">
+        <li><strong>Honest about retrospective evaluation</strong> — Objective 7 is done, but framed as retrospective + comparison-view-driven, not classroom user study.</li>
+        <li><strong>FR6 framed as Future Work, not failure</strong> — explicitly scoped out, not abandoned.</li>
+      </ul>
+    </div>
+  </div><!-- end ch6 -->
+
+  <!-- ─── Appendix A ─── -->
+  <div id="subpanel-sectionplan-appA" class="subpanel">
+    <div class="sp-header-strip">
+      <span class="sp-pill empty">Empty</span>
+      <span class="sp-sep">·</span>
+      <code>Report/appendix-sections/code-snippets.tex</code>
+      <span class="sp-sep">·</span>
+      <span><strong>Target:</strong> 5–8 surgical excerpts</span>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title want">What should be there</div>
+      <ul class="sp-list">
+        <li><code>min_max_normalize()</code> + cohort-edge-case handling — backs Ch3 normalisation discussion</li>
+        <li><code>compute_student_struggle_scores()</code> — the 7-signal weighted sum + shrinkage final transform</li>
+        <li><code>compute_question_difficulty_scores()</code> — 5-signal composite</li>
+        <li><code>compute_recent_incorrectness()</code> — A_raw exponential decay</li>
+        <li><code>fit_rasch_model()</code> — joint MLE with centring projection in the gradient</li>
+        <li><code>bkt_update()</code> + <code>compute_all_mastery()</code> — Bayes update + sequential replay sort</li>
+        <li><code>cluster_question_mistakes()</code> — TF-IDF + K-means with silhouette auto-k</li>
+        <li><code>generate_assistant_suggestions()</code> — RAG two-layer pandas + ChromaDB</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title gap">Gaps</div>
+      <ul class="sp-list"><li>Empty section.</li><li>No formatting decision yet (listings vs minted vs verbatim) — pick one and apply consistently.</li></ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title action">Action items</div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Pick LaTeX listings package + Python style; apply globally.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Paste 5–8 functions listed above with file:line headers; trim docstrings to one line each.</div></div>
+      <div class="sp-action"><span class="sp-prio low">low</span><span class="sp-eff">S</span><div class="sp-action-text">Cross-reference each excerpt from the matching Ch4 paragraph.</div></div>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title">Linked code</div>
+      <ul class="sp-list"><li><code>code/learning_dashboard/{analytics,models/irt,models/bkt,rag}.py</code></li></ul>
+    </div>
+  </div><!-- end appA -->
+
+  <!-- ─── Appendix B ─── -->
+  <div id="subpanel-sectionplan-appB" class="subpanel">
+    <div class="sp-header-strip">
+      <span class="sp-pill empty">Empty ◉ critical path</span>
+      <span class="sp-sep">·</span>
+      <code>Report/appendix-sections/ui-screenshots.tex</code>
+      <span class="sp-sep">·</span>
+      <span><strong>Target:</strong> ~10 pages of figures</span>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title want">What should be there</div>
+      <ul class="sp-list">
+        <li><strong>Instructor app</strong> — In Class view, Student Detail, Question Detail, Data Analysis, Comparison view (both tabs), Settings, Previous Sessions</li>
+        <li><strong>Assistant app</strong> — Join screen, Waiting/unassigned, Assigned (with RAG bullets + Mark Helped), Session ended</li>
+        <li><strong>Cross-cutting</strong> — Sidebar (filters + session controls), threshold colour legend, sound-effects toggle</li>
+        <li>Each figure with caption + cross-reference label so Ch4 can <code>\ref</code> them</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title gap">Gaps</div>
+      <ul class="sp-list">
+        <li>Empty</li>
+        <li>Dashboard must be in stable visual state before screenshot campaign — avoid re-shoots</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title action">Action items</div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Stage a representative session with realistic data (not just a handful of submissions).</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text">Capture all 11+ screenshots in one campaign at the same browser zoom and theme.</div></div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">Annotate 2–3 key screenshots (callouts on threshold colours, on Mark Helped button).</div></div>
+      <div class="sp-action"><span class="sp-prio low">low</span><span class="sp-eff">S</span><div class="sp-action-text">Compress to a sensible PDF size (~150 dpi) before final embed.</div></div>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title">Linked vault</div>
+      <ul class="sp-list"><li><code>docs/obsidian-vault/My Notes/Thesis/Figures and Tables.md</code> — the figure inventory</li></ul>
+    </div>
+  </div><!-- end appB -->
+
+  <!-- ─── Appendix C ─── -->
+  <div id="subpanel-sectionplan-appC" class="subpanel">
+    <div class="sp-header-strip">
+      <span class="sp-pill empty">Empty ◉ critical path</span>
+      <span class="sp-sep">·</span>
+      <code>Report/appendix-sections/detailed-test-results.tex</code>
+      <span class="sp-sep">·</span>
+      <span><strong>Target:</strong> ~6 pages</span>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title want">What should be there</div>
+      <ul class="sp-list">
+        <li>FR1–FR7 traceability matrix with pass/fail per smoke-test step</li>
+        <li>NFR1–NFR6 evidence (refresh latency, robustness with empty/single-student inputs, privacy/CSP notes)</li>
+        <li>Per-view quick checks (each instructor + assistant view)</li>
+        <li>Edge cases: empty data, single student, no AI feedback, mid-session session-end</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title gap">Gaps</div>
+      <ul class="sp-list">
+        <li>Empty</li>
+        <li>No automated test suite — must be honest; smoke-test checklist is the source</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title action">Action items</div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Run end-to-end smoke test from <code>Setup and Runbook.md</code>.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Author FR + NFR result tables; cross-reference from Ch5 §5.2 / §5.3.</div></div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">Capture refresh-latency timing over a 5-minute session (timestamps in console / browser perf tab).</div></div>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title">Linked vault</div>
+      <ul class="sp-list"><li><code>docs/obsidian-vault/My Notes/Thesis/Setup and Runbook.md</code> — smoke-test checklist</li></ul>
+    </div>
+  </div><!-- end appC -->
+
+  <!-- ─── Appendix D ─── -->
+  <div id="subpanel-sectionplan-appD" class="subpanel">
+    <div class="sp-header-strip">
+      <span class="sp-pill done">Done</span>
+      <span class="sp-sep">·</span>
+      <code>Report/appendix-sections/themes-and-references.tex</code>
+      <span class="sp-sep">·</span>
+      <span><strong>Status:</strong> 36 citations mapped to research themes</span>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title">What's there now</div>
+      <ul class="sp-list">
+        <li>Themes: learning analytics, dashboards, struggle modelling, difficulty modelling, CF, knowledge tracing, real-time analytics, etc.</li>
+        <li>Each theme lists the bibkeys that support it and one-line summaries</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title action">Maintenance</div>
+      <div class="sp-action"><span class="sp-prio low">low</span><span class="sp-eff">S</span><div class="sp-action-text">Re-review after Ch2 backlog adds new bibkeys (BKT, RAG, text mining, IRT extensions, classical test theory, evaluation metrics) — add to appropriate themes.</div></div>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title">Linked vault</div>
+      <ul class="sp-list"><li><code>docs/obsidian-vault/My Notes/Literature/index.md</code> — bibkey grouping mirror</li></ul>
+    </div>
+  </div><!-- end appD -->
+
+  <!-- ─── Appendix E ─── -->
+  <div id="subpanel-sectionplan-appE" class="subpanel">
+    <div class="sp-header-strip">
+      <span class="sp-pill empty">Empty</span>
+      <span class="sp-sep">·</span>
+      <code>Report/appendix-sections/formulae.tex</code>
+      <span class="sp-sep">·</span>
+      <span><strong>Target:</strong> consolidated formula reference (~3 pages)</span>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title want">What should be there</div>
+      <ul class="sp-list">
+        <li>Cohort min-max normalisation (with degenerate-case rule returning 0.5)</li>
+        <li>Recent incorrectness <code>A_raw</code> exponential decay</li>
+        <li>Improvement trajectory slope <code>d̂</code></li>
+        <li>Answer repetition rate <code>rep̂</code></li>
+        <li>Struggle composite (7-signal weighted sum)</li>
+        <li>Bayesian shrinkage <code>S_final = w_n·S + (1−w_n)·μ</code></li>
+        <li>Difficulty composite (5-signal weighted sum)</li>
+        <li>BKT update equations (a)–(e): observation prob, posterior, transition</li>
+        <li>Rasch 1PL <code>P(correct | θ, b) = σ(θ − b)</code></li>
+        <li>Improved struggle 3-component formula</li>
+        <li>EWMA recurrence <code>S_smooth(t) = α·S(t) + (1−α)·S_smooth(t−Δt)</code></li>
+        <li>Measurement confidence 3-factor formula</li>
+        <li>Cosine similarity, TF-IDF, silhouette score</li>
+        <li>Cohen's κ (if implemented in Ch5)</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title action">Action items</div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Compile every formula listed above into a single LaTeX-formatted reference; mirror Ch3 + Ch4 narrative notation exactly.</div></div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">Each formula gets a cross-reference label so Ch3/Ch4 can <code>\eqref</code> it.</div></div>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title">Linked code</div>
+      <ul class="sp-list"><li><code>code/learning_dashboard/{config.py, analytics.py, models/*.py}</code></li></ul>
+    </div>
+  </div><!-- end appE -->
+
+  <!-- ─── Appendix F ─── -->
+  <div id="subpanel-sectionplan-appF" class="subpanel">
+    <div class="sp-header-strip">
+      <span class="sp-pill empty">Empty</span>
+      <span class="sp-sep">·</span>
+      <code>Report/appendix-sections/formulae-derivation.tex</code>
+      <span class="sp-sep">·</span>
+      <span><strong>Target:</strong> derivations (~5 pages)</span>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title want">What should be there</div>
+      <ul class="sp-list">
+        <li>BKT (b) and (c) — derive from Bayes' rule starting from observation likelihoods</li>
+        <li>Rasch 1PL — Bernoulli log-likelihood, gradient w.r.t. θ and b, centring projection rationale</li>
+        <li>Bayesian shrinkage — posterior derivation under conjugate prior; intuition for K=5</li>
+        <li>EWMA recurrence — closed-form expansion + relationship to exponential weighting</li>
+        <li>Optional: silhouette score derivation, cosine similarity geometric intuition</li>
+      </ul>
+    </div>
+
+    <div class="sp-block"><div class="sp-block-title action">Action items</div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text">Write derivations; keep prose tight — these are reference, not tutorial.</div></div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">Each derivation references the parent formula in App E.</div></div>
+    </div>
+  </div><!-- end appF -->
+
+</div><!-- end panel-sectionplan -->
 
 <script>
 /* ══════════════════════════════════════════

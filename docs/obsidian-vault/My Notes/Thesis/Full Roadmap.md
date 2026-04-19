@@ -245,6 +245,27 @@ Lightweight mobile Help panel for lab assistants covering join guide, student ca
 
 ---
 
+## Alternative React (Vite) frontend — `code2/` shadow workspace
+
+Additive track kicked off after the core Streamlit app was feature-complete. **`code/` stays pristine** throughout; everything happens in the `code2/` shadow copy. The thesis contribution (analytics, IRT, BKT, improved struggle, CF, RAG) is unchanged — only the presentation layer differs.
+
+| Phase | Description | Status |
+|---|---|---|
+| 0 | Bootstrap — `cp -r code code2`, create `code2/CHECKLIST.md` resumable log | **Done** (2026-04-19) |
+| 1 | FastAPI backend skeleton — `code2/backend/` + two 4-line `learning_dashboard/` refactors (`analytics.py:25` OpenAI-key guard, `data_loader.py:16` cached/uncached split) | **Done** (2026-04-19) |
+| 2 | Vite + React + TypeScript scaffold — 7 themes (paper / newsprint / solar / scifi / blueprint / matrix / cyberpunk) extracted verbatim from `Alternative Dashboard _standalone_.html`, runtime theme + accent swap with `localStorage` persistence | **Done** (2026-04-19) |
+| 3 | Port 7 non-lab views — InClassView, StudentDetail, QuestionDetail (+ new "Top Strugglers on this Question" table), DataAnalysisView, SettingsView, PreviousSessionsView, ComparisonView. Cold-start analytics mitigation via 5-min cache + `lifespan` prewarm. | **Done** (2026-04-19) |
+| 4 | Lab state parity — 11 `/api/lab/*` endpoints, LabAssistantView with dispatch queue. Verified curl cycle: join → assign → mark helped → remove, state mutates through the same `FileLock`-protected `lab_session.json` that the Streamlit apps use. | **Done** (2026-04-19) |
+| 5 | Sessions + settings + RAG — `/api/sessions` (read-only), `/api/settings` (read-only config snapshot), `/api/rag/{student,question}/{id}` (`async` + `to_thread` so the first-time Chroma build doesn't block the event loop). RagPanel integrated into detail views. | **Done** (2026-04-19) |
+| 6 | Build + polish — ErrorBoundary, loading skeletons, `npm run build` → `dist/` (≈260 KB / 74 KB gzipped), `StaticFiles` mount at `/`, `/docs` Swagger UI, custom editorial favicon | **Done** (2026-04-19) |
+| 7 | Documentation sync — this block, Evidence Bank, Report Sync, Figures and Tables, Weekly Plan, Setup and Runbook, recap toolkit panels | **In progress** |
+| 8 | Defence rehearsal — 5-process smoke test, thesis screenshots, demo script | Not started |
+
+Plan file (full context, resumable across context loss): `C:\Users\Bakri\.claude\plans\c-users-bakri-downloads-alternative-das-majestic-garden.md`.
+Execution log with decision history: `code2/CHECKLIST.md`.
+
+---
+
 ## Useful links
 
 - [[Coding Roadmap]] — full coding phase status and sub-tasks

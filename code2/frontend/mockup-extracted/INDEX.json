@@ -1,0 +1,434 @@
+[
+  {
+    "uuid": "c2023538-746e-4de6-94fb-3baaf6be939e",
+    "ext": ".js",
+    "size": 3137752,
+    "compressed": true
+  },
+  {
+    "uuid": "50ccb9a4-bb20-4ef0-828c-efebfe1d8a03",
+    "ext": ".css",
+    "size": 1080227,
+    "compressed": true
+  },
+  {
+    "uuid": "c39f3abe-c6aa-4819-ab08-86fcac0d784f",
+    "ext": ".css",
+    "size": 109931,
+    "compressed": true
+  },
+  {
+    "uuid": "8e15b2db-4164-4298-a5c9-3607fd6a3bef",
+    "ext": ".txt",
+    "size": 79344,
+    "compressed": false
+  },
+  {
+    "uuid": "b343066c-60cf-43cb-8d3c-bd6f3c787063",
+    "ext": ".txt",
+    "size": 77440,
+    "compressed": false
+  },
+  {
+    "uuid": "54430ee2-e2f8-432a-bfcc-c22135e91fae",
+    "ext": ".txt",
+    "size": 77136,
+    "compressed": false
+  },
+  {
+    "uuid": "d21b236e-46ed-4f96-ae61-d2d05d5cf2b4",
+    "ext": ".txt",
+    "size": 75744,
+    "compressed": false
+  },
+  {
+    "uuid": "65392968-07cb-4c17-b0ff-f452b5adb468",
+    "ext": ".js",
+    "size": 48012,
+    "compressed": true
+  },
+  {
+    "uuid": "123c6402-e9f6-4c49-89e1-61ca4ae55752",
+    "ext": ".txt",
+    "size": 45712,
+    "compressed": false
+  },
+  {
+    "uuid": "975bb864-1456-44c0-96f5-23a38b532947",
+    "ext": ".txt",
+    "size": 38404,
+    "compressed": false
+  },
+  {
+    "uuid": "287b7461-6b62-47af-be2f-a7076651e42a",
+    "ext": ".txt",
+    "size": 36620,
+    "compressed": false
+  },
+  {
+    "uuid": "1aa16744-a3e4-4eae-a79b-4edaf8ce0525",
+    "ext": ".txt",
+    "size": 34084,
+    "compressed": false
+  },
+  {
+    "uuid": "914a33f0-dfed-4c9d-ac1d-8a7ec0636c6d",
+    "ext": ".txt",
+    "size": 33584,
+    "compressed": false
+  },
+  {
+    "uuid": "eb2be5ac-a088-45d0-854b-0826effda063",
+    "ext": ".txt",
+    "size": 31432,
+    "compressed": false
+  },
+  {
+    "uuid": "b2d0e413-c07f-4fe6-8b48-bd3d82764356",
+    "ext": ".txt",
+    "size": 31184,
+    "compressed": false
+  },
+  {
+    "uuid": "6cd9f5d3-ee5a-4cab-80de-3990bf6d2171",
+    "ext": ".txt",
+    "size": 30964,
+    "compressed": false
+  },
+  {
+    "uuid": "72b33c1c-d2de-4d65-bd90-e95585c039bd",
+    "ext": ".txt",
+    "size": 29512,
+    "compressed": false
+  },
+  {
+    "uuid": "303a4e85-9312-4985-a5c8-ee9ba45a1465",
+    "ext": ".txt",
+    "size": 23568,
+    "compressed": false
+  },
+  {
+    "uuid": "4ca18033-cc6b-471f-ad58-5b574b5d363a",
+    "ext": ".txt",
+    "size": 22288,
+    "compressed": false
+  },
+  {
+    "uuid": "95753b2a-796c-4595-859d-823309e9ab73",
+    "ext": ".txt",
+    "size": 21152,
+    "compressed": false
+  },
+  {
+    "uuid": "de743542-fb43-472d-b5d6-ac99be0718e4",
+    "ext": ".txt",
+    "size": 21140,
+    "compressed": false
+  },
+  {
+    "uuid": "3be741f8-6135-4cd3-956b-aeaaeed6b7c5",
+    "ext": ".txt",
+    "size": 20308,
+    "compressed": false
+  },
+  {
+    "uuid": "a4ca8a5f-e864-477b-95fd-82a86484b609",
+    "ext": ".txt",
+    "size": 19580,
+    "compressed": false
+  },
+  {
+    "uuid": "04ca7220-121c-432f-9462-31069e4c5f7f",
+    "ext": ".txt",
+    "size": 19500,
+    "compressed": false
+  },
+  {
+    "uuid": "de66c8bb-3395-4e23-aa24-94ca5c29eaee",
+    "ext": ".txt",
+    "size": 19348,
+    "compressed": false
+  },
+  {
+    "uuid": "2d4cabaf-20b6-4526-87d2-066ff13e4d34",
+    "ext": ".txt",
+    "size": 18940,
+    "compressed": false
+  },
+  {
+    "uuid": "37d62104-2524-4e3a-b4a8-efbc3d1bb0ba",
+    "ext": ".txt",
+    "size": 18640,
+    "compressed": false
+  },
+  {
+    "uuid": "b4790cca-31f2-412b-9d95-b708850b8962",
+    "ext": ".txt",
+    "size": 17936,
+    "compressed": false
+  },
+  {
+    "uuid": "bfac6f1d-d8da-4d2b-9f70-4bfd5768208b",
+    "ext": ".txt",
+    "size": 16372,
+    "compressed": false
+  },
+  {
+    "uuid": "86acc801-a38d-488b-8cff-b07aa3e5c264",
+    "ext": ".js",
+    "size": 16171,
+    "compressed": true
+  },
+  {
+    "uuid": "51c448ea-b30d-4bfa-95b8-9e7be9cfe2c9",
+    "ext": ".txt",
+    "size": 15732,
+    "compressed": false
+  },
+  {
+    "uuid": "7dee9a0e-70f9-45c1-b75d-ace62264e721",
+    "ext": ".txt",
+    "size": 15688,
+    "compressed": false
+  },
+  {
+    "uuid": "07f64b2c-fc64-4d39-998b-ca29cd1ed98d",
+    "ext": ".txt",
+    "size": 15512,
+    "compressed": false
+  },
+  {
+    "uuid": "a612d39f-5bf0-43dd-a357-d27343ea730f",
+    "ext": ".txt",
+    "size": 15476,
+    "compressed": false
+  },
+  {
+    "uuid": "26554d32-8289-4c15-a9f6-f7f105c58bb2",
+    "ext": ".txt",
+    "size": 15084,
+    "compressed": false
+  },
+  {
+    "uuid": "7cbd8a72-097b-4043-8627-b84efd153a0a",
+    "ext": ".txt",
+    "size": 14976,
+    "compressed": false
+  },
+  {
+    "uuid": "76fb3c4e-c340-4166-bd19-ba4b61440782",
+    "ext": ".txt",
+    "size": 14888,
+    "compressed": false
+  },
+  {
+    "uuid": "58fc4797-49d7-497e-97b7-0b0ccfb25ca0",
+    "ext": ".txt",
+    "size": 14708,
+    "compressed": false
+  },
+  {
+    "uuid": "8393b1dc-7b7a-4248-8d9c-11949c9e0ea9",
+    "ext": ".txt",
+    "size": 13432,
+    "compressed": false
+  },
+  {
+    "uuid": "cea8803f-2650-4b11-bdb4-84c35437fd61",
+    "ext": ".txt",
+    "size": 13348,
+    "compressed": false
+  },
+  {
+    "uuid": "8b6fd87a-0fd1-4be6-9973-f3bf1938b2c3",
+    "ext": ".js",
+    "size": 13190,
+    "compressed": true
+  },
+  {
+    "uuid": "2d2556a6-8606-4f0b-a9c9-707613e5d69d",
+    "ext": ".txt",
+    "size": 13160,
+    "compressed": false
+  },
+  {
+    "uuid": "4c649624-8c47-4a3b-a484-7dbb3205b225",
+    "ext": ".txt",
+    "size": 13124,
+    "compressed": false
+  },
+  {
+    "uuid": "f3c3a5f9-1091-4353-9af3-f78ad16d9c82",
+    "ext": ".txt",
+    "size": 12964,
+    "compressed": false
+  },
+  {
+    "uuid": "d10de7ed-a386-415b-abc9-25c2ccbbeda7",
+    "ext": ".txt",
+    "size": 12928,
+    "compressed": false
+  },
+  {
+    "uuid": "ae725e84-f187-4db6-868b-6f45307e0934",
+    "ext": ".txt",
+    "size": 12736,
+    "compressed": false
+  },
+  {
+    "uuid": "5f6487c4-d06e-4169-abff-0cd9cb0ef43d",
+    "ext": ".txt",
+    "size": 12388,
+    "compressed": false
+  },
+  {
+    "uuid": "79b2ef31-445a-4b98-a415-739a5ce63b2e",
+    "ext": ".txt",
+    "size": 12388,
+    "compressed": false
+  },
+  {
+    "uuid": "be00c353-bae9-42f2-9c74-62f9525c39df",
+    "ext": ".txt",
+    "size": 12380,
+    "compressed": false
+  },
+  {
+    "uuid": "64ec3223-3158-4ded-b93b-24417ec73312",
+    "ext": ".txt",
+    "size": 12280,
+    "compressed": false
+  },
+  {
+    "uuid": "b7a955fa-6700-48ff-b3f2-adb68b3cb420",
+    "ext": ".txt",
+    "size": 12108,
+    "compressed": false
+  },
+  {
+    "uuid": "5d8f2dff-a797-4417-91a3-dd153bd0e3c3",
+    "ext": ".txt",
+    "size": 11624,
+    "compressed": false
+  },
+  {
+    "uuid": "efaaa988-57a6-417a-b4ca-a83b827eec3d",
+    "ext": ".txt",
+    "size": 11572,
+    "compressed": false
+  },
+  {
+    "uuid": "e6f93f3a-5c1e-4eaf-a011-3052f7584a4b",
+    "ext": ".txt",
+    "size": 9112,
+    "compressed": false
+  },
+  {
+    "uuid": "fba7713f-f734-4362-a032-8e1fa8b9b454",
+    "ext": ".txt",
+    "size": 8920,
+    "compressed": false
+  },
+  {
+    "uuid": "796e7f32-b455-48ae-b56b-ea67dd81c038",
+    "ext": ".txt",
+    "size": 8872,
+    "compressed": false
+  },
+  {
+    "uuid": "b7d3033c-677f-43ee-bd3e-23d3d2e138b1",
+    "ext": ".txt",
+    "size": 8728,
+    "compressed": false
+  },
+  {
+    "uuid": "2a2fc84f-eddf-488c-8f07-2dc1f2a054bf",
+    "ext": ".txt",
+    "size": 8460,
+    "compressed": false
+  },
+  {
+    "uuid": "b49721b1-7cf5-4304-9208-246a57f35f53",
+    "ext": ".txt",
+    "size": 8356,
+    "compressed": false
+  },
+  {
+    "uuid": "375c7e73-af22-4ff9-b020-55aec2610f58",
+    "ext": ".txt",
+    "size": 7932,
+    "compressed": false
+  },
+  {
+    "uuid": "21f71f19-2800-4d18-92da-788eae0c4f26",
+    "ext": ".txt",
+    "size": 6972,
+    "compressed": false
+  },
+  {
+    "uuid": "2d29d31e-179c-4866-a138-62ebe34a348c",
+    "ext": ".txt",
+    "size": 6912,
+    "compressed": false
+  },
+  {
+    "uuid": "d32b9192-54c3-4e37-8fcb-f62e33d66e18",
+    "ext": ".txt",
+    "size": 6836,
+    "compressed": false
+  },
+  {
+    "uuid": "0ed989f6-8de1-4c11-aeb7-4680b9cd1d72",
+    "ext": ".txt",
+    "size": 6712,
+    "compressed": false
+  },
+  {
+    "uuid": "5e895c85-2303-4625-b038-5bf174c3a949",
+    "ext": ".txt",
+    "size": 6240,
+    "compressed": false
+  },
+  {
+    "uuid": "e4846b70-f3c9-4e88-9f6d-a25eb628fb26",
+    "ext": ".txt",
+    "size": 6152,
+    "compressed": false
+  },
+  {
+    "uuid": "f335739f-1af0-4965-b237-b03762fd03c9",
+    "ext": ".txt",
+    "size": 6040,
+    "compressed": false
+  },
+  {
+    "uuid": "e4798512-dc23-48de-82b8-3bf75747f36a",
+    "ext": ".txt",
+    "size": 5888,
+    "compressed": false
+  },
+  {
+    "uuid": "5e0dbd7d-1f61-49cc-91d7-7e00b9851399",
+    "ext": ".js",
+    "size": 5873,
+    "compressed": true
+  },
+  {
+    "uuid": "ccc85794-afd0-4e41-aae1-763ef61e4f80",
+    "ext": ".txt",
+    "size": 5868,
+    "compressed": false
+  },
+  {
+    "uuid": "1eca17bf-41d5-46b1-9819-b127426e2f66",
+    "ext": ".js",
+    "size": 3311,
+    "compressed": true
+  },
+  {
+    "uuid": "06f0ad80-7e08-4c9a-be23-3034ddbc96ae",
+    "ext": ".txt",
+    "size": 1640,
+    "compressed": false
+  }
+]

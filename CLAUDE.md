@@ -90,7 +90,7 @@ Rules:
 
 `docs/recap_toolkit/dashboard_v3_toolkit.html` is the canonical unified reference. It mirrors the code, the thesis, AND the vault — it is the primary intuitive navigation surface, more flexible than the Obsidian vault for exploring how methods work.
 
-Panels (10 tabs):
+Panels (11 tabs):
 
 - **Overview** — what the system does, who uses it, architecture
 - **Code reference** — searchable function list
@@ -101,6 +101,7 @@ Panels (10 tabs):
 - **Deep dive** — per-method walkthroughs with citation footers
 - **Roadmap** — CODE-LEARNING stages 1–6 ending with Stage 6 defence-prep Q&A. Distinct from Plan.
 - **Plan** — SUBMISSION roadmap (14 steps, mirrors `Full Roadmap.md`) + 6-week schedule (mirrors `Weekly Plan.md`). Distinct from Roadmap.
+- **Section Plan** — per-section punch list with subtabs for each chapter and appendix; what's there now, what should be there, gaps, action items, citations and figures needed. Mirrors `Report Sync.md` + `Rewrite Queue.md` at the section level.
 - **Report guide** — per-chapter writing guide
 
 Keep it in sync after any of the following:

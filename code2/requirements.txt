@@ -1,0 +1,18 @@
+streamlit>=1.32.0
+plotly>=5.18.0
+pandas>=2.1.0
+numpy>=1.26.0
+scipy>=1.11.0
+requests>=2.31.0
+streamlit-autorefresh>=1.0.1
+filelock>=3.12.0
+openai>=1.0.0
+scikit-learn>=1.4.0
+chromadb>=0.4.0
+sentence-transformers>=2.2.0
+
+# --- Alternative frontend stack (code2/backend only) ---
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+cachetools>=5.3.0
+python-dotenv>=1.0.0
