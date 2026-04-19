@@ -1,5 +1,6 @@
 import { T, LEVEL_STYLES } from '../theme/tokens'
 import { useApiData } from '../api/hooks'
+import { useFilterQuery } from '../api/filterQuery'
 import type { ModelCompareResponse, ModelRow } from '../types/api'
 import { Pill } from '../components/primitives/Pill'
 import { ScoreBar } from '../components/primitives/ScoreBar'
@@ -7,7 +8,8 @@ import { Stat } from '../components/primitives/Stat'
 import { SectionLabel } from '../components/primitives/SectionLabel'
 
 export function ComparisonView() {
-  const { data, error, loading } = useApiData<ModelCompareResponse>('/models/compare', 120_000)
+  const q = useFilterQuery()
+  const { data, error, loading } = useApiData<ModelCompareResponse>('/models/compare', 120_000, q)
 
   return (
     <div style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}>

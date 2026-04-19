@@ -4,8 +4,8 @@ from __future__ import annotations
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException
 
-from backend.cache import load_difficulty_df, load_struggle_df
-from backend.deps import get_dataframe
+from backend.cache import filter_df, load_difficulty_df, load_struggle_df
+from backend.deps import TimeWindow, get_dataframe, get_time_window
 from backend.schemas import (
     ScoreComponent,
     StudentDetail,
@@ -37,16 +37,21 @@ def _safe(val: object, default: float = 0.0) -> float:
 
 
 @router.get("/student/{student_id}", response_model=StudentDetail)
-def get_student(student_id: str, df: pd.DataFrame = Depends(get_dataframe)) -> StudentDetail:
+def get_student(
+    student_id: str,
+    df: pd.DataFrame = Depends(get_dataframe),
+    window: TimeWindow = Depends(get_time_window),
+) -> StudentDetail:
     if df.empty or "user" not in df.columns:
         raise HTTPException(status_code=404, detail="No data loaded")
 
-    user_df = df[df["user"].astype(str) == student_id].copy()
+    working = filter_df(df, window.from_, window.to_) if window.active else df
+    user_df = working[working["user"].astype(str) == student_id].copy()
     if user_df.empty:
         raise HTTPException(status_code=404, detail=f"Student {student_id!r} not found")
 
-    # Pull pre-computed struggle row from the cached full leaderboard
-    struggle_all = load_struggle_df()
+    # Pull pre-computed struggle row from the cached window-specific leaderboard
+    struggle_all = load_struggle_df(window.from_, window.to_)
     row = struggle_all[struggle_all["user"].astype(str) == student_id]
     if row.empty:
         raise HTTPException(status_code=404, detail=f"Student {student_id!r} has no struggle score")
@@ -72,7 +77,7 @@ def get_student(student_id: str, df: pd.DataFrame = Depends(get_dataframe)) -> S
         .sort_values("attempts", ascending=False)
         .head(10)
     )
-    difficulty_all = load_difficulty_df()
+    difficulty_all = load_difficulty_df(window.from_, window.to_)
     difficulty_lookup = {
         str(q): str(lvl)
         for q, lvl in zip(difficulty_all.get("question", []), difficulty_all.get("difficulty_level", []))

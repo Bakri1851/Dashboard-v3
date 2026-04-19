@@ -1,20 +1,35 @@
-"""GET /api/sessions — list previously saved lab sessions (read-only).
+"""Sessions router — GET list, POST save (retroactive), DELETE by id.
 
-Writes are Streamlit-only today because `build_session_record_from_state`
-pulls from `st.session_state`. When the React UI needs to persist sessions
-directly, add a POST endpoint that accepts the record shape built client-side.
+`POST /api/sessions/save` builds a session record from the current time-
+filter window (supplied by the frontend) and delegates to
+`data_loader.save_session_record`. The Streamlit `build_session_record_from_state`
+helper is Streamlit-only because it reads `st.session_state` — here the same
+shape is assembled from plain POST arguments.
+
+`DELETE /api/sessions/{id}` delegates to `data_loader.delete_session_record`.
 """
 from __future__ import annotations
 
+import uuid
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 from backend.schemas import SavedSession
 from learning_dashboard import data_loader
 
 router = APIRouter(tags=["sessions"])
+
+
+class SaveSessionRequest(BaseModel):
+    name: str
+    start_time: str      # ISO-8601
+    end_time: str        # ISO-8601
+    module_filter: str | None = None
+    dashboard_view: str | None = None
+    time_filter_preset: str | None = None
 
 
 def _parse_dt(value: Any) -> datetime | None:
@@ -50,3 +65,32 @@ def _as_saved_session(r: dict) -> SavedSession:
 def list_sessions() -> list[SavedSession]:
     raw = data_loader.load_saved_sessions()
     return [_as_saved_session(r) for r in raw if isinstance(r, dict)]
+
+
+@router.post("/sessions/save", response_model=SavedSession)
+def save_session(req: SaveSessionRequest) -> SavedSession:
+    """Retroactive save — builds a record from the frontend's current filter
+    window and persists it through `data_loader.save_session_record`."""
+    record = {
+        "id": uuid.uuid4().hex,
+        "name": req.name,
+        "start_time": req.start_time,
+        "end_time": req.end_time,
+        "created_at": datetime.now().isoformat(timespec="seconds"),
+        "dashboard_view": req.dashboard_view or "In Class View",
+        "secondary_module_filter": req.module_filter or "All",
+        "time_filter_preset": req.time_filter_preset or "Custom",
+    }
+    try:
+        data_loader.save_session_record(record)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Save failed: {type(e).__name__} - {e}")
+    return _as_saved_session(record)
+
+
+@router.delete("/sessions/{session_id}", response_model=list[SavedSession])
+def delete_session(session_id: str) -> list[SavedSession]:
+    ok = data_loader.delete_session_record(session_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail=f"Session {session_id!r} not found.")
+    return list_sessions()

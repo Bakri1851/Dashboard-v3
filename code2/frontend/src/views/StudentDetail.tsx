@@ -1,7 +1,10 @@
 import { useMemo } from 'react'
 import { T, LEVEL_STYLES } from '../theme/tokens'
 import { useApiData } from '../api/hooks'
-import type { StudentDetail as StudentDetailData } from '../types/api'
+import { useFilterQuery } from '../api/filterQuery'
+import type { SimilarStudent, StudentDetail as StudentDetailData } from '../types/api'
+import { useSettings } from '../api/useSettings'
+import { useViewStore } from '../state/viewStore'
 import { Pill } from '../components/primitives/Pill'
 import { ScoreBar } from '../components/primitives/ScoreBar'
 import { SectionLabel } from '../components/primitives/SectionLabel'
@@ -17,7 +20,20 @@ function colorForComponent(key: string, value: number): string {
 }
 
 export function StudentDetailView({ studentId }: { studentId: string }) {
-  const { data, error, loading } = useApiData<StudentDetailData>(`/student/${encodeURIComponent(studentId)}`)
+  const q = useFilterQuery()
+  const { data: settings } = useSettings()
+  const cfEnabled = settings?.runtime.cf_enabled ?? false
+  const pickStudent = useViewStore((s) => s.pickStudent)
+  const { data, error, loading } = useApiData<StudentDetailData>(
+    `/student/${encodeURIComponent(studentId)}`,
+    undefined,
+    q
+  )
+  const { data: similar } = useApiData<SimilarStudent[]>(
+    cfEnabled ? `/student/${encodeURIComponent(studentId)}/similar` : '',
+    0,
+    q
+  )
   const lvl = useMemo(() => (data ? LEVEL_STYLES[data.level] ?? { fg: T.ink, label: data.level } : null), [data])
 
   if (loading) {
@@ -201,12 +217,43 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
         </div>
       </div>
 
+      {/* CF similar students */}
+      {cfEnabled && similar && similar.length > 0 && (
+        <div style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
+          <SectionLabel n={6}>Similar Students · Collaborative Filtering</SectionLabel>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
+            {similar.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => pickStudent(s.id)}
+                style={{ padding: 14, border: `1px solid ${T.line}`, background: T.bg2, textAlign: 'left', cursor: 'pointer' }}
+              >
+                <div style={{ fontFamily: T.fMono, fontSize: 12, color: T.ink, marginBottom: 6 }}>{s.id}</div>
+                <Pill level={s.level} />
+                <div style={{ marginTop: 10, fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, letterSpacing: 1, textTransform: 'uppercase' }}>
+                  COS SIM
+                </div>
+                <div style={{ fontFamily: T.fMono, fontSize: 18, color: T.accent, marginTop: 2 }}>
+                  {s.similarity.toFixed(2)}
+                </div>
+                <div style={{ marginTop: 6, fontFamily: T.fMono, fontSize: 10.5, color: T.ink3 }}>
+                  struggle {s.struggle_score.toFixed(2)}
+                </div>
+              </button>
+            ))}
+          </div>
+          <div style={{ marginTop: 14, fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, lineHeight: 1.6 }}>
+            Ranked by cosine similarity across 5 behavioural features (n̂, t̂, ī, Â, d̂). High similarity = comparable submission patterns.
+          </div>
+        </div>
+      )}
+
       {/* RAG coaching suggestions */}
-      <RagPanel audience="student" subjectId={data.id} sectionNumber={6} />
+      <RagPanel audience="student" subjectId={data.id} sectionNumber={7} />
 
       {/* Recent submissions */}
       <div style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
-        <SectionLabel n={7}>Recent Submissions</SectionLabel>
+        <SectionLabel n={8}>Recent Submissions</SectionLabel>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: T.fSans, fontSize: 13 }}>
           <thead>
             <tr>

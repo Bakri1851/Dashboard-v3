@@ -9,8 +9,8 @@ import numpy as np
 import pandas as pd
 from fastapi import APIRouter, Depends
 
-from backend.cache import load_struggle_df
-from backend.deps import get_dataframe
+from backend.cache import filter_df, load_struggle_df
+from backend.deps import TimeWindow, get_dataframe, get_time_window
 from backend.schemas import ModelCompareResponse, ModelRow
 from learning_dashboard.models import improved_struggle
 
@@ -41,12 +41,18 @@ def _as_row(rec: dict) -> ModelRow:
 
 
 @router.get("/models/compare", response_model=ModelCompareResponse)
-def models_compare(df: pd.DataFrame = Depends(get_dataframe)) -> ModelCompareResponse:
-    baseline_df = load_struggle_df().sort_values("struggle_score", ascending=False)
+def models_compare(
+    df: pd.DataFrame = Depends(get_dataframe),
+    window: TimeWindow = Depends(get_time_window),
+) -> ModelCompareResponse:
+    working = filter_df(df, window.from_, window.to_) if window.active else df
+    baseline_df = load_struggle_df(window.from_, window.to_).sort_values(
+        "struggle_score", ascending=False
+    )
 
     improved_df: pd.DataFrame
     try:
-        improved_df = improved_struggle.compute_improved_struggle_scores(df)
+        improved_df = improved_struggle.compute_improved_struggle_scores(working)
     except Exception:
         improved_df = pd.DataFrame()
     if not improved_df.empty:

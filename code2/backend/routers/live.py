@@ -4,6 +4,8 @@ Endpoints:
     GET /api/live       — hero stats + 24h timeline + level-bucket counts
     GET /api/struggle   — ranked student struggle leaderboard
     GET /api/difficulty — ranked question difficulty leaderboard
+
+All three accept `?from=<iso>&to=<iso>` to filter by submission timestamp.
 """
 from __future__ import annotations
 
@@ -13,8 +15,8 @@ import numpy as np
 import pandas as pd
 from fastapi import APIRouter, Depends
 
-from backend.cache import load_difficulty_df, load_struggle_df
-from backend.deps import get_dataframe
+from backend.cache import filter_df, load_difficulty_df, load_struggle_df
+from backend.deps import TimeWindow, get_dataframe, get_time_window
 from backend.schemas import (
     LevelBucket,
     LiveDataResponse,
@@ -35,13 +37,15 @@ def _nunique(df: pd.DataFrame, col: str) -> int:
 
 
 def _bucket_counts(series: pd.Series, order: list[str]) -> list[LevelBucket]:
-    """Count per-label occurrences in a series, preserving `order`."""
     counts = series.value_counts().to_dict() if len(series) else {}
     return [LevelBucket(label=lbl, count=int(counts.get(lbl, 0))) for lbl in order]
 
 
 def _timeline_24h(df: pd.DataFrame) -> list[int]:
-    """Hourly submission counts for the last 24h (length 24)."""
+    """Hourly submission counts for the last 24h (length 24).
+
+    Always operates on the wall-clock last 24h regardless of the active filter,
+    because this is a *heartbeat* chart, not a filtered aggregate."""
     if df.empty or "timestamp" not in df.columns:
         return [0] * 24
     ts = pd.to_datetime(df["timestamp"], errors="coerce", utc=True)
@@ -69,18 +73,23 @@ DIFFICULTY_ORDER = ["Easy", "Medium", "Hard", "Very Hard"]
 
 
 @router.get("/live", response_model=LiveDataResponse)
-def get_live(df: pd.DataFrame = Depends(get_dataframe)) -> LiveDataResponse:
-    struggle_df = load_struggle_df()
-    difficulty_df = load_difficulty_df()
+def get_live(
+    df: pd.DataFrame = Depends(get_dataframe),
+    window: TimeWindow = Depends(get_time_window),
+) -> LiveDataResponse:
+    # Hero stats + buckets reflect the filter window. Timeline stays wall-clock-24h.
+    working = filter_df(df, window.from_, window.to_) if window.active else df
+    struggle_df = load_struggle_df(window.from_, window.to_)
+    difficulty_df = load_difficulty_df(window.from_, window.to_)
 
-    mean_inc = float(df["incorrectness"].mean()) if "incorrectness" in df.columns and not df.empty else 0.0
+    mean_inc = float(working["incorrectness"].mean()) if "incorrectness" in working.columns and not working.empty else 0.0
 
     return LiveDataResponse(
-        records=int(len(df)),
+        records=int(len(working)),
         last_updated=datetime.now(timezone.utc).isoformat(),
-        unique_students=_nunique(df, "user"),
-        unique_questions=_nunique(df, "question"),
-        unique_modules=_nunique(df, "module"),
+        unique_students=_nunique(working, "user"),
+        unique_questions=_nunique(working, "question"),
+        unique_modules=_nunique(working, "module"),
         mean_incorrectness=round(mean_inc, 3),
         struggle_buckets=_bucket_counts(struggle_df.get("struggle_level", pd.Series(dtype=str)), STRUGGLE_ORDER),
         difficulty_buckets=_bucket_counts(difficulty_df.get("difficulty_level", pd.Series(dtype=str)), DIFFICULTY_ORDER),
@@ -90,8 +99,8 @@ def get_live(df: pd.DataFrame = Depends(get_dataframe)) -> LiveDataResponse:
 
 
 @router.get("/struggle", response_model=list[StudentStruggle])
-def get_struggle() -> list[StudentStruggle]:
-    s = load_struggle_df()
+def get_struggle(window: TimeWindow = Depends(get_time_window)) -> list[StudentStruggle]:
+    s = load_struggle_df(window.from_, window.to_)
     if s.empty:
         return []
     s = s.sort_values("struggle_score", ascending=False)
@@ -104,8 +113,6 @@ def get_struggle() -> list[StudentStruggle]:
                 score=float(r.get("struggle_score", 0.0)),
                 submissions=int(r.get("submission_count", 0)),
                 recent=float(r.get("recent_incorrectness", 0.0)),
-                # d_hat is the normalised improvement slope; flip sign so that
-                # negative d_hat (getting worse) reads as a negative trend.
                 trend=float(-r.get("d_hat", 0.0)),
             )
         )
@@ -113,17 +120,21 @@ def get_struggle() -> list[StudentStruggle]:
 
 
 @router.get("/difficulty", response_model=list[QuestionDifficulty])
-def get_difficulty(df: pd.DataFrame = Depends(get_dataframe)) -> list[QuestionDifficulty]:
-    q = load_difficulty_df()
+def get_difficulty(
+    df: pd.DataFrame = Depends(get_dataframe),
+    window: TimeWindow = Depends(get_time_window),
+) -> list[QuestionDifficulty]:
+    q = load_difficulty_df(window.from_, window.to_)
     if q.empty:
         return []
     q = q.sort_values("difficulty_score", ascending=False)
 
-    # Look up one representative module per question from the source df.
+    # Representative module per question from the (filtered) source df.
+    working = filter_df(df, window.from_, window.to_) if window.active else df
     module_lookup: dict[str, str] = {}
-    if not df.empty and "question" in df.columns and "module" in df.columns:
+    if not working.empty and "question" in working.columns and "module" in working.columns:
         module_lookup = (
-            df.drop_duplicates("question").set_index("question")["module"].astype(str).to_dict()
+            working.drop_duplicates("question").set_index("question")["module"].astype(str).to_dict()
         )
 
     out: list[QuestionDifficulty] = []

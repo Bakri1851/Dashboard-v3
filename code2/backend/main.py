@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from backend.cache import load_dataframe, load_difficulty_df, load_struggle_df
-from backend.routers import analysis, lab, live, models_cmp, question, rag, sessions, settings, student
+from backend.routers import analysis, cf, lab, live, meta, models_cmp, question, rag, sessions, settings, student
 
 logger = logging.getLogger("backend")
 
@@ -70,6 +70,8 @@ app.include_router(settings.router, prefix="/api")
 app.include_router(models_cmp.router, prefix="/api")
 app.include_router(lab.router, prefix="/api")
 app.include_router(rag.router, prefix="/api")
+app.include_router(meta.router, prefix="/api")
+app.include_router(cf.router, prefix="/api")
 
 
 @app.get("/api/health", tags=["meta"])

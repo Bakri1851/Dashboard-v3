@@ -1,11 +1,16 @@
 import { useMemo, useState } from 'react'
 import { T } from '../theme/tokens'
 import { useApiData } from '../api/hooks'
+import { useFilterQuery } from '../api/filterQuery'
+import { useSettings } from '../api/useSettings'
 import type {
+  CFDiagnostics,
   LiveDataResponse,
   QuestionDifficulty,
   StudentStruggle,
 } from '../types/api'
+import { Pill } from '../components/primitives/Pill'
+import { ScoreBar } from '../components/primitives/ScoreBar'
 import { Stat } from '../components/primitives/Stat'
 import { SectionLabel } from '../components/primitives/SectionLabel'
 import { Histogram } from '../components/charts/Histogram'
@@ -27,11 +32,16 @@ const STRUGGLE_COLS: LeaderboardColumn[] = ['rank', 'id', 'level', 'score', 'sub
 const DIFFICULTY_COLS: LeaderboardColumn[] = ['rank', 'id', 'level', 'score', 'students', 'avgAttempts', 'module']
 
 export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionActive }: Props) {
-  const { data: live, error: liveErr, loading: liveLoading } = useApiData<LiveDataResponse>('/live', 10_000)
+  const q = useFilterQuery()
+  const { data: settings } = useSettings()
+  const cfEnabled = settings?.runtime.cf_enabled ?? false
+  const { data: live, error: liveErr, loading: liveLoading } =
+    useApiData<LiveDataResponse>('/live', 10_000, q)
   const { data: struggle, error: strugErr, loading: strugLoading } =
-    useApiData<StudentStruggle[]>('/struggle', 15_000)
+    useApiData<StudentStruggle[]>('/struggle', 15_000, q)
   const { data: difficulty, error: diffErr, loading: diffLoading } =
-    useApiData<QuestionDifficulty[]>('/difficulty', 15_000)
+    useApiData<QuestionDifficulty[]>('/difficulty', 15_000, q)
+  const { data: cf } = useApiData<CFDiagnostics>(cfEnabled ? '/cf' : '', 30_000, q)
   const anyError = liveErr || strugErr || diffErr
   const anyLoading = liveLoading || strugLoading || diffLoading
 
@@ -245,6 +255,65 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
           onClick={(r) => onPickQuestion(r.id)}
         />
       </div>
+
+      {/* CF panel (when enabled) */}
+      {cfEnabled && cf && (
+        <div style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
+          <SectionLabel n={4}>Collaborative Filtering</SectionLabel>
+          {cf.fallback ? (
+            <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3 }}>
+              CF skipped — {cf.reason ?? 'insufficient data'}
+            </div>
+          ) : (
+            <div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 16 }}>
+                <Stat label="Parametric flagged" value={String(cf.n_flagged_parametric)} note={`τ = ${cf.threshold.toFixed(2)}`} />
+                <Stat label="CF elevated" value={String(cf.n_elevated_cf)} note={`k = ${cf.k} neighbours`} accent={T.accent} />
+                <Stat label="Agreement" value={cf.n_flagged_parametric > 0 ? `${Math.round((1 - cf.n_elevated_cf / Math.max(cf.n_flagged_parametric, 1)) * 100)}%` : '—'} note="lower = CF disagrees more" />
+              </div>
+              {cf.elevated_students.length > 0 && (
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: T.fSans, fontSize: 13 }}>
+                  <thead>
+                    <tr>
+                      {['Student', 'Level', 'Baseline', 'CF score', 'Δ'].map((h) => (
+                        <th key={h} style={{
+                          textAlign: h === 'Student' || h === 'Level' ? 'left' : 'right',
+                          padding: '8px 12px',
+                          fontFamily: T.fMono,
+                          fontSize: 10,
+                          color: T.ink3,
+                          letterSpacing: 1.2,
+                          textTransform: 'uppercase',
+                          fontWeight: 500,
+                          borderBottom: `1px solid ${T.line}`,
+                        }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cf.elevated_students.map((s) => (
+                      <tr key={s.id} onClick={() => onPickStudent(s.id)} style={{ cursor: 'pointer' }}>
+                        <td style={{ padding: '8px 12px', fontFamily: T.fMono, fontSize: 12, color: T.ink, borderBottom: `1px solid ${T.line2}` }}>{s.id}</td>
+                        <td style={{ padding: '8px 12px', borderBottom: `1px solid ${T.line2}` }}><Pill level={s.level} /></td>
+                        <td style={{ padding: '8px 12px', textAlign: 'right', fontFamily: T.fMono, fontSize: 12, color: T.ink2, borderBottom: `1px solid ${T.line2}` }}>{s.baseline_score.toFixed(2)}</td>
+                        <td style={{ padding: '8px 12px', textAlign: 'right', borderBottom: `1px solid ${T.line2}` }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end', width: '100%' }}>
+                            <ScoreBar value={s.cf_score} color={T.accent} width={44} height={3} />
+                            <span style={{ fontFamily: T.fMono, fontSize: 12 }}>{s.cf_score.toFixed(2)}</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: '8px 12px', textAlign: 'right', fontFamily: T.fMono, fontSize: 12, color: s.delta >= 0 ? T.accent : T.ink3, borderBottom: `1px solid ${T.line2}` }}>
+                          {s.delta >= 0 ? '+' : ''}{s.delta.toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Distributions + timeline */}
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr)', gap: 24 }}>

@@ -1674,6 +1674,97 @@ button:hover{border-color:#555;background:#22263a}
 </div>
 
 <div class="plan-section">
+  <h3>§ Phase 8 — Defence rehearsal prep</h3>
+  <p class="plan-intro">Use this panel the week before the viva. Work top-to-bottom — each block unblocks the next. Tick boxes as you go; state persists in <code>localStorage</code>.</p>
+
+  <div class="ops-section">
+    <h3>1 · Bring-up sequence (5 processes, ~3 min cold start)</h3>
+    <p style="font-size:12px;color:#888;margin-bottom:6px">Run each in its own terminal from the repo root. Start backend <strong>first</strong> and give it ~2 min so the lifespan prewarm finishes before your first click in the demo.</p>
+    <p style="font-size:12px;color:#aaa;margin-top:8px;margin-bottom:2px">① FastAPI + React (new frontend):</p>
+    <div class="ops-cmd">uvicorn backend.main:app --app-dir code2 --port 8000</div>
+    <p style="font-size:12px;color:#aaa;margin-top:10px;margin-bottom:2px">② Streamlit instructor (fallback, untouched):</p>
+    <div class="ops-cmd">python -m streamlit run code/app.py</div>
+    <p style="font-size:12px;color:#aaa;margin-top:10px;margin-bottom:2px">③ Streamlit mobile lab assistant (original):</p>
+    <div class="ops-cmd">streamlit run code/lab_app.py --server.port 8502</div>
+    <p style="font-size:12px;color:#aaa;margin-top:10px;margin-bottom:2px">④ ⑤ Cross-check Streamlit (prove shadow copy still works):</p>
+    <div class="ops-cmd">streamlit run code2/app.py --server.port 8503</div>
+    <div class="ops-cmd">streamlit run code2/lab_app.py --server.port 8504</div>
+    <p style="font-size:12px;color:#888;margin-top:10px">Demo URL: <code>http://localhost:8000/</code> · API docs: <code>http://localhost:8000/docs</code> · Fallback: <code>http://localhost:8501</code>.</p>
+  </div>
+
+  <div class="ops-section">
+    <h3>2 · Smoke test (run once all 5 are up)</h3>
+    <div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-text"><strong>Fallback integrity</strong> — load <code>localhost:8501</code> — instructor dashboard renders exactly as today. Load <code>localhost:8502</code> — mobile app renders.</div></div></div>
+    <div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-text"><strong>React first load</strong> — <code>localhost:8000</code> — sidebar shows "Start Session" (no hardcoded code), In Class view populated with 34k-record leaderboards inside ~2 s (prewarm).</div></div></div>
+    <div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-text"><strong>Session create</strong> — click Start Session in sidebar — 6-char code appears, LIVE dot, timer counting. Verify same code shows on the Streamlit instructor at :8501 within 3 s (shared <code>data/lab_session.json</code>).</div></div></div>
+    <div class="step-row"><div class="step-num">4</div><div class="step-body"><div class="step-text"><strong>Assistant join</strong> — open <code>localhost:8502</code>, join with the code + a name — assistant appears in the Lab tab of the React app within 5 s.</div></div></div>
+    <div class="step-row"><div class="step-num">5</div><div class="step-body"><div class="step-text"><strong>Dispatch → helped cycle</strong> — click Dispatch on a flagged student in React Lab view → status flips to "Helping" in all 3 Streamlit apps. Click "Helped" in React → status flips everywhere.</div></div></div>
+    <div class="step-row"><div class="step-num">6</div><div class="step-body"><div class="step-text"><strong>Filter</strong> — set sidebar time filter to "Today" — In Class record count drops to today-only. Side-by-side with Streamlit using the same preset — counts match.</div></div></div>
+    <div class="step-row"><div class="step-num">7</div><div class="step-body"><div class="step-text"><strong>Theme gallery</strong> — cycle all 7 themes via the TopBar select — each palette/font combo renders without flash, no console errors.</div></div></div>
+    <div class="step-row"><div class="step-num">8</div><div class="step-body"><div class="step-text"><strong>Drill-down</strong> — click top struggle-student → StudentDetail renders sparkline + components + RAG panel. Click top question → QuestionDetail shows mistake clusters + top strugglers + RAG.</div></div></div>
+  </div>
+
+  <div class="ops-section">
+    <h3>3 · Screenshot inventory (8 views × 3 states)</h3>
+    <p style="font-size:12px;color:#888;margin-bottom:6px">Target ≈24 images for Ch4 figures + Appendix B. Capture at 1440×900 on Paper theme first (default — cleanest for print); shoot one alt-theme series too so the 7-theme story is documented.</p>
+    <div style="font-family:ui-monospace,monospace;font-size:11.5px;color:#c9d1d9">
+      <div style="margin-bottom:8px"><strong style="color:#e3b341">In Class view</strong> — (a) session inactive, leaderboards empty-state · (b) session live, full leaderboards · (c) CF panel on (Settings → CF: on)</div>
+      <div style="margin-bottom:8px"><strong style="color:#e3b341">Student Detail</strong> — (a) Needs Help student with red bars · (b) On Track student with green bars · (c) scrolled to Similar Students + RAG panel</div>
+      <div style="margin-bottom:8px"><strong style="color:#e3b341">Question Detail</strong> — (a) Hard question with mistake clusters filled · (b) top-strugglers table · (c) RAG Suggested Feedback panel</div>
+      <div style="margin-bottom:8px"><strong style="color:#e3b341">Data Analysis</strong> — (a) Module Usage HBars · (b) Top Questions table · (c) Activity-by-Week heatmap</div>
+      <div style="margin-bottom:8px"><strong style="color:#e3b341">Model Comparison</strong> — (a) Spearman ρ card · (b) baseline ranking · (c) improved ranking side-by-side</div>
+      <div style="margin-bottom:8px"><strong style="color:#e3b341">Previous Sessions</strong> — (a) list · (b) Save-retroactive dialog open · (c) post-load (filter applied to sidebar)</div>
+      <div style="margin-bottom:8px"><strong style="color:#e3b341">Lab Assistants</strong> — (a) no active session prompt · (b) live: code + roster + dispatch queue · (c) assignments table with Helping + Helped rows</div>
+      <div style="margin-bottom:8px"><strong style="color:#e3b341">Settings</strong> — (a) theme picker with Paper active · (b) live toggles (CF on, smoothing off) · (c) BKT sliders + read-only config reference</div>
+      <div style="margin-top:12px;color:#888"><strong style="color:#e3b341">Bonus</strong> — theme gallery strip (7 tiny crops of InClassView across all themes) · <code>/docs</code> Swagger UI · architecture diagram (from plan §4)</div>
+    </div>
+  </div>
+
+  <div class="ops-section">
+    <h3>4 · Demo script — 12-minute walk-through</h3>
+    <p style="font-size:12px;color:#888;margin-bottom:8px">Rehearse twice. Keep a stopwatch — land under 12 minutes so the examiners have 15+ minutes for questions.</p>
+    <div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-text"><strong>0:00 – 0:45</strong> Landing on <code>localhost:8000</code> — Paper theme · session idle · sidebar sections (session, filter, views) · say "This is the alternative React frontend. The original Streamlit dashboard at <code>code/</code> is still running on 8501 — I'll show it works in parallel."</div></div></div>
+    <div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-text"><strong>0:45 – 2:00</strong> Start Session. Cut to Streamlit 8501 — same code visible. Say: "Both frontends read <code>data/lab_session.json</code> via a file lock. Four processes coordinate without any new infrastructure."</div></div></div>
+    <div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-text"><strong>2:00 – 4:00</strong> In Class walk-through — hero stats, Struggle leaderboard (composite score, EMA, Bayesian shrinkage), Difficulty leaderboard (IRT-style weighting), distributions. Toggle module filter.</div></div></div>
+    <div class="step-row"><div class="step-num">4</div><div class="step-body"><div class="step-text"><strong>4:00 – 6:00</strong> Drill: click top struggler → StudentDetail — explain the 7-component score components chart, trajectory sparkline, CF similar students grid ("cosine similarity on 5 behavioural features"). Click back.</div></div></div>
+    <div class="step-row"><div class="step-num">5</div><div class="step-body"><div class="step-text"><strong>6:00 – 7:30</strong> Click top question → QuestionDetail — mistake clusters (TF-IDF + K-means with silhouette auto-k), RAG suggested feedback ("ChromaDB + sentence-transformers + GPT-4o-mini"). Point out measurement confidence.</div></div></div>
+    <div class="step-row"><div class="step-num">6</div><div class="step-body"><div class="step-text"><strong>7:30 – 8:30</strong> Data Analysis — cycle 3 chart modes (Module Usage → Top Questions → Activity by Academic Week heatmap). Set the time filter to a specific academic week.</div></div></div>
+    <div class="step-row"><div class="step-num">7</div><div class="step-body"><div class="step-text"><strong>8:30 – 9:30</strong> Lab Assistants — show the dispatch queue, dispatch a student, cut to the Streamlit 8502 mobile tab — the assignment is already there. Hit "Mark Helped" on either.</div></div></div>
+    <div class="step-row"><div class="step-num">8</div><div class="step-body"><div class="step-text"><strong>9:30 – 10:15</strong> Settings — flip CF off + on, model to Improved, slide BKT p_learn — explain each mutation invalidates analytics caches. Toggle through 2–3 themes for visual variety.</div></div></div>
+    <div class="step-row"><div class="step-num">9</div><div class="step-body"><div class="step-text"><strong>10:15 – 11:15</strong> Model Comparison — explain the Spearman ρ and top-10 overlap, link to Ch5 §5.5's discussion of the "improved model collapses under sparse data" limitation.</div></div></div>
+    <div class="step-row"><div class="step-num">10</div><div class="step-body"><div class="step-text"><strong>11:15 – 12:00</strong> Wrap — "Same analytics layer, two frontends: Streamlit for iteration, React/FastAPI for a production-shaped demo. <code>code/</code> never modified; shadow copy in <code>code2/</code>. Happy to take questions." Open <code>/docs</code> as a parting flourish.</div></div></div>
+  </div>
+
+  <div class="ops-section">
+    <h3>5 · Likely defence questions — have an answer ready</h3>
+    <p style="font-size:12px;color:#888;margin-bottom:8px">See the <strong>Roadmap</strong> panel (Stage 6) for the full Q&amp;A deck. These are the ones most likely to come up <em>because</em> the new React frontend is in the room:</p>
+    <ul class="ops-list">
+      <li><strong>"Why two frontends?"</strong> → Academic contribution is in the analytics, not the framework. Streamlit iterated fastest for research; React demonstrates framework independence + a production shape. <code>code/</code> is a zero-risk fallback.</li>
+      <li><strong>"What does the React frontend actually add vs Streamlit?"</strong> → Polling-based multi-process coordination via the existing <code>FileLock</code>; same analytics unchanged; new surface (API + SPA) that generalises to mobile / multi-user / embedded contexts. Infrastructure, not new algorithms.</li>
+      <li><strong>"How much did you change in <code>code/</code>?"</strong> → Nothing. <code>git status code/</code> is clean. Two 4-line refactors in <code>code2/learning_dashboard/</code> only (analytics.py OpenAI key guard; data_loader.py cached/uncached split).</li>
+      <li><strong>"The first /api/struggle call takes 2 minutes — is that a problem?"</strong> → Same cost Streamlit pays on cold start (iterates 203 students × 7 features). Solved with a 5-min analytics TTL cache + a <code>lifespan</code> prewarm hook that runs the compute at server boot, before any click.</li>
+      <li><strong>"Why not WebSocket push instead of polling?"</strong> → 3–5 s polling is enough for a single-user defence demo. WebSocket listed in Ch6 Future Work for the multi-user production path.</li>
+      <li><strong>"Can CF and improved-struggle be edited live?"</strong> → Yes — Settings view POSTs to <code>/api/settings</code>, which flushes the analytics cache and re-derives leaderboards on the next poll. Weights / thresholds still require a <code>config.py</code> edit + restart.</li>
+    </ul>
+  </div>
+
+  <div class="ops-section">
+    <h3>6 · Day-of-defence check list</h3>
+    <p style="font-size:12px;color:#888;margin-bottom:6px">Run through the night before AND 30 minutes before the viva.</p>
+    <ul class="ops-list">
+      <li>Laptop on power · Wi-Fi confirmed for the sci-project API (<code>sccb2.sci-project.lboro.ac.uk</code>)</li>
+      <li><code>.streamlit/secrets.toml</code> + <code>OPENAI_API_KEY</code> env var both populated (Streamlit reads the file; FastAPI reads the env)</li>
+      <li>All 5 processes launched ≥3 minutes before start — verify each with a single click (<code>:8501</code>, <code>:8502</code>, <code>:8503</code>, <code>:8504</code>, <code>:8000</code>)</li>
+      <li>Browser tabs pre-opened — one per port; Paper theme selected on <code>:8000</code></li>
+      <li>Thesis PDF + appendix open · Obsidian vault loaded · Toolkit (this file) open in another window for live reference</li>
+      <li>Demo script printed / on a second screen — do NOT read from the demo laptop</li>
+      <li>Session code card hidden until you deliberately start a session (confirms the Priority-0 bug fix landed)</li>
+      <li>Backup plan — if React frontend misbehaves, switch to Streamlit 8501 mid-demo without commentary; <code>code/</code> is byte-identical to the submitted implementation</li>
+    </ul>
+  </div>
+</div>
+
+<div class="plan-section">
   <h3>§ Submission roadmap — 14 steps</h3>
   <p class="plan-intro">Work top-to-bottom; each step unblocks the next. Tick as you go — progress persists in <code>localStorage</code> and rolls up into the global roadmap progress bar.</p>
 

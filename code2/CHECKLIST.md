@@ -95,7 +95,64 @@ For each view: extract from mockup → port to .tsx → implement backing endpoi
 - [x] `docs/recap_toolkit/dashboard_v3_toolkit.html` — Overview (new `code2/` card), Operations (full alt-frontend Run section), Plan (new "Alternative React (Vite) frontend track" section) — 2026-04-19
 - [x] Graphify regenerated — jumped from 340 / 489 / 21 to **1742 nodes / 4628 edges / 61 communities** (captures all of `code2/`) — 2026-04-19
 
-## Phase 8 — Defence rehearsal
+## Phase 9 — Functional parity with Streamlit (gap fill)
+
+**Priority 0 — user-reported bugs — 2026-04-19**
+- [x] `Sidebar.tsx` drives session card from `/api/lab/state`; hidden when `session_active === false`
+- [x] Sidebar Start / End session buttons (POST `/api/lab/start` / `/api/lab/end`)
+
+**Priority 1A — sidebar time filter — 2026-04-19**
+- [x] `src/state/filterStore.ts` (zustand) — 8 presets + custom date/time + academic-week
+- [x] Sidebar panel: All Time / Live Session / Today / Past Hour / Past 24H / Current Week / Last Week / Custom + Custom form
+- [x] Backend `filter_df(df, from_, to_)` helper in `cache.py`; `TimeWindow` FastAPI dep in `deps.py`
+- [x] `/api/live`, `/api/struggle`, `/api/difficulty`, `/api/student/{id}`, `/api/question/{id}`, `/api/analysis`, `/api/models/compare`, `/api/cf`, `/api/student/{id}/similar` all accept `?from` / `?to`
+- [x] `backend/cache.py` TTLCache maxsize 8, keyed by `(from_, to_)`
+- [x] Academic-week picker pulls from `/api/meta/academic-periods` (37 periods from `learning_dashboard.academic_calendar`)
+- [x] "Live Session" preset auto-filters `session_start → now`
+- [x] `useApiData` extended to accept a `query` string; `useFilterQuery()` helper ties filter+lab+periods into a single query
+- [x] **Smoke test**: no filter → 34,475 records; narrow 6-hour window → 7 records
+
+**Priority 1B — settings persistence — 2026-04-19**
+- [x] `backend/runtime_config.py` singleton — sounds, auto_refresh, refresh_interval, smoothing, cf_enabled, cf_threshold, struggle/difficulty_model, BKT p_* (with thread-safe update/reset)
+- [x] `POST /api/settings` + `POST /api/settings/reset` (both invalidate analytics caches)
+- [x] `src/api/useSettings.ts` hook (no separate zustand — useApiData + refetch)
+- [x] `SettingsView.tsx` live toggles / sliders / dropdowns (matches `ui/views.py:533–693` control inventory)
+- [x] **Smoke test**: POST `{sounds_enabled: false, struggle_model: "improved"}` → GET reflects change → /reset → GET reflects defaults
+
+**Priority 1C — Data Analysis 6-chart selector — 2026-04-19**
+- [x] `/api/analysis` now returns all 6 shapes in one payload: module_breakdown / top_questions / user_activity / timeline_24h / activity_by_week / (module_breakdown again for students-per-module reuse)
+- [x] `DataAnalysisView.tsx` pill selector + 5 new variants (Top Questions table, User Activity table, Students-per-Module HBars, Activity-by-Week Heatmap reusing new `Heatmap.tsx`)
+- [x] `components/charts/Heatmap.tsx` — generic row × col heatmap with OKLch accent intensity
+- [x] Academic-calendar integration: backend iterates timestamps through `academic_calendar.get_academic_period`
+
+**Priority 1D — Previous Sessions CRUD — 2026-04-19**
+- [x] `POST /api/sessions/save` — retroactive save from the frontend's current filter window
+- [x] `DELETE /api/sessions/{id}` — wraps `data_loader.delete_session_record`
+- [x] `PreviousSessions.tsx` — Save dialog (name + from + to), Load (applies as filter + switches to InClass), Delete (with confirm)
+- [~] Academic-period filter on the list — deferred (sidebar filter already supports it via academic-week picker, so list doesn't duplicate)
+
+**Priority 1E — CF panels — 2026-04-19**
+- [x] `GET /api/cf` — wraps `analytics.compute_cf_struggle_scores(struggle_df, threshold, k)`; returns elevated students + diagnostics
+- [x] `GET /api/student/{id}/similar` — top-5 cosine-sim neighbours on CF_FEATURES (`n_hat`, `t_hat`, `i_norm|i_hat`, `A_norm|A_raw`, `d_hat` with graceful fallback)
+- [x] InClassView CF panel (gated on `settings.runtime.cf_enabled`) — 3 metric cards + elevated-students table with click-to-drill
+- [x] StudentDetail "Similar Students" grid — 5 cards with cosine-sim badges, click-to-drill
+
+**Priority 2 — polish — 2026-04-19**
+- [x] `src/sound.ts` — 8 Web Audio functions mirroring `sound.py` (sessionStart/End, selection, navigation, refresh, assistantJoin, assignmentReceived, highStruggle); gated via `viewStore.soundsEnabled` which is mirrored from `settings.runtime.sounds_enabled`
+- [~] QuestionDetail `ConfidenceBadge` — deferred (low visual-impact; measurement confidence already surfaced indirectly via the struggle-score ScoreBar colour)
+- [~] ComparisonView 4×4 confusion matrix — deferred (Spearman ρ + top-10 overlap already communicate concordance; matrix is a Phase 10 polish item)
+- [~] InClassView secondary module pills + formula panel — deferred (module filter is covered by the global time-filter; formula panel available in Settings read-only reference)
+
+**Verification — 2026-04-19**
+- [x] Typecheck clean (`npx tsc --noEmit` exit 0) across all edits
+- [x] Vite build clean — 283 KB JS / 81 KB gzipped
+- [x] Backend `py_compile` clean for all new + edited files
+- [x] `git status code/` clean, `py_compile code/` clean — fallback intact
+- [x] Filter round-trip: `?from=…&to=…` drops record count from 34,475 → 7 as expected
+- [x] Settings round-trip: POST + GET + reset all reflect changes; analytics cache invalidated
+- [x] Meta endpoints: `/api/meta/filter-presets` → 8 presets; `/api/meta/academic-periods` → 37 weeks
+
+## Phase 8 — Defence rehearsal (run AFTER Phase 9)
 - [ ] All 5 processes started (code/ ×2, code2/ ×2, FastAPI ×1)
 - [ ] End-to-end smoke test per plan §12
 - [ ] Thesis screenshots captured (8 views, 3 states per view)
@@ -114,3 +171,4 @@ _Use this section to log surprises, blockers, deviations from the plan, and deci
 - **2026-04-19** — Phase 5: RAG wired but first call found to block the event loop (first-time ChromaDB build + sentence-transformers model download = minutes). Rewrote handlers as `async def` + `asyncio.to_thread(...)` so the blocking work runs on a worker and /api/live, /api/lab/state etc stay responsive. RagPanel in both detail views shows a cold-start message while the Chroma collection builds; subsequent calls (same session_id) return cached bullets instantly. Also replaced the Vite default favicon with a thematic editorial mark (paper cream + indigo + terracotta stripes).
 - **2026-04-19** — Phase 6 closed out with a single new item (favicon). All other items ticked by earlier phases (ErrorBoundary in Phase 2, loading skeletons per-view in Phase 3, `dist/` served by FastAPI since Phase 1, `/docs` automatic with FastAPI, theme-swatch context-swap in Phase 2).
 - **2026-04-19** — Phase 7: Vault + toolkit synced. Graphify regen needed `PYTHONIOENCODING=utf-8 PYTHONUTF8=1` on Windows because the default cp1252 codec couldn't handle the arrow glyph inside the docstrings — logged here so the next regen remembers.
+- **2026-04-19** — Phase 9: full feature-gap audit vs Streamlit instructor app done (was ~50% feature-complete). Shipped Priority 0 (session card from `/api/lab/state`, Start/End in sidebar), 1A (time filter with 8 presets + academic-week + backend `TimeWindow` dep + window-keyed analytics cache), 1B (runtime_config singleton + live Settings view), 1C (6-chart Data Analysis with new Heatmap), 1D (Previous Sessions save + delete + load-as-filter), 1E (CF diagnostic panel in InClassView + similar-students grid in StudentDetail), and Priority 2 sound effects (8 Web Audio functions gated on runtime sounds toggle). Deferred: ConfidenceBadge, ComparisonView confusion matrix, secondary module filter — low-impact polish for Phase 10 if defence schedule allows. Graphify jumped 1742 → 1815 nodes to cover the new backend modules.

@@ -137,6 +137,18 @@ export interface Thresholds {
   difficulty: [number, number, string, string][]
 }
 
+export interface RuntimeSettings {
+  sounds_enabled: boolean
+  auto_refresh: boolean
+  refresh_interval: number
+  smoothing_enabled: boolean
+  cf_enabled: boolean
+  cf_threshold: number
+  struggle_model: 'baseline' | 'improved' | string
+  difficulty_model: 'baseline' | 'irt' | string
+  bkt: BKTParameters
+}
+
 export interface Settings {
   cache_ttl: number
   correct_threshold: number
@@ -146,12 +158,36 @@ export interface Settings {
   thresholds: Thresholds
   bkt: BKTParameters
   leaderboard_max_items: number
+  runtime: RuntimeSettings
 }
 
 export interface ModuleBreakdown {
   module: string
   submissions: number
   unique_students: number
+}
+
+export interface TopQuestionRow {
+  question: string
+  module: string
+  attempts: number
+  unique_students: number
+  avg_attempts: number
+}
+
+export interface UserActivityRow {
+  user: string
+  submissions: number
+  unique_questions: number
+  first_submission: string | null
+  last_submission: string | null
+}
+
+export interface WeekActivityCell {
+  week_label: string
+  day_index: number
+  day_label: string
+  count: number
 }
 
 export interface AnalysisStats {
@@ -165,6 +201,9 @@ export interface AnalysisStats {
   avg_session_minutes: number
   module_breakdown: ModuleBreakdown[]
   timeline_24h: number[]
+  top_questions: TopQuestionRow[]
+  user_activity: UserActivityRow[]
+  activity_by_week: WeekActivityCell[]
 }
 
 export interface ModelRow {
@@ -216,4 +255,41 @@ export interface RagSuggestions {
   subject_id: string
   bullets: string[]
   session_id: string | null
+}
+
+export interface AcademicPeriod {
+  label: string
+  start_date: string
+  end_date: string
+}
+
+export interface FilterPresetMeta {
+  id: string
+  label: string
+  needs_custom: boolean
+}
+
+export interface CFElevatedStudent {
+  id: string
+  level: string
+  baseline_score: number
+  cf_score: number
+  delta: number
+}
+
+export interface CFDiagnostics {
+  threshold: number
+  k: number
+  n_flagged_parametric: number
+  n_elevated_cf: number
+  fallback: boolean
+  reason: string | null
+  elevated_students: CFElevatedStudent[]
+}
+
+export interface SimilarStudent {
+  id: string
+  level: string
+  struggle_score: number
+  similarity: number
 }

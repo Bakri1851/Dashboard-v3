@@ -5,8 +5,16 @@ import numpy as np
 import pandas as pd
 from fastapi import APIRouter, Depends
 
-from backend.deps import get_dataframe
-from backend.schemas import AnalysisStats, ModuleBreakdown
+from backend.cache import filter_df
+from backend.deps import TimeWindow, get_dataframe, get_time_window
+from backend.schemas import (
+    AnalysisStats,
+    ModuleBreakdown,
+    TopQuestionRow,
+    UserActivityRow,
+    WeekActivityCell,
+)
+from learning_dashboard import academic_calendar
 
 router = APIRouter(tags=["analysis"])
 
@@ -35,14 +43,106 @@ def _timeline_24h(df: pd.DataFrame) -> tuple[list[int], int, int]:
     return buckets.tolist(), peak_hour, peak_count
 
 
+_DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+
+def _top_questions(df: pd.DataFrame, limit: int = 15) -> list[TopQuestionRow]:
+    if df.empty or "question" not in df.columns:
+        return []
+    g = df.groupby("question")
+    top = g.agg(
+        attempts=("question", "size"),
+        unique_students=("user", "nunique"),
+    ).sort_values("attempts", ascending=False).head(limit)
+    mod_lookup = df.drop_duplicates("question").set_index("question")["module"].astype(str).to_dict() if "module" in df.columns else {}
+    out: list[TopQuestionRow] = []
+    for qid, r in top.iterrows():
+        students = int(r["unique_students"])
+        attempts = int(r["attempts"])
+        out.append(
+            TopQuestionRow(
+                question=str(qid),
+                module=mod_lookup.get(str(qid), ""),
+                attempts=attempts,
+                unique_students=students,
+                avg_attempts=round(attempts / students, 2) if students else 0.0,
+            )
+        )
+    return out
+
+
+def _user_activity(df: pd.DataFrame, limit: int = 20) -> list[UserActivityRow]:
+    if df.empty or "user" not in df.columns:
+        return []
+    ts = pd.to_datetime(df["timestamp"], errors="coerce", utc=True) if "timestamp" in df.columns else None
+    work = df.assign(_ts=ts) if ts is not None else df.assign(_ts=None)
+    g = work.groupby("user")
+    agg = g.agg(
+        submissions=("user", "size"),
+        unique_questions=("question", "nunique"),
+        first_ts=("_ts", "min"),
+        last_ts=("_ts", "max"),
+    ).sort_values("submissions", ascending=False).head(limit)
+    out: list[UserActivityRow] = []
+    for uid, r in agg.iterrows():
+        out.append(
+            UserActivityRow(
+                user=str(uid),
+                submissions=int(r["submissions"]),
+                unique_questions=int(r["unique_questions"]),
+                first_submission=r["first_ts"].isoformat() if pd.notna(r["first_ts"]) else None,
+                last_submission=r["last_ts"].isoformat() if pd.notna(r["last_ts"]) else None,
+            )
+        )
+    return out
+
+
+def _activity_by_week(df: pd.DataFrame) -> list[WeekActivityCell]:
+    """Counts keyed by (academic period label, day-of-week) — feeds a heatmap."""
+    if df.empty or "timestamp" not in df.columns:
+        return []
+    ts = pd.to_datetime(df["timestamp"], errors="coerce", utc=True).dropna()
+    if ts.empty:
+        return []
+
+    # For each ts, ask the academic calendar for its label; skip missing.
+    cells: dict[tuple[str, int], int] = {}
+    for t in ts:
+        label = academic_calendar.get_academic_period(t.date())
+        if not label:
+            continue
+        dow = int(t.weekday())
+        key = (str(label), dow)
+        cells[key] = cells.get(key, 0) + 1
+
+    out: list[WeekActivityCell] = []
+    for (label, dow), count in cells.items():
+        out.append(
+            WeekActivityCell(
+                week_label=label,
+                day_index=dow,
+                day_label=_DAY_LABELS[dow] if 0 <= dow < 7 else str(dow),
+                count=count,
+            )
+        )
+    # Sort for stable order
+    out.sort(key=lambda c: (c.week_label, c.day_index))
+    return out
+
+
 @router.get("/analysis", response_model=AnalysisStats)
-def get_analysis(df: pd.DataFrame = Depends(get_dataframe)) -> AnalysisStats:
+def get_analysis(
+    df: pd.DataFrame = Depends(get_dataframe),
+    window: TimeWindow = Depends(get_time_window),
+) -> AnalysisStats:
+    df = filter_df(df, window.from_, window.to_) if window.active else df
     if df.empty:
         return AnalysisStats(
             total_records=0, unique_students=0, unique_questions=0, modules=0,
             peak_hour=0, peak_hour_count=0,
             avg_attempts_per_question=0.0, avg_session_minutes=0.0,
             module_breakdown=[], timeline_24h=[0] * 24,
+            top_questions=[], user_activity=[], activity_by_week=[],
         )
 
     timeline, peak_hour, peak_count = _timeline_24h(df)
@@ -84,4 +184,7 @@ def get_analysis(df: pd.DataFrame = Depends(get_dataframe)) -> AnalysisStats:
         avg_session_minutes=round(avg_session_minutes, 1),
         module_breakdown=module_breakdown,
         timeline_24h=timeline,
+        top_questions=_top_questions(df),
+        user_activity=_user_activity(df),
+        activity_by_week=_activity_by_week(df),
     )

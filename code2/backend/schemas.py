@@ -204,7 +204,21 @@ class BKTParameters(BaseModel):
     mastery_threshold: float
 
 
+class RuntimeSettings(BaseModel):
+    """Mutable slice — what the Settings view can toggle live."""
+    sounds_enabled: bool
+    auto_refresh: bool
+    refresh_interval: int
+    smoothing_enabled: bool
+    cf_enabled: bool
+    cf_threshold: float
+    struggle_model: str           # "baseline" | "improved"
+    difficulty_model: str         # "baseline" | "irt"
+    bkt: BKTParameters
+
+
 class Settings(BaseModel):
+    # Immutable / config.py-derived
     cache_ttl: int
     correct_threshold: float
     smoothing_alpha: float
@@ -213,6 +227,8 @@ class Settings(BaseModel):
     thresholds: Thresholds
     bkt: BKTParameters
     leaderboard_max_items: int
+    # Mutable / runtime_config-derived
+    runtime: RuntimeSettings
 
 
 # ----------------------------------------------------------------
@@ -226,6 +242,29 @@ class ModuleBreakdown(BaseModel):
     unique_students: int
 
 
+class TopQuestionRow(BaseModel):
+    question: str
+    module: str
+    attempts: int
+    unique_students: int
+    avg_attempts: float
+
+
+class UserActivityRow(BaseModel):
+    user: str
+    submissions: int
+    unique_questions: int
+    first_submission: str | None
+    last_submission: str | None
+
+
+class WeekActivityCell(BaseModel):
+    week_label: str
+    day_index: int          # 0=Mon, 6=Sun
+    day_label: str
+    count: int
+
+
 class AnalysisStats(BaseModel):
     total_records: int
     unique_students: int
@@ -237,6 +276,9 @@ class AnalysisStats(BaseModel):
     avg_session_minutes: float
     module_breakdown: list[ModuleBreakdown]
     timeline_24h: list[int]
+    top_questions: list[TopQuestionRow] = Field(default_factory=list)
+    user_activity: list[UserActivityRow] = Field(default_factory=list)
+    activity_by_week: list[WeekActivityCell] = Field(default_factory=list)
 
 
 # ----------------------------------------------------------------
@@ -330,3 +372,50 @@ class RagSuggestions(BaseModel):
     subject_id: str
     bullets: list[str]
     session_id: str | None = None
+
+
+# ----------------------------------------------------------------
+# /api/meta/*
+# ----------------------------------------------------------------
+
+
+class AcademicPeriod(BaseModel):
+    label: str
+    start_date: str  # ISO date
+    end_date: str
+
+
+class FilterPreset(BaseModel):
+    id: str
+    label: str
+    needs_custom: bool = False
+
+
+# ----------------------------------------------------------------
+# /api/cf + /api/student/{id}/similar
+# ----------------------------------------------------------------
+
+
+class CFElevatedStudent(BaseModel):
+    id: str
+    level: str
+    baseline_score: float
+    cf_score: float
+    delta: float
+
+
+class CFDiagnostics(BaseModel):
+    threshold: float
+    k: int
+    n_flagged_parametric: int
+    n_elevated_cf: int
+    fallback: bool
+    reason: str | None = None
+    elevated_students: list[CFElevatedStudent]
+
+
+class SimilarStudent(BaseModel):
+    id: str
+    level: str
+    struggle_score: float
+    similarity: float

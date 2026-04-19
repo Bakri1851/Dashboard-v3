@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { T, LEVEL_STYLES } from '../theme/tokens'
 import { useApiData } from '../api/hooks'
+import { useFilterQuery } from '../api/filterQuery'
 import type { QuestionDetail as QuestionDetailData } from '../types/api'
 import { Pill } from '../components/primitives/Pill'
 import { ScoreBar } from '../components/primitives/ScoreBar'
@@ -9,8 +10,11 @@ import { RagPanel } from '../components/RagPanel'
 import { useViewStore } from '../state/viewStore'
 
 export function QuestionDetailView({ questionId }: { questionId: string }) {
+  const q = useFilterQuery()
   const { data, error, loading } = useApiData<QuestionDetailData>(
-    `/question/${encodeURIComponent(questionId)}`
+    `/question/${encodeURIComponent(questionId)}`,
+    undefined,
+    q
   )
   const pickStudent = useViewStore((s) => s.pickStudent)
   const lvl = useMemo(

@@ -4,8 +4,8 @@ from __future__ import annotations
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException
 
-from backend.cache import load_difficulty_df, load_struggle_df
-from backend.deps import get_dataframe
+from backend.cache import filter_df, load_difficulty_df, load_struggle_df
+from backend.deps import TimeWindow, get_dataframe, get_time_window
 from backend.schemas import (
     MistakeCluster,
     QuestionDetail,
@@ -26,15 +26,20 @@ def _safe(val: object, default: float = 0.0) -> float:
 
 
 @router.get("/question/{question_id}", response_model=QuestionDetail)
-def get_question(question_id: str, df: pd.DataFrame = Depends(get_dataframe)) -> QuestionDetail:
+def get_question(
+    question_id: str,
+    df: pd.DataFrame = Depends(get_dataframe),
+    window: TimeWindow = Depends(get_time_window),
+) -> QuestionDetail:
     if df.empty or "question" not in df.columns:
         raise HTTPException(status_code=404, detail="No data loaded")
 
-    q_df = df[df["question"].astype(str) == question_id].copy()
+    working = filter_df(df, window.from_, window.to_) if window.active else df
+    q_df = working[working["question"].astype(str) == question_id].copy()
     if q_df.empty:
         raise HTTPException(status_code=404, detail=f"Question {question_id!r} not found")
 
-    difficulty_all = load_difficulty_df()
+    difficulty_all = load_difficulty_df(window.from_, window.to_)
     row_sel = difficulty_all[difficulty_all["question"].astype(str) == question_id]
     if row_sel.empty:
         raise HTTPException(status_code=404, detail=f"No difficulty score for {question_id!r}")
@@ -82,8 +87,8 @@ def get_question(question_id: str, df: pd.DataFrame = Depends(get_dataframe)) ->
                 mean_inc=("incorrectness", "mean"),
             )
         )
-        # Join struggle-level + global-score from the cached leaderboard.
-        struggle_all = load_struggle_df()
+        # Join struggle-level + global-score from the cached window-specific leaderboard.
+        struggle_all = load_struggle_df(window.from_, window.to_)
         level_lookup: dict[str, str] = {}
         score_lookup: dict[str, float] = {}
         if not struggle_all.empty:
