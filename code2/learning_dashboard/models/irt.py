@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
@@ -9,6 +11,8 @@ from scipy.special import expit  # sigmoid
 
 from learning_dashboard import config
 from learning_dashboard.analytics import classify_score
+
+logger = logging.getLogger("learning_dashboard.irt")
 
 # Column schema for the output DataFrame (used for empty-data fallback).
 _OUTPUT_COLUMNS = [
@@ -31,7 +35,14 @@ def build_response_matrix(
 
     Rows and columns with fewer than the configured minimums are dropped.
     """
-    if df.empty or "incorrectness" not in df.columns:
+    if df.empty:
+        logger.info("build_response_matrix: df is empty")
+        return pd.DataFrame()
+    if "incorrectness" not in df.columns:
+        logger.info(
+            "build_response_matrix: missing 'incorrectness' column (have: %s)",
+            list(df.columns),
+        )
         return pd.DataFrame()
 
     # Best attempt per student-question pair.
@@ -43,41 +54,68 @@ def build_response_matrix(
     best["correct"] = (best["incorrectness"] < correct_threshold).astype(int)
 
     matrix = best.pivot(index="user", columns="question", values="correct")
+    logger.info(
+        "build_response_matrix: initial matrix %d students x %d questions "
+        "(correct_rate=%.3f, threshold=%.2f)",
+        matrix.shape[0], matrix.shape[1],
+        float(best["correct"].mean()) if len(best) else 0.0,
+        correct_threshold,
+    )
 
     # Iteratively filter until minimums are met AND no single-class
     # (all-correct / all-wrong) rows or columns remain. Single-class patterns
     # make Rasch MLE unbounded (θ or b → ±∞), so L-BFGS-B drifts to a bounds
     # corner and the gradient vanishes. Dropping them is the standard fix.
     changed = True
+    passes = 0
     while changed:
         changed = False
+        passes += 1
+        shape_before = matrix.shape
         # Drop questions with too few responding students.
         col_counts = matrix.notna().sum(axis=0)
         keep_cols = col_counts[col_counts >= config.IRT_MIN_ATTEMPTS_PER_QUESTION].index
-        if len(keep_cols) < len(matrix.columns):
+        dropped_min_q = len(matrix.columns) - len(keep_cols)
+        if dropped_min_q:
             matrix = matrix[keep_cols]
             changed = True
         # Drop students with too few attempted questions.
         row_counts = matrix.notna().sum(axis=1)
         keep_rows = row_counts[row_counts >= config.IRT_MIN_ATTEMPTS_PER_STUDENT].index
-        if len(keep_rows) < len(matrix.index):
+        dropped_min_s = len(matrix.index) - len(keep_rows)
+        if dropped_min_s:
             matrix = matrix.loc[keep_rows]
             changed = True
         if matrix.empty:
+            logger.info(
+                "build_response_matrix: empty after min-attempts pass %d "
+                "(dropped %d questions < %d responses, %d students < %d responses)",
+                passes, dropped_min_q, config.IRT_MIN_ATTEMPTS_PER_QUESTION,
+                dropped_min_s, config.IRT_MIN_ATTEMPTS_PER_STUDENT,
+            )
             break
         # Drop single-class questions (all students answered the same way).
         col_nunique = matrix.apply(lambda s: s.dropna().nunique(), axis=0)
         keep_cols = col_nunique[col_nunique >= 2].index
-        if len(keep_cols) < len(matrix.columns):
+        dropped_sep_q = len(matrix.columns) - len(keep_cols)
+        if dropped_sep_q:
             matrix = matrix[keep_cols]
             changed = True
         # Drop single-class students (answered all their questions the same way).
         row_nunique = matrix.apply(lambda s: s.dropna().nunique(), axis=1)
         keep_rows = row_nunique[row_nunique >= 2].index
-        if len(keep_rows) < len(matrix.index):
+        dropped_sep_s = len(matrix.index) - len(keep_rows)
+        if dropped_sep_s:
             matrix = matrix.loc[keep_rows]
             changed = True
+        logger.info(
+            "build_response_matrix pass %d: %s → %s "
+            "(dropped: min-attempts q=%d s=%d, separable q=%d s=%d)",
+            passes, shape_before, matrix.shape,
+            dropped_min_q, dropped_min_s, dropped_sep_q, dropped_sep_s,
+        )
 
+    logger.info("build_response_matrix: final matrix %s after %d pass(es)", matrix.shape, passes)
     return matrix
 
 

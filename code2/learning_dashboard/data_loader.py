@@ -76,10 +76,12 @@ def parse_json_response(raw: str) -> list[dict]:
                         record["student_answer"] = (
                             srep.text if srep is not None and srep.text else ""
                         )
-                        feedback_resp = sub.find(".//feedback/response")
+                        # Live schema: <feedback model="..." friend="..." time="...">TEXT</feedback>
+                        # (no nested <response>). Text is HTML-escaped — GPT handles that fine.
+                        feedback_el = sub.find("feedback")
                         record["ai_feedback"] = (
-                            feedback_resp.text
-                            if feedback_resp is not None and feedback_resp.text
+                            feedback_el.text
+                            if feedback_el is not None and feedback_el.text
                             else ""
                         )
                         records.append(record)
@@ -126,10 +128,12 @@ def parse_xml_response(raw: str) -> list[dict]:
                 record = base.copy()
                 record["timestamp"] = _xml_text(sub, "timestamp")
                 record["student_answer"] = _xml_text(sub, "srep")
-                feedback_resp = sub.find(".//feedback/response")
+                # Live schema: <feedback model="..." friend="..." time="...">TEXT</feedback>
+                # (no nested <response>).
+                feedback_el = sub.find("feedback")
                 record["ai_feedback"] = (
-                    feedback_resp.text
-                    if feedback_resp is not None and feedback_resp.text
+                    feedback_el.text
+                    if feedback_el is not None and feedback_el.text
                     else ""
                 )
                 records.append(record)

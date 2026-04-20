@@ -142,17 +142,57 @@ def compute_incorrectness_column(df: pd.DataFrame) -> pd.Series:
     """
     feedbacks = df["ai_feedback"].astype(str).str.strip()
 
+    if not getattr(config, "OPENAI_SCORING_ENABLED", True):
+        logger.info(
+            "compute_incorrectness_column: OPENAI_SCORING_ENABLED=False — "
+            "returning 0.5 for all %d rows without any API call.",
+            len(df),
+        )
+        return pd.Series(0.5, index=df.index)
+
+    unique_feedbacks = feedbacks.unique()
+    already_cached = sum(1 for t in unique_feedbacks if t in _incorrectness_cache)
+
     # Collect unique non-empty texts not yet cached
-    uncached = [t for t in feedbacks.unique() if t and t not in _incorrectness_cache]
+    uncached = [t for t in unique_feedbacks if t and t not in _incorrectness_cache]
+    n_empty = sum(1 for t in unique_feedbacks if not t)
+
+    logger.info(
+        "compute_incorrectness_column: total_rows=%d unique_feedbacks=%d "
+        "already_cached=%d non_empty_uncached=%d empty_feedbacks=%d model=%s",
+        len(df), len(unique_feedbacks), already_cached, len(uncached), n_empty,
+        config.OPENAI_MODEL,
+    )
+
+    batches_attempted = 0
+    batches_succeeded = 0
+    scores_added = 0
 
     # Fetch in batches — only cache successful responses.
     for i in range(0, len(uncached), config.OPENAI_BATCH_SIZE):
         batch = uncached[i : i + config.OPENAI_BATCH_SIZE]
+        batches_attempted += 1
         scores = _call_openai_batch(batch)
         if scores is not None:
             _incorrectness_cache.update(zip(batch, scores))
+            batches_succeeded += 1
+            scores_added += len(batch)
 
-    return feedbacks.map(lambda t: _incorrectness_cache.get(t, 0.5))
+    result = feedbacks.map(lambda t: _incorrectness_cache.get(t, 0.5))
+    share_at_half = float((result == 0.5).mean()) if len(result) else 0.0
+
+    logger.info(
+        "compute_incorrectness_column: batches_attempted=%d batches_succeeded=%d "
+        "scores_added=%d cache_size=%d | result min=%.3f median=%.3f max=%.3f "
+        "share_at_0.5=%.1f%%",
+        batches_attempted, batches_succeeded, scores_added, len(_incorrectness_cache),
+        float(result.min()) if len(result) else 0.0,
+        float(result.median()) if len(result) else 0.0,
+        float(result.max()) if len(result) else 0.0,
+        100.0 * share_at_half,
+    )
+
+    return result
 
 
 # Min-Max Normalization

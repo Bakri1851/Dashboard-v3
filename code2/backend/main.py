@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
+import tomllib
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -17,6 +19,24 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+
+# Mirror the Streamlit app's secrets bootstrap (instructor_app.py:25-28):
+# read .streamlit/secrets.toml and lift OPENAI_API_KEY into the environment
+# so analytics._get_openai_client() finds it. Without this, the backend runs
+# with an empty key, every OpenAI call 401s, and every incorrectness score
+# falls back to 0.5 — which makes IRT, improved struggle, and measurement
+# confidence all degrade silently.
+if not os.environ.get("OPENAI_API_KEY"):
+    _secrets_path = Path(__file__).resolve().parents[2] / ".streamlit" / "secrets.toml"
+    if _secrets_path.is_file():
+        try:
+            with _secrets_path.open("rb") as _f:
+                _secrets = tomllib.load(_f)
+            _key = _secrets.get("OPENAI_API_KEY", "")
+            if _key:
+                os.environ["OPENAI_API_KEY"] = _key
+        except (OSError, tomllib.TOMLDecodeError):
+            pass
 
 from backend.cache import load_dataframe, load_difficulty_df, load_struggle_df
 from backend.routers import analysis, cf, lab, live, meta, models_cmp, question, rag, sessions, settings, student
@@ -32,14 +52,25 @@ if not logger.handlers:
     logger.addHandler(_h)
     logger.setLevel(logging.INFO)
     logger.propagate = False
-# Same treatment for the rag module so its fast-path / model-load lines show up.
-_rag_logger = logging.getLogger("learning_dashboard.rag")
-if not _rag_logger.handlers:
-    _rh = logging.StreamHandler()
-    _rh.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s", datefmt="%H:%M:%S"))
-    _rag_logger.addHandler(_rh)
-    _rag_logger.setLevel(logging.INFO)
-    _rag_logger.propagate = False
+# Attach a single handler at the learning_dashboard root so every submodule
+# (rag, irt, bkt, improved_struggle, ...) logs through uvicorn's stderr with
+# the same format. Without this, uvicorn silently drops all INFO logs from
+# the learning_dashboard.* namespace because its own config only covers
+# "uvicorn.*" loggers.
+_ld_logger = logging.getLogger("learning_dashboard")
+if not _ld_logger.handlers:
+    _ldh = logging.StreamHandler()
+    _ldh.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s", datefmt="%H:%M:%S"))
+    _ld_logger.addHandler(_ldh)
+    _ld_logger.setLevel(logging.INFO)
+    _ld_logger.propagate = False
+
+_openai_key_present = bool(os.environ.get("OPENAI_API_KEY"))
+logger.info(
+    "OPENAI_API_KEY %s; incorrectness scoring will %s.",
+    "loaded" if _openai_key_present else "MISSING",
+    "use OpenAI" if _openai_key_present else "fall back to 0.5 for every row",
+)
 
 
 @asynccontextmanager
@@ -54,6 +85,21 @@ async def lifespan(app: FastAPI):
             t0 = _time.monotonic()
             df, err = load_dataframe()
             logger.info("prewarm: loaded %d records in %.1fs (err=%r)", len(df), _time.monotonic() - t0, err)
+            if "incorrectness" in df.columns and not df.empty:
+                _inc = df["incorrectness"]
+                logger.info(
+                    "prewarm: incorrectness distribution — rows=%d "
+                    "min=%.3f median=%.3f max=%.3f share_at_0.5=%.1f%% "
+                    "(near 100%% at 0.5 means OpenAI scoring effectively no-op)",
+                    len(_inc),
+                    float(_inc.min()), float(_inc.median()), float(_inc.max()),
+                    100.0 * float((_inc == 0.5).mean()),
+                )
+            else:
+                logger.warning(
+                    "prewarm: df has no 'incorrectness' column after load_dataframe — "
+                    "compute_incorrectness_column was bypassed or crashed silently"
+                )
             t1 = _time.monotonic()
             load_struggle_df()
             logger.info("prewarm: struggle ready in %.1fs", _time.monotonic() - t1)

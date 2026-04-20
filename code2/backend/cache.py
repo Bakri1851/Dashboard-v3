@@ -8,6 +8,7 @@ between "Today / Past Hour / Current Week / Custom").
 """
 from __future__ import annotations
 
+import logging
 import threading
 from typing import Optional
 
@@ -16,6 +17,8 @@ from cachetools import TTLCache
 
 from learning_dashboard import analytics, config, data_loader
 from learning_dashboard.models import improved_struggle, irt
+
+logger = logging.getLogger("backend.cache")
 
 _EMPTY_DF = pd.DataFrame(
     columns=[
@@ -184,6 +187,12 @@ def load_improved_struggle_df(
         try:
             result = improved_struggle.compute_improved_struggle_scores(sliced)
         except Exception:
+            logger.warning(
+                "improved_struggle.compute_improved_struggle_scores failed for "
+                "window=(%s, %s) rows=%d — caching empty result",
+                from_, to_, len(sliced),
+                exc_info=True,
+            )
             result = pd.DataFrame()
         _improved_cache[key] = result
         return result
@@ -204,7 +213,19 @@ def load_irt_difficulty_df(
         try:
             result = irt.compute_irt_difficulty_scores(sliced)
         except Exception:
+            logger.warning(
+                "irt.compute_irt_difficulty_scores failed for "
+                "window=(%s, %s) rows=%d — caching empty result",
+                from_, to_, len(sliced),
+                exc_info=True,
+            )
             result = pd.DataFrame()
+        if result.empty:
+            logger.info(
+                "IRT fit returned empty for window=(%s, %s) rows=%d — likely "
+                "too few eligible attempts after min-count + separation filter.",
+                from_, to_, len(sliced),
+            )
         _irt_difficulty_cache[key] = result
         return result
 
