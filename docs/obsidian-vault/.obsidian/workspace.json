@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "My Notes/Thesis/Writing Roadmap.md",
+                "file": "My Notes/Thesis/Ch2 – Background and Requirements.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Writing Roadmap"
+              "title": "Ch2 – Background and Requirements"
             }
           }
         ]
@@ -184,6 +184,7 @@
   },
   "active": "be447fca2c261028",
   "lastOpenFiles": [
+    "My Notes/Thesis/Writing Roadmap.md",
     "My Notes/Thesis/Thesis Overview.md.tmp.21060.1776545575134",
     "My Notes/Thesis/Weekly Plan.md",
     "My Notes/Thesis/Thesis Overview.md",
@@ -221,7 +222,6 @@
     "My Notes/Code/Source Tree/code.md.tmp.13760.1776183041999",
     "My Notes/Code/Source Tree",
     "Phase 9 RAG Pipeline — How Suggested Feedback Works.md.tmp.3108.1776180127933",
-    "Phase 9 RAG Suggested Feedback for Question Clusters.md.tmp.3108.1776180097924",
     "Pasted image 20260414004425.png",
     "Pasted image 20260414004418.png",
     "graph.canvas",

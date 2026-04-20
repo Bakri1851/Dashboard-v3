@@ -250,6 +250,11 @@ export interface JoinResult {
   error: string | null
 }
 
+export interface StrugglingQuestionRow {
+  question: string
+  avg_incorrectness: number
+}
+
 export interface RagSuggestions {
   audience: 'student' | 'question' | string
   subject_id: string

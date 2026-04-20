@@ -12,25 +12,26 @@ export function Histogram({
   bucketColors: string[]
   height?: number
 }) {
-  const max = Math.max(...data, 1)
+  const maxRaw = Math.max(...data, 1)
+  const max = isFinite(maxRaw) && maxRaw > 0 ? maxRaw : 1
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height }}>
         {data.map((v, i) => {
-          const pct = (v / max) * 100
+          const n = Number(v)
+          const pct = !isFinite(n) ? 0 : Math.max(0, Math.min(100, (n / max) * 100))
           return (
-            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-              <div
-                style={{
-                  width: '100%',
-                  height: `${pct}%`,
-                  background: bucketColors[i] ?? T.ink,
-                  minHeight: v > 0 ? 2 : 0,
-                  transition: 'height 200ms ease-out',
-                }}
-                title={`${labels[i]} — ${v}`}
-              />
-            </div>
+            <div
+              key={i}
+              style={{
+                flex: 1,
+                height: `${pct}%`,
+                minHeight: n > 0 ? 2 : 0,
+                background: bucketColors[i] ?? T.ink,
+                transition: 'height 200ms ease-out',
+              }}
+              title={`${labels[i]} — ${v}`}
+            />
           )
         })}
       </div>

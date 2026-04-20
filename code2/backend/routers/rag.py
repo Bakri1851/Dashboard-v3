@@ -17,8 +17,8 @@ import asyncio
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException
 
-from backend.cache import load_struggle_df
-from backend.deps import get_dataframe
+from backend.cache import filter_df, load_struggle_df
+from backend.deps import TimeWindow, get_dataframe, get_time_window
 from backend.schemas import RagSuggestions
 from learning_dashboard import analytics, lab_state, rag
 
@@ -34,11 +34,13 @@ def _session_id() -> str:
 async def student_suggestions(
     student_id: str,
     df: pd.DataFrame = Depends(get_dataframe),
+    window: TimeWindow = Depends(get_time_window),
 ) -> RagSuggestions:
     if df.empty:
         raise HTTPException(status_code=404, detail="No data loaded.")
 
-    struggle_all = load_struggle_df()
+    working = filter_df(df, window.from_, window.to_) if window.active else df
+    struggle_all = load_struggle_df(window.from_, window.to_)
     row_sel = struggle_all[struggle_all["user"].astype(str) == student_id]
     if row_sel.empty:
         raise HTTPException(status_code=404, detail=f"Student {student_id!r} not found.")
@@ -48,7 +50,7 @@ async def student_suggestions(
     bullets = await asyncio.to_thread(
         rag.generate_assistant_suggestions,
         student_id,
-        df,
+        working,
         struggle_row,
         session_id,
     )

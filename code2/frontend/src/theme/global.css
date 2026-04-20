@@ -30,6 +30,8 @@ html.theme-paper body {
   --ok:     oklch(0.52 0.14 150);
   --warn:   oklch(0.62 0.15 65);
   --danger: oklch(0.52 0.20 25);
+  --priority-bg: oklch(0.18 0.01 80);
+  --priority-fg: #ffffff;
   background: var(--bg);
   font-family: 'IBM Plex Sans', system-ui, sans-serif;
   color: var(--ink);
@@ -53,6 +55,8 @@ html.theme-newsprint body {
   --ok:     oklch(0.48 0.14 150);
   --warn:   oklch(0.58 0.16 55);
   --danger: oklch(0.45 0.20 25);
+  --priority-bg: oklch(0.15 0.02 60);
+  --priority-fg: #ffffff;
   background: var(--bg);
   font-family: 'Playfair Display', Georgia, serif;
   color: var(--ink);
@@ -79,6 +83,8 @@ html.theme-solar body {
   --ok:     oklch(0.48 0.14 150);
   --warn:   oklch(0.62 0.15 55);
   --danger: oklch(0.52 0.20 25);
+  --priority-bg: oklch(0.30 0.04 55);
+  --priority-fg: #ffffff;
   background: var(--bg);
   font-family: 'Fraunces', Georgia, serif;
   color: var(--ink);
@@ -100,6 +106,8 @@ html.theme-scifi body {
   --ok:     oklch(0.78 0.14 180);
   --warn:   oklch(0.78 0.14 80);
   --danger: oklch(0.72 0.20 20);
+  --priority-bg: oklch(0.22 0.08 200);
+  --priority-fg: oklch(0.92 0.14 200);
   background: var(--bg);
   font-family: 'Space Grotesk', system-ui, sans-serif;
   color: var(--ink);
@@ -134,6 +142,8 @@ html.theme-blueprint body {
   --ok:     oklch(0.82 0.14 150);
   --warn:   oklch(0.88 0.15 85);
   --danger: oklch(0.72 0.18 25);
+  --priority-bg: oklch(0.18 0.10 245);
+  --priority-fg: oklch(0.92 0.14 200);
   background: var(--bg);
   font-family: 'Inconsolata', monospace;
   color: var(--ink);
@@ -162,6 +172,8 @@ html.theme-matrix body {
   --ok:     oklch(0.92 0.20 150);
   --warn:   oklch(0.85 0.18 90);
   --danger: oklch(0.70 0.22 25);
+  --priority-bg: oklch(0.10 0.02 150);
+  --priority-fg: oklch(0.92 0.22 150);
   background: var(--bg);
   font-family: 'VT323', monospace;
   font-size: 16px;
@@ -192,6 +204,8 @@ html.theme-cyberpunk body {
   --ok:     oklch(0.80 0.18 180);
   --warn:   oklch(0.85 0.18 85);
   --danger: oklch(0.72 0.26 335);
+  --priority-bg: oklch(0.18 0.12 315);
+  --priority-fg: oklch(0.92 0.14 200);
   background: var(--bg);
   font-family: 'Rajdhani', 'Space Grotesk', sans-serif;
   color: var(--ink);

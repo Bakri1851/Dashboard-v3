@@ -362,6 +362,16 @@ class SimpleResult(BaseModel):
     error: str | None = None
 
 
+class StrugglingQuestionRow(BaseModel):
+    """One row in the mobile-assistant 'Top Struggling Questions' list.
+
+    Returned by GET /api/lab/student/{id}/struggling-questions; questions are
+    sorted by mean incorrectness (descending) for the given student.
+    """
+    question: str
+    avg_incorrectness: float
+
+
 # ----------------------------------------------------------------
 # /api/rag/*
 # ----------------------------------------------------------------

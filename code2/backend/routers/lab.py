@@ -9,8 +9,11 @@ without a separate GET round-trip.
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+import pandas as pd
+from fastapi import APIRouter, Depends, HTTPException, Query
 
+from backend.deps import TimeWindow, get_dataframe, get_time_window
+from backend.cache import filter_df
 from backend.schemas import (
     AssignRequest,
     AssistantIdRequest,
@@ -21,9 +24,10 @@ from backend.schemas import (
     LabState,
     SetBoolRequest,
     SimpleResult,
+    StrugglingQuestionRow,
     StudentIdRequest,
 )
-from learning_dashboard import lab_state
+from learning_dashboard import analytics, lab_state
 
 router = APIRouter(prefix="/lab", tags=["lab"])
 
@@ -134,3 +138,56 @@ def remove_assistant(req: AssistantIdRequest) -> LabState:
 def allow_self_alloc(req: SetBoolRequest) -> SimpleResult:
     lab_state.set_allow_self_allocation(req.enabled)
     return SimpleResult(ok=True)
+
+
+@router.get(
+    "/student/{student_id}/struggling-questions",
+    response_model=list[StrugglingQuestionRow],
+)
+def struggling_questions(
+    student_id: str,
+    limit: int = Query(default=3, ge=1, le=20),
+    df: pd.DataFrame = Depends(get_dataframe),
+    window: TimeWindow = Depends(get_time_window),
+) -> list[StrugglingQuestionRow]:
+    """Top-N questions for a student, ranked by mean incorrectness DESC.
+
+    Mirrors `code/learning_dashboard/assistant_app.py:389-398`. The mobile
+    lab-assistant portal uses this to tell a helper which questions their
+    assigned student is doing worst on.
+    """
+    if df.empty or "user" not in df.columns:
+        return []
+
+    # Default to the active lab session's start when no explicit window is
+    # passed — matches the Streamlit original which reads
+    # `state["session_start"]` in `_load_student_data()`.
+    effective_from = window.from_
+    effective_to = window.to_
+    if not window.active:
+        session_start = lab_state.read_lab_state().get("session_start")
+        if session_start:
+            effective_from = str(session_start)
+
+    working = (
+        filter_df(df, effective_from, effective_to)
+        if (effective_from or effective_to)
+        else df
+    )
+    student_df = working[working["user"].astype(str) == student_id].copy()
+    if student_df.empty:
+        return []
+
+    if "incorrectness" not in student_df.columns:
+        student_df["incorrectness"] = analytics.compute_incorrectness_column(student_df)
+
+    q_scores = (
+        student_df.groupby("question")["incorrectness"]
+        .mean()
+        .sort_values(ascending=False)
+        .head(limit)
+    )
+    return [
+        StrugglingQuestionRow(question=str(q), avg_incorrectness=float(v))
+        for q, v in q_scores.items()
+    ]

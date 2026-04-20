@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { T } from '../theme/tokens'
 import { useApiData } from '../api/hooks'
 import { useFilterQuery } from '../api/filterQuery'
+import { useFilterStore } from '../state/filterStore'
 import { useSettings } from '../api/useSettings'
 import type {
   CFDiagnostics,
@@ -33,6 +34,7 @@ const DIFFICULTY_COLS: LeaderboardColumn[] = ['rank', 'id', 'level', 'score', 's
 
 export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionActive }: Props) {
   const q = useFilterQuery()
+  const filter = useFilterStore()
   const { data: settings } = useSettings()
   const cfEnabled = settings?.runtime.cf_enabled ?? false
   const { data: live, error: liveErr, loading: liveLoading } =
@@ -94,6 +96,19 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
   const struggleBuckets = live?.struggle_buckets ?? []
   const difficultyBuckets = live?.difficulty_buckets ?? []
 
+  // Auto-fallback: if preset is 'today' and today has no records, switch to 'all'
+  // once. The flag prevents ping-pong between the two presets.
+  useEffect(() => {
+    if (!live) return
+    if (filter.preset === 'today' && records === 0 && !filter.autoFallbackApplied) {
+      filter.setAutoFallbackApplied(true)
+      filter.setPreset('all')
+    }
+  }, [live, records, filter])
+
+  const showFallbackBanner =
+    filter.autoFallbackApplied && filter.preset === 'all' && records > 0
+
   return (
     <div style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 28 }}>
       {anyError && (
@@ -136,13 +151,53 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
           Loading live data…
         </div>
       )}
+      {showFallbackBanner && (
+        <div
+          style={{
+            padding: '10px 14px',
+            border: `1px solid ${T.line2}`,
+            background: T.card,
+            color: T.ink2,
+            fontFamily: T.fMono,
+            fontSize: 11,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+          }}
+        >
+          <span style={{ color: T.ink3, letterSpacing: 1, textTransform: 'uppercase', fontSize: 10 }}>
+            No activity today
+          </span>
+          <span>— showing all time.</span>
+          <button
+            onClick={() => {
+              filter.setAutoFallbackApplied(false)
+              filter.setPreset('today')
+            }}
+            style={{
+              marginLeft: 'auto',
+              padding: '4px 10px',
+              fontFamily: T.fMono,
+              fontSize: 10,
+              background: 'transparent',
+              color: T.ink2,
+              border: `1px solid ${T.line}`,
+              letterSpacing: 1,
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+            }}
+          >
+            Back to today
+          </button>
+        </div>
+      )}
       {/* Hero stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)', gap: 12 }}>
         <div
           style={{
             padding: '20px 22px',
-            background: T.ink,
-            color: '#ffffff',
+            background: T.priorityBg,
+            color: T.priorityFg,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
@@ -155,7 +210,7 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
               fontSize: 10.5,
               letterSpacing: 1.3,
               textTransform: 'uppercase',
-              opacity: 0.7,
+              opacity: 0.75,
             }}
           >
             Priority Now
@@ -167,11 +222,12 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
                 fontSize: 56,
                 lineHeight: 0.95,
                 fontFeatureSettings: '"tnum"',
+                color: T.priorityFg,
               }}
             >
               {needsHelp}
             </div>
-            <div style={{ fontFamily: T.fMono, fontSize: 11, marginTop: 8, opacity: 0.75 }}>
+            <div style={{ fontFamily: T.fMono, fontSize: 11, marginTop: 8, opacity: 0.8 }}>
               students need help · {strugCount} struggling
             </div>
             <div style={{ marginTop: 14 }}>
@@ -181,14 +237,14 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
                 style={{
                   padding: '6px 12px',
                   background: 'transparent',
-                  color: '#ffffff',
-                  border: '1px solid rgba(255,255,255,0.4)',
+                  color: T.priorityFg,
+                  border: `1px solid ${T.priorityFg}`,
                   fontFamily: T.fMono,
                   fontSize: 10.5,
                   letterSpacing: 1.2,
                   textTransform: 'uppercase',
                   cursor: sessionActive ? 'pointer' : 'not-allowed',
-                  opacity: sessionActive ? 1 : 0.4,
+                  opacity: sessionActive ? 0.9 : 0.4,
                 }}
               >
                 Dispatch Assistants →
@@ -224,9 +280,9 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
               onClick={() => setModuleFilter(m)}
               style={{
                 padding: '5px 10px',
-                background: active ? T.ink : 'transparent',
-                color: active ? '#ffffff' : T.ink2,
-                border: `1px solid ${active ? T.ink : T.line2}`,
+                background: active ? T.priorityBg : 'transparent',
+                color: active ? T.priorityFg : T.ink2,
+                border: `1px solid ${active ? T.priorityBg : T.line2}`,
                 borderRadius: 999,
                 fontFamily: T.fSans,
                 fontSize: 12,

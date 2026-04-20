@@ -15,6 +15,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from backend.cache import load_dataframe, load_difficulty_df, load_struggle_df
@@ -82,4 +83,14 @@ def health() -> dict[str, str]:
 # Serve the built React SPA when dist/ exists (Phase 6 onward).
 # During Phase 2-5 the frontend is served by Vite on :5173 instead.
 if _DIST_DIR.exists():
+    _MOBILE_HTML = _DIST_DIR / "mobile.html"
+
+    # Clean URL for the mobile lab-assistant portal: /mobile → mobile.html.
+    # Registered BEFORE the StaticFiles mount so it wins against the catch-all.
+    if _MOBILE_HTML.exists():
+
+        @app.get("/mobile", include_in_schema=False)
+        def mobile_entry() -> FileResponse:
+            return FileResponse(_MOBILE_HTML)
+
     app.mount("/", StaticFiles(directory=str(_DIST_DIR), html=True), name="static")

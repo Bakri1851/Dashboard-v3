@@ -18,25 +18,34 @@ export interface FilterState {
   timeStart: string                // HH:MM — applied to customFrom
   timeEnd: string                  // HH:MM — applied to customTo
   academicWeek: string | null      // label string from /api/meta/academic-periods
+  /** True once InClassView has auto-switched from 'today' to 'all' because
+   *  today returned no records. Prevents ping-ponging between the two. */
+  autoFallbackApplied: boolean
   setPreset: (p: FilterPreset) => void
   setCustom: (from: string | null, to: string | null) => void
   setTimes: (start: string, end: string) => void
   setAcademicWeek: (label: string | null) => void
+  setAutoFallbackApplied: (v: boolean) => void
   reset: () => void
 }
 
 export const useFilterStore = create<FilterState>((set) => ({
-  preset: 'all',
+  preset: 'today',
   customFrom: null,
   customTo: null,
   timeStart: '00:00',
   timeEnd: '23:59',
   academicWeek: null,
-  setPreset: (preset) => set({ preset }),
+  autoFallbackApplied: false,
+  setPreset: (preset) =>
+    // Re-arm the fallback when picking 'today' so an empty today can fall
+    // back to 'all' again on the next /live tick.
+    set(preset === 'today' ? { preset, autoFallbackApplied: false } : { preset }),
   setCustom: (customFrom, customTo) => set({ customFrom, customTo, preset: 'custom' }),
   setTimes: (timeStart, timeEnd) => set({ timeStart, timeEnd }),
   setAcademicWeek: (academicWeek) =>
     set({ academicWeek, preset: academicWeek ? 'custom' : 'all' }),
+  setAutoFallbackApplied: (autoFallbackApplied) => set({ autoFallbackApplied }),
   reset: () =>
     set({
       preset: 'all',
@@ -45,6 +54,7 @@ export const useFilterStore = create<FilterState>((set) => ({
       timeStart: '00:00',
       timeEnd: '23:59',
       academicWeek: null,
+      autoFallbackApplied: false,
     }),
 }))
 

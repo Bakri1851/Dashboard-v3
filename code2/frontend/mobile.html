@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Lab Assistant</title>
+    <script>
+      // Apply persisted theme class before React renders so there's no flash.
+      // Same localStorage key as the instructor SPA, so both share the theme.
+      ;(function () {
+        var t = localStorage.getItem('dash-theme') || 'paper'
+        document.documentElement.classList.add('theme-' + t)
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/mobile/main.tsx"></script>
+  </body>
+</html>

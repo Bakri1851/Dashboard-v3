@@ -62,6 +62,10 @@ export const T = {
   ok: 'var(--ok)',
   warn: 'var(--warn)',
   danger: 'var(--danger)',
+
+  // --- priority card (theme-safe dark background + high-contrast fg) -----
+  priorityBg: 'var(--priority-bg)',
+  priorityFg: 'var(--priority-fg)',
 } as const
 
 export const ACCENT_HUES: { id: string; h: number }[] = [

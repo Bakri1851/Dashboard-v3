@@ -84,9 +84,9 @@ export function DataAnalysisView() {
               title={m.hint}
               style={{
                 padding: '6px 12px',
-                background: active ? T.ink : 'transparent',
-                color: active ? '#ffffff' : T.ink2,
-                border: `1px solid ${active ? T.ink : T.line2}`,
+                background: active ? T.priorityBg : 'transparent',
+                color: active ? T.priorityFg : T.ink2,
+                border: `1px solid ${active ? T.priorityBg : T.line2}`,
                 borderRadius: 999,
                 fontFamily: T.fSans,
                 fontSize: 12,

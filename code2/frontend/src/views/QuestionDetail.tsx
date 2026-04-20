@@ -115,7 +115,7 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
           </div>
         </div>
 
-        <div style={{ padding: '28px 28px', background: T.ink, color: '#ffffff', borderRadius: 2 }}>
+        <div style={{ padding: '28px 28px', background: T.priorityBg, color: T.priorityFg, borderRadius: 2 }}>
           <div
             style={{
               fontFamily: T.fMono,
