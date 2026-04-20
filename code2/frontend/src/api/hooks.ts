@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { api, ApiError } from './client'
 
 export interface ApiState<T> {
@@ -18,8 +18,6 @@ export function prefetchApi<T>(path: string): Promise<T> {
   const existing = inflight.get(path)
   if (existing) return existing as Promise<T>
   const p = api.get<T>(path).finally(() => {
-    // Drop after 30s so a delayed mount still gets fresh-ish data, and so
-    // the map doesn't leak across long-lived tabs.
     setTimeout(() => {
       if (inflight.get(path) === p) inflight.delete(path)
     }, 30_000)
@@ -28,15 +26,14 @@ export function prefetchApi<T>(path: string): Promise<T> {
   return p as Promise<T>
 }
 
+function isAbortError(e: unknown): boolean {
+  return e instanceof DOMException && (e.name === 'AbortError' || e.name === 'TimeoutError')
+}
+
 /**
  * Fetch `path` once on mount (+ optional poll at `intervalMs`).
- *
- * `query` is an optional URL query-string fragment (without the leading `?`)
- * — typically produced by `filterToQuery(resolveFilter(...))`. Changing it
- * triggers a refetch and invalidates the cached response.
- *
- * On the first run for a given `fullPath`, an in-flight promise from
- * `prefetchApi()` is adopted if present — subsequent polls bypass the cache.
+ * Uses an AbortController so unmount / dep change cancels the in-flight request
+ * and the 30s fetch-level timeout in client.ts bounds any hung response.
  */
 export function useApiData<T>(
   path: string,
@@ -47,38 +44,37 @@ export function useApiData<T>(
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [tick, setTick] = useState(0)
-  const aborted = useRef(false)
 
   const skip = !path
   const fullPath = skip ? '' : query ? `${path}${path.includes('?') ? '&' : '?'}${query}` : path
 
   useEffect(() => {
-    aborted.current = false
-    let cancel = false
     if (skip) {
       setData(null)
       setError(null)
       setLoading(false)
       return
     }
+    const ac = new AbortController()
     setData(null)
     setError(null)
     setLoading(true)
 
     let firstRun = true
     const run = () => {
+      if (ac.signal.aborted) return
       const prefetched = firstRun ? (inflight.get(fullPath) as Promise<T> | undefined) : undefined
       firstRun = false
-      const promise = prefetched ?? api.get<T>(fullPath)
+      const promise = prefetched ?? api.get<T>(fullPath, ac.signal)
       promise
         .then((payload) => {
-          if (cancel || aborted.current) return
+          if (ac.signal.aborted) return
           setData(payload)
           setError(null)
           setLoading(false)
         })
         .catch((e: unknown) => {
-          if (cancel || aborted.current) return
+          if (ac.signal.aborted || isAbortError(e)) return
           setError(e instanceof ApiError ? `${e.status}: ${e.message}` : String(e))
           setLoading(false)
         })
@@ -90,8 +86,7 @@ export function useApiData<T>(
       timer = window.setInterval(run, intervalMs)
     }
     return () => {
-      cancel = true
-      aborted.current = true
+      ac.abort()
       if (timer) window.clearInterval(timer)
     }
   }, [fullPath, intervalMs, tick, skip])

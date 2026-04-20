@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { T } from '../theme/tokens'
 import { prefetchApi, useApiData } from '../api/hooks'
 import { useFilterQuery } from '../api/filterQuery'
@@ -48,6 +48,17 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
   const anyLoading = liveLoading || strugLoading || diffLoading
 
   const [moduleFilter, setModuleFilter] = useState<string>('All Modules')
+
+  // Debounce hover-prefetch so sweeping the mouse across rows doesn't fan out
+  // into a dozen concurrent /rag/ requests that saturate the backend threadpool.
+  const hoverTimer = useRef<number | null>(null)
+  const debouncedPrefetch = (path: string) => {
+    if (hoverTimer.current) window.clearTimeout(hoverTimer.current)
+    hoverTimer.current = window.setTimeout(() => prefetchApi(path), 150)
+  }
+  useEffect(() => () => {
+    if (hoverTimer.current) window.clearTimeout(hoverTimer.current)
+  }, [])
 
   const moduleOptions = useMemo(() => {
     const mods = new Set<string>()
@@ -304,7 +315,7 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
           cols={STRUGGLE_COLS}
           rows={struggleRows}
           onClick={(r) => onPickStudent(r.id)}
-          onHover={(r) => prefetchApi(`/rag/student/${encodeURIComponent(r.id)}`)}
+          onHover={(r) => debouncedPrefetch(`/rag/student/${encodeURIComponent(r.id)}`)}
         />
         <Leaderboard
           title="Question Difficulty"
@@ -312,7 +323,7 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
           cols={DIFFICULTY_COLS}
           rows={filteredDifficulty}
           onClick={(r) => onPickQuestion(r.id)}
-          onHover={(r) => prefetchApi(`/rag/question/${encodeURIComponent(r.id)}`)}
+          onHover={(r) => debouncedPrefetch(`/rag/question/${encodeURIComponent(r.id)}`)}
         />
       </div>
 

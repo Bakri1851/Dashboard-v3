@@ -8,10 +8,11 @@ between "Today / Past Hour / Current Week / Custom").
 """
 from __future__ import annotations
 
+import threading
 from typing import Optional
 
 import pandas as pd
-from cachetools import TTLCache, cached
+from cachetools import TTLCache
 
 from learning_dashboard import analytics, config, data_loader
 from learning_dashboard.models import improved_struggle
@@ -43,10 +44,31 @@ _improved_cache: TTLCache = TTLCache(maxsize=4, ttl=_IMPROVED_TTL)
 # CF diagnostics derive from struggle_df + threshold; mirror the analytics TTL.
 _cf_cache: TTLCache = TTLCache(maxsize=16, ttl=_ANALYTICS_TTL)
 
+# Single-flight locks prevent thundering-herd rebuilds when TTL expires and
+# multiple pollers hit the endpoint at the same moment. Without these, a
+# single slow rebuild (>2 min on 34k records) was fanned out across every
+# queued request, saturating the FastAPI threadpool.
+_df_lock = threading.Lock()
+_struggle_lock = threading.Lock()
+_difficulty_lock = threading.Lock()
+_improved_lock = threading.Lock()
 
-@cached(_df_cache)
+
 def load_dataframe() -> tuple[pd.DataFrame, str]:
     """Fetch + parse + normalise raw API data. Returns (df, error_msg)."""
+    cached = _df_cache.get("df")
+    if cached is not None:
+        return cached
+    with _df_lock:
+        cached = _df_cache.get("df")
+        if cached is not None:
+            return cached
+        result = _load_dataframe_uncached()
+        _df_cache["df"] = result
+        return result
+
+
+def _load_dataframe_uncached() -> tuple[pd.DataFrame, str]:
     try:
         raw = data_loader.fetch_raw_data_uncached()
     except Exception as e:
@@ -73,10 +95,6 @@ def load_dataframe() -> tuple[pd.DataFrame, str]:
 
     df = data_loader.normalize_and_clean(records)
 
-    # Pre-compute the incorrectness column once at load time so downstream
-    # endpoints (question.py, student.py, rag.py) don't each re-derive it on
-    # every request. Guarded so a missing OpenAI key / transient API failure
-    # doesn't break the whole load; endpoints will recompute on demand.
     if not df.empty and "ai_feedback" in df.columns and "incorrectness" not in df.columns:
         try:
             df["incorrectness"] = analytics.compute_incorrectness_column(df)
@@ -119,11 +137,14 @@ def load_struggle_df(from_: Optional[str] = None, to_: Optional[str] = None) -> 
     key = _window_key(from_, to_)
     if key in _struggle_cache:
         return _struggle_cache[key]
-    df, _ = load_dataframe()
-    sliced = filter_df(df, from_, to_) if (from_ or to_) else df
-    result = analytics.compute_student_struggle_scores(sliced)
-    _struggle_cache[key] = result
-    return result
+    with _struggle_lock:
+        if key in _struggle_cache:
+            return _struggle_cache[key]
+        df, _ = load_dataframe()
+        sliced = filter_df(df, from_, to_) if (from_ or to_) else df
+        result = analytics.compute_student_struggle_scores(sliced)
+        _struggle_cache[key] = result
+        return result
 
 
 def load_difficulty_df(from_: Optional[str] = None, to_: Optional[str] = None) -> pd.DataFrame:
@@ -131,11 +152,14 @@ def load_difficulty_df(from_: Optional[str] = None, to_: Optional[str] = None) -
     key = _window_key(from_, to_)
     if key in _difficulty_cache:
         return _difficulty_cache[key]
-    df, _ = load_dataframe()
-    sliced = filter_df(df, from_, to_) if (from_ or to_) else df
-    result = analytics.compute_question_difficulty_scores(sliced)
-    _difficulty_cache[key] = result
-    return result
+    with _difficulty_lock:
+        if key in _difficulty_cache:
+            return _difficulty_cache[key]
+        df, _ = load_dataframe()
+        sliced = filter_df(df, from_, to_) if (from_ or to_) else df
+        result = analytics.compute_question_difficulty_scores(sliced)
+        _difficulty_cache[key] = result
+        return result
 
 
 def load_improved_struggle_df(
@@ -148,14 +172,17 @@ def load_improved_struggle_df(
     key = _window_key(from_, to_)
     if key in _improved_cache:
         return _improved_cache[key]
-    df, _ = load_dataframe()
-    sliced = filter_df(df, from_, to_) if (from_ or to_) else df
-    try:
-        result = improved_struggle.compute_improved_struggle_scores(sliced)
-    except Exception:
-        result = pd.DataFrame()
-    _improved_cache[key] = result
-    return result
+    with _improved_lock:
+        if key in _improved_cache:
+            return _improved_cache[key]
+        df, _ = load_dataframe()
+        sliced = filter_df(df, from_, to_) if (from_ or to_) else df
+        try:
+            result = improved_struggle.compute_improved_struggle_scores(sliced)
+        except Exception:
+            result = pd.DataFrame()
+        _improved_cache[key] = result
+        return result
 
 
 def invalidate() -> None:

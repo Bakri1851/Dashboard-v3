@@ -28,7 +28,7 @@ def _get_openai_client() -> OpenAI:
             key = st.secrets.get("OPENAI_API_KEY", "") or ""
         except Exception:
             key = ""
-    return OpenAI(api_key=key)
+    return OpenAI(api_key=key, max_retries=1, timeout=20.0)
 
 
 # Incorrectness Estimation via OpenAI
@@ -98,6 +98,7 @@ def _call_openai_batch(feedbacks: list[str]) -> Optional[list[float]]:
             model=config.OPENAI_MODEL,
             messages=[{"role": "user", "content": prompt}],
             temperature=0,
+            timeout=15.0,
         )
     except Exception as exc:
         logger.warning("OpenAI batch call failed (%s): %s", type(exc).__name__, exc)
@@ -659,6 +660,7 @@ def _label_clusters_with_openai(clusters: list[dict], question_id: str) -> list[
             model=config.OPENAI_MODEL,
             messages=[{"role": "user", "content": prompt}],
             temperature=0,
+            timeout=15.0,
         )
         labels = json.loads(response.choices[0].message.content.strip())
         if isinstance(labels, list) and len(labels) == len(clusters):

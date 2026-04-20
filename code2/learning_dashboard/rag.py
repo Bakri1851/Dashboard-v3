@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
 from typing import TYPE_CHECKING, Any
 
 from cachetools import TTLCache
@@ -38,6 +39,12 @@ _cached_session_id: str | None = None
 _cached_row_count: int = 0
 _cached_latest_ts: str = ""
 _collection: Any = None  # chromadb.Collection once built
+
+# Single-flight guard around build_rag_collection(). The first build on cold
+# start takes 60-120s (sentence-transformers download + embedding); without
+# this lock, concurrent requests each kick off their own rebuild and
+# saturate the FastAPI threadpool.
+_build_lock = threading.Lock()
 
 
 # ---------------------------------------------------------------------------
@@ -106,53 +113,77 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
     if chromadb_mod is None:
         return None
 
-    try:
-        client = chromadb_mod.PersistentClient(path=str(paths.rag_chroma_dir()))
-        collection = client.get_or_create_collection(name=_COLLECTION_NAME)
+    with _build_lock:
+        # Another thread may have completed the rebuild while we were waiting.
+        if (
+            _collection is not None
+            and len(df) == _cached_row_count
+            and latest_ts == _cached_latest_ts
+        ):
+            _cached_session_id = session_id
+            return _collection
 
-        # Build document lists from the dataframe
-        ids: list[str] = []
-        documents: list[str] = []
-        metadatas: list[dict] = []
+        try:
+            client = chromadb_mod.PersistentClient(path=str(paths.rag_chroma_dir()))
+            collection = client.get_or_create_collection(name=_COLLECTION_NAME)
 
-        for i, row in enumerate(df.itertuples(index=False)):
-            question = getattr(row, "question", "") or ""
-            student_answer = getattr(row, "student_answer", "") or ""
-            ai_feedback = getattr(row, "ai_feedback", "") or ""
-            student_id = getattr(row, "user", "") or ""
-            incorrectness = float(getattr(row, "incorrectness", 0.0) or 0.0)
+            # Fast path on process restart: the persistent ChromaDB store already
+            # has embeddings from a previous run. If its row count matches the
+            # current dataframe, trust it and skip the 30-60s re-embed. The
+            # Streamlit app stays warm within one process and never hits this,
+            # which is why it feels instant while FastAPI did not.
+            try:
+                existing = collection.count()
+            except Exception:
+                existing = 0
+            if existing == len(df) and existing > 0:
+                _collection = collection
+                _cached_session_id = session_id
+                _cached_row_count = len(df)
+                _cached_latest_ts = latest_ts
+                return _collection
 
-            ids.append(f"row_{i}")
-            documents.append(f"{question} | {student_answer} | {ai_feedback}")
-            metadatas.append({
-                "student_id": str(student_id),
-                "question": str(question),
-                "incorrectness": incorrectness,
-            })
+            ids: list[str] = []
+            documents: list[str] = []
+            metadatas: list[dict] = []
 
-        if not documents:
+            for i, row in enumerate(df.itertuples(index=False)):
+                question = getattr(row, "question", "") or ""
+                student_answer = getattr(row, "student_answer", "") or ""
+                ai_feedback = getattr(row, "ai_feedback", "") or ""
+                student_id = getattr(row, "user", "") or ""
+                incorrectness = float(getattr(row, "incorrectness", 0.0) or 0.0)
+
+                ids.append(f"row_{i}")
+                documents.append(f"{question} | {student_answer} | {ai_feedback}")
+                metadatas.append({
+                    "student_id": str(student_id),
+                    "question": str(question),
+                    "incorrectness": incorrectness,
+                })
+
+            if not documents:
+                return None
+
+            model = SentenceTransformer(config.RAG_EMBEDDING_MODEL)
+            embeddings = model.encode(documents, show_progress_bar=False).tolist()
+
+            collection.upsert(
+                ids=ids,
+                embeddings=embeddings,
+                documents=documents,
+                metadatas=metadatas,
+            )
+
+            _collection = collection
+            _cached_session_id = session_id
+            _cached_row_count = len(df)
+            _cached_latest_ts = latest_ts
+            return _collection
+
+        except Exception as exc:
+            logger.warning("RAG build_rag_collection failed: %s", exc)
             return None
-
-        # Compute embeddings
-        model = SentenceTransformer(config.RAG_EMBEDDING_MODEL)
-        embeddings = model.encode(documents, show_progress_bar=False).tolist()
-
-        collection.upsert(
-            ids=ids,
-            embeddings=embeddings,
-            documents=documents,
-            metadatas=metadatas,
-        )
-
-        _collection = collection
-        _cached_session_id = session_id
-        _cached_row_count = len(df)
-        _cached_latest_ts = latest_ts
-        return _collection
-
-    except Exception as exc:
-        logger.warning("RAG build_rag_collection failed: %s", exc)
-        return None
 
 
 def _extract_bullets(parsed: Any) -> list[str]:
@@ -291,6 +322,7 @@ def generate_assistant_suggestions(
             ],
             temperature=0,
             response_format={"type": "json_object"},
+            timeout=15.0,
         )
 
         raw = response.choices[0].message.content.strip()
@@ -382,6 +414,7 @@ def generate_cluster_suggestions(
             ],
             temperature=0,
             response_format={"type": "json_object"},
+            timeout=15.0,
         )
         raw = response.choices[0].message.content.strip()
         parsed = json.loads(raw)
