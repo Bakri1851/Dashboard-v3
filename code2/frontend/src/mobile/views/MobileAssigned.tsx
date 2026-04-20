@@ -236,7 +236,9 @@ export function MobileAssigned({
                 textAlign: 'center',
               }}
             >
-              {suggestions == null ? 'Loading suggestions…' : 'Not enough data yet.'}
+              {suggestions == null
+                ? 'Loading suggestions…'
+                : 'No recent context — ask the student what they were working on.'}
             </div>
           )}
         </div>
@@ -259,7 +261,7 @@ export function MobileAssigned({
             <div style={{ fontFamily: T.fMono, fontSize: 10.5, color: T.ink3 }}>loading…</div>
           ) : topQuestions.length === 0 ? (
             <div style={{ fontFamily: T.fMono, fontSize: 10.5, color: T.ink3 }}>
-              No submission data for this student yet.
+              No struggling questions on record — check in with the student directly.
             </div>
           ) : (
             topQuestions.map((q, i) => {

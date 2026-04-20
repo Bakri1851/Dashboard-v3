@@ -57,7 +57,7 @@ def init_session_state() -> None:
         "_autorefresh_count": None,
         "_struggle_df": None,
         "_difficulty_df": None,
-        "cf_enabled": True,
+        "cf_enabled": False,
         "cf_threshold": 0.5,
         "sounds_enabled":            config.SOUNDS_ENABLED_DEFAULT,
         "_prev_session_active":      False,
@@ -856,11 +856,33 @@ def main() -> None:
                 st.session_state["_mastery_summary_df"] = None
 
             if _improved_struggle_active:
-                st.session_state["_improved_struggle_df"] = improved_struggle.compute_improved_struggle_scores(
+                _improved_df = improved_struggle.compute_improved_struggle_scores(
                     df,
                     mastery_summary=st.session_state["_mastery_summary_df"],
                     irt_difficulty=st.session_state["_irt_difficulty_df"],
                 )
+                # Apply the same EMA smoothing used on the baseline path so the
+                # Settings toggle behaves consistently. Shares `previous_scores`
+                # with baseline — a one-tick discontinuity on model toggle is
+                # accepted in exchange for a single source of per-student state.
+                if st.session_state.get("smoothing_enabled", True) and not _improved_df.empty:
+                    prev = st.session_state.get("previous_scores", {})
+                    _improved_df = _improved_df.copy()
+                    new_prev = {}
+                    for idx, row in _improved_df.iterrows():
+                        student = row["user"]
+                        smoothed = analytics.apply_temporal_smoothing(
+                            row["struggle_score"], prev.get(student)
+                        )
+                        _improved_df.at[idx, "struggle_score"] = smoothed
+                        level, color = analytics.classify_score(
+                            smoothed, config.STRUGGLE_THRESHOLDS
+                        )
+                        _improved_df.at[idx, "struggle_level"] = level
+                        _improved_df.at[idx, "struggle_color"] = color
+                        new_prev[student] = smoothed
+                    st.session_state["previous_scores"] = new_prev
+                st.session_state["_improved_struggle_df"] = _improved_df
             else:
                 st.session_state["_improved_struggle_df"] = None
 

@@ -212,11 +212,40 @@ export interface ModelRow {
   score: number
 }
 
+export interface ModelPairRow {
+  id: string
+  baseline_level: string
+  baseline_score: number
+  improved_level: string
+  improved_score: number
+  delta: number
+}
+
+export interface AgreementSummary {
+  agreement_pct: number
+  upgraded: number
+  downgraded: number
+  unchanged: number
+  total: number
+}
+
+export interface ModelComparisonSection {
+  baseline: ModelRow[]
+  improved: ModelRow[]
+  pairs: ModelPairRow[]
+  agreement: AgreementSummary | null
+  spearman_rho: number | null
+  top10_overlap: number | null
+}
+
 export interface ModelCompareResponse {
   baseline: ModelRow[]
   improved: ModelRow[]
   spearman_rho: number | null
   top10_overlap: number | null
+  pairs: ModelPairRow[]
+  agreement: AgreementSummary | null
+  difficulty: ModelComparisonSection | null
 }
 
 export interface LabAssistant {

@@ -83,11 +83,10 @@ export function MobileApp() {
     ? `/lab/student/${encodeURIComponent(assignedStudent)}/struggling-questions?limit=3`
     : ''
 
-  const { data: studentDetail, loading: studentLoading } = useApiData<StudentDetail>(
-    studentPath,
-    undefined,
-    sessionQuery
-  )
+  // Student profile + top questions ignore the session window — assistants
+  // need the student's historic context, not just the current lab slice
+  // (which is usually empty for the first few minutes of a session).
+  const { data: studentDetail, loading: studentLoading } = useApiData<StudentDetail>(studentPath)
   const { data: ragData } = useApiData<RagSuggestions>(ragPath, undefined, sessionQuery)
   const { data: topQuestions } = useApiData<StrugglingQuestionRow[]>(topPath)
 
@@ -136,7 +135,19 @@ export function MobileApp() {
     setJoinNotice(null)
     setJoining(true)
     try {
-      const res = await api.post<JoinResult>('/lab/join', { code, name })
+      let res = await api.post<JoinResult>('/lab/join', { code, name })
+      // If the first attempt fails with a transient "no session / invalid
+      // code" error, the mobile's cached lab state is probably stale (the
+      // instructor just started the session). Refetch and retry silently.
+      if (!res.ok) {
+        const msg = (res.error ?? '').toLowerCase()
+        const looksStale = msg.includes('invalid') || msg.includes('no active')
+        if (looksStale) {
+          await refetchState()
+          await new Promise((r) => setTimeout(r, 150))
+          res = await api.post<JoinResult>('/lab/join', { code, name })
+        }
+      }
       if (!res.ok || !res.assistant_id) {
         setJoinError(res.error ?? 'Could not join session.')
       } else {

@@ -1,7 +1,7 @@
 /** Thin fetch wrapper. Same-origin in prod (FastAPI serves dist/); Vite proxies /api → :8000 in dev. */
 
 const BASE = '/api'
-const DEFAULT_TIMEOUT_MS = 30_000
+const DEFAULT_TIMEOUT_MS = 60_000
 
 export class ApiError extends Error {
   readonly status: number

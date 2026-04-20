@@ -3,14 +3,14 @@
 # --- API Configuration ---
 API_URL: str = "http://sccb2.sci-project.lboro.ac.uk/retrievalEndpoint.php"
 API_TIMEOUT: int = 30          # seconds
-CACHE_TTL: int = 10            # seconds
+CACHE_TTL: int = 60            # seconds
 
 # --- Data Cleaning ---
 EXCLUDED_MODULES: list[str] = ["AI_TEST", "24COB231", "24WSC701"]
 MODULE_RENAME_MAP: dict[str, str] = {"25COA504": "25COP504"}
 
 # --- OpenAI Configuration ---
-OPENAI_MODEL: str = "gpt-5.4-mini"  # local, no API cost; "gpt-
+OPENAI_MODEL: str = "gpt-4o-mini"
 OPENAI_BATCH_SIZE: int = 20       # max (question, answer) pairs per API call — smaller batches parse more reliably
 SCORING_PER_RUN_CAP: int = 500    # max new pairs scored per Streamlit rerun; rest fall back to 0.5 and get scored on subsequent runs (keeps UI responsive on cold-start)
 
@@ -164,6 +164,13 @@ RAG_ENABLED_DEFAULT: bool = True
 RAG_EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"   # sentence-transformers, local, no API cost
 RAG_SUGGESTION_MAX_RESULTS: int = 5              # top-k chunks retrieved per query
 RAG_MIN_SUBMISSIONS: int = 2                     # min student submissions before RAG is attempted
+
+# RAG corpus sampling: keep the embedding corpus small enough to build in
+# tens of seconds on CPU. The shared `submissions` ChromaDB collection holds
+# a stratified per-ISO-week sample instead of the full dataframe. Set
+# RAG_SAMPLE_PER_WEEK = 0 to disable sampling and embed the entire dataset.
+RAG_SAMPLE_PER_WEEK: int = 500
+RAG_SAMPLE_SEED: int = 42
 
 
 # --- Weight-sum invariants (import-time sanity checks) ---

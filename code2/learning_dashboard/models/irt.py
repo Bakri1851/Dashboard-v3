@@ -44,7 +44,10 @@ def build_response_matrix(
 
     matrix = best.pivot(index="user", columns="question", values="correct")
 
-    # Iteratively filter until minimums are met.
+    # Iteratively filter until minimums are met AND no single-class
+    # (all-correct / all-wrong) rows or columns remain. Single-class patterns
+    # make Rasch MLE unbounded (θ or b → ±∞), so L-BFGS-B drifts to a bounds
+    # corner and the gradient vanishes. Dropping them is the standard fix.
     changed = True
     while changed:
         changed = False
@@ -57,6 +60,20 @@ def build_response_matrix(
         # Drop students with too few attempted questions.
         row_counts = matrix.notna().sum(axis=1)
         keep_rows = row_counts[row_counts >= config.IRT_MIN_ATTEMPTS_PER_STUDENT].index
+        if len(keep_rows) < len(matrix.index):
+            matrix = matrix.loc[keep_rows]
+            changed = True
+        if matrix.empty:
+            break
+        # Drop single-class questions (all students answered the same way).
+        col_nunique = matrix.apply(lambda s: s.dropna().nunique(), axis=0)
+        keep_cols = col_nunique[col_nunique >= 2].index
+        if len(keep_cols) < len(matrix.columns):
+            matrix = matrix[keep_cols]
+            changed = True
+        # Drop single-class students (answered all their questions the same way).
+        row_nunique = matrix.apply(lambda s: s.dropna().nunique(), axis=1)
+        keep_rows = row_nunique[row_nunique >= 2].index
         if len(keep_rows) < len(matrix.index):
             matrix = matrix.loc[keep_rows]
             changed = True
@@ -108,6 +125,17 @@ def fit_rasch_model(
     obs_rows = np.array(obs_rows, dtype=int)
     obs_cols = np.array(obs_cols, dtype=int)
     obs_vals = np.array(obs_vals, dtype=float)
+
+    # Defense in depth: build_response_matrix already drops single-class rows
+    # and columns, but if callers pass a hand-constructed matrix we still
+    # refuse to fit a single-class dataset — the MLE is unbounded.
+    if obs_vals.size == 0 or np.unique(obs_vals).size < 2:
+        return {
+            "difficulty": {},
+            "ability": {},
+            "convergence": False,
+            "log_likelihood": 0.0,
+        }
 
     def _neg_log_likelihood(params: np.ndarray) -> float:
         theta = params[:n_students]

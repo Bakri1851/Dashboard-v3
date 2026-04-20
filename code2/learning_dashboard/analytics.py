@@ -183,8 +183,13 @@ def compute_recent_incorrectness(student_submissions: pd.DataFrame) -> float:
     Weights are normalised to sum to 1.0.
     Falls back to equal weights if all timestamps are identical.
     """
+    # Drop NaT/NaN timestamps before sorting — the exp-decay calculation below
+    # does arithmetic on timestamps, so a NaT silently propagates as NaN into
+    # the weights. Upstream data_loader already drops these, but this function
+    # is also called on user-supplied / saved-session slices that may bypass it.
     recent = (
-        student_submissions.sort_values("timestamp", ascending=False)
+        student_submissions.dropna(subset=["timestamp"])
+        .sort_values("timestamp", ascending=False)
         .head(config.RECENT_SUBMISSION_COUNT)
     )
     scores = recent["incorrectness"].tolist()
@@ -222,7 +227,10 @@ def _compute_slope(student_submissions: pd.DataFrame) -> float:
     Positive slope = getting worse; negative = improving.
     Returns 0.0 if fewer than 2 submissions.
     """
-    sorted_subs = student_submissions.sort_values("timestamp", ascending=True)
+    sorted_subs = (
+        student_submissions.dropna(subset=["timestamp"])
+        .sort_values("timestamp", ascending=True)
+    )
     scores = sorted_subs["incorrectness"].tolist()
     n = len(scores)
     if n < 2:

@@ -86,18 +86,48 @@ def get_cf(window: TimeWindow = Depends(get_time_window)) -> CFDiagnostics:
             fallback=True, reason=f"{type(e).__name__}: {e}", elevated_students=[],
         )
 
-    # Shape the elevated list for the UI.
+    # Shape the elevated list for the UI. analytics.compute_cf_struggle_scores
+    # emits rows keyed for the legacy Streamlit table ("Student" / "Parametric
+    # Score" / "CF Score"); the React frontend expects snake_case, and level
+    # isn't carried in the dict, so look it up from struggle_df.
+    user_to_level: dict[str, str] = {}
+    if "struggle_level" in struggle_df.columns:
+        user_to_level = dict(
+            zip(
+                struggle_df["user"].astype(str),
+                struggle_df["struggle_level"].astype(str),
+            )
+        )
+
     elevated_raw: list[dict] = diagnostics.get("elevated_students") or []
     elevated: list[CFElevatedStudent] = []
     for row in elevated_raw:
         try:
+            uid = str(row.get("Student") or row.get("user") or row.get("id", ""))
+            baseline = float(
+                row.get("Parametric Score")
+                if row.get("Parametric Score") is not None
+                else (row.get("baseline_score") if row.get("baseline_score") is not None else row.get("struggle_score", 0.0))
+            )
+            cf = float(
+                row.get("CF Score")
+                if row.get("CF Score") is not None
+                else row.get("cf_score", 0.0)
+            )
+            delta_val = row.get("delta")
+            delta_f = float(delta_val) if delta_val is not None else (cf - baseline)
+            level = str(
+                row.get("struggle_level")
+                or row.get("level")
+                or user_to_level.get(uid, "")
+            )
             elevated.append(
                 CFElevatedStudent(
-                    id=str(row.get("user") or row.get("id", "")),
-                    level=str(row.get("struggle_level") or row.get("level", "")),
-                    baseline_score=float(row.get("baseline_score") or row.get("struggle_score", 0.0)),
-                    cf_score=float(row.get("cf_score") or 0.0),
-                    delta=float(row.get("delta") or (float(row.get("cf_score") or 0.0) - float(row.get("baseline_score") or row.get("struggle_score", 0.0)))),
+                    id=uid,
+                    level=level,
+                    baseline_score=baseline,
+                    cf_score=cf,
+                    delta=delta_f,
                 )
             )
         except Exception:

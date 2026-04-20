@@ -15,7 +15,7 @@ import pandas as pd
 from cachetools import TTLCache
 
 from learning_dashboard import analytics, config, data_loader
-from learning_dashboard.models import improved_struggle
+from learning_dashboard.models import improved_struggle, irt
 
 _EMPTY_DF = pd.DataFrame(
     columns=[
@@ -41,6 +41,9 @@ _df_cache: TTLCache = TTLCache(maxsize=1, ttl=config.CACHE_TTL)
 _struggle_cache: TTLCache = TTLCache(maxsize=16, ttl=_ANALYTICS_TTL)
 _difficulty_cache: TTLCache = TTLCache(maxsize=16, ttl=_ANALYTICS_TTL)
 _improved_cache: TTLCache = TTLCache(maxsize=4, ttl=_IMPROVED_TTL)
+# IRT difficulty fit is expensive (Rasch MLE on question × student matrix);
+# cache separately so the Model Comparison view can reuse it cheaply.
+_irt_difficulty_cache: TTLCache = TTLCache(maxsize=4, ttl=_IMPROVED_TTL)
 # CF diagnostics derive from struggle_df + threshold; mirror the analytics TTL.
 _cf_cache: TTLCache = TTLCache(maxsize=16, ttl=_ANALYTICS_TTL)
 
@@ -52,6 +55,7 @@ _df_lock = threading.Lock()
 _struggle_lock = threading.Lock()
 _difficulty_lock = threading.Lock()
 _improved_lock = threading.Lock()
+_irt_difficulty_lock = threading.Lock()
 
 
 def load_dataframe() -> tuple[pd.DataFrame, str]:
@@ -185,10 +189,31 @@ def load_improved_struggle_df(
         return result
 
 
+def load_irt_difficulty_df(
+    from_: Optional[str] = None, to_: Optional[str] = None
+) -> pd.DataFrame:
+    """Compute + cache IRT question-difficulty scores for the window."""
+    key = _window_key(from_, to_)
+    if key in _irt_difficulty_cache:
+        return _irt_difficulty_cache[key]
+    with _irt_difficulty_lock:
+        if key in _irt_difficulty_cache:
+            return _irt_difficulty_cache[key]
+        df, _ = load_dataframe()
+        sliced = filter_df(df, from_, to_) if (from_ or to_) else df
+        try:
+            result = irt.compute_irt_difficulty_scores(sliced)
+        except Exception:
+            result = pd.DataFrame()
+        _irt_difficulty_cache[key] = result
+        return result
+
+
 def invalidate() -> None:
     """Drop all caches — called by POST endpoints that mutate settings/weights."""
     _df_cache.clear()
     _struggle_cache.clear()
     _difficulty_cache.clear()
     _improved_cache.clear()
+    _irt_difficulty_cache.clear()
     _cf_cache.clear()

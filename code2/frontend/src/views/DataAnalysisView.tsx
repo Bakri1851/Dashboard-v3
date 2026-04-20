@@ -43,20 +43,38 @@ export function DataAnalysisView() {
 
   return (
     <div style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {/* Hero stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12 }}>
-        <Stat label="Modules" value={String(data.modules)} note={`${data.unique_students} active students`} />
+      {/* Classic hero stats (matches the old Streamlit view) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12 }}>
+        <Stat
+          label="Total submissions"
+          value={data.total_records.toLocaleString()}
+          note={`across ${data.modules} module${data.modules === 1 ? '' : 's'}`}
+          accent={T.accent}
+        />
+        <Stat
+          label="Unique students"
+          value={data.unique_students.toLocaleString()}
+          note={`avg session ${data.avg_session_minutes.toFixed(0)}m`}
+        />
+        <Stat
+          label="Unique questions"
+          value={data.unique_questions.toLocaleString()}
+          note={`avg ${data.avg_attempts_per_question.toFixed(1)} attempts each`}
+        />
+      </div>
+
+      {/* Secondary stats — peak activity at a glance */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
         <Stat
           label="Peak hour"
           value={`${String(data.peak_hour).padStart(2, '0')}:00`}
-          note={`${data.peak_hour_count} submissions`}
-          accent={T.accent}
+          note={`${data.peak_hour_count} submissions at peak`}
+          accent={T.warn}
         />
-        <Stat label="Avg attempts / Q" value={data.avg_attempts_per_question.toFixed(1)} note="class median" />
         <Stat
           label="Avg session"
           value={`${data.avg_session_minutes.toFixed(0)}m`}
-          note="min → max per student"
+          note="first → last submission per student"
         />
       </div>
 
@@ -142,71 +160,103 @@ function ChartBody({ mode, data }: { mode: ChartMode; data: AnalysisStats }) {
         />
       )
     }
-    case 'top_questions':
+    case 'top_questions': {
       if (!data.top_questions.length) return <Empty>No questions attempted in the current window.</Empty>
+      const qmax = Math.max(...data.top_questions.map((q) => q.attempts), 1)
       return (
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: T.fSans, fontSize: 13 }}>
-          <thead>
-            <tr>
-              {['Question', 'Module', 'Attempts', 'Students', 'Avg / student'].map((h) => (
-                <th key={h} style={thStyle(h === 'Question' || h === 'Module')}>
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data.top_questions.map((r, i) => (
-              <tr key={`${r.question}-${i}`}>
-                <td style={tdStyle(true, { maxWidth: 380, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' })} title={r.question}>
-                  {r.question}
-                </td>
-                <td style={tdStyle(true)}>{r.module}</td>
-                <td style={tdStyle(false)}>{r.attempts.toLocaleString()}</td>
-                <td style={tdStyle(false)}>{r.unique_students}</td>
-                <td style={tdStyle(false)}>{r.avg_attempts.toFixed(1)}</td>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <HBars
+            items={data.top_questions.map((r, i) => ({
+              label: truncate(r.question, 48),
+              value: r.attempts,
+              valueLabel: `${r.attempts.toLocaleString()} attempts · ${r.unique_students} students`,
+              color: i < 3 ? T.danger : i < 6 ? T.warn : i < 10 ? T.ink2 : T.ink3,
+            }))}
+            max={qmax}
+          />
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: T.fSans, fontSize: 13 }}>
+            <thead>
+              <tr>
+                {['Question', 'Module', 'Attempts', 'Students', 'Avg / student'].map((h) => (
+                  <th key={h} style={thStyle(h === 'Question' || h === 'Module')}>
+                    {h}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.top_questions.map((r, i) => (
+                <tr key={`${r.question}-${i}`}>
+                  <td style={tdStyle(true, { maxWidth: 380, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' })} title={r.question}>
+                    {r.question}
+                  </td>
+                  <td style={tdStyle(true)}>{r.module}</td>
+                  <td style={tdStyle(false)}>{r.attempts.toLocaleString()}</td>
+                  <td style={tdStyle(false)}>{r.unique_students}</td>
+                  <td style={tdStyle(false)}>{r.avg_attempts.toFixed(1)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )
-    case 'user_activity':
+    }
+    case 'user_activity': {
       if (!data.user_activity.length) return <Empty>No student activity in the current window.</Empty>
+      const umax = Math.max(...data.user_activity.map((u) => u.submissions), 1)
       return (
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: T.fSans, fontSize: 13 }}>
-          <thead>
-            <tr>
-              {['Student', 'Submissions', 'Questions', 'First', 'Last'].map((h) => (
-                <th key={h} style={thStyle(h === 'Student')}>
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data.user_activity.map((r) => (
-              <tr key={r.user}>
-                <td style={tdStyle(true)}>{r.user}</td>
-                <td style={tdStyle(false)}>{r.submissions.toLocaleString()}</td>
-                <td style={tdStyle(false)}>{r.unique_questions}</td>
-                <td style={tdStyle(true)}>{formatTimestamp(r.first_submission)}</td>
-                <td style={tdStyle(true)}>{formatTimestamp(r.last_submission)}</td>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <HBars
+            items={data.user_activity.map((r, i) => ({
+              label: r.user,
+              value: r.submissions,
+              valueLabel: `${r.submissions.toLocaleString()} subs · ${r.unique_questions} qs`,
+              color: i < 3 ? T.ok : i < 6 ? T.accent : T.ink2,
+            }))}
+            max={umax}
+          />
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: T.fSans, fontSize: 13 }}>
+            <thead>
+              <tr>
+                {['Student', 'Submissions', 'Questions', 'First', 'Last'].map((h) => (
+                  <th key={h} style={thStyle(h === 'Student')}>
+                    {h}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.user_activity.map((r) => (
+                <tr key={r.user}>
+                  <td style={tdStyle(true)}>{r.user}</td>
+                  <td style={tdStyle(false)}>{r.submissions.toLocaleString()}</td>
+                  <td style={tdStyle(false)}>{r.unique_questions}</td>
+                  <td style={tdStyle(true)}>{formatTimestamp(r.first_submission)}</td>
+                  <td style={tdStyle(true)}>{formatTimestamp(r.last_submission)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )
+    }
     case 'timeline':
       return <TimelineChart data={data.timeline_24h} highlightRange={[22, 23]} />
     case 'week_heatmap':
-      return <WeekHeatmap data={data} />
+      return <WeekView data={data} />
   }
 }
 
-function WeekHeatmap({ data }: { data: AnalysisStats }) {
+function truncate(s: string, max: number): string {
+  if (s.length <= max) return s
+  return s.slice(0, max - 1) + '…'
+}
+
+function WeekView({ data }: { data: AnalysisStats }) {
+  const [mode, setMode] = useState<'bars' | 'heatmap'>('heatmap')
+
   const rows = useMemo<HeatmapRow[]>(() => {
     if (!data.activity_by_week.length) return []
-    // Group cells by week_label, preserving incoming order.
     const grouped: Record<string, HeatmapRow> = {}
     const order: string[] = []
     for (const c of data.activity_by_week) {
@@ -219,12 +269,66 @@ function WeekHeatmap({ data }: { data: AnalysisStats }) {
     return order.map((k) => grouped[k])
   }, [data.activity_by_week])
 
+  // Chronological bar chart: total count per academic period.
+  const weekTotals = useMemo(() => {
+    if (!data.activity_by_week.length) return [] as { label: string; value: number }[]
+    const totals: Record<string, number> = {}
+    const order: string[] = []
+    for (const c of data.activity_by_week) {
+      if (totals[c.week_label] == null) {
+        totals[c.week_label] = 0
+        order.push(c.week_label)
+      }
+      totals[c.week_label] += c.count
+    }
+    return order.map((k) => ({ label: k, value: totals[k] }))
+  }, [data.activity_by_week])
+
   if (!rows.length) {
     return <Empty>No activity falls within a mapped academic week.</Empty>
   }
+
+  const weekMax = Math.max(...weekTotals.map((w) => w.value), 1)
+
   return (
     <div>
-      <Heatmap rows={rows} colLabels={DAY_COLS} />
+      <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+        {(['heatmap', 'bars'] as const).map((m) => {
+          const active = mode === m
+          return (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              style={{
+                padding: '4px 10px',
+                background: active ? T.ink : 'transparent',
+                color: active ? T.bg : T.ink2,
+                border: `1px solid ${active ? T.ink : T.line2}`,
+                fontFamily: T.fMono,
+                fontSize: 10,
+                letterSpacing: 1,
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+              }}
+            >
+              {m === 'bars' ? 'Chronological bars' : 'Day × week heatmap'}
+            </button>
+          )
+        })}
+      </div>
+      {mode === 'bars' ? (
+        <HBars
+          items={weekTotals.map((w, i) => ({
+            label: w.label,
+            value: w.value,
+            valueLabel: `${w.value.toLocaleString()} subs`,
+            color: i % 2 === 0 ? T.accent : T.ink2,
+          }))}
+          max={weekMax}
+        />
+      ) : (
+        <Heatmap rows={rows} colLabels={DAY_COLS} />
+      )}
       <div style={{ marginTop: 14, fontFamily: T.fMono, fontSize: 10.5, color: T.ink3 }}>
         Academic periods from <code>academic_calendar.py</code> · filtered by the sidebar time window.
       </div>

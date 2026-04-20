@@ -135,10 +135,14 @@ See [[Ch4 – Implementation]] for full chapter analysis.
 - Sub-model toggles and BKT parameter sliders in Settings
 
 **This view is the primary evaluation evidence for Ch5.** Run it with real session data and capture:
-- Agreement % between baseline struggle and improved struggle
+- Agreement % between baseline struggle and improved struggle (categorical level match)
 - Agreement % between baseline difficulty and IRT difficulty
 - Scatter plots showing systematic bias (above/below diagonal)
 - Students/questions with largest delta — analyse why models disagree
+- **Spearman ρ** (rank correlation) between baseline and improved orderings — computed on the full common-student set, exposed as `spearman_rho` on `/api/models/compare` (implementation: `code2/backend/routers/models_cmp.py:_spearman`). Report with one of three interpretive bands: strong (>0.7), moderate (0.3–0.7), weak (<0.3).
+- **Top-10 overlap** — fraction of the most-at-risk cohort both models agree on. Complements Spearman ρ when only the flagged tail matters operationally.
+
+**Reporting guidance for Ch5:** present categorical agreement (raw %) AND rank concordance (Spearman ρ + top-10 overlap) together. Categorical agreement can be low when two models disagree on level boundaries even though they produce near-identical orderings, and Spearman ρ catches that. Cite the Spearman 1904 paper when introducing ρ (add the bibkey to `Literature/index.md` if missing). Kendall τ is NOT currently implemented — frame that as a future-work item rather than a reporting gap.
 
 **What could go here:**
 - Functional testing against FR1-FR7

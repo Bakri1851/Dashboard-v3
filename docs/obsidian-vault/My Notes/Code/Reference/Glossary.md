@@ -54,6 +54,14 @@ Related: [[Student Struggle Logic]], [[Question Difficulty Logic]], [[Instructor
 - `mastery_df`: per-student per-question mastery DataFrame cached in session state.
 - `mastery_summary_df`: per-student aggregate mastery statistics (mean, min, mastered count).
 
+## Model comparison and rank concordance
+
+- `Spearman ρ` (rho): rank correlation coefficient in `[-1, 1]` between two orderings of the same set of entities. Computed as the Pearson correlation of the rank vectors; `1.0` = identical ordering, `0.0` = no monotonic relationship, `-1.0` = reversed order. In this dashboard it compares the baseline vs. improved struggle rankings over the common student set (see `code2/backend/routers/models_cmp.py::_spearman`). Requires at least 3 entities with non-zero rank variance; returns `None` otherwise.
+- `Kendall τ` (tau): an alternative rank-correlation metric counting concordant / discordant pairs. Not implemented in code2 — Spearman ρ is the only rank-concordance metric shipped so far.
+- `Top-10 overlap`: fraction of students (or questions) in the intersection of the baseline and improved top-10 sets, divided by 10. Complements ρ by capturing whether the two models flag the same urgent cases, even when their full-ordering correlation is moderate.
+- `Level agreement`: categorical concordance between two classifiers. For struggle, the four-level order is `On Track < Minor Issues < Struggling < Needs Help`; "upgraded" means improved is more severe than baseline, "downgraded" the reverse, "unchanged" counts towards the agreement %.
+- `Rank concordance`: umbrella term for Spearman ρ + top-10 overlap together — how consistently two scoring methods rank the same entities by severity.
+
 ## Code references
 
 - `code/learning_dashboard/config.py`

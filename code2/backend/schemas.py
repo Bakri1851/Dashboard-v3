@@ -292,11 +292,40 @@ class ModelRow(BaseModel):
     score: float
 
 
+class ModelPairRow(BaseModel):
+    id: str
+    baseline_level: str
+    baseline_score: float
+    improved_level: str
+    improved_score: float
+    delta: float
+
+
+class AgreementSummary(BaseModel):
+    agreement_pct: float
+    upgraded: int
+    downgraded: int
+    unchanged: int
+    total: int
+
+
+class ModelComparisonSection(BaseModel):
+    baseline: list[ModelRow]
+    improved: list[ModelRow]
+    pairs: list[ModelPairRow] = Field(default_factory=list)
+    agreement: AgreementSummary | None = None
+    spearman_rho: float | None = None
+    top10_overlap: float | None = None
+
+
 class ModelCompareResponse(BaseModel):
     baseline: list[ModelRow]
     improved: list[ModelRow]
     spearman_rho: float | None = Field(default=None, description="Rank correlation baseline vs improved")
     top10_overlap: float | None = Field(default=None, description="Fraction overlap in top-10 needs-help sets")
+    pairs: list[ModelPairRow] = Field(default_factory=list, description="All students keyed on id with both baseline + improved scores")
+    agreement: AgreementSummary | None = Field(default=None, description="Level-classification agreement counts")
+    difficulty: ModelComparisonSection | None = Field(default=None, description="Baseline vs IRT question difficulty")
 
 
 # ----------------------------------------------------------------

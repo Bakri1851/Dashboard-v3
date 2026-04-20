@@ -39,12 +39,18 @@ _cached_session_id: str | None = None
 _cached_row_count: int = 0
 _cached_latest_ts: str = ""
 _collection: Any = None  # chromadb.Collection once built
+_sentence_model: Any = None  # SentenceTransformer singleton — load once per process
 
 # Single-flight guard around build_rag_collection(). The first build on cold
 # start takes 60-120s (sentence-transformers download + embedding); without
 # this lock, concurrent requests each kick off their own rebuild and
 # saturate the FastAPI threadpool.
 _build_lock = threading.Lock()
+# Count-drift tolerance for skipping the re-embed. The persistent ChromaDB
+# store may be a few rows behind the live dataframe (new submissions since
+# last rebuild); a 10% tolerance avoids a 60-120s re-embed for routine drift
+# while still triggering a rebuild on a genuine dataset change.
+_FAST_PATH_DRIFT_TOLERANCE = 0.10
 
 
 # ---------------------------------------------------------------------------
@@ -80,6 +86,34 @@ def _lazy_import() -> tuple[Any, Any]:
 _COLLECTION_NAME = "submissions"
 
 
+def _sample_for_rag(df: Any) -> Any:
+    """Reduce the embedding corpus with a stratified per-ISO-week sample.
+
+    Keeps up to ``config.RAG_SAMPLE_PER_WEEK`` rows from each ISO-year-week
+    bucket using a fixed seed. Rows without a parseable timestamp fall into a
+    single sentinel bucket. Returns ``df`` unchanged when sampling is disabled
+    (cap <= 0) or the corpus is already below the cap.
+    """
+    import pandas as _pd  # noqa: PLC0415
+    cap = int(getattr(config, "RAG_SAMPLE_PER_WEEK", 0) or 0)
+    if cap <= 0 or "timestamp" not in df.columns or len(df) <= cap:
+        return df
+    ts = _pd.to_datetime(df["timestamp"], errors="coerce", utc=True)
+    iso = ts.dt.isocalendar()
+    week_key = (
+        iso["year"].astype("string").fillna("NA")
+        + "-W"
+        + iso["week"].astype("string").fillna("00")
+    )
+    week_key.index = df.index  # align for groupby-by-series
+    seed = int(getattr(config, "RAG_SAMPLE_SEED", 42))
+    sampled = (
+        df.groupby(week_key, group_keys=False, sort=False)
+          .apply(lambda g: g.sample(n=min(len(g), cap), random_state=seed))
+    )
+    return sampled
+
+
 def build_rag_collection(df: Any, session_id: str) -> Any:
     """Build (or reuse) the ChromaDB collection for current submissions.
 
@@ -94,32 +128,31 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
     """
     global _collection, _cached_session_id, _cached_row_count, _cached_latest_ts
 
-    # Composite rebuild guard: row count + max(timestamp). Catches both inserts
-    # and silent row-level edits.
+    # In-memory cache hit: always reuse the collection once built. Minor drift
+    # from new submissions is acceptable — the embeddings are still semantically
+    # valid, and a 60-120s re-embed on a user request is not.
+    if _collection is not None:
+        _cached_session_id = session_id
+        return _collection
+
     try:
         latest_ts = str(df["timestamp"].max()) if "timestamp" in df.columns else ""
     except Exception:
         latest_ts = ""
-    if (
-        _collection is not None
-        and len(df) == _cached_row_count
-        and latest_ts == _cached_latest_ts
-    ):
-        # Refresh session tag for diagnostics; data is unchanged.
-        _cached_session_id = session_id
-        return _collection
 
     chromadb_mod, SentenceTransformer = _lazy_import()
     if chromadb_mod is None:
         return None
 
-    with _build_lock:
-        # Another thread may have completed the rebuild while we were waiting.
-        if (
-            _collection is not None
-            and len(df) == _cached_row_count
-            and latest_ts == _cached_latest_ts
-        ):
+    # Non-blocking lock: if another thread (usually the startup prewarm) is
+    # already doing the 60-120s first-time embed, don't pile up behind it.
+    # User requests return None fast and get real results next click once
+    # prewarm finishes and populates `_collection`.
+    if not _build_lock.acquire(blocking=False):
+        logger.info("RAG: build already in progress; returning None so the request doesn't hang")
+        return None
+    try:
+        if _collection is not None:
             _cached_session_id = session_id
             return _collection
 
@@ -127,19 +160,34 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
             client = chromadb_mod.PersistentClient(path=str(paths.rag_chroma_dir()))
             collection = client.get_or_create_collection(name=_COLLECTION_NAME)
 
-            # Fast path on process restart: the persistent ChromaDB store already
-            # has embeddings from a previous run. If its row count matches the
-            # current dataframe, trust it and skip the 30-60s re-embed. The
-            # Streamlit app stays warm within one process and never hits this,
-            # which is why it feels instant while FastAPI did not.
+            # Stratify the embedding corpus so the first-time build fits in
+            # tens of seconds on CPU. The rest of the app still uses the full
+            # df — this only affects which rows land in ChromaDB.
+            sampled_df = _sample_for_rag(df)
+
+            # Fast path on process restart: compare the persistent count
+            # against the SAMPLED size (that's what we embedded last time),
+            # not the full df. 10% drift tolerance absorbs minor variation.
             try:
                 existing = collection.count()
             except Exception:
                 existing = 0
-            if existing == len(df) and existing > 0:
+            n = len(sampled_df)
+            drift_ok = (
+                existing > 0
+                and n > 0
+                and abs(existing - n) / max(1, n) <= _FAST_PATH_DRIFT_TOLERANCE
+            )
+            if drift_ok:
+                logger.info(
+                    "RAG fast-path: reusing persistent collection (existing=%d, sampled=%d, full=%d)",
+                    existing,
+                    n,
+                    len(df),
+                )
                 _collection = collection
                 _cached_session_id = session_id
-                _cached_row_count = len(df)
+                _cached_row_count = existing
                 _cached_latest_ts = latest_ts
                 return _collection
 
@@ -147,7 +195,7 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
             documents: list[str] = []
             metadatas: list[dict] = []
 
-            for i, row in enumerate(df.itertuples(index=False)):
+            for i, row in enumerate(sampled_df.itertuples(index=False)):
                 question = getattr(row, "question", "") or ""
                 student_answer = getattr(row, "student_answer", "") or ""
                 ai_feedback = getattr(row, "ai_feedback", "") or ""
@@ -165,25 +213,42 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
             if not documents:
                 return None
 
-            model = SentenceTransformer(config.RAG_EMBEDDING_MODEL)
-            embeddings = model.encode(documents, show_progress_bar=False).tolist()
-
-            collection.upsert(
-                ids=ids,
-                embeddings=embeddings,
-                documents=documents,
-                metadatas=metadatas,
+            global _sentence_model
+            if _sentence_model is None:
+                logger.info("RAG: loading sentence-transformers model %s", config.RAG_EMBEDDING_MODEL)
+                _sentence_model = SentenceTransformer(config.RAG_EMBEDDING_MODEL)
+            logger.info(
+                "RAG: embedding %d sampled rows (full df=%d) — this prints a progress bar to stderr",
+                len(documents),
+                len(df),
             )
+            embeddings = _sentence_model.encode(documents, show_progress_bar=True, batch_size=32).tolist()
+
+            # ChromaDB imposes a per-call upsert limit (~5461 items). Chunk so
+            # larger sampled corpora still write successfully.
+            UPSERT_CHUNK = 5000
+            total = len(ids)
+            for start in range(0, total, UPSERT_CHUNK):
+                end = min(start + UPSERT_CHUNK, total)
+                collection.upsert(
+                    ids=ids[start:end],
+                    embeddings=embeddings[start:end],
+                    documents=documents[start:end],
+                    metadatas=metadatas[start:end],
+                )
+            logger.info("RAG: upserted %d rows in %d chunk(s)", total, (total + UPSERT_CHUNK - 1) // UPSERT_CHUNK)
 
             _collection = collection
             _cached_session_id = session_id
-            _cached_row_count = len(df)
+            _cached_row_count = len(sampled_df)
             _cached_latest_ts = latest_ts
             return _collection
 
         except Exception as exc:
             logger.warning("RAG build_rag_collection failed: %s", exc)
             return None
+    finally:
+        _build_lock.release()
 
 
 def _extract_bullets(parsed: Any) -> list[str]:

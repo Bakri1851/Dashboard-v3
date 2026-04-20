@@ -57,7 +57,7 @@ def init_session_state() -> None:
         "_autorefresh_count": None,
         "_struggle_df": None,
         "_difficulty_df": None,
-        "cf_enabled": True,
+        "cf_enabled": False,
         "cf_threshold": 0.5,
         "sounds_enabled":            config.SOUNDS_ENABLED_DEFAULT,
         "_prev_session_active":      False,

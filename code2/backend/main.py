@@ -24,6 +24,22 @@ from learning_dashboard import lab_state
 from learning_dashboard import rag as rag_module
 
 logger = logging.getLogger("backend")
+# Attach a console handler so prewarm / RAG diagnostics actually print under
+# uvicorn (which only configures its own "uvicorn.*" loggers by default).
+if not logger.handlers:
+    _h = logging.StreamHandler()
+    _h.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s", datefmt="%H:%M:%S"))
+    logger.addHandler(_h)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+# Same treatment for the rag module so its fast-path / model-load lines show up.
+_rag_logger = logging.getLogger("learning_dashboard.rag")
+if not _rag_logger.handlers:
+    _rh = logging.StreamHandler()
+    _rh.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s", datefmt="%H:%M:%S"))
+    _rag_logger.addHandler(_rh)
+    _rag_logger.setLevel(logging.INFO)
+    _rag_logger.propagate = False
 
 
 @asynccontextmanager
@@ -33,22 +49,29 @@ async def lifespan(app: FastAPI):
     serving immediately; the prewarm runs asynchronously."""
 
     def _prewarm() -> None:
+        import time as _time
         try:
+            t0 = _time.monotonic()
             df, err = load_dataframe()
-            logger.info("prewarm: loaded %d records (err=%r)", len(df), err)
+            logger.info("prewarm: loaded %d records in %.1fs (err=%r)", len(df), _time.monotonic() - t0, err)
+            t1 = _time.monotonic()
             load_struggle_df()
-            logger.info("prewarm: struggle ready")
+            logger.info("prewarm: struggle ready in %.1fs", _time.monotonic() - t1)
+            t2 = _time.monotonic()
             load_difficulty_df()
-            logger.info("prewarm: difficulty ready")
-            # Build the RAG collection up-front so the first /api/rag/* request
-            # doesn't pay the 60-120s sentence-transformers + embedding cost.
+            logger.info("prewarm: difficulty ready in %.1fs", _time.monotonic() - t2)
             try:
+                t3 = _time.monotonic()
                 code = lab_state.read_lab_state().get("session_code")
                 session_id = str(code) if code else "default"
-                rag_module.build_rag_collection(df, session_id)
-                logger.info("prewarm: RAG collection ready (session=%s)", session_id)
+                result = rag_module.build_rag_collection(df, session_id)
+                if result is not None:
+                    logger.info("prewarm: RAG collection ready (session=%s) in %.1fs", session_id, _time.monotonic() - t3)
+                else:
+                    logger.warning("prewarm: RAG build returned None (session=%s) after %.1fs — check earlier log lines for the failure reason", session_id, _time.monotonic() - t3)
             except Exception as e:  # noqa: BLE001
-                logger.warning("prewarm: RAG build failed: %s", e)
+                logger.warning("prewarm: RAG build raised: %s", e)
+            logger.info("prewarm: total %.1fs", _time.monotonic() - t0)
         except Exception as e:  # noqa: BLE001
             logger.exception("prewarm failed: %s", e)
 

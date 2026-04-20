@@ -65,7 +65,10 @@ def compute_student_mastery(
         return {}
 
     if "timestamp" in student_df.columns:
-        student_df = student_df.sort_values("timestamp", ascending=True, kind="mergesort")
+        student_df = (
+            student_df.dropna(subset=["timestamp"])
+            .sort_values("timestamp", ascending=True, kind="mergesort")
+        )
 
     mastery: dict[str, float] = {}
     for _, row in student_df.iterrows():
@@ -96,8 +99,9 @@ def compute_all_mastery(
     # BKT is a sequential HMM; replay order determines the posterior.
     # Sort with a secondary key so submissions at identical timestamps
     # (bulk imports, same-second posts) replay in a deterministic order.
-    ordered = df.sort_values(
-        ["timestamp", "question"], ascending=True, kind="mergesort"
+    ordered = (
+        df.dropna(subset=["timestamp"])
+        .sort_values(["timestamp", "question"], ascending=True, kind="mergesort")
     )
 
     attempt_counts = ordered.groupby(["user", "question"]).size()
@@ -130,8 +134,9 @@ def _build_sequences(df: pd.DataFrame) -> list[np.ndarray]:
     if df.empty or not required.issubset(df.columns):
         return []
 
-    ordered = df.sort_values(
-        ["timestamp", "question"], ascending=True, kind="mergesort"
+    ordered = (
+        df.dropna(subset=["timestamp"])
+        .sort_values(["timestamp", "question"], ascending=True, kind="mergesort")
     )
     correct = (ordered["incorrectness"] < config.CORRECT_THRESHOLD).astype(np.int8).to_numpy()
     users = ordered["user"].to_numpy()

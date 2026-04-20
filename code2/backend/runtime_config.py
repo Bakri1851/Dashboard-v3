@@ -21,7 +21,7 @@ class RuntimeConfig:
     auto_refresh: bool = True
     refresh_interval: int = 300
     smoothing_enabled: bool = True
-    cf_enabled: bool = True
+    cf_enabled: bool = False
     cf_threshold: float = 0.7
     struggle_model: str = "baseline"      # "baseline" | "improved"
     difficulty_model: str = "baseline"    # "baseline" | "irt"
@@ -38,7 +38,7 @@ class RuntimeConfig:
             auto_refresh=config.AUTO_REFRESH_DEFAULT,
             refresh_interval=config.AUTO_REFRESH_INTERVAL_DEFAULT,
             smoothing_enabled=config.SMOOTHING_ENABLED,
-            cf_enabled=True,
+            cf_enabled=False,
             cf_threshold=0.7,
             struggle_model="baseline",
             difficulty_model="baseline",

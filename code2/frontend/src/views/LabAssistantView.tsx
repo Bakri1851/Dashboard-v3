@@ -13,7 +13,13 @@ export function LabAssistantView() {
   const pickStudent = useViewStore((s) => s.pickStudent)
   const { data: state, error: stateErr, loading: stateLoading, refetch: refetchState } =
     useApiData<LabState>('/lab/state', 3_000)
-  const { data: struggle } = useApiData<StudentStruggle[]>('/struggle', 15_000)
+  // When a session is active, scope the dispatch queue to students seen in
+  // the current session window. Without this, the queue shows every urgent
+  // student in the historical data — unhelpful when triaging live.
+  const sessionQuery = state?.session_start
+    ? `from=${encodeURIComponent(state.session_start)}`
+    : undefined
+  const { data: struggle } = useApiData<StudentStruggle[]>('/struggle', 15_000, sessionQuery)
 
   // Students that need help but aren't already assigned.
   const assignedSet = useMemo(() => new Set((state?.assignments ?? []).map((a) => a.student_id)), [state])

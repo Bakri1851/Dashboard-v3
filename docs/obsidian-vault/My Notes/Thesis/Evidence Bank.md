@@ -46,6 +46,8 @@ Evidence that features are built. Code references documented in vault notes.
 | Saved sessions | `data_loader.py:save_session_record()` etc. | Yes — [[Data Loading and Session Persistence]] |
 | Academic calendar | `academic_calendar.py` | Yes — [[Academic Period Converter]] |
 | Config-driven thresholds | `config.py` | Yes — [[Configuration and Runtime Paths]] |
+| Model comparison + Spearman ρ | `code2/backend/routers/models_cmp.py:_spearman` + `/api/models/compare` | Yes — see Glossary "Model comparison and rank concordance" |
+| Agreement summary (upgraded / downgraded / unchanged) | `code2/backend/routers/models_cmp.py:_agreement` + ComparisonView pairs table | Yes — Glossary "Level agreement" |
 
 ---
 
@@ -57,6 +59,9 @@ Comparative data showing model behavior. Target: Ch5 Results.
 |----------|-------------|-----------------|--------|
 | Baseline vs IRT difficulty | Side-by-side difficulty scores for same questions | Run dashboard with both models enabled, compare outputs | Needed |
 | Baseline vs improved struggle | Side-by-side struggle scores for same students | Run dashboard with both models enabled, compare outputs | Needed |
+| Spearman ρ for baseline vs improved struggle | Rank-correlation coefficient between the two student orderings | Read `spearman_rho` from `/api/models/compare` — surfaced in ComparisonView "Rank Concordance" card | Needed (capture for Ch5) |
+| Top-10 overlap for flagged cohort | Fraction of the top-10 Needs Help / Struggling cohort that both models agree on | Read `top10_overlap` from `/api/models/compare` | Needed (capture for Ch5) |
+| Level-agreement split (struggle) | Agreement % + upgraded/downgraded/unchanged counts | Read `agreement` block from `/api/models/compare` | Needed (capture for Ch5) |
 | CF elevation examples | Students elevated by CF that baseline missed | Enable CF, capture diagnostic panel with elevated students | Needed |
 | Mistake cluster examples | Cluster labels and representative answers for a question | Run dashboard on session with enough incorrect answers (>3) | Needed |
 | BKT mastery evolution | How mastery changes with successive attempts | Extract from `mastery_df` session state for a student | Needed |

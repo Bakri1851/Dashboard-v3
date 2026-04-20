@@ -39,7 +39,6 @@ async def student_suggestions(
     if df.empty:
         raise HTTPException(status_code=404, detail="No data loaded.")
 
-    working = filter_df(df, window.from_, window.to_) if window.active else df
     struggle_all = load_struggle_df(window.from_, window.to_)
     row_sel = struggle_all[struggle_all["user"].astype(str) == student_id]
     if row_sel.empty:
@@ -50,7 +49,7 @@ async def student_suggestions(
     bullets = await asyncio.to_thread(
         rag.generate_assistant_suggestions,
         student_id,
-        working,
+        df,
         struggle_row,
         session_id,
     )
