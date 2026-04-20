@@ -20,6 +20,8 @@ from fastapi.staticfiles import StaticFiles
 
 from backend.cache import load_dataframe, load_difficulty_df, load_struggle_df
 from backend.routers import analysis, cf, lab, live, meta, models_cmp, question, rag, sessions, settings, student
+from learning_dashboard import lab_state
+from learning_dashboard import rag as rag_module
 
 logger = logging.getLogger("backend")
 
@@ -38,6 +40,15 @@ async def lifespan(app: FastAPI):
             logger.info("prewarm: struggle ready")
             load_difficulty_df()
             logger.info("prewarm: difficulty ready")
+            # Build the RAG collection up-front so the first /api/rag/* request
+            # doesn't pay the 60-120s sentence-transformers + embedding cost.
+            try:
+                code = lab_state.read_lab_state().get("session_code")
+                session_id = str(code) if code else "default"
+                rag_module.build_rag_collection(df, session_id)
+                logger.info("prewarm: RAG collection ready (session=%s)", session_id)
+            except Exception as e:  # noqa: BLE001
+                logger.warning("prewarm: RAG build failed: %s", e)
         except Exception as e:  # noqa: BLE001
             logger.exception("prewarm failed: %s", e)
 

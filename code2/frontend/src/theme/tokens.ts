@@ -28,10 +28,10 @@ export const THEMES: { id: ThemeName; label: string; preview: string }[] = [
 
 /** Runtime-swappable tokens. Values are var() strings so themes take effect live. */
 export const T = {
-  /** Font stacks (themes override body font-family; these are for component-level choices). */
-  fMono: "'Courier Prime', 'IBM Plex Mono', ui-monospace, Menlo, monospace",
-  fSerif: "'IBM Plex Serif', 'Playfair Display', Georgia, serif",
-  fSans: "'IBM Plex Sans', system-ui, sans-serif",
+  /** Font stacks — resolve to per-theme CSS variables defined in global.css. */
+  fMono: 'var(--font-mono)',
+  fSerif: 'var(--font-serif)',
+  fSans: 'var(--font-sans)',
 
   // --- surfaces -----------------------------------------------------------
   bg: 'var(--bg)',

@@ -92,21 +92,22 @@ def get_question(
         level_lookup: dict[str, str] = {}
         score_lookup: dict[str, float] = {}
         if not struggle_all.empty:
-            for _, sr in struggle_all.iterrows():
-                level_lookup[str(sr["user"])] = str(sr.get("struggle_level", ""))
-                score_lookup[str(sr["user"])] = float(sr.get("struggle_score", 0.0))
+            uid_idx = struggle_all["user"].astype(str)
+            level_lookup = dict(zip(uid_idx, struggle_all.get("struggle_level", pd.Series(dtype=str)).astype(str)))
+            score_lookup = dict(zip(uid_idx, struggle_all.get("struggle_score", pd.Series(dtype=float)).astype(float)))
 
         per_user = per_user.sort_values(
             ["mean_inc", "attempts"], ascending=[False, False]
         ).head(15)
-        for uid, r2 in per_user.iterrows():
+        for r2 in per_user.reset_index().to_dict("records"):
+            uid = str(r2["user"])
             top_strugglers.append(
                 QuestionStudentRow(
-                    id=str(uid),
+                    id=uid,
                     attempts=int(r2["attempts"]),
                     mean_incorrectness=_safe(r2.get("mean_inc")),
-                    struggle_level=level_lookup.get(str(uid), ""),
-                    struggle_score=score_lookup.get(str(uid), 0.0),
+                    struggle_level=level_lookup.get(uid, ""),
+                    struggle_score=score_lookup.get(uid, 0.0),
                 )
             )
 
@@ -119,7 +120,7 @@ def get_question(
             answer=str(row.get("student_answer", ""))[:400],
             incorrectness=_safe(row.get("incorrectness")),
         )
-        for _, row in recent.iterrows()
+        for row in recent.to_dict("records")
     ]
 
     return QuestionDetail(

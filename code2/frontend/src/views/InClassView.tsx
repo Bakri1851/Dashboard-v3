@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { T } from '../theme/tokens'
-import { useApiData } from '../api/hooks'
+import { prefetchApi, useApiData } from '../api/hooks'
 import { useFilterQuery } from '../api/filterQuery'
-import { useFilterStore } from '../state/filterStore'
+import { useFilterStore, presetNote } from '../state/filterStore'
 import { useSettings } from '../api/useSettings'
 import type {
   CFDiagnostics,
@@ -108,6 +108,8 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
 
   const showFallbackBanner =
     filter.autoFallbackApplied && filter.preset === 'all' && records > 0
+
+  const submissionsNote = presetNote(filter.preset)
 
   return (
     <div style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 28 }}>
@@ -252,7 +254,7 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
             </div>
           </div>
         </div>
-        <Stat label="Total Submissions" value={records.toLocaleString()} note="all-time" />
+        <Stat label="Total Submissions" value={records.toLocaleString()} note={submissionsNote} />
         <Stat label="Unique Students" value={String(students)} note="loaded records" accent={T.accent} />
         <Stat label="Questions Answered" value={String(questions)} note={`across ${live?.unique_modules ?? 0} modules`} />
         <Stat label="Mean Incorrectness" value={meanInc.toFixed(2)} note="class average" accent={T.warn} />
@@ -302,6 +304,7 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
           cols={STRUGGLE_COLS}
           rows={struggleRows}
           onClick={(r) => onPickStudent(r.id)}
+          onHover={(r) => prefetchApi(`/rag/student/${encodeURIComponent(r.id)}`)}
         />
         <Leaderboard
           title="Question Difficulty"
@@ -309,6 +312,7 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
           cols={DIFFICULTY_COLS}
           rows={filteredDifficulty}
           onClick={(r) => onPickQuestion(r.id)}
+          onHover={(r) => prefetchApi(`/rag/question/${encodeURIComponent(r.id)}`)}
         />
       </div>
 

@@ -105,7 +105,7 @@ def get_struggle(window: TimeWindow = Depends(get_time_window)) -> list[StudentS
         return []
     s = s.sort_values("struggle_score", ascending=False)
     out: list[StudentStruggle] = []
-    for _, r in s.iterrows():
+    for r in s.to_dict("records"):
         out.append(
             StudentStruggle(
                 id=str(r["user"]),
@@ -138,7 +138,7 @@ def get_difficulty(
         )
 
     out: list[QuestionDifficulty] = []
-    for _, r in q.iterrows():
+    for r in q.to_dict("records"):
         qid = str(r["question"])
         out.append(
             QuestionDifficulty(

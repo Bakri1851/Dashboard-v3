@@ -344,9 +344,9 @@ function ToggleRow({
                 fontSize: 10.5,
                 letterSpacing: 1,
                 textTransform: 'uppercase',
-                background: isActive ? T.ink : 'transparent',
+                background: isActive ? T.accent : 'transparent',
                 color: isActive ? '#fff' : T.ink2,
-                border: `1px solid ${isActive ? T.ink : T.line}`,
+                border: `1px solid ${isActive ? T.accent : T.line}`,
                 borderRight: 'none',
                 cursor: 'pointer',
               }}

@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sklearn.metrics.pairwise import cosine_similarity
 
 from backend import runtime_config
-from backend.cache import load_struggle_df
+from backend.cache import _cf_cache, load_struggle_df
 from backend.deps import TimeWindow, get_time_window
 from backend.schemas import (
     CFDiagnostics,
@@ -55,9 +55,14 @@ def _feature_matrix(struggle_df: pd.DataFrame) -> tuple[np.ndarray, list[str]]:
 @router.get("/cf", response_model=CFDiagnostics)
 def get_cf(window: TimeWindow = Depends(get_time_window)) -> CFDiagnostics:
     rc = runtime_config.get()
+    cache_key = (window.from_ or "", window.to_ or "", float(rc.cf_threshold))
+    cached = _cf_cache.get(cache_key)
+    if cached is not None:
+        return cached
+
     struggle_df = load_struggle_df(window.from_, window.to_)
     if struggle_df.empty:
-        return CFDiagnostics(
+        result = CFDiagnostics(
             threshold=rc.cf_threshold,
             k=3,
             n_flagged_parametric=0,
@@ -66,6 +71,8 @@ def get_cf(window: TimeWindow = Depends(get_time_window)) -> CFDiagnostics:
             reason="no data in window",
             elevated_students=[],
         )
+        _cf_cache[cache_key] = result
+        return result
 
     # Run the analytics function directly to reuse its logic.
     try:
@@ -73,6 +80,7 @@ def get_cf(window: TimeWindow = Depends(get_time_window)) -> CFDiagnostics:
             struggle_df, threshold=rc.cf_threshold, k=3
         )
     except Exception as e:
+        # Don't cache transient failures.
         return CFDiagnostics(
             threshold=rc.cf_threshold, k=3, n_flagged_parametric=0, n_elevated_cf=0,
             fallback=True, reason=f"{type(e).__name__}: {e}", elevated_students=[],
@@ -95,7 +103,7 @@ def get_cf(window: TimeWindow = Depends(get_time_window)) -> CFDiagnostics:
         except Exception:
             continue
 
-    return CFDiagnostics(
+    result = CFDiagnostics(
         threshold=float(diagnostics.get("threshold", rc.cf_threshold)),
         k=int(diagnostics.get("k", 3)),
         n_flagged_parametric=int(diagnostics.get("n_flagged_parametric", 0)),
@@ -104,6 +112,8 @@ def get_cf(window: TimeWindow = Depends(get_time_window)) -> CFDiagnostics:
         reason=diagnostics.get("reason"),
         elevated_students=elevated,
     )
+    _cf_cache[cache_key] = result
+    return result
 
 
 @router.get("/student/{student_id}/similar", response_model=list[SimilarStudent])

@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react'
 import { T } from '../../theme/tokens'
+import { useTheme } from '../../theme/ThemeContext'
+import { CornerMarks } from './CornerMarks'
 
 /**
  * Hero stat card — variant `primary` renders the inverted dark card used for
@@ -19,7 +21,11 @@ export function Stat({
   variant?: 'default' | 'primary'
 }) {
   const isPrimary = variant === 'primary'
+  const { themeKind } = useTheme()
+  const dark = themeKind === 'dark'
+  const valueColor = accent ?? (isPrimary ? '#ffffff' : T.ink)
   const base: CSSProperties = {
+    position: 'relative',
     padding: '20px 22px',
     background: isPrimary ? T.ink : T.card,
     color: isPrimary ? '#ffffff' : T.ink,
@@ -27,11 +33,12 @@ export function Stat({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
-    borderRadius: 2,
+    borderRadius: dark ? 0 : 2,
     minHeight: 128,
   }
   return (
     <div style={base}>
+      {dark && !isPrimary && <CornerMarks color={T.line} />}
       <div
         style={{
           fontFamily: T.fMono,
@@ -51,8 +58,11 @@ export function Stat({
             fontSize: 46,
             lineHeight: 0.95,
             fontFeatureSettings: '"tnum"',
-            color: accent ?? (isPrimary ? '#ffffff' : T.ink),
+            color: valueColor,
             marginTop: 16,
+            letterSpacing: dark ? 0.5 : 0,
+            textShadow: dark ? `0 0 12px ${valueColor}88` : 'none',
+            fontWeight: dark ? 500 : 400,
           }}
         >
           {value}

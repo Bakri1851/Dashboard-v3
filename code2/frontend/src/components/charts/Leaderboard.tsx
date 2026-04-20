@@ -53,12 +53,14 @@ export function Leaderboard({
   cols,
   rows,
   onClick,
+  onHover,
 }: {
   title: string
   subtitle: string
   cols: LeaderboardColumn[]
   rows: LeaderboardRow[]
   onClick: (r: LeaderboardRow) => void
+  onHover?: (r: LeaderboardRow) => void
 }) {
   const [hover, setHover] = useState<number | null>(null)
 
@@ -101,7 +103,10 @@ export function Leaderboard({
               <tr
                 key={`${r.id}-${i}`}
                 onClick={() => onClick(r)}
-                onMouseEnter={() => setHover(i)}
+                onMouseEnter={() => {
+                  setHover(i)
+                  onHover?.(r)
+                }}
                 onMouseLeave={() => setHover(null)}
                 style={{ cursor: 'pointer', background: hover === i ? T.bg2 : 'transparent' }}
               >

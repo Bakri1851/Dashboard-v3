@@ -56,13 +56,14 @@ def _top_questions(df: pd.DataFrame, limit: int = 15) -> list[TopQuestionRow]:
     ).sort_values("attempts", ascending=False).head(limit)
     mod_lookup = df.drop_duplicates("question").set_index("question")["module"].astype(str).to_dict() if "module" in df.columns else {}
     out: list[TopQuestionRow] = []
-    for qid, r in top.iterrows():
+    for r in top.reset_index().to_dict("records"):
+        qid = str(r["question"])
         students = int(r["unique_students"])
         attempts = int(r["attempts"])
         out.append(
             TopQuestionRow(
-                question=str(qid),
-                module=mod_lookup.get(str(qid), ""),
+                question=qid,
+                module=mod_lookup.get(qid, ""),
                 attempts=attempts,
                 unique_students=students,
                 avg_attempts=round(attempts / students, 2) if students else 0.0,
@@ -84,10 +85,10 @@ def _user_activity(df: pd.DataFrame, limit: int = 20) -> list[UserActivityRow]:
         last_ts=("_ts", "max"),
     ).sort_values("submissions", ascending=False).head(limit)
     out: list[UserActivityRow] = []
-    for uid, r in agg.iterrows():
+    for r in agg.reset_index().to_dict("records"):
         out.append(
             UserActivityRow(
-                user=str(uid),
+                user=str(r["user"]),
                 submissions=int(r["submissions"]),
                 unique_questions=int(r["unique_questions"]),
                 first_submission=r["first_ts"].isoformat() if pd.notna(r["first_ts"]) else None,

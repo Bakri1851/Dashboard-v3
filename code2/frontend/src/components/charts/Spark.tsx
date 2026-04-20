@@ -7,21 +7,25 @@ export function Spark({
   height = 70,
   color = T.ink,
   fill = false,
+  domain,
 }: {
   data: number[]
   width?: number
   height?: number
   color?: string
   fill?: boolean
+  domain?: [number, number]
 }) {
   if (data.length === 0) {
     return <div style={{ width, height, color: T.ink3, fontFamily: T.fMono, fontSize: 11 }}>no data</div>
   }
-  const min = Math.min(...data)
-  const max = Math.max(...data)
-  const range = max - min || 1
+  const [lo, hi] = domain ?? [Math.min(...data), Math.max(...data)]
+  const range = hi - lo
   const stepX = width / Math.max(data.length - 1, 1)
-  const yOf = (v: number) => height - ((v - min) / range) * height
+  const yOf =
+    range === 0
+      ? () => height / 2
+      : (v: number) => height - ((v - lo) / range) * height
 
   let path = ''
   data.forEach((v, i) => {

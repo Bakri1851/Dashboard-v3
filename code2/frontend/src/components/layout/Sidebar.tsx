@@ -12,16 +12,15 @@ import type { AcademicPeriod, FilterPresetMeta, LabState } from '../../types/api
 interface NavItem {
   id: ViewId
   label: string
-  hint: string
 }
 
 const NAV: NavItem[] = [
-  { id: 'inclass',  label: '01  In Class',         hint: 'Live leaderboards' },
-  { id: 'analysis', label: '04  Data Analysis',    hint: 'Historical view' },
-  { id: 'compare',  label: '05  Model Comparison', hint: 'IRT · BKT · improved' },
-  { id: 'previous', label: '06  Previous Sessions',hint: 'Saved records' },
-  { id: 'lab',      label: '07  Lab Assistants',   hint: 'Assign / monitor' },
-  { id: 'settings', label: '08  Settings',         hint: 'Weights · thresholds' },
+  { id: 'inclass',  label: 'In Class' },
+  { id: 'analysis', label: 'Data Analysis' },
+  { id: 'compare',  label: 'Model Comparison' },
+  { id: 'previous', label: 'Previous Sessions' },
+  { id: 'lab',      label: 'Lab Assistants' },
+  { id: 'settings', label: 'Settings' },
 ]
 
 function fmtElapsed(totalSeconds: number): string {
@@ -92,9 +91,6 @@ export function Sidebar() {
         <h1 style={{ fontSize: 16, fontWeight: 600, letterSpacing: 0.3, margin: 0 }}>
           Learning Analytics
         </h1>
-        <div style={{ fontSize: 10.5, letterSpacing: 1.5, textTransform: 'uppercase', color: T.ink3, marginTop: 4 }}>
-          Studio — Thesis Design
-        </div>
       </div>
 
       {/* Lab session */}
@@ -278,7 +274,6 @@ export function Sidebar() {
               }}
             >
               <div style={{ fontSize: 13, fontWeight: active ? 600 : 500 }}>{item.label}</div>
-              <div style={{ fontSize: 10.5, color: T.ink3, marginTop: 2 }}>{item.hint}</div>
             </button>
           )
         })}

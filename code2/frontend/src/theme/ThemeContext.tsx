@@ -10,8 +10,11 @@ import {
 } from './tokens'
 import type { ThemeName } from './tokens'
 
+export type ThemeKind = 'dark' | 'light'
+
 interface ThemeContextValue {
   theme: ThemeName
+  themeKind: ThemeKind
   setTheme: (t: ThemeName) => void
   accentId: string
   accentHue: number
@@ -28,9 +31,18 @@ function applyThemeClass(theme: ThemeName) {
   html.classList.add(`theme-${theme}`)
 }
 
-function applyAccent(hue: number) {
-  document.documentElement.style.setProperty('--accent', `oklch(0.42 0.12 ${hue})`)
-  document.documentElement.style.setProperty('--accent-soft', `oklch(0.93 0.03 ${hue})`)
+const DARK_THEMES: ReadonlySet<ThemeName> = new Set(['scifi', 'blueprint', 'matrix', 'cyberpunk'])
+
+function applyAccent(hue: number, theme: ThemeName) {
+  const isDark = DARK_THEMES.has(theme)
+  // --accent: border/bg tint — slightly brighter on dark themes so it reads
+  // against a near-black panel.
+  const accent = isDark ? `oklch(0.58 0.14 ${hue})` : `oklch(0.42 0.12 ${hue})`
+  // --accent-soft: highlight wash behind selected items. Must contrast with
+  // --ink, which is near-white on dark themes and near-black on light.
+  const accentSoft = isDark ? `oklch(0.30 0.07 ${hue})` : `oklch(0.93 0.03 ${hue})`
+  document.documentElement.style.setProperty('--accent', accent)
+  document.documentElement.style.setProperty('--accent-soft', accentSoft)
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -55,16 +67,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme])
 
   useEffect(() => {
-    applyAccent(accentHue)
+    applyAccent(accentHue, theme)
     localStorage.setItem(STORAGE_KEY_ACCENT, accentId)
-  }, [accentHue, accentId])
+  }, [accentHue, accentId, theme])
 
   const setTheme = useCallback((t: ThemeName) => setThemeState(t), [])
   const setAccent = useCallback((id: string) => setAccentIdState(id), [])
 
+  const themeKind: ThemeKind = DARK_THEMES.has(theme) ? 'dark' : 'light'
+
   const value = useMemo<ThemeContextValue>(
-    () => ({ theme, setTheme, accentId, accentHue, setAccent, themes: THEMES, accents: ACCENT_HUES }),
-    [theme, accentId, accentHue, setTheme, setAccent]
+    () => ({ theme, themeKind, setTheme, accentId, accentHue, setAccent, themes: THEMES, accents: ACCENT_HUES }),
+    [theme, themeKind, accentId, accentHue, setTheme, setAccent]
   )
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

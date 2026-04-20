@@ -134,6 +134,26 @@ export function resolveFilter(
   }
 }
 
+/** Lowercase human-readable label for the current filter preset. Used by
+ *  stat/metric tiles whose value is scoped to the active time window, so the
+ *  caption accurately describes the window rather than hardcoding "all time".
+ */
+const PRESET_NOTE: Record<FilterPreset, string> = {
+  all: 'all time',
+  live: 'live session',
+  today: 'today',
+  past_hour: 'past hour',
+  past_24h: 'past 24h',
+  current_week: 'current week',
+  last_week: 'last week',
+  current_month: 'current month',
+  custom: 'custom range',
+}
+
+export function presetNote(preset: FilterPreset): string {
+  return PRESET_NOTE[preset] ?? 'filtered'
+}
+
 /** Serialise a ResolvedWindow into URLSearchParams form (no leading `?`). */
 export function filterToQuery(window: ResolvedWindow): string {
   const p = new URLSearchParams()

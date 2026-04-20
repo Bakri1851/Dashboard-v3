@@ -22,10 +22,23 @@ export function RagPanel({
       <SectionLabel n={sectionNumber}>{title}</SectionLabel>
 
       {loading && (
-        <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink2, lineHeight: 1.6 }}>
-          Generating… first call on a cold backend can take a couple of minutes while the sentence-transformers
-          model downloads and embeds {'~'}34k records. Subsequent queries hit the cached Chroma collection.
-        </div>
+        <ul style={{ margin: 0, paddingLeft: 20, listStyle: 'none' }} aria-label="Loading suggestions">
+          {[0, 1, 2].map((i) => (
+            <li
+              key={i}
+              style={{
+                marginBottom: 8,
+                height: 12,
+                width: `${85 - i * 12}%`,
+                background: T.line2,
+                opacity: 0.55,
+                borderRadius: 2,
+                animation: 'pulse 1.4s ease-in-out infinite',
+                animationDelay: `${i * 120}ms`,
+              }}
+            />
+          ))}
+        </ul>
       )}
 
       {error && (

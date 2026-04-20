@@ -35,9 +35,13 @@ _ANALYTICS_TTL = 300  # seconds
 _IMPROVED_TTL = 600   # seconds — IRT+BKT fits are the most expensive path
 
 _df_cache: TTLCache = TTLCache(maxsize=1, ttl=config.CACHE_TTL)
-_struggle_cache: TTLCache = TTLCache(maxsize=8, ttl=_ANALYTICS_TTL)
-_difficulty_cache: TTLCache = TTLCache(maxsize=8, ttl=_ANALYTICS_TTL)
+# maxsize=16 covers a full day of window flips (Today / Past Hour / Current
+# Week / Custom × live-session toggles) without eviction thrash.
+_struggle_cache: TTLCache = TTLCache(maxsize=16, ttl=_ANALYTICS_TTL)
+_difficulty_cache: TTLCache = TTLCache(maxsize=16, ttl=_ANALYTICS_TTL)
 _improved_cache: TTLCache = TTLCache(maxsize=4, ttl=_IMPROVED_TTL)
+# CF diagnostics derive from struggle_df + threshold; mirror the analytics TTL.
+_cf_cache: TTLCache = TTLCache(maxsize=16, ttl=_ANALYTICS_TTL)
 
 
 @cached(_df_cache)
@@ -160,3 +164,4 @@ def invalidate() -> None:
     _struggle_cache.clear()
     _difficulty_cache.clear()
     _improved_cache.clear()
+    _cf_cache.clear()

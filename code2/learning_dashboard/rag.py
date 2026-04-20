@@ -16,6 +16,8 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any
 
+from cachetools import TTLCache
+
 from learning_dashboard import config
 from learning_dashboard import paths
 from learning_dashboard.analytics import _get_openai_client
@@ -28,10 +30,13 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Module-level state (mirrors _incorrectness_cache in analytics.py:26)
 # ---------------------------------------------------------------------------
-_suggestion_cache: dict[str, list[str]] = {}
-_cluster_suggestion_cache: dict[str, list[str]] = {}
+# 10-minute TTL bounds staleness for long lab sessions; maxsize=256 covers a
+# full cohort of students and questions without unbounded growth.
+_suggestion_cache: TTLCache = TTLCache(maxsize=256, ttl=600)
+_cluster_suggestion_cache: TTLCache = TTLCache(maxsize=256, ttl=600)
 _cached_session_id: str | None = None
 _cached_row_count: int = 0
+_cached_latest_ts: str = ""
 _collection: Any = None  # chromadb.Collection once built
 
 
@@ -65,22 +70,36 @@ def _lazy_import() -> tuple[Any, Any]:
 # Public API
 # ---------------------------------------------------------------------------
 
-def build_rag_collection(df: Any, session_id: str) -> Any:
-    """Build (or reuse) a ChromaDB collection for the current session.
+_COLLECTION_NAME = "submissions"
 
-    Rebuild guard: returns the cached collection unchanged when session_id and
-    row count match — avoids recomputing embeddings on every 5-second refresh.
+
+def build_rag_collection(df: Any, session_id: str) -> Any:
+    """Build (or reuse) the ChromaDB collection for current submissions.
+
+    Rebuild guard: row count + max(timestamp) — the embedded documents and
+    metadata don't depend on session_id (it isn't in the text or any filter
+    field), so starting a new lab session no longer forces a 30–60s re-embed.
+
+    `session_id` is accepted for backwards compatibility and recorded for
+    diagnostics, but does NOT invalidate the cached collection.
 
     Returns None if chromadb/sentence-transformers are not installed or on error.
     """
-    global _collection, _cached_session_id, _cached_row_count
+    global _collection, _cached_session_id, _cached_row_count, _cached_latest_ts
 
-    # Rebuild guard
+    # Composite rebuild guard: row count + max(timestamp). Catches both inserts
+    # and silent row-level edits.
+    try:
+        latest_ts = str(df["timestamp"].max()) if "timestamp" in df.columns else ""
+    except Exception:
+        latest_ts = ""
     if (
         _collection is not None
-        and session_id == _cached_session_id
         and len(df) == _cached_row_count
+        and latest_ts == _cached_latest_ts
     ):
+        # Refresh session tag for diagnostics; data is unchanged.
+        _cached_session_id = session_id
         return _collection
 
     chromadb_mod, SentenceTransformer = _lazy_import()
@@ -89,17 +108,7 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
 
     try:
         client = chromadb_mod.PersistentClient(path=str(paths.rag_chroma_dir()))
-
-        collection_name = f"session_{session_id}"
-
-        # If session changed, delete the old collection to prevent stale cross-session bleed
-        if session_id != _cached_session_id:
-            try:
-                client.delete_collection(name=collection_name)
-            except Exception:
-                pass  # collection didn't exist yet — fine
-
-        collection = client.get_or_create_collection(name=collection_name)
+        collection = client.get_or_create_collection(name=_COLLECTION_NAME)
 
         # Build document lists from the dataframe
         ids: list[str] = []
@@ -113,7 +122,7 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
             student_id = getattr(row, "user", "") or ""
             incorrectness = float(getattr(row, "incorrectness", 0.0) or 0.0)
 
-            ids.append(f"{session_id}_{i}")
+            ids.append(f"row_{i}")
             documents.append(f"{question} | {student_answer} | {ai_feedback}")
             metadatas.append({
                 "student_id": str(student_id),
@@ -138,6 +147,7 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
         _collection = collection
         _cached_session_id = session_id
         _cached_row_count = len(df)
+        _cached_latest_ts = latest_ts
         return _collection
 
     except Exception as exc:
@@ -387,15 +397,14 @@ def generate_cluster_suggestions(
 
 
 def clear_suggestion_cache() -> None:
-    """Clear all module-level RAG state. Call when session_id changes."""
-    global _suggestion_cache, _cached_session_id, _cached_row_count, _collection
-    _suggestion_cache = {}
+    """Clear cached coaching bullets. Call when session_id changes — keeps the
+    embedded ChromaDB collection intact (its content doesn't depend on the
+    session) so a new lab session doesn't pay the 30–60s re-embed cost."""
+    global _cached_session_id
+    _suggestion_cache.clear()
     _cached_session_id = None
-    _cached_row_count = 0
-    _collection = None
 
 
 def clear_cluster_suggestion_cache() -> None:
     """Clear the per-question RAG cache. Call when session_id changes."""
-    global _cluster_suggestion_cache
-    _cluster_suggestion_cache = {}
+    _cluster_suggestion_cache.clear()

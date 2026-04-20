@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { T, LEVEL_STYLES } from '../theme/tokens'
 import { useApiData } from '../api/hooks'
 import { useFilterQuery } from '../api/filterQuery'
+import { useFilterStore, presetNote } from '../state/filterStore'
 import type { SimilarStudent, StudentDetail as StudentDetailData } from '../types/api'
 import { useSettings } from '../api/useSettings'
 import { useViewStore } from '../state/viewStore'
@@ -21,6 +22,8 @@ function colorForComponent(key: string, value: number): string {
 
 export function StudentDetailView({ studentId }: { studentId: string }) {
   const q = useFilterQuery()
+  const preset = useFilterStore((s) => s.preset)
+  const scopeNote = presetNote(preset)
   const { data: settings } = useSettings()
   const cfEnabled = settings?.runtime.cf_enabled ?? false
   const pickStudent = useViewStore((s) => s.pickStudent)
@@ -78,7 +81,7 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
                 Trajectory, last {data.trajectory.length}
               </div>
               <div style={{ marginTop: 12 }}>
-                <Spark data={data.trajectory} width={240} height={70} color={lvl?.fg ?? T.ink} fill />
+                <Spark data={data.trajectory} width={240} height={70} color={lvl?.fg ?? T.ink} fill domain={[0, 1]} />
               </div>
               <div style={{ fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, marginTop: 8 }}>
                 {data.trend >= 0 ? '+' : ''}
@@ -105,8 +108,8 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
         </div>
 
         <div style={{ display: 'grid', gridTemplateRows: 'repeat(4, 1fr)', gap: 8 }}>
-          <MetricRow label="Submissions" value={data.submissions.toLocaleString()} note="all time" />
-          <MetricRow label="Time active" value={`${data.time_active_min.toFixed(0)} min`} note="cumulative" />
+          <MetricRow label="Submissions" value={data.submissions.toLocaleString()} note={scopeNote} />
+          <MetricRow label="Time active" value={`${data.time_active_min.toFixed(0)} min`} note={scopeNote} />
           <MetricRow label="Retry rate" value={`${(data.retry_rate * 100).toFixed(0)}%`} note="vs class median" />
           <MetricRow
             label="Recent incorrectness"

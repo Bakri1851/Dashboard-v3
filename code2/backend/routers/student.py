@@ -84,12 +84,12 @@ def get_student(
     } if not difficulty_all.empty else {}
     top_questions = [
         StudentQuestionRow(
-            question=str(idx),
+            question=str(r2["question"]),
             attempts=int(r2["attempts"]),
-            difficulty=difficulty_lookup.get(str(idx), ""),
+            difficulty=difficulty_lookup.get(str(r2["question"]), ""),
             last_incorrectness=_safe(r2.get("last_inc")),
         )
-        for idx, r2 in top_q.iterrows()
+        for r2 in top_q.reset_index().to_dict("records")
     ]
 
     # --- recent submissions (newest first) --------------------------------
@@ -101,7 +101,7 @@ def get_student(
             answer=str(row.get("student_answer", ""))[:400],
             incorrectness=_safe(row.get("incorrectness")),
         )
-        for _, row in recent.iterrows()
+        for row in recent.to_dict("records")
     ]
 
     return StudentDetail(
