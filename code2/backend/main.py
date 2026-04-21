@@ -20,14 +20,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-# Bootstrap OPENAI_API_KEY from .streamlit/secrets.toml at the repo root
-# (shared config file; name is historical). Lift it into the environment so
-# analytics._get_openai_client() finds it. Without this, the backend runs
-# with an empty key, every OpenAI call 401s, and every incorrectness score
-# falls back to 0.5 — IRT, improved struggle, and measurement confidence
-# all degrade silently.
+# Bootstrap OPENAI_API_KEY from .secrets/secrets.toml at the repo root.
+# Lift it into the environment so analytics._get_openai_client() finds it.
+# Without this, the backend runs with an empty key, every OpenAI call 401s,
+# and every incorrectness score falls back to 0.5 — IRT, improved struggle,
+# and measurement confidence all degrade silently.
 if not os.environ.get("OPENAI_API_KEY"):
-    _secrets_path = Path(__file__).resolve().parents[2] / ".streamlit" / "secrets.toml"
+    _secrets_path = Path(__file__).resolve().parents[2] / ".secrets" / "secrets.toml"
     if _secrets_path.is_file():
         try:
             with _secrets_path.open("rb") as _f:

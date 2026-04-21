@@ -17,3 +17,6 @@ lab_session.lock
 
 .streamlit/secrets.toml
 code/.streamlit/secrets.toml
+code2/.streamlit/secrets.toml
+**/.streamlit/secrets.toml
+.secrets/
