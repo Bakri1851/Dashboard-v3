@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "My Notes/Thesis/Evaluation Plan.md",
+                "file": "My Notes/Code/Overview/Streamlit vs React Parity Audit.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Evaluation Plan"
+              "title": "Streamlit vs React Parity Audit"
             }
           }
         ]
@@ -184,6 +184,7 @@
   },
   "active": "be447fca2c261028",
   "lastOpenFiles": [
+    "My Notes/Thesis/Evaluation Plan.md",
     "Untitled.canvas",
     "My Notes/Thesis/Ch2 – Background and Requirements.md",
     "My Notes/Thesis/Writing Roadmap.md",
