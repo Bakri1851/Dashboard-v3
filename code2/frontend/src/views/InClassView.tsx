@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { T } from '../theme/tokens'
 import { prefetchApi, useApiData } from '../api/hooks'
+import { useAutoRefreshInterval } from '../api/useAutoRefreshInterval'
 import { useFilterQuery } from '../api/filterQuery'
 import { useFilterStore, presetNote } from '../state/filterStore'
 import { useSettings } from '../api/useSettings'
@@ -37,13 +38,17 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
   const filter = useFilterStore()
   const { data: settings } = useSettings()
   const cfEnabled = settings?.runtime.cf_enabled ?? false
+  const liveInterval = useAutoRefreshInterval(10_000)
+  const strugInterval = useAutoRefreshInterval(15_000)
+  const diffInterval = useAutoRefreshInterval(15_000)
+  const cfInterval = useAutoRefreshInterval(30_000)
   const { data: live, error: liveErr, loading: liveLoading } =
-    useApiData<LiveDataResponse>('/live', 10_000, q)
+    useApiData<LiveDataResponse>('/live', liveInterval, q)
   const { data: struggle, error: strugErr, loading: strugLoading } =
-    useApiData<StudentStruggle[]>('/struggle', 15_000, q)
+    useApiData<StudentStruggle[]>('/struggle', strugInterval, q)
   const { data: difficulty, error: diffErr, loading: diffLoading } =
-    useApiData<QuestionDifficulty[]>('/difficulty', 15_000, q)
-  const { data: cf } = useApiData<CFDiagnostics>(cfEnabled ? '/cf' : '', 30_000, q)
+    useApiData<QuestionDifficulty[]>('/difficulty', diffInterval, q)
+  const { data: cf } = useApiData<CFDiagnostics>(cfEnabled ? '/cf' : '', cfInterval, q)
   const anyError = liveErr || strugErr || diffErr
   const anyLoading = liveLoading || strugLoading || diffLoading
 

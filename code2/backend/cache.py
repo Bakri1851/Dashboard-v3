@@ -16,7 +16,7 @@ import pandas as pd
 from cachetools import TTLCache
 
 from learning_dashboard import analytics, config, data_loader
-from learning_dashboard.models import improved_struggle, irt
+from learning_dashboard.models import bkt, improved_struggle, irt
 
 logger = logging.getLogger("backend.cache")
 
@@ -174,8 +174,13 @@ def load_improved_struggle_df(
 ) -> pd.DataFrame:
     """Compute + cache improved (IRT + BKT) struggle scores for the window.
 
-    The underlying fit is the most expensive path in the app — cache hits save
-    tens of seconds per repeat visit to the Model Comparison view."""
+    BKT mastery is computed inline with the runtime-configured parameters so
+    that the Settings sliders (p_init, p_learn, p_guess, p_slip) actually
+    shape the output. The cache key is the window only — runtime-param
+    changes go through `POST /api/settings` which calls `invalidate()`."""
+    # Local import keeps the cache module import-safe during router boot.
+    from backend import runtime_config as _rc_mod
+
     key = _window_key(from_, to_)
     if key in _improved_cache:
         return _improved_cache[key]
@@ -184,8 +189,28 @@ def load_improved_struggle_df(
             return _improved_cache[key]
         df, _ = load_dataframe()
         sliced = filter_df(df, from_, to_) if (from_ or to_) else df
+        rc = _rc_mod.get()
         try:
-            result = improved_struggle.compute_improved_struggle_scores(sliced)
+            mastery_df = bkt.compute_all_mastery(
+                sliced,
+                p_init=rc.bkt_p_init,
+                p_learn=rc.bkt_p_learn,
+                p_guess=rc.bkt_p_guess,
+                p_slip=rc.bkt_p_slip,
+            )
+            mastery_summary = (
+                bkt.compute_student_mastery_summary(mastery_df)
+                if not mastery_df.empty
+                else None
+            )
+            # Reuse the IRT difficulty cache so a back-to-back visit to the
+            # Model Comparison view doesn't re-fit Rasch.
+            irt_df = load_irt_difficulty_df(from_, to_)
+            result = improved_struggle.compute_improved_struggle_scores(
+                sliced,
+                mastery_summary=mastery_summary,
+                irt_difficulty=irt_df if not irt_df.empty else None,
+            )
         except Exception:
             logger.warning(
                 "improved_struggle.compute_improved_struggle_scores failed for "
@@ -228,6 +253,73 @@ def load_irt_difficulty_df(
             )
         _irt_difficulty_cache[key] = result
         return result
+
+
+def load_active_struggle_df(
+    from_: Optional[str] = None, to_: Optional[str] = None
+) -> pd.DataFrame:
+    """Return the struggle leaderboard for the currently-selected model.
+
+    Dispatches on `runtime_config.struggle_model`:
+      - "improved": BKT-mastery + IRT-weighted struggle (honours BKT sliders)
+      - anything else: baseline behavioural composite
+
+    When improved is active, baseline's ancillary columns
+    (`submission_count`, `recent_incorrectness`, `d_hat`, `n_hat`, `t_hat`,
+    etc.) are merged onto each user so downstream endpoints see a single
+    superset schema regardless of model — `struggle_score`/`struggle_level`
+    come from improved, row-level diagnostics from baseline. Ordering is
+    preserved from the improved result (score desc).
+
+    Graceful fallback: if the improved fit returns empty (sparse data,
+    single-class outcomes), fall through to the baseline so downstream
+    endpoints never see an empty leaderboard when data exists.
+    """
+    from backend import runtime_config as _rc_mod
+
+    if _rc_mod.get().struggle_model == "improved":
+        improved_df = load_improved_struggle_df(from_, to_)
+        if not improved_df.empty:
+            baseline_df = load_struggle_df(from_, to_)
+            if not baseline_df.empty and "user" in baseline_df.columns:
+                ancillary = [
+                    c for c in baseline_df.columns
+                    if c not in improved_df.columns and c != "user"
+                ]
+                if ancillary:
+                    improved_df = improved_df.merge(
+                        baseline_df[["user"] + ancillary],
+                        on="user",
+                        how="left",
+                    )
+            return improved_df
+    return load_struggle_df(from_, to_)
+
+
+def load_active_difficulty_df(
+    from_: Optional[str] = None, to_: Optional[str] = None
+) -> pd.DataFrame:
+    """Return the difficulty leaderboard for the currently-selected model.
+
+    Dispatches on `runtime_config.difficulty_model`:
+      - "irt": Rasch 1PL b_i estimates (column-renamed to the baseline schema)
+      - anything else: baseline behavioural composite
+    The column-rename keeps callers (live.py, student.py) agnostic to which
+    model produced the row — they always read `difficulty_score` /
+    `difficulty_level`.
+    """
+    from backend import runtime_config as _rc_mod
+
+    if _rc_mod.get().difficulty_model == "irt":
+        df = load_irt_difficulty_df(from_, to_)
+        if not df.empty and "irt_difficulty" in df.columns:
+            return df.rename(
+                columns={
+                    "irt_difficulty": "difficulty_score",
+                    "irt_difficulty_level": "difficulty_level",
+                }
+            )
+    return load_difficulty_df(from_, to_)
 
 
 def invalidate() -> None:

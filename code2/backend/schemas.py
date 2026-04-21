@@ -209,7 +209,6 @@ class RuntimeSettings(BaseModel):
     sounds_enabled: bool
     auto_refresh: bool
     refresh_interval: int
-    smoothing_enabled: bool
     cf_enabled: bool
     cf_threshold: float
     struggle_model: str           # "baseline" | "improved"

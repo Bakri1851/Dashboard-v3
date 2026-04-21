@@ -176,15 +176,6 @@ export function SettingsView() {
           <div style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
             <SectionLabel n={4}>Environment</SectionLabel>
             <ToggleRow
-              label="Temporal smoothing (EMA)"
-              options={[
-                { id: 'off', label: 'Off' },
-                { id: 'on', label: 'On' },
-              ]}
-              active={data.runtime.smoothing_enabled ? 'on' : 'off'}
-              onChange={(v) => update({ smoothing_enabled: v === 'on' })}
-            />
-            <ToggleRow
               label="Sound effects"
               options={[
                 { id: 'off', label: 'Off' },

@@ -1,8 +1,9 @@
 """Lab-session coordination endpoints.
 
 Every endpoint delegates to `learning_dashboard.lab_state`, which uses a
-`FileLock` on `data/lab_session.json` — so all four processes (code/ Streamlit
-×2, code2/ Streamlit ×2, this FastAPI) share the same source of truth.
+`FileLock` on `data/lab_session.json` — so all three processes (code/ Streamlit
+instructor + mobile, and this FastAPI) share the same source of truth. The
+React SPA reads state through this backend, not the file directly.
 
 POST endpoints return the fresh `LabState` so React can optimistically refresh
 without a separate GET round-trip.

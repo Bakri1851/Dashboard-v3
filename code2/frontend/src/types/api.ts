@@ -141,7 +141,6 @@ export interface RuntimeSettings {
   sounds_enabled: boolean
   auto_refresh: boolean
   refresh_interval: number
-  smoothing_enabled: boolean
   cf_enabled: boolean
   cf_threshold: number
   struggle_model: 'baseline' | 'improved' | string

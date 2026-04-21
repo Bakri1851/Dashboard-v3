@@ -75,6 +75,22 @@ Streamlit's Plotly leaderboards (`components.py:285–460`) support clicking the
 
 ---
 
+## Ghost-settings fix (2026-04-21)
+
+Separate from the 11 parity gaps above, an audit of `runtime_config` found that six Settings controls wrote to the backend but no code ever read them — they were UI-only ghosts. Fixed in one pass:
+
+- **`auto_refresh` + `refresh_interval`** — now drive every instructor-facing poll via new `useAutoRefreshInterval.ts`. Off → polling stops; interval dropdown retimes every poll. `/lab/state` stays hardcoded at 3s (peer coordination).
+- **`struggle_model` (baseline/improved)** — new `cache.load_active_struggle_df` dispatches. Improved path now actually runs BKT + IRT. Baseline ancillary columns (`submission_count`, `d_hat`, …) are merged onto improved so router schemas stay stable.
+- **`difficulty_model` (baseline/irt)** — new `cache.load_active_difficulty_df` dispatches, renames IRT columns to the baseline schema.
+- **BKT parameters (`p_init`, `p_learn`, `p_guess`, `p_slip`, `bkt_mastery_threshold`)** — `cache.load_improved_struggle_df` rewritten to compute mastery with runtime values. Sliders now move the leaderboard.
+- **`smoothing_enabled`** — removed entirely from the Settings UI, `runtime_config`, `schemas`, and `types/api.ts`. The backend `apply_temporal_smoothing` is still a stub (noted in `analytics.py:858`); wiring the toggle would have required reworking the score-composition flow. Follow-up if temporal smoothing is ever properly implemented.
+
+Sidebar "Refresh Now" button (item 9 above) deliberately **not** added — auto-refresh honouring the user's setting covers the use case. Can be added later if demo UX demands it.
+
+Still outstanding from the 11 parity gaps: items 1–8 and 10–11 (chart additions, confusion matrix, academic-period filter, `play_high_struggle` trigger, legend toggle).
+
+---
+
 ## Fix-pointer reference
 
 When you pick items to fill in, these are the files to touch:

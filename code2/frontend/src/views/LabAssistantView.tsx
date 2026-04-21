@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { T } from '../theme/tokens'
 import { useApiData } from '../api/hooks'
+import { useAutoRefreshInterval } from '../api/useAutoRefreshInterval'
 import { api } from '../api/client'
 import type { LabState, StudentStruggle } from '../types/api'
 import { Pill } from '../components/primitives/Pill'
@@ -19,7 +20,8 @@ export function LabAssistantView() {
   const sessionQuery = state?.session_start
     ? `from=${encodeURIComponent(state.session_start)}`
     : undefined
-  const { data: struggle } = useApiData<StudentStruggle[]>('/struggle', 15_000, sessionQuery)
+  const strugInterval = useAutoRefreshInterval(15_000)
+  const { data: struggle } = useApiData<StudentStruggle[]>('/struggle', strugInterval, sessionQuery)
 
   // Students that need help but aren't already assigned.
   const assignedSet = useMemo(() => new Set((state?.assignments ?? []).map((a) => a.student_id)), [state])
@@ -67,7 +69,7 @@ export function LabAssistantView() {
         <div style={{ fontFamily: T.fSans, fontSize: 13.5, color: T.ink2, maxWidth: 480, lineHeight: 1.6 }}>
           Starting a session generates a 6-character join code and writes to{' '}
           <code style={{ fontFamily: T.fMono, background: T.bg2, padding: '1px 4px' }}>data/lab_session.json</code>.
-          All four processes (Streamlit instructor, Streamlit mobile, React frontend, FastAPI) see the same state via the file-lock.
+          All active processes (React frontend, FastAPI backend, and any Streamlit fallbacks in code/) see the same state via the file-lock.
         </div>
         <button
           onClick={() => post('/lab/start', undefined)}
@@ -168,7 +170,7 @@ export function LabAssistantView() {
           </div>
           {state.lab_assistants.length === 0 ? (
             <div style={{ padding: 22, color: T.ink3, fontFamily: T.fMono, fontSize: 11 }}>
-              Nobody has joined yet. Assistants connect from the Streamlit mobile app on port 8502 with the code above.
+              Nobody has joined yet. Assistants join at /mobile on this server with the code above.
             </div>
           ) : (
             state.lab_assistants.map((a, i) => {

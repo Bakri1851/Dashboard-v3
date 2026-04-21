@@ -148,7 +148,7 @@ export function PreviousSessionsView() {
         {error && <div style={{ padding: 28, color: T.danger, fontFamily: T.fMono, fontSize: 11 }}>{error}</div>}
         {!loading && !error && data && data.length === 0 && (
           <div style={{ padding: 28, color: T.ink3, fontFamily: T.fMono, fontSize: 11 }}>
-            No saved sessions yet. Click "Save Retroactive Session" to create one from the current time window, or end a session from the Streamlit instructor app.
+            No saved sessions yet. Click "Save Retroactive Session" to create one from the current time window, or end the active session from the Sidebar.
           </div>
         )}
 

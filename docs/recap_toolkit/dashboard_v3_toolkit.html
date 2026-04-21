@@ -457,7 +457,41 @@ button:hover{border-color:#555;background:#22263a}
 .sp-parity-table td.sp-parity-ok{color:#56d364;font-family:'SF Mono',Consolas,monospace;font-size:11px}
 .sp-link{color:#7ab8f5;cursor:pointer;text-decoration:none;border-bottom:1px dotted #2d5a8e}
 .sp-link:hover{color:#a8d4ff;border-bottom-style:solid}
+/* ══════════════════════════════════════════
+   PANEL — ARCHITECTURE (interactive class diagram)
+══════════════════════════════════════════ */
+.arch-wrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start}
+.arch-lead{font-size:13px;color:#888;line-height:1.7;margin-bottom:1rem;max-width:1000px}
+.arch-legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;font-size:11px;color:#888}
+.arch-legend .chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;border:1px solid #2a2d3a;background:#161923}
+.arch-legend .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.arch-sub-tabs{display:flex;gap:6px;margin-bottom:12px}
+.arch-sub-tab{padding:5px 14px;border:1px solid #333;border-radius:6px;font-size:12px;cursor:pointer;background:#1a1d27;color:#aaa;transition:all 0.15s;white-space:nowrap}
+.arch-sub-tab:hover{border-color:#555;color:#ccc}
+.arch-sub-tab.active{background:#1e3a5f;color:#7ab8f5;border-color:#2d5a8e}
+.arch-diagram-host{background:#12151e;border:1px solid #2a2d3a;border-radius:10px;padding:14px;min-height:480px;overflow:auto;position:relative}
+.arch-diagram-host .mermaid{font-size:13px}
+.arch-diagram-host svg{max-width:none !important;height:auto !important}
+.arch-sub-section{display:none}
+.arch-sub-section.active{display:block}
+.arch-detail{background:#12151e;border:1px solid #2a2d3a;border-radius:10px;padding:16px 18px;font-size:13px;line-height:1.7;color:#ccc;position:sticky;top:70px;max-height:calc(100vh - 100px);overflow-y:auto}
+.arch-detail h4{font-size:13px;color:#e3b341;margin-bottom:10px;letter-spacing:0.02em}
+.arch-detail .pill{display:inline-block;font-size:10px;padding:2px 8px;border-radius:999px;margin-right:6px;margin-bottom:6px;letter-spacing:0.05em}
+.arch-detail .pill.ts{background:#003a3a;color:#5fd3cf}
+.arch-detail .pill.py{background:#0d2a4a;color:#7ab8f5}
+.arch-detail .pill.ana{background:#1d0e3a;color:#b88cff}
+.arch-detail .pill.new{background:#0d3322;color:#56d364}
+.arch-detail .pill.mod{background:#3a2a00;color:#e3b341}
+.arch-detail .pill.same{background:#1a1a1a;color:#888}
+.arch-detail p{margin-bottom:8px;color:#aaa}
+.arch-detail .path{font-family:'SF Mono',Consolas,monospace;font-size:11px;color:#7ab8f5;display:block;margin-bottom:8px;word-break:break-all}
+.arch-detail .role{font-size:12px;color:#ccc;margin-bottom:8px}
+.arch-detail .change{background:#161923;border-left:3px solid #56d364;padding:8px 12px;font-size:12px;color:#aaa;margin-top:10px}
+.arch-detail .change.mod{border-left-color:#e3b341}
+.arch-detail .change.same{border-left-color:#555}
+@media(max-width:1100px){.arch-wrap{grid-template-columns:1fr}.arch-detail{position:static;max-height:none}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.0/dist/mermaid.min.js"></script>
 </head>
 <body>
 
@@ -466,6 +500,7 @@ button:hover{border-color:#555;background:#22263a}
   <div class="top-tab active" data-panel="overview" onclick="switchPanel('overview',this)">Overview</div>
   <div class="top-tab" data-panel="ref" onclick="switchPanel('ref',this)">Code reference</div>
   <div class="top-tab" data-panel="files" onclick="switchPanel('files',this)">File breakdown</div>
+  <div class="top-tab" data-panel="arch" onclick="switchPanel('arch',this)">Architecture</div>
   <div class="top-tab" data-panel="glossary" onclick="switchPanel('glossary',this)">Glossary</div>
   <div class="top-tab" data-panel="literature" onclick="switchPanel('literature',this)">Literature</div>
   <div class="top-tab" data-panel="ops" onclick="switchPanel('ops',this)">Operations</div>
@@ -599,6 +634,150 @@ button:hover{border-color:#555;background:#22263a}
   <div class="file-tabs" id="files-tabs"></div>
   <div class="ref-count" id="files-count"></div>
   <div class="fn-list" id="files-list"></div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PANEL — ARCHITECTURE (interactive class diagram)
+══════════════════════════════════════════ -->
+<div id="panel-arch" class="panel">
+  <p class="arch-lead">
+    Cross-language class/module diagram of the <strong>ghost-settings fix</strong> (2026-04-21) — where the Settings UI toggles actually land, and how they shape what the analytics return. Two sub-diagrams: the <em>write path</em> (user toggles a control → backend state) and the <em>read path</em> (a polling view → backend analytics → rendered number). Click any node for its role, file path, and what changed. TypeScript is the frontend SPA; Python is split between the FastAPI HTTP surface and the analytics / model core that composes <code>learning_dashboard/</code>.
+  </p>
+
+  <div class="arch-legend">
+    <span class="chip"><span class="dot" style="background:#5fd3cf"></span>TypeScript · frontend</span>
+    <span class="chip"><span class="dot" style="background:#7ab8f5"></span>Python · backend HTTP</span>
+    <span class="chip"><span class="dot" style="background:#b88cff"></span>Python · analytics / models</span>
+    <span class="chip"><span class="dot" style="background:#56d364"></span>NEW in this fix</span>
+    <span class="chip"><span class="dot" style="background:#e3b341"></span>MODIFIED</span>
+    <span class="chip"><span class="dot" style="background:#888"></span>unchanged</span>
+  </div>
+
+  <div class="arch-sub-tabs">
+    <div class="arch-sub-tab active" data-sub="settings" onclick="archSwitchSub('settings',this)">Write path · Settings → backend</div>
+    <div class="arch-sub-tab" data-sub="data" onclick="archSwitchSub('data',this)">Read path · Polling → analytics</div>
+  </div>
+
+  <div class="arch-wrap">
+    <div>
+      <div class="arch-sub-section active" data-sub="settings">
+        <div class="arch-diagram-host">
+          <pre class="mermaid" id="arch-diagram-settings">
+flowchart LR
+  SettingsView["SettingsView.tsx<br/><i>modified</i>"]:::ts
+  useSettings["useSettings.ts<br/><i>unchanged</i>"]:::ts
+  useAutoRefresh["useAutoRefreshInterval.ts<br/><i>NEW</i>"]:::tsnew
+  App["App.tsx<br/><i>modified</i>"]:::ts
+  InClassView["views/InClassView.tsx<br/><i>modified</i>"]:::ts
+  LabAssistantView["views/LabAssistantView.tsx<br/><i>modified</i>"]:::ts
+  TypesApi["types/api.ts<br/><i>modified</i>"]:::ts
+  SettingsRouter["routers/settings.py<br/><i>modified</i>"]:::py
+  RuntimeConfig["runtime_config.py<br/><i>modified</i>"]:::py
+  Schemas["schemas.py<br/><i>modified</i>"]:::py
+  Cache["cache.py<br/><i>modified</i>"]:::py
+
+  SettingsView -->|read + write| useSettings
+  useSettings -->|HTTP GET/POST| SettingsRouter
+  SettingsRouter -->|update partial| RuntimeConfig
+  SettingsRouter -->|invalidate| Cache
+  SettingsRouter -.->|response_model| Schemas
+  useSettings -.->|Settings type| TypesApi
+  Schemas -.->|mirror| TypesApi
+
+  useAutoRefresh -->|read auto_refresh + interval| useSettings
+  App -->|intervalMs| useAutoRefresh
+  InClassView -->|intervalMs x4| useAutoRefresh
+  LabAssistantView -->|intervalMs| useAutoRefresh
+
+  classDef ts fill:#0a2a2a,stroke:#5fd3cf,color:#d7fff9,stroke-width:1px
+  classDef tsnew fill:#0a3a1f,stroke:#56d364,color:#d7ffe0,stroke-width:2px
+  classDef py fill:#0d2338,stroke:#7ab8f5,color:#d6e7ff,stroke-width:1px
+
+  click SettingsView call archNodeClick("SettingsView") "Settings UI panel"
+  click useSettings call archNodeClick("useSettings") "React hook for /api/settings"
+  click useAutoRefresh call archNodeClick("useAutoRefresh") "NEW - derives intervalMs from Settings"
+  click App call archNodeClick("App") "Root SPA shell"
+  click InClassView call archNodeClick("InClassView") "Primary instructor view"
+  click LabAssistantView call archNodeClick("LabAssistantView") "Lab-assistant roster + dispatch queue"
+  click SettingsRouter call archNodeClick("SettingsRouter") "FastAPI settings endpoints"
+  click RuntimeConfig call archNodeClick("RuntimeConfig") "Mutable runtime singleton"
+  click Schemas call archNodeClick("Schemas") "Pydantic response models"
+  click Cache call archNodeClick("Cache") "Analytics cache + active dispatchers"
+  click TypesApi call archNodeClick("TypesApi") "TS mirror of schemas.py"
+          </pre>
+        </div>
+      </div>
+      <div class="arch-sub-section" data-sub="data">
+        <div class="arch-diagram-host">
+          <pre class="mermaid" id="arch-diagram-data">
+flowchart LR
+  InClassView["views/InClassView.tsx<br/><i>modified</i>"]:::ts
+  StudentDetail["views/StudentDetail.tsx<br/><i>unchanged</i>"]:::ts
+  LabAssistantView["views/LabAssistantView.tsx<br/><i>modified</i>"]:::ts
+  useApiData["api/hooks.ts - useApiData<br/><i>unchanged</i>"]:::ts
+  useAutoRefresh["useAutoRefreshInterval.ts<br/><i>NEW</i>"]:::tsnew
+  LiveRouter["routers/live.py<br/><i>modified</i>"]:::py
+  StudentRouter["routers/student.py<br/><i>modified</i>"]:::py
+  Cache["cache.py<br/><i>modified</i>"]:::py
+  RuntimeConfig["runtime_config.py<br/><i>modified</i>"]:::py
+  BKT["models/bkt.py<br/><i>analytics</i>"]:::ana
+  ImprovedStruggle["models/improved_struggle.py<br/><i>analytics</i>"]:::ana
+  IRT["models/irt.py<br/><i>analytics</i>"]:::ana
+  Analytics["analytics.py<br/><i>analytics</i>"]:::ana
+
+  InClassView -->|intervalMs| useAutoRefresh
+  LabAssistantView -->|intervalMs| useAutoRefresh
+  InClassView -->|fetch + poll| useApiData
+  StudentDetail -->|fetch| useApiData
+  LabAssistantView -->|fetch + poll| useApiData
+  useApiData -->|HTTP GET| LiveRouter
+  useApiData -->|HTTP GET| StudentRouter
+
+  LiveRouter -->|load_active_struggle_df| Cache
+  LiveRouter -->|load_active_difficulty_df| Cache
+  StudentRouter -->|load_active_struggle_df| Cache
+  StudentRouter -->|load_active_difficulty_df| Cache
+
+  Cache -.->|reads struggle_model + BKT p| RuntimeConfig
+  Cache -->|mastery + irt_df| ImprovedStruggle
+  Cache -->|p_init p_learn p_guess p_slip| BKT
+  Cache -->|via load_irt_difficulty_df| IRT
+  Cache -->|baseline fallback| Analytics
+  ImprovedStruggle -->|shared helpers| Analytics
+
+  classDef ts fill:#0a2a2a,stroke:#5fd3cf,color:#d7fff9,stroke-width:1px
+  classDef tsnew fill:#0a3a1f,stroke:#56d364,color:#d7ffe0,stroke-width:2px
+  classDef py fill:#0d2338,stroke:#7ab8f5,color:#d6e7ff,stroke-width:1px
+  classDef ana fill:#1a1040,stroke:#b88cff,color:#e8d9ff,stroke-width:1px
+
+click InClassView call archNodeClick("InClassView") "Primary instructor view"
+click StudentDetail call archNodeClick("StudentDetail") "Per-student deep-dive"
+click LabAssistantView call archNodeClick("LabAssistantView") "Lab-assistant dispatch"
+click useApiData call archNodeClick("useApiData") "Generic fetch+poll hook"
+click useAutoRefresh call archNodeClick("useAutoRefresh") "NEW - Settings to intervalMs"
+click LiveRouter call archNodeClick("LiveRouter") "/live /struggle /difficulty"
+click StudentRouter call archNodeClick("StudentRouter") "Serves /student deep-dive"
+click Cache call archNodeClick("Cache") "Analytics cache + active dispatchers"
+click RuntimeConfig call archNodeClick("RuntimeConfig") "Runtime singleton"
+click BKT call archNodeClick("BKT") "Bayesian Knowledge Tracing"
+click ImprovedStruggle call archNodeClick("ImprovedStruggle") "Mastery+IRT-weighted struggle"
+click IRT call archNodeClick("IRT") "Rasch 1PL IRT"
+click Analytics call archNodeClick("Analytics") "Baseline analytics core"
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-detail" id="arch-detail">
+      <h4>Click any node</h4>
+      <p>The diagrams are clickable — tap a class to see its file path, role in the pipeline, and what changed (or didn't) in this fix.</p>
+      <p style="color:#888;font-size:12px">
+        <strong style="color:#ccc">Legend recap.</strong><br>
+        Solid arrow <code>--&gt;</code> = function call / HTTP request.<br>
+        Dashed arrow <code>..&gt;</code> = type reference / schema mirror.<br>
+      </p>
+    </div>
+  </div>
 </div>
 
 <!-- ══════════════════════════════════════════
@@ -3425,6 +3604,234 @@ function switchSubpanel(panelId,subId,btn){
 }
 
 /* ══════════════════════════════════════════
+   ARCHITECTURE PANEL — Mermaid + click handlers
+══════════════════════════════════════════ */
+const ARCH_NODES = {
+  SettingsView: {
+    title: "SettingsView.tsx",
+    path: "code2/frontend/src/views/SettingsView.tsx",
+    pills: [{cls:"ts",text:"TypeScript"},{cls:"mod",text:"MODIFIED"}],
+    role: "Renders the theme picker, model toggles, CF controls, BKT sliders, and the Auto-refresh/interval control. Writes any change via useSettings().update().",
+    change: "Removed the Temporal-smoothing toggle (lines 178–186 deleted). That toggle was a ghost — the backend had no hook to wire it to (apply_temporal_smoothing is marked as a stub)."
+  },
+  useSettings: {
+    title: "useSettings.ts",
+    path: "code2/frontend/src/api/useSettings.ts",
+    pills: [{cls:"ts",text:"TypeScript"},{cls:"same",text:"unchanged"}],
+    role: "Single source of truth for the /api/settings payload on the frontend. GETs with intervalMs=0 (fetch once), exposes update(patch) → POST + refetch. Any consumer that needs a runtime flag reads settings.runtime.* from here.",
+    change: "Untouched — but now has three new consumers: SettingsView (existing), and useAutoRefreshInterval (new). This hook is the hub that makes settings actually reach behavior."
+  },
+  useAutoRefresh: {
+    title: "useAutoRefreshInterval.ts",
+    path: "code2/frontend/src/api/useAutoRefreshInterval.ts",
+    pills: [{cls:"ts",text:"TypeScript"},{cls:"new",text:"NEW"}],
+    role: "Tiny helper hook that turns the user's Settings choices into an intervalMs for useApiData. Returns 0 when auto_refresh is off (which useApiData interprets as 'fetch once, no polling'), otherwise refresh_interval × 1000.",
+    change: "NEW FILE — before this, App.tsx / InClassView / LabAssistantView all hardcoded their own polling interval. The Settings toggle + dropdown were UI-only ghosts. Now the Settings UI actually shapes polling for all instructor-facing analytical endpoints (/live, /struggle, /difficulty, /cf)."
+  },
+  App: {
+    title: "App.tsx",
+    path: "code2/frontend/src/App.tsx",
+    pills: [{cls:"ts",text:"TypeScript"},{cls:"mod",text:"MODIFIED"}],
+    role: "Root SPA shell. Fetches /live (for the top-bar record count) and /lab/state (for the session banner). Routes to InClassView / StudentDetail / QuestionDetail / … based on viewStore.",
+    change: "Replaced hardcoded useApiData('/live', 10_000) with useApiData('/live', useAutoRefreshInterval(10_000)). /lab/state stays at 3s — peer coordination must keep working regardless of the instructor's auto-refresh preference."
+  },
+  InClassView: {
+    title: "InClassView.tsx",
+    path: "code2/frontend/src/views/InClassView.tsx",
+    pills: [{cls:"ts",text:"TypeScript"},{cls:"mod",text:"MODIFIED"}],
+    role: "The instructor's main view — headline stats, struggle leaderboard, difficulty leaderboard, CF diagnostics. Polls four endpoints.",
+    change: "All four polls (/live, /struggle, /difficulty, /cf) now route through useAutoRefreshInterval with their previous literal as the fallback. Toggling auto_refresh off here freezes everything except /lab/state."
+  },
+  StudentDetail: {
+    title: "StudentDetail.tsx",
+    path: "code2/frontend/src/views/StudentDetail.tsx",
+    pills: [{cls:"ts",text:"TypeScript"},{cls:"same",text:"unchanged"}],
+    role: "Per-student deep-dive. Fetches /student/{id} which uses load_active_struggle_df under the hood, so the headline struggle score here now reflects the selected model.",
+    change: "Not directly modified — but inherits the model-aware score via the backend change. Toggling Struggle model = Improved re-ranks the 'level' and 'score' fields shown at the top of the detail panel."
+  },
+  LabAssistantView: {
+    title: "LabAssistantView.tsx",
+    path: "code2/frontend/src/views/LabAssistantView.tsx",
+    pills: [{cls:"ts",text:"TypeScript"},{cls:"mod",text:"MODIFIED"}],
+    role: "Instructor's view of the lab-assistant roster + dispatch queue. Polls /lab/state (3s, untouched) and /struggle (session-scoped) for the dispatch queue.",
+    change: "The /struggle poll now honours Auto-refresh. /lab/state stays hardcoded so dispatch hand-offs don't freeze if the instructor toggles auto-refresh off."
+  },
+  useApiData: {
+    title: "api/hooks.ts · useApiData",
+    path: "code2/frontend/src/api/hooks.ts",
+    pills: [{cls:"ts",text:"TypeScript"},{cls:"same",text:"unchanged"}],
+    role: "The generic fetch+poll hook every view uses. Accepts (path, intervalMs, query). intervalMs=0 → fetch once, no polling. Uses AbortController so navigation cancels in-flight requests.",
+    change: "Untouched — but its intervalMs argument is now driven by useAutoRefreshInterval in every instructor-facing call site, so the existing 'if interval > 0 setInterval' guard (line 85) is the actual enable/disable switch."
+  },
+  TypesApi: {
+    title: "types/api.ts",
+    path: "code2/frontend/src/types/api.ts",
+    pills: [{cls:"ts",text:"TypeScript"},{cls:"mod",text:"MODIFIED"}],
+    role: "TypeScript mirror of schemas.py — shape of every /api/* response. Keeps frontend and backend contracts in sync.",
+    change: "Dropped smoothing_enabled from the RuntimeSettings interface. The field no longer appears in /api/settings responses."
+  },
+  SettingsRouter: {
+    title: "routers/settings.py",
+    path: "code2/backend/routers/settings.py",
+    pills: [{cls:"py",text:"Python · FastAPI"},{cls:"mod",text:"MODIFIED"}],
+    role: "Handles GET /api/settings (immutable config + live runtime), POST /api/settings (merge partial into runtime_config, invalidate caches), and POST /api/settings/reset.",
+    change: "Removed smoothing_enabled from the _to_runtime_settings() constructor. Every POST still invalidates all analytics caches — that's the mechanism that makes a BKT-slider change take effect on the next poll."
+  },
+  RuntimeConfig: {
+    title: "runtime_config.py",
+    path: "code2/backend/runtime_config.py",
+    pills: [{cls:"py",text:"Python · FastAPI"},{cls:"mod",text:"MODIFIED"}],
+    role: "Thread-safe mutable singleton that holds every user-changeable setting. POST /api/settings mutates it; GET reads a copy. Cache functions pull the live value to decide which model path to run.",
+    change: "Removed smoothing_enabled. Still carries: auto_refresh, refresh_interval, struggle_model, difficulty_model, and the 5 BKT parameters — all of which were previously ghosts and are now actually consumed by downstream code."
+  },
+  Schemas: {
+    title: "schemas.py",
+    path: "code2/backend/schemas.py",
+    pills: [{cls:"py",text:"Python · FastAPI"},{cls:"mod",text:"MODIFIED"}],
+    role: "Pydantic response models. RuntimeSettings mirrors the mutable slice that SettingsView writes.",
+    change: "Dropped smoothing_enabled from RuntimeSettings. Every other mutable field kept."
+  },
+  Cache: {
+    title: "cache.py",
+    path: "code2/backend/cache.py",
+    pills: [{cls:"py",text:"Python · FastAPI"},{cls:"mod",text:"MODIFIED"}],
+    role: "Single-flight TTL caches for the expensive analytics frames (df, struggle, difficulty, improved struggle, IRT difficulty, CF). Callers go through load_*_df helpers; writers call invalidate() after settings change.",
+    change: "Added load_active_struggle_df and load_active_difficulty_df dispatchers that branch on runtime_config.struggle_model / difficulty_model. Rewrote load_improved_struggle_df to compute BKT mastery with runtime p_* params and pass (mastery_summary, irt_df) to improved_struggle. Ancillary columns (submission_count, d_hat, …) merged from baseline onto improved output so router schemas stay stable."
+  },
+  LiveRouter: {
+    title: "routers/live.py",
+    path: "code2/backend/routers/live.py",
+    pills: [{cls:"py",text:"Python · FastAPI"},{cls:"mod",text:"MODIFIED"}],
+    role: "Owns /live (hero stats + 24h timeline), /struggle (ranked leaderboard), /difficulty (ranked leaderboard). Accepts ?from=&to= for window filtering.",
+    change: "All four call sites swapped from load_struggle_df / load_difficulty_df to load_active_struggle_df / load_active_difficulty_df. The router is now model-agnostic — it just asks for 'the leaderboard' and the cache decides which model to run."
+  },
+  StudentRouter: {
+    title: "routers/student.py",
+    path: "code2/backend/routers/student.py",
+    pills: [{cls:"py",text:"Python · FastAPI"},{cls:"mod",text:"MODIFIED"}],
+    role: "Serves /student/{id} — per-student deep-dive with score components, trajectory sparkline, top questions attempted, recent submissions.",
+    change: "Two call sites swapped to the active-model helpers. The score and score-components shown on the detail panel now match whatever model the instructor selected in Settings."
+  },
+  BKT: {
+    title: "models/bkt.py",
+    path: "code2/learning_dashboard/models/bkt.py",
+    pills: [{cls:"ana",text:"Python · analytics"},{cls:"same",text:"unchanged"}],
+    role: "Bayesian Knowledge Tracing — 2-state HMM per (user, question). compute_all_mastery replays a cohort and returns a per-attempt mastery. fit_bkt_parameters does joint MLE via L-BFGS-B.",
+    change: "Untouched — but its parameters (p_init, p_learn, p_guess, p_slip) are now threaded through from runtime_config. cache.load_improved_struggle_df calls compute_all_mastery with the user's current slider values. That's what makes the BKT sliders in Settings non-ghost."
+  },
+  ImprovedStruggle: {
+    title: "models/improved_struggle.py",
+    path: "code2/learning_dashboard/models/improved_struggle.py",
+    pills: [{cls:"ana",text:"Python · analytics"},{cls:"same",text:"unchanged"}],
+    role: "Combines behavioural composite (0.45) + BKT mastery gap (0.30) + IRT-weighted difficulty (0.25). Graceful degradation: missing mastery or IRT redistributes weight to behavioural.",
+    change: "Signature untouched — already accepted (df, mastery_summary=None, irt_difficulty=None). The change is that cache.py now supplies both optional arguments, so the BKT + IRT paths are finally live."
+  },
+  IRT: {
+    title: "models/irt.py",
+    path: "code2/learning_dashboard/models/irt.py",
+    pills: [{cls:"ana",text:"Python · analytics"},{cls:"same",text:"unchanged"}],
+    role: "Rasch 1PL IRT fit via L-BFGS-B with centering projection. Maps b_j → sigmoid → [0,1] for the difficulty leaderboard.",
+    change: "Untouched — but load_active_difficulty_df now routes to load_irt_difficulty_df when difficulty_model == 'irt', and renames columns so downstream routers see the baseline schema. Toggling the model in Settings re-ranks the top-questions list."
+  },
+  Analytics: {
+    title: "analytics.py",
+    path: "code2/learning_dashboard/analytics.py",
+    pills: [{cls:"ana",text:"Python · analytics"},{cls:"same",text:"unchanged"}],
+    role: "The baseline analytics core — compute_student_struggle_scores, compute_question_difficulty_scores, incorrectness scoring, mistake clustering.",
+    change: "Untouched — stays the fallback path. When struggle_model='baseline' (default), this is exactly what the endpoints return. apply_temporal_smoothing is still a stub — the smoothing_enabled ghost toggle was removed rather than wired to this stub."
+  }
+};
+
+window.archNodeClick = function(id) {
+  const detail = document.getElementById('arch-detail');
+  if (!detail) return;
+  const node = ARCH_NODES[id];
+  if (!node) {
+    detail.innerHTML = '<h4>' + id + '</h4><p>No details registered for this node.</p>';
+    return;
+  }
+  const pills = (node.pills || []).map(function(p){return '<span class="pill ' + p.cls + '">' + p.text + '</span>';}).join('');
+  const changeClass = /\bunchanged\b/i.test((node.pills||[]).map(function(p){return p.text;}).join(' ')) ? 'same'
+                   : /NEW/i.test((node.pills||[]).map(function(p){return p.text;}).join(' ')) ? ''
+                   : 'mod';
+  detail.innerHTML =
+    '<h4>' + node.title + '</h4>' +
+    '<code class="path">' + node.path + '</code>' +
+    '<div style="margin-bottom:10px">' + pills + '</div>' +
+    '<div class="role">' + node.role + '</div>' +
+    '<div class="change ' + changeClass + '"><strong style="color:#ccc">What changed:</strong><br>' + node.change + '</div>';
+};
+
+let _archMermaidInitDone = false;
+function archEnsureMermaid() {
+  if (typeof mermaid === 'undefined') return;
+  if (!_archMermaidInitDone) {
+    try {
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: 'dark',
+        securityLevel: 'loose',
+        themeVariables: {
+          darkMode: true,
+          background: '#12151e',
+          primaryColor: '#1a1d27',
+          primaryTextColor: '#e0e0e0',
+          primaryBorderColor: '#2a2d3a',
+          lineColor: '#7ab8f5',
+          fontFamily: "'SF Mono', Consolas, monospace"
+        }
+      });
+      _archMermaidInitDone = true;
+    } catch(e) { console.error('mermaid init failed', e); }
+  }
+  const panel = document.getElementById('panel-arch');
+  if (!panel) return;
+  // Snapshot the raw source on first encounter so we can restore + re-run when
+  // a diagram's sub-section is revealed later (mermaid mutates innerHTML on run).
+  panel.querySelectorAll('.mermaid').forEach(function(el){
+    if (!el.hasAttribute('data-mermaid-src')) {
+      el.setAttribute('data-mermaid-src', el.textContent);
+    }
+  });
+  // Only render the diagram in the currently-visible sub-section. Rendering a
+  // mermaid node inside a display:none parent produces a zero-dim SVG that
+  // can't be "revived" later — instead restore the source and re-run.
+  const active = panel.querySelector('.arch-sub-section.active .mermaid');
+  if (!active) return;
+  if (active.hasAttribute('data-processed') || active.querySelector('svg')) {
+    const src = active.getAttribute('data-mermaid-src');
+    if (src) {
+      active.innerHTML = src;
+      active.removeAttribute('data-processed');
+    }
+  }
+  try {
+    mermaid.run({ nodes: [active] });
+  } catch(e) { console.error('mermaid.run failed', e); }
+}
+
+function archSwitchSub(sub, btn) {
+  const panel = document.getElementById('panel-arch');
+  if (!panel) return;
+  panel.querySelectorAll('.arch-sub-section').forEach(function(s){s.classList.remove('active');});
+  panel.querySelectorAll('.arch-sub-tab').forEach(function(t){t.classList.remove('active');});
+  const section = panel.querySelector('.arch-sub-section[data-sub="' + sub + '"]');
+  if (section) section.classList.add('active');
+  if (btn) btn.classList.add('active');
+  archEnsureMermaid();
+}
+
+/* Hook into the panel switcher so mermaid renders on first Architecture open. */
+(function(){
+  const orig = window.switchPanel;
+  if (typeof orig !== 'function') return;
+  window.switchPanel = function(id, btn) {
+    orig(id, btn);
+    if (id === 'arch') setTimeout(archEnsureMermaid, 10);
+  };
+})();
+
+/* ══════════════════════════════════════════
    CODE REFERENCE JS
 ══════════════════════════════════════════ */
 const ALL=[
@@ -3945,7 +4352,7 @@ function resetProgress(){
   });
   /* Active top-level tab */
   if(STATE.tab){
-    const validIds=['overview','ref','glossary','literature','ops','status','dive','road','plan','sectionplan','report'];
+    const validIds=['overview','ref','files','arch','glossary','literature','ops','status','dive','road','plan','sectionplan','report'];
     if(validIds.indexOf(STATE.tab)>=0&&STATE.tab!=='overview')switchPanel(STATE.tab);
   }
   /* Restore subpanel selections */

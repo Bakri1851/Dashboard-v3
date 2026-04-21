@@ -4,7 +4,7 @@ from __future__ import annotations
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException
 
-from backend.cache import filter_df, load_difficulty_df, load_struggle_df
+from backend.cache import filter_df, load_active_difficulty_df, load_active_struggle_df
 from backend.deps import TimeWindow, get_dataframe, get_time_window
 from backend.schemas import (
     ScoreComponent,
@@ -51,7 +51,7 @@ def get_student(
         raise HTTPException(status_code=404, detail=f"Student {student_id!r} not found")
 
     # Pull pre-computed struggle row from the cached window-specific leaderboard
-    struggle_all = load_struggle_df(window.from_, window.to_)
+    struggle_all = load_active_struggle_df(window.from_, window.to_)
     row = struggle_all[struggle_all["user"].astype(str) == student_id]
     if row.empty:
         raise HTTPException(status_code=404, detail=f"Student {student_id!r} has no struggle score")
@@ -77,7 +77,7 @@ def get_student(
         .sort_values("attempts", ascending=False)
         .head(10)
     )
-    difficulty_all = load_difficulty_df(window.from_, window.to_)
+    difficulty_all = load_active_difficulty_df(window.from_, window.to_)
     difficulty_lookup = {
         str(q): str(lvl)
         for q, lvl in zip(difficulty_all.get("question", []), difficulty_all.get("difficulty_level", []))

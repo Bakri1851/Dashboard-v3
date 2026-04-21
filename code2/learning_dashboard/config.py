@@ -12,7 +12,7 @@ MODULE_RENAME_MAP: dict[str, str] = {"25COA504": "25COP504"}
 # --- OpenAI Configuration ---
 OPENAI_MODEL: str = "gpt-4o-mini"
 OPENAI_BATCH_SIZE: int = 20       # max (question, answer) pairs per API call — smaller batches parse more reliably
-SCORING_PER_RUN_CAP: int = 500    # max new pairs scored per Streamlit rerun; rest fall back to 0.5 and get scored on subsequent runs (keeps UI responsive on cold-start)
+SCORING_PER_RUN_CAP: int = 500    # max new pairs scored per request / Streamlit rerun; rest fall back to 0.5 and get scored on subsequent calls (keeps UI responsive on cold-start)
 # Master switch for OpenAI incorrectness scoring. When False, compute_incorrectness_column
 # returns 0.5 for every row without hitting the API — the dashboard still runs but
 # IRT/improved-struggle/measurement confidence lose their signal. Flip back to True

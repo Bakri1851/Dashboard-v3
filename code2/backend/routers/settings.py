@@ -1,7 +1,7 @@
 """GET / POST / DELETE `/api/settings`.
 
 `GET` returns the immutable config snapshot (weights, thresholds) alongside
-the live runtime flags (sounds, CF, smoothing, model selectors, BKT params).
+the live runtime flags (sounds, CF, auto-refresh, model selectors, BKT params).
 `POST` merges a partial dict into `runtime_config` and invalidates the
 analytics caches so the next request recomputes with the new flags.
 `POST /reset` reverts to defaults.
@@ -31,7 +31,6 @@ def _to_runtime_settings(rc: runtime_config.RuntimeConfig) -> RuntimeSettings:
         sounds_enabled=rc.sounds_enabled,
         auto_refresh=rc.auto_refresh,
         refresh_interval=rc.refresh_interval,
-        smoothing_enabled=rc.smoothing_enabled,
         cf_enabled=rc.cf_enabled,
         cf_threshold=rc.cf_threshold,
         struggle_model=rc.struggle_model,

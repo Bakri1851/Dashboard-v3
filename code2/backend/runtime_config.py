@@ -1,9 +1,9 @@
 """Process-local mutable settings — powers the live Settings view.
 
-Mirrors Streamlit's `st.session_state` flags for things like `cf_enabled`,
-`improved_models_enabled`, BKT parameters, auto-refresh, sounds etc. Any POST
-to `/api/settings` updates this singleton; analytics caches are flushed so
-the next data request picks up the new values.
+Thread-safe singleton holding every user-changeable flag: `cf_enabled`,
+`struggle_model`, `difficulty_model`, BKT parameters, auto-refresh interval,
+sounds etc. Any POST to `/api/settings` updates this singleton; analytics
+caches are flushed so the next data request picks up the new values.
 """
 from __future__ import annotations
 
@@ -20,7 +20,6 @@ class RuntimeConfig:
     sounds_enabled: bool = True
     auto_refresh: bool = True
     refresh_interval: int = 300
-    smoothing_enabled: bool = True
     cf_enabled: bool = False
     cf_threshold: float = 0.7
     struggle_model: str = "baseline"      # "baseline" | "improved"
@@ -37,7 +36,6 @@ class RuntimeConfig:
             sounds_enabled=config.SOUNDS_ENABLED_DEFAULT,
             auto_refresh=config.AUTO_REFRESH_DEFAULT,
             refresh_interval=config.AUTO_REFRESH_INTERVAL_DEFAULT,
-            smoothing_enabled=config.SMOOTHING_ENABLED,
             cf_enabled=False,
             cf_threshold=0.7,
             struggle_model="baseline",

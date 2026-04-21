@@ -20,12 +20,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-# Mirror the Streamlit app's secrets bootstrap (instructor_app.py:25-28):
-# read .streamlit/secrets.toml and lift OPENAI_API_KEY into the environment
-# so analytics._get_openai_client() finds it. Without this, the backend runs
+# Bootstrap OPENAI_API_KEY from .streamlit/secrets.toml at the repo root
+# (shared config file; name is historical). Lift it into the environment so
+# analytics._get_openai_client() finds it. Without this, the backend runs
 # with an empty key, every OpenAI call 401s, and every incorrectness score
-# falls back to 0.5 — which makes IRT, improved struggle, and measurement
-# confidence all degrade silently.
+# falls back to 0.5 — IRT, improved struggle, and measurement confidence
+# all degrade silently.
 if not os.environ.get("OPENAI_API_KEY"):
     _secrets_path = Path(__file__).resolve().parents[2] / ".streamlit" / "secrets.toml"
     if _secrets_path.is_file():
@@ -130,7 +130,7 @@ _DIST_DIR = Path(__file__).resolve().parent.parent / "frontend" / "dist"
 
 app = FastAPI(
     title="Dashboard v3 API",
-    description="Alternative-frontend backend. Streamlit apps in code/ and code2/ are unaffected.",
+    description="FastAPI backend for the React frontend. Coexists with the Streamlit stack in code/ via shared data/lab_session.json.",
     version="0.1.0",
     lifespan=lifespan,
 )

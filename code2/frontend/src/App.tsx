@@ -16,12 +16,13 @@ import { ComparisonView } from './views/ComparisonView'
 import { LabAssistantView } from './views/LabAssistantView'
 import { useEffect } from 'react'
 import { useSettings } from './api/useSettings'
+import { useAutoRefreshInterval } from './api/useAutoRefreshInterval'
 
 export default function App() {
   const { view, selectedStudentId, selectedQuestionId, pickStudent, pickQuestion, setView, back, setSoundsEnabled } =
     useViewStore()
   const { data: settings } = useSettings()
-  const { data: live } = useApiData<LiveDataResponse>('/live', 10_000)
+  const { data: live } = useApiData<LiveDataResponse>('/live', useAutoRefreshInterval(10_000))
   const { data: lab } = useApiData<LabState>('/lab/state', 3_000)
 
   // Mirror runtime sounds_enabled into the view store so navigation/selection
