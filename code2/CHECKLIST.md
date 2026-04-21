@@ -17,9 +17,9 @@
 ## Phase 0 — Bootstrap
 - [x] `cp -r code code2` (PowerShell: `Copy-Item -Recurse code code2`) — 2026-04-19
 - [x] `code2/CHECKLIST.md` created from plan §15 — 2026-04-19
-- [ ] `streamlit run code2/app.py --server.port 8503` renders (manual verification by user)
-- [ ] `streamlit run code2/lab_app.py --server.port 8504` renders (manual verification by user)
-- [ ] Cross-copy state sharing verified: session started on code/ visible in code2/ Streamlit (manual)
+- [~] `streamlit run code2/app.py --server.port 8503` renders — dropped 2026-04-21; `code2/` no longer ships a Streamlit UI (see Phase 10). `code/` on 8501 is the canonical Streamlit fallback.
+- [~] `streamlit run code2/lab_app.py --server.port 8504` renders — dropped 2026-04-21; see Phase 10.
+- [~] Cross-copy state sharing verified — superseded by the 3-process model (`code/` Streamlit × 2 + `code2/` FastAPI × 1) sharing `data/lab_session.json`.
 
 ## Phase 1 — Backend skeleton
 - [x] Append `fastapi`, `uvicorn[standard]`, `cachetools`, `python-dotenv` to `code2/requirements.txt`; `pip install` — 2026-04-19
@@ -153,10 +153,21 @@ For each view: extract from mockup → port to .tsx → implement backing endpoi
 - [x] Meta endpoints: `/api/meta/filter-presets` → 8 presets; `/api/meta/academic-periods` → 37 weeks
 
 ## Phase 8 — Defence rehearsal (run AFTER Phase 9)
-- [ ] All 5 processes started (code/ ×2, code2/ ×2, FastAPI ×1)
+- [ ] All 3 processes started (code/ ×2 Streamlit, code2/ ×1 FastAPI+SPA) — was 5 before Phase 10 cleanup
 - [ ] End-to-end smoke test per plan §12
 - [ ] Thesis screenshots captured (8 views, 3 states per view)
 - [ ] Demo script rehearsed
+
+## Phase 10 — Streamlit removal from code2/ — 2026-04-21
+- [x] Deleted `code2/app.py`, `code2/lab_app.py`, `code2/learning_dashboard/instructor_app.py`, `code2/learning_dashboard/assistant_app.py`, `code2/learning_dashboard/sound.py`, `code2/learning_dashboard/ui/` — the React SPA covers every view these rendered.
+- [x] Stripped `import streamlit` + `st.secrets` fallback from `analytics.py` — OpenAI key now sourced only from `OPENAI_API_KEY`, which `backend/main.py` lifts out of `.streamlit/secrets.toml` at boot.
+- [x] Stripped `@st.cache_data` decorator and the Streamlit-only `fetch_raw_data()` wrapper from `data_loader.py`; `fetch_raw_data_uncached()` stays as the single entry point (caching is handled by `backend/cache.py`).
+- [x] Removed Streamlit-only helpers from `data_loader.py`: `load_data()` (used `st.session_state` short-circuit), `build_session_record_from_state()`, `apply_saved_session_to_state()`, `build_retroactive_session_record()` — the FastAPI `sessions.py` router builds its record dict inline from POST args.
+- [x] Replaced the one `st.warning(...)` call in `_read_saved_sessions_payload` with a `logger.warning(...)`.
+- [x] Dropped `streamlit`, `streamlit-autorefresh`, `plotly` from `code2/requirements.txt` (plotly was only consumed by the deleted Streamlit UI; React uses D3).
+- [x] Updated `code2/backend/routers/sessions.py` docstring to drop the stale reference to `build_session_record_from_state`.
+- [x] Updated project-root `CLAUDE.md` — "Two-app system" section now describes the two stacks (`code/` Streamlit vs `code2/` React+FastAPI) and the shared-state contract.
+- [x] Verification: `python -m py_compile` clean across `code2/backend/` + `code2/learning_dashboard/`; import check loads every backend router without error; `code/` untouched and remains the Streamlit reference.
 
 ## Running notes (append below as you go)
 

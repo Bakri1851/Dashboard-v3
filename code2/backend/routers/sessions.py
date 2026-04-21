@@ -2,9 +2,7 @@
 
 `POST /api/sessions/save` builds a session record from the current time-
 filter window (supplied by the frontend) and delegates to
-`data_loader.save_session_record`. The Streamlit `build_session_record_from_state`
-helper is Streamlit-only because it reads `st.session_state` — here the same
-shape is assembled from plain POST arguments.
+`data_loader.save_session_record`.
 
 `DELETE /api/sessions/{id}` delegates to `data_loader.delete_session_record`.
 """

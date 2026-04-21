@@ -9,7 +9,6 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
-import streamlit as st
 from openai import OpenAI
 from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -22,12 +21,9 @@ logger = logging.getLogger(__name__)
 
 
 def _get_openai_client() -> OpenAI:
+    # Key is sourced from OPENAI_API_KEY in the environment. backend/main.py
+    # lifts it out of .streamlit/secrets.toml at FastAPI boot.
     key = os.environ.get("OPENAI_API_KEY", "")
-    if not key:
-        try:
-            key = st.secrets.get("OPENAI_API_KEY", "") or ""
-        except Exception:
-            key = ""
     return OpenAI(api_key=key, max_retries=1, timeout=20.0)
 
 

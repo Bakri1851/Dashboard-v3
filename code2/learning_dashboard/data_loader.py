@@ -1,5 +1,6 @@
 # data_loader.py — API fetching, parsing, normalization, cleaning
 import json
+import logging
 import xml.etree.ElementTree as ET
 from datetime import date as dt_date, datetime, time as dt_time
 from pathlib import Path
@@ -8,22 +9,17 @@ from uuid import uuid4
 
 import pandas as pd
 import requests
-import streamlit as st
 
 from learning_dashboard import config, paths
 
+logger = logging.getLogger(__name__)
+
 
 def fetch_raw_data_uncached() -> str:
-    """GET request to the API endpoint. Uncached — for use outside Streamlit (e.g. FastAPI)."""
+    """GET request to the API endpoint. Caching is handled by backend/cache.py."""
     response = requests.get(config.API_URL, timeout=config.API_TIMEOUT)
     response.raise_for_status()
     return response.text
-
-
-@st.cache_data(ttl=config.CACHE_TTL)
-def fetch_raw_data() -> str:
-    """GET request to the API endpoint. Cached for CACHE_TTL seconds (Streamlit path)."""
-    return fetch_raw_data_uncached()
 
 
 def detect_format(raw: str) -> str:
@@ -202,64 +198,6 @@ def add_feedback_flag(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def load_data() -> tuple[pd.DataFrame, str]:
-    """Top-level: fetch -> detect -> parse -> clean. Returns (DataFrame, error_msg)."""
-    empty_df = pd.DataFrame(
-        columns=[
-            "module",
-            "question",
-            "timestamp",
-            "student_answer",
-            "ai_feedback",
-            "session",
-            "user",
-        ]
-    )
-    try:
-        raw = fetch_raw_data()
-    except Exception as e:
-        return empty_df, f"API connection failed: {type(e).__name__} - {e}"
-
-    # Skip parse/normalize when raw data hasn't changed since last render
-    raw_hash = hash(raw)
-    if st.session_state.get("_df_hash") == raw_hash and "_df" in st.session_state:
-        return st.session_state["_df"], ""
-
-    fmt = detect_format(raw)
-
-    if fmt == "json":
-        try:
-            records = parse_json_response(raw)
-        except Exception as json_error:
-            try:
-                records = parse_xml_response(raw)
-            except Exception as xml_error:
-                return (
-                    empty_df,
-                    "Unable to parse API response as JSON or XML: "
-                    f"{type(json_error).__name__}, {type(xml_error).__name__}",
-                )
-    else:
-        try:
-            records = parse_xml_response(raw)
-        except Exception as xml_error:
-            try:
-                records = parse_json_response(raw)
-            except Exception as json_error:
-                return (
-                    empty_df,
-                    "Unable to parse API response as XML or JSON: "
-                    f"{type(xml_error).__name__}, {type(json_error).__name__}",
-                )
-
-    try:
-        df = normalize_and_clean(records)
-        st.session_state["_df_hash"] = raw_hash
-        st.session_state["_df"] = df
-        return df, ""
-    except Exception as e:
-        return empty_df, f"Data normalization failed: {type(e).__name__} - {e}"
-
 def _saved_sessions_path() -> Path:
     """Absolute path to the local saved-session store."""
     return paths.saved_sessions_path()
@@ -288,7 +226,7 @@ def _read_saved_sessions_payload() -> dict:
             _backup_corrupt_saved_sessions(path)
         except OSError:
             pass
-        st.warning("Saved sessions file was corrupted and has been reset.")
+        logger.warning("Saved sessions file was corrupted and has been reset.")
         return _empty_saved_sessions_payload()
 
     if not isinstance(payload, dict):
@@ -388,174 +326,6 @@ def delete_session_record(session_id: str) -> bool:
         }
     )
     return True
-
-
-def build_session_record_from_state(now: datetime) -> Optional[dict]:
-    """Build a persisted record from the current Streamlit session state."""
-    session_start = st.session_state.get("session_start")
-    if not isinstance(session_start, datetime):
-        return None
-
-    session_name = str(st.session_state.get("session_name_draft", "")).strip()
-    if not session_name:
-        session_name = f"Lab Session {session_start.strftime('%Y-%m-%d %H:%M')}"
-
-    time_filter_preset = st.session_state.get("time_filter_preset", "Today")
-    is_custom = time_filter_preset == "Custom"
-
-    date_range_value = st.session_state.get("time_date_range")
-    start_date_iso = None
-    end_date_iso = None
-    if isinstance(date_range_value, (tuple, list)) and len(date_range_value) == 2:
-        start_date = date_range_value[0]
-        end_date = date_range_value[1]
-        if hasattr(start_date, "isoformat") and hasattr(end_date, "isoformat"):
-            start_date_iso = start_date.isoformat()
-            end_date_iso = end_date.isoformat()
-
-    start_time_value = st.session_state.get("time_start")
-    end_time_value = st.session_state.get("time_end")
-    start_time_iso = (
-        start_time_value.isoformat() if isinstance(start_time_value, dt_time) else None
-    )
-    end_time_iso = (
-        end_time_value.isoformat() if isinstance(end_time_value, dt_time) else None
-    )
-
-    duration_seconds = max(0, int((now - session_start).total_seconds()))
-
-    return {
-        "id": str(uuid4()),
-        "name": session_name,
-        "start_time": session_start.isoformat(timespec="seconds"),
-        "end_time": now.isoformat(timespec="seconds"),
-        "duration_seconds": duration_seconds,
-        "context": {
-            "dashboard_view": st.session_state.get("dashboard_view", "In Class View"),
-            "secondary_module_filter": st.session_state.get(
-                "secondary_module_filter", "All Modules"
-            ),
-            "time_filter_preset": time_filter_preset,
-            "time_date_range": (
-                [start_date_iso, end_date_iso]
-                if is_custom and start_date_iso and end_date_iso
-                else None
-            ),
-            "time_start": start_time_iso if is_custom else None,
-            "time_end": end_time_iso if is_custom else None,
-        },
-        "notes": "",
-    }
-
-
-def build_retroactive_session_record(
-    name: str,
-    start_date,
-    end_date,
-    start_time=None,
-    end_time=None,
-) -> dict:
-    """Build a session record from manual time-filter values.
-
-    Used when an instructor forgot to record a live session and wants to
-    retroactively save a time window as a session.
-    """
-    from datetime import time as dt_time
-
-    if not name.strip():
-        name = f"Retroactive Session {start_date.isoformat()}"
-
-    start_time = start_time or dt_time(0, 0)
-    end_time = end_time or dt_time(23, 59)
-
-    start_dt = datetime.combine(start_date, start_time)
-    end_dt = datetime.combine(end_date, end_time)
-    duration_seconds = max(0, int((end_dt - start_dt).total_seconds()))
-
-    return {
-        "id": str(uuid4()),
-        "name": name.strip(),
-        "start_time": start_dt.isoformat(timespec="seconds"),
-        "end_time": end_dt.isoformat(timespec="seconds"),
-        "duration_seconds": duration_seconds,
-        "context": {
-            "dashboard_view": st.session_state.get("dashboard_view", "In Class View"),
-            "secondary_module_filter": st.session_state.get(
-                "secondary_module_filter", "All Modules"
-            ),
-            "time_filter_preset": "Custom",
-            "time_date_range": [start_date.isoformat(), end_date.isoformat()],
-            "time_start": start_time.isoformat() if start_time else None,
-            "time_end": end_time.isoformat() if end_time else None,
-        },
-        "notes": "Retroactive session (saved from time filter)",
-    }
-
-
-def apply_saved_session_to_state(
-    record: dict,
-    available_modules: Optional[list[str]] = None,
-) -> None:
-    """Apply a saved session record onto active Streamlit state."""
-    if not isinstance(record, dict):
-        return
-
-    context = record.get("context", {})
-    if not isinstance(context, dict):
-        context = {}
-
-    dashboard_view = context.get("dashboard_view", "In Class View")
-    if dashboard_view not in {"In Class View", "Data Analysis View"}:
-        dashboard_view = "In Class View"
-
-    module_filter = context.get("secondary_module_filter", "All Modules") or "All Modules"
-    warning_messages: list[str] = []
-
-    if available_modules is not None and module_filter not in available_modules:
-        module_filter = "All Modules"
-        warning_messages.append(
-            "Saved module filter is no longer available. Fallback applied: All Modules."
-        )
-
-    saved_preset = context.get("time_filter_preset")
-    if saved_preset is None:
-        # Backward-compat: derive preset from old time_filter_enabled flag.
-        saved_preset = "Custom" if context.get("time_filter_enabled") else "Today"
-    date_range_value = context.get("time_date_range")
-    saved_start_time = _parse_iso_time(context.get("time_start"))
-    saved_end_time = _parse_iso_time(context.get("time_end"))
-    session_start = _parse_iso_datetime(record.get("start_time"))
-    session_end = _parse_iso_datetime(record.get("end_time"))
-    if session_start is None or session_end is None:
-        warning_messages.append(
-            "Saved session time window is missing; showing all available data."
-        )
-
-    st.session_state["dashboard_view"] = dashboard_view
-    st.session_state["current_view"] = "In Class View"
-    st.session_state["secondary_module_filter"] = module_filter
-    st.session_state["session_active"] = False
-    st.session_state["session_start"] = None
-    st.session_state["selected_student"] = None
-    st.session_state["selected_question"] = None
-    st.session_state["loaded_session_id"] = record.get("id")
-    st.session_state["session_name_draft"] = record.get("name", "")
-    st.session_state["time_filter_preset"] = saved_preset
-    st.session_state["loaded_session_start"] = session_start
-    st.session_state["loaded_session_end"] = session_end
-    st.session_state["session_load_warning"] = (
-        " ".join(warning_messages) if warning_messages else None
-    )
-
-    if saved_preset == "Custom":
-        if isinstance(date_range_value, (list, tuple)) and len(date_range_value) == 2:
-            start_date = _parse_iso_date(date_range_value[0])
-            end_date = _parse_iso_date(date_range_value[1])
-            if start_date and end_date:
-                st.session_state["time_date_range"] = (start_date, end_date)
-
-        st.session_state["time_start"] = saved_start_time or dt_time(0, 0)
-        st.session_state["time_end"] = saved_end_time or dt_time(23, 59)
 
 
 def filter_by_datetime_window(

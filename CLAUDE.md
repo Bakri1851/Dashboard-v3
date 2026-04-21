@@ -4,33 +4,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A Streamlit-based learning analytics dashboard for monitoring student struggle and question difficulty during university lab sessions. Two cooperating apps share live state through a file-locked JSON file on disk.
+A learning analytics dashboard for monitoring student struggle and question difficulty during university lab sessions. Shipped as two separate stacks that coexist in this repo:
+
+- **`code/`** — original Streamlit dashboard (instructor on 8501, mobile lab assistant on 8502). This is the canonical reference implementation and the fallback for the defence demo.
+- **`code2/`** — alternative React + FastAPI frontend (single FastAPI process on 8000 serves both the API and the built React SPA; Vite dev server on 5173 during frontend development). Feature-parity with `code/` was reached in Phase 9 (see `code2/CHECKLIST.md`). `code2/` has **no Streamlit UI** — the old `code2/app.py`, `code2/lab_app.py`, `code2/learning_dashboard/{instructor_app,assistant_app}.py`, and `code2/learning_dashboard/ui/` were removed; only the analytical core (`learning_dashboard/{analytics,data_loader,rag,models,…}`) remains, imported by the FastAPI routers.
+
+Both stacks share live state through `data/lab_session.json` — a file-locked JSON file coordinated through `lab_state.py` and `filelock`, so a Streamlit app in `code/` and the FastAPI backend in `code2/` can run side by side.
 
 ## Commands
 
 Run all commands from the repo root (`Dashboard v3/`).
 
 ```bash
-# Install dependencies
+# --- Streamlit stack (code/) ---
 pip install -r code/requirements.txt
+python -m streamlit run code/app.py                          # instructor, port 8501
+streamlit run code/lab_app.py --server.port 8502             # mobile lab assistant, port 8502
 
-# Run instructor dashboard (port 8501)
-python -m streamlit run code/app.py
+# --- React + FastAPI stack (code2/) ---
+pip install -r code2/requirements.txt
+uvicorn backend.main:app --app-dir code2 --port 8000         # API + built SPA on http://localhost:8000
+cd code2/frontend && npm install && npm run dev              # Vite dev server on http://localhost:5173 (proxies /api → :8000)
+cd code2/frontend && npm run build                           # build SPA into dist/ for FastAPI to serve
 
-# Run mobile lab assistant app (port 8502)
-streamlit run code/lab_app.py --server.port 8502
-
-# Syntax check all source files
+# --- Syntax check all source files ---
 python -m py_compile code/app.py code/lab_app.py code/learning_dashboard/*.py code/learning_dashboard/ui/*.py
+python -m py_compile code2/backend/*.py code2/backend/routers/*.py code2/learning_dashboard/*.py code2/learning_dashboard/models/*.py
 ```
 
 There are no automated tests. Validation is manual smoke testing (see README.md checklist).
 
 ## Architecture
 
-### Two-app system
-- `code/app.py` and `code/lab_app.py` are thin wrappers delegating to `code/learning_dashboard/instructor_app.py` and `code/learning_dashboard/assistant_app.py`
-- Both share state via `data/lab_session.json`, managed through `code/learning_dashboard/lab_state.py` with `filelock`
+### Two stacks, shared state
+- **Streamlit (`code/`)** — `code/app.py` and `code/lab_app.py` are thin wrappers delegating to `code/learning_dashboard/instructor_app.py` and `code/learning_dashboard/assistant_app.py`.
+- **React + FastAPI (`code2/`)** — `code2/backend/main.py` is the FastAPI entry; 10 routers under `code2/backend/routers/` adapt the `learning_dashboard` analytical core to HTTP. `code2/frontend/` is a Vite + React + TypeScript SPA with 8 views mirroring the Streamlit ones.
+- All three apps (two Streamlit + one FastAPI) share state via `data/lab_session.json`, managed through `learning_dashboard/lab_state.py` with `filelock` — so a session started in Streamlit is visible in React within ~5 s and vice versa.
 
 ### Package layout (`code/learning_dashboard/`)
 - `config.py` — all tunable constants (weights, thresholds, colors, API config). Start here for parameter changes.
