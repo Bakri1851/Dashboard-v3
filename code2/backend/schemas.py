@@ -128,6 +128,10 @@ class StudentDetail(BaseModel):
     trajectory: list[float] = Field(description="Recent incorrectness values (oldest → newest), up to 10")
     top_questions: list[StudentQuestionRow]
     recent_submissions: list[StudentRecentRow]
+    timeline_24h: list[int] = Field(
+        default_factory=lambda: [0] * 24,
+        description="Hour-of-day submission distribution for this student over the active window.",
+    )
 
 
 # ----------------------------------------------------------------
@@ -149,6 +153,10 @@ class QuestionDetail(BaseModel):
     top_strugglers: list[QuestionStudentRow] = Field(
         default_factory=list,
         description="Students sorted by mean incorrectness on this question (descending).",
+    )
+    timeline_24h: list[int] = Field(
+        default_factory=lambda: [0] * 24,
+        description="Hour-of-day attempt distribution for this question over the active window.",
     )
 
 

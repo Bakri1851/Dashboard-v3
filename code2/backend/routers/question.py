@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from backend.cache import filter_df, load_difficulty_df, load_struggle_df
 from backend.deps import TimeWindow, get_dataframe, get_time_window
+from backend.routers._timeline import hour_of_day_distribution
 from backend.schemas import (
     MistakeCluster,
     QuestionDetail,
@@ -135,4 +136,5 @@ def get_question(
         mistake_clusters=mistake_clusters,
         recent_attempts=recent_attempts,
         top_strugglers=top_strugglers,
+        timeline_24h=hour_of_day_distribution(q_df),
     )

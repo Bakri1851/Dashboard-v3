@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from backend.cache import filter_df, load_active_difficulty_df, load_active_struggle_df
 from backend.deps import TimeWindow, get_dataframe, get_time_window
+from backend.routers._timeline import hour_of_day_distribution
 from backend.schemas import (
     ScoreComponent,
     StudentDetail,
@@ -118,4 +119,5 @@ def get_student(
         trajectory=trajectory,
         top_questions=top_questions,
         recent_submissions=recent_submissions,
+        timeline_24h=hour_of_day_distribution(user_df),
     )

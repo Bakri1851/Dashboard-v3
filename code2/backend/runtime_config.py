@@ -19,7 +19,7 @@ class RuntimeConfig:
     # Runtime-mutable settings, defaults pulled from `config.py`.
     sounds_enabled: bool = True
     auto_refresh: bool = True
-    refresh_interval: int = 300
+    refresh_interval: int = 60
     cf_enabled: bool = False
     cf_threshold: float = 0.7
     struggle_model: str = "baseline"      # "baseline" | "improved"

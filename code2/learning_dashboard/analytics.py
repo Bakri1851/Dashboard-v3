@@ -131,6 +131,8 @@ def estimate_incorrectness(feedback: Optional[str]) -> float:
 def compute_incorrectness_column(
     df: pd.DataFrame,
     max_new_scores: Optional[int] = None,
+    *,
+    score_new: bool = True,
 ) -> pd.Series:
     """
     Score all ai_feedback values via OpenAI, batched for efficiency.
@@ -144,8 +146,12 @@ def compute_incorrectness_column(
       - ``0`` → no cap, score every uncached feedback in this call.
       - positive int → that many new scores at most.
     The background prewarm (``backend/main.py::_prewarm``) passes ``0`` so it
-    fully warms ``_incorrectness_cache`` without blocking in-request calls,
-    which continue to use the default cap.
+    fully warms ``_incorrectness_cache`` without blocking in-request calls.
+
+    ``score_new=False`` skips all OpenAI calls — the result is built purely
+    from ``_incorrectness_cache`` lookups, with uncached feedbacks mapped to
+    0.5. The in-request raw-data load path uses this so it never blocks on
+    OpenAI; the background prewarm is responsible for warming the cache.
     """
     feedbacks = df["ai_feedback"].astype(str).str.strip()
 
@@ -163,6 +169,19 @@ def compute_incorrectness_column(
     # Collect unique non-empty texts not yet cached
     uncached_all = [t for t in unique_feedbacks if t and t not in _incorrectness_cache]
     n_empty = sum(1 for t in unique_feedbacks if not t)
+
+    if not score_new:
+        # Pure cache-lookup mode — no OpenAI, no blocking. Deferred items
+        # remain at 0.5 until the background prewarm fills the cache.
+        result = feedbacks.map(lambda t: _incorrectness_cache.get(t, 0.5))
+        logger.info(
+            "compute_incorrectness_column: score_new=False lookup-only — "
+            "total_rows=%d unique_feedbacks=%d already_cached=%d "
+            "deferred=%d empty_feedbacks=%d",
+            len(df), len(unique_feedbacks), already_cached,
+            len(uncached_all), n_empty,
+        )
+        return result
 
     # Cap the number of new feedbacks scored per request so a cold cache
     # (~3k uniques on this dataset) doesn't block the first /struggle or /live

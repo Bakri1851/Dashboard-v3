@@ -479,7 +479,7 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
         </div>
         <div style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
           <SectionLabel n={3}>Submissions, last 24h</SectionLabel>
-          <TimelineChart data={timeline} highlightRange={[22, 23]} />
+          <TimelineChart data={timeline} semantic="hours_ago" highlightRange={[22, 23]} />
         </div>
       </AnimatedCard>
     </motion.div>

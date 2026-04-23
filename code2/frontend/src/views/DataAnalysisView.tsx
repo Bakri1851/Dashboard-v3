@@ -25,7 +25,7 @@ const MODES: { id: ChartMode; label: string; hint: string }[] = [
   { id: 'module_usage',        label: 'Module Usage',         hint: 'submissions per module' },
   { id: 'top_questions',       label: 'Top Questions',        hint: 'most attempted' },
   { id: 'user_activity',       label: 'User Activity',        hint: 'top submitters' },
-  { id: 'timeline',            label: 'Activity Timeline',    hint: '24-hour heartbeat' },
+  { id: 'timeline',            label: 'Activity Timeline',    hint: 'hour-of-day distribution' },
   { id: 'week_heatmap',        label: 'Activity by Week',     hint: 'academic week × day' },
   { id: 'students_per_module', label: 'Students by Module',   hint: 'unique students per module' },
 ]
@@ -275,7 +275,7 @@ function ChartBody({ mode, data }: { mode: ChartMode; data: AnalysisStats }) {
       )
     }
     case 'timeline':
-      return <TimelineChart data={data.timeline_24h} highlightRange={[22, 23]} />
+      return <TimelineChart data={data.timeline_24h} semantic="hour_of_day" />
     case 'week_heatmap':
       return <WeekView data={data} />
   }

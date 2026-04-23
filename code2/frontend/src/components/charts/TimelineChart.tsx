@@ -2,17 +2,42 @@ import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { T } from '../../theme/tokens'
 
-/** 24-hour submission volume — index 0 = earliest, index 23 = current hour. */
+type Semantic = 'hours_ago' | 'hour_of_day'
+
+/**
+ * 24-bar submission volume chart.
+ *
+ * semantic="hours_ago"    → index 0 = 24h ago, index 23 = now   (live heartbeat)
+ * semantic="hour_of_day"  → index 0 = 00:00,   index 23 = 23:00 (filtered aggregate)
+ */
 export function TimelineChart({
   data,
   highlightRange,
+  semantic = 'hours_ago',
 }: {
   data: number[]
   highlightRange?: [number, number]
+  semantic?: Semantic
 }) {
   const max = Math.max(...data, 1)
   const peakIdx = data.indexOf(max)
   const replayKey = useMemo(() => data.join('|'), [data])
+
+  const tileTitle = (i: number, v: number) =>
+    semantic === 'hour_of_day'
+      ? `${String(i).padStart(2, '0')}:00 — ${v}`
+      : `${23 - i}h ago — ${v}`
+
+  const peakCaption =
+    semantic === 'hour_of_day'
+      ? `Peak at ${String(peakIdx).padStart(2, '0')}:00 · ${max} submissions`
+      : `Peak ${23 - peakIdx}h ago · ${max} submissions`
+
+  const axisLabels =
+    semantic === 'hour_of_day'
+      ? ['00:00', '06:00', '12:00', '18:00', '23:00']
+      : ['-24h', '-18h', '-12h', '-6h', 'now']
+
   return (
     <div>
       <motion.div
@@ -42,7 +67,7 @@ export function TimelineChart({
                 background: inHighlight ? T.accent : T.ink2,
                 transformOrigin: 'bottom',
               }}
-              title={`${String(i).padStart(2, '0')}:00 — ${v}`}
+              title={tileTitle(i, v)}
             />
           )
         })}
@@ -57,10 +82,10 @@ export function TimelineChart({
           color: T.ink3,
         }}
       >
-        <span>-24h</span><span>-18h</span><span>-12h</span><span>-6h</span><span>now</span>
+        {axisLabels.map((l) => <span key={l}>{l}</span>)}
       </div>
       <div style={{ marginTop: 10, fontFamily: T.fMono, fontSize: 10.5, color: T.ink3 }}>
-        Peak at {String(peakIdx).padStart(2, '0')}h ago · {max} submissions
+        {peakCaption}
       </div>
     </div>
   )

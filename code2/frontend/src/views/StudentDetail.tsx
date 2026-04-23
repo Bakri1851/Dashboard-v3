@@ -14,6 +14,7 @@ import { AnimatedNumber } from '../components/primitives/AnimatedNumber'
 import { Skeleton, SkeletonStatCard } from '../components/primitives/Skeleton'
 import { Spark } from '../components/charts/Spark'
 import { HBars } from '../components/charts/HBars'
+import { TimelineChart } from '../components/charts/TimelineChart'
 import { RagPanel } from '../components/RagPanel'
 import { AnimatedCard } from '../animation/AnimatedCard'
 import { stagger, fadeUp } from '../animation/motion'
@@ -411,6 +412,12 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
             </AnimatePresence>
           </tbody>
         </table>
+      </AnimatedCard>
+
+      {/* Submission timeline — hour-of-day distribution for this student */}
+      <AnimatedCard variants={fadeUp} style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
+        <SectionLabel n={9}>Submission Timeline</SectionLabel>
+        <TimelineChart data={data.timeline_24h} semantic="hour_of_day" />
       </AnimatedCard>
     </motion.div>
   )

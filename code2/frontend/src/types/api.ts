@@ -71,6 +71,7 @@ export interface StudentDetail {
   trajectory: number[]
   top_questions: StudentQuestionRow[]
   recent_submissions: StudentRecentRow[]
+  timeline_24h: number[]
 }
 
 export interface MistakeCluster {
@@ -107,6 +108,7 @@ export interface QuestionDetail {
   mistake_clusters: MistakeCluster[]
   recent_attempts: QuestionRecentAttempt[]
   top_strugglers: QuestionStudentRow[]
+  timeline_24h: number[]
 }
 
 export interface SavedSession {

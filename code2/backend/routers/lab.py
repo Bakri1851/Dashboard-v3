@@ -14,7 +14,7 @@ import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from backend.deps import TimeWindow, get_dataframe, get_time_window
-from backend.cache import filter_df
+from backend.cache import filter_df, invalidate as invalidate_caches
 from backend.schemas import (
     AssignRequest,
     AssistantIdRequest,
@@ -72,12 +72,14 @@ def get_state() -> LabState:
 @router.post("/start", response_model=LabState)
 def start() -> LabState:
     lab_state.start_lab_session()
+    invalidate_caches()
     return _to_lab_state(lab_state.read_lab_state())
 
 
 @router.post("/end", response_model=LabState)
 def end() -> LabState:
     lab_state.end_lab_session()
+    invalidate_caches()
     return _to_lab_state(lab_state.read_lab_state())
 
 

@@ -10,6 +10,7 @@ import { SectionLabel } from '../components/primitives/SectionLabel'
 import { AnimatedNumber } from '../components/primitives/AnimatedNumber'
 import { Skeleton } from '../components/primitives/Skeleton'
 import { RagPanel } from '../components/RagPanel'
+import { TimelineChart } from '../components/charts/TimelineChart'
 import { useViewStore } from '../state/viewStore'
 import { AnimatedCard } from '../animation/AnimatedCard'
 import { stagger, fadeUp } from '../animation/motion'
@@ -480,6 +481,12 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
             </AnimatePresence>
           </tbody>
         </table>
+      </AnimatedCard>
+
+      {/* Attempt timeline — hour-of-day distribution for this question */}
+      <AnimatedCard variants={fadeUp} style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
+        <SectionLabel n={5}>Attempt Timeline</SectionLabel>
+        <TimelineChart data={data.timeline_24h} semantic="hour_of_day" />
       </AnimatedCard>
     </motion.div>
   )

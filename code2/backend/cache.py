@@ -104,8 +104,13 @@ def _load_dataframe_uncached() -> tuple[pd.DataFrame, str]:
     df = data_loader.normalize_and_clean(records)
 
     if not df.empty and "ai_feedback" in df.columns and "incorrectness" not in df.columns:
+        # Cache-lookup only — never block the request path on OpenAI. The
+        # background prewarm in main.py::_prewarm fills _incorrectness_cache
+        # (capped on its first load_dataframe(), then uncapped in a follow-up
+        # call). Uncached feedbacks resolve to 0.5 here and upgrade to real
+        # scores on the next cache expiry once the prewarm has populated them.
         try:
-            df["incorrectness"] = analytics.compute_incorrectness_column(df)
+            df["incorrectness"] = analytics.compute_incorrectness_column(df, score_new=False)
         except Exception:
             pass
 

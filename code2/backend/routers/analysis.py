@@ -1,12 +1,12 @@
 """GET /api/analysis — aggregate stats for the Data Analysis view."""
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 from fastapi import APIRouter, Depends
 
 from backend.cache import filter_df
 from backend.deps import TimeWindow, get_dataframe, get_time_window
+from backend.routers._timeline import hour_of_day_distribution
 from backend.schemas import (
     AnalysisStats,
     ModuleBreakdown,
@@ -19,28 +19,15 @@ from learning_dashboard import academic_calendar
 router = APIRouter(tags=["analysis"])
 
 
-def _timeline_24h(df: pd.DataFrame) -> tuple[list[int], int, int]:
-    """Hourly counts for the last 24h → (buckets, peak_hour_of_day, peak_count)."""
-    if df.empty or "timestamp" not in df.columns:
-        return [0] * 24, 0, 0
-    ts = pd.to_datetime(df["timestamp"], errors="coerce", utc=True).dropna()
-    if ts.empty:
-        return [0] * 24, 0, 0
-    now = pd.Timestamp.now(tz="UTC")
-    cutoff = now - pd.Timedelta(hours=24)
-    recent = ts[(ts >= cutoff) & (ts <= now)]
-    buckets = np.zeros(24, dtype=int)
-    if not recent.empty:
-        hours_ago = ((now - recent).dt.total_seconds() // 3600).astype(int)
-        for h in hours_ago:
-            idx = 23 - int(h)
-            if 0 <= idx < 24:
-                buckets[idx] += 1
-    # Peak hour-of-day across entire dataset (more stable than last-24h spike)
-    hod_counts = ts.dt.hour.value_counts()
-    peak_hour = int(hod_counts.idxmax()) if not hod_counts.empty else 0
-    peak_count = int(hod_counts.max()) if not hod_counts.empty else 0
-    return buckets.tolist(), peak_hour, peak_count
+def _timeline_stats(df: pd.DataFrame) -> tuple[list[int], int, int]:
+    """Hour-of-day buckets + peak hour/count over filtered df.
+
+    The timeline is a filtered aggregate (hour-of-day 00..23), not wall-clock
+    last-24h, so it respects whatever filter produced `df`. Peak stats are
+    derived from the same vector so chart and stats cannot disagree."""
+    buckets = hour_of_day_distribution(df)
+    peak_hour = max(range(24), key=lambda h: buckets[h])
+    return buckets, int(peak_hour), int(buckets[peak_hour])
 
 
 _DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -146,7 +133,7 @@ def get_analysis(
             top_questions=[], user_activity=[], activity_by_week=[],
         )
 
-    timeline, peak_hour, peak_count = _timeline_24h(df)
+    timeline, peak_hour, peak_count = _timeline_stats(df)
 
     # Module breakdown
     module_breakdown: list[ModuleBreakdown] = []

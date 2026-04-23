@@ -17,13 +17,15 @@ export function useFilterQuery(): string {
   const { data: periods } = useApiData<AcademicPeriod[]>('/meta/academic-periods', 0)
 
   // `resolveFilter` calls `new Date()` internally for time-relative presets
-  // (today, past_hour, past_24h, current_week, current_month). Without a
-  // ticking dependency the window freezes at mount and silently drops any
+  // (today, past_hour, past_24h, current_week, current_month, live). Without
+  // a ticking dependency the window freezes at mount and silently drops any
   // submission newer than "now at mount" — Streamlit doesn't have this bug
   // because Streamlit re-runs top-to-bottom on every auto-refresh tick.
-  const [minuteTick, setMinuteTick] = useState(0)
+  // 60s cadence matches the default refresh_interval; ticking faster than
+  // the compute cost causes cache-key thrash and _struggle_lock contention.
+  const [tick, setTick] = useState(0)
   useEffect(() => {
-    const id = window.setInterval(() => setMinuteTick((x) => x + 1), 60_000)
+    const id = window.setInterval(() => setTick((x) => x + 1), 60_000)
     return () => window.clearInterval(id)
   }, [])
 
@@ -42,6 +44,6 @@ export function useFilterQuery(): string {
     filter.academicWeek,
     lab?.session_start,
     periods,
-    minuteTick,
+    tick,
   ])
 }
