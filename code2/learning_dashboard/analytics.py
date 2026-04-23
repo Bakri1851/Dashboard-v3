@@ -235,6 +235,68 @@ def compute_incorrectness_column(
     return result
 
 
+# Feedback Confidence (consumed by struggle pipeline and measurement.py)
+
+_EMPTY_FEEDBACK_MARKERS = {"", "nan", "none", "null", "n/a", "na"}
+
+
+def compute_feedback_confidence(
+    feedbacks: pd.Series,
+    scores: pd.Series,
+) -> pd.Series:
+    """Per-row confidence in [0, 1] for an incorrectness score.
+
+    confidence = BASE · length_factor · (0.5 + 0.5 · extremity_factor)
+
+    - length_factor ramps 0→1 over the first MIN_LENGTH chars of feedback.
+    - extremity_factor = 2·|score − 0.5|  — mid-range LLM scores (≈0.5) are
+      the least trustworthy, so confidence dips toward the middle ("confidence
+      valley").
+    - Empty/null/whitespace-only feedback → 0.0 (the 0.5 fallback score is a
+      prior, not a measurement, so it should carry zero weight downstream).
+    """
+    feed_str = feedbacks.astype(str).str.strip()
+    is_empty = (
+        feed_str.str.lower().isin(_EMPTY_FEEDBACK_MARKERS)
+        | feedbacks.isna()
+        | scores.isna()
+    )
+
+    lengths = feed_str.str.len().fillna(0).astype(float)
+    length_factor = np.minimum(
+        1.0, lengths / config.MEASUREMENT_CONFIDENCE_MIN_LENGTH
+    )
+    safe_scores = scores.fillna(0.5)
+    extremity_factor = 2.0 * np.abs(safe_scores - 0.5)
+
+    confidence = (
+        config.MEASUREMENT_CONFIDENCE_BASE
+        * length_factor
+        * (0.5 + 0.5 * extremity_factor)
+    )
+    confidence = pd.Series(confidence, index=feedbacks.index).clip(0.0, 1.0)
+    confidence[is_empty] = 0.0
+    return confidence
+
+
+def _confidence_weighted_mean(
+    values: pd.Series,
+    weights: pd.Series,
+    fallback: Optional[pd.Series] = None,
+) -> float:
+    """Weighted mean with fallback to unweighted mean when all weights are 0.
+
+    Handles the all-empty-feedback case where every row has confidence=0 —
+    the confidence-weighted mean is undefined, so fall back to the simple
+    mean of *fallback* (defaults to *values*).
+    """
+    w_sum = float(weights.sum())
+    if w_sum <= 0.0:
+        pool = fallback if fallback is not None else values
+        return float(pool.mean()) if len(pool) else 0.0
+    return float((values * weights).sum() / w_sum)
+
+
 # Min-Max Normalization
 
 def min_max_normalize(series: pd.Series) -> pd.Series:
@@ -252,16 +314,47 @@ def min_max_normalize(series: pd.Series) -> pd.Series:
     return result.clip(0.0, 1.0)
 
 
+def min_max_normalize_grouped(
+    series: pd.Series,
+    groups: Optional[pd.Series],
+) -> pd.Series:
+    """Min-max normalise within each group label.
+
+    Different modules have different difficulty/workload distributions — a
+    CS student's time-on-task is not commensurable with a maths student's.
+    Grouping by module before normalisation keeps the rankings meaningful
+    when the global leaderboard mixes cohorts.
+
+    A single-group input (or ``groups=None``) is equivalent to
+    ``min_max_normalize``. Groups of size 1 or with all-equal values
+    return 0.5 for each member (same semantics as the ungrouped helper).
+    """
+    if groups is None:
+        return min_max_normalize(series)
+    groups = groups.reindex(series.index)
+    out = pd.Series(0.5, index=series.index, dtype=float)
+    for _label, idx in groups.groupby(groups, dropna=False).groups.items():
+        sub = series.loc[idx]
+        out.loc[idx] = min_max_normalize(sub).values
+    return out
+
+
 # -----------------------------------------------------------------
 # Recent Incorrectness (A_raw)
 # -----------------------------------------------------------------
 
 def compute_recent_incorrectness(student_submissions: pd.DataFrame) -> float:
     """
-    Last N submissions (most recent first), weighted by exponential time decay.
-    w_i = exp(-lambda * delta_t_i) where delta_t_i = seconds since submission i.
-    Weights are normalised to sum to 1.0.
-    Falls back to equal weights if all timestamps are identical.
+    Last N submissions (most recent first), weighted by exponential time decay
+    AND (when present) per-row measurement confidence.
+
+    w_i = exp(-lambda * delta_t_i) · confidence_i
+
+    Weights are normalised to sum to 1.0. If the `incorrectness_confidence`
+    column is absent, confidence weights default to 1.0 (unchanged behaviour
+    for callers that haven't wired confidence yet). If all composite weights
+    collapse to 0 (all empty feedback), falls back to the unweighted mean so
+    we never return NaN.
     """
     # Drop NaT/NaN timestamps before sorting — the exp-decay calculation below
     # does arithmetic on timestamps, so a NaT silently propagates as NaN into
@@ -282,17 +375,32 @@ def compute_recent_incorrectness(student_submissions: pd.DataFrame) -> float:
     t_now = timestamps[0]  # most recent after descending sort
     lam = math.log(2) / config.DECAY_HALFLIFE_SECONDS
 
-    raw_weights = [
+    time_weights = [
         math.exp(-lam * max(0.0, (t_now - ts).total_seconds()))
         for ts in timestamps
     ]
 
-    # Equal-weight fallback if all timestamps are identical (e.g. bulk import).
-    # Exponentials are always positive, so no zero-sum check needed.
+    if "incorrectness_confidence" in recent.columns:
+        conf_weights = [float(c) for c in recent["incorrectness_confidence"].fillna(0.0).tolist()]
+    else:
+        conf_weights = [1.0] * n_actual
+
+    raw_weights = [t * c for t, c in zip(time_weights, conf_weights)]
+    weight_sum = sum(raw_weights)
+
+    # All-empty-feedback (or all-zero-confidence) cohort: fall back to the
+    # time-decayed unweighted mean rather than returning 0 / NaN.
+    if weight_sum <= 0.0:
+        if all(w == time_weights[0] for w in time_weights):
+            return sum(scores) / n_actual
+        t_sum = sum(time_weights)
+        return sum((t / t_sum) * s for t, s in zip(time_weights, scores))
+
+    # Equal-weight fallback if all composite weights tied (e.g. bulk import
+    # with uniform confidence). Exponentials are always positive.
     if all(w == raw_weights[0] for w in raw_weights):
         return sum(scores) / n_actual
 
-    weight_sum = sum(raw_weights)
     weights = [w / weight_sum for w in raw_weights]
     return sum(w * s for w, s in zip(weights, scores))
 
@@ -358,6 +466,14 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
     work = df.copy()
     if "incorrectness" not in work.columns:
         work["incorrectness"] = compute_incorrectness_column(work)
+    # Attach per-row measurement confidence. compute_recent_incorrectness and
+    # the i_hat aggregation below read from this column — low-confidence rows
+    # (empty/short feedback, mid-range LLM scores) contribute less weight.
+    if "incorrectness_confidence" not in work.columns:
+        work["incorrectness_confidence"] = compute_feedback_confidence(
+            work["ai_feedback"] if "ai_feedback" in work.columns else pd.Series("", index=work.index),
+            work["incorrectness"],
+        )
 
     rows = []
     grouped = work.groupby("user")
@@ -371,8 +487,15 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
         else:
             t = 0.0
 
-        # Mean incorrectness: continuous gradient, no binary threshold
-        i_hat = group["incorrectness"].mean()
+        # Mean incorrectness: continuous gradient, no binary threshold.
+        # Confidence-weighted — low-confidence rows (empty/short feedback,
+        # mid-range LLM scores) contribute less. Falls back to simple mean
+        # when all rows are low-confidence so i_hat never collapses to 0.
+        i_hat = _confidence_weighted_mean(
+            group["incorrectness"],
+            group["incorrectness_confidence"],
+            fallback=group["incorrectness"],
+        )
 
         # Retry rate: fraction of submissions that are repeats of an already-attempted question
         unique_q = group["question"].nunique()
@@ -398,8 +521,19 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
                     seen.add(cleaned)
         rep_hat = total_repeat_submissions / n if n > 0 else 0.0
 
+        # Dominant module — the module this student submits to most often.
+        # Used for within-module normalisation so students from different
+        # modules (with different difficulty/workload distributions) don't
+        # contaminate each other's rankings on the global leaderboard.
+        if "module" in group.columns:
+            mode = group["module"].mode()
+            dominant_module = str(mode.iloc[0]) if not mode.empty else ""
+        else:
+            dominant_module = ""
+
         rows.append({
             "user": user,
+            "module": dominant_module,
             "submission_count": n,
             "time_active_min": round(t, 2),
             "n_raw": n,
@@ -416,13 +550,16 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
     # Min-max normalize every composite input so the configured weights match
     # the effective weights. Raw [0, 1] rates (i_hat, r_hat, A_raw, rep_hat)
     # are retained for display; the _norm columns feed the weighted sum.
-    result["n_hat"] = min_max_normalize(result["n_raw"])
-    result["t_hat"] = min_max_normalize(result["t_raw"])
-    result["d_hat"] = min_max_normalize(result["d_raw"])  # positive = getting worse
-    result["i_norm"] = min_max_normalize(result["i_hat"])
-    result["r_norm"] = min_max_normalize(result["r_hat"])
-    result["A_norm"] = min_max_normalize(result["A_raw"])
-    result["rep_norm"] = min_max_normalize(result["rep_hat"])
+    # Grouped by dominant module — collapses to ungrouped when the window
+    # contains a single module (typical after sidebar filtering).
+    modules = result["module"] if "module" in result.columns else None
+    result["n_hat"] = min_max_normalize_grouped(result["n_raw"], modules)
+    result["t_hat"] = min_max_normalize_grouped(result["t_raw"], modules)
+    result["d_hat"] = min_max_normalize_grouped(result["d_raw"], modules)  # positive = getting worse
+    result["i_norm"] = min_max_normalize_grouped(result["i_hat"], modules)
+    result["r_norm"] = min_max_normalize_grouped(result["r_hat"], modules)
+    result["A_norm"] = min_max_normalize_grouped(result["A_raw"], modules)
+    result["rep_norm"] = min_max_normalize_grouped(result["rep_hat"], modules)
 
     # Compute S_raw
     result["struggle_score"] = (
@@ -471,7 +608,7 @@ CF_FEATURES = ["n_hat", "t_hat", "i_norm", "A_norm", "d_hat"]
 
 def compute_cf_struggle_scores(
     struggle_df: pd.DataFrame,
-    threshold: float = 0.6,
+    threshold: float = 0.7,
     k: int = 3,
 ) -> tuple[pd.Series, dict]:
     """
@@ -666,8 +803,17 @@ def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
         failed_first = (first_attempts["incorrectness"] >= config.CORRECT_THRESHOLD).sum()
         p_tilde = failed_first / unique_students if unique_students > 0 else 0.0
 
+        # Module attribution: questions belong to exactly one module, so
+        # group["module"].iloc[0] is canonical. Used for within-module
+        # normalisation — see compute_student_struggle_scores.
+        if "module" in group.columns:
+            question_module = str(group["module"].iloc[0]) if len(group) else ""
+        else:
+            question_module = ""
+
         rows.append({
             "question": question,
+            "module": question_module,
             "total_attempts": total_attempts,
             "unique_students": unique_students,
             "avg_attempts": round(a_raw, 2),
@@ -683,11 +829,14 @@ def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
     # Min-max normalize every composite input so configured weights match
     # effective weights. Raw rates (c_tilde, f_tilde, p_tilde) are retained
     # for display (incorrect_rate_pct); _norm columns feed the weighted sum.
-    result["t_tilde"] = min_max_normalize(result["t_raw"])
-    result["a_tilde"] = min_max_normalize(result["a_raw"])
-    result["c_norm"] = min_max_normalize(result["c_tilde"])
-    result["f_norm"] = min_max_normalize(result["f_tilde"])
-    result["p_norm"] = min_max_normalize(result["p_tilde"])
+    # Grouped by module — a "hard" CS question is not commensurable with a
+    # "hard" maths question when both appear on the global leaderboard.
+    modules = result["module"] if "module" in result.columns else None
+    result["t_tilde"] = min_max_normalize_grouped(result["t_raw"], modules)
+    result["a_tilde"] = min_max_normalize_grouped(result["a_raw"], modules)
+    result["c_norm"] = min_max_normalize_grouped(result["c_tilde"], modules)
+    result["f_norm"] = min_max_normalize_grouped(result["f_tilde"], modules)
+    result["p_norm"] = min_max_normalize_grouped(result["p_tilde"], modules)
 
     # Compute D_raw
     result["difficulty_score"] = (

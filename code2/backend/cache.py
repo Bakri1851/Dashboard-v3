@@ -196,6 +196,18 @@ def load_improved_struggle_df(
         df, _ = load_dataframe()
         sliced = filter_df(df, from_, to_) if (from_ or to_) else df
         rc = _rc_mod.get()
+        # If the user hasn't touched the sliders, prefer the per-skill fitted
+        # params populated by the prewarm (_bkt.fit_all_skills). Any slider
+        # deviation from the config defaults counts as an explicit override
+        # and disables the fitted-params path so the slider actually takes
+        # effect.
+        at_defaults = (
+            rc.bkt_p_init == config.BKT_P_INIT
+            and rc.bkt_p_learn == config.BKT_P_LEARN
+            and rc.bkt_p_guess == config.BKT_P_GUESS
+            and rc.bkt_p_slip == config.BKT_P_SLIP
+        )
+        per_skill = bkt.get_fitted_params() if at_defaults else None
         try:
             mastery_df = bkt.compute_all_mastery(
                 sliced,
@@ -203,19 +215,26 @@ def load_improved_struggle_df(
                 p_learn=rc.bkt_p_learn,
                 p_guess=rc.bkt_p_guess,
                 p_slip=rc.bkt_p_slip,
+                per_skill_params=per_skill,
             )
             mastery_summary = (
                 bkt.compute_student_mastery_summary(mastery_df)
                 if not mastery_df.empty
                 else None
             )
-            # Reuse the IRT difficulty cache so a back-to-back visit to the
-            # Model Comparison view doesn't re-fit Rasch.
-            irt_df = load_irt_difficulty_df(from_, to_)
+            # Reuse the IRT model cache so a back-to-back visit to the
+            # Model Comparison view doesn't re-fit. We need the full model
+            # dict here (not just the difficulty projection) because the
+            # IRT-residual difficulty-adjusted signal needs b_raw + a_j +
+            # per-student θ.
+            irt_model = load_irt_model(from_, to_)
+            irt_diff_full = irt_model.get("difficulty_df", pd.DataFrame())
+            irt_ability = irt_model.get("ability_df", pd.DataFrame())
             result = improved_struggle.compute_improved_struggle_scores(
                 sliced,
                 mastery_summary=mastery_summary,
-                irt_difficulty=irt_df if not irt_df.empty else None,
+                irt_difficulty=irt_diff_full if not irt_diff_full.empty else None,
+                irt_ability=irt_ability if not irt_ability.empty else None,
             )
         except Exception:
             logger.warning(
@@ -229,36 +248,70 @@ def load_improved_struggle_df(
         return result
 
 
-def load_irt_difficulty_df(
+def load_irt_model(
     from_: Optional[str] = None, to_: Optional[str] = None
-) -> pd.DataFrame:
-    """Compute + cache IRT question-difficulty scores for the window."""
+) -> dict:
+    """Compute + cache the full IRT fit (difficulty + discrimination + ability).
+
+    Caches under the same window key as ``load_irt_difficulty_df`` so a
+    back-to-back ``difficulty`` and ``abilities`` lookup only fits once.
+    """
     key = _window_key(from_, to_)
-    if key in _irt_difficulty_cache:
-        return _irt_difficulty_cache[key]
+    cached = _irt_difficulty_cache.get(key)
+    if isinstance(cached, dict):
+        return cached
     with _irt_difficulty_lock:
-        if key in _irt_difficulty_cache:
-            return _irt_difficulty_cache[key]
+        cached = _irt_difficulty_cache.get(key)
+        if isinstance(cached, dict):
+            return cached
         df, _ = load_dataframe()
         sliced = filter_df(df, from_, to_) if (from_ or to_) else df
         try:
-            result = irt.compute_irt_difficulty_scores(sliced)
+            model = irt.compute_irt_model(sliced)
         except Exception:
             logger.warning(
-                "irt.compute_irt_difficulty_scores failed for "
-                "window=(%s, %s) rows=%d — caching empty result",
+                "irt.compute_irt_model failed for window=(%s, %s) rows=%d — "
+                "caching empty result",
                 from_, to_, len(sliced),
                 exc_info=True,
             )
-            result = pd.DataFrame()
-        if result.empty:
+            model = {
+                "difficulty_df": pd.DataFrame(),
+                "ability_df": pd.DataFrame(columns=["user", "theta"]),
+                "convergence": False,
+                "log_likelihood": 0.0,
+            }
+        if model["difficulty_df"].empty:
             logger.info(
                 "IRT fit returned empty for window=(%s, %s) rows=%d — likely "
                 "too few eligible attempts after min-count + separation filter.",
                 from_, to_, len(sliced),
             )
-        _irt_difficulty_cache[key] = result
-        return result
+        _irt_difficulty_cache[key] = model
+        return model
+
+
+def load_irt_difficulty_df(
+    from_: Optional[str] = None, to_: Optional[str] = None
+) -> pd.DataFrame:
+    """Compute + cache IRT question-difficulty scores for the window.
+
+    Projection of ``load_irt_model`` — returns only the question-level df
+    with the public ``_OUTPUT_COLUMNS`` schema (drops the internal b_raw).
+    """
+    model = load_irt_model(from_, to_)
+    diff = model.get("difficulty_df", pd.DataFrame())
+    if diff.empty:
+        return pd.DataFrame()
+    cols = [c for c in diff.columns if c != "b_raw"]
+    return diff[cols].copy()
+
+
+def load_irt_ability_df(
+    from_: Optional[str] = None, to_: Optional[str] = None
+) -> pd.DataFrame:
+    """Per-student θ for the window. Shares the cache with load_irt_model."""
+    return load_irt_model(from_, to_).get("ability_df", pd.DataFrame())
 
 
 def load_active_struggle_df(

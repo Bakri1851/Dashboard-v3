@@ -41,6 +41,7 @@ from backend.cache import load_dataframe, load_difficulty_df, load_struggle_df
 from backend.routers import analysis, cf, lab, live, meta, models_cmp, question, rag, sessions, settings, student
 from learning_dashboard import analytics, lab_state
 from learning_dashboard import rag as rag_module
+from learning_dashboard.models import bkt as _bkt
 
 logger = logging.getLogger("backend")
 # Attach a console handler so prewarm / RAG diagnostics actually print under
@@ -116,6 +117,22 @@ async def lifespan(app: FastAPI):
                     "prewarm: df has no 'incorrectness' column after load_dataframe — "
                     "compute_incorrectness_column was bypassed or crashed silently"
                 )
+            # Fit BKT parameters per skill (module) on the warmed df. The
+            # fitted params live in _bkt._BKT_PARAMS_CACHE and are used by
+            # compute_all_mastery when the runtime sliders are at their
+            # config defaults. Calibrates each skill to its own cohort
+            # rather than using literature-averaged priors globally.
+            if not df.empty:
+                t_bkt = _time.monotonic()
+                try:
+                    fitted = _bkt.fit_all_skills(df)
+                    logger.info(
+                        "prewarm: fit BKT params for %d skills in %.1fs",
+                        len(fitted), _time.monotonic() - t_bkt,
+                    )
+                except Exception as e:  # noqa: BLE001
+                    logger.warning("prewarm: BKT fit raised: %s", e)
+
             t1 = _time.monotonic()
             load_struggle_df()
             logger.info("prewarm: struggle ready in %.1fs", _time.monotonic() - t1)

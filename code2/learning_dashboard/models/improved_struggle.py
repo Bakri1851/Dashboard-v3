@@ -12,7 +12,9 @@ to the behavioral composite.
 
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
+from scipy.special import expit
 
 from learning_dashboard import analytics, config
 
@@ -25,11 +27,19 @@ def compute_improved_struggle_scores(
     df: pd.DataFrame,
     mastery_summary: pd.DataFrame | None = None,
     irt_difficulty: pd.DataFrame | None = None,
+    irt_ability: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """Return a struggle DataFrame compatible with the baseline schema.
 
     Extra diagnostic columns: ``behavioral_composite``, ``mastery_gap``,
     ``difficulty_adjusted_score``.
+
+    When ``irt_ability`` is provided (columns ``[user, theta]``) AND
+    ``irt_difficulty`` contains ``b_raw`` + ``irt_discrimination``, the
+    difficulty-adjusted signal is the IRT residual
+    ``expected_correct(θ, a, b) − observed_correct`` averaged over each
+    student's last N submissions. Otherwise it falls back to the legacy
+    ``incorrectness × (1 − norm_diff)`` formulation.
 
     Note: the weight-sum invariant (``w_beh + w_mg + w_da == 1``) is asserted
     only on the non-empty code path — empty-input early returns bypass it
@@ -50,6 +60,14 @@ def compute_improved_struggle_scores(
     work = df.copy()
     if "incorrectness" not in work.columns:
         work["incorrectness"] = analytics.compute_incorrectness_column(work)
+    # Attach per-row measurement confidence so the behavioral signals
+    # (A_raw via compute_recent_incorrectness, and the difficulty-adjusted
+    # branch) downweight low-confidence rows.
+    if "incorrectness_confidence" not in work.columns:
+        work["incorrectness_confidence"] = analytics.compute_feedback_confidence(
+            work["ai_feedback"] if "ai_feedback" in work.columns else pd.Series("", index=work.index),
+            work["incorrectness"],
+        )
 
     # --- Determine effective weights with graceful degradation ---
     w_beh = config.IMPROVED_STRUGGLE_WEIGHT_BEHAVIORAL
@@ -101,8 +119,17 @@ def compute_improved_struggle_scores(
                     seen.add(cleaned)
         rep_hat = total_repeat / n if n > 0 else 0.0
 
+        # Dominant module for within-module normalisation — same logic as
+        # analytics.compute_student_struggle_scores.
+        if "module" in group.columns:
+            mode = group["module"].mode()
+            dominant_module = str(mode.iloc[0]) if not mode.empty else ""
+        else:
+            dominant_module = ""
+
         rows.append({
             "user": user,
+            "module": dominant_module,
             "n": n,
             "A_raw": a_raw,
             "d_raw": d_raw,
@@ -117,11 +144,13 @@ def compute_improved_struggle_scores(
 
     # Min-max normalize every sub-signal onto the same cohort-relative
     # [0, 1] scale so the equal-weight average is actually equal-weighted.
-    # Raw rates (A_raw, r_hat, rep_hat) are kept on result for reference.
-    result["d_hat"] = analytics.min_max_normalize(result["d_raw"])
-    result["A_norm"] = analytics.min_max_normalize(result["A_raw"])
-    result["r_norm"] = analytics.min_max_normalize(result["r_hat"])
-    result["rep_norm"] = analytics.min_max_normalize(result["rep_hat"])
+    # Grouped by dominant module — collapses to ungrouped when the window
+    # contains a single module. Raw rates are kept on result for reference.
+    modules = result["module"] if "module" in result.columns else None
+    result["d_hat"] = analytics.min_max_normalize_grouped(result["d_raw"], modules)
+    result["A_norm"] = analytics.min_max_normalize_grouped(result["A_raw"], modules)
+    result["r_norm"] = analytics.min_max_normalize_grouped(result["r_hat"], modules)
+    result["rep_norm"] = analytics.min_max_normalize_grouped(result["rep_hat"], modules)
 
     # Behavioral composite: equal weight across the 4 sub-signals
     result["behavioral_composite"] = (
@@ -156,11 +185,26 @@ def compute_improved_struggle_scores(
         result.drop(columns=["mean_mastery"], inplace=True, errors="ignore")
 
     # --- Difficulty-adjusted score ---
+    # Prefer the IRT residual (expected − observed) when 2PL params and
+    # abilities are available. Falls back to the legacy (1 − norm_diff)
+    # weighting when only difficulty is known.
     result["difficulty_adjusted_score"] = 0.0
     if has_irt:
-        result["difficulty_adjusted_score"] = _compute_difficulty_adjusted(
-            work, result, irt_difficulty
+        has_full_2pl = (
+            irt_ability is not None
+            and not irt_ability.empty
+            and "theta" in irt_ability.columns
+            and "b_raw" in irt_difficulty.columns
+            and "irt_discrimination" in irt_difficulty.columns
         )
+        if has_full_2pl:
+            result["difficulty_adjusted_score"] = _compute_irt_residual(
+                work, result, irt_difficulty, irt_ability
+            )
+        else:
+            result["difficulty_adjusted_score"] = _compute_difficulty_adjusted(
+                work, result, irt_difficulty
+            )
 
     # --- Weighted combination ---
     # Invariant: redistribution above must preserve sum-to-one so configured
@@ -259,3 +303,83 @@ def _compute_difficulty_adjusted(
         scores[user] = coverage * user_mean + (1.0 - coverage) * global_mean
 
     return result["user"].map(scores).fillna(global_mean).clip(0.0, 1.0)
+
+
+def _compute_irt_residual(
+    work: pd.DataFrame,
+    result: pd.DataFrame,
+    irt_difficulty: pd.DataFrame,
+    irt_ability: pd.DataFrame,
+) -> pd.Series:
+    """Per-student IRT residual over last N submissions.
+
+    For each recent submission:
+      expected_correct = sigmoid(a_j · (θ_i − b_j))       # 2PL model
+      observed_correct = 1 − incorrectness                # LLM score
+      residual         = expected_correct − observed_correct
+
+    Positive residual = student is underperforming their fitted ability. The
+    mean residual over the last ``RECENT_SUBMISSION_COUNT`` submissions is
+    linearly rescaled from [−1, 1] to [0, 1] — 0.5 means "performing at
+    ability", 1.0 means "catastrophically underperforming".
+
+    Coverage shrinkage (unchanged from the legacy path): per-user means are
+    weighted toward the cohort mean by ``n_covered / n_recent`` so a
+    low-coverage student doesn't swing on a single sample.
+    """
+    required = {"user", "question", "timestamp", "incorrectness"}
+    if not required.issubset(work.columns):
+        return pd.Series(0.0, index=result.index)
+
+    # Item parameters keyed by question id.
+    item = irt_difficulty[["question", "b_raw", "irt_discrimination"]].copy()
+    item = item.rename(columns={"irt_discrimination": "a_j", "b_raw": "b_j"})
+
+    # Ability keyed by user.
+    theta_map = dict(zip(irt_ability["user"], irt_ability["theta"]))
+
+    def _residual(row: pd.Series) -> float:
+        theta = theta_map.get(row["user"])
+        if theta is None or pd.isna(row.get("a_j")) or pd.isna(row.get("b_j")):
+            return np.nan
+        expected = float(expit(row["a_j"] * (theta - row["b_j"])))
+        observed = 1.0 - float(row["incorrectness"])
+        return expected - observed
+
+    # Cohort-wide mean residual — shrinkage target for low-coverage users.
+    global_merged = work.merge(item, on="question", how="inner")
+    if global_merged.empty:
+        global_residual = 0.0
+    else:
+        global_merged["residual"] = global_merged.apply(_residual, axis=1)
+        global_residual = float(global_merged["residual"].dropna().mean())
+        if np.isnan(global_residual):
+            global_residual = 0.0
+
+    scores: dict[str, float] = {}
+    for user, group in work.groupby("user"):
+        recent = (
+            group.sort_values("timestamp", ascending=False)
+            .head(config.RECENT_SUBMISSION_COUNT)
+        )
+        if recent.empty:
+            scores[user] = global_residual
+            continue
+
+        merged = recent.merge(item, on="question", how="left")
+        merged["residual"] = merged.apply(_residual, axis=1)
+        covered = merged.dropna(subset=["residual"])
+
+        if covered.empty:
+            scores[user] = global_residual
+            continue
+
+        user_mean = float(covered["residual"].mean())
+        coverage = len(covered) / len(recent)
+        scores[user] = coverage * user_mean + (1.0 - coverage) * global_residual
+
+    # Rescale residual from [−1, 1] to [0, 1] so it matches the rest of the
+    # composite signals. Clip defensively; most residuals will sit in a
+    # narrow band around 0 so this rescaling rarely saturates.
+    raw = result["user"].map(scores).fillna(global_residual)
+    return ((raw + 1.0) / 2.0).clip(0.0, 1.0)

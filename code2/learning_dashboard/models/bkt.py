@@ -1,6 +1,11 @@
 """Phase 3 — Bayesian Knowledge Tracing (BKT) mastery estimation.
 
-Standard BKT with 4 parameters per skill (question = skill):
+Standard BKT with 4 parameters per skill. **Skill grain: module.** Each
+module is a coherent skill; mastery transfers across items within a module
+but not across modules. (Per-question grain produces mostly-degenerate
+sequences of 1–3 attempts where P(L_t) never leaves the prior.)
+
+Parameters:
     P(L_0)  prior probability of knowing the skill
     P(T)    probability of learning on each opportunity
     P(G)    probability of guessing correctly without knowing
@@ -16,7 +21,12 @@ from sklearn.metrics import roc_auc_score
 
 from learning_dashboard import config
 
-_MASTERY_COLUMNS = ["user", "question", "mastery", "n_attempts"]
+import logging
+
+# Column kept as "skill" (module) for clarity. `question` retained as an
+# alias in compute_all_mastery for backward compatibility with any external
+# consumer that hasn't migrated — new code should read `skill`.
+_MASTERY_COLUMNS = ["user", "skill", "mastery", "n_attempts"]
 _SUMMARY_COLUMNS = [
     "user",
     "mean_mastery",
@@ -24,6 +34,19 @@ _SUMMARY_COLUMNS = [
     "mastered_count",
     "total_questions",
 ]
+
+_logger = logging.getLogger(__name__)
+
+
+# Per-skill fitted parameters populated by ``fit_all_skills`` during prewarm.
+# ``compute_all_mastery`` reads from this when no per-skill override is passed
+# in by the caller. Map skill → {p_init, p_learn, p_guess, p_slip}.
+_BKT_PARAMS_CACHE: dict[str, dict[str, float]] = {}
+
+
+def get_fitted_params() -> dict[str, dict[str, float]]:
+    """Return a copy of the per-skill fitted BKT parameters."""
+    return {k: dict(v) for k, v in _BKT_PARAMS_CACHE.items()}
 
 
 def bkt_update(
@@ -49,17 +72,47 @@ def bkt_update(
     return float(np.clip(p_next, 0.0, 1.0))
 
 
+def _resolve_params(
+    skill: str,
+    per_skill_params: dict[str, dict[str, float]] | None,
+    defaults: tuple[float, float, float, float],
+) -> tuple[float, float, float, float]:
+    """Pick the (p_init, p_learn, p_guess, p_slip) tuple for a skill.
+
+    Precedence: caller-supplied per_skill_params > fitted _BKT_PARAMS_CACHE
+    > scalar defaults. A missing-key lookup in either map falls through to
+    the next level (so skills without fitted params inherit the defaults).
+    """
+    for source in (per_skill_params, _BKT_PARAMS_CACHE):
+        if source and skill in source:
+            s = source[skill]
+            return (
+                float(s.get("p_init", defaults[0])),
+                float(s.get("p_learn", defaults[1])),
+                float(s.get("p_guess", defaults[2])),
+                float(s.get("p_slip", defaults[3])),
+            )
+    return defaults
+
+
 def compute_student_mastery(
     student_df: pd.DataFrame,
     p_init: float = config.BKT_P_INIT,
     p_learn: float = config.BKT_P_LEARN,
     p_guess: float = config.BKT_P_GUESS,
     p_slip: float = config.BKT_P_SLIP,
+    per_skill_params: dict[str, dict[str, float]] | None = None,
 ) -> dict[str, float]:
-    """Replay one student's chronological submissions and return final mastery per question.
+    """Replay one student's chronological submissions and return final mastery per skill (module).
 
-    ``student_df`` must contain columns ``question``, ``timestamp``, and
-    ``incorrectness``, sorted by ``timestamp`` ascending.
+    ``student_df`` must contain columns ``module``, ``timestamp``, and
+    ``incorrectness``, sorted by ``timestamp`` ascending. Falls back to
+    ``question`` when ``module`` is absent so callers that haven't migrated
+    still work (degenerate: each question is its own skill).
+
+    When ``per_skill_params`` is provided (or ``_BKT_PARAMS_CACHE`` is
+    populated from a prior fit), those values are used instead of the scalar
+    defaults for skills present in the map.
     """
     if student_df.empty:
         return {}
@@ -70,12 +123,16 @@ def compute_student_mastery(
             .sort_values("timestamp", ascending=True, kind="mergesort")
         )
 
+    skill_col = "module" if "module" in student_df.columns else "question"
+    defaults = (p_init, p_learn, p_guess, p_slip)
+
     mastery: dict[str, float] = {}
     for _, row in student_df.iterrows():
-        qid = row["question"]
+        skill = row[skill_col]
         correct = row["incorrectness"] < config.CORRECT_THRESHOLD
-        mastery[qid] = bkt_update(
-            mastery.get(qid, p_init), correct, p_guess, p_slip, p_learn
+        pi, pl, pg, ps = _resolve_params(skill, per_skill_params, defaults)
+        mastery[skill] = bkt_update(
+            mastery.get(skill, pi), correct, pg, ps, pl
         )
     return mastery
 
@@ -86,14 +143,24 @@ def compute_all_mastery(
     p_learn: float = config.BKT_P_LEARN,
     p_guess: float = config.BKT_P_GUESS,
     p_slip: float = config.BKT_P_SLIP,
+    per_skill_params: dict[str, dict[str, float]] | None = None,
 ) -> pd.DataFrame:
-    """Per-student, per-question mastery for the entire dataset.
+    """Per-student, per-skill mastery for the entire dataset.
 
-    Returns DataFrame with columns: user, question, mastery, n_attempts.
+    Skill = module (preferred) or question (fallback when module is absent).
+    Returns DataFrame with columns: user, skill, mastery, n_attempts.
+
+    When ``per_skill_params`` is provided (or the module-level
+    ``_BKT_PARAMS_CACHE`` is populated from a prior fit), those values
+    override the scalar defaults on a per-skill basis.
     """
     empty = pd.DataFrame(columns=_MASTERY_COLUMNS)
-    required = {"user", "question", "timestamp", "incorrectness"}
-    if df.empty or not required.issubset(df.columns):
+    required_cols = {"user", "timestamp", "incorrectness"}
+    if df.empty or not required_cols.issubset(df.columns):
+        return empty
+
+    skill_col = "module" if "module" in df.columns else "question"
+    if skill_col not in df.columns:
         return empty
 
     # BKT is a sequential HMM; replay order determines the posterior.
@@ -101,50 +168,120 @@ def compute_all_mastery(
     # (bulk imports, same-second posts) replay in a deterministic order.
     ordered = (
         df.dropna(subset=["timestamp"])
-        .sort_values(["timestamp", "question"], ascending=True, kind="mergesort")
+        .sort_values(["timestamp", skill_col], ascending=True, kind="mergesort")
     )
 
-    attempt_counts = ordered.groupby(["user", "question"]).size()
+    attempt_counts = ordered.groupby(["user", skill_col]).size()
     rows: list[dict] = []
 
     for user, group in ordered.groupby("user", sort=False):
-        for qid, p in compute_student_mastery(
-            group, p_init=p_init, p_learn=p_learn, p_guess=p_guess, p_slip=p_slip
+        for skill, p in compute_student_mastery(
+            group,
+            p_init=p_init, p_learn=p_learn, p_guess=p_guess, p_slip=p_slip,
+            per_skill_params=per_skill_params,
         ).items():
             rows.append(
                 {
                     "user": user,
-                    "question": qid,
+                    "skill": skill,
                     "mastery": round(p, 6),
-                    "n_attempts": int(attempt_counts.loc[(user, qid)]),
+                    "n_attempts": int(attempt_counts.loc[(user, skill)]),
                 }
             )
 
     return pd.DataFrame(rows) if rows else empty
 
 
-def _build_sequences(df: pd.DataFrame) -> list[np.ndarray]:
-    """Per-(user, question) binary correctness sequences, in temporal order.
+def fit_all_skills(df: pd.DataFrame) -> dict[str, dict[str, float]]:
+    """Fit BKT parameters per skill and populate ``_BKT_PARAMS_CACHE``.
 
-    Uses the same ``[timestamp, question]`` mergesort ordering as
-    ``compute_all_mastery`` so the fit sees the exact same sequences as
-    inference.  Returns an empty list when required columns are missing.
+    Partitions ``df`` by skill (module preferred, question fallback) and calls
+    ``fit_bkt_parameters`` on each partition. Skills that fall below
+    ``BKT_FIT_MIN_OBSERVATIONS`` or have single-class outcomes are left out
+    of the cache (so ``_resolve_params`` falls through to scalar defaults
+    for them).
+
+    Returns the newly fitted parameters as a dict for logging/diagnostics.
+    The cache is cleared first so stale entries from a smaller prior dataset
+    can't leak through.
     """
-    required = {"user", "question", "timestamp", "incorrectness"}
-    if df.empty or not required.issubset(df.columns):
+    _BKT_PARAMS_CACHE.clear()
+    required_base = {"user", "timestamp", "incorrectness"}
+    if df.empty or not required_base.issubset(df.columns):
+        _logger.info("fit_all_skills: df missing required columns — skipped")
+        return {}
+
+    skill_col = "module" if "module" in df.columns else "question"
+    if skill_col not in df.columns:
+        return {}
+
+    fitted: dict[str, dict[str, float]] = {}
+    for skill, skill_df in df.groupby(skill_col, sort=False):
+        if not isinstance(skill, str) or not skill:
+            continue
+        res = fit_bkt_parameters(skill_df)
+        if not res.get("convergence"):
+            _logger.info(
+                "fit_all_skills: skill=%r not fitted (%s); keeping defaults",
+                skill, res.get("message") or "no convergence",
+            )
+            continue
+        params = {
+            "p_init": float(res["p_init"]),
+            "p_learn": float(res["p_learn"]),
+            "p_guess": float(res["p_guess"]),
+            "p_slip": float(res["p_slip"]),
+        }
+        # Guard against degenerate fits: values pinned at bounds carry no
+        # information (e.g. p_guess=0.5 means "50% chance to get it right
+        # without knowing", usually a sign of all-correct data).
+        if params["p_guess"] >= 0.499 and params["p_slip"] >= 0.499:
+            _logger.info(
+                "fit_all_skills: skill=%r fit pinned at bounds (pG=%.2f pS=%.2f); keeping defaults",
+                skill, params["p_guess"], params["p_slip"],
+            )
+            continue
+        _BKT_PARAMS_CACHE[skill] = params
+        fitted[skill] = params
+        _logger.info(
+            "fit_all_skills: skill=%r n=%d auc=%.3f | P0=%.3f PT=%.3f PG=%.3f PS=%.3f",
+            skill, int(res["n_observations"]), res.get("auc", float("nan")),
+            params["p_init"], params["p_learn"], params["p_guess"], params["p_slip"],
+        )
+    _logger.info(
+        "fit_all_skills: fitted %d/%d skills; rest fall back to config defaults",
+        len(fitted), df[skill_col].nunique(),
+    )
+    return fitted
+
+
+def _build_sequences(df: pd.DataFrame) -> list[np.ndarray]:
+    """Per-(user, skill) binary correctness sequences, in temporal order.
+
+    Skill = module (preferred) or question (fallback). Uses the same
+    ``[timestamp, skill]`` mergesort ordering as ``compute_all_mastery`` so
+    the fit sees the exact same sequences as inference. Returns an empty
+    list when required columns are missing.
+    """
+    required_base = {"user", "timestamp", "incorrectness"}
+    if df.empty or not required_base.issubset(df.columns):
+        return []
+
+    skill_col = "module" if "module" in df.columns else "question"
+    if skill_col not in df.columns:
         return []
 
     ordered = (
         df.dropna(subset=["timestamp"])
-        .sort_values(["timestamp", "question"], ascending=True, kind="mergesort")
+        .sort_values(["timestamp", skill_col], ascending=True, kind="mergesort")
     )
     correct = (ordered["incorrectness"] < config.CORRECT_THRESHOLD).astype(np.int8).to_numpy()
     users = ordered["user"].to_numpy()
-    questions = ordered["question"].to_numpy()
+    skills = ordered[skill_col].to_numpy()
 
     sequences: dict[tuple, list[int]] = {}
-    for u, q, c in zip(users, questions, correct):
-        sequences.setdefault((u, q), []).append(int(c))
+    for u, s, c in zip(users, skills, correct):
+        sequences.setdefault((u, s), []).append(int(c))
     return [np.asarray(seq, dtype=np.int8) for seq in sequences.values()]
 
 
