@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def _get_openai_client() -> OpenAI:
     # Key is sourced from OPENAI_API_KEY in the environment. backend/main.py
-    # lifts it out of .streamlit/secrets.toml at FastAPI boot.
+    # lifts it out of .secrets/secrets.toml at FastAPI boot.
     key = os.environ.get("OPENAI_API_KEY", "")
     return OpenAI(api_key=key, max_retries=1, timeout=20.0)
 

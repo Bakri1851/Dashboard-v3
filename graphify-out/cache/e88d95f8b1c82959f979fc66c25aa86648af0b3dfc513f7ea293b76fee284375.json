@@ -1,0 +1,1 @@
+{"nodes": [{"id": "motion", "label": "motion.ts", "file_type": "code", "source_file": "code2\\frontend\\src\\animation\\motion.ts", "source_location": "L1"}], "edges": [{"source": "motion", "target": "framer_motion", "relation": "imports_from", "confidence": "EXTRACTED", "source_file": "code2\\frontend\\src\\animation\\motion.ts", "source_location": "L1", "weight": 1.0}]}

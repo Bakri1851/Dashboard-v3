@@ -277,7 +277,7 @@ def fit_bkt_parameters(
                         "Most rows are at the 0.5 fallback — likely cause: "
                         "empty ai_feedback or OpenAI scoring failing silently. "
                         "Check the backend process logs for 'OpenAI batch call failed' "
-                        "warnings and verify .streamlit/secrets.toml at the repo root "
+                        "warnings and verify .secrets/secrets.toml at the repo root "
                         "has a valid OPENAI_API_KEY."
                     )
                 elif n_below == 0 and n_above > 0:
