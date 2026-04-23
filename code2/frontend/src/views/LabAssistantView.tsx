@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { T } from '../theme/tokens'
 import { useApiData } from '../api/hooks'
 import { useAutoRefreshInterval } from '../api/useAutoRefreshInterval'
@@ -6,7 +7,10 @@ import { api } from '../api/client'
 import type { LabState, StudentStruggle } from '../types/api'
 import { Pill } from '../components/primitives/Pill'
 import { SectionLabel } from '../components/primitives/SectionLabel'
+import { Skeleton } from '../components/primitives/Skeleton'
 import { useViewStore } from '../state/viewStore'
+import { AnimatedCard } from '../animation/AnimatedCard'
+import { stagger, fadeUp } from '../animation/motion'
 
 const URGENT_LEVELS = new Set(['Needs Help', 'Struggling'])
 
@@ -51,7 +55,20 @@ export function LabAssistantView() {
   )
 
   if (stateLoading && !state) {
-    return <div style={{ padding: 36, color: T.ink2, fontFamily: T.fMono, fontSize: 12 }}>loading lab state…</div>
+    return (
+      <motion.div
+        variants={stagger}
+        initial="initial"
+        animate="animate"
+        style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}
+      >
+        <AnimatedCard variants={fadeUp}><Skeleton variant="block" height={110} /></AnimatedCard>
+        <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: 24 }}>
+          <Skeleton variant="block" height={220} />
+          <Skeleton variant="block" height={220} />
+        </AnimatedCard>
+      </motion.div>
+    )
   }
   if (stateErr) {
     return <div style={{ padding: 36, color: T.danger, fontFamily: T.fMono, fontSize: 12 }}>{stateErr}</div>
@@ -61,7 +78,12 @@ export function LabAssistantView() {
   // No active session — show start prompt
   if (!state.session_active) {
     return (
-      <div style={{ padding: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18, textAlign: 'center' }}>
+      <motion.div
+        variants={stagger}
+        initial="initial"
+        animate="animate"
+        style={{ padding: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18, textAlign: 'center' }}
+      >
         <div style={{ fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, letterSpacing: 2, textTransform: 'uppercase' }}>
           No active session
         </div>
@@ -71,8 +93,10 @@ export function LabAssistantView() {
           <code style={{ fontFamily: T.fMono, background: T.bg2, padding: '1px 4px' }}>data/lab_session.json</code>.
           All active processes (React frontend, FastAPI backend, and any Streamlit fallbacks in code/) see the same state via the file-lock.
         </div>
-        <button
+        <motion.button
           onClick={() => post('/lab/start', undefined)}
+          whileHover={{ filter: 'brightness(1.1)', scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
           style={{
             marginTop: 10,
             padding: '10px 20px',
@@ -87,17 +111,23 @@ export function LabAssistantView() {
           }}
         >
           Start session
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
     )
   }
 
   const totalHelping = state.assignments.filter((a) => a.status === 'helping').length
 
   return (
-    <div style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <motion.div
+      variants={stagger}
+      initial="initial"
+      animate="animate"
+      style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}
+    >
       {/* Session banner */}
-      <div
+      <AnimatedCard
+        variants={fadeUp}
         style={{
           display: 'grid',
           gridTemplateColumns: 'minmax(0, 1fr) auto auto auto',
@@ -140,8 +170,10 @@ export function LabAssistantView() {
           />
           <span style={{ fontFamily: T.fSans, fontSize: 12.5, color: T.ink2 }}>Allow self-allocation</span>
         </label>
-        <button
+        <motion.button
           onClick={() => post('/lab/end', undefined)}
+          whileHover={{ filter: 'brightness(1.1)' }}
+          whileTap={{ scale: 0.96 }}
           style={{
             padding: '8px 16px',
             background: 'transparent',
@@ -155,11 +187,11 @@ export function LabAssistantView() {
           }}
         >
           End session
-        </button>
-      </div>
+        </motion.button>
+      </AnimatedCard>
 
       {/* Two columns */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.3fr)', gap: 24 }}>
+      <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.3fr)', gap: 24 }}>
         {/* Assistants */}
         <div style={{ background: T.card, border: `1px solid ${T.line}`, minWidth: 0 }}>
           <div style={{ padding: '18px 22px', borderBottom: `1px solid ${T.line}` }}>
@@ -173,7 +205,8 @@ export function LabAssistantView() {
               Nobody has joined yet. Assistants join at /mobile on this server with the code above.
             </div>
           ) : (
-            state.lab_assistants.map((a, i) => {
+            <AnimatePresence initial={false}>
+            {state.lab_assistants.map((a, i) => {
               const isLast = i === state.lab_assistants.length - 1
               const initials = a.name
                 .split(/\s+/)
@@ -183,8 +216,16 @@ export function LabAssistantView() {
                 .join('')
                 .toUpperCase()
               return (
-                <div
+                <motion.div
                   key={a.id}
+                  layout
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 14, scale: 0.98 }}
+                  transition={{
+                    layout: { type: 'spring', stiffness: 400, damping: 38 },
+                    opacity: { duration: 0.22 },
+                  }}
                   style={{
                     padding: '16px 22px',
                     borderBottom: isLast ? 'none' : `1px solid ${T.line2}`,
@@ -308,9 +349,10 @@ export function LabAssistantView() {
                       Remove
                     </button>
                   )}
-                </div>
+                </motion.div>
               )
-            })
+            })}
+            </AnimatePresence>
           )}
         </div>
 
@@ -349,12 +391,21 @@ export function LabAssistantView() {
               Nobody needs help right now. 🎉
             </div>
           ) : (
-            queue.map((s, i) => {
+            <AnimatePresence initial={false}>
+            {queue.map((s, i) => {
               const isLast = i === queue.length - 1
               const firstIdle = idleAssistants[0]
               return (
-                <div
+                <motion.div
                   key={s.id}
+                  layout
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 14, scale: 0.98 }}
+                  transition={{
+                    layout: { type: 'spring', stiffness: 400, damping: 38 },
+                    opacity: { duration: 0.22 },
+                  }}
                   style={{
                     padding: '14px 22px',
                     borderBottom: isLast ? 'none' : `1px solid ${T.line2}`,
@@ -387,8 +438,10 @@ export function LabAssistantView() {
                     </div>
                   </div>
                   <Pill level={s.level} />
-                  <button
+                  <motion.button
                     disabled={!firstIdle}
+                    whileHover={firstIdle ? { scale: 1.04 } : undefined}
+                    whileTap={firstIdle ? { scale: 0.96 } : undefined}
                     onClick={() => {
                       if (!firstIdle) return
                       post('/lab/assign', { student_id: s.id, assistant_id: firstIdle.id })
@@ -407,17 +460,18 @@ export function LabAssistantView() {
                     }}
                   >
                     Dispatch →
-                  </button>
-                </div>
+                  </motion.button>
+                </motion.div>
               )
-            })
+            })}
+            </AnimatePresence>
           )}
         </div>
-      </div>
+      </AnimatedCard>
 
       {/* Assignment list (if any in progress) */}
       {state.assignments.length > 0 && (
-        <div style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
+        <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
           <SectionLabel n={1}>Active Assignments</SectionLabel>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: T.fSans, fontSize: 13 }}>
             <thead>
@@ -443,10 +497,21 @@ export function LabAssistantView() {
               </tr>
             </thead>
             <tbody>
+              <AnimatePresence initial={false}>
               {state.assignments.map((asg) => {
                 const assistant = state.lab_assistants.find((a) => a.id === asg.assistant_id)
                 return (
-                  <tr key={asg.student_id}>
+                  <motion.tr
+                    key={asg.student_id}
+                    layout
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 12 }}
+                    transition={{
+                      layout: { type: 'spring', stiffness: 400, damping: 38 },
+                      opacity: { duration: 0.2 },
+                    }}
+                  >
                     <td
                       style={{
                         padding: '10px 0',
@@ -509,8 +574,10 @@ export function LabAssistantView() {
                       }}
                     >
                       {asg.status === 'helping' && (
-                        <button
+                        <motion.button
                           onClick={() => post('/lab/mark-helped', { student_id: asg.student_id })}
+                          whileHover={{ filter: 'brightness(1.1)' }}
+                          whileTap={{ scale: 0.94 }}
                           style={{
                             padding: '4px 10px',
                             fontFamily: T.fMono,
@@ -524,10 +591,13 @@ export function LabAssistantView() {
                           }}
                         >
                           Helped
-                        </button>
+                        </motion.button>
                       )}
-                      <button
+                      <motion.button
                         onClick={() => post('/lab/unassign', { student_id: asg.student_id })}
+                        whileHover={{ borderColor: T.danger, color: T.danger }}
+                        whileTap={{ scale: 0.94 }}
+                        transition={{ duration: 0.15 }}
                         style={{
                           padding: '4px 10px',
                           fontFamily: T.fMono,
@@ -541,16 +611,17 @@ export function LabAssistantView() {
                         }}
                       >
                         Release
-                      </button>
+                      </motion.button>
                     </td>
-                  </tr>
+                  </motion.tr>
                 )
               })}
+              </AnimatePresence>
             </tbody>
           </table>
-        </div>
+        </AnimatedCard>
       )}
-    </div>
+    </motion.div>
   )
 }
 

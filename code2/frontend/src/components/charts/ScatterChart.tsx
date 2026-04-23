@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { T } from '../../theme/tokens'
 
 export interface ScatterPoint {
@@ -38,9 +40,14 @@ export function ScatterChart({
   const sy = (v: number) => pad.top + (1 - (v - yMin) / (yMax - yMin || 1)) * innerH
 
   const ticks = [0, 0.25, 0.5, 0.75, 1]
+  const replayKey = useMemo(
+    () => `${points.length}:${points[0]?.id ?? ''}:${points[points.length - 1]?.id ?? ''}`,
+    [points],
+  )
 
   return (
     <svg
+      key={replayKey}
       width="100%"
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="xMidYMid meet"
@@ -70,8 +77,8 @@ export function ScatterChart({
         </g>
       ))}
 
-      {/* y = x diagonal */}
-      <line
+      {/* y = x diagonal — draws in alongside points */}
+      <motion.line
         x1={sx(0)}
         y1={sy(0)}
         x2={sx(1)}
@@ -79,6 +86,9 @@ export function ScatterChart({
         stroke={T.ink3}
         strokeDasharray="4 4"
         strokeWidth={1}
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: 1, opacity: 1 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
       />
 
       {/* Axes */}
@@ -134,21 +144,30 @@ export function ScatterChart({
         {yLabel.toUpperCase()}
       </text>
 
-      {/* Points */}
-      {points.map((p, i) => (
-        <circle
-          key={`${p.id}-${i}`}
-          cx={sx(p.x)}
-          cy={sy(p.y)}
-          r={3}
-          fill={dot}
-          fillOpacity={0.65}
-          stroke={dot}
-          strokeWidth={0.5}
-        >
-          <title>{`${p.id} · baseline ${p.x.toFixed(3)} · improved ${p.y.toFixed(3)}`}</title>
-        </circle>
-      ))}
+      {/* Points — staggered entrance, delay cap so large N stays snappy */}
+      {points.map((p, i) => {
+        const cx = sx(p.x)
+        const cy = sy(p.y)
+        const delay = Math.min(i * 0.008, 0.4)
+        return (
+          <motion.circle
+            key={`${p.id}-${i}`}
+            cx={cx}
+            cy={cy}
+            r={3}
+            fill={dot}
+            fillOpacity={0.65}
+            stroke={dot}
+            strokeWidth={0.5}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, delay, ease: 'easeOut' }}
+            style={{ transformOrigin: `${cx}px ${cy}px` }}
+          >
+            <title>{`${p.id} · baseline ${p.x.toFixed(3)} · improved ${p.y.toFixed(3)}`}</title>
+          </motion.circle>
+        )
+      })}
     </svg>
   )
 }

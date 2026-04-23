@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { T } from '../../theme/tokens'
 
 interface Props {
@@ -47,8 +48,11 @@ export function SessionStrip({ assistantName, sessionCode, onLeave }: Props) {
           <span style={{ color: T.accent, letterSpacing: 1.8 }}>{sessionCode ?? '------'}</span>
         </div>
       </div>
-      <button
+      <motion.button
         onClick={onLeave}
+        whileHover={{ background: T.danger, color: '#fff' }}
+        whileTap={{ scale: 0.94 }}
+        transition={{ duration: 0.15 }}
         style={{
           background: 'transparent',
           color: T.danger,
@@ -63,7 +67,7 @@ export function SessionStrip({ assistantName, sessionCode, onLeave }: Props) {
         }}
       >
         Leave
-      </button>
+      </motion.button>
     </div>
   )
 }

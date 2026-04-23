@@ -1,4 +1,6 @@
+import { motion } from 'framer-motion'
 import { T } from '../../theme/tokens'
+import { scoreBarSpring } from '../../animation/motion'
 
 /** Inline horizontal progress bar — used in leaderboard "score" cell. */
 export function ScoreBar({
@@ -25,7 +27,12 @@ export function ScoreBar({
         flexShrink: 0,
       }}
     >
-      <div style={{ width: `${clamped * 100}%`, height: '100%', background: color }} />
+      <motion.div
+        initial={{ width: 0 }}
+        animate={{ width: `${clamped * 100}%` }}
+        transition={scoreBarSpring}
+        style={{ height: '100%', background: color }}
+      />
     </div>
   )
 }

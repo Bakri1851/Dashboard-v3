@@ -1,10 +1,18 @@
+import { motion } from 'framer-motion'
 import { T } from '../../theme/tokens'
+import { stagger, fadeUp } from '../../animation/motion'
 
 /** Shown when the instructor has not started a lab session. */
 export function MobileSessionEnded() {
   return (
-    <div style={{ padding: '40px 22px', textAlign: 'center' }}>
-      <div
+    <motion.div
+      variants={stagger}
+      initial="initial"
+      animate="animate"
+      style={{ padding: '40px 22px', textAlign: 'center' }}
+    >
+      <motion.div
+        variants={fadeUp}
         style={{
           fontFamily: T.fMono,
           fontSize: 10,
@@ -14,9 +22,12 @@ export function MobileSessionEnded() {
         }}
       >
         Lab Assistant Portal
-      </div>
+      </motion.div>
 
-      <div
+      <motion.div
+        initial={{ opacity: 0, scale: 0.6 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 22, delay: 0.15 }}
         style={{
           margin: '44px auto 0',
           width: 74,
@@ -29,7 +40,10 @@ export function MobileSessionEnded() {
           position: 'relative',
         }}
       >
-        <div
+        {/* Concentric dashed ring — slow rotation for subtle "alive" feel */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
           style={{
             position: 'absolute',
             inset: 6,
@@ -38,10 +52,23 @@ export function MobileSessionEnded() {
             opacity: 0.55,
           }}
         />
+        {/* Outer breathing halo */}
+        <motion.div
+          animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0, 0.4] }}
+          transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            position: 'absolute',
+            inset: -6,
+            border: `1px solid ${T.danger}`,
+            borderRadius: '50%',
+            pointerEvents: 'none',
+          }}
+        />
         <span style={{ fontFamily: T.fMono, fontSize: 26, color: T.danger }}>✕</span>
-      </div>
+      </motion.div>
 
-      <div
+      <motion.div
+        variants={fadeUp}
         style={{
           marginTop: 22,
           fontFamily: T.fSerif,
@@ -53,9 +80,10 @@ export function MobileSessionEnded() {
         }}
       >
         No Active Session
-      </div>
+      </motion.div>
 
-      <div
+      <motion.div
+        variants={fadeUp}
         style={{
           marginTop: 14,
           maxWidth: 260,
@@ -67,9 +95,10 @@ export function MobileSessionEnded() {
         }}
       >
         Ask your instructor to start a lab session — this portal will refresh automatically.
-      </div>
+      </motion.div>
 
-      <div
+      <motion.div
+        variants={fadeUp}
         style={{
           marginTop: 32,
           padding: '12px 14px',
@@ -82,8 +111,15 @@ export function MobileSessionEnded() {
           lineHeight: 1.55,
         }}
       >
-        <span style={{ color: T.ink2 }}>polling</span> · every 5s
-      </div>
-    </div>
+        <motion.span
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ color: T.ink2, display: 'inline-block' }}
+        >
+          polling
+        </motion.span>{' '}
+        · every 5s
+      </motion.div>
+    </motion.div>
   )
 }

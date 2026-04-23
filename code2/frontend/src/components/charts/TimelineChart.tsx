@@ -1,28 +1,52 @@
+import { useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { T } from '../../theme/tokens'
 
 /** 24-hour submission volume — index 0 = earliest, index 23 = current hour. */
-export function TimelineChart({ data, highlightRange }: { data: number[]; highlightRange?: [number, number] }) {
+export function TimelineChart({
+  data,
+  highlightRange,
+}: {
+  data: number[]
+  highlightRange?: [number, number]
+}) {
   const max = Math.max(...data, 1)
   const peakIdx = data.indexOf(max)
+  const replayKey = useMemo(() => data.join('|'), [data])
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 110 }}>
+      <motion.div
+        key={replayKey}
+        style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 110 }}
+        initial="initial"
+        animate="animate"
+        variants={{
+          initial: {},
+          animate: { transition: { staggerChildren: 0.018 } },
+        }}
+      >
         {data.map((v, i) => {
           const inHighlight = highlightRange ? i >= highlightRange[0] && i <= highlightRange[1] : false
           return (
-            <div
+            <motion.div
               key={i}
+              variants={{
+                initial: { scaleY: 0, opacity: 0 },
+                animate: { scaleY: 1, opacity: 1 },
+              }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               style={{
                 flex: 1,
                 height: `${(v / max) * 100}%`,
                 minHeight: v > 0 ? 1 : 0,
                 background: inHighlight ? T.accent : T.ink2,
+                transformOrigin: 'bottom',
               }}
               title={`${String(i).padStart(2, '0')}:00 — ${v}`}
             />
           )
         })}
-      </div>
+      </motion.div>
       <div
         style={{
           display: 'flex',

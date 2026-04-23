@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 import { T } from '../../theme/tokens'
 import { useTheme } from '../../theme/ThemeContext'
 import { CornerMarks } from './CornerMarks'
+import { AnimatedNumber } from './AnimatedNumber'
 
 /**
  * Hero stat card — variant `primary` renders the inverted dark card used for
@@ -52,7 +53,8 @@ export function Stat({
         {label}
       </div>
       <div>
-        <div
+        <AnimatedNumber
+          value={value}
           style={{
             fontFamily: T.fSerif,
             fontSize: 46,
@@ -63,10 +65,9 @@ export function Stat({
             letterSpacing: dark ? 0.5 : 0,
             textShadow: dark ? `0 0 12px ${valueColor}88` : 'none',
             fontWeight: dark ? 500 : 400,
+            display: 'inline-block',
           }}
-        >
-          {value}
-        </div>
+        />
         {note && (
           <div
             style={{

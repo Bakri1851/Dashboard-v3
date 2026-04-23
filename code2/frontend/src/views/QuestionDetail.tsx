@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { T, LEVEL_STYLES } from '../theme/tokens'
 import { useApiData } from '../api/hooks'
 import { useFilterQuery } from '../api/filterQuery'
@@ -6,8 +7,12 @@ import type { QuestionDetail as QuestionDetailData } from '../types/api'
 import { Pill } from '../components/primitives/Pill'
 import { ScoreBar } from '../components/primitives/ScoreBar'
 import { SectionLabel } from '../components/primitives/SectionLabel'
+import { AnimatedNumber } from '../components/primitives/AnimatedNumber'
+import { Skeleton } from '../components/primitives/Skeleton'
 import { RagPanel } from '../components/RagPanel'
 import { useViewStore } from '../state/viewStore'
+import { AnimatedCard } from '../animation/AnimatedCard'
+import { stagger, fadeUp } from '../animation/motion'
 
 export function QuestionDetailView({ questionId }: { questionId: string }) {
   const q = useFilterQuery()
@@ -22,8 +27,29 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
     [data]
   )
 
-  if (loading) {
-    return <div style={{ padding: 36, color: T.ink2, fontFamily: T.fMono, fontSize: 12 }}>loading question…</div>
+  if (loading && !data) {
+    return (
+      <motion.div
+        variants={stagger}
+        initial="initial"
+        animate="animate"
+        style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}
+      >
+        <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 20 }}>
+          <div style={{ padding: '32px 36px', background: T.card, border: `1px solid ${T.line}` }}>
+            <Skeleton variant="text" width="40%" height={10} />
+            <div style={{ height: 18 }} />
+            <Skeleton variant="block" width={240} height={68} />
+            <div style={{ height: 18 }} />
+            <Skeleton variant="text" width="30%" height={14} />
+          </div>
+          <div style={{ padding: '28px 28px', background: T.bg2, border: `1px solid ${T.line}` }}>
+            <Skeleton variant="text" rows={4} />
+          </div>
+        </AnimatedCard>
+        <AnimatedCard variants={fadeUp}><Skeleton variant="block" height={220} /></AnimatedCard>
+      </motion.div>
+    )
   }
   if (error || !data) {
     return (
@@ -34,9 +60,14 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
   }
 
   return (
-    <div style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <motion.div
+      variants={stagger}
+      initial="initial"
+      animate="animate"
+      style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}
+    >
       {/* Header + measurement card */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 20 }}>
+      <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 20 }}>
         <div style={{ padding: '32px 36px', background: T.card, border: `1px solid ${T.line}` }}>
           <div
             style={{
@@ -50,17 +81,19 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
           >
             Question · {data.id} · {data.module}
           </div>
-          <div
-            style={{
-              fontFamily: T.fSerif,
-              fontSize: 72,
-              lineHeight: 0.95,
-              color: lvl?.fg ?? T.ink,
-              marginBottom: 18,
-              fontFeatureSettings: '"tnum"',
-            }}
-          >
-            {data.score.toFixed(2)}
+          <div style={{ marginBottom: 18 }}>
+            <AnimatedNumber
+              value={data.score.toFixed(2)}
+              duration={0.8}
+              style={{
+                fontFamily: T.fSerif,
+                fontSize: 72,
+                lineHeight: 0.95,
+                color: lvl?.fg ?? T.ink,
+                fontFeatureSettings: '"tnum"',
+                display: 'inline-block',
+              }}
+            />
           </div>
           <div style={{ marginBottom: 28 }}>
             <Pill level={data.level} />
@@ -100,16 +133,16 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
                 >
                   {m.l}
                 </div>
-                <div
+                <AnimatedNumber
+                  value={m.v}
                   style={{
                     fontFamily: T.fSerif,
                     fontSize: 24,
                     color: T.ink,
                     fontFeatureSettings: '"tnum"',
+                    display: 'inline-block',
                   }}
-                >
-                  {m.v}
-                </div>
+                />
               </div>
             ))}
           </div>
@@ -128,15 +161,16 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
           >
             Measurement
           </div>
-          <div
-            style={{
-              fontFamily: T.fSerif,
-              fontSize: 56,
-              lineHeight: 0.95,
-              marginBottom: 14,
-            }}
-          >
-            {data.students}
+          <div style={{ marginBottom: 14 }}>
+            <AnimatedNumber
+              value={String(data.students)}
+              style={{
+                fontFamily: T.fSerif,
+                fontSize: 56,
+                lineHeight: 0.95,
+                display: 'inline-block',
+              }}
+            />
           </div>
           <div style={{ fontFamily: T.fMono, fontSize: 11, opacity: 0.75 }}>
             students · {Math.round(data.students * data.avg_attempts)} submissions
@@ -160,10 +194,10 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
             </div>
           </div>
         </div>
-      </div>
+      </AnimatedCard>
 
       {/* Top strugglers on this question */}
-      <div style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
+      <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
         <SectionLabel n={1}>Top Strugglers on this Question</SectionLabel>
         {data.top_strugglers.length === 0 ? (
           <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3 }}>
@@ -194,13 +228,21 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
               </tr>
             </thead>
             <tbody>
+              <AnimatePresence initial={false}>
               {data.top_strugglers.map((s) => (
-                <tr
+                <motion.tr
                   key={s.id}
+                  layout
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 12 }}
+                  transition={{
+                    layout: { type: 'spring', stiffness: 400, damping: 38 },
+                    opacity: { duration: 0.2 },
+                  }}
                   onClick={() => pickStudent(s.id)}
+                  whileHover={{ background: T.bg2 }}
                   style={{ cursor: 'pointer' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = T.bg2)}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
                   <td
                     style={{
@@ -264,15 +306,16 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
                   >
                     click →
                   </td>
-                </tr>
+                </motion.tr>
               ))}
+              </AnimatePresence>
             </tbody>
           </table>
         )}
-      </div>
+      </AnimatedCard>
 
       {/* Mistake clusters */}
-      <div style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
+      <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
         <SectionLabel n={2}>Mistake Clusters</SectionLabel>
         {data.mistake_clusters.length === 0 ? (
           <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3 }}>
@@ -281,13 +324,23 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
             {data.mistake_clusters.map((c, i) => (
-              <div key={i} style={{ padding: '18px 20px', border: `1px solid ${T.line}`, background: T.bg2 }}>
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: i * 0.05, ease: 'easeOut' }}
+                whileHover={{ y: -2, borderColor: T.accent }}
+                style={{ padding: '18px 20px', border: `1px solid ${T.line}`, background: T.bg2 }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 16 }}>
                   <div style={{ fontFamily: T.fSans, fontSize: 14, fontWeight: 500, color: T.ink, lineHeight: 1.3 }}>
                     {c.label}
                   </div>
                   <div style={{ fontFamily: T.fSerif, fontSize: 22, color: T.accent, fontFeatureSettings: '"tnum"' }}>
-                    {Math.round(c.percent_of_wrong * 100)}
+                    <AnimatedNumber
+                      value={String(Math.round(c.percent_of_wrong * 100))}
+                      style={{ display: 'inline-block' }}
+                    />
                     <span style={{ fontSize: 13, color: T.ink3 }}>%</span>
                   </div>
                 </div>
@@ -310,17 +363,19 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
                     </div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}
-      </div>
+      </AnimatedCard>
 
       {/* RAG teaching feedback */}
-      <RagPanel audience="question" subjectId={data.id} sectionNumber={3} />
+      <AnimatedCard variants={fadeUp}>
+        <RagPanel audience="question" subjectId={data.id} sectionNumber={3} />
+      </AnimatedCard>
 
       {/* Recent attempts */}
-      <div style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
+      <AnimatedCard variants={fadeUp} style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
         <SectionLabel n={4}>Recent Attempts</SectionLabel>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: T.fSans, fontSize: 13 }}>
           <thead>
@@ -346,13 +401,21 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
             </tr>
           </thead>
           <tbody>
+            <AnimatePresence initial={false}>
             {data.recent_attempts.map((r, i) => (
-              <tr
+              <motion.tr
                 key={i}
+                layout
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 12 }}
+                transition={{
+                  layout: { type: 'spring', stiffness: 400, damping: 38 },
+                  opacity: { duration: 0.2 },
+                }}
                 onClick={() => pickStudent(r.user)}
+                whileHover={{ background: T.bg2 }}
                 style={{ cursor: 'pointer' }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = T.bg2)}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >
                 <td
                   style={{
@@ -412,12 +475,13 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
                     </span>
                   </div>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
+            </AnimatePresence>
           </tbody>
         </table>
-      </div>
-    </div>
+      </AnimatedCard>
+    </motion.div>
   )
 }
 

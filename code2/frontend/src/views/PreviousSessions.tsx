@@ -1,11 +1,15 @@
 import { useCallback, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { T } from '../theme/tokens'
 import { useApiData } from '../api/hooks'
 import { api } from '../api/client'
 import type { SavedSession } from '../types/api'
 import { SectionLabel } from '../components/primitives/SectionLabel'
+import { Skeleton } from '../components/primitives/Skeleton'
 import { useFilterStore } from '../state/filterStore'
 import { useViewStore } from '../state/viewStore'
+import { AnimatedCard } from '../animation/AnimatedCard'
+import { stagger, fadeUp } from '../animation/motion'
 
 function fmtDuration(mins: number | null): string {
   if (mins == null) return '—'
@@ -105,8 +109,13 @@ export function PreviousSessionsView() {
   }
 
   return (
-    <div style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <div style={{ background: T.card, border: `1px solid ${T.line}` }}>
+    <motion.div
+      variants={stagger}
+      initial="initial"
+      animate="animate"
+      style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 18 }}
+    >
+      <AnimatedCard variants={fadeUp} style={{ background: T.card, border: `1px solid ${T.line}` }}>
         <div
           style={{
             padding: '18px 22px',
@@ -124,8 +133,10 @@ export function PreviousSessionsView() {
               Stored in <code style={{ background: T.bg2, padding: '1px 4px' }}>data/saved_sessions.json</code>. Click Load to apply a session as the current filter.
             </div>
           </div>
-          <button
+          <motion.button
             onClick={openSaveDialog}
+            whileHover={{ filter: 'brightness(1.1)' }}
+            whileTap={{ scale: 0.96 }}
             style={{
               padding: '6px 14px',
               background: T.accent,
@@ -139,11 +150,13 @@ export function PreviousSessionsView() {
             }}
           >
             Save Retroactive Session
-          </button>
+          </motion.button>
         </div>
 
-        {loading && (
-          <div style={{ padding: 28, color: T.ink3, fontFamily: T.fMono, fontSize: 11 }}>loading…</div>
+        {loading && !data && (
+          <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <Skeleton variant="text" rows={4} />
+          </div>
         )}
         {error && <div style={{ padding: 28, color: T.danger, fontFamily: T.fMono, fontSize: 11 }}>{error}</div>}
         {!loading && !error && data && data.length === 0 && (
@@ -177,8 +190,16 @@ export function PreviousSessionsView() {
               </tr>
             </thead>
             <tbody>
-              {data.map((s) => (
-                <tr key={s.id}>
+              <AnimatePresence initial={false}>
+              {data.map((s, i) => (
+                <motion.tr
+                  key={s.id}
+                  layout
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: 12 }}
+                  transition={{ duration: 0.25, delay: i * 0.03 }}
+                >
                   <td style={{ padding: '14px 22px', borderBottom: `1px solid ${T.line2}`, color: T.ink }}>{s.name}</td>
                   <td style={{ padding: '14px 22px', borderBottom: `1px solid ${T.line2}`, fontFamily: T.fMono, fontSize: 12, color: T.ink2 }}>
                     {fmtTimestamp(s.start_time)}
@@ -196,8 +217,10 @@ export function PreviousSessionsView() {
                     {s.module_filter ?? '—'}
                   </td>
                   <td style={{ padding: '14px 22px', borderBottom: `1px solid ${T.line2}`, textAlign: 'right', whiteSpace: 'nowrap' }}>
-                    <button
+                    <motion.button
                       onClick={() => loadSession(s)}
+                      whileHover={{ filter: 'brightness(1.1)' }}
+                      whileTap={{ scale: 0.95 }}
                       style={{
                         padding: '4px 10px',
                         fontFamily: T.fMono,
@@ -212,10 +235,13 @@ export function PreviousSessionsView() {
                       }}
                     >
                       Load
-                    </button>
-                    <button
+                    </motion.button>
+                    <motion.button
                       onClick={() => deleteSession(s)}
                       disabled={busy}
+                      whileHover={busy ? undefined : { background: T.danger, color: '#fff' }}
+                      whileTap={busy ? undefined : { scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
                       style={{
                         padding: '4px 10px',
                         fontFamily: T.fMono,
@@ -230,21 +256,30 @@ export function PreviousSessionsView() {
                       }}
                     >
                       Delete
-                    </button>
+                    </motion.button>
                   </td>
-                </tr>
+                </motion.tr>
               ))}
+              </AnimatePresence>
             </tbody>
           </table>
         )}
-      </div>
+      </AnimatedCard>
 
+      <AnimatePresence>
       {saveOpen && (
-        <div
+        <motion.div
+          key="save-dialog"
+          layout
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           style={{
             padding: 18,
             background: T.card,
             border: `1px solid ${T.accent}`,
+            overflow: 'hidden',
           }}
         >
           <SectionLabel n={2}>Save Retroactive Session</SectionLabel>
@@ -295,9 +330,10 @@ export function PreviousSessionsView() {
               Save
             </button>
           </div>
-        </div>
+        </motion.div>
       )}
-    </div>
+      </AnimatePresence>
+    </motion.div>
   )
 }
 

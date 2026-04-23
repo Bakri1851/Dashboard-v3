@@ -25,8 +25,19 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
+let transitionTimer: number | null = null
+
 function applyThemeClass(theme: ThemeName) {
   const html = document.documentElement
+  // Enable a one-shot global transition so the var() swap crossfades
+  // instead of snapping. Removed after 240ms so normal per-element
+  // transitions aren't hijacked during ordinary interactions.
+  html.classList.add('theme-transitioning')
+  if (transitionTimer != null) window.clearTimeout(transitionTimer)
+  transitionTimer = window.setTimeout(() => {
+    html.classList.remove('theme-transitioning')
+    transitionTimer = null
+  }, 240)
   THEMES.forEach((t) => html.classList.remove(`theme-${t.id}`))
   html.classList.add(`theme-${theme}`)
 }

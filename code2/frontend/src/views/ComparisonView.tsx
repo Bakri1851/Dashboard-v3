@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { T, LEVEL_STYLES } from '../theme/tokens'
 import { useApiData } from '../api/hooks'
 import { useFilterQuery } from '../api/filterQuery'
@@ -11,7 +12,10 @@ import type {
 import { Pill } from '../components/primitives/Pill'
 import { ScoreBar } from '../components/primitives/ScoreBar'
 import { SectionLabel } from '../components/primitives/SectionLabel'
+import { Skeleton, SkeletonStatCard } from '../components/primitives/Skeleton'
 import { ScatterChart } from '../components/charts/ScatterChart'
+import { AnimatedCard } from '../animation/AnimatedCard'
+import { stagger, fadeUp } from '../animation/motion'
 
 type CmpTab = 'struggle' | 'difficulty'
 
@@ -21,9 +25,21 @@ export function ComparisonView() {
   const [tab, setTab] = useState<CmpTab>('struggle')
 
   return (
-    <div style={{ padding: '20px 28px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <motion.div
+      variants={stagger}
+      initial="initial"
+      animate="animate"
+      style={{ padding: '20px 28px', display: 'flex', flexDirection: 'column', gap: 20 }}
+    >
       {loading && !data && (
-        <div style={{ color: T.ink3, fontFamily: T.fMono, fontSize: 11 }}>loading model comparison…</div>
+        <AnimatedCard variants={fadeUp} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12 }}>
+            <SkeletonStatCard />
+            <SkeletonStatCard />
+            <SkeletonStatCard />
+          </div>
+          <Skeleton variant="block" height={360} />
+        </AnimatedCard>
       )}
       {error && <div style={{ color: T.danger, fontFamily: T.fMono, fontSize: 11 }}>{error}</div>}
 
@@ -79,7 +95,7 @@ export function ComparisonView() {
           </div>
         </>
       )}
-    </div>
+    </motion.div>
   )
 }
 

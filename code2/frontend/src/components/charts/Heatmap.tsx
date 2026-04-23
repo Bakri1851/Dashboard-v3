@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { T } from '../../theme/tokens'
 
 export interface HeatmapRow {
@@ -22,10 +24,14 @@ export function Heatmap({
   cellSize?: number
 }) {
   const max = maxValue ?? Math.max(1, ...rows.flatMap((r) => r.cells.map((c) => c.value)))
+  const replayKey = useMemo(
+    () => `${rows.length}:${rows.map((r) => r.rowLabel).join(',')}`,
+    [rows],
+  )
 
   return (
     <div style={{ overflow: 'auto', fontFamily: T.fMono, fontSize: 10.5 }}>
-      <table style={{ borderCollapse: 'separate', borderSpacing: 2, color: T.ink2 }}>
+      <table key={replayKey} style={{ borderCollapse: 'separate', borderSpacing: 2, color: T.ink2 }}>
         <thead>
           <tr>
             <th style={{ padding: '2px 8px', textAlign: 'left', color: T.ink3, fontWeight: 400 }}></th>
@@ -48,7 +54,7 @@ export function Heatmap({
           </tr>
         </thead>
         <tbody>
-          {rows.map((r) => (
+          {rows.map((r, rIdx) => (
             <tr key={r.rowLabel}>
               <th
                 style={{
@@ -61,14 +67,19 @@ export function Heatmap({
               >
                 {r.rowLabel}
               </th>
-              {colLabels.map((col) => {
+              {colLabels.map((col, cIdx) => {
                 const cell = r.cells.find((c) => c.colLabel === col)
                 const v = cell?.value ?? 0
                 const opacity = max > 0 ? v / max : 0
+                // diagonal wipe-in — capped so big grids still finish ≤ 0.8s
+                const delay = Math.min((rIdx + cIdx) * 0.012, 0.8)
                 return (
-                  <td
+                  <motion.td
                     key={col}
                     title={`${r.rowLabel} · ${col} · ${v}`}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.22, delay, ease: 'easeOut' }}
                     style={{
                       width: cellSize,
                       height: cellSize,
@@ -83,7 +94,7 @@ export function Heatmap({
                     }}
                   >
                     {v > 0 ? v : ''}
-                  </td>
+                  </motion.td>
                 )
               })}
             </tr>

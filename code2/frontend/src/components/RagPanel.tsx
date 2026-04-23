@@ -1,7 +1,9 @@
+import { AnimatePresence, motion } from 'framer-motion'
 import { T } from '../theme/tokens'
 import { useApiData } from '../api/hooks'
 import type { RagSuggestions } from '../types/api'
 import { SectionLabel } from './primitives/SectionLabel'
+import { Skeleton } from './primitives/Skeleton'
 
 /** Per-student or per-question RAG coaching panel. */
 export function RagPanel({
@@ -21,39 +23,52 @@ export function RagPanel({
     <div style={{ padding: 24, background: T.accentSoft, border: `1px solid ${T.accent}` }}>
       <SectionLabel n={sectionNumber}>{title}</SectionLabel>
 
-      {loading && (
-        <ul style={{ margin: 0, paddingLeft: 20, listStyle: 'none' }} aria-label="Loading suggestions">
-          {[0, 1, 2].map((i) => (
-            <li
-              key={i}
-              style={{
-                marginBottom: 8,
-                height: 12,
-                width: `${85 - i * 12}%`,
-                background: T.line2,
-                opacity: 0.55,
-                borderRadius: 2,
-                animation: 'pulse 1.4s ease-in-out infinite',
-                animationDelay: `${i * 120}ms`,
-              }}
-            />
-          ))}
-        </ul>
-      )}
-
-      {error && (
-        <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.danger }}>
-          {error}
-        </div>
-      )}
-
-      {data && data.bullets.length > 0 && (
-        <ul style={{ margin: 0, paddingLeft: 20, fontFamily: T.fSans, fontSize: 13.5, color: T.ink, lineHeight: 1.7 }}>
-          {data.bullets.map((b, i) => (
-            <li key={i} style={{ marginBottom: 6 }}>{b}</li>
-          ))}
-        </ul>
-      )}
+      <AnimatePresence mode="wait" initial={false}>
+        {loading && (
+          <motion.div
+            key="skeleton"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            aria-label="Loading suggestions"
+          >
+            <Skeleton variant="text" rows={3} />
+          </motion.div>
+        )}
+        {!loading && error && (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{ fontFamily: T.fMono, fontSize: 11, color: T.danger }}
+          >
+            {error}
+          </motion.div>
+        )}
+        {!loading && !error && data && data.bullets.length > 0 && (
+          <motion.ul
+            key="bullets"
+            initial="initial"
+            animate="animate"
+            variants={{ initial: {}, animate: { transition: { staggerChildren: 0.06 } } }}
+            style={{ margin: 0, paddingLeft: 20, fontFamily: T.fSans, fontSize: 13.5, color: T.ink, lineHeight: 1.7 }}
+          >
+            {data.bullets.map((b, i) => (
+              <motion.li
+                key={i}
+                variants={{ initial: { opacity: 0, x: -6 }, animate: { opacity: 1, x: 0 } }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                style={{ marginBottom: 6 }}
+              >
+                {b}
+              </motion.li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
 
       {data && data.bullets.length === 0 && !loading && !error && (
         <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3, lineHeight: 1.6 }}>

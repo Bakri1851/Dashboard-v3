@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { T, LEVEL_STYLES } from '../../theme/tokens'
 import { Pill } from '../primitives/Pill'
 import { ScoreBar } from '../primitives/ScoreBar'
+import { rowEnter, rowLayoutSpring } from '../../animation/motion'
 
 export type LeaderboardColumn =
   | 'rank'
@@ -47,6 +49,8 @@ function alignFor(col: LeaderboardColumn): 'left' | 'right' {
   return col === 'id' || col === 'level' || col === 'module' ? 'left' : 'right'
 }
 
+const FLASH_LEVELS: ReadonlySet<string> = new Set(['Needs Help', 'Very Hard'])
+
 export function Leaderboard({
   title,
   subtitle,
@@ -62,7 +66,32 @@ export function Leaderboard({
   onClick: (r: LeaderboardRow) => void
   onHover?: (r: LeaderboardRow) => void
 }) {
-  const [hover, setHover] = useState<number | null>(null)
+  const [hover, setHover] = useState<string | null>(null)
+  const seenRef = useRef<Set<string>>(new Set())
+  const [flashIds, setFlashIds] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    const current = new Set(rows.map((r) => r.id))
+    const isFirstPaint = seenRef.current.size === 0
+    const nextFlash = new Set<string>()
+    if (!isFirstPaint) {
+      for (const r of rows) {
+        if (!seenRef.current.has(r.id) && FLASH_LEVELS.has(r.level)) {
+          nextFlash.add(r.id)
+        }
+      }
+    }
+    seenRef.current = current
+    if (nextFlash.size === 0) return
+    // Defer the setState out of the effect body so React doesn't cascade
+    // a synchronous re-render (see react-hooks/set-state-in-effect).
+    const mount = window.setTimeout(() => setFlashIds(nextFlash), 0)
+    const clear = window.setTimeout(() => setFlashIds(new Set()), 1400)
+    return () => {
+      window.clearTimeout(mount)
+      window.clearTimeout(clear)
+    }
+  }, [rows])
 
   return (
     <div style={{ background: T.card, border: `1px solid ${T.line}`, minWidth: 0, overflow: 'hidden' }}>
@@ -91,6 +120,7 @@ export function Leaderboard({
                     background: T.card,
                     position: 'sticky',
                     top: 0,
+                    zIndex: 2,
                   }}
                 >
                   {HEADER[c]}
@@ -99,35 +129,63 @@ export function Leaderboard({
             </tr>
           </thead>
           <tbody>
-            {rows.map((r, i) => (
-              <tr
-                key={`${r.id}-${i}`}
-                onClick={() => onClick(r)}
-                onMouseEnter={() => {
-                  setHover(i)
-                  onHover?.(r)
-                }}
-                onMouseLeave={() => setHover(null)}
-                style={{ cursor: 'pointer', background: hover === i ? T.bg2 : 'transparent' }}
-              >
-                {cols.map((c) => (
-                  <td
-                    key={c}
+            <AnimatePresence initial={false}>
+              {rows.map((r) => {
+                const isHover = hover === r.id
+                const shouldFlash = flashIds.has(r.id)
+                const flashBg = T.warn
+                return (
+                  <motion.tr
+                    key={r.id}
+                    layout
+                    layoutId={`row-${r.id}`}
+                    variants={rowEnter}
+                    initial="initial"
+                    animate={
+                      shouldFlash
+                        ? {
+                            opacity: 1,
+                            x: 0,
+                            backgroundColor: [`${flashBg}44`, `${flashBg}22`, 'rgba(0,0,0,0)'],
+                          }
+                        : 'animate'
+                    }
+                    exit="exit"
+                    transition={{
+                      layout: rowLayoutSpring,
+                      backgroundColor: { duration: 1.4, ease: 'easeOut' },
+                    }}
+                    onClick={() => onClick(r)}
+                    onMouseEnter={() => {
+                      setHover(r.id)
+                      onHover?.(r)
+                    }}
+                    onMouseLeave={() => setHover(null)}
                     style={{
-                      padding: '9px 18px',
-                      borderBottom: `1px solid ${T.line2}`,
-                      fontVariantNumeric: 'tabular-nums',
-                      fontFamily: c === 'id' ? T.fMono : T.fSans,
-                      fontSize: c === 'id' ? 12 : 13,
-                      color: T.ink,
-                      textAlign: alignFor(c),
+                      cursor: 'pointer',
+                      background: isHover ? T.bg2 : 'transparent',
                     }}
                   >
-                    {renderCell(c, r)}
-                  </td>
-                ))}
-              </tr>
-            ))}
+                    {cols.map((c) => (
+                      <td
+                        key={c}
+                        style={{
+                          padding: '9px 18px',
+                          borderBottom: `1px solid ${T.line2}`,
+                          fontVariantNumeric: 'tabular-nums',
+                          fontFamily: c === 'id' ? T.fMono : T.fSans,
+                          fontSize: c === 'id' ? 12 : 13,
+                          color: T.ink,
+                          textAlign: alignFor(c),
+                        }}
+                      >
+                        {renderCell(c, r)}
+                      </td>
+                    ))}
+                  </motion.tr>
+                )
+              })}
+            </AnimatePresence>
             {rows.length === 0 && (
               <tr>
                 <td

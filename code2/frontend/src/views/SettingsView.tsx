@@ -1,7 +1,10 @@
+import { motion } from 'framer-motion'
 import { T, THEMES } from '../theme/tokens'
 import { useTheme } from '../theme/ThemeContext'
 import { useSettings } from '../api/useSettings'
 import { SectionLabel } from '../components/primitives/SectionLabel'
+import { AnimatedCard } from '../animation/AnimatedCard'
+import { stagger, fadeUp } from '../animation/motion'
 
 const AUTO_REFRESH_OPTIONS = [5, 10, 15, 30, 60, 120, 300]
 
@@ -10,20 +13,30 @@ export function SettingsView() {
   const { data, error, loading, update, reset } = useSettings()
 
   return (
-    <div style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 960 }}>
+    <motion.div
+      variants={stagger}
+      initial="initial"
+      animate="animate"
+      style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 960 }}
+    >
       {/* Theme picker */}
-      <div style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
+      <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
         <SectionLabel n={1}>Appearance · Theme</SectionLabel>
         <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3, marginBottom: 14, lineHeight: 1.6 }}>
           Seven visual skins — pick any. Changes persist in localStorage and apply immediately.
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-          {THEMES.map((t) => {
+          {THEMES.map((t, i) => {
             const active = theme === t.id
             return (
-              <button
+              <motion.button
                 key={t.id}
                 onClick={() => setTheme(t.id)}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: i * 0.04 }}
+                whileHover={{ y: -2, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 style={{
                   padding: '16px 18px',
                   background: t.preview,
@@ -54,7 +67,7 @@ export function SettingsView() {
                     ACTIVE
                   </span>
                 )}
-              </button>
+              </motion.button>
             )
           })}
         </div>
@@ -81,7 +94,7 @@ export function SettingsView() {
             />
           ))}
         </div>
-      </div>
+      </AnimatedCard>
 
       {loading && !data && (
         <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3 }}>loading backend config…</div>
@@ -93,7 +106,7 @@ export function SettingsView() {
       {data && (
         <>
           {/* Scoring Models */}
-          <div style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
+          <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
             <SectionLabel n={2}>Scoring Models</SectionLabel>
             <ToggleRow
               label="Struggle model"
@@ -146,10 +159,11 @@ export function SettingsView() {
               disabled={!data.runtime.cf_enabled}
               onChange={(v) => update({ cf_threshold: v })}
             />
-          </div>
+          </AnimatedCard>
 
           {/* BKT Parameters */}
-          <div
+          <AnimatedCard
+            variants={fadeUp}
             style={{
               padding: 24,
               background: T.card,
@@ -170,10 +184,10 @@ export function SettingsView() {
               <BKTCard label="p_guess" value={data.runtime.bkt.p_guess} max={0.5} onChange={(v) => update({ bkt_p_guess: v })} />
               <BKTCard label="p_slip"  value={data.runtime.bkt.p_slip}  max={0.5} onChange={(v) => update({ bkt_p_slip: v })} />
             </div>
-          </div>
+          </AnimatedCard>
 
           {/* Environment */}
-          <div style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
+          <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
             <SectionLabel n={4}>Environment</SectionLabel>
             <ToggleRow
               label="Sound effects"
@@ -224,10 +238,11 @@ export function SettingsView() {
                 ))}
               </select>
             </div>
-          </div>
+          </AnimatedCard>
 
           {/* Reset + read-only config reference */}
-          <div
+          <AnimatedCard
+            variants={fadeUp}
             style={{
               padding: '14px 18px',
               background: T.bg2,
@@ -259,10 +274,10 @@ export function SettingsView() {
             >
               Reset Defaults
             </button>
-          </div>
+          </AnimatedCard>
 
           {/* Read-only config reference (unchanged from Phase 3) */}
-          <div style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
+          <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
             <SectionLabel n={5}>Read-only config reference</SectionLabel>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16 }}>
               <InfoBlock title="Struggle weights (sum = 1.00)">
@@ -292,10 +307,10 @@ export function SettingsView() {
                 <Line label="leaderboard_max" value={String(data.leaderboard_max_items)} />
               </InfoBlock>
             </div>
-          </div>
+          </AnimatedCard>
         </>
       )}
-    </div>
+    </motion.div>
   )
 }
 

@@ -1,13 +1,17 @@
 import { useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
 import { T } from '../theme/tokens'
 import { useApiData } from '../api/hooks'
 import { useFilterQuery } from '../api/filterQuery'
 import type { AnalysisStats } from '../types/api'
 import { Stat } from '../components/primitives/Stat'
 import { SectionLabel } from '../components/primitives/SectionLabel'
+import { SkeletonStatCard, Skeleton } from '../components/primitives/Skeleton'
 import { HBars } from '../components/charts/HBars'
 import { TimelineChart } from '../components/charts/TimelineChart'
 import { Heatmap, type HeatmapRow } from '../components/charts/Heatmap'
+import { AnimatedCard } from '../animation/AnimatedCard'
+import { stagger, fadeUp } from '../animation/motion'
 
 type ChartMode =
   | 'module_usage'
@@ -34,7 +38,27 @@ export function DataAnalysisView() {
   const [mode, setMode] = useState<ChartMode>('module_usage')
 
   if (loading && !data) {
-    return <div style={{ padding: 36, color: T.ink2, fontFamily: T.fMono, fontSize: 12 }}>loading analysis…</div>
+    return (
+      <motion.div
+        variants={stagger}
+        initial="initial"
+        animate="animate"
+        style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}
+      >
+        <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12 }}>
+          <SkeletonStatCard />
+          <SkeletonStatCard />
+          <SkeletonStatCard />
+        </AnimatedCard>
+        <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
+          <SkeletonStatCard />
+          <SkeletonStatCard />
+        </AnimatedCard>
+        <AnimatedCard variants={fadeUp}>
+          <Skeleton variant="block" height={240} />
+        </AnimatedCard>
+      </motion.div>
+    )
   }
   if (error) {
     return <div style={{ padding: 36, color: T.danger, fontFamily: T.fMono, fontSize: 12 }}>{error}</div>
@@ -42,9 +66,14 @@ export function DataAnalysisView() {
   if (!data) return null
 
   return (
-    <div style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <motion.div
+      variants={stagger}
+      initial="initial"
+      animate="animate"
+      style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}
+    >
       {/* Classic hero stats (matches the old Streamlit view) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12 }}>
+      <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12 }}>
         <Stat
           label="Total submissions"
           value={data.total_records.toLocaleString()}
@@ -61,10 +90,10 @@ export function DataAnalysisView() {
           value={data.unique_questions.toLocaleString()}
           note={`avg ${data.avg_attempts_per_question.toFixed(1)} attempts each`}
         />
-      </div>
+      </AnimatedCard>
 
       {/* Secondary stats — peak activity at a glance */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
+      <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
         <Stat
           label="Peak hour"
           value={`${String(data.peak_hour).padStart(2, '0')}:00`}
@@ -76,10 +105,10 @@ export function DataAnalysisView() {
           value={`${data.avg_session_minutes.toFixed(0)}m`}
           note="first → last submission per student"
         />
-      </div>
+      </AnimatedCard>
 
       {/* Chart-mode picker */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+      <AnimatedCard variants={fadeUp} style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         <span
           style={{
             fontFamily: T.fMono,
@@ -96,10 +125,12 @@ export function DataAnalysisView() {
         {MODES.map((m) => {
           const active = mode === m.id
           return (
-            <button
+            <motion.button
               key={m.id}
               onClick={() => setMode(m.id)}
               title={m.hint}
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.95 }}
               style={{
                 padding: '6px 12px',
                 background: active ? T.priorityBg : 'transparent',
@@ -112,19 +143,23 @@ export function DataAnalysisView() {
               }}
             >
               {m.label}
-            </button>
+            </motion.button>
           )
         })}
-      </div>
+      </AnimatedCard>
 
       {/* Chart body */}
-      <div style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
+      <AnimatedCard
+        variants={fadeUp}
+        key={mode}
+        style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}
+      >
         <SectionLabel n={MODES.findIndex((m) => m.id === mode) + 1}>
           {MODES.find((m) => m.id === mode)?.label}
         </SectionLabel>
         <ChartBody mode={mode} data={data} />
-      </div>
-    </div>
+      </AnimatedCard>
+    </motion.div>
   )
 }
 

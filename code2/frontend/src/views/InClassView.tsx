@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { T } from '../theme/tokens'
 import { prefetchApi, useApiData } from '../api/hooks'
+import { AnimatedCard } from '../animation/AnimatedCard'
+import { stagger, fadeUp } from '../animation/motion'
+import { AnimatedNumber } from '../components/primitives/AnimatedNumber'
+import { Skeleton, SkeletonStatCard } from '../components/primitives/Skeleton'
 import { useAutoRefreshInterval } from '../api/useAutoRefreshInterval'
 import { useFilterQuery } from '../api/filterQuery'
 import { useFilterStore, presetNote } from '../state/filterStore'
@@ -128,89 +133,116 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
   const submissionsNote = presetNote(filter.preset)
 
   return (
-    <div style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 28 }}>
-      {anyError && (
-        <div
-          style={{
-            padding: '12px 16px',
-            border: `1px solid ${T.danger}`,
-            background: T.card,
-            color: T.danger,
-            fontFamily: T.fMono,
-            fontSize: 12,
-            lineHeight: 1.5,
-          }}
-        >
-          <div style={{ fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', fontSize: 10 }}>
-            Backend unreachable
-          </div>
-          <div style={{ color: T.ink2, marginTop: 4 }}>
-            {liveErr ?? strugErr ?? diffErr}
-          </div>
-          <div style={{ color: T.ink3, marginTop: 6 }}>
-            Start the FastAPI backend: <code style={{ background: T.bg2, padding: '1px 4px' }}>
-              uvicorn backend.main:app --app-dir code2 --port 8000 --reload
-            </code>
-          </div>
-        </div>
-      )}
-      {anyLoading && !anyError && (
-        <div
-          style={{
-            padding: '10px 14px',
-            border: `1px dashed ${T.line2}`,
-            color: T.ink3,
-            fontFamily: T.fMono,
-            fontSize: 11,
-            letterSpacing: 1,
-            textTransform: 'uppercase',
-          }}
-        >
-          Loading live data…
-        </div>
-      )}
-      {showFallbackBanner && (
-        <div
-          style={{
-            padding: '10px 14px',
-            border: `1px solid ${T.line2}`,
-            background: T.card,
-            color: T.ink2,
-            fontFamily: T.fMono,
-            fontSize: 11,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-          }}
-        >
-          <span style={{ color: T.ink3, letterSpacing: 1, textTransform: 'uppercase', fontSize: 10 }}>
-            No activity today
-          </span>
-          <span>— showing all time.</span>
-          <button
-            onClick={() => {
-              filter.setAutoFallbackApplied(false)
-              filter.setPreset('today')
-            }}
-            style={{
-              marginLeft: 'auto',
-              padding: '4px 10px',
-              fontFamily: T.fMono,
-              fontSize: 10,
-              background: 'transparent',
-              color: T.ink2,
-              border: `1px solid ${T.line}`,
-              letterSpacing: 1,
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-            }}
+    <motion.div
+      variants={stagger}
+      initial="initial"
+      animate="animate"
+      style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 28 }}
+    >
+      <AnimatePresence initial={false}>
+        {anyError && (
+          <motion.div
+            key="err-banner"
+            layout
+            initial={{ opacity: 0, height: 0, y: -6 }}
+            animate={{ opacity: 1, height: 'auto', y: 0 }}
+            exit={{ opacity: 0, height: 0, y: -6 }}
+            transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+            style={{ overflow: 'hidden' }}
           >
-            Back to today
-          </button>
-        </div>
+            <div
+              style={{
+                padding: '12px 16px',
+                border: `1px solid ${T.danger}`,
+                background: T.card,
+                color: T.danger,
+                fontFamily: T.fMono,
+                fontSize: 12,
+                lineHeight: 1.5,
+              }}
+            >
+              <div style={{ fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', fontSize: 10 }}>
+                Backend unreachable
+              </div>
+              <div style={{ color: T.ink2, marginTop: 4 }}>
+                {liveErr ?? strugErr ?? diffErr}
+              </div>
+              <div style={{ color: T.ink3, marginTop: 6 }}>
+                Start the FastAPI backend: <code style={{ background: T.bg2, padding: '1px 4px' }}>
+                  uvicorn backend.main:app --app-dir code2 --port 8000 --reload
+                </code>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {anyLoading && !anyError && !live && (
+        <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)', gap: 12 }}>
+          <SkeletonStatCard height={148} />
+          <SkeletonStatCard />
+          <SkeletonStatCard />
+          <SkeletonStatCard />
+          <SkeletonStatCard />
+        </AnimatedCard>
       )}
+      <AnimatePresence initial={false}>
+        {showFallbackBanner && (
+          <motion.div
+            key="fallback-banner"
+            layout
+            initial={{ opacity: 0, height: 0, y: -6 }}
+            animate={{ opacity: 1, height: 'auto', y: 0 }}
+            exit={{ opacity: 0, height: 0, y: -6 }}
+            transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div
+              style={{
+                padding: '10px 14px',
+                border: `1px solid ${T.line2}`,
+                background: T.card,
+                color: T.ink2,
+                fontFamily: T.fMono,
+                fontSize: 11,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+              }}
+            >
+              <span style={{ color: T.ink3, letterSpacing: 1, textTransform: 'uppercase', fontSize: 10 }}>
+                No activity today
+              </span>
+              <span>— showing all time.</span>
+              <motion.button
+                onClick={() => {
+                  filter.setAutoFallbackApplied(false)
+                  filter.setPreset('today')
+                }}
+                whileHover={{ borderColor: T.ink2, color: T.ink }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ duration: 0.15 }}
+                style={{
+                  marginLeft: 'auto',
+                  padding: '4px 10px',
+                  fontFamily: T.fMono,
+                  fontSize: 10,
+                  background: 'transparent',
+                  color: T.ink2,
+                  border: `1px solid ${T.line}`,
+                  letterSpacing: 1,
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                }}
+              >
+                Back to today
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Hero stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)', gap: 12 }}>
+      {live && (
+      <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)', gap: 12 }}>
         <div
           style={{
             padding: '20px 22px',
@@ -234,24 +266,26 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
             Priority Now
           </div>
           <div>
-            <div
+            <AnimatedNumber
+              value={String(needsHelp)}
               style={{
                 fontFamily: T.fSerif,
                 fontSize: 56,
                 lineHeight: 0.95,
                 fontFeatureSettings: '"tnum"',
                 color: T.priorityFg,
+                display: 'inline-block',
               }}
-            >
-              {needsHelp}
-            </div>
+            />
             <div style={{ fontFamily: T.fMono, fontSize: 11, marginTop: 8, opacity: 0.8 }}>
               students need help · {strugCount} struggling
             </div>
             <div style={{ marginTop: 14 }}>
-              <button
+              <motion.button
                 onClick={onOpenLab}
                 disabled={!sessionActive}
+                whileHover={sessionActive ? { scale: 1.03 } : undefined}
+                whileTap={sessionActive ? { scale: 0.97 } : undefined}
                 style={{
                   padding: '6px 12px',
                   background: 'transparent',
@@ -266,7 +300,7 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
                 }}
               >
                 Dispatch Assistants →
-              </button>
+              </motion.button>
             </div>
           </div>
         </div>
@@ -274,10 +308,11 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
         <Stat label="Unique Students" value={String(students)} note="loaded records" accent={T.accent} />
         <Stat label="Questions Answered" value={String(questions)} note={`across ${live?.unique_modules ?? 0} modules`} />
         <Stat label="Mean Incorrectness" value={meanInc.toFixed(2)} note="class average" accent={T.warn} />
-      </div>
+      </AnimatedCard>
+      )}
 
       {/* Module filter */}
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+      <AnimatedCard variants={fadeUp} style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
         <span
           style={{
             fontFamily: T.fMono,
@@ -293,9 +328,11 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
         {moduleOptions.map((m) => {
           const active = m === moduleFilter
           return (
-            <button
+            <motion.button
               key={m}
               onClick={() => setModuleFilter(m)}
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.95 }}
               style={{
                 padding: '5px 10px',
                 background: active ? T.priorityBg : 'transparent',
@@ -304,16 +341,17 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
                 borderRadius: 999,
                 fontFamily: T.fSans,
                 fontSize: 12,
+                cursor: 'pointer',
               }}
             >
               {m}
-            </button>
+            </motion.button>
           )
         })}
-      </div>
+      </AnimatedCard>
 
       {/* Two leaderboards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 24 }}>
+      <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 24 }}>
         <Leaderboard
           title="Student Struggle"
           subtitle="Ranked by composite struggle score · click to drill in"
@@ -330,11 +368,18 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
           onClick={(r) => onPickQuestion(r.id)}
           onHover={(r) => debouncedPrefetch(`/rag/question/${encodeURIComponent(r.id)}`)}
         />
-      </div>
+      </AnimatedCard>
+
+      {strugLoading && !struggle && (
+        <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 24 }}>
+          <LeaderboardSkeleton />
+          <LeaderboardSkeleton />
+        </AnimatedCard>
+      )}
 
       {/* CF panel (when enabled) */}
       {cfEnabled && cf && (
-        <div style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
+        <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
           <SectionLabel n={4}>Collaborative Filtering</SectionLabel>
           {cf.fallback ? (
             <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3 }}>
@@ -367,32 +412,47 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
                     </tr>
                   </thead>
                   <tbody>
-                    {cf.elevated_students.map((s) => (
-                      <tr key={s.id} onClick={() => onPickStudent(s.id)} style={{ cursor: 'pointer' }}>
-                        <td style={{ padding: '8px 12px', fontFamily: T.fMono, fontSize: 12, color: T.ink, borderBottom: `1px solid ${T.line2}` }}>{s.id}</td>
-                        <td style={{ padding: '8px 12px', borderBottom: `1px solid ${T.line2}` }}><Pill level={s.level} /></td>
-                        <td style={{ padding: '8px 12px', textAlign: 'right', fontFamily: T.fMono, fontSize: 12, color: T.ink2, borderBottom: `1px solid ${T.line2}` }}>{s.baseline_score.toFixed(2)}</td>
-                        <td style={{ padding: '8px 12px', textAlign: 'right', borderBottom: `1px solid ${T.line2}` }}>
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end', width: '100%' }}>
-                            <ScoreBar value={s.cf_score} color={T.accent} width={44} height={3} />
-                            <span style={{ fontFamily: T.fMono, fontSize: 12 }}>{s.cf_score.toFixed(2)}</span>
-                          </div>
-                        </td>
-                        <td style={{ padding: '8px 12px', textAlign: 'right', fontFamily: T.fMono, fontSize: 12, color: s.delta >= 0 ? T.accent : T.ink3, borderBottom: `1px solid ${T.line2}` }}>
-                          {s.delta >= 0 ? '+' : ''}{s.delta.toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
+                    <AnimatePresence initial={false}>
+                      {cf.elevated_students.map((s) => (
+                        <motion.tr
+                          key={s.id}
+                          layout
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 12 }}
+                          transition={{
+                            layout: { type: 'spring', stiffness: 400, damping: 38 },
+                            opacity: { duration: 0.2 },
+                          }}
+                          onClick={() => onPickStudent(s.id)}
+                          whileHover={{ background: T.bg2 }}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <td style={{ padding: '8px 12px', fontFamily: T.fMono, fontSize: 12, color: T.ink, borderBottom: `1px solid ${T.line2}` }}>{s.id}</td>
+                          <td style={{ padding: '8px 12px', borderBottom: `1px solid ${T.line2}` }}><Pill level={s.level} /></td>
+                          <td style={{ padding: '8px 12px', textAlign: 'right', fontFamily: T.fMono, fontSize: 12, color: T.ink2, borderBottom: `1px solid ${T.line2}` }}>{s.baseline_score.toFixed(2)}</td>
+                          <td style={{ padding: '8px 12px', textAlign: 'right', borderBottom: `1px solid ${T.line2}` }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end', width: '100%' }}>
+                              <ScoreBar value={s.cf_score} color={T.accent} width={44} height={3} />
+                              <span style={{ fontFamily: T.fMono, fontSize: 12 }}>{s.cf_score.toFixed(2)}</span>
+                            </div>
+                          </td>
+                          <td style={{ padding: '8px 12px', textAlign: 'right', fontFamily: T.fMono, fontSize: 12, color: s.delta >= 0 ? T.accent : T.ink3, borderBottom: `1px solid ${T.line2}` }}>
+                            {s.delta >= 0 ? '+' : ''}{s.delta.toFixed(2)}
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </AnimatePresence>
                   </tbody>
                 </table>
               )}
             </div>
           )}
-        </div>
+        </AnimatedCard>
       )}
 
       {/* Distributions + timeline */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr)', gap: 24 }}>
+      <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr)', gap: 24 }}>
         <div style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
           <SectionLabel n={1}>Struggle Distribution</SectionLabel>
           <Histogram
@@ -421,7 +481,19 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
           <SectionLabel n={3}>Submissions, last 24h</SectionLabel>
           <TimelineChart data={timeline} highlightRange={[22, 23]} />
         </div>
-      </div>
+      </AnimatedCard>
+    </motion.div>
+  )
+}
+
+function LeaderboardSkeleton() {
+  return (
+    <div style={{ background: T.card, border: `1px solid ${T.line}`, padding: 20 }}>
+      <Skeleton variant="text" width="40%" height={14} />
+      <div style={{ height: 8 }} />
+      <Skeleton variant="text" width="60%" height={10} />
+      <div style={{ height: 18 }} />
+      <Skeleton variant="text" rows={6} />
     </div>
   )
 }

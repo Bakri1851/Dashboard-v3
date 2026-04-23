@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { T } from '../../theme/tokens'
 import { useTheme } from '../../theme/ThemeContext'
 import { useViewStore } from '../../state/viewStore'
@@ -87,7 +88,12 @@ export function Sidebar() {
       }}
     >
       <div>
-        <div style={{ height: 4, width: 56, background: T.accent, marginBottom: 10 }} />
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: 56 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+          style={{ height: 4, background: T.accent, marginBottom: 10 }}
+        />
         <h1 style={{ fontSize: 16, fontWeight: 600, letterSpacing: 0.3, margin: 0 }}>
           Learning Analytics
         </h1>
@@ -96,65 +102,92 @@ export function Sidebar() {
       {/* Lab session */}
       <div>
         <Label>Lab Session</Label>
-        {!sessionActive ? (
-          <button
-            onClick={startSession}
-            disabled={busy}
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              background: T.accent,
-              color: '#ffffff',
-              border: 'none',
-              fontFamily: T.fMono,
-              fontSize: 11,
-              letterSpacing: 1.4,
-              textTransform: 'uppercase',
-              cursor: busy ? 'progress' : 'pointer',
-              opacity: busy ? 0.6 : 1,
-            }}
-          >
-            Start Session
-          </button>
-        ) : (
-          <div style={{ background: T.card, border: `1px solid ${T.border}`, padding: '10px 12px' }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-              <span style={{ fontFamily: T.fMono, fontSize: 9.5, color: T.ok, letterSpacing: 1.5 }}>● LIVE</span>
-              <span style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink, fontVariantNumeric: 'tabular-nums' }}>
-                {fmtElapsed(elapsedSec)}
-              </span>
-            </div>
-            <div style={{ marginTop: 10, fontFamily: T.fMono, fontSize: 9.5, color: T.ink3, letterSpacing: 1.2, textTransform: 'uppercase' }}>
-              Code
-            </div>
-            <div style={{ fontFamily: T.fMono, fontSize: 22, color: T.ink, letterSpacing: 3, marginTop: 2 }}>
-              {sessionCode ?? '—'}
-            </div>
-            <div style={{ marginTop: 10, fontFamily: T.fMono, fontSize: 10.5, color: T.ink2 }}>
-              {helpingCount} of {assistants.length} assistants helping
-            </div>
-            <button
-              onClick={endSession}
+        <AnimatePresence mode="wait" initial={false}>
+          {!sessionActive ? (
+            <motion.button
+              key="start"
+              onClick={startSession}
               disabled={busy}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              whileHover={{ filter: 'brightness(1.1)' }}
+              whileTap={{ scale: 0.97 }}
               style={{
                 width: '100%',
-                marginTop: 10,
-                padding: '6px 10px',
-                background: 'transparent',
-                color: T.danger,
-                border: `1px solid ${T.danger}`,
+                padding: '10px 12px',
+                background: T.accent,
+                color: '#ffffff',
+                border: 'none',
                 fontFamily: T.fMono,
-                fontSize: 10.5,
-                letterSpacing: 1.2,
+                fontSize: 11,
+                letterSpacing: 1.4,
                 textTransform: 'uppercase',
                 cursor: busy ? 'progress' : 'pointer',
                 opacity: busy ? 0.6 : 1,
               }}
             >
-              End Session
-            </button>
-          </div>
-        )}
+              Start Session
+            </motion.button>
+          ) : (
+            <motion.div
+              key="live"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              style={{ background: T.card, border: `1px solid ${T.border}`, padding: '10px 12px' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                <span style={{ fontFamily: T.fMono, fontSize: 9.5, color: T.ok, letterSpacing: 1.5 }}>
+                  <motion.span
+                    animate={{ opacity: [1, 0.35, 1] }}
+                    transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                    style={{ display: 'inline-block', marginRight: 4 }}
+                  >
+                    ●
+                  </motion.span>
+                  LIVE
+                </span>
+                <span style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink, fontVariantNumeric: 'tabular-nums' }}>
+                  {fmtElapsed(elapsedSec)}
+                </span>
+              </div>
+              <div style={{ marginTop: 10, fontFamily: T.fMono, fontSize: 9.5, color: T.ink3, letterSpacing: 1.2, textTransform: 'uppercase' }}>
+                Code
+              </div>
+              <div style={{ fontFamily: T.fMono, fontSize: 22, color: T.ink, letterSpacing: 3, marginTop: 2 }}>
+                {sessionCode ?? '—'}
+              </div>
+              <div style={{ marginTop: 10, fontFamily: T.fMono, fontSize: 10.5, color: T.ink2 }}>
+                {helpingCount} of {assistants.length} assistants helping
+              </div>
+              <motion.button
+                onClick={endSession}
+                disabled={busy}
+                whileHover={{ filter: 'brightness(1.15)' }}
+                whileTap={{ scale: 0.97 }}
+                style={{
+                  width: '100%',
+                  marginTop: 10,
+                  padding: '6px 10px',
+                  background: 'transparent',
+                  color: T.danger,
+                  border: `1px solid ${T.danger}`,
+                  fontFamily: T.fMono,
+                  fontSize: 10.5,
+                  letterSpacing: 1.2,
+                  textTransform: 'uppercase',
+                  cursor: busy ? 'progress' : 'pointer',
+                  opacity: busy ? 0.6 : 1,
+                }}
+              >
+                End Session
+              </motion.button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Time filter */}
@@ -165,11 +198,13 @@ export function Sidebar() {
             const active = filter.preset === (p.id as FilterPreset)
             const disabled = p.id === 'live' && !sessionActive
             return (
-              <button
+              <motion.button
                 key={p.id}
                 disabled={disabled}
                 onClick={() => filter.setPreset(p.id as FilterPreset)}
                 title={disabled ? 'Requires an active session' : p.label}
+                whileHover={disabled ? undefined : { y: -1 }}
+                whileTap={disabled ? undefined : { scale: 0.94 }}
                 style={{
                   padding: '4px 8px',
                   fontFamily: T.fMono,
@@ -184,75 +219,87 @@ export function Sidebar() {
                 }}
               >
                 {p.label}
-              </button>
+              </motion.button>
             )
           })}
         </div>
 
-        {isCustom && (
-          <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <SmallLabel>From</SmallLabel>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 4 }}>
-              <input
-                type="date"
-                value={filter.customFrom ?? ''}
-                onChange={(e) => filter.setCustom(e.target.value || null, filter.customTo)}
-                style={inputStyle()}
-              />
-              <input
-                type="time"
-                value={filter.timeStart}
-                onChange={(e) => filter.setTimes(e.target.value, filter.timeEnd)}
-                style={{ ...inputStyle(), width: 82 }}
-              />
-            </div>
-            <SmallLabel>To</SmallLabel>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 4 }}>
-              <input
-                type="date"
-                value={filter.customTo ?? ''}
-                onChange={(e) => filter.setCustom(filter.customFrom, e.target.value || null)}
-                style={inputStyle()}
-              />
-              <input
-                type="time"
-                value={filter.timeEnd}
-                onChange={(e) => filter.setTimes(filter.timeStart, e.target.value)}
-                style={{ ...inputStyle(), width: 82 }}
-              />
-            </div>
-            <SmallLabel>Academic week</SmallLabel>
-            <select
-              value={filter.academicWeek ?? ''}
-              onChange={(e) => filter.setAcademicWeek(e.target.value || null)}
-              style={inputStyle()}
+        <AnimatePresence initial={false}>
+          {isCustom && (
+            <motion.div
+              key="custom-panel"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              style={{ overflow: 'hidden' }}
             >
-              <option value="">— any —</option>
-              {(academicPeriods ?? []).map((p) => (
-                <option key={p.label} value={p.label}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={() => filter.reset()}
-              style={{
-                marginTop: 4,
-                padding: '4px 8px',
-                fontFamily: T.fMono,
-                fontSize: 10,
-                background: 'transparent',
-                color: T.ink3,
-                border: `1px solid ${T.line}`,
-                letterSpacing: 1,
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-              }}
-            >
-              Reset to All Time
-            </button>
-          </div>
-        )}
+              <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <SmallLabel>From</SmallLabel>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 4 }}>
+                  <input
+                    type="date"
+                    value={filter.customFrom ?? ''}
+                    onChange={(e) => filter.setCustom(e.target.value || null, filter.customTo)}
+                    style={inputStyle()}
+                  />
+                  <input
+                    type="time"
+                    value={filter.timeStart}
+                    onChange={(e) => filter.setTimes(e.target.value, filter.timeEnd)}
+                    style={{ ...inputStyle(), width: 82 }}
+                  />
+                </div>
+                <SmallLabel>To</SmallLabel>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 4 }}>
+                  <input
+                    type="date"
+                    value={filter.customTo ?? ''}
+                    onChange={(e) => filter.setCustom(filter.customFrom, e.target.value || null)}
+                    style={inputStyle()}
+                  />
+                  <input
+                    type="time"
+                    value={filter.timeEnd}
+                    onChange={(e) => filter.setTimes(filter.timeStart, e.target.value)}
+                    style={{ ...inputStyle(), width: 82 }}
+                  />
+                </div>
+                <SmallLabel>Academic week</SmallLabel>
+                <select
+                  value={filter.academicWeek ?? ''}
+                  onChange={(e) => filter.setAcademicWeek(e.target.value || null)}
+                  style={inputStyle()}
+                >
+                  <option value="">— any —</option>
+                  {(academicPeriods ?? []).map((p) => (
+                    <option key={p.label} value={p.label}>
+                      {p.label}
+                    </option>
+                  ))}
+                </select>
+                <motion.button
+                  onClick={() => filter.reset()}
+                  whileTap={{ scale: 0.96 }}
+                  style={{
+                    marginTop: 4,
+                    padding: '4px 8px',
+                    fontFamily: T.fMono,
+                    fontSize: 10,
+                    background: 'transparent',
+                    color: T.ink3,
+                    border: `1px solid ${T.line}`,
+                    letterSpacing: 1,
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Reset to All Time
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Nav */}
@@ -261,20 +308,37 @@ export function Sidebar() {
         {NAV.map((item) => {
           const active = item.id === view
           return (
-            <button
+            <motion.button
               key={item.id}
               onClick={() => setView(item.id)}
+              whileHover={active ? undefined : { x: 3 }}
+              whileTap={{ scale: 0.98 }}
               style={{
+                position: 'relative',
                 textAlign: 'left',
                 padding: '10px 12px',
-                borderLeft: `2px solid ${active ? T.accent : 'transparent'}`,
+                borderLeft: '2px solid transparent',
                 background: active ? T.accentSoft : 'transparent',
                 color: active ? T.ink : T.ink2,
                 cursor: 'pointer',
               }}
             >
+              {active && (
+                <motion.span
+                  layoutId="nav-active-bar"
+                  transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    left: -1,
+                    width: 2,
+                    background: T.accent,
+                  }}
+                />
+              )}
               <div style={{ fontSize: 13, fontWeight: active ? 600 : 500 }}>{item.label}</div>
-            </button>
+            </motion.button>
           )
         })}
       </nav>

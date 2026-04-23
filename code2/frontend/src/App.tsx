@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { Sidebar } from './components/layout/Sidebar'
 import { TopBar } from './components/layout/TopBar'
 import { ErrorBoundary } from './components/layout/ErrorBoundary'
+import { Heartbeat } from './components/layout/Heartbeat'
 import { T } from './theme/tokens'
 import { useApiData } from './api/hooks'
 import type { LabState, LiveDataResponse } from './types/api'
@@ -17,13 +19,19 @@ import { LabAssistantView } from './views/LabAssistantView'
 import { useEffect } from 'react'
 import { useSettings } from './api/useSettings'
 import { useAutoRefreshInterval } from './api/useAutoRefreshInterval'
+import { ViewTransition } from './animation/ViewTransition'
+import { AnimatedNumber } from './components/primitives/AnimatedNumber'
 
 export default function App() {
   const { view, selectedStudentId, selectedQuestionId, pickStudent, pickQuestion, setView, back, setSoundsEnabled } =
     useViewStore()
   const { data: settings } = useSettings()
-  const { data: live } = useApiData<LiveDataResponse>('/live', useAutoRefreshInterval(10_000))
-  const { data: lab } = useApiData<LabState>('/lab/state', 3_000)
+  const { data: live, loading: liveLoading } = useApiData<LiveDataResponse>(
+    '/live',
+    useAutoRefreshInterval(10_000)
+  )
+  const { data: lab, loading: labLoading } = useApiData<LabState>('/lab/state', 3_000)
+  const heartbeat = liveLoading || labLoading
 
   // Mirror runtime sounds_enabled into the view store so navigation/selection
   // can check a sync flag without having to call useSettings everywhere.
@@ -37,19 +45,28 @@ export default function App() {
   let breadcrumbs = 'Instructor Console'
   let title = 'In Class'
   let screen: ReactNode = null
+  let viewKey: string = view
   const right = (
-    <span style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3 }}>
-      {live ? `${live.records.toLocaleString()} records` : 'loading…'}
+    <span style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3, fontVariantNumeric: 'tabular-nums' }}>
+      {live ? (
+        <>
+          <AnimatedNumber value={String(live.records)} duration={0.8} /> records
+        </>
+      ) : (
+        'loading…'
+      )}
     </span>
   )
 
   if (selectedStudentId) {
     breadcrumbs = 'Instructor Console · Student'
     title = selectedStudentId
+    viewKey = `student:${selectedStudentId}`
     screen = <StudentDetailView studentId={selectedStudentId} />
   } else if (selectedQuestionId) {
     breadcrumbs = 'Instructor Console · Question'
     title = selectedQuestionId
+    viewKey = `question:${selectedQuestionId}`
     screen = <QuestionDetailView questionId={selectedQuestionId} />
   } else {
     switch (view) {
@@ -91,6 +108,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
+      <Heartbeat active={heartbeat} />
       <div style={{ display: 'flex', minHeight: '100vh', background: T.bg, color: T.ink }}>
         <Sidebar />
         <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
@@ -117,7 +135,11 @@ export default function App() {
               </>
             }
           />
-          <section style={{ flex: 1, overflow: 'auto' }}>{screen}</section>
+          <section style={{ flex: 1, overflow: 'auto' }}>
+            <AnimatePresence mode="wait" initial={false}>
+              <ViewTransition key={viewKey}>{screen}</ViewTransition>
+            </AnimatePresence>
+          </section>
         </main>
       </div>
     </ErrorBoundary>

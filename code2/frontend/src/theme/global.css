@@ -245,3 +245,49 @@ html.theme-cyberpunk body::before {
   0%, 100% { opacity: 0.55; }
   50%      { opacity: 0.25; }
 }
+
+/* Level pill neon glow — applied only in dark themes on high-severity levels
+   (Needs Help / Very Hard). Breathing shadow, not colour flicker. */
+@keyframes levelPulse {
+  0%, 100% { box-shadow: 0 0 8px var(--pulse-color, currentColor), inset 0 0 6px var(--pulse-color, currentColor); }
+  50%      { box-shadow: 0 0 16px var(--pulse-color, currentColor), inset 0 0 10px var(--pulse-color, currentColor); }
+}
+.pill-pulse { animation: levelPulse 2.4s ease-in-out infinite; }
+
+/* CornerMarks ambient breathing — dark themes only, driven by framer-motion
+   for per-tick stagger; this keyframe exists so CSS-only consumers still get
+   the effect even without JS. */
+@keyframes cornerBreath {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+/* Theme crossfade — activated for ~220ms on every setTheme() call via a
+   transient class on <html>. Bridges the raw var() swap so colour changes
+   glide instead of snapping. */
+html.theme-transitioning,
+html.theme-transitioning body,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition:
+    background-color 200ms ease,
+    background 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease,
+    fill 200ms ease,
+    stroke 200ms ease,
+    box-shadow 200ms ease !important;
+}
+
+/* Reduced-motion belt-and-suspenders. Framer-motion already respects the OS
+   flag through MotionConfig reducedMotion="user"; this zeros any CSS
+   transitions / keyframes the rest of the app might sneak in. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

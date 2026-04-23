@@ -1,13 +1,18 @@
 import { T, LEVEL_STYLES } from '../../theme/tokens'
 import { useTheme } from '../../theme/ThemeContext'
 
+const PULSE_LEVELS: ReadonlySet<string> = new Set(['Needs Help', 'Very Hard'])
+
 /** Level badge used in leaderboard rows and detail headers. */
 export function Pill({ level }: { level: string }) {
   const style = LEVEL_STYLES[level] ?? { fg: T.ink3, label: level }
   const { themeKind } = useTheme()
   const dark = themeKind === 'dark'
+  const pulse = dark && PULSE_LEVELS.has(level)
   return (
     <span
+      data-level={level}
+      className={pulse ? 'pill-pulse' : undefined}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -22,6 +27,8 @@ export function Pill({ level }: { level: string }) {
         borderRadius: dark ? 0 : 999,
         whiteSpace: 'nowrap',
         boxShadow: dark ? `0 0 8px ${style.fg}55, inset 0 0 8px ${style.fg}22` : 'none',
+        // Custom property consumed by the levelPulse keyframes when pulsing.
+        ...(pulse ? ({ ['--pulse-color' as string]: `${style.fg}55` } as Record<string, string>) : {}),
       }}
     >
       {dark && (

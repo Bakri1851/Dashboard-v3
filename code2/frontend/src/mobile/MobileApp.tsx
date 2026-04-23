@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { api, ApiError } from '../api/client'
 import { useApiData } from '../api/hooks'
 import { T } from '../theme/tokens'
@@ -240,8 +241,15 @@ export function MobileApp() {
           fontSize: 12,
           letterSpacing: 1.4,
           textTransform: 'uppercase',
+          gap: 10,
         }}
       >
+        <motion.span
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          ●
+        </motion.span>
         connecting…
       </div>
     )
@@ -265,9 +273,12 @@ export function MobileApp() {
   if (!labState) return null
 
   let body: React.ReactNode
+  let bodyKey: string
   if (!labState.session_active) {
+    bodyKey = 'ended'
     body = <MobileSessionEnded />
   } else if (!aid || !assistant) {
+    bodyKey = 'join'
     body = (
       <MobileJoin
         name={joinName}
@@ -281,6 +292,7 @@ export function MobileApp() {
       />
     )
   } else if (!assignedStudent) {
+    bodyKey = 'unassigned'
     body = (
       <MobileUnassigned
         assistantName={assistant.name}
@@ -294,6 +306,7 @@ export function MobileApp() {
       />
     )
   } else {
+    bodyKey = `assigned:${assignedStudent}`
     body = (
       <MobileAssigned
         assistantName={assistant.name}
@@ -320,9 +333,20 @@ export function MobileApp() {
         background: T.bg,
         color: T.ink,
         fontFamily: T.fSans,
+        overflow: 'hidden',
       }}
     >
-      {body}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={bodyKey}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {body}
+        </motion.div>
+      </AnimatePresence>
     </div>
   )
 }
