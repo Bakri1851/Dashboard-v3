@@ -10,7 +10,7 @@ EXCLUDED_MODULES: list[str] = ["AI_TEST", "24COB231", "24WSC701"]
 MODULE_RENAME_MAP: dict[str, str] = {"25COA504": "25COP504"}
 
 # --- OpenAI Configuration ---
-OPENAI_MODEL: str = "gpt-5.4-mini"  # local, no API cost; "gpt-
+OPENAI_MODEL: str = "gpt-4o-mini"  # matches code2; gpt-5.4-mini is not a real model and silently 500s every call
 OPENAI_BATCH_SIZE: int = 20       # max (question, answer) pairs per API call — smaller batches parse more reliably
 SCORING_PER_RUN_CAP: int = 500    # max new pairs scored per Streamlit rerun; rest fall back to 0.5 and get scored on subsequent runs (keeps UI responsive on cold-start)
 

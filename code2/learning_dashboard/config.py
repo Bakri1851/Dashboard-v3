@@ -12,13 +12,15 @@ MODULE_RENAME_MAP: dict[str, str] = {"25COA504": "25COP504"}
 # --- OpenAI Configuration ---
 OPENAI_MODEL: str = "gpt-4o-mini"
 OPENAI_BATCH_SIZE: int = 20       # max (question, answer) pairs per API call — smaller batches parse more reliably
-SCORING_PER_RUN_CAP: int = 500    # max new pairs scored per request / Streamlit rerun; rest fall back to 0.5 and get scored on subsequent calls (keeps UI responsive on cold-start)
-# Master switch for OpenAI incorrectness scoring. When False, compute_incorrectness_column
-# returns 0.5 for every row without hitting the API — the dashboard still runs but
-# IRT/improved-struggle/measurement confidence lose their signal. Flip back to True
-# when the scoring pipeline is actively being used; cold prewarm scores ~3k unique
-# feedbacks and takes several minutes.
-OPENAI_SCORING_ENABLED: bool = False
+SCORING_PER_RUN_CAP: int = 500    # max new pairs scored per request; rest fall back to 0.5 and get scored on subsequent calls (keeps UI responsive on cold-start)
+# Master switch for OpenAI incorrectness scoring. When False,
+# compute_incorrectness_column returns 0.5 for every row without hitting the
+# API and the leaderboards diverge from the canonical code/ Streamlit dashboard
+# (which does score feedback). With scoring on, the first /struggle request
+# blocks while SCORING_PER_RUN_CAP feedbacks are scored; remaining ones
+# surface as 0.5 until later polls catch up, so the cache warms progressively
+# instead of stalling the UI for minutes on a cold cache.
+OPENAI_SCORING_ENABLED: bool = True
 
 # --- Student Struggle Score Weights ---
 STRUGGLE_WEIGHT_N: float = 0.10   # submission count (min-max normalised)

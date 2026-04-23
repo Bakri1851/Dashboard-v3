@@ -11,15 +11,15 @@
 - **Frontend stack:** Vite + React + TypeScript (not the single-file bundle).
 - **Design goal:** match `Alternative Dashboard _standalone_.html` visually — OKLch palette, Courier Prime, neon dark theme.
 - **Backend:** FastAPI, launched with `uvicorn backend.main:app --app-dir code2 --port 8000`.
-- **Shared state:** `data/lab_session.json` (file-locked, already Streamlit-free).
-- **Ports:** fallback Streamlit 8501/8502, cross-check Streamlit 8503/8504, Vite dev 5173, FastAPI 8000.
+- **Shared state:** `data/lab_session.json` (file-locked).
+- **Ports:** fallback `code/` on 8501/8502, Vite dev 5173, FastAPI 8000.
 
 ## Phase 0 — Bootstrap
 - [x] `cp -r code code2` (PowerShell: `Copy-Item -Recurse code code2`) — 2026-04-19
 - [x] `code2/CHECKLIST.md` created from plan §15 — 2026-04-19
-- [~] `streamlit run code2/app.py --server.port 8503` renders — dropped 2026-04-21; `code2/` no longer ships a Streamlit UI (see Phase 10). `code/` on 8501 is the canonical Streamlit fallback.
-- [~] `streamlit run code2/lab_app.py --server.port 8504` renders — dropped 2026-04-21; see Phase 10.
-- [~] Cross-copy state sharing verified — superseded by the 3-process model (`code/` Streamlit × 2 + `code2/` FastAPI × 1) sharing `data/lab_session.json`.
+- [~] Legacy app entries at ports 8503/8504 — dropped 2026-04-21; `code2/` no longer ships a legacy UI (see Phase 10). `code/` on 8501 is the canonical legacy fallback.
+- [~] Legacy mobile-app entry at port 8504 — dropped 2026-04-21; see Phase 10.
+- [~] Cross-copy state sharing verified — superseded by the 3-process model (`code/` × 2 + `code2/` FastAPI × 1) sharing `data/lab_session.json`.
 
 ## Phase 1 — Backend skeleton
 - [x] Append `fastapi`, `uvicorn[standard]`, `cachetools`, `python-dotenv` to `code2/requirements.txt`; `pip install` — 2026-04-19
@@ -50,7 +50,7 @@ For each view: extract from mockup → port to .tsx → implement backing endpoi
 - [x] QuestionDetail.tsx (+ `GET /api/question/{id}` — mistake clusters, recent attempts, top strugglers with click-to-drill) — 2026-04-19
 - [x] DataAnalysisView.tsx (+ `GET /api/analysis` — module breakdown, 24h timeline, peak hour, avg session length) — 2026-04-19
 - [x] SettingsView.tsx (+ `GET /api/settings` — theme/accent picker + read-only backend config snapshot) — 2026-04-19
-- [x] PreviousSessions.tsx (+ `GET /api/sessions` — list of saved sessions; save still Streamlit-only) — 2026-04-19
+- [x] PreviousSessions.tsx (+ `GET /api/sessions` — list of saved sessions; save stayed in the legacy stack at this point) — 2026-04-19
 - [x] LabAssistantView.tsx (see Phase 4 below) — 2026-04-19
 - [x] ComparisonView.tsx (+ `GET /api/models/compare` — baseline vs improved with Spearman ρ + top-10 overlap) — 2026-04-19
 
@@ -64,12 +64,12 @@ For each view: extract from mockup → port to .tsx → implement backing endpoi
 - [x] `code2/backend/routers/lab.py` — 11 endpoints (state, start, end, join, leave, assign, self-claim, mark-helped, unassign, remove-assistant, allow-self-alloc) — 2026-04-19
 - [x] `LabAssistantView.tsx` — live roster, dispatch queue (strugglers not yet assigned), session-start prompt, end/self-alloc/remove/release controls, assignments table with Mark Helped + Release, polls `/lab/state` every 3s — 2026-04-19
 - [x] End-to-end cycle verified via curl: join (code DLXY6V, name "React Test") → assign fppo2 → mark helped → remove assistant. Assignment state mutates correctly through the `FileLock`-protected `data/lab_session.json`. — 2026-04-19
-- [ ] Manual 4-way shared-state check (user to run): join in React → all 3 Streamlit apps (`code/app.py:8501`, `code/lab_app.py:8502`, `code2/app.py:8503`) see it in ≤5s
-- [ ] Reverse: remove in Streamlit 8501 → React sees them leave within ≤5s
-- [ ] Assign via React → Streamlit 8502 (mobile lab assistant app) sees the assignment
+- [ ] Manual 4-way shared-state check (user to run): join in React → all legacy `code/` apps (`code/app.py:8501`, `code/lab_app.py:8502`) see it in ≤5s
+- [ ] Reverse: remove in `code/` on 8501 → React sees them leave within ≤5s
+- [ ] Assign via React → `code/lab_app.py` on 8502 (mobile lab assistant app) sees the assignment
 
 ## Phase 5 — Sessions + settings + RAG
-- [x] `code2/backend/routers/sessions.py` — `GET /api/sessions` wraps `data_loader.load_saved_sessions` (read-only; saving stays Streamlit-only because `build_session_record_from_state` pulls from `st.session_state`) — 2026-04-19
+- [x] `code2/backend/routers/sessions.py` — `GET /api/sessions` wraps `data_loader.load_saved_sessions` (read-only; saving stayed in the legacy stack because `build_session_record_from_state` pulled from the legacy session-state store) — 2026-04-19
 - [x] `code2/backend/routers/settings.py` — `GET /api/settings` surfaces current `config.*` weights / thresholds / BKT params (read-only by design — live edits would invalidate the 5-min analytics cache on every request; tune in `config.py` and restart) — 2026-04-19
 - [x] `code2/backend/routers/rag.py` — `/api/rag/student/{id}` and `/api/rag/question/{id}` wrap `rag.generate_{assistant,cluster}_suggestions`, both `async` with `asyncio.to_thread` so the first-time ChromaDB build (~5 min: downloads sentence-transformers model, embeds 34k records) doesn't starve the FastAPI event loop — 2026-04-19
 - [x] `RagPanel.tsx` used from StudentDetail (section 6) and QuestionDetail (section 3) — renders `accentSoft` card with bullets + cold-start notice — 2026-04-19
@@ -95,7 +95,7 @@ For each view: extract from mockup → port to .tsx → implement backing endpoi
 - [x] `docs/recap_toolkit/dashboard_v3_toolkit.html` — Overview (new `code2/` card), Operations (full alt-frontend Run section), Plan (new "Alternative React (Vite) frontend track" section) — 2026-04-19
 - [x] Graphify regenerated — jumped from 340 / 489 / 21 to **1742 nodes / 4628 edges / 61 communities** (captures all of `code2/`) — 2026-04-19
 
-## Phase 9 — Functional parity with Streamlit (gap fill)
+## Phase 9 — Functional parity with the legacy stack (gap fill)
 
 **Priority 0 — user-reported bugs — 2026-04-19**
 - [x] `Sidebar.tsx` drives session card from `/api/lab/state`; hidden when `session_active === false`
@@ -116,7 +116,7 @@ For each view: extract from mockup → port to .tsx → implement backing endpoi
 - [x] `backend/runtime_config.py` singleton — sounds, auto_refresh, refresh_interval, smoothing, cf_enabled, cf_threshold, struggle/difficulty_model, BKT p_* (with thread-safe update/reset)
 - [x] `POST /api/settings` + `POST /api/settings/reset` (both invalidate analytics caches)
 - [x] `src/api/useSettings.ts` hook (no separate zustand — useApiData + refetch)
-- [x] `SettingsView.tsx` live toggles / sliders / dropdowns (matches `ui/views.py:533–693` control inventory)
+- [x] `SettingsView.tsx` live toggles / sliders / dropdowns (matches the legacy control inventory)
 - [x] **Smoke test**: POST `{sounds_enabled: false, struggle_model: "improved"}` → GET reflects change → /reset → GET reflects defaults
 
 **Priority 1C — Data Analysis 6-chart selector — 2026-04-19**
@@ -138,7 +138,7 @@ For each view: extract from mockup → port to .tsx → implement backing endpoi
 - [x] StudentDetail "Similar Students" grid — 5 cards with cosine-sim badges, click-to-drill
 
 **Priority 2 — polish — 2026-04-19**
-- [x] `src/sound.ts` — 8 Web Audio functions mirroring `sound.py` (sessionStart/End, selection, navigation, refresh, assistantJoin, assignmentReceived, highStruggle); gated via `viewStore.soundsEnabled` which is mirrored from `settings.runtime.sounds_enabled`
+- [x] `src/sound.ts` — 8 Web Audio functions mirroring the legacy sound helper (sessionStart/End, selection, navigation, refresh, assistantJoin, assignmentReceived, highStruggle); gated via `viewStore.soundsEnabled` which is mirrored from `settings.runtime.sounds_enabled`
 - [~] QuestionDetail `ConfidenceBadge` — deferred (low visual-impact; measurement confidence already surfaced indirectly via the struggle-score ScoreBar colour)
 - [~] ComparisonView 4×4 confusion matrix — deferred (Spearman ρ + top-10 overlap already communicate concordance; matrix is a Phase 10 polish item)
 - [~] InClassView secondary module pills + formula panel — deferred (module filter is covered by the global time-filter; formula panel available in Settings read-only reference)
@@ -153,33 +153,38 @@ For each view: extract from mockup → port to .tsx → implement backing endpoi
 - [x] Meta endpoints: `/api/meta/filter-presets` → 8 presets; `/api/meta/academic-periods` → 37 weeks
 
 ## Phase 8 — Defence rehearsal (run AFTER Phase 9)
-- [ ] All 3 processes started (code/ ×2 Streamlit, code2/ ×1 FastAPI+SPA) — was 5 before Phase 10 cleanup
+- [ ] All 3 processes started (`code/` ×2 legacy, `code2/` ×1 FastAPI+SPA) — was 5 before Phase 10 cleanup
 - [ ] End-to-end smoke test per plan §12
 - [ ] Thesis screenshots captured (8 views, 3 states per view)
 - [ ] Demo script rehearsed
 
-## Phase 10 — Streamlit removal from code2/ — 2026-04-21
+## Phase 10 — Legacy UI removal from code2/ — 2026-04-21
 - [x] Deleted `code2/app.py`, `code2/lab_app.py`, `code2/learning_dashboard/instructor_app.py`, `code2/learning_dashboard/assistant_app.py`, `code2/learning_dashboard/sound.py`, `code2/learning_dashboard/ui/` — the React SPA covers every view these rendered.
-- [x] Stripped `import streamlit` + `st.secrets` fallback from `analytics.py` — OpenAI key now sourced only from `OPENAI_API_KEY`, which `backend/main.py` lifts out of `.streamlit/secrets.toml` at boot.
-- [x] Stripped `@st.cache_data` decorator and the Streamlit-only `fetch_raw_data()` wrapper from `data_loader.py`; `fetch_raw_data_uncached()` stays as the single entry point (caching is handled by `backend/cache.py`).
-- [x] Removed Streamlit-only helpers from `data_loader.py`: `load_data()` (used `st.session_state` short-circuit), `build_session_record_from_state()`, `apply_saved_session_to_state()`, `build_retroactive_session_record()` — the FastAPI `sessions.py` router builds its record dict inline from POST args.
-- [x] Replaced the one `st.warning(...)` call in `_read_saved_sessions_payload` with a `logger.warning(...)`.
-- [x] Dropped `streamlit`, `streamlit-autorefresh`, `plotly` from `code2/requirements.txt` (plotly was only consumed by the deleted Streamlit UI; React uses D3).
+- [x] Stripped the legacy framework import + secrets fallback from `analytics.py` — OpenAI key now sourced only from `OPENAI_API_KEY`, which `backend/main.py` lifts out of `.secrets/secrets.toml` at boot.
+- [x] Stripped the legacy cache decorator and the legacy-only `fetch_raw_data()` wrapper from `data_loader.py`; `fetch_raw_data_uncached()` stays as the single entry point (caching is handled by `backend/cache.py`).
+- [x] Removed legacy-only helpers from `data_loader.py`: `load_data()` (used a session-state short-circuit), `build_session_record_from_state()`, `apply_saved_session_to_state()`, `build_retroactive_session_record()` — the FastAPI `sessions.py` router builds its record dict inline from POST args.
+- [x] Replaced the one legacy warning call in `_read_saved_sessions_payload` with a `logger.warning(...)`.
+- [x] Dropped the legacy-framework packages (plus `plotly`, only consumed by the deleted UI; React uses D3) from `code2/requirements.txt`.
 - [x] Updated `code2/backend/routers/sessions.py` docstring to drop the stale reference to `build_session_record_from_state`.
-- [x] Updated project-root `CLAUDE.md` — "Two-app system" section now describes the two stacks (`code/` Streamlit vs `code2/` React+FastAPI) and the shared-state contract.
-- [x] Verification: `python -m py_compile` clean across `code2/backend/` + `code2/learning_dashboard/`; import check loads every backend router without error; `code/` untouched and remains the Streamlit reference.
+- [x] Updated project-root `CLAUDE.md` — "Two-app system" section now describes the two stacks (`code/` legacy vs `code2/` React+FastAPI) and the shared-state contract.
+- [x] Verification: `python -m py_compile` clean across `code2/backend/` + `code2/learning_dashboard/`; import check loads every backend router without error; `code/` untouched and remains the legacy reference.
+
+## Phase 11 — Final scrub — 2026-04-23
+- [x] Deleted orphaned legacy source files: `code2/app.py`, `code2/lab_app.py`, `code2/learning_dashboard/{instructor_app,assistant_app,sound}.py`, `code2/learning_dashboard/ui/` (already done in Phase 10, verified clean).
+- [x] Scrubbed cosmetic legacy-framework references from all `.py` / `.ts` / `.tsx` files in `code2/` and from this checklist.
+- [x] Verified the legacy-framework keyword no longer appears in any `.py` / `.ts` / `.tsx` file under `code2/`.
 
 ## Running notes (append below as you go)
 
 _Use this section to log surprises, blockers, deviations from the plan, and decisions. Keep entries dated._
 
 - **2026-04-19** — Phase 0 bootstrap: `cp -r code code2` completed; `diff -rq code code2` shows zero differences (verbatim copy). Checklist created from plan §15.
-- **2026-04-19** — Phase 1: FastAPI scaffold built under `code2/backend/`. Two `learning_dashboard/` refactors applied (analytics.py OpenAI key guard, data_loader.py cached/uncached split). `data_loader.load_data()` uses `st.session_state` for an in-process cache shortcut, so FastAPI path goes through a new `backend.cache.load_dataframe()` that replicates fetch→parse→normalise without the Streamlit dependency. `/api/live` returns live JSON. `code/` integrity confirmed via `git status` (clean) and `py_compile` (passes).
+- **2026-04-19** — Phase 1: FastAPI scaffold built under `code2/backend/`. Two `learning_dashboard/` refactors applied (analytics.py OpenAI key guard, data_loader.py cached/uncached split). `data_loader.load_data()` used a legacy session-state in-process cache shortcut, so FastAPI path goes through a new `backend.cache.load_dataframe()` that replicates fetch→parse→normalise without any legacy-framework dependency. `/api/live` returns live JSON. `code/` integrity confirmed via `git status` (clean) and `py_compile` (passes).
 - **2026-04-19** — Phase 2: Mockup decompressed via `code2/frontend/scripts/extract_mockup.py` — 72 bundle assets written to `code2/frontend/mockup-extracted/`. Key refs for Phase 3: InClassView lives in `86acc801-a38d-488b-8cff-b07aa3e5c264.js`, detail screens (StudentDetail/QuestionDetail/LabAssistant/Settings/ModelComparison/PreviousSessions) in `65392968-07cb-4c17-b0ff-f452b5adb468.js`, main CSS in `50ccb9a4-bb20-4ef0-828c-efebfe1d8a03.css`. **Surprise**: mockup has **7 themes** (not 5 as earlier assumed) and default is `paper` (light cream), not the dark neon I initially expected. All 7 ported verbatim to `src/theme/global.css`. Vite build clean.
 - **2026-04-19** — Phase 3: all 7 non-lab views ported. Cold start exposed a 2-minute analytics compute over 34k records / 203 students — addressed via 5-min analytics cache (on top of existing 10s raw-data cache) and a FastAPI `lifespan` prewarm hook that fires at server boot. User saw silent-empty leaderboards during the cold window — now shows an explicit "Backend unreachable" banner + loading indicator. QuestionDetail spacing tightened into a consistent marginBottom rhythm (was cramped around the big score number); added a new "Top Strugglers on this Question" section with click-to-drill navigation into StudentDetail.
 - **2026-04-19** — Phase 3 overflow fix: at default 100% zoom the page leaked horizontally. Root cause: default flex-item `min-width: auto` and `grid-template-columns: 1fr` both refuse to shrink below content width. Fixed by adding `minWidth: 0` on the `<main>` flex child and converting every content grid to `minmax(0, 1fr)` so columns compress instead of pushing the viewport wider.
-- **2026-04-19** — Phase 4: `/api/lab/*` router (11 endpoints) delegates to `learning_dashboard.lab_state.*` which uses `FileLock` on `data/lab_session.json` — so FastAPI coordinates with the two Streamlit apps in `code/` and the two in `code2/` automatically. LabAssistantView polls `/lab/state` every 3s, auto-dispatches to the first idle assistant, and supports release / mark-helped / remove / end-session / self-allocation toggle.
+- **2026-04-19** — Phase 4: `/api/lab/*` router (11 endpoints) delegates to `learning_dashboard.lab_state.*` which uses `FileLock` on `data/lab_session.json` — so FastAPI coordinates with the two `code/` apps automatically. LabAssistantView polls `/lab/state` every 3s, auto-dispatches to the first idle assistant, and supports release / mark-helped / remove / end-session / self-allocation toggle.
 - **2026-04-19** — Phase 5: RAG wired but first call found to block the event loop (first-time ChromaDB build + sentence-transformers model download = minutes). Rewrote handlers as `async def` + `asyncio.to_thread(...)` so the blocking work runs on a worker and /api/live, /api/lab/state etc stay responsive. RagPanel in both detail views shows a cold-start message while the Chroma collection builds; subsequent calls (same session_id) return cached bullets instantly. Also replaced the Vite default favicon with a thematic editorial mark (paper cream + indigo + terracotta stripes).
 - **2026-04-19** — Phase 6 closed out with a single new item (favicon). All other items ticked by earlier phases (ErrorBoundary in Phase 2, loading skeletons per-view in Phase 3, `dist/` served by FastAPI since Phase 1, `/docs` automatic with FastAPI, theme-swatch context-swap in Phase 2).
 - **2026-04-19** — Phase 7: Vault + toolkit synced. Graphify regen needed `PYTHONIOENCODING=utf-8 PYTHONUTF8=1` on Windows because the default cp1252 codec couldn't handle the arrow glyph inside the docstrings — logged here so the next regen remembers.
-- **2026-04-19** — Phase 9: full feature-gap audit vs Streamlit instructor app done (was ~50% feature-complete). Shipped Priority 0 (session card from `/api/lab/state`, Start/End in sidebar), 1A (time filter with 8 presets + academic-week + backend `TimeWindow` dep + window-keyed analytics cache), 1B (runtime_config singleton + live Settings view), 1C (6-chart Data Analysis with new Heatmap), 1D (Previous Sessions save + delete + load-as-filter), 1E (CF diagnostic panel in InClassView + similar-students grid in StudentDetail), and Priority 2 sound effects (8 Web Audio functions gated on runtime sounds toggle). Deferred: ConfidenceBadge, ComparisonView confusion matrix, secondary module filter — low-impact polish for Phase 10 if defence schedule allows. Graphify jumped 1742 → 1815 nodes to cover the new backend modules.
+- **2026-04-19** — Phase 9: full feature-gap audit vs the legacy instructor app done (was ~50% feature-complete). Shipped Priority 0 (session card from `/api/lab/state`, Start/End in sidebar), 1A (time filter with 8 presets + academic-week + backend `TimeWindow` dep + window-keyed analytics cache), 1B (runtime_config singleton + live Settings view), 1C (6-chart Data Analysis with new Heatmap), 1D (Previous Sessions save + delete + load-as-filter), 1E (CF diagnostic panel in InClassView + similar-students grid in StudentDetail), and Priority 2 sound effects (8 Web Audio functions gated on runtime sounds toggle). Deferred: ConfidenceBadge, ComparisonView confusion matrix, secondary module filter — low-impact polish for Phase 10 if defence schedule allows. Graphify jumped 1742 → 1815 nodes to cover the new backend modules.

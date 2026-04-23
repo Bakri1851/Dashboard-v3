@@ -32,10 +32,11 @@ _EMPTY_DF = pd.DataFrame(
     ]
 )
 
-# Raw-data TTL matches the Streamlit app (fresh submissions matter).
-# Analytics TTL is larger — the full recompute is expensive (~2 min on 34k
-# records × 203 students). A filter window can happily live for 5 minutes.
-_ANALYTICS_TTL = 300  # seconds
+# Analytics TTL is coupled to the raw-data TTL — a struggle leaderboard built
+# from a 60-second-old DataFrame should not outlive it. Live lab dispatch
+# relies on this: a student who just started failing must surface in the
+# queue within one refresh cycle, not five minutes later.
+_ANALYTICS_TTL = config.CACHE_TTL  # seconds — tracks raw-data TTL
 _IMPROVED_TTL = 600   # seconds — IRT+BKT fits are the most expensive path
 
 _df_cache: TTLCache = TTLCache(maxsize=1, ttl=config.CACHE_TTL)

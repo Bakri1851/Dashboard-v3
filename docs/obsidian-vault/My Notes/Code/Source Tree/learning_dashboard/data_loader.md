@@ -9,7 +9,7 @@
 
 - Fetch the raw API response (cached with `@st.cache_data(ttl=CACHE_TTL)`).
 - Auto-detect whether the response is JSON or XML and parse accordingly, with fallback to the other format on error.
-- Flatten embedded `<submission>` XML inside JSON records, pulling out `srep` (student answer) and `feedback/response` (AI feedback).
+- Flatten embedded `<submission>` XML inside JSON records, pulling out `srep` (student answer) and the flat `<feedback>` element's text (AI feedback — live schema has no nested `<response>`).
 - Drop excluded modules, apply module renames, coerce timestamps, sort, and attach the academic-period column.
 - Provide filter helpers: by module, by time range, by session start, by datetime window.
 - Persist saved sessions — live-built records and retroactive records from manual time-filter values — with atomic writes, corruption backup, and dedupe by session ID.

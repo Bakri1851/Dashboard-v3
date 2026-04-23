@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useApiData } from './hooks'
 import { filterToQuery, resolveFilter, useFilterStore } from '../state/filterStore'
 import type { AcademicPeriod, LabState } from '../types/api'
@@ -16,6 +16,17 @@ export function useFilterQuery(): string {
   const { data: lab } = useApiData<LabState>('/lab/state', 30_000)
   const { data: periods } = useApiData<AcademicPeriod[]>('/meta/academic-periods', 0)
 
+  // `resolveFilter` calls `new Date()` internally for time-relative presets
+  // (today, past_hour, past_24h, current_week, current_month). Without a
+  // ticking dependency the window freezes at mount and silently drops any
+  // submission newer than "now at mount" — Streamlit doesn't have this bug
+  // because Streamlit re-runs top-to-bottom on every auto-refresh tick.
+  const [minuteTick, setMinuteTick] = useState(0)
+  useEffect(() => {
+    const id = window.setInterval(() => setMinuteTick((x) => x + 1), 60_000)
+    return () => window.clearInterval(id)
+  }, [])
+
   return useMemo(() => {
     const resolved = resolveFilter(filter, {
       labSessionStart: lab?.session_start ?? null,
@@ -31,5 +42,6 @@ export function useFilterQuery(): string {
     filter.academicWeek,
     lab?.session_start,
     periods,
+    minuteTick,
   ])
 }

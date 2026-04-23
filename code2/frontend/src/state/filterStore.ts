@@ -76,6 +76,12 @@ export function resolveFilter(
   const now = new Date()
 
   const startOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0)
+  // Serialise a local wall-clock instant as if it were UTC — `2026-04-23T15:30
+  // BST` becomes `2026-04-23T15:30:00.000Z`. This matches what the backend
+  // sees: `pd.to_datetime(df["timestamp"], utc=True)` treats the API's naive
+  // local timestamps as UTC, so bounds must be labelled the same way.
+  // Using `.toISOString()` (actual UTC) on one bound while isoUtc on the other
+  // causes a local-offset worth of events (1h in BST) to be silently dropped.
   const isoUtc = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString()
 
   switch (state.preset) {
@@ -83,19 +89,26 @@ export function resolveFilter(
       return { from: null, to: null }
     case 'live': {
       const from = ctx.labSessionStart ?? null
-      return { from: from ? new Date(from).toISOString() : null, to: now.toISOString() }
+      // `labSessionStart` is written by the backend as a naive local ISO
+      // string (no tz). Append 'Z' after stripping any existing tz so the
+      // bound uses the same "local-as-UTC" convention as the rest.
+      const fromNoTz = from ? from.replace(/(?:Z|[+-]\d{2}:?\d{2})$/, '') : null
+      return {
+        from: fromNoTz ? `${fromNoTz}Z` : null,
+        to: isoUtc(now),
+      }
     }
     case 'today':
-      return { from: isoUtc(startOf(now)), to: now.toISOString() }
+      return { from: isoUtc(startOf(now)), to: isoUtc(now) }
     case 'past_hour':
-      return { from: new Date(now.getTime() - 60 * 60 * 1000).toISOString(), to: now.toISOString() }
+      return { from: isoUtc(new Date(now.getTime() - 60 * 60 * 1000)), to: isoUtc(now) }
     case 'past_24h':
-      return { from: new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString(), to: now.toISOString() }
+      return { from: isoUtc(new Date(now.getTime() - 24 * 60 * 60 * 1000)), to: isoUtc(now) }
     case 'current_week': {
       const day = now.getDay() || 7            // Mon=1…Sun=7
       const monday = startOf(now)
       monday.setDate(monday.getDate() - (day - 1))
-      return { from: isoUtc(monday), to: now.toISOString() }
+      return { from: isoUtc(monday), to: isoUtc(now) }
     }
     case 'last_week': {
       const day = now.getDay() || 7
@@ -108,7 +121,7 @@ export function resolveFilter(
     }
     case 'current_month': {
       const first = new Date(now.getFullYear(), now.getMonth(), 1)
-      return { from: isoUtc(first), to: now.toISOString() }
+      return { from: isoUtc(first), to: isoUtc(now) }
     }
     case 'custom': {
       // Academic week picker takes precedence over manual date range.
@@ -116,16 +129,16 @@ export function resolveFilter(
         const p = ctx.academicPeriods.find((x) => x.label === state.academicWeek)
         if (p) {
           return {
-            from: new Date(`${p.start_date}T00:00:00`).toISOString(),
-            to: new Date(`${p.end_date}T23:59:59`).toISOString(),
+            from: isoUtc(new Date(`${p.start_date}T00:00:00`)),
+            to: isoUtc(new Date(`${p.end_date}T23:59:59`)),
           }
         }
       }
       const from = state.customFrom
-        ? new Date(`${state.customFrom}T${state.timeStart || '00:00'}:00`).toISOString()
+        ? isoUtc(new Date(`${state.customFrom}T${state.timeStart || '00:00'}:00`))
         : null
       const to = state.customTo
-        ? new Date(`${state.customTo}T${state.timeEnd || '23:59'}:59`).toISOString()
+        ? isoUtc(new Date(`${state.customTo}T${state.timeEnd || '23:59'}:59`))
         : null
       return { from, to }
     }

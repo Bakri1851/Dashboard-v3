@@ -87,7 +87,7 @@ def get_cf(window: TimeWindow = Depends(get_time_window)) -> CFDiagnostics:
         )
 
     # Shape the elevated list for the UI. analytics.compute_cf_struggle_scores
-    # emits rows keyed for the legacy Streamlit table ("Student" / "Parametric
+    # emits rows keyed for the legacy table schema ("Student" / "Parametric
     # Score" / "CF Score"); the React frontend expects snake_case, and level
     # isn't carried in the dict, so look it up from struggle_df.
     user_to_level: dict[str, str] = {}

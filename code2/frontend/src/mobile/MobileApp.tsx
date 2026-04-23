@@ -14,6 +14,7 @@ import type {
 } from '../types/api'
 import { clearAid, readAid, writeAid } from './state/aid'
 import { useAssignmentSound } from './hooks/useAssignmentSound'
+import { MobileThemeSwitcher } from './components/MobileThemeSwitcher'
 import { MobileAssigned } from './views/MobileAssigned'
 import { MobileJoin } from './views/MobileJoin'
 import { MobileSessionEnded } from './views/MobileSessionEnded'
@@ -62,9 +63,9 @@ export function MobileApp() {
     return labState.assignments.find((a) => a.student_id === assignedStudent) ?? null
   }, [labState, assignedStudent])
 
-  // Mirror the Streamlit session-window filter: every data endpoint that
-  // accepts `?from=` gets the active session's `session_start` so the mobile
-  // only ever sees data since the instructor pressed Start Session.
+  // Apply the session-window filter: every data endpoint that accepts
+  // `?from=` gets the active session's `session_start` so the mobile only
+  // ever sees data since the instructor pressed Start Session.
   const sessionQuery = labState?.session_start
     ? `from=${encodeURIComponent(labState.session_start)}`
     : undefined
@@ -227,6 +228,12 @@ export function MobileApp() {
   }, [assignedStudent, refetchState])
 
   // --- Render ----------------------------------------------------------
+  const floatingSwitcher = (
+    <div style={{ position: 'fixed', top: 10, right: 10, zIndex: 20 }}>
+      <MobileThemeSwitcher />
+    </div>
+  )
+
   if (stateLoading && !labState) {
     return (
       <div
@@ -244,6 +251,7 @@ export function MobileApp() {
           gap: 10,
         }}
       >
+        {floatingSwitcher}
         <motion.span
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
@@ -266,6 +274,7 @@ export function MobileApp() {
           fontSize: 12,
         }}
       >
+        {floatingSwitcher}
         {stateErr}
       </div>
     )
@@ -336,6 +345,7 @@ export function MobileApp() {
         overflow: 'hidden',
       }}
     >
+      {floatingSwitcher}
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={bodyKey}

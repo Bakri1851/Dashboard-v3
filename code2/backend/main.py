@@ -39,7 +39,7 @@ if not os.environ.get("OPENAI_API_KEY"):
 
 from backend.cache import load_dataframe, load_difficulty_df, load_struggle_df
 from backend.routers import analysis, cf, lab, live, meta, models_cmp, question, rag, sessions, settings, student
-from learning_dashboard import lab_state
+from learning_dashboard import analytics, lab_state
 from learning_dashboard import rag as rag_module
 
 logger = logging.getLogger("backend")
@@ -84,6 +84,23 @@ async def lifespan(app: FastAPI):
             t0 = _time.monotonic()
             df, err = load_dataframe()
             logger.info("prewarm: loaded %d records in %.1fs (err=%r)", len(df), _time.monotonic() - t0, err)
+            # `load_dataframe` respects SCORING_PER_RUN_CAP so the df it just
+            # cached has real incorrectness for only the first N uniques and
+            # 0.5 for the rest — leaderboards computed on that would diverge
+            # from code/'s (which has no cap). Score the remaining uncached
+            # feedbacks here with the cap disabled; in-request calls still
+            # use the cap, but the module-level _incorrectness_cache is now
+            # fully warm, and the cached df's incorrectness column gets
+            # updated in place because `df` and `_df_cache["df"][0]` are the
+            # same object. Running in the background thread means this ~5–7
+            # min OpenAI pass doesn't block concurrent requests.
+            if not df.empty and "ai_feedback" in df.columns:
+                t_score = _time.monotonic()
+                try:
+                    df["incorrectness"] = analytics.compute_incorrectness_column(df, max_new_scores=0)
+                    logger.info("prewarm: full incorrectness scoring done in %.1fs", _time.monotonic() - t_score)
+                except Exception as e:  # noqa: BLE001
+                    logger.warning("prewarm: full scoring raised: %s", e)
             if "incorrectness" in df.columns and not df.empty:
                 _inc = df["incorrectness"]
                 logger.info(
@@ -129,7 +146,7 @@ _DIST_DIR = Path(__file__).resolve().parent.parent / "frontend" / "dist"
 
 app = FastAPI(
     title="Dashboard v3 API",
-    description="FastAPI backend for the React frontend. Coexists with the Streamlit stack in code/ via shared data/lab_session.json.",
+    description="FastAPI backend for the React frontend. Coexists with the legacy stack in code/ via shared data/lab_session.json.",
     version="0.1.0",
     lifespan=lifespan,
 )

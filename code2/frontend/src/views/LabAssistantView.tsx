@@ -2,7 +2,6 @@ import { useCallback, useMemo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { T } from '../theme/tokens'
 import { useApiData } from '../api/hooks'
-import { useAutoRefreshInterval } from '../api/useAutoRefreshInterval'
 import { api } from '../api/client'
 import type { LabState, StudentStruggle } from '../types/api'
 import { Pill } from '../components/primitives/Pill'
@@ -24,8 +23,9 @@ export function LabAssistantView() {
   const sessionQuery = state?.session_start
     ? `from=${encodeURIComponent(state.session_start)}`
     : undefined
-  const strugInterval = useAutoRefreshInterval(15_000)
-  const { data: struggle } = useApiData<StudentStruggle[]>('/struggle', strugInterval, sessionQuery)
+  // Hard-coded 10 s to match MobileApp.tsx — lab dispatch must not freeze
+  // when the global auto-refresh toggle is off (that's for heavier views).
+  const { data: struggle } = useApiData<StudentStruggle[]>('/struggle', 10_000, sessionQuery)
 
   // Students that need help but aren't already assigned.
   const assignedSet = useMemo(() => new Set((state?.assignments ?? []).map((a) => a.student_id)), [state])
@@ -33,6 +33,7 @@ export function LabAssistantView() {
     if (!struggle) return []
     return struggle
       .filter((s) => URGENT_LEVELS.has(s.level) && !assignedSet.has(s.id))
+      .sort((a, b) => b.score - a.score)
       .slice(0, 10)
   }, [struggle, assignedSet])
 
@@ -91,7 +92,7 @@ export function LabAssistantView() {
         <div style={{ fontFamily: T.fSans, fontSize: 13.5, color: T.ink2, maxWidth: 480, lineHeight: 1.6 }}>
           Starting a session generates a 6-character join code and writes to{' '}
           <code style={{ fontFamily: T.fMono, background: T.bg2, padding: '1px 4px' }}>data/lab_session.json</code>.
-          All active processes (React frontend, FastAPI backend, and any Streamlit fallbacks in code/) see the same state via the file-lock.
+          All active processes (React frontend, FastAPI backend, and any fallback instances in code/) see the same state via the file-lock.
         </div>
         <motion.button
           onClick={() => post('/lab/start', undefined)}

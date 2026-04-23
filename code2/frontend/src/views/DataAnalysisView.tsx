@@ -72,7 +72,6 @@ export function DataAnalysisView() {
       animate="animate"
       style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}
     >
-      {/* Classic hero stats (matches the old Streamlit view) */}
       <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12 }}>
         <Stat
           label="Total submissions"

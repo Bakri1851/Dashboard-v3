@@ -128,13 +128,24 @@ def estimate_incorrectness(feedback: Optional[str]) -> float:
     return scores[0]
 
 
-def compute_incorrectness_column(df: pd.DataFrame) -> pd.Series:
+def compute_incorrectness_column(
+    df: pd.DataFrame,
+    max_new_scores: Optional[int] = None,
+) -> pd.Series:
     """
     Score all ai_feedback values via OpenAI, batched for efficiency.
     Successful batches are cached in-process to avoid repeat API calls.
     Failed batches leave the cache untouched so the next call retries —
     this prevents transient API errors from poisoning downstream analytics.
     Empty/null feedback → 0.5 without an API call.
+
+    ``max_new_scores`` overrides the per-run scoring cap:
+      - ``None`` (default) → fall back to ``config.SCORING_PER_RUN_CAP``.
+      - ``0`` → no cap, score every uncached feedback in this call.
+      - positive int → that many new scores at most.
+    The background prewarm (``backend/main.py::_prewarm``) passes ``0`` so it
+    fully warms ``_incorrectness_cache`` without blocking in-request calls,
+    which continue to use the default cap.
     """
     feedbacks = df["ai_feedback"].astype(str).str.strip()
 
@@ -150,14 +161,28 @@ def compute_incorrectness_column(df: pd.DataFrame) -> pd.Series:
     already_cached = sum(1 for t in unique_feedbacks if t in _incorrectness_cache)
 
     # Collect unique non-empty texts not yet cached
-    uncached = [t for t in unique_feedbacks if t and t not in _incorrectness_cache]
+    uncached_all = [t for t in unique_feedbacks if t and t not in _incorrectness_cache]
     n_empty = sum(1 for t in unique_feedbacks if not t)
+
+    # Cap the number of new feedbacks scored per request so a cold cache
+    # (~3k uniques on this dataset) doesn't block the first /struggle or /live
+    # call for 5–10 minutes of serial OpenAI round-trips. Remaining uncached
+    # feedbacks stay at 0.5 for this request and get picked up by subsequent
+    # calls (the raw-data TTL evicts the window cache every CACHE_TTL seconds,
+    # so the cache fills progressively across a few poll cycles).
+    if max_new_scores is None:
+        cap = int(getattr(config, "SCORING_PER_RUN_CAP", 0) or 0)
+    else:
+        cap = int(max_new_scores)
+    uncached = uncached_all[:cap] if cap > 0 else uncached_all
+    deferred = len(uncached_all) - len(uncached)
 
     logger.info(
         "compute_incorrectness_column: total_rows=%d unique_feedbacks=%d "
-        "already_cached=%d non_empty_uncached=%d empty_feedbacks=%d model=%s",
-        len(df), len(unique_feedbacks), already_cached, len(uncached), n_empty,
-        config.OPENAI_MODEL,
+        "already_cached=%d non_empty_uncached=%d scoring_this_run=%d "
+        "deferred=%d empty_feedbacks=%d model=%s",
+        len(df), len(unique_feedbacks), already_cached, len(uncached_all),
+        len(uncached), deferred, n_empty, config.OPENAI_MODEL,
     )
 
     batches_attempted = 0

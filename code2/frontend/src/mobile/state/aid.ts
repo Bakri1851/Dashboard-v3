@@ -1,7 +1,6 @@
 /**
  * Identity persistence for the lab assistant: the `?aid=` URL query param
- * survives browser refreshes on mobile, mirroring the Streamlit original
- * (`_coerce_query_value` + `st.query_params`).
+ * survives browser refreshes on mobile.
  */
 
 const QUERY_KEY = 'aid'

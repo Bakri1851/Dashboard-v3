@@ -1,7 +1,7 @@
 """Lab-session coordination endpoints.
 
 Every endpoint delegates to `learning_dashboard.lab_state`, which uses a
-`FileLock` on `data/lab_session.json` — so all three processes (code/ Streamlit
+`FileLock` on `data/lab_session.json` — so all three processes (code/
 instructor + mobile, and this FastAPI) share the same source of truth. The
 React SPA reads state through this backend, not the file directly.
 
@@ -161,7 +161,7 @@ def struggling_questions(
         return []
 
     # Default to the active lab session's start when no explicit window is
-    # passed — matches the Streamlit original which reads
+    # passed — matches the `code/` original which reads
     # `state["session_start"]` in `_load_student_data()`.
     effective_from = window.from_
     effective_to = window.to_
