@@ -796,9 +796,11 @@ click Analytics call archNodeClick("Analytics") "Baseline analytics core"
 <div id="panel-literature" class="panel">
 <p class="lit-intro">Every non-trivial mathematical method in the codebase should be grounded in a published source. This panel mirrors <strong>docs/obsidian-vault/My Notes/Literature/index.md</strong> and flags which citations are already in place (cited ✓) versus which still need a note added (cite needed ⚠). Keep in sync when a new bibtex entry is added to the thesis.</p>
 
+<div class="note-box" style="background:rgba(122,184,245,0.10);border-left:3px solid #7ab8f5;margin-bottom:14px"><strong>2026-04-24 refresh.</strong> Literature/index.md now contains <strong>89 entries</strong> (36 original + 53 added this refresh). All stub notes exist under <code>My Notes/Literature/*.md</code>. The ⚠ pill below now means "vault stub exists but <code>\cite&#123;&#125;</code> calls not yet inserted in the thesis tex". New groupings added 2026-04-24 (at the foot of this panel): Formative Assessment · Teacher-Facing Orchestration · LA Surveys · At-Risk EWS Extensions · Gaming Detection &amp; Wheel-Spinning · LLM-as-Judge Extensions. See [[Report Sync#2026-04-24 refresh]] for the gap audit that drove these additions.</div>
+
 <div class="lit-legend">
-  <span><span class="lit-mark ok">✓</span> cited — entry exists in Literature/index.md and `\cite{}` calls in the thesis</span>
-  <span><span class="lit-mark todo">⚠</span> cite needed — method used in code but no note yet (see Rewrite Queue "Methods lit-review backlog")</span>
+  <span><span class="lit-mark ok">✓</span> cited — vault stub exists AND `\cite{}` calls in the thesis</span>
+  <span><span class="lit-mark todo">⚠</span> stub exists — vault note created but `\cite{}` calls not yet inserted in the tex (do during writing burst)</span>
 </div>
 
 <div class="lit-group">
@@ -972,7 +974,83 @@ click Analytics call archNodeClick("Analytics") "Baseline analytics core"
   <div class="lit-entry"><div class="lit-mark ok">✓</div><div class="lit-key">tzimas_2021_ethical · dasilva_2022_a · montebello_assisting · kiatxin_development · liu_open</div><div class="lit-desc">Ethics, architecture, educational-technology context.</div></div>
 </div>
 
-<p class="lit-intro" style="margin-top:2rem;font-size:12px;color:#666;max-width:none">Source of truth for the backlog: <strong>docs/obsidian-vault/My Notes/Thesis/Rewrite Queue.md</strong> — see "Methods lit-review backlog (2026-04-18)". Source of truth for the index: <strong>docs/obsidian-vault/My Notes/Literature/index.md</strong>. When a ⚠ entry is written up, update Literature/index.md and change the mark to ✓ here in the next toolkit sync.</p>
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Formative Assessment &amp; Feedback Theory <span class="lit-mark todo">(added 2026-04-24)</span></div>
+    <div class="lit-group-sub">Educational-theory grounding for the monitor-and-intervene premise · Ch1 introduction, Ch2 §2.1.1, Ch3 RAG feedback design</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">black_1998_assessment</div><div class="lit-desc"><strong>Black &amp; Wiliam (1998)</strong> — <em>Assessment and Classroom Learning</em>. Seminal formative-assessment paper (10,000+ citations); grounds the live monitor-and-intervene loop.</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">shute_2008_focus</div><div class="lit-desc"><strong>Shute (2008)</strong> — <em>Focus on Formative Feedback</em>. Directly frames the RAG suggested-feedback layer.<span class="lit-xref">Used in: rag.py → Ch3 §3.5</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">hattie_2007_the</div><div class="lit-desc"><strong>Hattie &amp; Timperley (2007)</strong> — <em>The Power of Feedback</em>. Feedback-levels framework (task / process / self-reg / self).</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Teacher-Facing Orchestration Analytics <span class="lit-mark todo">(added 2026-04-24)</span></div>
+    <div class="lit-group-sub">Instructor-side analytics as a distinct category from student-facing · Ch2 §2.1.3, Ch4 §4.x Lab Instructor System</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">holstein_2018_student</div><div class="lit-desc"><strong>Holstein, McLaren &amp; Aleven (2018)</strong> — mixed-reality teacher awareness tool. Empirical validation of teacher-facing tools improving learning outcomes.</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">holstein_2017_intelligent</div><div class="lit-desc"><strong>Holstein, McLaren &amp; Aleven (2017)</strong> — intelligent tutors as teachers' aides; motivates the instructor+AI hybrid.</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Learning Analytics Surveys <span class="lit-mark todo">(added 2026-04-24)</span></div>
+    <div class="lit-group-sub">Canonical framing papers · Ch2 §2.1.1 foundations</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">romero_2020_educational</div><div class="lit-desc"><strong>Romero &amp; Ventura (2020)</strong> — updated EDM/LA survey. Modern framing citation.</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">siemens_2013_learning</div><div class="lit-desc"><strong>Siemens (2013)</strong> — LA as a discipline. Defines the field.</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">clow_2013_an</div><div class="lit-desc"><strong>Clow (2013)</strong> — overview + LA cycle (data → measure → visualise → intervene → learn).</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">At-Risk &amp; Early-Warning Extensions <span class="lit-mark todo">(added 2026-04-24)</span></div>
+    <div class="lit-group-sub">Canonical EWS references to complement / replace the anonymous Ch2 §2.2.3 entries</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">macfadyen_2010_mining</div><div class="lit-desc"><strong>Macfadyen &amp; Dawson (2010)</strong> — <em>Mining LMS Data for EWS</em>. Canonical composite-score EWS paper in HE.<span class="lit-xref">Used in: Ch2 §2.2.3 + struggle-score framing</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">agnihotri_2015_building</div><div class="lit-desc"><strong>Agnihotri, Ott &amp; Pazzani (2015)</strong> — predictive model of student success.</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">jayaprakash_2014_early</div><div class="lit-desc"><strong>Jayaprakash et al. (2014)</strong> — open-source early-alert initiative.</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Gaming Detection &amp; Unproductive Persistence <span class="lit-mark todo">(added 2026-04-24)</span></div>
+    <div class="lit-group-sub">Grounds the <code>r_hat</code> and <code>rep_hat</code> signals in the 7-signal struggle model · Ch2 §2.1.4, Ch3 §3.3.1</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">baker_2008_why</div><div class="lit-desc"><strong>Baker et al. (2008)</strong> — <em>Why Students Engage in Gaming the System</em>. Foundational reference for repeated-attempt gaming as a struggle signal.<span class="lit-xref">Used in: config.py STRUGGLE_WEIGHT_R · STRUGGLE_WEIGHT_REP</span></div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">baker_2004_offtask</div><div class="lit-desc"><strong>Baker, Corbett, Koedinger &amp; Wagner (2004)</strong> — off-task gaming in Cognitive Tutor. Seminal gaming-detection paper.</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">beck_2013_wheelspinning</div><div class="lit-desc"><strong>Beck &amp; Gong (2013)</strong> — wheel-spinning. Directly underpins <code>rep_hat</code> and <code>d_hat</code>.</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">LLM-as-Judge Extensions <span class="lit-mark todo">(added 2026-04-24)</span></div>
+    <div class="lit-group-sub">Education-specific and methodology-rigorous references beyond Zheng 2023 · Ch2 §2.1.4 LLM-as-Judge, Ch3 §3.3.0, Ch5 §5.5 limitations</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">kasneci_2023_chatgpt</div><div class="lit-desc"><strong>Kasneci et al. (2023)</strong> — <em>ChatGPT for Good? LLMs for Education</em>. Primary education-framed citation for the gpt-4o-mini incorrectness scorer.</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">chiang_2023_can</div><div class="lit-desc"><strong>Chiang &amp; Lee (2023)</strong> — can LLMs replace human evaluations? Methodology rigour.</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">liu_2023_geval</div><div class="lit-desc"><strong>Liu et al. (2023)</strong> — G-Eval: GPT-4 evaluation with better human alignment. Prompt-design reference.</div></div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">gilardi_2023_chatgpt</div><div class="lit-desc"><strong>Gilardi, Alizadeh &amp; Kubli (2023)</strong> — PNAS: LLMs outperform crowd-workers on annotation. Economic case for LLM scoring.</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Deep Knowledge Tracing (baseline comparison) <span class="lit-mark todo">(added 2026-04-24)</span></div>
+    <div class="lit-group-sub">Why BKT was chosen over DKT · Ch3 §3.4.3</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">piech_2015_deep</div><div class="lit-desc"><strong>Piech et al. (2015)</strong> — <em>Deep Knowledge Tracing</em>. Modern RNN baseline; cited to justify BKT choice on interpretability + low-data grounds.</div></div>
+</div>
+
+<div class="lit-group">
+  <div class="lit-group-head">
+    <div class="lit-group-title">Information-Retrieval Textbook (clustering + TF-IDF) <span class="lit-mark todo">(added 2026-04-24)</span></div>
+    <div class="lit-group-sub">Modern textbook reference alongside the historical Salton / MacQueen / Lloyd citations · Ch2 §2.1.7, Ch3 §3.3.x</div>
+  </div>
+  <div class="lit-entry"><div class="lit-mark todo">⚠</div><div class="lit-key">manning_2008_introduction</div><div class="lit-desc"><strong>Manning, Raghavan &amp; Schütze (2008)</strong> — <em>Introduction to Information Retrieval</em>. Modern TF-IDF + clustering reference.</div></div>
+</div>
+
+<p class="lit-intro" style="margin-top:2rem;font-size:12px;color:#666;max-width:none">Source of truth for the backlog: <strong>docs/obsidian-vault/My Notes/Thesis/Rewrite Queue.md</strong> — see "Methods lit-review backlog (2026-04-18)" + "2026-04-24 additions". Source of truth for the index: <strong>docs/obsidian-vault/My Notes/Literature/index.md</strong> (89 entries as of 2026-04-24). When a ⚠ entry has its <code>\cite{}</code> inserted into the tex, flip the mark to ✓ here in the next toolkit sync.</p>
 </div>
 
 <!-- ══════════════════════════════════════════
@@ -1085,10 +1163,11 @@ click Analytics call archNodeClick("Analytics") "Baseline analytics core"
 ══════════════════════════════════════════ -->
 <div id="panel-status" class="panel">
 <p class="ov-lead">Single-pane project status: what's implemented, what evidence is missing, how the thesis aligns with the code, and which figures/tables need work. Sources: <strong>Evidence Bank.md</strong>, <strong>Report Sync.md</strong>, <strong>Figures and Tables.md</strong>.</p>
+<div class="note-box" style="background:rgba(122,184,245,0.10);border-left:3px solid #7ab8f5;margin-bottom:18px"><strong>Last refresh — 2026-04-24.</strong> Reconciled against post-Phase-11 code polish (commits <code>54d45b7</code> filter fixing · <code>17173a8</code> hover tooltips · <code>8c4c13c</code> maths fix · <code>72ce45c</code> assistant themes · <code>5ea4d21</code> animated UI · <code>462de20</code> cleaned code2) and against the Evaluation Plan (2026-04-21). 26 working days to 2026-05-20 submission.</div>
 
 <div class="status-section">
   <h3>§1 — Implementation status</h3>
-  <p class="status-intro">14 V2 features that exist in the codebase. Green = production-ready feature backed by a function you can point an examiner at.</p>
+  <p class="status-intro">21 V2 features that exist in the codebase. Green = production-ready feature backed by a function you can point an examiner at. Rows 15–21 are post-Phase-11 polish added 2026-04-24.</p>
   <table class="status-table">
     <tr><th style="width:28%">Feature</th><th>Code location</th><th style="width:12%">Status</th></tr>
     <tr><td>7-signal student struggle</td><td><code>analytics.py · compute_student_struggle_scores()</code></td><td><span class="status-pill done">Done</span></td></tr>
@@ -1099,29 +1178,41 @@ click Analytics call archNodeClick("Analytics") "Baseline analytics core"
     <tr><td>IRT difficulty (Rasch 1PL)</td><td><code>models/irt.py · compute_irt_difficulty_scores()</code></td><td><span class="status-pill done">Done</span></td></tr>
     <tr><td>BKT mastery tracking</td><td><code>models/bkt.py · compute_all_mastery()</code></td><td><span class="status-pill done">Done</span></td></tr>
     <tr><td>Improved struggle model</td><td><code>models/improved_struggle.py</code></td><td><span class="status-pill done">Done</span></td></tr>
-    <tr><td>Measurement confidence</td><td><code>models/measurement.py</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Measurement confidence</td><td><code>models/measurement.py</code> <em>(computed but not displayed)</em></td><td><span class="status-pill done">Done</span></td></tr>
     <tr><td>Lab assistant system</td><td><code>lab_state.py · assistant_app.py</code></td><td><span class="status-pill done">Done</span></td></tr>
     <tr><td>RAG coaching suggestions</td><td><code>rag.py · generate_assistant_suggestions()</code></td><td><span class="status-pill done">Done</span></td></tr>
     <tr><td>Saved sessions</td><td><code>data_loader.py · save_session_record()</code></td><td><span class="status-pill done">Done</span></td></tr>
     <tr><td>Academic calendar mapping</td><td><code>academic_calendar.py</code></td><td><span class="status-pill done">Done</span></td></tr>
-    <tr><td>Config-driven thresholds</td><td><code>config.py</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Config-driven thresholds</td><td><code>config.py</code> (maths-fix values locked in commit <code>8c4c13c</code>)</td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Model Comparison endpoint — Spearman ρ + top-10 overlap + agreement split</td><td><code>code2/backend/routers/models_cmp.py · _spearman · _agreement</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Animated UI layer (post-Phase-11)</td><td><code>code2/frontend/src/animation/</code> (motion.ts · AnimatedCard · ViewTransition)</td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>SessionProgression view (new 9th instructor view)</td><td><code>code2/frontend/src/views/SessionProgression.tsx</code> + <code>backend/routers/sessions.py:get_session_progression</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Hover-tooltip layer across charts &amp; stats</td><td><code>code2/frontend/src/components/primitives/Tooltip.tsx</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Per-window analytics cache (TTL 10 s raw / 300 s analytics)</td><td><code>code2/backend/cache.py</code> keyed by <code>(from_, to_, module)</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Theme system — 7 themes × 5 accents (OKLch tokens)</td><td><code>code2/frontend/src/theme/tokens.ts</code></td><td><span class="status-pill done">Done</span></td></tr>
+    <tr><td>Lab assistant app theme parity with instructor app</td><td><code>code2/frontend/src/views/LabAssistantView.tsx</code> + shared tokens</td><td><span class="status-pill done">Done</span></td></tr>
   </table>
 </div>
 
 <div class="status-section">
   <h3>§2 — Evidence gaps (for Ch5)</h3>
-  <p class="status-intro">What still needs to be <em>produced</em> — screenshots to capture, comparisons to run, tests to walk through. Amber = action required.</p>
+  <p class="status-intro">What still needs to be <em>produced</em> — screenshots to capture, comparisons to run, tests to walk through. Amber = action required. Green = artefact now exists and is ready to capture (Phase-5 Model Comparison unblocked 2026-04-21).</p>
   <table class="status-table">
     <tr><th style="width:32%">Evidence</th><th>How to generate</th><th style="width:12%">Status</th></tr>
-    <tr><td>All 11 UI screenshots (Appendix B)</td><td>Run dashboard with real data, capture each of the 6 instructor views + 3 assistant views + CF panel + sidebar</td><td><span class="status-pill needed">Needed</span></td></tr>
-    <tr><td>Baseline vs IRT difficulty</td><td>Enable both models, open Model Comparison view, screenshot side-by-side scores</td><td><span class="status-pill needed">Needed</span></td></tr>
-    <tr><td>Baseline vs improved struggle</td><td>Same view, student-struggle tab</td><td><span class="status-pill needed">Needed</span></td></tr>
+    <tr><td>All 11 UI screenshots (Appendix B)</td><td>Run dashboard with real data, capture each of the 6 instructor views + 3 assistant views + CF panel + sidebar + SessionProgression</td><td><span class="status-pill needed">Needed</span></td></tr>
+    <tr><td>Baseline vs IRT difficulty — Spearman ρ + agreement</td><td>Read <code>/api/models/compare</code> → ComparisonView Rank-Concordance + Agreement cards. Screenshot.</td><td><span class="status-pill done">Ready</span></td></tr>
+    <tr><td>Baseline vs improved struggle — Spearman ρ + top-10 overlap</td><td>Same endpoint, struggle tab. Screenshot Top-10 Overlap card.</td><td><span class="status-pill done">Ready</span></td></tr>
+    <tr><td>Level-agreement split (upgraded / downgraded / unchanged)</td><td>Read <code>agreement</code> block from <code>/api/models/compare</code>. Screenshot pill summary.</td><td><span class="status-pill done">Ready</span></td></tr>
     <tr><td>CF elevation examples</td><td>Enable CF, capture diagnostic panel with elevated students</td><td><span class="status-pill needed">Needed</span></td></tr>
     <tr><td>Mistake cluster examples</td><td>Session with &gt;3 incorrect answers on one question, screenshot clusters</td><td><span class="status-pill needed">Needed</span></td></tr>
     <tr><td>BKT mastery evolution</td><td>Extract from <code>mastery_df</code> session state for a student across multiple attempts</td><td><span class="status-pill needed">Needed</span></td></tr>
     <tr><td>Score distributions</td><td>Histograms of struggle/difficulty across a real session — In Class view</td><td><span class="status-pill needed">Needed</span></td></tr>
     <tr><td>FR1–FR7 walkthroughs</td><td>Smoke-test checklist in Operations panel, recorded pass/fail per requirement</td><td><span class="status-pill needed">Needed</span></td></tr>
-    <tr><td>NFR performance measurement</td><td>Time the refresh cycle end-to-end</td><td><span class="status-pill needed">Needed</span></td></tr>
+    <tr><td>NFR performance measurement</td><td>Time cold vs warm <code>/api/live</code>; post-Phase-11 cache should show sub-second warm</td><td><span class="status-pill needed">Needed</span></td></tr>
+    <tr><td>SessionProgression view screenshot</td><td>Load a historical session, scrub through buckets, screenshot stacked-area + scrubber</td><td><span class="status-pill needed">Needed</span></td></tr>
+    <tr><td>Themes × accents gallery (7 × 5)</td><td>Cycle through theme picker, compose into 7-thumbnail sheet</td><td><span class="status-pill needed">Needed</span></td></tr>
+    <tr><td>Tooltip showcase</td><td>Hover over a stat-card or chart; screenshot with tooltip visible</td><td><span class="status-pill needed">Needed</span></td></tr>
+    <tr><td>Graceful-degradation example (improved struggle)</td><td>Run with partial BKT / IRT data, screenshot weight-redistribution behaviour (0.75/0.00/0.25 or 0.70/0.30/0.00)</td><td><span class="status-pill needed">Needed</span></td></tr>
   </table>
   <div class="note-box" style="margin-top:12px"><strong>What's structurally missing:</strong> no automated test suite, no benchmark datasets, no user studies, no performance profiling data, no accessibility testing. Document these as limitations + future work in Ch6.</div>
 </div>
@@ -1133,9 +1224,9 @@ click Analytics call archNodeClick("Analytics") "Baseline analytics core"
     <tr><th style="width:22%">Chapter</th><th style="width:12%">Status</th><th>Biggest mismatch</th></tr>
     <tr><td>Ch1 Introduction</td><td><span class="status-pill partial">Partial</span></td><td>Future-tense framing throughout; risk table mitigations are generic, not tied to actual decisions.</td></tr>
     <tr><td>Ch2 Background &amp; Requirements</td><td><span class="status-pill partial">Partial</span></td><td><code>[FILL IN]</code> placeholder at §2.1.7 research gaps. FR/NFR have no implementation-status mapping.</td></tr>
-    <tr><td>Ch3 Design &amp; Modelling</td><td><span class="status-pill partial">Partial</span></td><td>Struggle formula has 5 components in thesis, 7 in code. Difficulty has 4 vs 5. IRT, BKT, improved struggle, mistake clustering — none mentioned.</td></tr>
-    <tr><td>Ch4 Implementation</td><td><span class="status-pill outdated">Outdated</span></td><td>Describes V1 prototype. OpenAI scoring, 7-signal struggle, CF, IRT, BKT, RAG, lab assistant system, saved sessions — none present. Full rewrite required.</td></tr>
-    <tr><td>Ch5 Results &amp; Evaluation</td><td><span class="status-pill empty">Empty</span></td><td>Header-only. Model Comparison view is built but evaluation not written.</td></tr>
+    <tr><td>Ch3 Design &amp; Modelling</td><td><span class="status-pill partial">Partial</span></td><td>Struggle formula has 5 components in thesis, 7 in code (weights must match maths-fix values from commit <code>8c4c13c</code>). Difficulty has 4 vs 5. IRT, BKT, improved struggle, mistake clustering — none mentioned. Figs 8–10 Figma mockups still in place.</td></tr>
+    <tr><td>Ch4 Implementation</td><td><span class="status-pill outdated">Outdated + widened</span></td><td>Describes V1 prototype. V2 system absent (OpenAI scoring, 7-signal struggle, CF, IRT, BKT, RAG, lab assistant, saved sessions) <em>plus</em> post-Phase-11 polish (animations, SessionProgression view, tooltips, cache hardening, 7-theme system, assistant-app parity) also absent. Full rewrite required.</td></tr>
+    <tr><td>Ch5 Results &amp; Evaluation</td><td><span class="status-pill empty">Empty · unblocked</span></td><td>Header-only. Unblocked 2026-04-21: Model Comparison view + Spearman ρ + top-10 overlap + agreement-split all available from <code>/api/models/compare</code>. Capture during screenshot campaign.</td></tr>
     <tr><td>Ch6 Conclusion</td><td><span class="status-pill empty">Empty</span></td><td>Header-only.</td></tr>
     <tr><td>Appendix A Code Snippets</td><td><span class="status-pill empty">Empty</span></td><td>—</td></tr>
     <tr><td>Appendix B Screenshots</td><td><span class="status-pill empty">Empty</span></td><td>—</td></tr>
@@ -1197,6 +1288,11 @@ click Analytics call archNodeClick("Analytics") "Baseline analytics core"
         <li>Settings</li>
         <li>Lab assistant views (3)</li>
         <li>V2 architecture diagram</li>
+        <li>SessionProgression timeline <em>(post-Phase-11)</em></li>
+        <li>Themes × accents matrix (7 × 5) <em>(post-Phase-11)</em></li>
+        <li>Model Comparison panel (Spearman ρ + top-10 overlap + agreement)</li>
+        <li>Tooltip in action <em>(post-Phase-11)</em></li>
+        <li>Graceful-degradation trace <em>(improved struggle fallback)</em></li>
       </ul>
     </div>
     <div class="fig-audit-card">
@@ -1204,8 +1300,12 @@ click Analytics call archNodeClick("Analytics") "Baseline analytics core"
       <ul>
         <li>Requirements traceability (FR/NFR → status)</li>
         <li>Model comparison results</li>
-        <li>Struggle formula components (all 7)</li>
-        <li>Difficulty formula components (all 5)</li>
+        <li>Struggle formula components (all 7, maths-fix weights)</li>
+        <li>Difficulty formula components (all 5, maths-fix weights)</li>
+        <li>Improved-struggle weight redistribution (base + 3 fallback cases)</li>
+        <li>BKT params — default vs fit-from-data</li>
+        <li>Theme × accent combinations (35 valid)</li>
+        <li>API endpoint map (≥22 routes × delegate × cache TTL)</li>
       </ul>
     </div>
   </div>
@@ -1273,6 +1373,11 @@ click Analytics call archNodeClick("Analytics") "Baseline analytics core"
     <tr><td>13</td><td>Phase 9 status: "out of scope" (Full Roadmap) vs "must be credited" (Report Sync)</td><td>Reconciled: <em>code</em> complete · <em>Ch4 description + Ch2 lit review</em> in scope · <em>evaluation</em> deferred to Ch6 §6.3</td><td>Clarifying sentence added to both vault files this session.</td><td><span class="status-pill done">Resolved (vault)</span></td></tr>
     <tr><td>14</td><td>Vault Ch1–Ch6 notes' "Current contents" pre-date Phase 6 tex-skeleton additions (2026-04-12)</td><td>Actual tex state; Rewrite Queue "Phase 6 additions" section</td><td>Sync-date banner added to each Ch-note this session, pointing readers at the Rewrite Queue Phase 6 block instead of rewriting the duplicate content.</td><td><span class="status-pill done">Resolved (vault)</span></td></tr>
     <tr><td>15</td><td>Ch2 research-gap <code>[FILL IN]</code> placeholder at <code>requirements-specification.tex:119</code></td><td>Draft exists commented out at lines 121–130</td><td>Uncomment and polish. Tracked in Rewrite Queue.</td><td><span class="status-pill needed">Queued</span></td></tr>
+    <tr><td>16</td><td>Post-Phase-11 polish surface absent from thesis: animated UI, SessionProgression view, hover tooltips, per-window cache hardening, maths-fix weight values, 7-theme system, assistant-app theme parity</td><td>Code — all live in <code>code2/frontend/</code> and <code>code2/backend/cache.py</code></td><td>Thesis: Ch3 weights must use maths-fix values; Ch4 rewrite must cover 7 new subsections. Tracked in Rewrite Queue "2026-04-24 additions".</td><td><span class="status-pill needed">Queued</span></td></tr>
+    <tr><td>17</td><td><code>apply_temporal_smoothing()</code> exists with <code>SMOOTHING_ENABLED=True</code> but is never invoked in the compute pipeline</td><td>Code — dead stub under a "true" flag</td><td>Decision needed: wire it up or retire. Tracked in Rewrite Queue + Ch6 future work.</td><td><span class="status-pill needed">Queued</span></td></tr>
+    <tr><td>18</td><td>Measurement-confidence values computed but not displayed anywhere in UI</td><td>Code — <code>models/measurement.py</code> produces <code>incorrectness_confidence</code> but no surface renders it</td><td>Ch3 §3.4.1 documents this; Ch6 future-work entry proposes confidence-badge component.</td><td><span class="status-pill needed">Queued</span></td></tr>
+    <tr><td>19</td><td>BKT MLE fit logic (<code>fit_bkt_parameters()</code>) exists but is never called live — defaults from <code>config.py</code> used exclusively</td><td>Code — fit code present, unused</td><td>Ch3 §3.4.3 should note both modes; Ch6 future-work entry proposes enabling fit once <code>BKT_FIT_MIN_OBSERVATIONS=50</code> is routinely met.</td><td><span class="status-pill needed">Queued</span></td></tr>
+    <tr><td>20</td><td>Literature index missing foundational citations (gaming detection, LLM-as-judge specific, IRT/CTT, KT, composite indicators, RAG, evaluation metrics, teacher-facing LA) — ~48 entries</td><td>Code implements these techniques</td><td>Literature/index.md extended with 48 new entries + matching stub notes in 2026-04-24 refresh. Ch2/Ch3 <code>\cite</code> calls still to insert during writing burst.</td><td><span class="status-pill done">Resolved (vault)</span></td></tr>
   </table>
 
   <div class="note-box" style="margin-top:14px"><strong>How to reconcile a new disagreement:</strong> (1) classify the claim using Table A, (2) pick the authoritative source, (3) add a row to Table B with a concrete resolution action, (4) when closed, flip the pill to <span class="status-pill done">Resolved</span> and leave the row as a historical record — don't delete. Future Claude sessions should be able to see the full reconciliation history from this one pane.</div>
@@ -1283,6 +1388,7 @@ click Analytics call archNodeClick("Analytics") "Baseline analytics core"
      PANEL 2 — DEEP DIVE
 ══════════════════════════════════════════ -->
 <div id="panel-dive" class="panel">
+<div class="note-box" style="background:rgba(122,184,245,0.10);border-left:3px solid #7ab8f5;margin-bottom:14px"><strong>2026-04-24 refresh.</strong> Citation footers on every card now reference the extended Literature/index.md (89 entries total; 53 added 2026-04-24). The ⚠ "cite needed" markers below mean the <code>\cite&#123;&#125;</code> calls still need to be inserted in the thesis tex — the vault stubs already exist. <strong>Post-Phase-11 surface not yet deep-dived here:</strong> animated UI, <strong>SessionProgression view</strong> (new 9th instructor view at <code>code2/frontend/src/views/SessionProgression.tsx</code>), hover tooltips, per-window cache hardening, 7-theme system, assistant-app parity. See Source Tree docs: <code>code2-frontend-animation.md</code>, <code>code2-frontend-views-session-progression.md</code>. <strong>Measurement confidence</strong> (<code>models/measurement.py</code>) is referenced in dd-views but not deep-dived — computed but not wired to UI; Ch6 future-work entry proposes wire-up.</div>
 <div class="dd-nav">
   <button class="dd-btn active" onclick="ddShow('dd-data',this)">Data pipeline</button>
   <button class="dd-btn" onclick="ddShow('dd-scoring',this)">LLM-as-judge scoring</button>
@@ -1883,8 +1989,12 @@ click Analytics call archNodeClick("Analytics") "Baseline analytics core"
   <p class="plan-intro">Additive second frontend shipped over one working session (2026-04-19). <strong><code>code/</code> stays untouched</strong> throughout; everything happens in a <code>code2/</code> copy. Reason for the track: demonstrate that the analytics layer is framework-agnostic and give the defence a visually polished modern alternative while keeping the Streamlit demo as a fallback.</p>
   <ul class="ops-list">
     <li><strong>Phases 0–6</strong> done (shadow copy · FastAPI backend with 8 routers / 20+ endpoints · Vite + React + TypeScript frontend with 7 themes + 8 views · lab-state parity through the existing <code>FileLock</code> · RAG via <code>asyncio.to_thread</code> so it doesn't block · <code>dist/</code> served at <code>http://localhost:8000/</code> · <code>/docs</code> Swagger UI · custom favicon).</li>
-    <li><strong>Phase 7</strong> in progress — documentation sync (this panel, Evidence Bank, Report Sync, Figures and Tables, Full Roadmap, Weekly Plan, Setup and Runbook) + graphify regen.</li>
-    <li><strong>Phase 8</strong> — defence rehearsal (5-process smoke test, 7-theme screenshot gallery, demo script). Cold-start note: start FastAPI ~2 minutes before the demo so the analytics prewarm is done before the first click.</li>
+    <li><strong>Phase 7</strong> done — documentation sync (this panel, Evidence Bank, Report Sync, Figures and Tables, Full Roadmap, Weekly Plan, Setup and Runbook) + graphify regen.</li>
+    <li><strong>Phase 8</strong> done — defence rehearsal (5-process smoke test, 7-theme screenshot gallery, demo script). Cold-start note: start FastAPI ~2 minutes before the demo so the analytics prewarm is done before the first click.</li>
+    <li><strong>Phase 9</strong> done — functional parity with legacy stack (session card + Start/End, time filter 8 presets + academic-week, RuntimeConfig + live settings POST/reset, Data Analysis 6-chart selector, Previous Sessions save/load/delete, CF diagnostics panel, Web Audio sound effects).</li>
+    <li><strong>Phase 10</strong> done — legacy UI removal (Streamlit views stripped from <code>code2/</code>, analytical core retained and imported by FastAPI routers).</li>
+    <li><strong>Phase 11</strong> done — defence-ready state; <code>code2/CHECKLIST.md</code> all Phase 0–11 items ticked.</li>
+    <li><strong>Phase 12 — post-freeze polish (2026-04-24 snapshot).</strong> Continuing work beyond defence-ready: animated UI layer (<code>src/animation/</code>), new <strong>SessionProgression</strong> view (9th instructor view, backend endpoint <code>/api/sessions/&#123;id&#125;/progression</code>), hover-tooltip layer, per-window cache hardening (TTL 10s raw / 300s analytics keyed by <code>(from_, to_, module)</code>), maths-fix weight tuning (commit <code>8c4c13c</code> — thesis weights must use these final values), 7 themes × 5 accents expansion, assistant-app theme parity. <strong>These need Ch4 coverage but are not blocking submission.</strong> Full writing guidance in Rewrite Queue "2026-04-24 additions".</li>
   </ul>
   <p style="font-size:12px;color:#888;margin-top:10px">Plan file (resumable across context loss): <code>~/.claude/plans/c-users-bakri-downloads-alternative-das-majestic-garden.md</code> · Execution log with decision history: <code>code2/CHECKLIST.md</code>.</p>
 </div>
@@ -3144,6 +3254,8 @@ click Analytics call archNodeClick("Analytics") "Baseline analytics core"
       <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Document RAG cache-by-cluster-signature decision (Meeting 4 — Dr Batmaz suggested).</div></div>
       <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">Add "Problems Encountered" subsection: deferred actions, sound-effects iframe CSP, BKT timestamp ordering, OpenAI batch fallback.</div></div>
       <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">For each model, drop a one-line <code>file.py:line</code> reference to keep narrative anchored to source.</div></div>
+      <div class="sp-action" style="border-top:1px dashed #ccc;padding-top:6px;margin-top:6px"><span class="sp-prio high">high</span><span class="sp-eff">M</span><div class="sp-action-text"><strong>2026-04-24 post-Phase-11 additions</strong> — document animated UI (<code>code2/frontend/src/animation/motion.ts, AnimatedCard, ViewTransition</code>); new <strong>SessionProgression view</strong> (9th instructor view at <code>SessionProgression.tsx</code>, endpoint <code>/api/sessions/&#123;id&#125;/progression</code>); hover-tooltip layer (<code>Tooltip.tsx</code>); per-window analytics cache keyed by <code>(from_, to_, module)</code> with TTL 10s raw / 300s analytics (<code>code2/backend/cache.py</code>); 7 themes × 5 accents in <code>code2/frontend/src/theme/tokens.ts</code>; assistant-app theme parity (commit <code>72ce45c</code>).</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Lock Ch3/Ch4 weights to the <strong>maths-fix values</strong> from commit <code>8c4c13c</code>: struggle 0.10/0.10/0.20/0.10/0.38/0.05/0.07; difficulty 0.28/0.12/0.20/0.20/0.20; improved struggle 0.45/0.30/0.25. These are the final values — earlier drafts are superseded.</div></div>
     </div>
 
     <div class="sp-block"><div class="sp-block-title fig">Required figures &amp; tables</div>
@@ -3154,7 +3266,12 @@ click Analytics call archNodeClick("Analytics") "Baseline analytics core"
         <tr><td>Fig — RAG two-layer retrieval</td><td>redraw</td><td><span class="sp-pill needed">Add</span></td></tr>
         <tr><td>Screenshots — 6 instructor views</td><td>App B</td><td><span class="sp-pill empty">Capture</span></td></tr>
         <tr><td>Screenshots — 4 assistant view states</td><td>App B</td><td><span class="sp-pill empty">Capture</span></td></tr>
+        <tr><td>Screenshot — SessionProgression view <em>(post-Phase-11)</em></td><td>App B</td><td><span class="sp-pill empty">Capture</span></td></tr>
+        <tr><td>Screenshot — Themes × accents matrix (7×5) <em>(post-Phase-11)</em></td><td>App B</td><td><span class="sp-pill empty">Capture</span></td></tr>
+        <tr><td>Screenshot — Tooltip in action <em>(post-Phase-11)</em></td><td>App B</td><td><span class="sp-pill empty">Capture</span></td></tr>
+        <tr><td>Screenshot — Graceful-degradation trace (improved struggle fallback)</td><td>App B</td><td><span class="sp-pill empty">Capture</span></td></tr>
         <tr><td>Table — Tech stack (revised)</td><td>Author</td><td><span class="sp-pill partial">Update</span></td></tr>
+        <tr><td>Table — API endpoint map (22+ routes × delegate × cache TTL)</td><td>Author from <code>code2/backend/routers/</code></td><td><span class="sp-pill needed">Add</span></td></tr>
       </tbody></table>
     </div>
 
@@ -3231,13 +3348,15 @@ click Analytics call archNodeClick("Analytics") "Baseline analytics core"
     </div>
 
     <div class="sp-block"><div class="sp-block-title action">Action items</div>
-      <div class="sp-action"><span class="sp-prio crit">crit</span><span class="sp-eff">M</span><div class="sp-action-text">Run a live or saved-session capture of the Model Comparison view; screenshot the four panels (struggle scatter, struggle table, difficulty scatter, difficulty table).</div></div>
+      <div class="sp-action"><span class="sp-prio crit">crit</span><span class="sp-eff">M</span><div class="sp-action-text">Run a live or saved-session capture of the Model Comparison view; screenshot the four panels (struggle scatter, struggle table, difficulty scatter, difficulty table) <strong>plus the Rank Concordance card (Spearman ρ), Top-10 Overlap card, and Agreement split (upgraded/downgraded/unchanged) — all exposed on <code>/api/models/compare</code></strong> (2026-04-24 unblock).</div></div>
       <div class="sp-action"><span class="sp-prio crit">crit</span><span class="sp-eff">M</span><div class="sp-action-text">Run smoke test from <code>Setup and Runbook.md</code> end-to-end; populate App C with pass/fail evidence.</div></div>
       <div class="sp-action"><span class="sp-prio crit">crit</span><span class="sp-eff">L</span><div class="sp-action-text">Write all five subsections; aim for ~14 pages.</div></div>
       <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Decide on Cohen's κ — implement (Cohen 1960) or discuss as limitation.</div></div>
       <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Draft CF evaluation methodology — held-out historical sessions as proxy ground truth; report RMSE, precision@k, coverage. (Dr Batmaz open question.)</div></div>
       <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text">Discuss IRT/BKT improved-model collapse to ~0% agreement (Meeting 4) — frame causes (sparse data per question for IRT, BKT mastery threshold sensitivity).</div></div>
-      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">State manual weight-tuning explicitly as limitation; future-work hook in Ch6.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text"><strong>2026-04-24 addition — §5.3 NFR1 measurement now available.</strong> Post-Phase-11 cache hardening gives measurable cold-vs-warm latency: time <code>/api/live</code> immediately after boot (cold) vs after the lifespan prewarm (warm), keyed by the same <code>(from_, to_, module)</code>. Warm response should be sub-second; report both.</div></div>
+      <div class="sp-action"><span class="sp-prio high">high</span><span class="sp-eff">S</span><div class="sp-action-text"><strong>2026-04-24 addition — §5.5 limitations.</strong> Add one paragraph on the graceful-degradation fallback in improved struggle: shows the model remains well-defined even with sparse BKT/IRT data (weight-sum invariant), and explains why the comparison view can surface level disagreement in low-data sessions.</div></div>
+      <div class="sp-action"><span class="sp-prio med">med</span><span class="sp-eff">S</span><div class="sp-action-text">State manual weight-tuning explicitly as limitation; future-work hook in Ch6. Weights locked to the maths-fix values from commit <code>8c4c13c</code>.</div></div>
     </div>
 
     <div class="sp-block"><div class="sp-block-title fig">Required figures &amp; tables</div>
@@ -3307,14 +3426,17 @@ click Analytics call archNodeClick("Analytics") "Baseline analytics core"
             <li>FR6 smart-device integration</li>
             <li>Event-driven architecture (replace interval-based pipeline)</li>
             <li>BKT mastery visualisation in assistant app (still deferred; sliders exist in Settings)</li>
-            <li>Surface measurement-confidence in question-detail view</li>
-            <li>Fully wire temporal smoothing (currently flag exists, behaviour partial)</li>
+            <li>Surface measurement-confidence in question-detail view <strong>(code exists at <code>models/measurement.py</code>, not wired to UI — 2026-04-24)</strong></li>
+            <li>Enable BKT MLE parameter fitting live <strong>(<code>fit_bkt_parameters()</code> exists but never called; defaults used — 2026-04-24)</strong></li>
+            <li>Temporal smoothing decision: wire <code>apply_temporal_smoothing()</code> into the compute pipeline or retire the stub <strong>(currently <code>SMOOTHING_ENABLED=True</code> but never invoked — 2026-04-24)</strong></li>
             <li>Automated evaluation framework + classroom user study (IRB)</li>
             <li>ML-based weight optimisation (Optuna / logistic regression / gradient boosting) once labelled ground truth exists</li>
             <li>Predictive alerts / forward-looking risk prediction</li>
             <li>Export &amp; reporting (CSV / PDF)</li>
             <li>BKT parameter sensitivity / grid search (sliders exist; needs labelled data)</li>
             <li>RAG empirical evaluation (deferred from Phase 9)</li>
+            <li>Animate state transitions across sessions — extend per-view animation to "student moves Struggling → Needs Help" with inline trail <strong>(2026-04-24 post-Phase-11 extension)</strong></li>
+            <li>WebSocket push notifications (replace 3–5s polling for multi-user production path)</li>
             <li>Discussion-chapter material from Dr Batmaz's MSc ethics class Q&amp;A (Mon 27 Apr)</li>
           </ul>
         </li>

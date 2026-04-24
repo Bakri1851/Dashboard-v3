@@ -230,3 +230,53 @@ Added during the final sprint as an **additive** second frontend — `code/` rem
 
 **Scope guard.** This is infrastructure, not a new algorithmic contribution — no new literature citations expected. Evaluation section (Ch5) doesn't change: both frontends read the same analytics, so any results from `code/` apply unchanged.
 5. **Formula divergence** — Struggle (5 vs 7 components) and difficulty (4 vs 5 components) formulas differ between thesis and code.
+
+---
+
+## 2026-04-24 refresh — post-Phase-11 polish audit
+
+Code has continued past Phase 11 (defence-ready) with a polish burst that is **not yet reflected in the thesis**. Recent commits surfaced by this refresh: `54d45b7` filter fixing, `17173a8` hover tooltips, `8c4c13c` maths fix, `092f20f` bug fixers, `72ce45c` assistant themes, `5ea4d21` animated UI, `462de20` code2 cleanup. With 26 working days to 2026-05-20 submission, these need a thesis home in the Ch4 rewrite.
+
+### Post-Phase-11 surface area (new in V2, absent in thesis)
+
+| Feature | Code location | Thesis home | Status |
+|---|---|---|---|
+| Animated UI layer | `code2/frontend/src/animation/` (motion.ts, AnimatedCard, ViewTransition) | Ch4 §4.x Lab Instructor System — presentation layer | ❌ Not yet written |
+| SessionProgression view | `code2/frontend/src/views/SessionProgression.tsx` | Ch4 §4.x Lab Instructor System — new 9th view | ❌ Not yet written, not in CHECKLIST |
+| Hover-tooltip layer | Tooltip affordances across charts + stat cards | Ch4 §4.x Interaction design | ❌ Not yet written |
+| Per-window analytics cache | `code2/backend/cache.py` keyed by `(from_, to_, module)`; TTL 10 s raw / 300 s analytics | Ch4 §4.x Data pipeline + Ch5 NFR1 performance evidence | ❌ Not yet written |
+| Maths fix (weight tuning) | Commit `8c4c13c`; current `config.py` values are authoritative | Ch3 §3.3.1 / §3.3.2 — treat current values as final | ❌ Thesis weights out of date |
+| 7 themes × 5 accents | `code2/frontend/src/theme/tokens.ts` (paper / newsprint / solar / scifi / blueprint / matrix / cyberpunk × indigo/teal/terracotta/forest/crimson) | Ch4 §4.x Interaction design — accessibility / presentation choice | ❌ Not yet written |
+| Assistant-app theme parity | Commit `72ce45c` — lab assistant view now has themed appearance matching instructor app | Ch4 §4.x Lab Assistant System — presentation | ❌ Not yet written |
+
+### Code-but-not-thesis divergences (stable, known, still need decisions)
+
+| # | Divergence | Current state | Decision needed |
+|---|---|---|---|
+| 16 | `apply_temporal_smoothing()` exists in `analytics.py` with `SMOOTHING_ENABLED=True` but is never invoked in the compute pipeline | Dead code under a "true" flag | Ch3 should either (a) describe it as active once wired or (b) drop smoothing from Ch3 and note the stub in Ch6 future work |
+| 17 | `models/measurement.py` `compute_incorrectness_with_confidence()` fully implemented but no UI surface displays `incorrectness_confidence` | Computed, discarded | Ch3 §3.4.1 + Ch6 future work entry ("wire confidence badge") |
+| 18 | `models/bkt.py` has full MLE parameter-fitting logic (`fit_bkt_parameters`, `BKT_FIT_MIN_OBSERVATIONS=50`, `BKT_FIT_MAX_ITER=200`) but it is never invoked live — defaults from `config.py` are used | Fit code present, not called | Ch3 §3.4.3 should note the two modes; Ch6 future work entry ("enable BKT MLE in live runs") |
+| 19 | `/api/models/compare` now surfaces `agreement` breakdown (upgraded / downgraded / unchanged), `spearman_rho`, `top10_overlap` — enough raw material for Ch5 | Endpoint live; ComparisonView consumes it | Reconcile Evidence Bank (reconciled below), Ch5 §5.4 unblocked |
+| 20 | `MEMORY.md` auto-memory claims "flat layout with 10 Python files" | Stale (now package layout with `models/`, `ui/`, `rag.py`) | Out of scope — refresh in a later memory-management session |
+
+### Status roll-up after this refresh
+
+| Chapter | Previous status | Current status | Change |
+|---|---|---|---|
+| Ch1 Introduction | Partial | Partial | No change |
+| Ch2 Background | Partial | Partial | No change; lit-review backlog still queued |
+| Ch3 Design | Partial | Partial | **Weights must update to maths-fix values**; Figs 8–10 still marked Replace |
+| Ch4 Implementation | Outdated | **Outdated + widened** | Post-Phase-11 features add 7 new subsections worth of content |
+| Ch5 Evaluation | Empty | **Empty but unblocked** | Model Comparison / Spearman ρ / top-10 overlap all now sourced from `/api/models/compare` |
+| Ch6 Conclusion | Empty | Empty | 3 new future-work entries (#16, #17, #18 above) |
+| Appendix B screenshots | None captured | None captured | All views now stable; ready to photograph — screenshot campaign is a single sit-down task |
+| Appendix E formulae | Empty | Empty | New rows needed for 7-signal struggle + 5-signal difficulty tables (maths-fix values) |
+| Appendix F derivations | Empty | Empty | No change |
+
+### Top 5 thesis-writing tasks in priority order (for next session)
+
+1. **Ch3 weight and formula update** — struggle 7 signals with current config weights, difficulty 5 signals with current weights, Bayesian shrinkage description, CF reframed as implemented, Figs 8–10 replaced. Unblocks Ch4 rewrite.
+2. **Ch4 full rewrite** — 26 Phase-6 placeholder subsections + 7 post-Phase-11 additions. Largest single writing task.
+3. **Ch5 write from scratch** — Evaluation Design / Functional / NFR / Results / Discussion. `/api/models/compare` gives the results material; smoke-test walkthroughs give functional evidence.
+4. **Appendix B screenshot campaign** — 11+ views in one sit-down session with a live dashboard.
+5. **Ch6 conclusion** — Summary + Contributions + Future Work (includes #16, #17, #18 from divergences table).

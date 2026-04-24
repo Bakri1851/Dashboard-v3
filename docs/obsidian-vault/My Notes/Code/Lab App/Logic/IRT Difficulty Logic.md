@@ -4,7 +4,7 @@ IRT (Item Response Theory) provides an alternative difficulty estimate that trea
 
 Related: [[Question Difficulty Logic]], [[Analytics Engine]], [[Next Steps]], [[Glossary]]
 
-Academic foundations: [[frederikbaucks_2024_gaining|Baucks et al.]] (IRT reveals hidden difficulty patterns), [[pankiewicz_measuring|Pankiewicz]] (multi-attempt difficulty measurement), [[baeres_2020_an|Baeres et al.]] (IRT-based course difficulty analysis). See [[Ch2 – Background and Requirements]] §2.1.5.
+Academic foundations: Rasch 1PL originates with [[rasch_1960_probabilistic|Rasch 1960]]; the classical-test-theory baseline is in [[lord_1968_statistical|Lord & Novick 1968]] and [[wright_1979_best|Wright & Stone 1979]]; MLE is [[fisher_1922_on|Fisher 1922]]; the L-BFGS-B solver is [[byrd_1995_a|Byrd et al. 1995]]. Empirical uses of IRT in education: [[frederikbaucks_2024_gaining|Baucks et al.]] (IRT reveals hidden difficulty patterns), [[pankiewicz_measuring|Pankiewicz]] (multi-attempt difficulty measurement), [[baeres_2020_an|Baeres et al.]] (IRT-based course difficulty analysis). See [[Ch2 – Background and Requirements]] §2.1.5.
 
 ## Relationship to baseline
 

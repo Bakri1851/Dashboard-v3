@@ -184,3 +184,52 @@ New skeleton subsections added to `implementation.tex` and `design-and-architect
 - [ ] **Ch4 — RAG feedback caching** — the current pipeline regenerates OpenAI feedback on every click. Dr. Batmaz suggested caching by cluster signature (question ID + cluster centroid hash) so repeated identical clusters don't re-call the API. Implement and document the caching design decision in Ch4. #meeting4
 - [ ] **Ch5 — Retrospective evaluation results** — once the evaluation pipeline is implemented, capture results (accuracy vs time cutoff for parametric / CF / hypothesis-based ranking) and write up as §5.4. See [[Evaluation Strategy]]. #meeting4
 - [ ] **Discussion chapter / ethics appendix — guest lecture notes** — Dr. Batmaz suggested recording the MSc ethics class session (Mon 27 Apr) and using the student Q&A as material for the Discussion chapter. Transcribe key questions raised and develop answers collaboratively with Dr. Batmaz. #meeting4
+
+---
+
+## 2026-04-24 additions — post-Phase-11 polish
+
+Triggered by commits `54d45b7` (filter fixing), `17173a8` (hover tooltips), `8c4c13c` (maths fix), `092f20f` (bug fixers), `72ce45c` (assistant themes), `5ea4d21` (animated UI), `462de20` (code2 cleanup). Adds content to Ch3, Ch4, and Ch6. See [[Report Sync#2026-04-24 refresh — post-Phase-11 polish audit]] for divergence table.
+
+### Authoritative weight values (lock these into Ch3 + Appendix E)
+
+Current `config.py` values after maths-fix commit `8c4c13c`. These are the values the thesis should cite; earlier tuning drafts are superseded.
+
+- **Struggle (7 signals, sum = 1.00):** `STRUGGLE_WEIGHT_N=0.10`, `_T=0.10`, `_I=0.20`, `_R=0.10`, `_A=0.38`, `_D=0.05`, `_REP=0.07`.
+- **Difficulty (5 signals, sum = 1.00):** `DIFFICULTY_WEIGHT_C=0.28`, `_T=0.12`, `_A=0.20`, `_F=0.20`, `_P=0.20`.
+- **Improved struggle (3 buckets, sum = 1.00):** `IMPROVED_STRUGGLE_WEIGHT_BEHAVIORAL=0.45`, `_MASTERY_GAP=0.30`, `_DIFFICULTY_ADJ=0.25`.
+- **Shrinkage constant:** `SHRINKAGE_K=5` (pull toward class mean with weight `n/(n+K)`).
+
+### Ch3 additions
+
+- [ ] **§3.4.4 Improved Struggle — graceful-degradation weight-redistribution rules** — if `mastery_summary` coverage < 50%, the `mastery_gap` weight collapses and redistributes to behavioral (effective 0.75/0.00/0.25). If IRT has < 2 distinct difficulty values, `difficulty_adjusted` collapses and redistributes to behavioral (effective 0.70/0.30/0.00). If both collapse, effective 1.00/0.00/0.00. Invariant assertion at `improved_struggle.py:168-171` guarantees weights always sum to 1.0. Cite Little & Rubin (2002) for the mean-imputation pattern.
+- [ ] **§3.x — Presentation layer: animation and theming** — 7 themes × 5 accents as a deliberate accessibility / preference choice, not cosmetic. Animated transitions (`motion.ts`, `AnimatedCard`, `ViewTransition`) keep the dashboard legible when data refreshes; no "jump cuts" between views. Cite a minimal usability source (existing Gelan 2018 or Verbert 2020 is enough) rather than adding new lit.
+
+### Ch4 additions (post-Phase-11 surface)
+
+- [ ] **§4.x Animated UI layer** — `code2/frontend/src/animation/motion.ts`, `AnimatedCard.tsx`, `ViewTransition.tsx`. Describe as a presentation-only concern (no analytics impact); quote the 2–3 places it's used (page transitions, card mount).
+- [ ] **§4.x SessionProgression view** — new 9th instructor view (`code2/frontend/src/views/SessionProgression.tsx`). Describe its purpose, sidebar entry, and relationship to the other views. **Not in CHECKLIST** — needs a short paragraph explaining what problem it solves.
+- [ ] **§4.x Tooltip layer** — Commit `17173a8` added on-hover explanations to charts and stat cards. Justify: reduces the cognitive load of dense dashboards (fits NFR2 interpretability). Screenshot one chart with tooltip visible for Appendix B.
+- [ ] **§4.x Cache and filter hardening** — commits `54d45b7` and `462de20`. Per-window cache key is `(from_, to_, module)`; TTL 10 s for raw data, 300 s for computed analytics. Describe as NFR1 performance evidence: warm clicks drop from multi-second to sub-second.
+- [ ] **§4.x Theme system** — 7 themes × 5 accents in `code2/frontend/src/theme/tokens.ts`. Document OKLch token layer; note that themes are consumer-chosen per session, do not reset on refresh.
+- [ ] **§4.x Assistant-app theme parity** — commit `72ce45c`. Lab assistant app now uses same theme tokens as instructor app. Cross-reference Ch4 Lab Assistant System section.
+- [ ] **§4.x "Maths fix" note** — commit `8c4c13c` tuned struggle/difficulty normalization. Include one-paragraph history: "weights were trial-and-error through April 2026; values cited in this section are the final set." Paired with Ch5 limitations discussion.
+
+### Ch6 Future Work additions
+
+- [ ] **§6.3 Wire measurement confidence to UI** — `compute_incorrectness_with_confidence()` in `models/measurement.py` already produces `incorrectness_confidence` and `incorrectness_source`. Nothing displays them. Propose a confidence-badge component (grey/amber/green) next to struggle scores.
+- [ ] **§6.3 Enable BKT MLE fitting in live runs** — `fit_bkt_parameters()` exists but is never called. Live pipeline uses `BKT_P_INIT=0.3`, `_LEARN=0.1`, `_GUESS=0.2`, `_SLIP=0.1` defaults. Once `BKT_FIT_MIN_OBSERVATIONS=50` is routinely met, enabling the fit would give per-session parameter estimates.
+- [ ] **§6.3 Temporal smoothing decision** — `apply_temporal_smoothing()` exists with `SMOOTHING_ENABLED=True` but is never invoked. Either wire it into the compute pipeline (EMA across refresh cycles, α=0.3) or retire the stub. Either way, make the state explicit.
+- [ ] **§6.3 Animate state transitions across sessions** — current animation is per-view. Could extend to "student moves from Struggling to Needs Help" with an inline trail, making changes visible without the instructor staring.
+
+### Method-note housekeeping
+
+- [x] **`Student Struggle Logic.md` — authoritative weights** — updated to reflect maths-fix commit `8c4c13c`; temporal-smoothing cross-ref added as not-invoked (see #16 in Report Sync).
+- [x] **`Question Difficulty Logic.md` — add mistake-clustering section** — TF-IDF + K-means + silhouette auto-k + OpenAI labelling (cite Salton & McGill 1983, MacQueen 1967, Arthur & Vassilvitskii 2007, Rousseeuw 1987 once bibkeys exist).
+- [x] **`Improved Struggle Logic.md` — document graceful-degradation** — weight-redistribution invariant assertion at `improved_struggle.py:168-171`; add the three fallback rows (0.75/0.00/0.25; 0.70/0.30/0.00; 1.00/0.00/0.00).
+
+### Source Tree documentation to create
+
+- [ ] **`Source Tree/code2-frontend-animation.md`** — describe `src/animation/motion.ts`, `AnimatedCard.tsx`, `ViewTransition.tsx`; list the 2–3 places they're used.
+- [ ] **`Source Tree/code2-frontend-views-session-progression.md`** — document `SessionProgression.tsx` purpose / data-source / sidebar entry.
+- [ ] **`Lab App/Flows/Session Progression.md`** — flow-level description.

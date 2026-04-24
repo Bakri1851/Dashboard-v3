@@ -59,9 +59,9 @@ Comparative data showing model behavior. Target: Ch5 Results.
 |----------|-------------|-----------------|--------|
 | Baseline vs IRT difficulty | Side-by-side difficulty scores for same questions | Run dashboard with both models enabled, compare outputs | Needed |
 | Baseline vs improved struggle | Side-by-side struggle scores for same students | Run dashboard with both models enabled, compare outputs | Needed |
-| Spearman ρ for baseline vs improved struggle | Rank-correlation coefficient between the two student orderings | Read `spearman_rho` from `/api/models/compare` — surfaced in ComparisonView "Rank Concordance" card | Needed (capture for Ch5) |
-| Top-10 overlap for flagged cohort | Fraction of the top-10 Needs Help / Struggling cohort that both models agree on | Read `top10_overlap` from `/api/models/compare` | Needed (capture for Ch5) |
-| Level-agreement split (struggle) | Agreement % + upgraded/downgraded/unchanged counts | Read `agreement` block from `/api/models/compare` | Needed (capture for Ch5) |
+| Spearman ρ for baseline vs improved struggle | Rank-correlation coefficient between the two student orderings | Read `spearman_rho` from `/api/models/compare` — surfaced in ComparisonView "Rank Concordance" card | **Ready** (endpoint + UI card live; capture screenshot for Ch5) |
+| Top-10 overlap for flagged cohort | Fraction of the top-10 Needs Help / Struggling cohort that both models agree on | Read `top10_overlap` from `/api/models/compare` | **Ready** (endpoint + UI card live; capture for Ch5) |
+| Level-agreement split (struggle) | Agreement % + upgraded/downgraded/unchanged counts | Read `agreement` block from `/api/models/compare` | **Ready** (endpoint + UI card live; capture for Ch5) |
 | CF elevation examples | Students elevated by CF that baseline missed | Enable CF, capture diagnostic panel with elevated students | Needed |
 | Mistake cluster examples | Cluster labels and representative answers for a question | Run dashboard on session with enough incorrect answers (>3) | Needed |
 | BKT mastery evolution | How mastery changes with successive attempts | Extract from `mastery_df` session state for a student | Needed |
@@ -144,3 +144,32 @@ Evidence that the thesis could claim a second, modernised frontend without scope
 | Lab assistants | Sidebar → "07 Lab Assistants" (session banner + dispatch queue) |
 | Settings | Sidebar → "08 Settings" (theme picker + read-only config) |
 | Swagger UI | `http://localhost:8000/docs` — professional API surface for the defence
+
+---
+
+## 2026-04-24 refresh — reconciled against Evaluation Plan 2026-04-21
+
+The Evaluation Plan (last updated 2026-04-21) captured Phase 5 outcomes that this Evidence Bank (last updated 2026-04-20) did not reflect. Reconciliation applied above: Spearman ρ / top-10 overlap / level-agreement rows moved from **Needed** to **Ready** because the endpoint + UI card are live. Capture remains pending — schedule during the Appendix B screenshot campaign.
+
+### Post-Phase-11 evidence — Status: To capture
+
+New artefacts the thesis should show now that the code has continued past Phase 11 (defence-ready).
+
+| Artefact | Description | Supports | Status |
+|---|---|---|---|
+| SessionProgression view | New 9th instructor view (`code2/frontend/src/views/SessionProgression.tsx`). Animated state progression across the live session. | Ch4 §4.x Lab Instructor System (new subsection) | Needs screenshot |
+| 7 themes × 5 accents grid | Full theme gallery thumbnail sheet (paper / newsprint / solar / scifi / blueprint / matrix / cyberpunk × indigo / teal / terracotta / forest / crimson). | Ch4 Interaction design; Appendix B | Needs screenshot |
+| Tooltip showcase | One chart with hover-tooltip visible (commit `17173a8`); demonstrates NFR2 interpretability affordance. | Ch4 Interaction design; NFR2 evidence | Needs screenshot |
+| Graceful-degradation example | Improved-struggle output when mastery data is sparse: shows weight redistribution from 0.45/0.30/0.25 → 0.75/0.00/0.25 (or 0.70/0.30/0.00) with the invariant assertion passing at `improved_struggle.py:168-171`. | Ch3 §3.4.4; Ch5 §5.5 limitations (sparse-data behaviour) | Needs generation (run with partial data) |
+| Animated UI in motion | Short screen-capture of `AnimatedCard` / `ViewTransition` mounting — for defence demo rather than thesis figure. | Defence demo asset | Needs capture |
+| Per-window cache effect | Timing comparison: cold `/api/live` call vs warm (same window key). Demonstrates NFR1 performance claim. | Ch5 §5.3 NFR1 evidence | Needs measurement |
+
+### Model evidence now marked Ready (capture guidance)
+
+All three live at `/api/models/compare`. ComparisonView in the React frontend (Sidebar → "05 Model Comparison") consumes them directly. Capture plan:
+
+1. Start a live session with ≥10 students active.
+2. Enable both baseline and improved struggle models in Settings.
+3. Navigate to Model Comparison view.
+4. Screenshot the Rank Concordance card (shows `spearman_rho` interpretive band), Top-10 Overlap card, and Agreement split (upgraded / downgraded / unchanged counts).
+5. Export the scatter plot (baseline x vs improved y) with a diagonal reference line.

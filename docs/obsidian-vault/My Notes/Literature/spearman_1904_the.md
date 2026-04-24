@@ -1,0 +1,5 @@
+# Spearman — The Proof and Measurement of Association between Two Things
+
+Origin of Spearman rank-correlation coefficient ρ; cited in Ch5 §5.4 when reporting rank concordance between baseline and improved models (surfaced from `/api/models/compare`).
+
+Cited in: [[Ch5 – Results and Evaluation]] · [[Evaluation Plan]]

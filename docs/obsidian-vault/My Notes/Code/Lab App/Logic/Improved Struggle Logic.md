@@ -4,7 +4,7 @@ The improved struggle model (Phase 4) combines behavioral signals with BKT maste
 
 Related: [[Student Struggle Logic]], [[BKT Mastery Logic]], [[IRT Difficulty Logic]], [[Analytics Engine]], [[Next Steps]]
 
-Academic foundations: [[piech_modeling|Piech et al.]] (progression path modelling), [[khajah_supercharging|Khajah et al.]] (BKT + IRT combination), [[koutcheme_using|Koutcheme et al.]] (LLM answer quality), [[pitts_a|Pitts et al.]] (human oversight for LLM scoring). See [[Ch2 – Background and Requirements]] §2.1.4–§2.1.5.
+Academic foundations: [[piech_modeling|Piech et al.]] (progression path modelling), [[khajah_supercharging|Khajah et al.]] (BKT + IRT combination), [[koutcheme_using|Koutcheme et al.]] (LLM answer quality), [[pitts_a|Pitts et al.]] (human oversight for LLM scoring). Mean-imputation of missing BKT mastery follows [[little_2002_statistical|Little & Rubin 2002]]. See [[Ch2 – Background and Requirements]] §2.1.4–§2.1.5.
 
 ## Relationship to baseline
 
@@ -54,6 +54,17 @@ Computed over the student's last `RECENT_SUBMISSION_COUNT` submissions. Failing 
 ## Graceful degradation
 
 If BKT mastery is unavailable (too few submissions or feature disabled), the mastery gap weight (0.30) is redistributed to the behavioral composite. If IRT difficulty is unavailable, the difficulty-adjusted weight (0.25) is redistributed similarly. At the extreme, the model collapses to a behavioral-only model with weight 1.0.
+
+The three fallback cases produce these effective weight vectors (behavioral / mastery-gap / difficulty-adjusted):
+
+| Case | Trigger | Effective weights |
+|---|---|---|
+| Base | All signals available | 0.45 / 0.30 / 0.25 |
+| Mastery missing | BKT coverage < 50% or feature disabled | 0.75 / 0.00 / 0.25 |
+| IRT missing | < 2 distinct IRT difficulty values | 0.70 / 0.30 / 0.00 |
+| Both missing | Neither BKT nor IRT usable | 1.00 / 0.00 / 0.00 |
+
+The invariant assertion at `improved_struggle.py:168-171` guarantees that whichever case applies, the effective weights sum to exactly 1.00 before the weighted sum is formed. This is intentional mean-imputation behaviour grounded in [[little_2002_statistical|Little & Rubin 2002]] — rather than silently producing a partial score, the model re-allocates its uncertainty budget to the dimensions it still trusts.
 
 ## Final assembly
 

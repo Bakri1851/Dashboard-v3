@@ -49,6 +49,16 @@ Phase 4 adds an improved struggle model that incorporates BKT mastery and IRT di
 
 The weighted parametric model was chosen over collaborative filtering as the primary approach for three reasons: (1) it produces scores immediately with no minimum class size, avoiding the cold-start problem where CF requires k+1 active students; (2) it is interpretable — each weight has a clear meaning; (3) it runs in O(n) per update versus O(n^2) for CF's pairwise similarity matrix. See [[Ch3 – Design and Modelling]] for the thesis comparison table.
 
+Academic foundations: weighted-sum composite indicators follow the OECD/JRC methodology ([[oecd_2008_handbook|OECD/JRC 2008]], [[nardo_2005_tools|Nardo et al. 2005]]); the `n/(n+K)` shrinkage toward the class mean is James-Stein empirical Bayes ([[efron_1977_stein|Efron & Morris 1977]], [[morris_1983_parametric|Morris 1983]]); `A_raw`'s exponential time decay follows Ebbinghaus's forgetting curve ([[ebbinghaus_1885_uber|Ebbinghaus 1885]], [[wixted_2007_the|Wixted & Carpenter 2007]]); `d_hat` is a simple-linear-regression slope ([[draper_1998_applied|Draper & Smith 1998]]); and the `rep_hat` / `r_hat` signals operationalise the gaming / wheel-spinning literature ([[baker_2008_why|Baker et al. 2008]], [[beck_2013_wheelspinning|Beck & Gong 2013]]). The overall monitor-and-intervene framing draws on formative assessment theory ([[black_1998_assessment|Black & Wiliam 1998]]) and early-warning systems in higher education ([[macfadyen_2010_mining|Macfadyen & Dawson 2010]]).
+
+## Authoritative weight values (post-maths-fix, commit 8c4c13c)
+
+The weights above reflect the final values from commit `8c4c13c` ("attempt to fix maths"). Earlier drafts cited different weights; Ch3 and Appendix E should cite these numbers exclusively. Assertion in `config.py` verifies they sum to 1.00 at import time.
+
+## Temporal smoothing — implementation-but-not-invoked
+
+`apply_temporal_smoothing()` exists in `analytics.py` with `SMOOTHING_ENABLED=True` (α = 0.3 across refresh cycles) but is **never invoked in the compute pipeline**. This is distinct from the per-submission exponential decay already active inside `A_raw`. The stub is retained for a future wire-up; Ch3 should either describe smoothing once it is actually called or drop it from the baseline description. Tracked in [[Report Sync#2026-04-24 refresh]] divergence #16.
+
 The thesis design chapter defines a 5-component struggle formula (n, t, e, f, A_raw). The V2 implementation extends this to 7 components, adding retry rate (r_hat), trajectory slope (d_hat), and exact-answer repetition (rep_hat). SMOOTHING_ENABLED is set to True in config.py but apply_temporal_smoothing() is never called in compute_student_struggle_scores(). The flag is True; the function is not wired into the pipeline. This is a confirmed code/report mismatch tracked in [[Report Sync]].
 
 Academic foundations: [[dong_using|Dong et al.]] (session-level struggle detection), [[estey_2017_automatically|Estey et al.]] (trajectory metric reducing false-positive rate), [[piech_modeling|Piech et al.]] (progression path modelling), [[or_2024_exploring|Or]] (consecutive failure threshold), and LLM-based answer quality assessment ([[koutcheme_using|Koutcheme et al.]], [[pitts_a|Pitts et al.]]). See [[Ch2 – Background and Requirements]] for the full literature review.

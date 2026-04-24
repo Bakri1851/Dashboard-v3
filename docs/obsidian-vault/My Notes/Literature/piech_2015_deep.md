@@ -1,0 +1,5 @@
+# Piech et al. — Deep Knowledge Tracing
+
+Recurrent-neural-network model of knowledge tracing that outperforms BKT on standard benchmarks; referenced in Ch3 §3.4.3 as the modern baseline against which BKT was chosen for interpretability and low-data tractability.
+
+Cited in: [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[BKT Mastery Logic]]

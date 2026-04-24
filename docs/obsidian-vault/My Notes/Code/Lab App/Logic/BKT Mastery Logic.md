@@ -4,7 +4,7 @@ Bayesian Knowledge Tracing (BKT) estimates per-student, per-question mastery as 
 
 Related: [[Student Struggle Logic]], [[IRT Difficulty Logic]], [[Analytics Engine]], [[Next Steps]], [[Glossary]]
 
-Academic foundations: [[khajah_supercharging|Khajah et al.]] (strengthening BKT with IRT-like structure), [[kim_knowledge|Kim et al.]] (knowledge tracing with auto-extracted skills). See [[Ch2 – Background and Requirements]] §2.1.4.
+Academic foundations: BKT originates with [[corbett_1995_knowledge|Corbett & Anderson 1995]]; per-student parameterisation is in [[yudelson_2013_individualized|Yudelson, Koedinger & Gordon 2013]]; deep-learning alternatives (DKT) surveyed in [[piech_2015_deep|Piech et al. 2015]] — BKT is preferred here for interpretability and low-data tractability. Prior uses in the struggle-detection literature: [[khajah_supercharging|Khajah et al.]] (BKT + IRT-like structure), [[kim_knowledge|Kim et al.]] (knowledge tracing with auto-extracted skills). See [[Ch2 – Background and Requirements]] §2.1.4.
 
 ## Relationship to baseline
 
