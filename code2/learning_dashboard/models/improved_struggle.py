@@ -119,17 +119,8 @@ def compute_improved_struggle_scores(
                     seen.add(cleaned)
         rep_hat = total_repeat / n if n > 0 else 0.0
 
-        # Dominant module for within-module normalisation — same logic as
-        # analytics.compute_student_struggle_scores.
-        if "module" in group.columns:
-            mode = group["module"].mode()
-            dominant_module = str(mode.iloc[0]) if not mode.empty else ""
-        else:
-            dominant_module = ""
-
         rows.append({
             "user": user,
-            "module": dominant_module,
             "n": n,
             "A_raw": a_raw,
             "d_raw": d_raw,
@@ -144,13 +135,15 @@ def compute_improved_struggle_scores(
 
     # Min-max normalize every sub-signal onto the same cohort-relative
     # [0, 1] scale so the equal-weight average is actually equal-weighted.
-    # Grouped by dominant module — collapses to ungrouped when the window
-    # contains a single module. Raw rates are kept on result for reference.
-    modules = result["module"] if "module" in result.columns else None
-    result["d_hat"] = analytics.min_max_normalize_grouped(result["d_raw"], modules)
-    result["A_norm"] = analytics.min_max_normalize_grouped(result["A_raw"], modules)
-    result["r_norm"] = analytics.min_max_normalize_grouped(result["r_hat"], modules)
-    result["rep_norm"] = analytics.min_max_normalize_grouped(result["rep_hat"], modules)
+    # Student-level within-module grouping was tried and reverted: with a
+    # dominant-module label, minority-module students collapse to single-
+    # member groups where every signal snaps to 0.5, producing a struggle
+    # score of exactly 0.5 → "Needs Help" for every such student. See
+    # analytics.compute_student_struggle_scores for the full rationale.
+    result["d_hat"] = analytics.min_max_normalize(result["d_raw"])
+    result["A_norm"] = analytics.min_max_normalize(result["A_raw"])
+    result["r_norm"] = analytics.min_max_normalize(result["r_hat"])
+    result["rep_norm"] = analytics.min_max_normalize(result["rep_hat"])
 
     # Behavioral composite: equal weight across the 4 sub-signals
     result["behavioral_composite"] = (

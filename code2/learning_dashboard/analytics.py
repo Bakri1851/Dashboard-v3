@@ -279,22 +279,34 @@ def compute_feedback_confidence(
     return confidence
 
 
+# Minimum weight applied to every row regardless of confidence. Without this
+# floor, rows with empty / short feedback (confidence = 0) are dropped
+# entirely from the aggregation. That systematically under-counts correct
+# answers (which in this dataset often have shorter / empty feedback)
+# and biases the resulting i_hat / A_raw upward — producing a false
+# "everyone is struggling" signal in the aggregate. The floor keeps every
+# row in the mean while still letting high-confidence rows count more.
+_CONFIDENCE_FLOOR: float = 0.2
+
+
 def _confidence_weighted_mean(
     values: pd.Series,
     weights: pd.Series,
     fallback: Optional[pd.Series] = None,
 ) -> float:
-    """Weighted mean with fallback to unweighted mean when all weights are 0.
+    """Weighted mean with a confidence floor + fallback when all weights vanish.
 
-    Handles the all-empty-feedback case where every row has confidence=0 —
-    the confidence-weighted mean is undefined, so fall back to the simple
-    mean of *fallback* (defaults to *values*).
+    Each row's effective weight is ``max(confidence, _CONFIDENCE_FLOOR)`` so
+    low-confidence rows still contribute to the mean, preventing the bias
+    introduced by hard-zeroing empty-feedback rows (which often correlate
+    with correct answers in this dataset).
     """
-    w_sum = float(weights.sum())
+    eff = weights.clip(lower=_CONFIDENCE_FLOOR)
+    w_sum = float(eff.sum())
     if w_sum <= 0.0:
         pool = fallback if fallback is not None else values
         return float(pool.mean()) if len(pool) else 0.0
-    return float((values * weights).sum() / w_sum)
+    return float((values * eff).sum() / w_sum)
 
 
 # Min-Max Normalization
@@ -381,7 +393,10 @@ def compute_recent_incorrectness(student_submissions: pd.DataFrame) -> float:
     ]
 
     if "incorrectness_confidence" in recent.columns:
-        conf_weights = [float(c) for c in recent["incorrectness_confidence"].fillna(0.0).tolist()]
+        conf_weights = [
+            max(_CONFIDENCE_FLOOR, float(c))
+            for c in recent["incorrectness_confidence"].fillna(0.0).tolist()
+        ]
     else:
         conf_weights = [1.0] * n_actual
 
@@ -389,7 +404,9 @@ def compute_recent_incorrectness(student_submissions: pd.DataFrame) -> float:
     weight_sum = sum(raw_weights)
 
     # All-empty-feedback (or all-zero-confidence) cohort: fall back to the
-    # time-decayed unweighted mean rather than returning 0 / NaN.
+    # time-decayed unweighted mean rather than returning 0 / NaN. With the
+    # confidence floor above, this branch is only reachable when time_weights
+    # themselves collapse (single-timestamp data), but kept defensively.
     if weight_sum <= 0.0:
         if all(w == time_weights[0] for w in time_weights):
             return sum(scores) / n_actual
@@ -521,10 +538,16 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
                     seen.add(cleaned)
         rep_hat = total_repeat_submissions / n if n > 0 else 0.0
 
-        # Dominant module — the module this student submits to most often.
-        # Used for within-module normalisation so students from different
-        # modules (with different difficulty/workload distributions) don't
-        # contaminate each other's rankings on the global leaderboard.
+        # Dominant module — kept as diagnostic metadata. NOT used for
+        # normalisation: grouping students by dominant-module collapses
+        # minority-module students into degenerate single-member groups
+        # where every min-max signal snaps to 0.5, producing a struggle
+        # score of exactly 0.5 → "Needs Help" for everyone in a small
+        # module. If you need per-module rankings, use the sidebar module
+        # filter instead — that scopes the whole computation to one module
+        # cleanly. Within-module normalisation is only meaningful at the
+        # question level (compute_question_difficulty_scores below), where
+        # each item has a canonical module.
         if "module" in group.columns:
             mode = group["module"].mode()
             dominant_module = str(mode.iloc[0]) if not mode.empty else ""
@@ -550,16 +573,13 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
     # Min-max normalize every composite input so the configured weights match
     # the effective weights. Raw [0, 1] rates (i_hat, r_hat, A_raw, rep_hat)
     # are retained for display; the _norm columns feed the weighted sum.
-    # Grouped by dominant module — collapses to ungrouped when the window
-    # contains a single module (typical after sidebar filtering).
-    modules = result["module"] if "module" in result.columns else None
-    result["n_hat"] = min_max_normalize_grouped(result["n_raw"], modules)
-    result["t_hat"] = min_max_normalize_grouped(result["t_raw"], modules)
-    result["d_hat"] = min_max_normalize_grouped(result["d_raw"], modules)  # positive = getting worse
-    result["i_norm"] = min_max_normalize_grouped(result["i_hat"], modules)
-    result["r_norm"] = min_max_normalize_grouped(result["r_hat"], modules)
-    result["A_norm"] = min_max_normalize_grouped(result["A_raw"], modules)
-    result["rep_norm"] = min_max_normalize_grouped(result["rep_hat"], modules)
+    result["n_hat"] = min_max_normalize(result["n_raw"])
+    result["t_hat"] = min_max_normalize(result["t_raw"])
+    result["d_hat"] = min_max_normalize(result["d_raw"])  # positive = getting worse
+    result["i_norm"] = min_max_normalize(result["i_hat"])
+    result["r_norm"] = min_max_normalize(result["r_hat"])
+    result["A_norm"] = min_max_normalize(result["A_raw"])
+    result["rep_norm"] = min_max_normalize(result["rep_hat"])
 
     # Compute S_raw
     result["struggle_score"] = (

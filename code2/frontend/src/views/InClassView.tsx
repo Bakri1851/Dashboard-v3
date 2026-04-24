@@ -20,6 +20,8 @@ import { Pill } from '../components/primitives/Pill'
 import { ScoreBar } from '../components/primitives/ScoreBar'
 import { Stat } from '../components/primitives/Stat'
 import { SectionLabel } from '../components/primitives/SectionLabel'
+import { LevelChips } from '../components/primitives/LevelChips'
+import { Tooltip } from '../components/primitives/Tooltip'
 import { Histogram } from '../components/charts/Histogram'
 import { TimelineChart } from '../components/charts/TimelineChart'
 import {
@@ -37,6 +39,22 @@ interface Props {
 
 const STRUGGLE_COLS: LeaderboardColumn[] = ['rank', 'id', 'level', 'score', 'submissions', 'recent', 'trend']
 const DIFFICULTY_COLS: LeaderboardColumn[] = ['rank', 'id', 'level', 'score', 'students', 'avgAttempts', 'module']
+
+const STRUGGLE_CHIP_HELP: Record<string, string> = {
+  'On Track': 'Struggle score < 0.20. Performing well — low incorrectness and positive trends.',
+  'Minor Issues': 'Struggle score 0.20–0.35. Some difficulty present. Monitor over upcoming submissions.',
+  Struggling: 'Struggle score 0.35–0.50. Consistent difficulty signals. Consider checking in soon.',
+  'Needs Help':
+    'Struggle score ≥ 0.50. Highest combined incorrectness, retry rate, and recent difficulty. Immediate attention recommended.',
+}
+
+const DIFFICULTY_CHIP_HELP: Record<string, string> = {
+  Easy: 'Difficulty score < 0.25. Most students answer correctly quickly and on the first attempt.',
+  Medium: 'Difficulty score 0.25–0.50. Typical range — some retries, most get there.',
+  Hard: 'Difficulty score 0.50–0.75. High retry rates or first-attempt failures. Worth reviewing.',
+  'Very Hard':
+    'Difficulty score ≥ 0.75. Most students struggle — high incorrectness, many attempts, poor first-fail rate.',
+}
 
 export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionActive }: Props) {
   const q = useFilterQuery()
@@ -263,7 +281,9 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
               opacity: 0.75,
             }}
           >
-            Priority Now
+            <Tooltip content="Students with composite struggle score ≥ 0.50 (Needs Help band). Click 'Dispatch Assistants' to push them out to lab assistants.">
+              <span style={{ cursor: 'help', borderBottom: `1px dotted currentColor` }}>Priority Now</span>
+            </Tooltip>
           </div>
           <div>
             <AnimatedNumber
@@ -304,10 +324,32 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
             </div>
           </div>
         </div>
-        <Stat label="Total Submissions" value={records.toLocaleString()} note={submissionsNote} />
-        <Stat label="Unique Students" value={String(students)} note="loaded records" accent={T.accent} />
-        <Stat label="Questions Answered" value={String(questions)} note={`across ${live?.unique_modules ?? 0} modules`} />
-        <Stat label="Mean Incorrectness" value={meanInc.toFixed(2)} note="class average" accent={T.warn} />
+        <Stat
+          label="Total Submissions"
+          value={records.toLocaleString()}
+          note={submissionsNote}
+          help="Count of answer records in the current time window, after any active filters."
+        />
+        <Stat
+          label="Unique Students"
+          value={String(students)}
+          note="loaded records"
+          accent={T.accent}
+          help="Distinct student IDs who submitted at least one answer in this window."
+        />
+        <Stat
+          label="Questions Answered"
+          value={String(questions)}
+          note={`across ${live?.unique_modules ?? 0} modules`}
+          help="Distinct question IDs attempted by any student in this window."
+        />
+        <Stat
+          label="Mean Incorrectness"
+          value={meanInc.toFixed(2)}
+          note="class average"
+          accent={T.warn}
+          help="Class-average AI-scored incorrectness (0 = fully correct, 1 = fully incorrect). An answer counts as incorrect when its score ≥ 0.50."
+        />
       </AnimatedCard>
       )}
 
@@ -349,6 +391,51 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
           )
         })}
       </AnimatedCard>
+
+      {/* Threshold-count chip rows — one per leaderboard */}
+      {live && (struggleBuckets.length > 0 || difficultyBuckets.length > 0) && (
+        <AnimatedCard
+          variants={fadeUp}
+          style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 24 }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <span
+              style={{
+                fontFamily: T.fMono,
+                fontSize: 10,
+                color: T.ink3,
+                letterSpacing: 1.2,
+                textTransform: 'uppercase',
+              }}
+            >
+              <Tooltip content="Count of students in each struggle band — use to see at a glance how the class is distributed.">
+                <span style={{ cursor: 'help', borderBottom: `1px dotted currentColor` }}>
+                  Students per struggle level
+                </span>
+              </Tooltip>
+            </span>
+            <LevelChips buckets={struggleBuckets} tooltips={STRUGGLE_CHIP_HELP} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <span
+              style={{
+                fontFamily: T.fMono,
+                fontSize: 10,
+                color: T.ink3,
+                letterSpacing: 1.2,
+                textTransform: 'uppercase',
+              }}
+            >
+              <Tooltip content="Count of questions in each difficulty band.">
+                <span style={{ cursor: 'help', borderBottom: `1px dotted currentColor` }}>
+                  Questions per difficulty level
+                </span>
+              </Tooltip>
+            </span>
+            <LevelChips buckets={difficultyBuckets} tooltips={DIFFICULTY_CHIP_HELP} />
+          </div>
+        </AnimatedCard>
+      )}
 
       {/* Two leaderboards */}
       <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 24 }}>
@@ -454,7 +541,11 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
       {/* Distributions + timeline */}
       <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr)', gap: 24 }}>
         <div style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
-          <SectionLabel n={1}>Struggle Distribution</SectionLabel>
+          <Tooltip content="Count of students falling into each struggle band, using the composite struggle score (0–1).">
+            <span style={{ cursor: 'help' }}>
+              <SectionLabel n={1}>Struggle Distribution</SectionLabel>
+            </span>
+          </Tooltip>
           <Histogram
             data={struggleBuckets.map((b) => b.count)}
             labels={['On Track', 'Minor', 'Strug.', 'Needs']}
@@ -466,7 +557,11 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
           </div>
         </div>
         <div style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
-          <SectionLabel n={2}>Difficulty Distribution</SectionLabel>
+          <Tooltip content="Count of questions in each difficulty band, using the composite difficulty score (0–1).">
+            <span style={{ cursor: 'help' }}>
+              <SectionLabel n={2}>Difficulty Distribution</SectionLabel>
+            </span>
+          </Tooltip>
           <Histogram
             data={difficultyBuckets.map((b) => b.count)}
             labels={['Easy', 'Medium', 'Hard', 'V.Hard']}
@@ -478,7 +573,11 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
           </div>
         </div>
         <div style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
-          <SectionLabel n={3}>Submissions, last 24h</SectionLabel>
+          <Tooltip content="Wall-clock hourly submission counts for the past 24 hours. Always shows live activity, independent of the filter preset.">
+            <span style={{ cursor: 'help' }}>
+              <SectionLabel n={3}>Submissions, last 24h</SectionLabel>
+            </span>
+          </Tooltip>
           <TimelineChart data={timeline} semantic="hours_ago" highlightRange={[22, 23]} />
         </div>
       </AnimatedCard>

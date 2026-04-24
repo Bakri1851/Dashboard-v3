@@ -34,6 +34,7 @@ export function PreviousSessionsView() {
   const { data, error, loading, refetch } = useApiData<SavedSession[]>('/sessions')
   const filter = useFilterStore()
   const setView = useViewStore((s) => s.setView)
+  const openSessionProgression = useViewStore((s) => s.openSessionProgression)
 
   const [saveOpen, setSaveOpen] = useState(false)
   const [saveName, setSaveName] = useState('')
@@ -218,6 +219,26 @@ export function PreviousSessionsView() {
                   </td>
                   <td style={{ padding: '14px 22px', borderBottom: `1px solid ${T.line2}`, textAlign: 'right', whiteSpace: 'nowrap' }}>
                     <motion.button
+                      onClick={() => openSessionProgression(s.id)}
+                      whileHover={{ borderColor: T.ink, color: T.ink }}
+                      whileTap={{ scale: 0.95 }}
+                      style={{
+                        padding: '4px 10px',
+                        fontFamily: T.fMono,
+                        fontSize: 10,
+                        background: 'transparent',
+                        color: T.ink2,
+                        border: `1px solid ${T.line}`,
+                        letterSpacing: 1,
+                        textTransform: 'uppercase',
+                        cursor: 'pointer',
+                        marginRight: 6,
+                      }}
+                      title="Replay how this session progressed over time"
+                    >
+                      Progression →
+                    </motion.button>
+                    <motion.button
                       onClick={() => loadSession(s)}
                       whileHover={{ filter: 'brightness(1.1)' }}
                       whileTap={{ scale: 0.95 }}
@@ -233,6 +254,7 @@ export function PreviousSessionsView() {
                         cursor: 'pointer',
                         marginRight: 6,
                       }}
+                      title="Apply this session as the current time filter (final state)"
                     >
                       Load
                     </motion.button>

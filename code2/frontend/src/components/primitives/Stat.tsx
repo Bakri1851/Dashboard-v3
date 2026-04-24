@@ -3,6 +3,7 @@ import { T } from '../../theme/tokens'
 import { useTheme } from '../../theme/ThemeContext'
 import { CornerMarks } from './CornerMarks'
 import { AnimatedNumber } from './AnimatedNumber'
+import { Tooltip } from './Tooltip'
 
 /**
  * Hero stat card — variant `primary` renders the inverted dark card used for
@@ -14,12 +15,15 @@ export function Stat({
   note,
   accent,
   variant = 'default',
+  help,
 }: {
   label: string
   value: string
   note?: string
   accent?: string
   variant?: 'default' | 'primary'
+  /** Optional hover-tooltip copy explaining what this metric means. */
+  help?: string
 }) {
   const isPrimary = variant === 'primary'
   const { themeKind } = useTheme()
@@ -50,7 +54,13 @@ export function Stat({
           color: isPrimary ? '#ffffff' : T.ink3,
         }}
       >
-        {label}
+        {help ? (
+          <Tooltip content={help}>
+            <span style={{ cursor: 'help', borderBottom: `1px dotted currentColor` }}>{label}</span>
+          </Tooltip>
+        ) : (
+          label
+        )}
       </div>
       <div>
         <AnimatedNumber

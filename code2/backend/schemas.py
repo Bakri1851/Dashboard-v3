@@ -176,6 +176,26 @@ class SavedSession(BaseModel):
     module_filter: str | None = None
 
 
+class ProgressionPoint(BaseModel):
+    """One time-bucket snapshot in a session progression."""
+    t_end: str  # ISO-8601 — the right edge of this bucket
+    cumulative_submissions: int
+    cumulative_students: int
+    mean_incorrectness: float
+    struggle_buckets: list[LevelBucket]
+    difficulty_buckets: list[LevelBucket]
+    needs_help_ids: list[str] = Field(
+        default_factory=list,
+        description="Student IDs in the Needs Help band at this point in time.",
+    )
+
+
+class SessionProgression(BaseModel):
+    session: SavedSession
+    bucket_minutes: float
+    points: list[ProgressionPoint]
+
+
 # ----------------------------------------------------------------
 # /api/settings
 # ----------------------------------------------------------------

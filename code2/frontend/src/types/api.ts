@@ -122,6 +122,22 @@ export interface SavedSession {
   module_filter: string | null
 }
 
+export interface ProgressionPoint {
+  t_end: string
+  cumulative_submissions: number
+  cumulative_students: number
+  mean_incorrectness: number
+  struggle_buckets: LevelBucket[]
+  difficulty_buckets: LevelBucket[]
+  needs_help_ids: string[]
+}
+
+export interface SessionProgression {
+  session: SavedSession
+  bucket_minutes: number
+  points: ProgressionPoint[]
+}
+
 export interface StruggleWeights {
   n: number; t: number; i: number; r: number; a: number; d: number; rep: number
 }

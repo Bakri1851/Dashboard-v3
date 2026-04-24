@@ -78,16 +78,19 @@ export function DataAnalysisView() {
           value={data.total_records.toLocaleString()}
           note={`across ${data.modules} module${data.modules === 1 ? '' : 's'}`}
           accent={T.accent}
+          help="Count of answer records in the active time window, after any filters."
         />
         <Stat
           label="Unique students"
           value={data.unique_students.toLocaleString()}
           note={`avg session ${data.avg_session_minutes.toFixed(0)}m`}
+          help="Distinct student IDs who submitted at least one answer in the window."
         />
         <Stat
           label="Unique questions"
           value={data.unique_questions.toLocaleString()}
           note={`avg ${data.avg_attempts_per_question.toFixed(1)} attempts each`}
+          help="Distinct question IDs attempted. Average attempts counts retries per student per question."
         />
       </AnimatedCard>
 
@@ -98,11 +101,13 @@ export function DataAnalysisView() {
           value={`${String(data.peak_hour).padStart(2, '0')}:00`}
           note={`${data.peak_hour_count} submissions at peak`}
           accent={T.warn}
+          help="Hour-of-day with the highest submission count across the window (local time, 0–23)."
         />
         <Stat
           label="Avg session"
           value={`${data.avg_session_minutes.toFixed(0)}m`}
           note="first → last submission per student"
+          help="Mean minutes from each student's first to last submission in the window. Short windows can be noisy."
         />
       </AnimatedCard>
 

@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { T, LEVEL_STYLES } from '../../theme/tokens'
 import { Pill } from '../primitives/Pill'
 import { ScoreBar } from '../primitives/ScoreBar'
+import { Tooltip } from '../primitives/Tooltip'
 import { rowEnter, rowLayoutSpring } from '../../animation/motion'
 
 export type LeaderboardColumn =
@@ -43,6 +44,21 @@ const HEADER: Record<LeaderboardColumn, string> = {
   students: 'Students',
   avgAttempts: 'Avg att.',
   module: 'Module',
+}
+
+const HEADER_HELP: Partial<Record<LeaderboardColumn, string>> = {
+  rank: 'Row rank on this leaderboard — highest score is #01.',
+  id: 'Unique identifier. Click the row to drill in.',
+  level: 'Threshold band for this score (On Track · Minor · Struggling · Needs Help; Easy · Medium · Hard · Very Hard).',
+  score:
+    'Composite 0–1 score. Struggle blends incorrectness, retries, submission count, time active, trend, and answer repetition. Difficulty blends incorrect rate, avg time, avg attempts, mean incorrectness, and first-attempt fails.',
+  submissions: "Number of this student's submissions in the active time window.",
+  recent:
+    "Time-decayed mean incorrectness of this student's last few submissions (30-minute half-life) — recent answers weigh more.",
+  trend: 'Slope of recent struggle scores — ↓ = improving, ↑ = getting worse.',
+  students: 'Distinct students who attempted this question in the active window.',
+  avgAttempts: 'Mean submission attempts per student. High values indicate repeated retries.',
+  module: 'Source module / lab for this question.',
 }
 
 function alignFor(col: LeaderboardColumn): 'left' | 'right' {
@@ -104,28 +120,39 @@ export function Leaderboard({
         <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: T.fSans, fontSize: 13 }}>
           <thead>
             <tr>
-              {cols.map((c) => (
-                <th
-                  key={c}
-                  style={{
-                    textAlign: alignFor(c),
-                    padding: '10px 18px',
-                    fontFamily: T.fMono,
-                    fontSize: 10,
-                    color: T.ink3,
-                    letterSpacing: 1.2,
-                    textTransform: 'uppercase',
-                    fontWeight: 500,
-                    borderBottom: `1px solid ${T.line}`,
-                    background: T.card,
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 2,
-                  }}
-                >
-                  {HEADER[c]}
-                </th>
-              ))}
+              {cols.map((c) => {
+                const help = HEADER_HELP[c]
+                return (
+                  <th
+                    key={c}
+                    style={{
+                      textAlign: alignFor(c),
+                      padding: '10px 18px',
+                      fontFamily: T.fMono,
+                      fontSize: 10,
+                      color: T.ink3,
+                      letterSpacing: 1.2,
+                      textTransform: 'uppercase',
+                      fontWeight: 500,
+                      borderBottom: `1px solid ${T.line}`,
+                      background: T.card,
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 2,
+                    }}
+                  >
+                    {help ? (
+                      <Tooltip content={help}>
+                        <span style={{ cursor: 'help', borderBottom: `1px dotted currentColor` }}>
+                          {HEADER[c]}
+                        </span>
+                      </Tooltip>
+                    ) : (
+                      HEADER[c]
+                    )}
+                  </th>
+                )
+              })}
             </tr>
           </thead>
           <tbody>

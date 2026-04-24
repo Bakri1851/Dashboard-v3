@@ -11,6 +11,7 @@ import { Pill } from '../components/primitives/Pill'
 import { ScoreBar } from '../components/primitives/ScoreBar'
 import { SectionLabel } from '../components/primitives/SectionLabel'
 import { AnimatedNumber } from '../components/primitives/AnimatedNumber'
+import { Tooltip } from '../components/primitives/Tooltip'
 import { Skeleton, SkeletonStatCard } from '../components/primitives/Skeleton'
 import { Spark } from '../components/charts/Spark'
 import { HBars } from '../components/charts/HBars'
@@ -136,21 +137,41 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
               lineHeight: 1.55,
             }}
           >
-            <strong style={{ color: T.ink, fontWeight: 500 }}>Why flagged.</strong> Recent
-            incorrectness {data.recent.toFixed(2)} vs mean {(data.mean_incorrectness).toFixed(2)}. Retry rate{' '}
+            <Tooltip content="Plain-English summary of the signals driving this student's composite struggle score. Bayesian shrinkage (K=5) pulls low-submission students back toward the class mean so a single bad answer doesn't spike the score.">
+              <strong style={{ color: T.ink, fontWeight: 500, cursor: 'help', borderBottom: `1px dotted currentColor` }}>
+                Why flagged.
+              </strong>
+            </Tooltip>{' '}
+            Recent incorrectness {data.recent.toFixed(2)} vs mean {(data.mean_incorrectness).toFixed(2)}. Retry rate{' '}
             {(data.retry_rate * 100).toFixed(0)}%. Bayesian shrinkage (K=5) applied to the raw struggle
             score to land at <strong>{data.score.toFixed(2)}</strong>.
           </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateRows: 'repeat(4, 1fr)', gap: 8 }}>
-          <MetricRow label="Submissions" value={data.submissions.toLocaleString()} note={scopeNote} />
-          <MetricRow label="Time active" value={`${data.time_active_min.toFixed(0)} min`} note={scopeNote} />
-          <MetricRow label="Retry rate" value={`${(data.retry_rate * 100).toFixed(0)}%`} note="vs class median" />
+          <MetricRow
+            label="Submissions"
+            value={data.submissions.toLocaleString()}
+            note={scopeNote}
+            help="Total number of answer attempts by this student in the active time window."
+          />
+          <MetricRow
+            label="Time active"
+            value={`${data.time_active_min.toFixed(0)} min`}
+            note={scopeNote}
+            help="Minutes between this student's first and last submission in the window."
+          />
+          <MetricRow
+            label="Retry rate"
+            value={`${(data.retry_rate * 100).toFixed(0)}%`}
+            note="vs class median"
+            help="Share of this student's distinct questions attempted more than once. High retry rate often signals persistent difficulty."
+          />
           <MetricRow
             label="Recent incorrectness"
             value={data.recent.toFixed(2)}
             note={`trend ${data.trend >= 0 ? '+' : ''}${data.trend.toFixed(2)}`}
+            help="Time-decayed mean of the last 5 submissions (30-min half-life). Trend is the slope of recent struggle scores — negative = improving."
           />
         </div>
       </AnimatedCard>
@@ -423,7 +444,17 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
   )
 }
 
-function MetricRow({ label, value, note }: { label: string; value: string; note: string }) {
+function MetricRow({
+  label,
+  value,
+  note,
+  help,
+}: {
+  label: string
+  value: string
+  note: string
+  help?: string
+}) {
   return (
     <div
       style={{
@@ -437,7 +468,13 @@ function MetricRow({ label, value, note }: { label: string; value: string; note:
     >
       <div>
         <div style={{ fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, letterSpacing: 1.2, textTransform: 'uppercase' }}>
-          {label}
+          {help ? (
+            <Tooltip content={help}>
+              <span style={{ cursor: 'help', borderBottom: `1px dotted currentColor` }}>{label}</span>
+            </Tooltip>
+          ) : (
+            label
+          )}
         </div>
         <div style={{ fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, marginTop: 4 }}>{note}</div>
       </div>

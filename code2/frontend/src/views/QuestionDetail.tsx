@@ -8,6 +8,7 @@ import { Pill } from '../components/primitives/Pill'
 import { ScoreBar } from '../components/primitives/ScoreBar'
 import { SectionLabel } from '../components/primitives/SectionLabel'
 import { AnimatedNumber } from '../components/primitives/AnimatedNumber'
+import { Tooltip } from '../components/primitives/Tooltip'
 import { Skeleton } from '../components/primitives/Skeleton'
 import { RagPanel } from '../components/RagPanel'
 import { TimelineChart } from '../components/charts/TimelineChart'
@@ -110,10 +111,26 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
             }}
           >
             {[
-              { l: 'Incorrect rate', v: `${(data.incorrect_rate * 100).toFixed(0)}%` },
-              { l: 'Avg attempts', v: data.avg_attempts.toFixed(1) },
-              { l: 'Students', v: String(data.students) },
-              { l: 'First-fail', v: `${(data.first_fail_rate * 100).toFixed(0)}%` },
+              {
+                l: 'Incorrect rate',
+                v: `${(data.incorrect_rate * 100).toFixed(0)}%`,
+                help: 'Share of attempts scored as incorrect (AI incorrectness ≥ 0.50).',
+              },
+              {
+                l: 'Avg attempts',
+                v: data.avg_attempts.toFixed(1),
+                help: 'Mean submission attempts per student for this question. High values indicate repeated retries.',
+              },
+              {
+                l: 'Students',
+                v: String(data.students),
+                help: 'Distinct students who attempted this question in the active window.',
+              },
+              {
+                l: 'First-fail',
+                v: `${(data.first_fail_rate * 100).toFixed(0)}%`,
+                help: "Share of students whose first attempt was scored incorrect — a clean proxy for 'how hard is this on sight'.",
+              },
             ].map((m, i, arr) => (
               <div
                 key={i}
@@ -132,7 +149,9 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
                     marginBottom: 8,
                   }}
                 >
-                  {m.l}
+                  <Tooltip content={m.help}>
+                    <span style={{ cursor: 'help', borderBottom: `1px dotted currentColor` }}>{m.l}</span>
+                  </Tooltip>
                 </div>
                 <AnimatedNumber
                   value={m.v}
@@ -160,7 +179,9 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
               marginBottom: 16,
             }}
           >
-            Measurement
+            <Tooltip content="Sample size behind this question's difficulty estimate — more students and submissions mean a more reliable score.">
+              <span style={{ cursor: 'help', borderBottom: `1px dotted currentColor` }}>Measurement</span>
+            </Tooltip>
           </div>
           <div style={{ marginBottom: 14 }}>
             <AnimatedNumber
@@ -187,7 +208,9 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
                 marginBottom: 8,
               }}
             >
-              Composite score
+              <Tooltip content="Composite 0–1 question difficulty. D = 0.28·incorrect_rate + 0.12·avg_time + 0.20·avg_attempts + 0.20·first_fail + 0.20·mean_incorrectness.">
+                <span style={{ cursor: 'help', borderBottom: `1px dotted currentColor` }}>Composite score</span>
+              </Tooltip>
             </div>
             <div style={{ fontFamily: T.fMono, fontSize: 22, marginBottom: 8 }}>D = {data.score.toFixed(2)}</div>
             <div style={{ fontFamily: T.fMono, fontSize: 11, opacity: 0.7 }}>

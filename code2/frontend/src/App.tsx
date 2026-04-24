@@ -16,6 +16,7 @@ import { SettingsView } from './views/SettingsView'
 import { DataAnalysisView } from './views/DataAnalysisView'
 import { ComparisonView } from './views/ComparisonView'
 import { LabAssistantView } from './views/LabAssistantView'
+import { SessionProgressionView } from './views/SessionProgression'
 import { useEffect } from 'react'
 import { useSettings } from './api/useSettings'
 import { useAutoRefreshInterval } from './api/useAutoRefreshInterval'
@@ -23,8 +24,17 @@ import { ViewTransition } from './animation/ViewTransition'
 import { AnimatedNumber } from './components/primitives/AnimatedNumber'
 
 export default function App() {
-  const { view, selectedStudentId, selectedQuestionId, pickStudent, pickQuestion, setView, back, setSoundsEnabled } =
-    useViewStore()
+  const {
+    view,
+    selectedStudentId,
+    selectedQuestionId,
+    selectedSessionId,
+    pickStudent,
+    pickQuestion,
+    setView,
+    back,
+    setSoundsEnabled,
+  } = useViewStore()
   const { data: settings } = useSettings()
   const { data: live, loading: liveLoading } = useApiData<LiveDataResponse>(
     '/live',
@@ -94,6 +104,16 @@ export default function App() {
       case 'previous':
         title = 'Previous Sessions'
         screen = <PreviousSessionsView />
+        break
+      case 'session-progression':
+        title = 'Session Progression'
+        breadcrumbs = 'Instructor Console · Previous Sessions · Progression'
+        viewKey = `session-progression:${selectedSessionId ?? ''}`
+        screen = selectedSessionId ? (
+          <SessionProgressionView sessionId={selectedSessionId} />
+        ) : (
+          <PreviousSessionsView />
+        )
         break
       case 'lab':
         title = 'Lab Assistants'
