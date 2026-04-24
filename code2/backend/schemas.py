@@ -78,6 +78,7 @@ class LiveDataResponse(BaseModel):
     struggle_buckets: list[LevelBucket]
     difficulty_buckets: list[LevelBucket]
     timeline_24h: list[int]
+    modules: list[str] = []
     error: str | None = None
 
 

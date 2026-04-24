@@ -96,12 +96,33 @@ async def lifespan(app: FastAPI):
             # same object. Running in the background thread means this ~5–7
             # min OpenAI pass doesn't block concurrent requests.
             if not df.empty and "ai_feedback" in df.columns:
-                t_score = _time.monotonic()
-                try:
-                    df["incorrectness"] = analytics.compute_incorrectness_column(df, max_new_scores=0)
-                    logger.info("prewarm: full incorrectness scoring done in %.1fs", _time.monotonic() - t_score)
-                except Exception as e:  # noqa: BLE001
-                    logger.warning("prewarm: full scoring raised: %s", e)
+                # Skip the uncapped scoring pass when the disk-backed cache
+                # already covers nearly every unique feedback — a warm restart
+                # should boot in seconds, not minutes.
+                feedbacks = df["ai_feedback"].astype(str).str.strip()
+                unique_fbs = [t for t in feedbacks.unique() if t]
+                if unique_fbs:
+                    cached_count = sum(1 for t in unique_fbs if t in analytics._incorrectness_cache)
+                    warm_ratio = cached_count / len(unique_fbs)
+                else:
+                    warm_ratio = 1.0
+                if warm_ratio >= 0.95:
+                    logger.info(
+                        "prewarm: incorrectness cache is %.1f%% warm (%d/%d uniques) — "
+                        "skipping full scoring pass",
+                        100.0 * warm_ratio, cached_count if unique_fbs else 0, len(unique_fbs),
+                    )
+                    try:
+                        df["incorrectness"] = analytics.compute_incorrectness_column(df, score_new=False)
+                    except Exception as e:  # noqa: BLE001
+                        logger.warning("prewarm: lookup-only scoring raised: %s", e)
+                else:
+                    t_score = _time.monotonic()
+                    try:
+                        df["incorrectness"] = analytics.compute_incorrectness_column(df, max_new_scores=0)
+                        logger.info("prewarm: full incorrectness scoring done in %.1fs", _time.monotonic() - t_score)
+                    except Exception as e:  # noqa: BLE001
+                        logger.warning("prewarm: full scoring raised: %s", e)
             if "incorrectness" in df.columns and not df.empty:
                 _inc = df["incorrectness"]
                 logger.info(

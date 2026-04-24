@@ -18,6 +18,7 @@ export interface FilterState {
   timeStart: string                // HH:MM — applied to customFrom
   timeEnd: string                  // HH:MM — applied to customTo
   academicWeek: string | null      // label string from /api/meta/academic-periods
+  module: string                   // 'All Modules' = no filter; any other value scopes backend queries
   /** True once InClassView has auto-switched from 'today' to 'all' because
    *  today returned no records. Prevents ping-ponging between the two. */
   autoFallbackApplied: boolean
@@ -25,6 +26,7 @@ export interface FilterState {
   setCustom: (from: string | null, to: string | null) => void
   setTimes: (start: string, end: string) => void
   setAcademicWeek: (label: string | null) => void
+  setModule: (m: string) => void
   setAutoFallbackApplied: (v: boolean) => void
   reset: () => void
 }
@@ -36,6 +38,7 @@ export const useFilterStore = create<FilterState>((set) => ({
   timeStart: '00:00',
   timeEnd: '23:59',
   academicWeek: null,
+  module: 'All Modules',
   autoFallbackApplied: false,
   setPreset: (preset) =>
     // Re-arm the fallback when picking 'today' so an empty today can fall
@@ -45,6 +48,7 @@ export const useFilterStore = create<FilterState>((set) => ({
   setTimes: (timeStart, timeEnd) => set({ timeStart, timeEnd }),
   setAcademicWeek: (academicWeek) =>
     set({ academicWeek, preset: academicWeek ? 'custom' : 'all' }),
+  setModule: (module) => set({ module }),
   setAutoFallbackApplied: (autoFallbackApplied) => set({ autoFallbackApplied }),
   reset: () =>
     set({
@@ -54,6 +58,7 @@ export const useFilterStore = create<FilterState>((set) => ({
       timeStart: '00:00',
       timeEnd: '23:59',
       academicWeek: null,
+      module: 'All Modules',
       autoFallbackApplied: false,
     }),
 }))
@@ -168,10 +173,11 @@ export function presetNote(preset: FilterPreset): string {
 }
 
 /** Serialise a ResolvedWindow into URLSearchParams form (no leading `?`). */
-export function filterToQuery(window: ResolvedWindow): string {
+export function filterToQuery(window: ResolvedWindow, module?: string | null): string {
   const p = new URLSearchParams()
   if (window.from) p.set('from', window.from)
   if (window.to) p.set('to', window.to)
+  if (module && module !== 'All Modules') p.set('module', module)
   const q = p.toString()
   return q
 }

@@ -70,3 +70,10 @@ def rag_chroma_dir() -> Path:
     p = DATA_DIR / "rag_chroma"
     p.mkdir(parents=True, exist_ok=True)
     return p
+
+
+def incorrectness_cache_path() -> Path:
+    """Disk-backed OpenAI incorrectness score cache — avoids ~10 min of
+    serial scoring on every uvicorn restart."""
+    _ensure_data_dir()
+    return DATA_DIR / "incorrectness_cache.json"

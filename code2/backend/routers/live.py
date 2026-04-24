@@ -23,6 +23,7 @@ from backend.schemas import (
     QuestionDifficulty,
     StudentStruggle,
 )
+from learning_dashboard import data_loader
 
 router = APIRouter(tags=["live"])
 
@@ -77,12 +78,23 @@ def get_live(
     df: pd.DataFrame = Depends(get_dataframe),
     window: TimeWindow = Depends(get_time_window),
 ) -> LiveDataResponse:
-    # Hero stats + buckets reflect the filter window. Timeline stays wall-clock-24h.
-    working = filter_df(df, window.from_, window.to_) if window.active else df
-    struggle_df = load_active_struggle_df(window.from_, window.to_)
-    difficulty_df = load_active_difficulty_df(window.from_, window.to_)
+    # Hero stats + buckets reflect the filter window + module. Timeline stays wall-clock-24h.
+    working = filter_df(df, window.from_, window.to_) if (window.from_ or window.to_) else df
+    if window.module:
+        working = data_loader.filter_by_module(working, window.module)
+    struggle_df = load_active_struggle_df(window.from_, window.to_, window.module)
+    difficulty_df = load_active_difficulty_df(window.from_, window.to_, window.module)
 
     mean_inc = float(working["incorrectness"].mean()) if "incorrectness" in working.columns and not working.empty else 0.0
+
+    # Full module list comes from the unfiltered df so the frontend pill list
+    # stays stable regardless of the active module filter.
+    if "module" in df.columns and not df.empty:
+        all_modules = sorted(
+            m for m in df["module"].dropna().astype(str).unique() if m
+        )
+    else:
+        all_modules = []
 
     return LiveDataResponse(
         records=int(len(working)),
@@ -94,13 +106,14 @@ def get_live(
         struggle_buckets=_bucket_counts(struggle_df.get("struggle_level", pd.Series(dtype=str)), STRUGGLE_ORDER),
         difficulty_buckets=_bucket_counts(difficulty_df.get("difficulty_level", pd.Series(dtype=str)), DIFFICULTY_ORDER),
         timeline_24h=_timeline_24h(df),
+        modules=all_modules,
         error=None,
     )
 
 
 @router.get("/struggle", response_model=list[StudentStruggle])
 def get_struggle(window: TimeWindow = Depends(get_time_window)) -> list[StudentStruggle]:
-    s = load_active_struggle_df(window.from_, window.to_)
+    s = load_active_struggle_df(window.from_, window.to_, window.module)
     if s.empty:
         return []
     s = s.sort_values("struggle_score", ascending=False)
@@ -124,13 +137,15 @@ def get_difficulty(
     df: pd.DataFrame = Depends(get_dataframe),
     window: TimeWindow = Depends(get_time_window),
 ) -> list[QuestionDifficulty]:
-    q = load_active_difficulty_df(window.from_, window.to_)
+    q = load_active_difficulty_df(window.from_, window.to_, window.module)
     if q.empty:
         return []
     q = q.sort_values("difficulty_score", ascending=False)
 
     # Representative module per question from the (filtered) source df.
-    working = filter_df(df, window.from_, window.to_) if window.active else df
+    working = filter_df(df, window.from_, window.to_) if (window.from_ or window.to_) else df
+    if window.module:
+        working = data_loader.filter_by_module(working, window.module)
     module_lookup: dict[str, str] = {}
     if not working.empty and "question" in working.columns and "module" in working.columns:
         module_lookup = (

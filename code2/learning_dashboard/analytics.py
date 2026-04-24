@@ -5,6 +5,8 @@ import logging
 import math
 import os
 import re
+import threading
+import time
 from typing import Optional
 
 import numpy as np
@@ -15,7 +17,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import silhouette_score
 from sklearn.metrics.pairwise import cosine_similarity
 
-from learning_dashboard import config
+from learning_dashboard import config, paths
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +31,70 @@ def _get_openai_client() -> OpenAI:
 
 # Incorrectness Estimation via OpenAI
 
-_incorrectness_cache: dict[str, float] = {}
+# Disk-backed cache: scores persist across uvicorn restarts so a clean boot
+# doesn't re-score ~3,400 unique feedbacks against OpenAI. The on-disk file
+# stores the OPENAI_MODEL it was built with — if the model changes, the cache
+# is discarded on load because scores are model-dependent.
+_SAVE_DEBOUNCE_SECONDS = 30.0
+_incorrectness_save_lock = threading.Lock()
+_last_incorrectness_save_ts: float = 0.0
+
+
+def _load_incorrectness_cache() -> dict[str, float]:
+    path = paths.incorrectness_cache_path()
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning("incorrectness cache load failed (%s): %s", type(exc).__name__, exc)
+        return {}
+    if not isinstance(payload, dict):
+        return {}
+    stored_model = payload.get("model")
+    if stored_model != config.OPENAI_MODEL:
+        logger.info(
+            "incorrectness cache on disk was built for model=%r, current=%r — discarding",
+            stored_model, config.OPENAI_MODEL,
+        )
+        return {}
+    scores = payload.get("scores")
+    if not isinstance(scores, dict):
+        return {}
+    out: dict[str, float] = {}
+    for k, v in scores.items():
+        if isinstance(k, str) and isinstance(v, (int, float)):
+            out[k] = float(v)
+    logger.info("incorrectness cache: loaded %d entries from disk (model=%s)", len(out), stored_model)
+    return out
+
+
+def _save_incorrectness_cache(*, force: bool = False) -> None:
+    """Persist the in-memory cache to disk with debounce.
+
+    The prewarm adds ~170 batches of 20 scores back-to-back; without the
+    debounce, each batch would trigger a JSON dump of the full dict (~3,400
+    entries), which is wasted I/O. Call with ``force=True`` at the end of a
+    scoring pass to guarantee the final state reaches disk.
+    """
+    global _last_incorrectness_save_ts
+    with _incorrectness_save_lock:
+        now = time.monotonic()
+        if not force and (now - _last_incorrectness_save_ts) < _SAVE_DEBOUNCE_SECONDS:
+            return
+        _last_incorrectness_save_ts = now
+        snapshot = dict(_incorrectness_cache)
+    payload = {"model": config.OPENAI_MODEL, "scores": snapshot}
+    path = paths.incorrectness_cache_path()
+    try:
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(json.dumps(payload), encoding="utf-8")
+        tmp.replace(path)
+    except OSError as exc:
+        logger.warning("incorrectness cache save failed: %s", exc)
+
+
+_incorrectness_cache: dict[str, float] = _load_incorrectness_cache()
 _cluster_cache: dict[tuple[str, int, str], list[dict] | None] = {}
 
 
@@ -125,6 +190,7 @@ def estimate_incorrectness(feedback: Optional[str]) -> float:
     if scores is None:
         return 0.5
     _incorrectness_cache[key] = scores[0]
+    _save_incorrectness_cache()
     return scores[0]
 
 
@@ -217,6 +283,10 @@ def compute_incorrectness_column(
             _incorrectness_cache.update(zip(batch, scores))
             batches_succeeded += 1
             scores_added += len(batch)
+            _save_incorrectness_cache()
+
+    if scores_added > 0:
+        _save_incorrectness_cache(force=True)
 
     result = feedbacks.map(lambda t: _incorrectness_cache.get(t, 0.5))
     share_at_half = float((result == 0.5).mean()) if len(result) else 0.0

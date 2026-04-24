@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { T } from '../theme/tokens'
 import { prefetchApi, useApiData } from '../api/hooks'
@@ -75,7 +75,8 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
   const anyError = liveErr || strugErr || diffErr
   const anyLoading = liveLoading || strugLoading || diffLoading
 
-  const [moduleFilter, setModuleFilter] = useState<string>('All Modules')
+  const moduleFilter = filter.module
+  const setModuleFilter = filter.setModule
 
   // Debounce hover-prefetch so sweeping the mouse across rows doesn't fan out
   // into a dozen concurrent /rag/ requests that saturate the backend threadpool.
@@ -88,16 +89,15 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
     if (hoverTimer.current) window.clearTimeout(hoverTimer.current)
   }, [])
 
+  // Pill options come from /live.modules (full unfiltered list) so that
+  // picking a module doesn't collapse the pill row to a single entry.
   const moduleOptions = useMemo(() => {
-    const mods = new Set<string>()
-    difficulty?.forEach((q) => q.module && mods.add(q.module))
-    return ['All Modules', ...Array.from(mods).sort()]
-  }, [difficulty])
+    return ['All Modules', ...(live?.modules ?? [])]
+  }, [live?.modules])
 
-  const filteredDifficulty = useMemo(() => {
+  const filteredDifficulty = useMemo<LeaderboardRow[]>(() => {
     if (!difficulty) return []
-    const rows = moduleFilter === 'All Modules' ? difficulty : difficulty.filter((q) => q.module === moduleFilter)
-    return rows.slice(0, 15).map<LeaderboardRow>((q, i) => ({
+    return difficulty.slice(0, 15).map((q, i) => ({
       rank: i + 1,
       id: q.id,
       level: q.level,
@@ -107,7 +107,7 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
       module: q.module,
       raw: q,
     }))
-  }, [difficulty, moduleFilter])
+  }, [difficulty])
 
   const struggleRows = useMemo<LeaderboardRow[]>(() => {
     if (!struggle) return []

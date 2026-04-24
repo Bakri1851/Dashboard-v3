@@ -15,6 +15,7 @@ export interface LiveDataResponse {
   struggle_buckets: LevelBucket[]
   difficulty_buckets: LevelBucket[]
   timeline_24h: number[]
+  modules: string[]
   error: string | null
 }
 

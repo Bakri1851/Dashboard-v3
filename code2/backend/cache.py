@@ -32,11 +32,13 @@ _EMPTY_DF = pd.DataFrame(
     ]
 )
 
-# Analytics TTL is coupled to the raw-data TTL — a struggle leaderboard built
-# from a 60-second-old DataFrame should not outlive it. Live lab dispatch
-# relies on this: a student who just started failing must surface in the
-# queue within one refresh cycle, not five minutes later.
-_ANALYTICS_TTL = config.CACHE_TTL  # seconds — tracks raw-data TTL
+# Analytics caches hold aggregate leaderboards (struggle/difficulty) — 5 min
+# is tolerable because individual live-dispatch events flow through the
+# raw-data path (60 s TTL) and the lab-assistant view. Matching the short
+# raw-data TTL here would trigger a full leaderboard rebuild every minute,
+# which wastes CPU and — during the prewarm window — competes with the
+# background scoring pass for OpenAI throughput.
+_ANALYTICS_TTL = 300  # seconds
 _IMPROVED_TTL = 600   # seconds — IRT+BKT fits are the most expensive path
 
 _df_cache: TTLCache = TTLCache(maxsize=1, ttl=config.CACHE_TTL)
@@ -141,42 +143,67 @@ def filter_df(
     return df[mask].copy()
 
 
-def _window_key(from_: Optional[str], to_: Optional[str]) -> tuple[str, str]:
-    return (from_ or "", to_ or "")
+def _window_key(
+    from_: Optional[str], to_: Optional[str], module: Optional[str] = None
+) -> tuple[str, str, str]:
+    return (from_ or "", to_ or "", module or "")
 
 
-def load_struggle_df(from_: Optional[str] = None, to_: Optional[str] = None) -> pd.DataFrame:
-    """Compute + cache the struggle leaderboard for the given window."""
-    key = _window_key(from_, to_)
+def _slice_df(
+    df: pd.DataFrame,
+    from_: Optional[str],
+    to_: Optional[str],
+    module: Optional[str],
+) -> pd.DataFrame:
+    """Apply time + module filters in order. Either may be None."""
+    out = filter_df(df, from_, to_) if (from_ or to_) else df
+    if module:
+        out = data_loader.filter_by_module(out, module)
+    return out
+
+
+def load_struggle_df(
+    from_: Optional[str] = None,
+    to_: Optional[str] = None,
+    module: Optional[str] = None,
+) -> pd.DataFrame:
+    """Compute + cache the struggle leaderboard for the given window + module."""
+    key = _window_key(from_, to_, module)
     if key in _struggle_cache:
         return _struggle_cache[key]
     with _struggle_lock:
         if key in _struggle_cache:
             return _struggle_cache[key]
         df, _ = load_dataframe()
-        sliced = filter_df(df, from_, to_) if (from_ or to_) else df
+        sliced = _slice_df(df, from_, to_, module)
         result = analytics.compute_student_struggle_scores(sliced)
         _struggle_cache[key] = result
         return result
 
 
-def load_difficulty_df(from_: Optional[str] = None, to_: Optional[str] = None) -> pd.DataFrame:
-    """Compute + cache the difficulty leaderboard for the given window."""
-    key = _window_key(from_, to_)
+def load_difficulty_df(
+    from_: Optional[str] = None,
+    to_: Optional[str] = None,
+    module: Optional[str] = None,
+) -> pd.DataFrame:
+    """Compute + cache the difficulty leaderboard for the given window + module."""
+    key = _window_key(from_, to_, module)
     if key in _difficulty_cache:
         return _difficulty_cache[key]
     with _difficulty_lock:
         if key in _difficulty_cache:
             return _difficulty_cache[key]
         df, _ = load_dataframe()
-        sliced = filter_df(df, from_, to_) if (from_ or to_) else df
+        sliced = _slice_df(df, from_, to_, module)
         result = analytics.compute_question_difficulty_scores(sliced)
         _difficulty_cache[key] = result
         return result
 
 
 def load_improved_struggle_df(
-    from_: Optional[str] = None, to_: Optional[str] = None
+    from_: Optional[str] = None,
+    to_: Optional[str] = None,
+    module: Optional[str] = None,
 ) -> pd.DataFrame:
     """Compute + cache improved (IRT + BKT) struggle scores for the window.
 
@@ -187,14 +214,14 @@ def load_improved_struggle_df(
     # Local import keeps the cache module import-safe during router boot.
     from backend import runtime_config as _rc_mod
 
-    key = _window_key(from_, to_)
+    key = _window_key(from_, to_, module)
     if key in _improved_cache:
         return _improved_cache[key]
     with _improved_lock:
         if key in _improved_cache:
             return _improved_cache[key]
         df, _ = load_dataframe()
-        sliced = filter_df(df, from_, to_) if (from_ or to_) else df
+        sliced = _slice_df(df, from_, to_, module)
         rc = _rc_mod.get()
         # If the user hasn't touched the sliders, prefer the per-skill fitted
         # params populated by the prewarm (_bkt.fit_all_skills). Any slider
@@ -227,7 +254,7 @@ def load_improved_struggle_df(
             # dict here (not just the difficulty projection) because the
             # IRT-residual difficulty-adjusted signal needs b_raw + a_j +
             # per-student θ.
-            irt_model = load_irt_model(from_, to_)
+            irt_model = load_irt_model(from_, to_, module)
             irt_diff_full = irt_model.get("difficulty_df", pd.DataFrame())
             irt_ability = irt_model.get("ability_df", pd.DataFrame())
             result = improved_struggle.compute_improved_struggle_scores(
@@ -249,14 +276,16 @@ def load_improved_struggle_df(
 
 
 def load_irt_model(
-    from_: Optional[str] = None, to_: Optional[str] = None
+    from_: Optional[str] = None,
+    to_: Optional[str] = None,
+    module: Optional[str] = None,
 ) -> dict:
     """Compute + cache the full IRT fit (difficulty + discrimination + ability).
 
     Caches under the same window key as ``load_irt_difficulty_df`` so a
     back-to-back ``difficulty`` and ``abilities`` lookup only fits once.
     """
-    key = _window_key(from_, to_)
+    key = _window_key(from_, to_, module)
     cached = _irt_difficulty_cache.get(key)
     if isinstance(cached, dict):
         return cached
@@ -265,7 +294,7 @@ def load_irt_model(
         if isinstance(cached, dict):
             return cached
         df, _ = load_dataframe()
-        sliced = filter_df(df, from_, to_) if (from_ or to_) else df
+        sliced = _slice_df(df, from_, to_, module)
         try:
             model = irt.compute_irt_model(sliced)
         except Exception:
@@ -292,14 +321,16 @@ def load_irt_model(
 
 
 def load_irt_difficulty_df(
-    from_: Optional[str] = None, to_: Optional[str] = None
+    from_: Optional[str] = None,
+    to_: Optional[str] = None,
+    module: Optional[str] = None,
 ) -> pd.DataFrame:
     """Compute + cache IRT question-difficulty scores for the window.
 
     Projection of ``load_irt_model`` — returns only the question-level df
     with the public ``_OUTPUT_COLUMNS`` schema (drops the internal b_raw).
     """
-    model = load_irt_model(from_, to_)
+    model = load_irt_model(from_, to_, module)
     diff = model.get("difficulty_df", pd.DataFrame())
     if diff.empty:
         return pd.DataFrame()
@@ -308,14 +339,18 @@ def load_irt_difficulty_df(
 
 
 def load_irt_ability_df(
-    from_: Optional[str] = None, to_: Optional[str] = None
+    from_: Optional[str] = None,
+    to_: Optional[str] = None,
+    module: Optional[str] = None,
 ) -> pd.DataFrame:
     """Per-student θ for the window. Shares the cache with load_irt_model."""
-    return load_irt_model(from_, to_).get("ability_df", pd.DataFrame())
+    return load_irt_model(from_, to_, module).get("ability_df", pd.DataFrame())
 
 
 def load_active_struggle_df(
-    from_: Optional[str] = None, to_: Optional[str] = None
+    from_: Optional[str] = None,
+    to_: Optional[str] = None,
+    module: Optional[str] = None,
 ) -> pd.DataFrame:
     """Return the struggle leaderboard for the currently-selected model.
 
@@ -337,9 +372,9 @@ def load_active_struggle_df(
     from backend import runtime_config as _rc_mod
 
     if _rc_mod.get().struggle_model == "improved":
-        improved_df = load_improved_struggle_df(from_, to_)
+        improved_df = load_improved_struggle_df(from_, to_, module)
         if not improved_df.empty:
-            baseline_df = load_struggle_df(from_, to_)
+            baseline_df = load_struggle_df(from_, to_, module)
             if not baseline_df.empty and "user" in baseline_df.columns:
                 ancillary = [
                     c for c in baseline_df.columns
@@ -352,11 +387,13 @@ def load_active_struggle_df(
                         how="left",
                     )
             return improved_df
-    return load_struggle_df(from_, to_)
+    return load_struggle_df(from_, to_, module)
 
 
 def load_active_difficulty_df(
-    from_: Optional[str] = None, to_: Optional[str] = None
+    from_: Optional[str] = None,
+    to_: Optional[str] = None,
+    module: Optional[str] = None,
 ) -> pd.DataFrame:
     """Return the difficulty leaderboard for the currently-selected model.
 
@@ -370,7 +407,7 @@ def load_active_difficulty_df(
     from backend import runtime_config as _rc_mod
 
     if _rc_mod.get().difficulty_model == "irt":
-        df = load_irt_difficulty_df(from_, to_)
+        df = load_irt_difficulty_df(from_, to_, module)
         if not df.empty and "irt_difficulty" in df.columns:
             return df.rename(
                 columns={
@@ -378,7 +415,7 @@ def load_active_difficulty_df(
                     "irt_difficulty_level": "difficulty_level",
                 }
             )
-    return load_difficulty_df(from_, to_)
+    return load_difficulty_df(from_, to_, module)
 
 
 def invalidate() -> None:

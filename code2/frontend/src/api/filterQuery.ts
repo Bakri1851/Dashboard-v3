@@ -34,7 +34,7 @@ export function useFilterQuery(): string {
       labSessionStart: lab?.session_start ?? null,
       academicPeriods: periods ?? undefined,
     })
-    return filterToQuery(resolved)
+    return filterToQuery(resolved, filter.module)
   }, [
     filter.preset,
     filter.customFrom,
@@ -42,6 +42,7 @@ export function useFilterQuery(): string {
     filter.timeStart,
     filter.timeEnd,
     filter.academicWeek,
+    filter.module,
     lab?.session_start,
     periods,
     tick,
