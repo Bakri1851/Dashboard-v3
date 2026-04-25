@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.14)  18 APR 2026 21:38
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.14)  24 APR 2026 15:36
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -618,7 +618,7 @@ cal model of how stu-dents nav-i-gate through pro-gram-ming
 
 [10 <./figures/requirements-specification/Attention-Dashboard.png>] [11]
 Excluding 'comment' comment.
-Overfull \hbox (11.73152pt too wide) in paragraph at lines 155--156
+Overfull \hbox (11.73152pt too wide) in paragraph at lines 156--157
 \OT1/cmr/m/n/10 re-port-ing, au-toma-tion, and de-liv-ery of ed-u-ca-tional cou
 rses, train-ing pro-grams, ma-te-ri-als or learn-ing and de-vel-op-ment
  []
@@ -629,7 +629,7 @@ File: figures/requirements-specification/Piwik-Analytics.png Graphic file (type
  png)
 <use figures/requirements-specification/Piwik-Analytics.png>
 Package pdftex.def Info: figures/requirements-specification/Piwik-Analytics.png
-  used on input line 167.
+  used on input line 168.
 (pdftex.def)             Requested size: 489.10287pt x 303.17056pt.
 [12]
 <figures/requirements-specification/MM-Dashboard.png, id=789, 482.30188pt x 131
@@ -638,30 +638,30 @@ File: figures/requirements-specification/MM-Dashboard.png Graphic file (type pn
 g)
 <use figures/requirements-specification/MM-Dashboard.png>
 Package pdftex.def Info: figures/requirements-specification/MM-Dashboard.png  u
-sed on input line 175.
+sed on input line 176.
 (pdftex.def)             Requested size: 489.10287pt x 133.34883pt.
 
-Overfull \hbox (0.67369pt too wide) in paragraph at lines 172--178
+Overfull \hbox (0.67369pt too wide) in paragraph at lines 173--179
 []\OT1/cmr/m/n/10 Another im-ple-men-ta-tion of a learn-ing dash-board is the M
 ulti-Modal (MM) teacher dash-board, the MM dash-board:
  []
 
 
-Overfull \hbox (21.96284pt too wide) in paragraph at lines 172--178
+Overfull \hbox (21.96284pt too wide) in paragraph at lines 173--179
 \OT1/cmr/m/n/10 rel-e-vant cog-ni-tive, af-fec-tive, and phys-i-o-log-i-cal mea
 -sure-ments; 3) syn-chro-nises and vi-su-alises the re-sult-ing mea-sure-ments
  []
 
 [13 <./figures/requirements-specification/Piwik-Analytics.png> <./figures/requi
 rements-specification/MM-Dashboard.png>] [14]
-Overfull \hbox (2.79305pt too wide) in paragraph at lines 263--264
+Overfull \hbox (2.79305pt too wide) in paragraph at lines 264--265
  []\OT1/cmr/bx/n/10 NFR2: In-ter-pretabil-ity[] \OT1/cmr/m/n/10 Out-puts should
  be in-ter-pretable by in-struc-tors with-out re-quir-ing spe-cial-ist knowl-ed
 ge
  []
 
 
-Overfull \hbox (47.99251pt too wide) in paragraph at lines 285--306
+Overfull \hbox (47.99251pt too wide) in paragraph at lines 286--307
  [][] 
  []
 
@@ -895,7 +895,7 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 Here is how much of TeX's memory you used:
  13239 strings out of 467867
  227871 string characters out of 5418334
- 627023 words of memory out of 5000000
+ 626023 words of memory out of 5000000
  41598 multiletter control sequences out of 15000+600000
  633451 words of font info for 61 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -917,7 +917,7 @@ msfonts/cm/cmsy5.pfb><C:/Users/Bakri/AppData/Local/Programs/MiKTeX/fonts/type1/
 public/amsfonts/cm/cmsy7.pfb><C:/Users/Bakri/AppData/Local/Programs/MiKTeX/font
 s/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/Bakri/AppData/Local/Programs/Mi
 KTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on main.pdf (39 pages, 1653809 bytes).
+Output written on main.pdf (39 pages, 1653817 bytes).
 PDF statistics:
  1173 PDF objects out of 1200 (max. 8388607)
  281 named destinations out of 1000 (max. 500000)
