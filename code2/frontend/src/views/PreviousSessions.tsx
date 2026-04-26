@@ -170,7 +170,7 @@ export function PreviousSessionsView() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: T.fSans, fontSize: 13 }}>
             <thead>
               <tr>
-                {['Name', 'Start', 'Duration', 'Students', 'Flagged', 'Module', ''].map((h) => (
+                {['Class', 'Name', 'Start', 'Duration', 'Students', 'Flagged', 'Module', ''].map((h) => (
                   <th
                     key={h}
                     style={{
@@ -201,6 +201,9 @@ export function PreviousSessionsView() {
                   exit={{ opacity: 0, x: 12 }}
                   transition={{ duration: 0.25, delay: i * 0.03 }}
                 >
+                  <td style={{ padding: '14px 22px', borderBottom: `1px solid ${T.line2}`, color: s.class_label ? T.ink : T.ink3, fontFamily: T.fMono, fontSize: 12 }}>
+                    {s.class_label ?? 'Legacy (time-only)'}
+                  </td>
                   <td style={{ padding: '14px 22px', borderBottom: `1px solid ${T.line2}`, color: T.ink }}>{s.name}</td>
                   <td style={{ padding: '14px 22px', borderBottom: `1px solid ${T.line2}`, fontFamily: T.fMono, fontSize: 12, color: T.ink2 }}>
                     {fmtTimestamp(s.start_time)}

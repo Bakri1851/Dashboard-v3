@@ -109,6 +109,8 @@ class SaveSessionRequest(BaseModel):
     module_filter: str | None = None
     dashboard_view: str | None = None
     time_filter_preset: str | None = None
+    class_id: str | None = None
+    class_label: str | None = None
 
 
 def _parse_dt(value: Any) -> datetime | None:
@@ -137,6 +139,8 @@ def _as_saved_session(r: dict) -> SavedSession:
         students=r.get("students") or r.get("student_count"),
         flagged=r.get("flagged") or r.get("needs_help_count"),
         module_filter=r.get("secondary_module_filter") or r.get("module_filter"),
+        class_id=r.get("class_id"),
+        class_label=r.get("class_label"),
     )
 
 
@@ -150,6 +154,22 @@ def list_sessions() -> list[SavedSession]:
 def save_session(req: SaveSessionRequest) -> SavedSession:
     """Retroactive save — builds a record from the frontend's current filter
     window and persists it through `data_loader.save_session_record`."""
+    from learning_dashboard.lab_classes import (
+        class_id_for_timestamp,
+        class_label_for_timestamp,
+    )
+
+    class_id = req.class_id
+    class_label = req.class_label
+    if not class_id:
+        derived_module = (
+            req.module_filter
+            if req.module_filter and req.module_filter != "All Modules"
+            else "coa122"
+        )
+        class_id = class_id_for_timestamp(derived_module, req.start_time)
+        class_label = class_label_for_timestamp(derived_module, req.start_time)
+
     record = {
         "id": uuid.uuid4().hex,
         "name": req.name,
@@ -159,6 +179,8 @@ def save_session(req: SaveSessionRequest) -> SavedSession:
         "dashboard_view": req.dashboard_view or "In Class View",
         "secondary_module_filter": req.module_filter or "All",
         "time_filter_preset": req.time_filter_preset or "Custom",
+        "class_id": class_id,
+        "class_label": class_label,
     }
     try:
         data_loader.save_session_record(record)

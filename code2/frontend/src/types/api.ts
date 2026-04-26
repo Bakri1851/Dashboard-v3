@@ -121,7 +121,10 @@ export interface SavedSession {
   students: number | null
   flagged: number | null
   module_filter: string | null
+  class_id: string | null
+  class_label: string | null
 }
+
 
 export interface ProgressionPoint {
   t_end: string
@@ -289,6 +292,8 @@ export interface LabState {
   allow_self_allocation: boolean
   lab_assistants: LabAssistant[]
   assignments: LabAssignment[]
+  class_id: string | null
+  class_label: string | null
 }
 
 export interface JoinResult {

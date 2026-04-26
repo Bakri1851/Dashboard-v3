@@ -23,6 +23,7 @@ interface Props {
   onSetModule: (m: string) => void
   onPickStudent: (id: string) => void
   onPickQuestion: (id: string) => void
+  sessionActive: boolean
 }
 
 interface BasicRow {
@@ -85,6 +86,7 @@ export function InClassBasicView({
   onSetModule,
   onPickStudent,
   onPickQuestion,
+  sessionActive,
 }: Props) {
   const studentRows = useMemo(() => scaleCohort(struggle), [struggle])
   const questionRows = useMemo(() => scaleCohort(difficulty), [difficulty])
@@ -104,53 +106,55 @@ export function InClassBasicView({
         boxSizing: 'border-box',
       }}
     >
-      {/* Module filter — mirrors the advanced view so switching feels continuous */}
-      <AnimatedCard
-        variants={fadeUp}
-        style={{
-          flex: '0 0 auto',
-          display: 'flex',
-          gap: 6,
-          flexWrap: 'wrap',
-          alignItems: 'center',
-        }}
-      >
-        <span
+      {/* Module filter — hidden while a session has locked the module to a specific one */}
+      {!(sessionActive && currentModule !== 'All Modules') && (
+        <AnimatedCard
+          variants={fadeUp}
           style={{
-            fontFamily: T.fMono,
-            fontSize: 10.5,
-            color: T.ink3,
-            letterSpacing: 1,
-            textTransform: 'uppercase',
-            marginRight: 8,
+            flex: '0 0 auto',
+            display: 'flex',
+            gap: 6,
+            flexWrap: 'wrap',
+            alignItems: 'center',
           }}
         >
-          Module
-        </span>
-        {moduleOptions.map((m) => {
-          const active = m === currentModule
-          return (
-            <motion.button
-              key={m}
-              onClick={() => onSetModule(m)}
-              whileHover={{ y: -1 }}
-              whileTap={{ scale: 0.95 }}
-              style={{
-                padding: '5px 10px',
-                background: active ? T.priorityBg : 'transparent',
-                color: active ? T.priorityFg : T.ink2,
-                border: `1px solid ${active ? T.priorityBg : T.line2}`,
-                borderRadius: 999,
-                fontFamily: T.fSans,
-                fontSize: 12,
-                cursor: 'pointer',
-              }}
-            >
-              {m}
-            </motion.button>
-          )
-        })}
-      </AnimatedCard>
+          <span
+            style={{
+              fontFamily: T.fMono,
+              fontSize: 10.5,
+              color: T.ink3,
+              letterSpacing: 1,
+              textTransform: 'uppercase',
+              marginRight: 8,
+            }}
+          >
+            Module
+          </span>
+          {moduleOptions.map((m) => {
+            const active = m === currentModule
+            return (
+              <motion.button
+                key={m}
+                onClick={() => onSetModule(m)}
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.95 }}
+                style={{
+                  padding: '5px 10px',
+                  background: active ? T.priorityBg : 'transparent',
+                  color: active ? T.priorityFg : T.ink2,
+                  border: `1px solid ${active ? T.priorityBg : T.line2}`,
+                  borderRadius: 999,
+                  fontFamily: T.fSans,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                }}
+              >
+                {m}
+              </motion.button>
+            )
+          })}
+        </AnimatedCard>
+      )}
 
       {/* Students | Questions — fills the remaining viewport height */}
       <AnimatedCard

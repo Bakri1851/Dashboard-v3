@@ -277,10 +277,60 @@ def _parse_iso_datetime(raw_value) -> Optional[datetime]:
         return None
 
 
+def _backfill_saved_session_class_ids(
+    sessions: list[dict],
+    default_module: str = "coa122",
+) -> tuple[list[dict], bool]:
+    """One-shot migration: assign class_id/class_label to legacy records.
+
+    Records without ``class_id`` get one derived from their ``start_time``,
+    assuming module=``default_module`` (the only module historically present
+    in saved_sessions.json). Idempotent.
+    """
+    from learning_dashboard.lab_classes import (
+        class_id_for_timestamp,
+        class_label_for_timestamp,
+    )
+
+    changed = False
+    out: list[dict] = []
+    for record in sessions:
+        if not isinstance(record, dict):
+            out.append(record)
+            continue
+        if record.get("class_id"):
+            out.append(record)
+            continue
+        start_iso = record.get("start_time")
+        cid = class_id_for_timestamp(default_module, start_iso) if start_iso else None
+        if not cid:
+            out.append(record)
+            continue
+        record = dict(record)
+        record["class_id"] = cid
+        record["class_label"] = class_label_for_timestamp(default_module, start_iso)
+        out.append(record)
+        changed = True
+    return out, changed
+
+
 def load_saved_sessions() -> list[dict]:
     """Return saved session records sorted by newest end_time first."""
     payload = _read_saved_sessions_payload()
     sessions = payload.get("sessions", [])
+
+    backfilled, changed = _backfill_saved_session_class_ids(sessions)
+    if changed:
+        try:
+            _write_saved_sessions_payload(
+                {
+                    "version": config.SAVED_SESSIONS_VERSION,
+                    "sessions": backfilled,
+                }
+            )
+        except OSError:
+            pass
+        sessions = backfilled
 
     deduped: dict[str, dict] = {}
     for record in sessions:

@@ -175,6 +175,8 @@ class SavedSession(BaseModel):
     students: int | None = None
     flagged: int | None = None
     module_filter: str | None = None
+    class_id: str | None = None
+    class_label: str | None = None
 
 
 class ProgressionPoint(BaseModel):
@@ -384,6 +386,20 @@ class LabState(BaseModel):
     allow_self_allocation: bool
     lab_assistants: list[LabAssistant]
     assignments: list[LabAssignment]
+    class_id: str | None = None
+    class_label: str | None = None
+
+
+class StartLabSessionRequest(BaseModel):
+    """POST /api/lab/start payload.
+
+    The simple path is ``{"module": "coa122"}`` — the backend derives
+    ``class_id``/``class_label`` from the module + current time. Callers may
+    also send pre-computed ``class_id``/``class_label`` to override.
+    """
+    module: str | None = None
+    class_id: str | None = None
+    class_label: str | None = None
 
 
 class JoinRequest(BaseModel):

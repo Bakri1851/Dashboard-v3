@@ -333,10 +333,63 @@ def _parse_iso_datetime(raw_value) -> Optional[datetime]:
         return None
 
 
+def _backfill_saved_session_class_ids(
+    sessions: list[dict],
+    default_module: str = "coa122",
+) -> tuple[list[dict], bool]:
+    """One-shot migration: assign class_id/class_label to legacy records.
+
+    Records without ``class_id`` get one derived from their ``start_time``,
+    assuming module=``default_module`` (the only module historically present
+    in saved_sessions.json). Records with unparseable timestamps are left
+    untouched so the UI can render them with a "Legacy (time-only)" badge.
+    Idempotent — records already carrying class_id are skipped.
+    """
+    from learning_dashboard.lab_classes import (
+        class_id_for_timestamp,
+        class_label_for_timestamp,
+    )
+
+    changed = False
+    out: list[dict] = []
+    for record in sessions:
+        if not isinstance(record, dict):
+            out.append(record)
+            continue
+        if record.get("class_id"):
+            out.append(record)
+            continue
+        start_iso = record.get("start_time")
+        cid = class_id_for_timestamp(default_module, start_iso) if start_iso else None
+        if not cid:
+            out.append(record)
+            continue
+        record = dict(record)
+        record["class_id"] = cid
+        record["class_label"] = class_label_for_timestamp(default_module, start_iso)
+        out.append(record)
+        changed = True
+    return out, changed
+
+
 def load_saved_sessions() -> list[dict]:
     """Return saved session records sorted by newest end_time first."""
     payload = _read_saved_sessions_payload()
     sessions = payload.get("sessions", [])
+
+    backfilled, changed = _backfill_saved_session_class_ids(sessions)
+    if changed:
+        try:
+            _write_saved_sessions_payload(
+                {
+                    "version": config.SAVED_SESSIONS_VERSION,
+                    "sessions": backfilled,
+                }
+            )
+        except OSError:
+            # Read path must not break on a write failure; in-memory backfill is still valid.
+            pass
+        sessions = backfilled
 
     deduped: dict[str, dict] = {}
     for record in sessions:
@@ -418,12 +471,17 @@ def build_session_record_from_state(now: datetime) -> Optional[dict]:
 
     duration_seconds = max(0, int((now - session_start).total_seconds()))
 
+    class_id = st.session_state.get("class_id") or None
+    class_label = st.session_state.get("class_label") or None
+
     return {
         "id": str(uuid4()),
         "name": session_name,
         "start_time": session_start.isoformat(timespec="seconds"),
         "end_time": now.isoformat(timespec="seconds"),
         "duration_seconds": duration_seconds,
+        "class_id": class_id,
+        "class_label": class_label,
         "context": {
             "dashboard_view": st.session_state.get("dashboard_view", "In Class View"),
             "secondary_module_filter": st.session_state.get(
@@ -466,12 +524,27 @@ def build_retroactive_session_record(
     end_dt = datetime.combine(end_date, end_time)
     duration_seconds = max(0, int((end_dt - start_dt).total_seconds()))
 
+    module_filter = st.session_state.get("secondary_module_filter", "All Modules")
+    derived_module = (
+        module_filter
+        if isinstance(module_filter, str) and module_filter and module_filter != "All Modules"
+        else "coa122"
+    )
+    from learning_dashboard.lab_classes import (
+        class_id_for_timestamp,
+        class_label_for_timestamp,
+    )
+    class_id = class_id_for_timestamp(derived_module, start_dt)
+    class_label = class_label_for_timestamp(derived_module, start_dt)
+
     return {
         "id": str(uuid4()),
         "name": name.strip(),
         "start_time": start_dt.isoformat(timespec="seconds"),
         "end_time": end_dt.isoformat(timespec="seconds"),
         "duration_seconds": duration_seconds,
+        "class_id": class_id,
+        "class_label": class_label,
         "context": {
             "dashboard_view": st.session_state.get("dashboard_view", "In Class View"),
             "secondary_module_filter": st.session_state.get(
@@ -533,6 +606,8 @@ def apply_saved_session_to_state(
     st.session_state["selected_student"] = None
     st.session_state["selected_question"] = None
     st.session_state["loaded_session_id"] = record.get("id")
+    st.session_state["loaded_session_class_id"] = record.get("class_id")
+    st.session_state["loaded_session_class_label"] = record.get("class_label")
     st.session_state["session_name_draft"] = record.get("name", "")
     st.session_state["time_filter_preset"] = saved_preset
     st.session_state["loaded_session_start"] = session_start

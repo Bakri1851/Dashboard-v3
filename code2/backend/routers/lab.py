@@ -25,6 +25,7 @@ from backend.schemas import (
     LabState,
     SetBoolRequest,
     SimpleResult,
+    StartLabSessionRequest,
     StrugglingQuestionRow,
     StudentIdRequest,
 )
@@ -61,6 +62,8 @@ def _to_lab_state(raw: dict) -> LabState:
         allow_self_allocation=bool(raw.get("allow_self_allocation", False)),
         lab_assistants=assistants,
         assignments=assignments,
+        class_id=raw.get("class_id"),
+        class_label=raw.get("class_label"),
     )
 
 
@@ -70,8 +73,16 @@ def get_state() -> LabState:
 
 
 @router.post("/start", response_model=LabState)
-def start() -> LabState:
-    lab_state.start_lab_session()
+def start(req: StartLabSessionRequest | None = None) -> LabState:
+    cid = req.class_id if req else None
+    clabel = req.class_label if req else None
+    if (not cid or not clabel) and req and req.module:
+        from datetime import datetime as _dt
+        from learning_dashboard import lab_classes
+        now = _dt.now()
+        cid = cid or lab_classes.class_id_for_timestamp(req.module, now)
+        clabel = clabel or lab_classes.class_label_for_timestamp(req.module, now)
+    lab_state.start_lab_session(class_id=cid, class_label=clabel)
     invalidate_caches()
     return _to_lab_state(lab_state.read_lab_state())
 

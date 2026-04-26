@@ -30,6 +30,8 @@ def _default_state() -> dict[str, Any]:
         "lab_assistants": {},
         "assignments": {},
         "allow_self_allocation": False,
+        "class_id": None,
+        "class_label": None,
     }
 
 
@@ -58,6 +60,14 @@ def _normalize_state(raw_state: Any) -> dict[str, Any]:
     generated_at = raw_state.get("generated_at")
     if isinstance(generated_at, str) and generated_at:
         state["generated_at"] = generated_at
+
+    class_id = raw_state.get("class_id")
+    if isinstance(class_id, str) and class_id.strip():
+        state["class_id"] = class_id.strip()
+
+    class_label = raw_state.get("class_label")
+    if isinstance(class_label, str) and class_label.strip():
+        state["class_label"] = class_label.strip()
 
     assistants_raw = raw_state.get("lab_assistants", {})
     assistants: dict[str, dict[str, Any]] = {}
@@ -158,7 +168,11 @@ def generate_session_code() -> str:
     return "".join(random.choices(_SESSION_CODE_ALPHABET, k=config.LAB_CODE_LENGTH))
 
 
-def start_lab_session(session_code: Optional[str] = None) -> None:
+def start_lab_session(
+    session_code: Optional[str] = None,
+    class_id: Optional[str] = None,
+    class_label: Optional[str] = None,
+) -> None:
     code = (session_code or "").strip().upper()
     if len(code) != config.LAB_CODE_LENGTH:
         code = generate_session_code()
@@ -169,6 +183,10 @@ def start_lab_session(session_code: Optional[str] = None) -> None:
         state["session_active"] = True
         state["session_start"] = _now_iso()
         state["generated_at"] = _now_iso()
+        if isinstance(class_id, str) and class_id.strip():
+            state["class_id"] = class_id.strip()
+        if isinstance(class_label, str) and class_label.strip():
+            state["class_label"] = class_label.strip()
         _write_state_unlocked(state)
 
 
@@ -179,6 +197,7 @@ def end_lab_session() -> None:
         state["assignments"] = {}
         for info in state["lab_assistants"].values():
             info["assigned_student"] = None
+        # class_id / class_label retained on the inactive record.
         _write_state_unlocked(state)
 
 

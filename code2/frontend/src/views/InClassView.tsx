@@ -167,6 +167,7 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
         onSetModule={setModuleFilter}
         onPickStudent={onPickStudent}
         onPickQuestion={onPickQuestion}
+        sessionActive={sessionActive}
       />
     )
   }
@@ -374,44 +375,46 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
       </AnimatedCard>
       )}
 
-      {/* Module filter */}
-      <AnimatedCard variants={fadeUp} style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-        <span
-          style={{
-            fontFamily: T.fMono,
-            fontSize: 10.5,
-            color: T.ink3,
-            letterSpacing: 1,
-            textTransform: 'uppercase',
-            marginRight: 8,
-          }}
-        >
-          Module
-        </span>
-        {moduleOptions.map((m) => {
-          const active = m === moduleFilter
-          return (
-            <motion.button
-              key={m}
-              onClick={() => setModuleFilter(m)}
-              whileHover={{ y: -1 }}
-              whileTap={{ scale: 0.95 }}
-              style={{
-                padding: '5px 10px',
-                background: active ? T.priorityBg : 'transparent',
-                color: active ? T.priorityFg : T.ink2,
-                border: `1px solid ${active ? T.priorityBg : T.line2}`,
-                borderRadius: 999,
-                fontFamily: T.fSans,
-                fontSize: 12,
-                cursor: 'pointer',
-              }}
-            >
-              {m}
-            </motion.button>
-          )
-        })}
-      </AnimatedCard>
+      {/* Module filter — hidden while a session has locked the module to a specific one */}
+      {!(sessionActive && moduleFilter !== 'All Modules') && (
+        <AnimatedCard variants={fadeUp} style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          <span
+            style={{
+              fontFamily: T.fMono,
+              fontSize: 10.5,
+              color: T.ink3,
+              letterSpacing: 1,
+              textTransform: 'uppercase',
+              marginRight: 8,
+            }}
+          >
+            Module
+          </span>
+          {moduleOptions.map((m) => {
+            const active = m === moduleFilter
+            return (
+              <motion.button
+                key={m}
+                onClick={() => setModuleFilter(m)}
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.95 }}
+                style={{
+                  padding: '5px 10px',
+                  background: active ? T.priorityBg : 'transparent',
+                  color: active ? T.priorityFg : T.ink2,
+                  border: `1px solid ${active ? T.priorityBg : T.line2}`,
+                  borderRadius: 999,
+                  fontFamily: T.fSans,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                }}
+              >
+                {m}
+              </motion.button>
+            )
+          })}
+        </AnimatedCard>
+      )}
 
       {/* Threshold-count chip rows — one per leaderboard */}
       {live && (struggleBuckets.length > 0 || difficultyBuckets.length > 0) && (

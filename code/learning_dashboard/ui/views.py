@@ -44,11 +44,20 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
 
     # Secondary module filter (in main content area, NOT sidebar)
     modules = ["All Modules"] + sorted(df["module"].unique().tolist()) if not df.empty else ["All Modules"]
-    secondary_module = st.selectbox(
-        "Filter by Module",
-        modules,
-        key="secondary_module_filter",
+    locked_to_session = (
+        st.session_state.get("session_active")
+        and st.session_state.get("secondary_module_filter")
+        and st.session_state.get("secondary_module_filter") != "All Modules"
     )
+    if locked_to_session:
+        # Module is locked by the active lab session — read directly, no widget.
+        secondary_module = st.session_state.get("secondary_module_filter", "All Modules")
+    else:
+        secondary_module = st.selectbox(
+            "Filter by Module",
+            modules,
+            key="secondary_module_filter",
+        )
     view_df = data_loader.filter_by_module(df, secondary_module)
 
     if view_df.empty:
@@ -693,6 +702,33 @@ def settings_view(df: pd.DataFrame) -> None:
 
     st.markdown("---")
 
+    st.markdown(
+        f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
+        f'text-transform:uppercase; letter-spacing:2px; font-size:1rem;">Diagnostics</h3>',
+        unsafe_allow_html=True,
+    )
+
+    with st.expander("Upstream `session` field (raw API)", expanded=False):
+        if df.empty or "session" not in df.columns:
+            st.caption("No data loaded — refresh to populate.")
+        else:
+            sessions_col = df["session"].fillna("").astype(str)
+            total = len(sessions_col)
+            empty = int((sessions_col.str.strip() == "").sum())
+            non_empty_pct = 100.0 * (total - empty) / total if total else 0.0
+            st.caption(
+                f"{total:,} records · {non_empty_pct:.1f}% carry a non-empty session value."
+            )
+            counts = sessions_col[sessions_col.str.strip() != ""].value_counts().head(10)
+            if counts.empty:
+                st.caption("All values empty — upstream field is currently unused.")
+            else:
+                st.dataframe(
+                    counts.rename("count").reset_index().rename(columns={"index": "session"})
+                )
+
+    st.markdown("---")
+
 
 def comparison_view(df: pd.DataFrame) -> None:
     """Model comparison view — baseline vs improved models side by side."""
@@ -862,6 +898,8 @@ def previous_sessions_view(df: pd.DataFrame) -> None:
 
         is_loaded = st.session_state.get("loaded_session_id") == session_id
         session_name = record.get("name", "Untitled Session")
+        class_label = record.get("class_label")
+        class_id = record.get("class_id")
         start_at = _format_session_timestamp(record.get("start_time", ""))
         end_at = _format_session_timestamp(record.get("end_time", ""))
         duration = _format_duration(record.get("duration_seconds", 0))
@@ -873,7 +911,12 @@ def previous_sessions_view(df: pd.DataFrame) -> None:
 
         with st.container(border=True):
             loaded_note = " | LOADED" if is_loaded else ""
-            st.markdown(f"**{session_name}**{loaded_note}")
+            primary = class_label if class_label else "Legacy session (time-only)"
+            st.markdown(f"**{primary}**{loaded_note}")
+            secondary_bits = [session_name]
+            if not class_id:
+                secondary_bits.append("⚠ no class id")
+            st.caption(" · ".join(secondary_bits))
             st.caption(
                 f"Start: {start_at} | End: {end_at} | Duration: {duration} | "
                 f"View: {dashboard_view} | Module: {module_filter} | Range: {time_filter_state}"
@@ -902,6 +945,8 @@ def previous_sessions_view(df: pd.DataFrame) -> None:
                             st.session_state["loaded_session_id"] = None
                             st.session_state["loaded_session_start"] = None
                             st.session_state["loaded_session_end"] = None
+                            st.session_state["loaded_session_class_id"] = None
+                            st.session_state["loaded_session_class_label"] = None
                         st.rerun()
                 with cancel_col:
                     if st.button("Cancel", key=f"cancel_delete_session_{session_id}"):

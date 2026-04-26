@@ -8,7 +8,7 @@ import { useFilterStore } from '../../state/filterStore'
 import type { FilterPreset } from '../../state/filterStore'
 import { useApiData } from '../../api/hooks'
 import { api } from '../../api/client'
-import type { AcademicPeriod, FilterPresetMeta, LabState } from '../../types/api'
+import type { AcademicPeriod, FilterPresetMeta, LabState, LiveDataResponse } from '../../types/api'
 
 interface NavItem {
   id: ViewId
@@ -37,7 +37,17 @@ export function Sidebar() {
   const { data: lab, refetch } = useApiData<LabState>('/lab/state', 3_000)
   const { data: presetMeta } = useApiData<FilterPresetMeta[]>('/meta/filter-presets', 0)
   const { data: academicPeriods } = useApiData<AcademicPeriod[]>('/meta/academic-periods', 0)
+  const { data: live } = useApiData<LiveDataResponse>('/live', 30_000)
+  const modules = live?.modules ?? []
+  const [selectedModule, setSelectedModule] = useState<string>('')
   const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    if (modules.length === 0) return
+    if (!selectedModule || !modules.includes(selectedModule)) {
+      setSelectedModule(modules.includes('coa122') ? 'coa122' : modules[0])
+    }
+  }, [modules, selectedModule])
 
   const filter = useFilterStore()
 
@@ -56,14 +66,32 @@ export function Sidebar() {
 
   const startSession = useCallback(async () => {
     setBusy(true)
-    try { await api.post('/lab/start') } catch (e) { console.error('start session failed:', e) } finally { setBusy(false); refetch() }
-  }, [refetch])
+    const payload = selectedModule ? { module: selectedModule } : {}
+    try {
+      await api.post('/lab/start', payload)
+      filter.setPreset('live')
+      if (selectedModule) filter.setModule(selectedModule)
+    } catch (e) {
+      console.error('start session failed:', e)
+    } finally {
+      setBusy(false)
+      refetch()
+    }
+  }, [refetch, selectedModule, filter])
 
   const endSession = useCallback(async () => {
     if (!confirm('End the current lab session? Assistants will be unassigned.')) return
     setBusy(true)
-    try { await api.post('/lab/end') } catch (e) { console.error('end session failed:', e) } finally { setBusy(false); refetch() }
-  }, [refetch])
+    try {
+      await api.post('/lab/end')
+      filter.setModule('All Modules')
+    } catch (e) {
+      console.error('end session failed:', e)
+    } finally {
+      setBusy(false)
+      refetch()
+    }
+  }, [refetch, filter])
 
   const sessionActive = lab?.session_active ?? false
   const sessionCode = lab?.session_code ?? null
@@ -104,32 +132,58 @@ export function Sidebar() {
         <Label>Lab Session</Label>
         <AnimatePresence mode="wait" initial={false}>
           {!sessionActive ? (
-            <motion.button
+            <motion.div
               key="start"
-              onClick={startSession}
-              disabled={busy}
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.2 }}
-              whileHover={{ filter: 'brightness(1.1)' }}
-              whileTap={{ scale: 0.97 }}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                background: T.accent,
-                color: '#ffffff',
-                border: 'none',
-                fontFamily: T.fMono,
-                fontSize: 11,
-                letterSpacing: 1.4,
-                textTransform: 'uppercase',
-                cursor: busy ? 'progress' : 'pointer',
-                opacity: busy ? 0.6 : 1,
-              }}
             >
-              Start Session
-            </motion.button>
+              {modules.length > 0 && (
+                <select
+                  value={selectedModule}
+                  onChange={(e) => setSelectedModule(e.target.value)}
+                  disabled={busy}
+                  style={{
+                    width: '100%',
+                    padding: '6px 8px',
+                    marginBottom: 6,
+                    background: T.card,
+                    color: T.ink,
+                    border: `1px solid ${T.line}`,
+                    fontFamily: T.fMono,
+                    fontSize: 11,
+                  }}
+                >
+                  {modules.map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))}
+                </select>
+              )}
+              <motion.button
+                onClick={startSession}
+                disabled={busy}
+                whileHover={{ filter: 'brightness(1.1)' }}
+                whileTap={{ scale: 0.97 }}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  background: T.accent,
+                  color: '#ffffff',
+                  border: 'none',
+                  fontFamily: T.fMono,
+                  fontSize: 11,
+                  letterSpacing: 1.4,
+                  textTransform: 'uppercase',
+                  cursor: busy ? 'progress' : 'pointer',
+                  opacity: busy ? 0.6 : 1,
+                }}
+              >
+                Start Session
+              </motion.button>
+            </motion.div>
           ) : (
             <motion.div
               key="live"
@@ -154,6 +208,11 @@ export function Sidebar() {
                   {fmtElapsed(elapsedSec)}
                 </span>
               </div>
+              {lab?.class_label && (
+                <div style={{ marginTop: 8, fontFamily: T.fMono, fontSize: 10.5, color: T.ink2 }}>
+                  {lab.class_label}
+                </div>
+              )}
               <div style={{ marginTop: 10, fontFamily: T.fMono, fontSize: 9.5, color: T.ink3, letterSpacing: 1.2, textTransform: 'uppercase' }}>
                 Code
               </div>

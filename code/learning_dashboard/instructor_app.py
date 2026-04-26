@@ -16,6 +16,7 @@ from learning_dashboard.academic_calendar import (
     get_period_date_range,
 )
 from learning_dashboard import lab_state as _lab_state
+from learning_dashboard import lab_classes
 from learning_dashboard.models import measurement
 from learning_dashboard.models import irt
 from learning_dashboard.models import bkt
@@ -42,6 +43,12 @@ def init_session_state() -> None:
         "loaded_session_id": None,
         "loaded_session_start": None,
         "loaded_session_end": None,
+        "loaded_session_class_id": None,
+        "loaded_session_class_label": None,
+        "class_id": None,
+        "class_label": None,
+        "pending_start_class_id": None,
+        "pending_start_class_label": None,
         "session_load_warning": None,
         "pending_delete_session_id": None,
         "pending_session_load_record": None,
@@ -387,20 +394,54 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
         )
 
         if not st.session_state["session_active"]:
+            modules = (
+                sorted(df["module"].dropna().astype(str).unique().tolist())
+                if not df.empty and "module" in df.columns
+                else []
+            )
+            default_module = "coa122" if "coa122" in modules else (modules[0] if modules else "")
+            picked_module = (
+                st.selectbox(
+                    "Module",
+                    modules,
+                    index=modules.index(default_module) if default_module in modules else 0,
+                    key="start_module_selection",
+                )
+                if modules
+                else None
+            )
+
             if st.button("Start Lab Session", key="start_session"):
                 start_time = datetime.now()
+                cid = (
+                    lab_classes.class_id_for_timestamp(picked_module, start_time)
+                    if picked_module
+                    else None
+                )
+                clabel = (
+                    lab_classes.class_label_for_timestamp(picked_module, start_time)
+                    if picked_module
+                    else None
+                )
                 st.session_state["session_active"] = True
                 st.session_state["session_start"] = start_time
+                st.session_state["time_filter_preset"] = "Live Session"
                 st.session_state["pending_remove_assistant_id"] = None
                 st.session_state["session_name_draft"] = (
-                    f"Lab Session {start_time.strftime('%Y-%m-%d %H:%M')}"
+                    clabel or f"Lab Session {start_time.strftime('%Y-%m-%d %H:%M')}"
                 )
                 st.session_state["loaded_session_id"] = None
                 st.session_state["loaded_session_start"] = None
                 st.session_state["loaded_session_end"] = None
+                st.session_state["loaded_session_class_id"] = None
+                st.session_state["loaded_session_class_label"] = None
+                st.session_state["class_id"] = cid
+                st.session_state["class_label"] = clabel
+                if picked_module:
+                    st.session_state["secondary_module_filter"] = picked_module
                 code = _lab_state.generate_session_code()
                 st.session_state["lab_session_code"] = code
-                _lab_state.start_lab_session(code)
+                _lab_state.start_lab_session(code, class_id=cid, class_label=clabel)
                 data_loader.fetch_raw_data.clear()
                 st.rerun()
         else:
@@ -417,6 +458,9 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
                 """,
                 unsafe_allow_html=True,
             )
+            active_class_label = st.session_state.get("class_label")
+            if active_class_label:
+                st.caption(active_class_label)
             code = st.session_state.get("lab_session_code", "")
             if code:
                 _render_lab_code_card(code)
@@ -436,6 +480,9 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
                 st.session_state["lab_session_code"] = None
                 st.session_state["session_active"] = False
                 st.session_state["session_start"] = None
+                st.session_state["class_id"] = None
+                st.session_state["class_label"] = None
+                st.session_state["secondary_module_filter"] = "All Modules"
                 st.session_state["pending_remove_assistant_id"] = None
                 data_loader.fetch_raw_data.clear()
                 st.rerun()
@@ -521,6 +568,9 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
 
         if viewing_saved_session:
             df = data_loader.filter_by_datetime_window(df, loaded_start, loaded_end)
+            loaded_class_id = st.session_state.get("loaded_session_class_id")
+            if loaded_class_id and "class_id" in df.columns:
+                df = df[df["class_id"] == loaded_class_id]
             st.caption(f"Filtered records: {len(df):,} (loaded saved session)")
         else:
             current_preset = st.session_state.get("time_filter_preset", "Today")
@@ -578,6 +628,13 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
                 st.caption("No live session — showing all records.")
             elif preset != "All Time":
                 df = data_loader.filter_by_datetime_window(df, start_dt, end_dt)
+                if (
+                    preset == "Live Session"
+                    and st.session_state.get("session_active")
+                    and st.session_state.get("class_id")
+                    and "class_id" in df.columns
+                ):
+                    df = df[df["class_id"] == st.session_state["class_id"]]
                 st.caption(f"Filtered records: {len(df):,}")
 
         st.markdown("")
@@ -700,6 +757,9 @@ def main() -> None:
             )
             st.stop()
 
+    if not df.empty:
+        df = lab_classes.tag_records(df)
+
     pending_record = st.session_state.get("pending_session_load_record")
     if isinstance(pending_record, dict):
         available_modules = (
@@ -720,6 +780,8 @@ def main() -> None:
         st.session_state["loaded_session_id"] = None
         st.session_state["loaded_session_start"] = None
         st.session_state["loaded_session_end"] = None
+        st.session_state["loaded_session_class_id"] = None
+        st.session_state["loaded_session_class_label"] = None
         st.session_state["session_name_draft"] = ""
         st.session_state["session_load_warning"] = None
         st.session_state["pending_delete_session_id"] = None

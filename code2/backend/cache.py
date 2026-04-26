@@ -15,7 +15,7 @@ from typing import Optional
 import pandas as pd
 from cachetools import TTLCache
 
-from learning_dashboard import analytics, config, data_loader
+from learning_dashboard import analytics, config, data_loader, lab_classes
 from learning_dashboard.models import bkt, improved_struggle, irt
 
 logger = logging.getLogger("backend.cache")
@@ -104,6 +104,12 @@ def _load_dataframe_uncached() -> tuple[pd.DataFrame, str]:
             return _EMPTY_DF.copy(), f"XML parse failed: {type(e).__name__} - {e}"
 
     df = data_loader.normalize_and_clean(records)
+
+    if not df.empty:
+        try:
+            df = lab_classes.tag_records(df)
+        except Exception as e:
+            logger.warning("lab_classes.tag_records raised: %s", e)
 
     if not df.empty and "ai_feedback" in df.columns and "incorrectness" not in df.columns:
         # Cache-lookup only — never block the request path on OpenAI. The
