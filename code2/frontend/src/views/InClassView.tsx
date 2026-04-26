@@ -38,6 +38,7 @@ interface Props {
   onPickQuestion: (id: string) => void
   onOpenLab: () => void
   sessionActive: boolean
+  liveClassId: string | null
 }
 
 const STRUGGLE_COLS: LeaderboardColumn[] = ['rank', 'id', 'level', 'score', 'submissions', 'recent', 'trend']
@@ -59,7 +60,7 @@ const DIFFICULTY_CHIP_HELP: Record<string, string> = {
     'Difficulty score ≥ 0.75. Most students struggle — high incorrectness, many attempts, poor first-fail rate.',
 }
 
-export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionActive }: Props) {
+export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionActive, liveClassId }: Props) {
   const q = useFilterQuery()
   const filter = useFilterStore()
   const inClassViewMode = useUiPrefsStore((s) => s.inClassViewMode)
@@ -98,6 +99,37 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
   const moduleOptions = useMemo(() => {
     return ['All Modules', ...(live?.modules ?? [])]
   }, [live?.modules])
+
+  // When a live session is running or the user has loaded a saved session,
+  // the module is implicit — show exactly one non-clickable pill.
+  // Saved-session class_id slugs are lowercase and stripped of the year
+  // prefix ("coa122"), but the actual `module` column carries the full
+  // value ("25COA122"). Resolve the slug against the live module list so
+  // the backend query matches a real module value rather than the slug.
+  const loadedSessionModule = filter.loadedSessionModule
+  const lockedModule = useMemo(() => {
+    const candidate = sessionActive && liveClassId
+      ? (liveClassId.split('|')[0] || null)
+      : loadedSessionModule
+    if (!candidate) return null
+    const needle = candidate.toLowerCase()
+    const match = (live?.modules ?? []).find(
+      (m) => m.toLowerCase() === needle || m.toLowerCase().includes(needle),
+    )
+    return match ?? candidate
+  }, [sessionActive, liveClassId, loadedSessionModule, live?.modules])
+
+  // Keep the backend query scoped to the locked module while it's set, but
+  // only once we've resolved it against the real module list — pushing an
+  // unresolved slug zeroes out the leaderboards.
+  useEffect(() => {
+    if (!lockedModule) return
+    if (!live?.modules?.length) return
+    if (!live.modules.includes(lockedModule)) return
+    if (moduleFilter !== lockedModule) {
+      setModuleFilter(lockedModule)
+    }
+  }, [lockedModule, moduleFilter, setModuleFilter, live?.modules])
 
   const filteredDifficulty = useMemo<LeaderboardRow[]>(() => {
     if (!difficulty) return []
@@ -168,6 +200,7 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
         onPickStudent={onPickStudent}
         onPickQuestion={onPickQuestion}
         sessionActive={sessionActive}
+        lockedModule={lockedModule}
       />
     )
   }
@@ -375,22 +408,39 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
       </AnimatedCard>
       )}
 
-      {/* Module filter — hidden while a session has locked the module to a specific one */}
-      {!(sessionActive && moduleFilter !== 'All Modules') && (
-        <AnimatedCard variants={fadeUp} style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+      {/* Module filter — collapses to a single non-clickable pill when a
+          live or loaded session has locked the module. */}
+      <AnimatedCard variants={fadeUp} style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+        <span
+          style={{
+            fontFamily: T.fMono,
+            fontSize: 10.5,
+            color: T.ink3,
+            letterSpacing: 1,
+            textTransform: 'uppercase',
+            marginRight: 8,
+          }}
+        >
+          Module
+        </span>
+        {lockedModule ? (
           <span
             style={{
-              fontFamily: T.fMono,
-              fontSize: 10.5,
-              color: T.ink3,
-              letterSpacing: 1,
-              textTransform: 'uppercase',
-              marginRight: 8,
+              padding: '5px 10px',
+              background: T.priorityBg,
+              color: T.priorityFg,
+              border: `1px solid ${T.priorityBg}`,
+              borderRadius: 999,
+              fontFamily: T.fSans,
+              fontSize: 12,
+              cursor: 'default',
             }}
+            title={sessionActive ? 'Locked to the active live session' : 'Locked to the loaded saved session'}
           >
-            Module
+            {lockedModule}
           </span>
-          {moduleOptions.map((m) => {
+        ) : (
+          moduleOptions.map((m) => {
             const active = m === moduleFilter
             return (
               <motion.button
@@ -412,9 +462,9 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
                 {m}
               </motion.button>
             )
-          })}
-        </AnimatedCard>
-      )}
+          })
+        )}
+      </AnimatedCard>
 
       {/* Threshold-count chip rows — one per leaderboard */}
       {live && (struggleBuckets.length > 0 || difficultyBuckets.length > 0) && (

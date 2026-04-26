@@ -18,7 +18,7 @@ import pandas as pd
 from cachetools import TTLCache
 from fastapi import APIRouter, Depends, HTTPException
 
-from backend.cache import filter_df, load_struggle_df
+from backend.cache import load_active_struggle_df
 from backend.deps import TimeWindow, get_dataframe, get_time_window
 from backend.schemas import RagSuggestions
 from learning_dashboard import analytics, lab_state, rag
@@ -54,14 +54,23 @@ async def student_suggestions(
     if df.empty:
         raise HTTPException(status_code=404, detail="No data loaded.")
 
-    struggle_all = load_struggle_df(window.from_, window.to_)
-    row_sel = struggle_all[struggle_all["user"].astype(str) == student_id]
-    if row_sel.empty:
+    if df[df["user"].astype(str) == student_id].empty:
         raise HTTPException(status_code=404, detail=f"Student {student_id!r} not found.")
-    struggle_row = row_sel.iloc[0]
+
+    # Match /student/{id} — uses the active leaderboard (improved when enabled,
+    # baseline otherwise) and honours the module filter, so the prompt's
+    # struggle context lines up with what the page just rendered. Missing rows
+    # downgrade to None instead of 404 — generate_assistant_suggestions reads
+    # struggle fields with getattr defaults.
+    struggle_all = load_active_struggle_df(window.from_, window.to_, window.module)
+    if struggle_all.empty:
+        struggle_row = None
+    else:
+        row_sel = struggle_all[struggle_all["user"].astype(str) == student_id]
+        struggle_row = row_sel.iloc[0] if not row_sel.empty else None
 
     session_id = _session_id()
-    cache_key = (student_id, window.from_ or "", window.to_ or "", session_id)
+    cache_key = (student_id, window.from_ or "", window.to_ or "", window.module or "", session_id)
     bullets = _student_rag_cache.get(cache_key)
     if bullets is None:
         # No single-flight lock here — `threading.Lock` held across `await`

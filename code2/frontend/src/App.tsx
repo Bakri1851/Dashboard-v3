@@ -90,6 +90,7 @@ export default function App() {
             onPickQuestion={(id) => pickQuestion(id)}
             onOpenLab={() => setView('lab')}
             sessionActive={sessionActive}
+            liveClassId={lab?.class_id ?? null}
           />
         )
         break

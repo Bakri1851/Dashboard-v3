@@ -50,6 +50,13 @@ export function PreviousSessionsView() {
       }
       filter.setCustom(s.start_time.slice(0, 10), s.end_time.slice(0, 10))
       filter.setTimes(s.start_time.slice(11, 16) || '00:00', s.end_time.slice(11, 16) || '23:59')
+      const moduleSlug = s.class_id?.split('|')[0] ?? null
+      const lockedModule = moduleSlug
+        ? moduleSlug.toUpperCase()
+        : (s.module_filter && s.module_filter !== 'All Modules' && s.module_filter !== 'All'
+            ? s.module_filter.toUpperCase()
+            : null)
+      filter.setLoadedSession(s.id, lockedModule)
       setView('inclass')
     },
     [filter, setView]

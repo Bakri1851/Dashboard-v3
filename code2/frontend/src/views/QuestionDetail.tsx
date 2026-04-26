@@ -14,6 +14,7 @@ import { Collapsible } from '../components/primitives/Collapsible'
 import { RagPanel } from '../components/RagPanel'
 import { TimelineChart } from '../components/charts/TimelineChart'
 import { useViewStore } from '../state/viewStore'
+import { useUiPrefsStore } from '../state/uiPrefsStore'
 import { AnimatedCard } from '../animation/AnimatedCard'
 import { stagger, fadeUp } from '../animation/motion'
 
@@ -25,6 +26,7 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
     q
   )
   const pickStudent = useViewStore((s) => s.pickStudent)
+  const inClassViewMode = useUiPrefsStore((s) => s.inClassViewMode)
   const lvl = useMemo(
     () => (data ? LEVEL_STYLES[data.level] ?? { fg: T.ink, label: data.level } : null),
     [data]
@@ -198,26 +200,28 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
           <div style={{ fontFamily: T.fMono, fontSize: 11, opacity: 0.75 }}>
             students · {Math.round(data.students * data.avg_attempts)} submissions
           </div>
-          <div style={{ marginTop: 14, borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: 12 }}>
-            <div
-              style={{
-                fontFamily: T.fMono,
-                fontSize: 10.5,
-                opacity: 0.7,
-                letterSpacing: 1.3,
-                textTransform: 'uppercase',
-                marginBottom: 4,
-              }}
-            >
-              <Tooltip content="Composite 0–1 question difficulty. D = 0.28·incorrect_rate + 0.12·avg_time + 0.20·avg_attempts + 0.20·first_fail + 0.20·mean_incorrectness.">
-                <span style={{ cursor: 'help', borderBottom: `1px dotted currentColor` }}>Composite score</span>
-              </Tooltip>
+          {inClassViewMode === 'advanced' && (
+            <div style={{ marginTop: 14, borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: 12 }}>
+              <div
+                style={{
+                  fontFamily: T.fMono,
+                  fontSize: 10.5,
+                  opacity: 0.7,
+                  letterSpacing: 1.3,
+                  textTransform: 'uppercase',
+                  marginBottom: 4,
+                }}
+              >
+                <Tooltip content="Composite 0–1 question difficulty. D = 0.28·incorrect_rate + 0.12·avg_time + 0.20·avg_attempts + 0.20·first_fail + 0.20·mean_incorrectness.">
+                  <span style={{ cursor: 'help', borderBottom: `1px dotted currentColor` }}>Composite score</span>
+                </Tooltip>
+              </div>
+              <div style={{ fontFamily: T.fMono, fontSize: 18, marginBottom: 4 }}>D = {data.score.toFixed(2)}</div>
+              <div style={{ fontFamily: T.fMono, fontSize: 11, opacity: 0.7 }}>
+                0.28·c + 0.12·t + 0.20·a + 0.20·f + 0.20·p
+              </div>
             </div>
-            <div style={{ fontFamily: T.fMono, fontSize: 18, marginBottom: 4 }}>D = {data.score.toFixed(2)}</div>
-            <div style={{ fontFamily: T.fMono, fontSize: 11, opacity: 0.7 }}>
-              0.28·c + 0.12·t + 0.20·a + 0.20·f + 0.20·p
-            </div>
-          </div>
+          )}
         </div>
       </AnimatedCard>
 

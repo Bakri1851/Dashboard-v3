@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { T } from '../theme/tokens'
 import { useApiData } from '../api/hooks'
+import { useFilterQuery } from '../api/filterQuery'
 import type { RagSuggestions } from '../types/api'
 import { SectionLabel } from './primitives/SectionLabel'
 import { Skeleton } from './primitives/Skeleton'
@@ -15,8 +16,9 @@ export function RagPanel({
   subjectId: string
   sectionNumber: number
 }) {
+  const q = useFilterQuery()
   const path = `/rag/${audience}/${encodeURIComponent(subjectId)}`
-  const { data, error, loading } = useApiData<RagSuggestions>(path)
+  const { data, error, loading } = useApiData<RagSuggestions>(path, undefined, q)
   const title = audience === 'student' ? 'Coaching Suggestions · RAG' : 'Suggested Teaching Feedback · RAG'
 
   return (

@@ -24,6 +24,7 @@ interface Props {
   onPickStudent: (id: string) => void
   onPickQuestion: (id: string) => void
   sessionActive: boolean
+  lockedModule: string | null
 }
 
 interface BasicRow {
@@ -87,6 +88,7 @@ export function InClassBasicView({
   onPickStudent,
   onPickQuestion,
   sessionActive,
+  lockedModule,
 }: Props) {
   const studentRows = useMemo(() => scaleCohort(struggle), [struggle])
   const questionRows = useMemo(() => scaleCohort(difficulty), [difficulty])
@@ -106,31 +108,48 @@ export function InClassBasicView({
         boxSizing: 'border-box',
       }}
     >
-      {/* Module filter — hidden while a session has locked the module to a specific one */}
-      {!(sessionActive && currentModule !== 'All Modules') && (
-        <AnimatedCard
-          variants={fadeUp}
+      {/* Module filter — collapses to a single non-clickable pill when a
+          live or loaded session has locked the module. */}
+      <AnimatedCard
+        variants={fadeUp}
+        style={{
+          flex: '0 0 auto',
+          display: 'flex',
+          gap: 6,
+          flexWrap: 'wrap',
+          alignItems: 'center',
+        }}
+      >
+        <span
           style={{
-            flex: '0 0 auto',
-            display: 'flex',
-            gap: 6,
-            flexWrap: 'wrap',
-            alignItems: 'center',
+            fontFamily: T.fMono,
+            fontSize: 10.5,
+            color: T.ink3,
+            letterSpacing: 1,
+            textTransform: 'uppercase',
+            marginRight: 8,
           }}
         >
+          Module
+        </span>
+        {lockedModule ? (
           <span
             style={{
-              fontFamily: T.fMono,
-              fontSize: 10.5,
-              color: T.ink3,
-              letterSpacing: 1,
-              textTransform: 'uppercase',
-              marginRight: 8,
+              padding: '5px 10px',
+              background: T.priorityBg,
+              color: T.priorityFg,
+              border: `1px solid ${T.priorityBg}`,
+              borderRadius: 999,
+              fontFamily: T.fSans,
+              fontSize: 12,
+              cursor: 'default',
             }}
+            title={sessionActive ? 'Locked to the active live session' : 'Locked to the loaded saved session'}
           >
-            Module
+            {lockedModule}
           </span>
-          {moduleOptions.map((m) => {
+        ) : (
+          moduleOptions.map((m) => {
             const active = m === currentModule
             return (
               <motion.button
@@ -152,9 +171,9 @@ export function InClassBasicView({
                 {m}
               </motion.button>
             )
-          })}
-        </AnimatedCard>
-      )}
+          })
+        )}
+      </AnimatedCard>
 
       {/* Students | Questions — fills the remaining viewport height */}
       <AnimatedCard

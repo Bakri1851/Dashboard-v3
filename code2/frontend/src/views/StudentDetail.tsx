@@ -7,6 +7,7 @@ import { useFilterStore, presetNote } from '../state/filterStore'
 import type { SimilarStudent, StudentDetail as StudentDetailData } from '../types/api'
 import { useSettings } from '../api/useSettings'
 import { useViewStore } from '../state/viewStore'
+import { useUiPrefsStore } from '../state/uiPrefsStore'
 import { Pill } from '../components/primitives/Pill'
 import { ScoreBar } from '../components/primitives/ScoreBar'
 import { SectionLabel } from '../components/primitives/SectionLabel'
@@ -35,6 +36,7 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
   const { data: settings } = useSettings()
   const cfEnabled = settings?.runtime.cf_enabled ?? false
   const pickStudent = useViewStore((s) => s.pickStudent)
+  const inClassViewMode = useUiPrefsStore((s) => s.inClassViewMode)
   const { data, error, loading } = useApiData<StudentDetailData>(
     `/student/${encodeURIComponent(studentId)}`,
     undefined,
@@ -178,32 +180,41 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
       </AnimatedCard>
 
       {/* Score components + Top Questions */}
-      <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: 14 }}>
-        <div style={{ padding: 14, background: T.card, border: `1px solid ${T.line}` }}>
-          <SectionLabel n={4}>Score Components</SectionLabel>
-          <HBars
-            items={data.components.map((c) => ({
-              label: c.label,
-              value: c.value,
-              valueLabel: c.value.toFixed(2),
-              color: colorForComponent(c.key, c.value),
-            }))}
-            max={1}
-          />
-          <div
-            style={{
-              marginTop: 10,
-              padding: 10,
-              background: T.bg2,
-              fontFamily: T.fMono,
-              fontSize: 11,
-              color: T.ink2,
-              lineHeight: 1.5,
-            }}
-          >
-            S_raw = {data.components.map((c) => `${c.weight.toFixed(2)}·${c.key}`).join(' + ')}
+      <AnimatedCard
+        variants={fadeUp}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: inClassViewMode === 'advanced' ? 'minmax(0, 1fr) minmax(0, 1.2fr)' : '1fr',
+          gap: 14,
+        }}
+      >
+        {inClassViewMode === 'advanced' && (
+          <div style={{ padding: 14, background: T.card, border: `1px solid ${T.line}` }}>
+            <SectionLabel n={4}>Score Components</SectionLabel>
+            <HBars
+              items={data.components.map((c) => ({
+                label: c.label,
+                value: c.value,
+                valueLabel: c.value.toFixed(2),
+                color: colorForComponent(c.key, c.value),
+              }))}
+              max={1}
+            />
+            <div
+              style={{
+                marginTop: 10,
+                padding: 10,
+                background: T.bg2,
+                fontFamily: T.fMono,
+                fontSize: 11,
+                color: T.ink2,
+                lineHeight: 1.5,
+              }}
+            >
+              S_raw = {data.components.map((c) => `${c.weight.toFixed(2)}·${c.key}`).join(' + ')}
+            </div>
           </div>
-        </div>
+        )}
 
         <div style={{ padding: 14, background: T.card, border: `1px solid ${T.line}` }}>
           <SectionLabel n={5}>Top Questions Attempted</SectionLabel>

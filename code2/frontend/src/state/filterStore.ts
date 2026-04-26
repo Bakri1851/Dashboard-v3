@@ -22,12 +22,18 @@ export interface FilterState {
   /** True once InClassView has auto-switched from 'today' to 'all' because
    *  today returned no records. Prevents ping-ponging between the two. */
   autoFallbackApplied: boolean
+  /** Set when a saved session is opened from Previous Sessions; cleared when
+   *  the time preset moves off 'custom'. Drives the in-class single-pill
+   *  module lock for "viewing a previous session". */
+  loadedSessionId: string | null
+  loadedSessionModule: string | null   // already uppercased, e.g. "COA122"
   setPreset: (p: FilterPreset) => void
   setCustom: (from: string | null, to: string | null) => void
   setTimes: (start: string, end: string) => void
   setAcademicWeek: (label: string | null) => void
   setModule: (m: string) => void
   setAutoFallbackApplied: (v: boolean) => void
+  setLoadedSession: (id: string | null, module: string | null) => void
   reset: () => void
 }
 
@@ -40,16 +46,22 @@ export const useFilterStore = create<FilterState>((set) => ({
   academicWeek: null,
   module: 'All Modules',
   autoFallbackApplied: false,
-  setPreset: (preset) =>
-    // Re-arm the fallback when picking 'today' so an empty today can fall
-    // back to 'all' again on the next /live tick.
-    set(preset === 'today' ? { preset, autoFallbackApplied: false } : { preset }),
+  loadedSessionId: null,
+  loadedSessionModule: null,
+  setPreset: (preset) => {
+    // Leaving 'custom' means the user has navigated away from the loaded
+    // session window; drop the previous-session module lock too.
+    const base = preset === 'today' ? { preset, autoFallbackApplied: false } : { preset }
+    set(preset === 'custom' ? base : { ...base, loadedSessionId: null, loadedSessionModule: null })
+  },
   setCustom: (customFrom, customTo) => set({ customFrom, customTo, preset: 'custom' }),
   setTimes: (timeStart, timeEnd) => set({ timeStart, timeEnd }),
   setAcademicWeek: (academicWeek) =>
     set({ academicWeek, preset: academicWeek ? 'custom' : 'all' }),
   setModule: (module) => set({ module }),
   setAutoFallbackApplied: (autoFallbackApplied) => set({ autoFallbackApplied }),
+  setLoadedSession: (loadedSessionId, loadedSessionModule) =>
+    set({ loadedSessionId, loadedSessionModule }),
   reset: () =>
     set({
       preset: 'all',
@@ -60,6 +72,8 @@ export const useFilterStore = create<FilterState>((set) => ({
       academicWeek: null,
       module: 'All Modules',
       autoFallbackApplied: false,
+      loadedSessionId: null,
+      loadedSessionModule: null,
     }),
 }))
 
