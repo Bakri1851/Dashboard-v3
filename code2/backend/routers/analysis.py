@@ -1,7 +1,10 @@
 """GET /api/analysis — aggregate stats for the Data Analysis view."""
 from __future__ import annotations
 
+import threading
+
 import pandas as pd
+from cachetools import TTLCache
 from fastapi import APIRouter, Depends
 
 from backend.cache import filter_df
@@ -17,6 +20,20 @@ from backend.schemas import (
 from learning_dashboard import academic_calendar
 
 router = APIRouter(tags=["analysis"])
+
+# /api/analysis iterates the full df several times per call. The view isn't
+# live-polled, but the same window is hit repeatedly when the user scrolls
+# between panels. Cache the response by `(from, to, module)` so a re-render
+# is instant.
+_ANALYSIS_TTL = 300
+_analysis_cache: TTLCache = TTLCache(maxsize=8, ttl=_ANALYSIS_TTL)
+_analysis_lock = threading.Lock()
+
+
+def invalidate() -> None:
+    """Drop the analysis result cache. Called from cache.invalidate() so
+    settings POSTs that clear other caches clear this one too."""
+    _analysis_cache.clear()
 
 
 def _timeline_stats(df: pd.DataFrame) -> tuple[list[int], int, int]:
@@ -123,6 +140,20 @@ def get_analysis(
     df: pd.DataFrame = Depends(get_dataframe),
     window: TimeWindow = Depends(get_time_window),
 ) -> AnalysisStats:
+    cache_key = (window.from_ or "", window.to_ or "", window.module or "")
+    cached = _analysis_cache.get(cache_key)
+    if cached is not None:
+        return cached
+    with _analysis_lock:
+        cached = _analysis_cache.get(cache_key)
+        if cached is not None:
+            return cached
+        result = _compute_analysis(df, window)
+        _analysis_cache[cache_key] = result
+        return result
+
+
+def _compute_analysis(df: pd.DataFrame, window: TimeWindow) -> AnalysisStats:
     df = filter_df(df, window.from_, window.to_) if window.active else df
     if df.empty:
         return AnalysisStats(

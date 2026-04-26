@@ -15,6 +15,7 @@ from __future__ import annotations
 import asyncio
 
 import pandas as pd
+from cachetools import TTLCache
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.cache import filter_df, load_struggle_df
@@ -23,6 +24,20 @@ from backend.schemas import RagSuggestions
 from learning_dashboard import analytics, lab_state, rag
 
 router = APIRouter(prefix="/rag", tags=["rag"])
+
+# Hover-prefetch on a leaderboard fires one /rag/student/{id} per row, then
+# clicking opens the panel and refetches. Without a result cache that's an
+# OpenAI round-trip on every interaction. Cache the bullet list — not the
+# full RagSuggestions, so audience/subject_id stay correct on rebuild.
+_RAG_TTL = 600
+_student_rag_cache: TTLCache = TTLCache(maxsize=64, ttl=_RAG_TTL)
+_question_rag_cache: TTLCache = TTLCache(maxsize=64, ttl=_RAG_TTL)
+
+
+def invalidate() -> None:
+    """Drop both RAG result caches. Called from cache.invalidate()."""
+    _student_rag_cache.clear()
+    _question_rag_cache.clear()
 
 
 def _session_id() -> str:
@@ -46,13 +61,20 @@ async def student_suggestions(
     struggle_row = row_sel.iloc[0]
 
     session_id = _session_id()
-    bullets = await asyncio.to_thread(
-        rag.generate_assistant_suggestions,
-        student_id,
-        df,
-        struggle_row,
-        session_id,
-    )
+    cache_key = (student_id, window.from_ or "", window.to_ or "", session_id)
+    bullets = _student_rag_cache.get(cache_key)
+    if bullets is None:
+        # No single-flight lock here — `threading.Lock` held across `await`
+        # would block the event loop. A concurrent miss for the same key
+        # may double-fire OpenAI, which is acceptable.
+        bullets = await asyncio.to_thread(
+            rag.generate_assistant_suggestions,
+            student_id,
+            df,
+            struggle_row,
+            session_id,
+        )
+        _student_rag_cache[cache_key] = bullets or []
     return RagSuggestions(
         audience="student",
         subject_id=student_id,
@@ -87,7 +109,13 @@ async def question_suggestions(
             return []
 
     session_id = _session_id()
-    bullets = await asyncio.to_thread(_work)
+    cache_key = (question_id, session_id)
+    bullets = _question_rag_cache.get(cache_key)
+    if bullets is None:
+        # See note in /student endpoint — no async-unsafe sync lock around the
+        # OpenAI call.
+        bullets = await asyncio.to_thread(_work)
+        _question_rag_cache[cache_key] = bullets or []
     return RagSuggestions(
         audience="question",
         subject_id=question_id,

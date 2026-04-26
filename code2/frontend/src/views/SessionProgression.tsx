@@ -37,7 +37,7 @@ function fmtClock(iso: string): string {
 
 export function SessionProgressionView({ sessionId }: { sessionId: string }) {
   const { data, error, loading } = useApiData<SessionProgression>(
-    `/sessions/${encodeURIComponent(sessionId)}/progression?buckets=20`
+    `/sessions/${encodeURIComponent(sessionId)}/progression`
   )
   const pickStudent = useViewStore((s) => s.pickStudent)
   const setView = useViewStore((s) => s.setView)
