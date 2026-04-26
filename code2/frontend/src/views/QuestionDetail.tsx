@@ -10,6 +10,7 @@ import { SectionLabel } from '../components/primitives/SectionLabel'
 import { AnimatedNumber } from '../components/primitives/AnimatedNumber'
 import { Tooltip } from '../components/primitives/Tooltip'
 import { Skeleton } from '../components/primitives/Skeleton'
+import { Collapsible } from '../components/primitives/Collapsible'
 import { RagPanel } from '../components/RagPanel'
 import { TimelineChart } from '../components/charts/TimelineChart'
 import { useViewStore } from '../state/viewStore'
@@ -66,11 +67,11 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
       variants={stagger}
       initial="initial"
       animate="animate"
-      style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}
+      style={{ padding: '18px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}
     >
       {/* Header + measurement card */}
-      <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 20 }}>
-        <div style={{ padding: '32px 36px', background: T.card, border: `1px solid ${T.line}` }}>
+      <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 16 }}>
+        <div style={{ padding: '20px 26px', background: T.card, border: `1px solid ${T.line}` }}>
           <div
             style={{
               fontFamily: T.fMono,
@@ -78,18 +79,18 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
               color: T.ink3,
               letterSpacing: 1.3,
               textTransform: 'uppercase',
-              marginBottom: 18,
+              marginBottom: 10,
             }}
           >
             Question · {data.id} · {data.module}
           </div>
-          <div style={{ marginBottom: 18 }}>
+          <div style={{ marginBottom: 10 }}>
             <AnimatedNumber
               value={data.score.toFixed(2)}
               duration={0.8}
               style={{
                 fontFamily: T.fSerif,
-                fontSize: 72,
+                fontSize: 52,
                 lineHeight: 0.95,
                 color: lvl?.fg ?? T.ink,
                 fontFeatureSettings: '"tnum"',
@@ -97,17 +98,17 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
               }}
             />
           </div>
-          <div style={{ marginBottom: 28 }}>
+          <div style={{ marginBottom: 14 }}>
             <Pill level={data.level} />
           </div>
 
           <div
             style={{
-              paddingTop: 22,
+              paddingTop: 12,
               borderTop: `1px solid ${T.line}`,
               display: 'grid',
               gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-              gap: 20,
+              gap: 14,
             }}
           >
             {[
@@ -146,7 +147,7 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
                     color: T.ink3,
                     letterSpacing: 1.1,
                     textTransform: 'uppercase',
-                    marginBottom: 8,
+                    marginBottom: 4,
                   }}
                 >
                   <Tooltip content={m.help}>
@@ -157,7 +158,7 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
                   value={m.v}
                   style={{
                     fontFamily: T.fSerif,
-                    fontSize: 24,
+                    fontSize: 20,
                     color: T.ink,
                     fontFeatureSettings: '"tnum"',
                     display: 'inline-block',
@@ -168,7 +169,7 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
           </div>
         </div>
 
-        <div style={{ padding: '28px 28px', background: T.priorityBg, color: T.priorityFg, borderRadius: 2 }}>
+        <div style={{ padding: '18px 22px', background: T.priorityBg, color: T.priorityFg, borderRadius: 2 }}>
           <div
             style={{
               fontFamily: T.fMono,
@@ -176,19 +177,19 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
               opacity: 0.7,
               letterSpacing: 1.3,
               textTransform: 'uppercase',
-              marginBottom: 16,
+              marginBottom: 8,
             }}
           >
             <Tooltip content="Sample size behind this question's difficulty estimate — more students and submissions mean a more reliable score.">
               <span style={{ cursor: 'help', borderBottom: `1px dotted currentColor` }}>Measurement</span>
             </Tooltip>
           </div>
-          <div style={{ marginBottom: 14 }}>
+          <div style={{ marginBottom: 8 }}>
             <AnimatedNumber
               value={String(data.students)}
               style={{
                 fontFamily: T.fSerif,
-                fontSize: 56,
+                fontSize: 42,
                 lineHeight: 0.95,
                 display: 'inline-block',
               }}
@@ -197,7 +198,7 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
           <div style={{ fontFamily: T.fMono, fontSize: 11, opacity: 0.75 }}>
             students · {Math.round(data.students * data.avg_attempts)} submissions
           </div>
-          <div style={{ marginTop: 24, borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: 18 }}>
+          <div style={{ marginTop: 14, borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: 12 }}>
             <div
               style={{
                 fontFamily: T.fMono,
@@ -205,14 +206,14 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
                 opacity: 0.7,
                 letterSpacing: 1.3,
                 textTransform: 'uppercase',
-                marginBottom: 8,
+                marginBottom: 4,
               }}
             >
               <Tooltip content="Composite 0–1 question difficulty. D = 0.28·incorrect_rate + 0.12·avg_time + 0.20·avg_attempts + 0.20·first_fail + 0.20·mean_incorrectness.">
                 <span style={{ cursor: 'help', borderBottom: `1px dotted currentColor` }}>Composite score</span>
               </Tooltip>
             </div>
-            <div style={{ fontFamily: T.fMono, fontSize: 22, marginBottom: 8 }}>D = {data.score.toFixed(2)}</div>
+            <div style={{ fontFamily: T.fMono, fontSize: 18, marginBottom: 4 }}>D = {data.score.toFixed(2)}</div>
             <div style={{ fontFamily: T.fMono, fontSize: 11, opacity: 0.7 }}>
               0.28·c + 0.12·t + 0.20·a + 0.20·f + 0.20·p
             </div>
@@ -221,7 +222,7 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
       </AnimatedCard>
 
       {/* Top strugglers on this question */}
-      <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
+      <AnimatedCard variants={fadeUp} style={{ padding: 14, background: T.card, border: `1px solid ${T.line}` }}>
         <SectionLabel n={1}>Top Strugglers on this Question</SectionLabel>
         {data.top_strugglers.length === 0 ? (
           <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3 }}>
@@ -253,7 +254,7 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
             </thead>
             <tbody>
               <AnimatePresence initial={false}>
-              {data.top_strugglers.map((s) => (
+              {data.top_strugglers.slice(0, 8).map((s) => (
                 <motion.tr
                   key={s.id}
                   layout
@@ -270,7 +271,7 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
                 >
                   <td
                     style={{
-                      padding: '10px 0',
+                      padding: '7px 0',
                       fontFamily: T.fMono,
                       fontSize: 12,
                       color: T.ink,
@@ -281,7 +282,7 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
                   </td>
                   <td
                     style={{
-                      padding: '10px 0',
+                      padding: '7px 0',
                       fontFamily: T.fMono,
                       fontSize: 12,
                       color: T.ink2,
@@ -292,7 +293,7 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
                   </td>
                   <td
                     style={{
-                      padding: '10px 0',
+                      padding: '7px 0',
                       fontFamily: T.fMono,
                       fontSize: 12,
                       color: s.mean_incorrectness > 0.5 ? T.danger : T.ink2,
@@ -301,10 +302,10 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
                   >
                     {s.mean_incorrectness.toFixed(2)}
                   </td>
-                  <td style={{ padding: '10px 0', borderBottom: `1px solid ${T.line2}` }}>
+                  <td style={{ padding: '7px 0', borderBottom: `1px solid ${T.line2}` }}>
                     {s.struggle_level ? <Pill level={s.struggle_level} /> : <span style={{ color: T.ink3 }}>—</span>}
                   </td>
-                  <td style={{ padding: '10px 0', borderBottom: `1px solid ${T.line2}`, width: 160 }}>
+                  <td style={{ padding: '7px 0', borderBottom: `1px solid ${T.line2}`, width: 160 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <ScoreBar
                         value={s.struggle_score}
@@ -319,7 +320,7 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
                   </td>
                   <td
                     style={{
-                      padding: '10px 0',
+                      padding: '7px 0',
                       borderBottom: `1px solid ${T.line2}`,
                       textAlign: 'right',
                       fontFamily: T.fMono,
@@ -338,64 +339,70 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
         )}
       </AnimatedCard>
 
-      {/* Mistake clusters */}
-      <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
-        <SectionLabel n={2}>Mistake Clusters</SectionLabel>
-        {data.mistake_clusters.length === 0 ? (
-          <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3 }}>
-            Not enough incorrect submissions for clustering (min 3 wrong answers required).
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
-            {data.mistake_clusters.map((c, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.05, ease: 'easeOut' }}
-                whileHover={{ y: -2, borderColor: T.accent }}
-                style={{ padding: '18px 20px', border: `1px solid ${T.line}`, background: T.bg2 }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 16 }}>
-                  <div style={{ fontFamily: T.fSans, fontSize: 14, fontWeight: 500, color: T.ink, lineHeight: 1.3 }}>
-                    {c.label}
-                  </div>
-                  <div style={{ fontFamily: T.fSerif, fontSize: 22, color: T.accent, fontFeatureSettings: '"tnum"' }}>
-                    <AnimatedNumber
-                      value={String(Math.round(c.percent_of_wrong * 100))}
-                      style={{ display: 'inline-block' }}
-                    />
-                    <span style={{ fontSize: 13, color: T.ink3 }}>%</span>
-                  </div>
-                </div>
-                <div style={{ marginTop: 10 }}>
-                  <ScoreBar value={c.percent_of_wrong} color={T.accent} width={280} height={2} />
-                </div>
-                <div style={{ marginTop: 14 }}>
-                  {c.example_answers.map((ex, j) => (
-                    <div
-                      key={j}
-                      style={{
-                        fontFamily: T.fMono,
-                        fontSize: 11.5,
-                        color: T.ink2,
-                        padding: '5px 0',
-                        borderTop: j === 0 ? 'none' : `1px dashed ${T.line2}`,
-                      }}
-                    >
-                      {ex}
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </AnimatedCard>
-
       {/* RAG teaching feedback */}
       <AnimatedCard variants={fadeUp}>
-        <RagPanel audience="question" subjectId={data.id} sectionNumber={3} />
+        <RagPanel audience="question" subjectId={data.id} sectionNumber={2} />
+      </AnimatedCard>
+
+      {/* Mistake clusters — collapsed by default, sits below RAG */}
+      <AnimatedCard variants={fadeUp}>
+        <Collapsible
+          n={3}
+          title="Mistake Clusters"
+          count={data.mistake_clusters.length}
+          defaultOpen={false}
+        >
+          {data.mistake_clusters.length === 0 ? (
+            <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3 }}>
+              Not enough incorrect submissions for clustering (min 3 wrong answers required).
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+              {data.mistake_clusters.map((c, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.05, ease: 'easeOut' }}
+                  whileHover={{ y: -2, borderColor: T.accent }}
+                  style={{ padding: '12px 14px', border: `1px solid ${T.line}`, background: T.bg2 }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
+                    <div style={{ fontFamily: T.fSans, fontSize: 13, fontWeight: 500, color: T.ink, lineHeight: 1.3 }}>
+                      {c.label}
+                    </div>
+                    <div style={{ fontFamily: T.fSerif, fontSize: 18, color: T.accent, fontFeatureSettings: '"tnum"' }}>
+                      <AnimatedNumber
+                        value={String(Math.round(c.percent_of_wrong * 100))}
+                        style={{ display: 'inline-block' }}
+                      />
+                      <span style={{ fontSize: 12, color: T.ink3 }}>%</span>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: 6 }}>
+                    <ScoreBar value={c.percent_of_wrong} color={T.accent} width={240} height={2} />
+                  </div>
+                  <div style={{ marginTop: 8 }}>
+                    {c.example_answers.map((ex, j) => (
+                      <div
+                        key={j}
+                        style={{
+                          fontFamily: T.fMono,
+                          fontSize: 11.5,
+                          color: T.ink2,
+                          padding: '4px 0',
+                          borderTop: j === 0 ? 'none' : `1px dashed ${T.line2}`,
+                        }}
+                      >
+                        {ex}
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </Collapsible>
       </AnimatedCard>
 
       {/* Recent attempts */}
@@ -507,9 +514,10 @@ export function QuestionDetailView({ questionId }: { questionId: string }) {
       </AnimatedCard>
 
       {/* Attempt timeline — hour-of-day distribution for this question */}
-      <AnimatedCard variants={fadeUp} style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
-        <SectionLabel n={5}>Attempt Timeline</SectionLabel>
-        <TimelineChart data={data.timeline_24h} semantic="hour_of_day" />
+      <AnimatedCard variants={fadeUp}>
+        <Collapsible n={5} title="Attempt Timeline" defaultOpen={false}>
+          <TimelineChart data={data.timeline_24h} semantic="hour_of_day" />
+        </Collapsible>
       </AnimatedCard>
     </motion.div>
   )

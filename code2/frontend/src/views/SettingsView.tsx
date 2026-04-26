@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { T, THEMES } from '../theme/tokens'
 import { useTheme } from '../theme/ThemeContext'
 import { useSettings } from '../api/useSettings'
+import { useUiPrefsStore } from '../state/uiPrefsStore'
 import { SectionLabel } from '../components/primitives/SectionLabel'
 import { AnimatedCard } from '../animation/AnimatedCard'
 import { stagger, fadeUp } from '../animation/motion'
@@ -11,6 +12,8 @@ const AUTO_REFRESH_OPTIONS = [5, 10, 15, 30, 60, 120, 300]
 export function SettingsView() {
   const { theme, setTheme, accents, accentId, setAccent } = useTheme()
   const { data, error, loading, update, reset } = useSettings()
+  const inClassViewMode = useUiPrefsStore((s) => s.inClassViewMode)
+  const setInClassViewMode = useUiPrefsStore((s) => s.setInClassViewMode)
 
   return (
     <motion.div
@@ -96,6 +99,25 @@ export function SettingsView() {
         </div>
       </AnimatedCard>
 
+      {/* Display — local UI prefs (no backend dependency) */}
+      <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
+        <SectionLabel n={2}>Display</SectionLabel>
+        <ToggleRow
+          label="In-class layout"
+          options={[
+            { id: 'basic', label: 'Basic' },
+            { id: 'advanced', label: 'Advanced' },
+          ]}
+          active={inClassViewMode}
+          onChange={(v) => setInClassViewMode(v as 'basic' | 'advanced')}
+        />
+        <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3, marginTop: 12, lineHeight: 1.6 }}>
+          Basic layout shows one row per student / question with a colour-coded bar. Bar lengths are
+          stretched across the current cohort so small score differences stay visible. Advanced layout
+          keeps the full leaderboard, distributions, and timeline view.
+        </div>
+      </AnimatedCard>
+
       {loading && !data && (
         <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3 }}>loading backend config…</div>
       )}
@@ -107,7 +129,7 @@ export function SettingsView() {
         <>
           {/* Scoring Models */}
           <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
-            <SectionLabel n={2}>Scoring Models</SectionLabel>
+            <SectionLabel n={3}>Scoring Models</SectionLabel>
             <ToggleRow
               label="Struggle model"
               options={[
@@ -171,7 +193,7 @@ export function SettingsView() {
               opacity: data.runtime.struggle_model === 'improved' ? 1 : 0.55,
             }}
           >
-            <SectionLabel n={3}>BKT Parameters</SectionLabel>
+            <SectionLabel n={4}>BKT Parameters</SectionLabel>
             {data.runtime.struggle_model !== 'improved' && (
               <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3, marginBottom: 14 }}>
                 Enabled only when struggle model is set to "Improved". Change the sliders anyway —
@@ -188,7 +210,7 @@ export function SettingsView() {
 
           {/* Environment */}
           <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
-            <SectionLabel n={4}>Environment</SectionLabel>
+            <SectionLabel n={5}>Environment</SectionLabel>
             <ToggleRow
               label="Sound effects"
               options={[
@@ -278,7 +300,7 @@ export function SettingsView() {
 
           {/* Read-only config reference (unchanged from Phase 3) */}
           <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
-            <SectionLabel n={5}>Read-only config reference</SectionLabel>
+            <SectionLabel n={6}>Read-only config reference</SectionLabel>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16 }}>
               <InfoBlock title="Struggle weights (sum = 1.00)">
                 {Object.entries(data.struggle_weights).map(([k, v]) => (

@@ -13,6 +13,7 @@ import { SectionLabel } from '../components/primitives/SectionLabel'
 import { AnimatedNumber } from '../components/primitives/AnimatedNumber'
 import { Tooltip } from '../components/primitives/Tooltip'
 import { Skeleton, SkeletonStatCard } from '../components/primitives/Skeleton'
+import { Collapsible } from '../components/primitives/Collapsible'
 import { Spark } from '../components/charts/Spark'
 import { HBars } from '../components/charts/HBars'
 import { TimelineChart } from '../components/charts/TimelineChart'
@@ -86,11 +87,11 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
       variants={stagger}
       initial="initial"
       animate="animate"
-      style={{ padding: '28px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}
+      style={{ padding: '18px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}
     >
       {/* Header card + metric strip */}
-      <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 20 }}>
-        <div style={{ padding: '28px 32px', background: T.card, border: `1px solid ${T.line}` }}>
+      <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 16 }}>
+        <div style={{ padding: '18px 24px', background: T.card, border: `1px solid ${T.line}` }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20 }}>
             <div>
               <div style={{ fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, letterSpacing: 1.3, textTransform: 'uppercase' }}>
@@ -101,15 +102,15 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
                 duration={0.8}
                 style={{
                   fontFamily: T.fSerif,
-                  fontSize: 72,
+                  fontSize: 52,
                   lineHeight: 0.95,
                   color: lvl?.fg ?? T.ink,
-                  marginTop: 10,
+                  marginTop: 6,
                   fontFeatureSettings: '"tnum"',
                   display: 'inline-block',
                 }}
               />
-              <div style={{ marginTop: 10 }}>
+              <div style={{ marginTop: 8 }}>
                 <Pill level={data.level} />
               </div>
             </div>
@@ -117,10 +118,10 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
               <div style={{ fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, letterSpacing: 1.3, textTransform: 'uppercase' }}>
                 Trajectory, last {data.trajectory.length}
               </div>
-              <div style={{ marginTop: 12 }}>
-                <Spark data={data.trajectory} width={240} height={70} color={lvl?.fg ?? T.ink} fill domain={[0, 1]} />
+              <div style={{ marginTop: 8 }}>
+                <Spark data={data.trajectory} width={200} height={56} color={lvl?.fg ?? T.ink} fill domain={[0, 1]} />
               </div>
-              <div style={{ fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, marginTop: 8 }}>
+              <div style={{ fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, marginTop: 6 }}>
                 {data.trend >= 0 ? '+' : ''}
                 {data.trend.toFixed(2)} recent slope
               </div>
@@ -128,13 +129,13 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
           </div>
           <div
             style={{
-              marginTop: 24,
-              paddingTop: 20,
+              marginTop: 14,
+              paddingTop: 12,
               borderTop: `1px solid ${T.line}`,
               fontFamily: T.fSans,
               fontSize: 13,
               color: T.ink2,
-              lineHeight: 1.55,
+              lineHeight: 1.5,
             }}
           >
             <Tooltip content="Plain-English summary of the signals driving this student's composite struggle score. Bayesian shrinkage (K=5) pulls low-submission students back toward the class mean so a single bad answer doesn't spike the score.">
@@ -177,8 +178,8 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
       </AnimatedCard>
 
       {/* Score components + Top Questions */}
-      <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: 20 }}>
-        <div style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
+      <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: 14 }}>
+        <div style={{ padding: 14, background: T.card, border: `1px solid ${T.line}` }}>
           <SectionLabel n={4}>Score Components</SectionLabel>
           <HBars
             items={data.components.map((c) => ({
@@ -191,20 +192,20 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
           />
           <div
             style={{
-              marginTop: 16,
-              padding: 12,
+              marginTop: 10,
+              padding: 10,
               background: T.bg2,
               fontFamily: T.fMono,
               fontSize: 11,
               color: T.ink2,
-              lineHeight: 1.6,
+              lineHeight: 1.5,
             }}
           >
             S_raw = {data.components.map((c) => `${c.weight.toFixed(2)}·${c.key}`).join(' + ')}
           </div>
         </div>
 
-        <div style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
+        <div style={{ padding: 14, background: T.card, border: `1px solid ${T.line}` }}>
           <SectionLabel n={5}>Top Questions Attempted</SectionLabel>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: T.fSans, fontSize: 13 }}>
             <thead>
@@ -231,7 +232,7 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
             </thead>
             <tbody>
               <AnimatePresence initial={false}>
-              {data.top_questions.map((r, i) => (
+              {data.top_questions.slice(0, 6).map((r, i) => (
                 <motion.tr
                   key={i}
                   layout
@@ -245,7 +246,7 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
                 >
                   <td
                     style={{
-                      padding: '9px 0',
+                      padding: '7px 0',
                       fontFamily: T.fMono,
                       fontSize: 12,
                       borderBottom: `1px solid ${T.line2}`,
@@ -259,15 +260,15 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
                   >
                     {r.question}
                   </td>
-                  <td style={{ padding: '9px 0', fontVariantNumeric: 'tabular-nums', borderBottom: `1px solid ${T.line2}` }}>
+                  <td style={{ padding: '7px 0', fontVariantNumeric: 'tabular-nums', borderBottom: `1px solid ${T.line2}` }}>
                     {r.attempts}
                   </td>
-                  <td style={{ padding: '9px 0', borderBottom: `1px solid ${T.line2}` }}>
+                  <td style={{ padding: '7px 0', borderBottom: `1px solid ${T.line2}` }}>
                     {r.difficulty ? <Pill level={r.difficulty} /> : '—'}
                   </td>
                   <td
                     style={{
-                      padding: '9px 0',
+                      padding: '7px 0',
                       fontFamily: T.fMono,
                       fontSize: 12,
                       borderBottom: `1px solid ${T.line2}`,
@@ -289,46 +290,49 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
         </div>
       </AnimatedCard>
 
-      {/* CF similar students */}
-      {cfEnabled && similar && similar.length > 0 && (
-        <AnimatedCard variants={fadeUp} style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
-          <SectionLabel n={6}>Similar Students · Collaborative Filtering</SectionLabel>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
-            {similar.map((s, i) => (
-              <motion.button
-                key={s.id}
-                onClick={() => pickStudent(s.id)}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.04, ease: 'easeOut' }}
-                whileHover={{ y: -2, borderColor: T.accent }}
-                whileTap={{ scale: 0.97 }}
-                style={{ padding: 14, border: `1px solid ${T.line}`, background: T.bg2, textAlign: 'left', cursor: 'pointer' }}
-              >
-                <div style={{ fontFamily: T.fMono, fontSize: 12, color: T.ink, marginBottom: 6 }}>{s.id}</div>
-                <Pill level={s.level} />
-                <div style={{ marginTop: 10, fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, letterSpacing: 1, textTransform: 'uppercase' }}>
-                  COS SIM
-                </div>
-                <div style={{ fontFamily: T.fMono, fontSize: 18, color: T.accent, marginTop: 2 }}>
-                  {s.similarity.toFixed(2)}
-                </div>
-                <div style={{ marginTop: 6, fontFamily: T.fMono, fontSize: 10.5, color: T.ink3 }}>
-                  struggle {s.struggle_score.toFixed(2)}
-                </div>
-              </motion.button>
-            ))}
-          </div>
-          <div style={{ marginTop: 14, fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, lineHeight: 1.6 }}>
-            Ranked by cosine similarity across 5 behavioural features (n̂, t̂, ī, Â, d̂). High similarity = comparable submission patterns.
-          </div>
-        </AnimatedCard>
-      )}
-
       {/* RAG coaching suggestions */}
       <AnimatedCard variants={fadeUp}>
-        <RagPanel audience="student" subjectId={data.id} sectionNumber={7} />
+        <RagPanel audience="student" subjectId={data.id} sectionNumber={6} />
       </AnimatedCard>
+
+      {/* CF similar students — collapsed by default, sits below RAG */}
+      {cfEnabled && similar && similar.length > 0 && (
+        <AnimatedCard variants={fadeUp}>
+          <Collapsible
+            n={7}
+            title="Similar Students · Collaborative Filtering"
+            count={similar.length}
+            defaultOpen={false}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 10 }}>
+              {similar.map((s, i) => (
+                <motion.button
+                  key={s.id}
+                  onClick={() => pickStudent(s.id)}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.04, ease: 'easeOut' }}
+                  whileHover={{ y: -2, borderColor: T.accent }}
+                  whileTap={{ scale: 0.97 }}
+                  style={{ padding: 10, border: `1px solid ${T.line}`, background: T.bg2, textAlign: 'left', cursor: 'pointer' }}
+                >
+                  <div style={{ fontFamily: T.fMono, fontSize: 12, color: T.ink, marginBottom: 4 }}>{s.id}</div>
+                  <Pill level={s.level} />
+                  <div style={{ marginTop: 6, fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, letterSpacing: 1, textTransform: 'uppercase' }}>
+                    COS SIM
+                  </div>
+                  <div style={{ fontFamily: T.fMono, fontSize: 16, color: T.accent, marginTop: 2 }}>
+                    {s.similarity.toFixed(2)}
+                  </div>
+                  <div style={{ marginTop: 4, fontFamily: T.fMono, fontSize: 10.5, color: T.ink3 }}>
+                    struggle {s.struggle_score.toFixed(2)}
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          </Collapsible>
+        </AnimatedCard>
+      )}
 
       {/* Recent submissions */}
       <AnimatedCard variants={fadeUp} style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
@@ -436,9 +440,10 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
       </AnimatedCard>
 
       {/* Submission timeline — hour-of-day distribution for this student */}
-      <AnimatedCard variants={fadeUp} style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
-        <SectionLabel n={9}>Submission Timeline</SectionLabel>
-        <TimelineChart data={data.timeline_24h} semantic="hour_of_day" />
+      <AnimatedCard variants={fadeUp}>
+        <Collapsible n={9} title="Submission Timeline" defaultOpen={false}>
+          <TimelineChart data={data.timeline_24h} semantic="hour_of_day" />
+        </Collapsible>
       </AnimatedCard>
     </motion.div>
   )
@@ -460,7 +465,7 @@ function MetricRow({
       style={{
         display: 'grid',
         gridTemplateColumns: '1fr auto',
-        padding: '14px 18px',
+        padding: '10px 14px',
         background: T.card,
         border: `1px solid ${T.line}`,
         alignItems: 'center',
@@ -476,13 +481,13 @@ function MetricRow({
             label
           )}
         </div>
-        <div style={{ fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, marginTop: 4 }}>{note}</div>
+        <div style={{ fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, marginTop: 2 }}>{note}</div>
       </div>
       <AnimatedNumber
         value={value}
         style={{
           fontFamily: T.fSerif,
-          fontSize: 28,
+          fontSize: 22,
           color: T.ink,
           fontFeatureSettings: '"tnum"',
           whiteSpace: 'nowrap',

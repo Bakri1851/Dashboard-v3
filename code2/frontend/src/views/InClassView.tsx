@@ -9,7 +9,9 @@ import { Skeleton, SkeletonStatCard } from '../components/primitives/Skeleton'
 import { useAutoRefreshInterval } from '../api/useAutoRefreshInterval'
 import { useFilterQuery } from '../api/filterQuery'
 import { useFilterStore, presetNote } from '../state/filterStore'
+import { useUiPrefsStore } from '../state/uiPrefsStore'
 import { useSettings } from '../api/useSettings'
+import { InClassBasicView } from './InClassBasicView'
 import type {
   CFDiagnostics,
   LiveDataResponse,
@@ -22,6 +24,7 @@ import { Stat } from '../components/primitives/Stat'
 import { SectionLabel } from '../components/primitives/SectionLabel'
 import { LevelChips } from '../components/primitives/LevelChips'
 import { Tooltip } from '../components/primitives/Tooltip'
+import { ExpandableCard } from '../components/primitives/ExpandableCard'
 import { Histogram } from '../components/charts/Histogram'
 import { TimelineChart } from '../components/charts/TimelineChart'
 import {
@@ -59,6 +62,7 @@ const DIFFICULTY_CHIP_HELP: Record<string, string> = {
 export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionActive }: Props) {
   const q = useFilterQuery()
   const filter = useFilterStore()
+  const inClassViewMode = useUiPrefsStore((s) => s.inClassViewMode)
   const { data: settings } = useSettings()
   const cfEnabled = settings?.runtime.cf_enabled ?? false
   const liveInterval = useAutoRefreshInterval(10_000)
@@ -149,6 +153,23 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
     filter.autoFallbackApplied && filter.preset === 'all' && records > 0
 
   const submissionsNote = presetNote(filter.preset)
+
+  if (inClassViewMode === 'basic') {
+    return (
+      <InClassBasicView
+        struggle={struggle ?? []}
+        difficulty={difficulty ?? []}
+        struggleBuckets={struggleBuckets}
+        difficultyBuckets={difficultyBuckets}
+        timeline24h={timeline}
+        moduleOptions={moduleOptions}
+        currentModule={moduleFilter}
+        onSetModule={setModuleFilter}
+        onPickStudent={onPickStudent}
+        onPickQuestion={onPickQuestion}
+      />
+    )
+  }
 
   return (
     <motion.div
@@ -439,22 +460,26 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
 
       {/* Two leaderboards */}
       <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 24 }}>
-        <Leaderboard
-          title="Student Struggle"
-          subtitle="Ranked by composite struggle score · click to drill in"
-          cols={STRUGGLE_COLS}
-          rows={struggleRows}
-          onClick={(r) => onPickStudent(r.id)}
-          onHover={(r) => debouncedPrefetch(`/rag/student/${encodeURIComponent(r.id)}`)}
-        />
-        <Leaderboard
-          title="Question Difficulty"
-          subtitle="Ranked by composite difficulty score · click for mistake clusters"
-          cols={DIFFICULTY_COLS}
-          rows={filteredDifficulty}
-          onClick={(r) => onPickQuestion(r.id)}
-          onHover={(r) => debouncedPrefetch(`/rag/question/${encodeURIComponent(r.id)}`)}
-        />
+        <ExpandableCard label="Student Struggle">
+          <Leaderboard
+            title="Student Struggle"
+            subtitle="Ranked by composite struggle score · click to drill in"
+            cols={STRUGGLE_COLS}
+            rows={struggleRows}
+            onClick={(r) => onPickStudent(r.id)}
+            onHover={(r) => debouncedPrefetch(`/rag/student/${encodeURIComponent(r.id)}`)}
+          />
+        </ExpandableCard>
+        <ExpandableCard label="Question Difficulty">
+          <Leaderboard
+            title="Question Difficulty"
+            subtitle="Ranked by composite difficulty score · click for mistake clusters"
+            cols={DIFFICULTY_COLS}
+            rows={filteredDifficulty}
+            onClick={(r) => onPickQuestion(r.id)}
+            onHover={(r) => debouncedPrefetch(`/rag/question/${encodeURIComponent(r.id)}`)}
+          />
+        </ExpandableCard>
       </AnimatedCard>
 
       {strugLoading && !struggle && (
@@ -466,7 +491,11 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
 
       {/* CF panel (when enabled) */}
       {cfEnabled && cf && (
-        <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
+        <AnimatedCard variants={fadeUp}>
+          <ExpandableCard
+            label="Collaborative Filtering"
+            style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}
+          >
           <SectionLabel n={4}>Collaborative Filtering</SectionLabel>
           {cf.fallback ? (
             <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3 }}>
@@ -535,12 +564,13 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
               )}
             </div>
           )}
+          </ExpandableCard>
         </AnimatedCard>
       )}
 
       {/* Distributions + timeline */}
       <AnimatedCard variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr)', gap: 24 }}>
-        <div style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
+        <ExpandableCard label="Struggle Distribution" style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
           <Tooltip content="Count of students falling into each struggle band, using the composite struggle score (0–1).">
             <span style={{ cursor: 'help' }}>
               <SectionLabel n={1}>Struggle Distribution</SectionLabel>
@@ -555,8 +585,8 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
           <div style={{ fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, marginTop: 14, lineHeight: 1.6 }}>
             Thresholds: on track &lt; 0.20 · minor &lt; 0.35 · struggling &lt; 0.50 · needs help ≥ 0.50
           </div>
-        </div>
-        <div style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
+        </ExpandableCard>
+        <ExpandableCard label="Difficulty Distribution" style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
           <Tooltip content="Count of questions in each difficulty band, using the composite difficulty score (0–1).">
             <span style={{ cursor: 'help' }}>
               <SectionLabel n={2}>Difficulty Distribution</SectionLabel>
@@ -571,15 +601,15 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
           <div style={{ fontFamily: T.fMono, fontSize: 10.5, color: T.ink3, marginTop: 14, lineHeight: 1.6 }}>
             D = 0.28·c + 0.12·t + 0.20·a + 0.20·f + 0.20·p &nbsp;·&nbsp; weighted
           </div>
-        </div>
-        <div style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
+        </ExpandableCard>
+        <ExpandableCard label="Submissions, last 24h" style={{ padding: 20, background: T.card, border: `1px solid ${T.line}` }}>
           <Tooltip content="Wall-clock hourly submission counts for the past 24 hours. Always shows live activity, independent of the filter preset.">
             <span style={{ cursor: 'help' }}>
               <SectionLabel n={3}>Submissions, last 24h</SectionLabel>
             </span>
           </Tooltip>
           <TimelineChart data={timeline} semantic="hours_ago" highlightRange={[22, 23]} />
-        </div>
+        </ExpandableCard>
       </AnimatedCard>
     </motion.div>
   )
