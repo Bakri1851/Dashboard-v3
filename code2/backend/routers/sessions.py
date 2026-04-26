@@ -13,8 +13,12 @@ the end state.
 """
 from __future__ import annotations
 
+import json
+import logging
+import threading
 import uuid
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -28,12 +32,74 @@ from backend.schemas import (
     SavedSession,
     SessionProgression,
 )
-from learning_dashboard import analytics, data_loader
+from learning_dashboard import analytics, data_loader, paths
+
+logger = logging.getLogger("backend.sessions")
 
 router = APIRouter(tags=["sessions"])
 
 STRUGGLE_ORDER = ["On Track", "Minor Issues", "Struggling", "Needs Help"]
 DIFFICULTY_ORDER = ["Easy", "Medium", "Hard", "Very Hard"]
+
+# Saved-session progression is expensive (~20 buckets × full struggle +
+# difficulty pass on a 30 k-row session). Saved sessions are immutable, so
+# the result is valid forever — cache in memory + on disk so a re-visit is
+# instant and a uvicorn restart keeps the warm cache.
+_PROGRESSION_LOCK = threading.Lock()
+_PROGRESSION_MEM: dict[tuple[str, int], SessionProgression] = {}
+
+
+def _progression_cache_dir() -> Path:
+    p = paths.DATA_DIR / "progression_cache"
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+def _progression_cache_path(session_id: str, buckets: int) -> Path:
+    return _progression_cache_dir() / f"{session_id}_b{buckets}.json"
+
+
+def _load_progression_from_disk(session_id: str, buckets: int) -> SessionProgression | None:
+    path = _progression_cache_path(session_id, buckets)
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        return SessionProgression(**payload)
+    except (OSError, json.JSONDecodeError, TypeError, ValueError) as exc:
+        logger.warning(
+            "progression cache load failed for %s b%d (%s): %s",
+            session_id, buckets, type(exc).__name__, exc,
+        )
+        return None
+
+
+def _save_progression_to_disk(session_id: str, buckets: int, result: SessionProgression) -> None:
+    path = _progression_cache_path(session_id, buckets)
+    try:
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(result.model_dump_json(), encoding="utf-8")
+        tmp.replace(path)
+    except OSError as exc:
+        logger.warning("progression cache save failed for %s b%d: %s", session_id, buckets, exc)
+
+
+def _purge_progression_cache(session_id: str) -> None:
+    """Drop every cached progression result for ``session_id`` (memory + disk).
+
+    Called when a session is deleted so a re-saved session under the same id
+    cannot serve stale data."""
+    with _PROGRESSION_LOCK:
+        for key in [k for k in _PROGRESSION_MEM if k[0] == session_id]:
+            _PROGRESSION_MEM.pop(key, None)
+        try:
+            for f in _progression_cache_dir().glob(f"{session_id}_b*.json"):
+                try:
+                    f.unlink()
+                except OSError:
+                    pass
+        except OSError:
+            pass
 
 
 class SaveSessionRequest(BaseModel):
@@ -106,6 +172,7 @@ def delete_session(session_id: str) -> list[SavedSession]:
     ok = data_loader.delete_session_record(session_id)
     if not ok:
         raise HTTPException(status_code=404, detail=f"Session {session_id!r} not found.")
+    _purge_progression_cache(session_id)
     return list_sessions()
 
 
@@ -124,7 +191,7 @@ def _bucket_counts(series: pd.Series, order: list[str]) -> list[LevelBucket]:
 @router.get("/sessions/{session_id}/progression", response_model=SessionProgression)
 def get_session_progression(
     session_id: str,
-    buckets: int = Query(default=20, ge=3, le=60, description="Number of time buckets to generate."),
+    buckets: int = Query(default=12, ge=3, le=60, description="Number of time buckets to generate."),
 ) -> SessionProgression:
     """Replay a saved session as `buckets` time-bucket snapshots.
 
@@ -132,7 +199,24 @@ def get_session_progression(
     the struggle and difficulty leaderboards computed over all submissions
     up to `t_end`. The frontend draws the stacked-area progression from
     this series.
+
+    Saved sessions are immutable, so results are cached in memory and on
+    disk by ``(session_id, buckets)`` — a warm hit returns instantly and
+    survives uvicorn restarts.
     """
+    cache_key = (session_id, buckets)
+    cached = _PROGRESSION_MEM.get(cache_key)
+    if cached is not None:
+        return cached
+    with _PROGRESSION_LOCK:
+        cached = _PROGRESSION_MEM.get(cache_key)
+        if cached is not None:
+            return cached
+        on_disk = _load_progression_from_disk(session_id, buckets)
+        if on_disk is not None:
+            _PROGRESSION_MEM[cache_key] = on_disk
+            return on_disk
+
     record = _find_session(session_id)
     session_meta = _as_saved_session(record)
 
@@ -150,21 +234,35 @@ def get_session_progression(
 
     window_df = filter_df(df, start.isoformat(), end.isoformat())
     if window_df.empty or "timestamp" not in window_df.columns:
-        return SessionProgression(session=session_meta, bucket_minutes=0.0, points=[])
+        empty = SessionProgression(session=session_meta, bucket_minutes=0.0, points=[])
+        # Don't persist empty results — a re-fetch after data loads should
+        # rebuild fresh.
+        return empty
 
     duration_s = (end - start).total_seconds()
     bucket_s = max(duration_s / buckets, 60.0)  # never finer than 1 minute
     bucket_minutes = round(bucket_s / 60.0, 2)
 
+    # Sort once, then use DatetimeIndex.searchsorted to find each bucket's
+    # end-index — avoids re-running a boolean mask + .copy() per bucket,
+    # which on a 30 k-row frame meant 12 × full-frame copies.
     ts = pd.to_datetime(window_df["timestamp"], errors="coerce", utc=True)
-    working = window_df.assign(_ts=ts).dropna(subset=["_ts"])
+    working = (
+        window_df.assign(_ts=ts)
+        .dropna(subset=["_ts"])
+        .sort_values("_ts", kind="stable")
+        .reset_index(drop=True)
+    )
+    ts_index = pd.DatetimeIndex(working["_ts"])  # tz-aware; handles searchsorted correctly
     start_utc = pd.Timestamp(start).tz_convert("UTC") if pd.Timestamp(start).tzinfo else pd.Timestamp(start, tz="UTC")
 
     points: list[ProgressionPoint] = []
     for i in range(1, buckets + 1):
         t_end = start_utc + pd.Timedelta(seconds=bucket_s * i)
-        slice_df = working[working["_ts"] <= t_end].drop(columns=["_ts"])
-        if slice_df.empty:
+        # `searchsorted(side="right")` puts equal timestamps inside the bucket
+        # (matching the original `<= t_end` semantics).
+        end_idx = int(ts_index.searchsorted(t_end, side="right"))
+        if end_idx == 0:
             points.append(
                 ProgressionPoint(
                     t_end=t_end.isoformat(),
@@ -177,6 +275,8 @@ def get_session_progression(
                 )
             )
             continue
+
+        slice_df = working.iloc[:end_idx].drop(columns=["_ts"])
 
         try:
             struggle_df = analytics.compute_student_struggle_scores(slice_df)
@@ -217,8 +317,12 @@ def get_session_progression(
             )
         )
 
-    return SessionProgression(
+    result = SessionProgression(
         session=session_meta,
         bucket_minutes=bucket_minutes,
         points=points,
     )
+    with _PROGRESSION_LOCK:
+        _PROGRESSION_MEM[cache_key] = result
+    _save_progression_to_disk(session_id, buckets, result)
+    return result

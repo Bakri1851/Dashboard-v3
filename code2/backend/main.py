@@ -154,6 +154,17 @@ async def lifespan(app: FastAPI):
                 except Exception as e:  # noqa: BLE001
                     logger.warning("prewarm: BKT fit raised: %s", e)
 
+                # Prime the IRT cache so the first /api/models/compare hit
+                # doesn't pay the 30–60 s Rasch fit. load_irt_model already
+                # memoizes via _irt_difficulty_cache.
+                t_irt = _time.monotonic()
+                try:
+                    from backend import cache as _cache
+                    _cache.load_irt_model()
+                    logger.info("prewarm: IRT fit done in %.1fs", _time.monotonic() - t_irt)
+                except Exception as e:  # noqa: BLE001
+                    logger.warning("prewarm: IRT fit raised: %s", e)
+
             t1 = _time.monotonic()
             load_struggle_df()
             logger.info("prewarm: struggle ready in %.1fs", _time.monotonic() - t1)

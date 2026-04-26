@@ -32,13 +32,13 @@ _EMPTY_DF = pd.DataFrame(
     ]
 )
 
-# Analytics caches hold aggregate leaderboards (struggle/difficulty) — 5 min
-# is tolerable because individual live-dispatch events flow through the
-# raw-data path (60 s TTL) and the lab-assistant view. Matching the short
-# raw-data TTL here would trigger a full leaderboard rebuild every minute,
-# which wastes CPU and — during the prewarm window — competes with the
-# background scoring pass for OpenAI throughput.
-_ANALYTICS_TTL = 300  # seconds
+# Analytics caches hold aggregate leaderboards (struggle/difficulty) — 15
+# min is tolerable because individual live-dispatch events flow through the
+# raw-data path (60 s TTL) and the lab-assistant view. The longer TTL stops
+# fixed-window views ("Today", saved-session windows, scrubbing back through
+# Previous Sessions) from rebuilding on every poll cycle; live polling with
+# a rolling `to=` value misses the cache regardless and is unaffected.
+_ANALYTICS_TTL = 900  # seconds
 _IMPROVED_TTL = 600   # seconds — IRT+BKT fits are the most expensive path
 
 _df_cache: TTLCache = TTLCache(maxsize=1, ttl=config.CACHE_TTL)
@@ -426,3 +426,15 @@ def invalidate() -> None:
     _improved_cache.clear()
     _irt_difficulty_cache.clear()
     _cf_cache.clear()
+    # Result caches that live in router modules. Lazy-imported to avoid an
+    # import cycle (the routers import from cache).
+    try:
+        from backend.routers import analysis as _analysis_router
+        _analysis_router.invalidate()
+    except Exception:
+        pass
+    try:
+        from backend.routers import rag as _rag_router
+        _rag_router.invalidate()
+    except Exception:
+        pass
