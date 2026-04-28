@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { T, THEMES } from '../theme/tokens'
 import { useTheme } from '../theme/ThemeContext'
@@ -6,6 +7,7 @@ import { useUiPrefsStore } from '../state/uiPrefsStore'
 import { SectionLabel } from '../components/primitives/SectionLabel'
 import { AnimatedCard } from '../animation/AnimatedCard'
 import { stagger, fadeUp } from '../animation/motion'
+import { api } from '../api/client'
 
 const AUTO_REFRESH_OPTIONS = [5, 10, 15, 30, 60, 120, 300]
 
@@ -262,6 +264,8 @@ export function SettingsView() {
             </div>
           </AnimatedCard>
 
+          <DemoLabSection />
+
           {/* Reset + read-only config reference */}
           <AnimatedCard
             variants={fadeUp}
@@ -491,6 +495,90 @@ function InfoBlock({ title, children }: { title: string; children: React.ReactNo
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>{children}</div>
     </div>
+  )
+}
+
+function DemoLabSection() {
+  const [busy, setBusy] = useState<'seed' | 'end' | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
+
+  const run = async (action: 'seed' | 'end', path: string, doneText: string) => {
+    setBusy(action)
+    setMessage(null)
+    try {
+      await api.post(path, {})
+      setMessage(doneText)
+    } catch (e) {
+      setMessage(`Failed: ${e instanceof Error ? e.message : String(e)}`)
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  return (
+    <AnimatedCard
+      variants={fadeUp}
+      style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}
+    >
+      <SectionLabel n={6}>Demo Lab</SectionLabel>
+      <div
+        style={{
+          fontFamily: T.fMono,
+          fontSize: 11,
+          color: T.ink3,
+          marginBottom: 14,
+          lineHeight: 1.6,
+        }}
+      >
+        Populates a fake live session with 4 assistants so the In-Class assign column
+        is visible without a real lab. Click again to end.
+      </div>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+        <motion.button
+          onClick={() => run('seed', '/lab/seed-demo', 'Demo session seeded — open In Class.')}
+          disabled={busy !== null}
+          whileHover={busy ? undefined : { y: -1 }}
+          whileTap={busy ? undefined : { scale: 0.97 }}
+          style={{
+            padding: '6px 14px',
+            background: 'transparent',
+            color: T.accent,
+            border: `1px solid ${T.accent}`,
+            fontFamily: T.fMono,
+            fontSize: 11,
+            letterSpacing: 1.2,
+            textTransform: 'uppercase',
+            cursor: busy ? 'wait' : 'pointer',
+            opacity: busy && busy !== 'seed' ? 0.4 : 1,
+          }}
+        >
+          {busy === 'seed' ? 'Seeding…' : 'Seed demo lab'}
+        </motion.button>
+        <motion.button
+          onClick={() => run('end', '/lab/end', 'Demo session ended.')}
+          disabled={busy !== null}
+          whileHover={busy ? undefined : { y: -1 }}
+          whileTap={busy ? undefined : { scale: 0.97 }}
+          style={{
+            padding: '6px 14px',
+            background: 'transparent',
+            color: T.danger,
+            border: `1px solid ${T.danger}`,
+            fontFamily: T.fMono,
+            fontSize: 11,
+            letterSpacing: 1.2,
+            textTransform: 'uppercase',
+            cursor: busy ? 'wait' : 'pointer',
+            opacity: busy && busy !== 'end' ? 0.4 : 1,
+          }}
+        >
+          {busy === 'end' ? 'Ending…' : 'End demo lab'}
+        </motion.button>
+        {message && (
+          <span style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink2 }}>{message}</span>
+        )}
+      </div>
+    </AnimatedCard>
   )
 }
 

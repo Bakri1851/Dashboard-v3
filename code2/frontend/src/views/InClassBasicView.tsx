@@ -8,6 +8,8 @@ import { Tooltip } from '../components/primitives/Tooltip'
 import { ExpandableCard } from '../components/primitives/ExpandableCard'
 import { Histogram } from '../components/charts/Histogram'
 import { TimelineChart } from '../components/charts/TimelineChart'
+import { AssignCell } from '../components/lab/AssignCell'
+import type { AssignContext } from '../components/charts/Leaderboard'
 import type { LiveDataResponse, QuestionDifficulty, StudentStruggle } from '../types/api'
 
 type LevelBucket = LiveDataResponse['struggle_buckets'][number]
@@ -25,6 +27,7 @@ interface Props {
   onPickQuestion: (id: string) => void
   sessionActive: boolean
   lockedModule: string | null
+  assignContext?: AssignContext
 }
 
 interface BasicRow {
@@ -89,6 +92,7 @@ export function InClassBasicView({
   onPickQuestion,
   sessionActive,
   lockedModule,
+  assignContext,
 }: Props) {
   const studentRows = useMemo(() => scaleCohort(struggle), [struggle])
   const questionRows = useMemo(() => scaleCohort(difficulty), [difficulty])
@@ -200,6 +204,7 @@ export function InClassBasicView({
               rows={studentRows}
               emptyLabel="No student data yet"
               onClick={onPickStudent}
+              assignContext={assignContext}
             />
           </div>
         </ExpandableCard>
@@ -278,10 +283,12 @@ function BasicList({
   rows,
   emptyLabel,
   onClick,
+  assignContext,
 }: {
   rows: BasicRow[]
   emptyLabel: string
   onClick: (id: string) => void
+  assignContext?: AssignContext
 }) {
   if (rows.length === 0) {
     return (
@@ -293,7 +300,13 @@ function BasicList({
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       {rows.map((r, i) => (
-        <BasicRowView key={r.id} row={r} index={i} onClick={onClick} />
+        <BasicRowView
+          key={r.id}
+          row={r}
+          index={i}
+          onClick={onClick}
+          assignContext={assignContext}
+        />
       ))}
     </div>
   )
@@ -303,27 +316,39 @@ function BasicRowView({
   row,
   index,
   onClick,
+  assignContext,
 }: {
   row: BasicRow
   index: number
   onClick: (id: string) => void
+  assignContext?: AssignContext
 }) {
   const colour = LEVEL_STYLES[row.level]?.fg ?? T.ink2
+  const showAssign = !!assignContext
   return (
-    <motion.button
+    <motion.div
       onClick={() => onClick(row.id)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick(row.id)
+        }
+      }}
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22, delay: Math.min(index, 20) * 0.012, ease: 'easeOut' }}
       whileHover={{ background: T.bg2 }}
       style={{
         display: 'grid',
-        gridTemplateColumns: '120px minmax(0, 1fr) 56px',
+        gridTemplateColumns: showAssign
+          ? '120px minmax(0, 1fr) 56px auto'
+          : '120px minmax(0, 1fr) 56px',
         alignItems: 'center',
         gap: 12,
         padding: '8px 10px',
         background: 'transparent',
-        border: 'none',
         borderBottom: `1px solid ${T.line2}`,
         textAlign: 'left',
         cursor: 'pointer',
@@ -370,6 +395,15 @@ function BasicRowView({
       >
         {row.score.toFixed(2)}
       </span>
-    </motion.button>
+      {showAssign && (
+        <AssignCell
+          studentId={row.id}
+          assignment={assignContext!.assignmentByStudent.get(row.id) ?? null}
+          assistants={assignContext!.assistants}
+          onAssign={assignContext!.onAssign}
+          onUnassign={assignContext!.onUnassign}
+        />
+      )}
+    </motion.div>
   )
 }

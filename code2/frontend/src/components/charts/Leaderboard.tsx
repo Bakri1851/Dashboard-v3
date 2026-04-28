@@ -4,6 +4,7 @@ import { T, LEVEL_STYLES } from '../../theme/tokens'
 import { Pill } from '../primitives/Pill'
 import { ScoreBar } from '../primitives/ScoreBar'
 import { Tooltip } from '../primitives/Tooltip'
+import { AssignCell, type AssignCellAssignment, type AssignCellAssistant } from '../lab/AssignCell'
 import { rowEnter, rowLayoutSpring } from '../../animation/motion'
 
 export type LeaderboardColumn =
@@ -17,6 +18,14 @@ export type LeaderboardColumn =
   | 'students'
   | 'avgAttempts'
   | 'module'
+  | 'assign'
+
+export interface AssignContext {
+  assignmentByStudent: Map<string, AssignCellAssignment>
+  assistants: AssignCellAssistant[]
+  onAssign: (studentId: string, assistantId: string) => void
+  onUnassign: (studentId: string) => void
+}
 
 export interface LeaderboardRow {
   rank: number
@@ -44,6 +53,7 @@ const HEADER: Record<LeaderboardColumn, string> = {
   students: 'Students',
   avgAttempts: 'Avg att.',
   module: 'Module',
+  assign: 'Assign',
 }
 
 const HEADER_HELP: Partial<Record<LeaderboardColumn, string>> = {
@@ -59,6 +69,8 @@ const HEADER_HELP: Partial<Record<LeaderboardColumn, string>> = {
   students: 'Distinct students who attempted this question in the active window.',
   avgAttempts: 'Mean submission attempts per student. High values indicate repeated retries.',
   module: 'Source module / lab for this question.',
+  assign:
+    'Dispatch a free lab assistant to this student. Click the cell to pick from joined assistants; click × on the chip to release.',
 }
 
 function alignFor(col: LeaderboardColumn): 'left' | 'right' {
@@ -74,6 +86,7 @@ export function Leaderboard({
   rows,
   onClick,
   onHover,
+  assignContext,
 }: {
   title: string
   subtitle: string
@@ -81,6 +94,7 @@ export function Leaderboard({
   rows: LeaderboardRow[]
   onClick: (r: LeaderboardRow) => void
   onHover?: (r: LeaderboardRow) => void
+  assignContext?: AssignContext
 }) {
   const [hover, setHover] = useState<string | null>(null)
   const seenRef = useRef<Set<string>>(new Set())
@@ -204,9 +218,10 @@ export function Leaderboard({
                           fontSize: c === 'id' ? 12 : 13,
                           color: T.ink,
                           textAlign: alignFor(c),
+                          overflow: c === 'assign' ? 'visible' : undefined,
                         }}
                       >
-                        {renderCell(c, r)}
+                        {renderCell(c, r, assignContext)}
                       </td>
                     ))}
                   </motion.tr>
@@ -230,7 +245,7 @@ export function Leaderboard({
   )
 }
 
-function renderCell(col: LeaderboardColumn, r: LeaderboardRow) {
+function renderCell(col: LeaderboardColumn, r: LeaderboardRow, ctx?: AssignContext) {
   const val = (r as unknown as Record<string, unknown>)[col]
   switch (col) {
     case 'rank':
@@ -262,6 +277,18 @@ function renderCell(col: LeaderboardColumn, r: LeaderboardRow) {
       return (r.recent ?? 0).toFixed(2)
     case 'avgAttempts':
       return (r.avgAttempts ?? 0).toFixed(1)
+    case 'assign': {
+      if (!ctx) return null
+      return (
+        <AssignCell
+          studentId={r.id}
+          assignment={ctx.assignmentByStudent.get(r.id) ?? null}
+          assistants={ctx.assistants}
+          onAssign={ctx.onAssign}
+          onUnassign={ctx.onUnassign}
+        />
+      )
+    }
     case 'id':
     case 'module':
       return String(val ?? '')

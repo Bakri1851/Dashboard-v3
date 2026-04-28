@@ -32,6 +32,7 @@ def _default_state() -> dict[str, Any]:
         "allow_self_allocation": False,
         "class_id": None,
         "class_label": None,
+        "demo_mode": False,
     }
 
 
@@ -52,6 +53,7 @@ def _normalize_state(raw_state: Any) -> dict[str, Any]:
 
     state["session_active"] = bool(raw_state.get("session_active", False))
     state["allow_self_allocation"] = bool(raw_state.get("allow_self_allocation", False))
+    state["demo_mode"] = bool(raw_state.get("demo_mode", False))
 
     session_start = raw_state.get("session_start")
     if isinstance(session_start, str) and session_start:
@@ -432,3 +434,46 @@ def remove_assistant(assistant_id: str) -> tuple[bool, Optional[str]]:
             return False, err
         _write_state_unlocked(state)
         return True, None
+
+
+_DEMO_ASSISTANTS: tuple[tuple[str, str, int], ...] = (
+    ("amelia_r_demo", "Amelia R.", 25),
+    ("dev_k_demo", "Dev K.", 18),
+    ("noor_h_demo", "Noor H.", 12),
+    ("sam_o_demo", "Sam O.", 6),
+)
+
+DEMO_MODULE = "25COA122"
+DEMO_CLASS_ID = "25COA122|mon|14h"
+DEMO_CLASS_LABEL = "25COA122 Monday 14:00 (demo)"
+
+
+def seed_demo_session() -> None:
+    """Populate a fake live session with four named assistants for UI previews.
+
+    Idempotent: replaces any current state with a fresh demo session. The
+    instructor still calls /lab/end (or end_lab_session) to tear it down.
+    Marks demo_mode=True so the /live, /struggle, and /difficulty endpoints
+    return canned mock data instead of the empty real dataset.
+    """
+    from datetime import timedelta
+
+    start_lab_session(class_id=DEMO_CLASS_ID, class_label=DEMO_CLASS_LABEL)
+
+    with _lock():
+        state = _read_state_unlocked()
+        state["demo_mode"] = True
+        now = datetime.now()
+        for aid, name, minutes_ago in _DEMO_ASSISTANTS:
+            state["lab_assistants"][aid] = {
+                "name": name,
+                "joined_at": (now - timedelta(minutes=minutes_ago)).isoformat(timespec="seconds"),
+                "assigned_student": None,
+            }
+        _write_state_unlocked(state)
+
+
+def is_demo_mode() -> bool:
+    """True when the active session was created via seed_demo_session()."""
+    state = read_lab_state()
+    return bool(state.get("session_active") and state.get("demo_mode"))

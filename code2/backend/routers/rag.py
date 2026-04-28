@@ -18,6 +18,7 @@ import pandas as pd
 from cachetools import TTLCache
 from fastapi import APIRouter, Depends, HTTPException
 
+from backend import demo_data
 from backend.cache import load_active_struggle_df
 from backend.deps import TimeWindow, get_dataframe, get_time_window
 from backend.schemas import RagSuggestions
@@ -51,6 +52,10 @@ async def student_suggestions(
     df: pd.DataFrame = Depends(get_dataframe),
     window: TimeWindow = Depends(get_time_window),
 ) -> RagSuggestions:
+    if demo_data.is_active() and demo_data.has_student(student_id):
+        mock = demo_data.student_rag(student_id)
+        if mock is not None:
+            return mock
     if df.empty:
         raise HTTPException(status_code=404, detail="No data loaded.")
 
@@ -97,6 +102,10 @@ async def question_suggestions(
     question_id: str,
     df: pd.DataFrame = Depends(get_dataframe),
 ) -> RagSuggestions:
+    if demo_data.is_active() and demo_data.has_question(question_id):
+        mock = demo_data.question_rag(question_id)
+        if mock is not None:
+            return mock
     if df.empty:
         raise HTTPException(status_code=404, detail="No data loaded.")
 

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { T } from '../theme/tokens'
 import { prefetchApi, useApiData } from '../api/hooks'
+import { api } from '../api/client'
 import { AnimatedCard } from '../animation/AnimatedCard'
 import { stagger, fadeUp } from '../animation/motion'
 import { AnimatedNumber } from '../components/primitives/AnimatedNumber'
@@ -14,6 +15,7 @@ import { useSettings } from '../api/useSettings'
 import { InClassBasicView } from './InClassBasicView'
 import type {
   CFDiagnostics,
+  LabState,
   LiveDataResponse,
   QuestionDifficulty,
   StudentStruggle,
@@ -29,9 +31,14 @@ import { Histogram } from '../components/charts/Histogram'
 import { TimelineChart } from '../components/charts/TimelineChart'
 import {
   Leaderboard,
+  type AssignContext,
   type LeaderboardColumn,
   type LeaderboardRow,
 } from '../components/charts/Leaderboard'
+import type {
+  AssignCellAssignment,
+  AssignCellAssistant,
+} from '../components/lab/AssignCell'
 
 interface Props {
   onPickStudent: (id: string) => void
@@ -77,6 +84,10 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
   const { data: difficulty, error: diffErr, loading: diffLoading } =
     useApiData<QuestionDifficulty[]>('/difficulty', diffInterval, q)
   const { data: cf } = useApiData<CFDiagnostics>(cfEnabled ? '/cf' : '', cfInterval, q)
+  const { data: labStateData, refetch: refetchLab } = useApiData<LabState>(
+    sessionActive ? '/lab/state' : '',
+    sessionActive ? 5_000 : undefined,
+  )
   const anyError = liveErr || strugErr || diffErr
   const anyLoading = liveLoading || strugLoading || diffLoading
 
@@ -159,6 +170,47 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
     }))
   }, [struggle])
 
+  const struggleCols = useMemo<LeaderboardColumn[]>(
+    () => (sessionActive ? [...STRUGGLE_COLS, 'assign'] : STRUGGLE_COLS),
+    [sessionActive],
+  )
+
+  const assignContext = useMemo<AssignContext | undefined>(() => {
+    if (!sessionActive || !labStateData) return undefined
+    const nameById = new Map<string, string>()
+    const assistants: AssignCellAssistant[] = labStateData.lab_assistants.map((a) => {
+      nameById.set(a.id, a.name)
+      return {
+        id: a.id,
+        name: a.name,
+        joinedAt: a.joined_at,
+        busy: a.assigned_student !== null,
+      }
+    })
+    const assignmentByStudent = new Map<string, AssignCellAssignment>()
+    for (const a of labStateData.assignments) {
+      assignmentByStudent.set(a.student_id, {
+        assistantId: a.assistant_id,
+        assistantName: nameById.get(a.assistant_id) ?? a.assistant_id,
+      })
+    }
+    const post = async (path: string, body: unknown) => {
+      try {
+        await api.post(path, body)
+      } catch (e) {
+        console.error('lab action failed:', e)
+      } finally {
+        refetchLab()
+      }
+    }
+    return {
+      assignmentByStudent,
+      assistants,
+      onAssign: (sid, aid) => void post('/lab/assign', { student_id: sid, assistant_id: aid }),
+      onUnassign: (sid) => void post('/lab/unassign', { student_id: sid }),
+    }
+  }, [sessionActive, labStateData, refetchLab])
+
   // Hero stats
   const records = live?.records ?? 0
   const students = live?.unique_students ?? 0
@@ -201,6 +253,7 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
         onPickQuestion={onPickQuestion}
         sessionActive={sessionActive}
         lockedModule={lockedModule}
+        assignContext={assignContext}
       />
     )
   }
@@ -516,11 +569,16 @@ export function InClassView({ onPickStudent, onPickQuestion, onOpenLab, sessionA
         <ExpandableCard label="Student Struggle">
           <Leaderboard
             title="Student Struggle"
-            subtitle="Ranked by composite struggle score · click to drill in"
-            cols={STRUGGLE_COLS}
+            subtitle={
+              sessionActive
+                ? 'Ranked by composite struggle score · click to drill in · assign assistants inline'
+                : 'Ranked by composite struggle score · click to drill in'
+            }
+            cols={struggleCols}
             rows={struggleRows}
             onClick={(r) => onPickStudent(r.id)}
             onHover={(r) => debouncedPrefetch(`/rag/student/${encodeURIComponent(r.id)}`)}
+            assignContext={assignContext}
           />
         </ExpandableCard>
         <ExpandableCard label="Question Difficulty">

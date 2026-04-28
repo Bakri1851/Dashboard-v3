@@ -25,6 +25,7 @@ import pandas as pd
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
+from backend import demo_data
 from backend.cache import filter_df, load_dataframe
 from backend.schemas import (
     LevelBucket,
@@ -147,7 +148,10 @@ def _as_saved_session(r: dict) -> SavedSession:
 @router.get("/sessions", response_model=list[SavedSession])
 def list_sessions() -> list[SavedSession]:
     raw = data_loader.load_saved_sessions()
-    return [_as_saved_session(r) for r in raw if isinstance(r, dict)]
+    sessions = [_as_saved_session(r) for r in raw if isinstance(r, dict)]
+    if demo_data.is_active():
+        sessions = demo_data.saved_sessions() + sessions
+    return sessions
 
 
 @router.post("/sessions/save", response_model=SavedSession)
@@ -191,6 +195,13 @@ def save_session(req: SaveSessionRequest) -> SavedSession:
 
 @router.delete("/sessions/{session_id}", response_model=list[SavedSession])
 def delete_session(session_id: str) -> list[SavedSession]:
+    if demo_data.has_session(session_id):
+        # Demo sessions are synthesized in-memory; refuse delete with a 400 so
+        # the user knows to end the demo lab instead.
+        raise HTTPException(
+            status_code=400,
+            detail="Demo sessions can't be deleted — end the demo lab in Settings instead.",
+        )
     ok = data_loader.delete_session_record(session_id)
     if not ok:
         raise HTTPException(status_code=404, detail=f"Session {session_id!r} not found.")
@@ -226,6 +237,10 @@ def get_session_progression(
     disk by ``(session_id, buckets)`` — a warm hit returns instantly and
     survives uvicorn restarts.
     """
+    if demo_data.is_active() and demo_data.has_session(session_id):
+        mock = demo_data.session_progression(session_id, buckets)
+        if mock is not None:
+            return mock
     cache_key = (session_id, buckets)
     cached = _PROGRESSION_MEM.get(cache_key)
     if cached is not None:

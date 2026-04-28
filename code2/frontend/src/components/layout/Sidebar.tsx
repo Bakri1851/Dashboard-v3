@@ -8,7 +8,7 @@ import { useFilterStore } from '../../state/filterStore'
 import type { FilterPreset } from '../../state/filterStore'
 import { useApiData } from '../../api/hooks'
 import { api } from '../../api/client'
-import type { AcademicPeriod, FilterPresetMeta, LabState, LiveDataResponse } from '../../types/api'
+import type { AcademicPeriod, LabState, LiveDataResponse } from '../../types/api'
 
 interface NavItem {
   id: ViewId
@@ -24,6 +24,17 @@ const NAV: NavItem[] = [
   { id: 'settings', label: 'Settings' },
 ]
 
+const PRESETS: { id: FilterPreset; label: string }[] = [
+  { id: 'all',          label: 'All Time' },
+  { id: 'live',         label: 'Live Session' },
+  { id: 'today',        label: 'Today' },
+  { id: 'past_hour',    label: 'Past Hour' },
+  { id: 'past_24h',     label: 'Past 24H' },
+  { id: 'current_week', label: 'Current Week' },
+  { id: 'last_week',    label: 'Last Week' },
+  { id: 'custom',       label: 'Custom' },
+]
+
 function fmtElapsed(totalSeconds: number): string {
   const h = Math.floor(totalSeconds / 3600)
   const m = Math.floor((totalSeconds % 3600) / 60)
@@ -35,7 +46,6 @@ export function Sidebar() {
   const { view, setView } = useViewStore()
   const { theme } = useTheme()
   const { data: lab, refetch } = useApiData<LabState>('/lab/state', 3_000)
-  const { data: presetMeta } = useApiData<FilterPresetMeta[]>('/meta/filter-presets', 0)
   const { data: academicPeriods } = useApiData<AcademicPeriod[]>('/meta/academic-periods', 0)
   const { data: live } = useApiData<LiveDataResponse>('/live', 30_000)
   const modules = live?.modules ?? []
@@ -98,7 +108,6 @@ export function Sidebar() {
   const assistants = lab?.lab_assistants ?? []
   const helpingCount = (lab?.assignments ?? []).filter((a) => a.status === 'helping').length
 
-  const presets = presetMeta ?? []
   const isCustom = filter.preset === 'custom'
 
   return (
@@ -253,14 +262,14 @@ export function Sidebar() {
       <div>
         <Label>Time Filter</Label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-          {presets.map((p) => {
-            const active = filter.preset === (p.id as FilterPreset)
+          {PRESETS.map((p) => {
+            const active = filter.preset === p.id
             const disabled = p.id === 'live' && !sessionActive
             return (
               <motion.button
                 key={p.id}
                 disabled={disabled}
-                onClick={() => filter.setPreset(p.id as FilterPreset)}
+                onClick={() => filter.setPreset(p.id)}
                 title={disabled ? 'Requires an active session' : p.label}
                 whileHover={disabled ? undefined : { y: -1 }}
                 whileTap={disabled ? undefined : { scale: 0.94 }}

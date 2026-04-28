@@ -13,6 +13,7 @@ from __future__ import annotations
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+from backend import demo_data
 from backend.deps import TimeWindow, get_dataframe, get_time_window
 from backend.cache import filter_df, invalidate as invalidate_caches
 from backend.schemas import (
@@ -154,6 +155,13 @@ def allow_self_alloc(req: SetBoolRequest) -> SimpleResult:
     return SimpleResult(ok=True)
 
 
+@router.post("/seed-demo", response_model=LabState)
+def seed_demo() -> LabState:
+    lab_state.seed_demo_session()
+    invalidate_caches()
+    return _to_lab_state(lab_state.read_lab_state())
+
+
 @router.get(
     "/student/{student_id}/struggling-questions",
     response_model=list[StrugglingQuestionRow],
@@ -170,6 +178,8 @@ def struggling_questions(
     lab-assistant portal uses this to tell a helper which questions their
     assigned student is doing worst on.
     """
+    if demo_data.is_active() and demo_data.has_student(student_id):
+        return demo_data.student_top_questions(student_id, limit)
     if df.empty or "user" not in df.columns:
         return []
 

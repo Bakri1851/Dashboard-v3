@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A learning analytics dashboard for monitoring student struggle and question difficulty during university lab sessions. Shipped as two separate stacks that coexist in this repo:
 
-- **`code/`** — original Streamlit dashboard (instructor on 8501, mobile lab assistant on 8502). This is the canonical reference implementation and the fallback for the defence demo.
+- **`code/`** — original Streamlit dashboard (instructor on 8501, mobile lab assistant on 8502). This is the canonical reference implementation and the fallback for the defence demo. Do not work on it but look into it if needed
 - **`code2/`** — alternative React + FastAPI frontend (single FastAPI process on 8000 serves both the API and the built React SPA; Vite dev server on 5173 during frontend development). Feature-parity with `code/` was reached in Phase 9 (see `code2/CHECKLIST.md`). `code2/` has **no Streamlit UI** — the old `code2/app.py`, `code2/lab_app.py`, `code2/learning_dashboard/{instructor_app,assistant_app}.py`, and `code2/learning_dashboard/ui/` were removed; only the analytical core (`learning_dashboard/{analytics,data_loader,rag,models,…}`) remains, imported by the FastAPI routers.
 
 Both stacks share live state through `data/lab_session.json` — a file-locked JSON file coordinated through `lab_state.py` and `filelock`, so a Streamlit app in `code/` and the FastAPI backend in `code2/` can run side by side.

@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 from fastapi import APIRouter, Depends
 
+from backend import demo_data
 from backend.cache import filter_df, load_active_difficulty_df, load_active_struggle_df
 from backend.deps import TimeWindow, get_dataframe, get_time_window
 from backend.schemas import (
@@ -78,6 +79,8 @@ def get_live(
     df: pd.DataFrame = Depends(get_dataframe),
     window: TimeWindow = Depends(get_time_window),
 ) -> LiveDataResponse:
+    if demo_data.is_active():
+        return demo_data.live_response()
     # Hero stats + buckets reflect the filter window + module. Timeline stays wall-clock-24h.
     working = filter_df(df, window.from_, window.to_) if (window.from_ or window.to_) else df
     if window.module:
@@ -113,6 +116,8 @@ def get_live(
 
 @router.get("/struggle", response_model=list[StudentStruggle])
 def get_struggle(window: TimeWindow = Depends(get_time_window)) -> list[StudentStruggle]:
+    if demo_data.is_active():
+        return demo_data.struggle_rows()
     s = load_active_struggle_df(window.from_, window.to_, window.module)
     if s.empty:
         return []
@@ -137,6 +142,8 @@ def get_difficulty(
     df: pd.DataFrame = Depends(get_dataframe),
     window: TimeWindow = Depends(get_time_window),
 ) -> list[QuestionDifficulty]:
+    if demo_data.is_active():
+        return demo_data.difficulty_rows()
     q = load_active_difficulty_df(window.from_, window.to_, window.module)
     if q.empty:
         return []

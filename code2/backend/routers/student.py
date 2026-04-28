@@ -4,6 +4,7 @@ from __future__ import annotations
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException
 
+from backend import demo_data
 from backend.cache import filter_df, load_active_difficulty_df, load_active_struggle_df
 from backend.deps import TimeWindow, get_dataframe, get_time_window
 from backend.routers._timeline import hour_of_day_distribution
@@ -43,6 +44,10 @@ def get_student(
     df: pd.DataFrame = Depends(get_dataframe),
     window: TimeWindow = Depends(get_time_window),
 ) -> StudentDetail:
+    if demo_data.is_active() and demo_data.has_student(student_id):
+        mock = demo_data.student_detail(student_id)
+        if mock is not None:
+            return mock
     if df.empty or "user" not in df.columns:
         raise HTTPException(status_code=404, detail="No data loaded")
 
