@@ -7,7 +7,7 @@ cited_in_planned:
   - Ch3 – Design and Modelling
   - Ch4 – Implementation
   - IRT Difficulty Logic
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Byrd et al. — A Limited Memory Algorithm for Bound Constrained Optimization
 

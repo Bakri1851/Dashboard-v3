@@ -14,7 +14,7 @@ cited_in_tex:
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Question Difficulty Logic
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Evaluating task-level struggle detection methods in intelligent tutoring systems for programming
 

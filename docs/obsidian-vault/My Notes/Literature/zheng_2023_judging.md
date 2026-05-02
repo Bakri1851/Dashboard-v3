@@ -8,7 +8,7 @@ cited_in_planned:
   - Ch3 – Design and Modelling
   - Ch4 – Implementation
   - Analytics Engine
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Zheng et al. — Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena
 

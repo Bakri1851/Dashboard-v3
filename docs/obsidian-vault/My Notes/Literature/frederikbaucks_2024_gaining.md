@@ -12,7 +12,7 @@ cited_in_planned:
   - Ch2 – Background and Requirements
   - IRT Difficulty Logic
   - Question Difficulty Logic
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Gaining insights into course difficulty variations using item response theory
 

@@ -8,7 +8,7 @@ cited_in_planned:
   - Ch3 – Design and Modelling
   - Student Struggle Logic
   - Question Difficulty Logic
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # OECD / JRC — Handbook on Constructing Composite Indicators
 

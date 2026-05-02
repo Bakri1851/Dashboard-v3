@@ -8,7 +8,7 @@ cited_in_planned:
   - Ch3 – Design and Modelling
   - Ch4 – Implementation
   - RAG Pipeline - Two-Layer Retrieval
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Lewis et al. — Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks
 

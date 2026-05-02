@@ -12,7 +12,7 @@ cited_in_tex:
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Data Loading and Session Persistence
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Real-time data analytics in retail: A review of USA and global practices
 

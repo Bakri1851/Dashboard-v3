@@ -8,7 +8,7 @@ cited_in_planned:
   - Ch3 – Design and Modelling
   - Ch5 – Results and Evaluation
   - RAG Pipeline - Two-Layer Retrieval
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Kasneci et al. — ChatGPT for Good? Opportunities and Challenges of Large Language Models for Education
 

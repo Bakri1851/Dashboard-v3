@@ -7,7 +7,7 @@ cited_in_planned:
   - Ch2 – Background and Requirements
   - Ch4 – Implementation
   - RAG Pipeline - Two-Layer Retrieval
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Reimers & Gurevych — Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks
 

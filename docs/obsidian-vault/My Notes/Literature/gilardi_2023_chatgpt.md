@@ -6,7 +6,7 @@ cited_in_tex: []
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Ch5 – Results and Evaluation
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Gilardi, Alizadeh & Kubli — ChatGPT Outperforms Crowd-Workers for Text-Annotation Tasks
 

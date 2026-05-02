@@ -6,7 +6,7 @@ cited_in_tex: []
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Analytics Engine
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Resnick et al. — GroupLens: An Open Architecture for Collaborative Filtering of Netnews
 

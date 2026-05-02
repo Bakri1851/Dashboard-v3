@@ -6,7 +6,7 @@ cited_in_tex: []
 cited_in_planned:
   - Ch3 – Design and Modelling
   - Improved Struggle Logic
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Little & Rubin — Statistical Analysis with Missing Data
 

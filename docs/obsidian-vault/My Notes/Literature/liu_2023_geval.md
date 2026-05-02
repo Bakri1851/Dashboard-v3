@@ -6,7 +6,7 @@ cited_in_tex: []
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Ch4 – Implementation
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Liu et al. — G-Eval: NLG Evaluation using GPT-4 with Better Human Alignment
 

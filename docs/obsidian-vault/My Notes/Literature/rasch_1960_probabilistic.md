@@ -7,7 +7,7 @@ cited_in_planned:
   - Ch2 – Background and Requirements
   - Ch3 – Design and Modelling
   - IRT Difficulty Logic
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Rasch — Probabilistic Models for Some Intelligence and Attainment Tests
 

@@ -142,8 +142,7 @@ Canonical early-warning references to replace the three anonymous citations.
 
 Grounds the `r_hat` (retry rate) and `rep_hat` (answer repetition) signals in the 7-signal struggle model.
 
-- [[baker_2008_why|Baker et al. (2008)]] — why students game the system in interactive learning environments
-- [[baker_2004_offtask|Baker, Corbett, Koedinger & Wagner (2004)]] — off-task gaming behaviour in the cognitive tutor classroom
+- [[baker_2008_why|Baker et al. (2008)]] — generalizable detector of when students game the system (UMUAI)
 - [[beck_2013_wheelspinning|Beck & Gong (2013)]] — wheel-spinning: students who fail to master a skill
 
 ### LLM-as-Judge and LLM-in-Education
@@ -179,25 +178,25 @@ Extends the BKT grouping with the seminal Corbett & Anderson paper and modern ba
 Grounds the weighted-sum struggle/difficulty formulas and the `n/(n+K)` shrinkage pull toward class mean.
 
 - [[oecd_2008_handbook|OECD/JRC (2008)]] — handbook on constructing composite indicators
-- [[nardo_2005_tools|Nardo et al. (2005)]] — tools for composite indicators building
+- [[saisana_2005_uncertainty|Saisana, Saltelli & Tarantola (2005)]] — uncertainty and sensitivity analysis as quality-assessment tools for composite indicators (JRSS A)
 - [[efron_1977_stein|Efron & Morris (1977)]] — Stein's paradox in statistics; James-Stein shrinkage
-- [[morris_1983_parametric|Morris (1983)]] — parametric empirical Bayes inference
+- [[gelman_2013_bayesian|Gelman et al. (2013)]] — Bayesian Data Analysis, 3rd ed.; conjugate normal-normal derivation of n/(n+K) shrinkage
 - [[little_2002_statistical|Little & Rubin (2002)]] — statistical analysis with missing data; mean-imputation basis
 - [[draper_1998_applied|Draper & Smith (1998)]] — applied regression analysis; linear slope as trajectory signal
 
-### Forgetting and Time-Decay Models
+### Time-Decay Weighting (EWMA + Temporal CF)
 
 Grounds the exponential time-decay in `A_raw` (30-minute half-life) and the future EWMA smoothing layer.
 
-- [[ebbinghaus_1885_uber|Ebbinghaus (1885)]] — Über das Gedächtnis; origin of the forgetting curve
-- [[wixted_2007_the|Wixted & Carpenter (2007)]] — the Wickelgren power law and the Ebbinghaus savings function
+- [[hunter_1986_the|Hunter (1986)]] — the exponentially weighted moving average; canonical EWMA reference (J. Quality Technology)
+- [[koren_2009_collaborative|Koren (2009)]] — collaborative filtering with temporal dynamics; explicit time-decay weighting in CF (KDD 2009 / CACM 2010)
 
 ### Text Mining, Clustering, and Information Retrieval
 
 Grounds TF-IDF + K-means + silhouette in the mistake-clustering pipeline.
 
 - [[salton_1983_introduction|Salton & McGill (1983)]] — introduction to modern information retrieval
-- [[salton_1968_computer|Salton & Lesk (1968)]] — computer evaluation of indexing and text processing; TF-IDF origin
+- [[salton_1975_a|Salton, Wong & Yang (1975)]] — a vector space model for automatic indexing; canonical TF-IDF / vector-space formulation
 - [[manning_2008_introduction|Manning, Raghavan & Schütze (2008)]] — introduction to information retrieval; modern TF-IDF + clustering textbook
 - [[macqueen_1967_some|MacQueen (1967)]] — some methods for classification and analysis of multivariate observations; K-means origin
 - [[lloyd_1982_least|Lloyd (1982)]] — least squares quantization in PCM; Lloyd's algorithm

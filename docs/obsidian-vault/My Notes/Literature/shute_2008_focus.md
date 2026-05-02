@@ -7,7 +7,7 @@ cited_in_planned:
   - Ch2 – Background and Requirements
   - Ch3 – Design and Modelling
   - RAG Pipeline - Two-Layer Retrieval
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Shute — Focus on Formative Feedback
 

@@ -6,7 +6,7 @@ cited_in_tex: []
 cited_in_planned:
   - Ch4 – Implementation
   - RAG Pipeline - Two-Layer Retrieval
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Malkov & Yashunin — Efficient and Robust Approximate Nearest Neighbor Search using Hierarchical Navigable Small World Graphs
 

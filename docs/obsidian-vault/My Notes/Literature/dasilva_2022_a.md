@@ -9,7 +9,7 @@ cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:22
 cited_in_planned:
   - Ch2 – Background and Requirements
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # A systematic literature review on educational recommender systems for teaching and learning: research trends, limitations and opportunities
 

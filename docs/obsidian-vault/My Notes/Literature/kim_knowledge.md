@@ -11,7 +11,7 @@ cited_in_tex:
 cited_in_planned:
   - Ch2 – Background and Requirements
   - BKT Mastery Logic
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Knowledge tracing in programming education integrating students' questions
 

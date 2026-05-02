@@ -13,7 +13,7 @@ cited_in_tex:
 cited_in_planned:
   - Ch2 – Background and Requirements
   - IRT Difficulty Logic
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # An early warning system to detect at-risk students in online higher education
 

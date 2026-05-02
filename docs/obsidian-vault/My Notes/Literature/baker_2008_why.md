@@ -7,7 +7,7 @@ cited_in_planned:
   - Ch2 – Background and Requirements
   - Ch3 – Design and Modelling
   - Student Struggle Logic
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Baker et al. — Why Students Engage in "Gaming the System" Behavior in Interactive Learning Environments
 

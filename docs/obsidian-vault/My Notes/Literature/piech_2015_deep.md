@@ -7,7 +7,7 @@ cited_in_planned:
   - Ch2 – Background and Requirements
   - Ch3 – Design and Modelling
   - BKT Mastery Logic
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Piech et al. — Deep Knowledge Tracing
 

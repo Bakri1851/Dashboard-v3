@@ -8,7 +8,7 @@ cited_in_planned:
   - Ch3 – Design and Modelling
   - BKT Mastery Logic
   - Improved Struggle Logic
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Corbett & Anderson — Knowledge Tracing: Modeling the Acquisition of Procedural Knowledge
 

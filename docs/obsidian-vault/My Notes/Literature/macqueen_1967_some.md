@@ -6,7 +6,7 @@ cited_in_tex: []
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Question Difficulty Logic
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # MacQueen — Some Methods for Classification and Analysis of Multivariate Observations
 

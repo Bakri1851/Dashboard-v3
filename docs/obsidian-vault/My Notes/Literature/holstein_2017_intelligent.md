@@ -7,7 +7,7 @@ cited_in_planned:
   - Ch2 – Background and Requirements
   - Instructor Dashboard
   - Lab Assistant System
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Holstein, McLaren & Aleven — Intelligent Tutors as Teachers' Aides
 

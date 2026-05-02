@@ -12,7 +12,7 @@ cited_in_tex:
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Student Struggle Logic
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Automatically classifying students in need of support by detecting changes in programming behaviour
 

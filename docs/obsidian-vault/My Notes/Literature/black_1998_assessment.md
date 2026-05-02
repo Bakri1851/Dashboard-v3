@@ -7,7 +7,7 @@ cited_in_planned:
   - Ch2 – Background and Requirements
   - Ch1 – Introduction
   - Student Struggle Logic
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Black & Wiliam — Assessment and Classroom Learning
 

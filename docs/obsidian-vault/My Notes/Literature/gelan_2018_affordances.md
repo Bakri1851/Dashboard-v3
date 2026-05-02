@@ -10,7 +10,7 @@ cited_in_tex:
   - Report/main-sections/requirements-specification.tex:22
 cited_in_planned:
   - Ch2 – Background and Requirements
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Affordances and limitations of learning analytics for computer-assisted language learning: a case study of the VITAL project
 

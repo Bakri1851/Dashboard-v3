@@ -6,7 +6,7 @@ cited_in_tex: []
 cited_in_planned:
   - Ch3 – Design and Modelling
   - Analytics Engine
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Crocker & Algina — Introduction to Classical and Modern Test Theory
 

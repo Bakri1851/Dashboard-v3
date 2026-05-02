@@ -6,7 +6,7 @@ cited_in_tex: []
 cited_in_planned:
   - Ch5 – Results and Evaluation
   - Evaluation Plan
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Hanley & McNeil — The Meaning and Use of the Area under a Receiver Operating Characteristic (ROC) Curve
 

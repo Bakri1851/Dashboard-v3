@@ -11,7 +11,7 @@ cited_in_tex:
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Student Struggle Logic
-last_synced: 2026-05-02
+last_synced: 2026-05-03
 ---
 # Exploring novice programmers' testing behavior: a first step to define coding struggle citation in BibTeX format exploring novice programmer testing behavior: a first step to define coding struggle
 
