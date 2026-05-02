@@ -46,6 +46,33 @@ M. Khajah, ‘Supercharging BKT with multidimensional generalizable IRT and skil
 # Notes%% begin annotations %%
 ## Summary
 
+> [!Cite]
+> [1]
+
+M. Khajah, ‘Supercharging BKT with multidimensional generalizable IRT and skill discovery’. Accessed: Apr. 03, 2026. [Online]. Available: [https://files.eric.ed.gov/fulltext/EJ1430505.pdf](https://files.eric.ed.gov/fulltext/EJ1430505.pdf)
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Khajah, Mohammad
+~
+> **Title**:: Supercharging BKT with multidimensional generalizable IRT and skill discovery
+> **Year**:: Error: `format` can only be applied to dates. Tried for format object
+> **Citekey**:: khajah_supercharging
+> **itemType**:: document
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
 BKT can be strengthened by incorporating IRT-like latent structures; theoretical basis for combining BKT mastery with IRT difficulty in the improved struggle model.
 
 Cited in: [[Ch2 – Background and Requirements]] · [[BKT Mastery Logic]] · [[Improved Struggle Logic]]
@@ -55,8 +82,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-02T16:58:27.641+01:00 %%
+%% Import Date: 2026-05-02T19:06:10.851+01:00 %%
 %% End annotations %%

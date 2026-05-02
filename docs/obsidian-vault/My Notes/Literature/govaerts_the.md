@@ -48,6 +48,36 @@ S. Govaerts, K. Leuven, E. Duval, and K. Verbert, ‘The student activity meter 
 # Notes%% begin annotations %%
 ## Summary
 
+> [!Cite]
+> [1]
+
+S. Govaerts, K. Leuven, E. Duval, and K. Verbert, ‘The student activity meter for awareness and self-reflection’. May 05, 2012.
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Govaerts, Sten
+> **Author**:: Leuven, K
+> **Author**:: Duval, Erik
+> **Author**:: Verbert, Katrien
+~
+> **Title**:: The student activity meter for awareness and self-reflection
+> **Year**:: 2012
+> **Citekey**:: govaerts_the
+> **itemType**:: document
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
 Early learning analytics dashboard (SAM) separating students doing well from at-risk students based on time and resource use; one of the key prior systems surveyed in the background chapter.
 
 Cited in: [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]]
@@ -57,8 +87,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-02T16:58:27.553+01:00 %%
+%% Import Date: 2026-05-02T19:06:10.739+01:00 %%
 %% End annotations %%

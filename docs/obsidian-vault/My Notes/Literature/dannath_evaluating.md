@@ -52,6 +52,37 @@ J. Dannath, A. Deriyeva, and B. Paaßen, ‘Evaluating task-level struggle detec
 # Notes%% begin annotations %%
 ## Summary
 
+> [!Cite]
+> [1]
+
+J. Dannath, A. Deriyeva, and B. Paaßen, ‘Evaluating task-level struggle detection methods in intelligent tutoring systems for programming’, doi: [10.18420/delfi2024_07](https://doi.org/10.18420/delfi2024_07).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Dannath, Jesper
+> **Author**:: Deriyeva, Alina
+> **Author**:: Paaßen, Benjamin
+~
+> **Title**:: Evaluating task-level struggle detection methods in intelligent tutoring systems for programming
+> **Year**:: Error: `format` can only be applied to dates. Tried for format object
+> **Citekey**:: dannath_evaluating
+> **itemType**:: journalArticle
+> **Journal**:: **
+> **DOI**:: 10.18420/delfi2024_07
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
 Task-level struggle detection in ITS; argues that separating task difficulty from student ability is essential for accurate struggle measurement and intervention.
 
 Cited in: [[Ch2 – Background and Requirements]] · [[Question Difficulty Logic]]
@@ -61,8 +92,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-02T16:58:27.329+01:00 %%
+%% Import Date: 2026-05-02T19:06:10.377+01:00 %%
 %% End annotations %%

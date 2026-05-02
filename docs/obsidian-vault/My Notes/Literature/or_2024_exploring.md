@@ -46,6 +46,34 @@ P. Or, ‘Exploring novice programmers’ testing behavior: a first step to defi
 # Notes%% begin annotations %%
 ## Summary
 
+> [!Cite]
+> [1]
+
+P. Or, ‘Exploring novice programmers’ testing behavior: a first step to define coding struggle citation in BibTeX format exploring novice programmer testing behavior: a first step to define coding struggle’, 2024.
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Or, Portland
+~
+> **Title**:: Exploring novice programmers' testing behavior: a first step to define coding struggle citation in BibTeX format exploring novice programmer testing behavior: a first step to define coding struggle
+> **Year**:: 2024
+> **Citekey**:: or_2024_exploring
+> **itemType**:: journalArticle
+> **Journal**:: **
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
 Novice programmer study identifying 4+ consecutive failures as an empirical struggle threshold; underpins the retry-rate signal in the struggle model.
 
 Cited in: [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]]
@@ -55,8 +83,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-02T16:58:28.084+01:00 %%
+%% Import Date: 2026-05-02T19:06:11.671+01:00 %%
 %% End annotations %%

@@ -40,43 +40,43 @@ Warning--empty journal in frederikbaucks_2024_gaining
 Warning--empty journal in leecultura_2023_multimodal
 You've used 36 entries,
             1876 wiz_defined-function locations,
-            653 strings with 10203 characters,
-and the built_in function-call counts, 7779 in all, are:
-= -- 701
-> -- 376
+            667 strings with 10913 characters,
+and the built_in function-call counts, 8370 in all, are:
+= -- 776
+> -- 390
 < -- 0
-+ -- 141
-- -- 105
-* -- 544
-:= -- 1118
-add.period$ -- 27
++ -- 145
+- -- 109
+* -- 601
+:= -- 1195
+add.period$ -- 28
 call.type$ -- 36
 change.case$ -- 36
 chr.to.int$ -- 0
 cite$ -- 43
-duplicate$ -- 345
-empty$ -- 757
-format.name$ -- 105
-if$ -- 1865
+duplicate$ -- 382
+empty$ -- 791
+format.name$ -- 109
+if$ -- 2007
 int.to.chr$ -- 0
 int.to.str$ -- 36
-missing$ -- 20
+missing$ -- 23
 newline$ -- 111
 num.names$ -- 36
-pop$ -- 150
+pop$ -- 136
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 319
+skip$ -- 345
 stack$ -- 0
-substring$ -- 374
-swap$ -- 130
+substring$ -- 457
+swap$ -- 153
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 7
-while$ -- 72
+while$ -- 81
 width$ -- 38
-write$ -- 286
+write$ -- 298
 (There were 7 warnings)

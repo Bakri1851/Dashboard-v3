@@ -59,7 +59,7 @@ Most current approaches to the learning dashboard do not live in lab sessions, a
 
 \subsubsection{Real-Time Data Analytics and Visualisation}
 
-Real-time analytics refers to the practice of collecting and analysing data as it is generated, with minimal latency between data collection and analysis \cite{a2023_real,marr_2021_what}. When we can process data as it comes in, we can gain insight and understand what is happening within a relevant context almost instantly. Such a practice is used in applications where data timeliness is critical, such as smart pricing and predictive maintenance \cite{a2023_real,marr_2021_what}. Traditional data analysis, where data is captured and stored, and insights are pushed out of storage. In contrast, real-time data analysis allows data to be analysed in real time \cite{a2023_real}. Real-time data analytics have proven to be highly valuable, as evidenced by the success of Netflix, which has perfected the art of predicting its customers' next favourite show \cite{marr_2021_what}.
+Real-time analytics refers to the practice of collecting and analysing data as it is generated, with minimal latency between data collection and analysis \cite{marr_2021_what}. When we can process data as it comes in, we can gain insight and understand what is happening within a relevant context almost instantly. Such a practice is used in applications where data timeliness is critical, such as smart pricing and predictive maintenance \cite{marr_2021_what}. Traditional data analysis, where data is captured and stored, and insights are pushed out of storage. In contrast, real-time data analysis allows data to be analysed in real time. Real-time data analytics have proven to be highly valuable, as evidenced by the success of Netflix, which has perfected the art of predicting its customers' next favourite show \cite{marr_2021_what}.
 
 Real-time analytics has emerged as a pivotal tool across multiple sectors, including retail, revolutionising decision-making processes and operational strategies \cite{mustafaayobamiraji_2024_realtime}. Retail giants such as Walmart and Amazon have leveraged real-time data analytics to personalise marketing campaigns, optimise pricing strategy, and efficiently manage inventory \cite{mustafaayobamiraji_2024_realtime}. Technologies such as RFID, IoT, and advanced analytics platforms were used to gather real-time data, analyse customer behaviour, and make data-driven decisions \cite{mustafaayobamiraji_2024_realtime}. A less utilised but more relevant application is in education, for example, a real-time machine learning application that detects learners' attention levels and participation using sensory data. The data allows teachers to recalibrate their teaching as necessary \cite{montebello_assisting}.
 
@@ -185,7 +185,11 @@ The limitations highlight a critical gap in the practicality and potential for u
 
 
 \subsubsection{Early Warning and At-Risk Student Systems}
-Early warning systems are a chain of information communication systems that can be implemented, comprising sensors, event detection and decision subsystems for early identification \cite{a2022_early}. In education, an At-risk student system is an early warning system that spots struggling students before it is too late \cite{baeres_2020_an}. Recently, many approaches to at-risk student systems have leveraged AI to identify students at risk \cite{baeres_2020_an}.  
+
+Early warning systems in education identify students at risk of poor learning outcomes by analysing routinely collected data and surface those students to instructors before failure becomes irreversible \cite{macfadyenMiningLMSData2010}.
+In education, an At-risk student system is an early warning system that spots struggling students before it is too late \cite{baeres_2020_an}. 
+Recently, many approaches to at-risk student systems have leveraged AI to identify students at risk \cite{baeres_2020_an}.
+
 
 Student data is analysed to flag potential issues. Typically, grades, attendance, online activity, and behaviour are used to alert teachers to help students early, before problems grow \cite{baeres_2020_an}. The datafication of education enables the use of automated methods to detect patterns in extensive educational data. Approaches leverage predictive models to use the data, predicting the likelihood that a student will fail a course \cite{baeres_2020_an}.
 
@@ -211,6 +215,9 @@ We can look at the edInsight Early Warning System as an example. This system loo
     \label{tab: grade scoring}
 \end{table}
 With the scores calculated, educators have a clear idea of which students are most at risk, making this information useful for directing attention to those who need the most help \cite{a2020_atrisk}.
+The same approach has been validated in academic environments. Arnold and Pistilli describe the Course Signals system at Purdue, which is an early intervention system that combines grade, past academic history and demographic predictors into a traffic light indicator for instructors, reporting measurable gains in student retention \cite{arnoldCourseSignalsPurdue2012a}.
+Jayaprakash et al.\ generalises this further with an open-source initiative, the Open Academic Analytics Initiative (OAAI), which has been deployed across multiple US institutions, demonstrating that the underlying predictive techniques are not specific to a single platform \cite{jayaprakashEarlyAlertAcademically2014}.
+
 
 Although the system is beneficial for identifying students who are struggling at the course level, it does not necessarily help identify students at the lab level, as its design assumptions do not align with the demands of lab sessions. Educators working in real-time sessions require live data. Hence, they have immediate awareness of which students are currently struggling, rather than future failure. However, we can apply the same concepts used in at-risk systems to identify students who are struggling the most and questions that have the most difficulty. As a result, as a result while traditional at risk systems are not designed for lab sessions, the underlying principles can be adapted to meet the needs of real-time lab analytics.
 

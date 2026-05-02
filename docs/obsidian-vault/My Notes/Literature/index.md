@@ -100,7 +100,6 @@ Broader contextual references.
 - [[dasilva_2022_a|Da Silva et al. (2022)]] — learning analytics system architecture
 - [[montebello_assisting|Montebello]] — AI-assisted instructor and student support
 - [[kiatxin_development|Kiat Xin et al.]] — educational technology development methodology
-- [[liu_open|Liu et al.]] — open learning platforms and analytics
 
 ---
 
@@ -135,9 +134,9 @@ Canonical framing papers for Ch2 §2.1.1.
 
 Canonical early-warning references to replace the three anonymous citations.
 
-- [[macfadyen_2010_mining|Macfadyen & Dawson (2010)]] — mining LMS data for early warning; the canonical EWS paper
-- [[agnihotri_2015_building|Agnihotri, Ott & Pazzani (2015)]] — predictive model of student success
-- [[jayaprakash_2014_early|Jayaprakash et al. (2014)]] — early alert for academically at-risk students (open-source initiative)
+- [[macfadyenMiningLMSData2010|Macfadyen & Dawson (2010)]] — mining LMS data for early warning; the canonical EWS paper
+- [[arnoldCourseSignalsPurdue2012a|Arnold & Pistilli (2012)]] — Course Signals at Purdue; canonical institutional EWS deployment
+- [[jayaprakashEarlyAlertAcademically2014|Jayaprakash et al. (2014)]] — early alert for academically at-risk students (open-source initiative)
 
 ### Gaming Detection and Unproductive Persistence
 

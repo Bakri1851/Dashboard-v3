@@ -50,6 +50,37 @@ A. Estey, H. Keuning, and Y. Coady, ‘Automatically classifying students in nee
 # Notes%% begin annotations %%
 ## Summary
 
+> [!Cite]
+> [1]
+
+A. Estey, H. Keuning, and Y. Coady, ‘Automatically classifying students in need of support by detecting changes in programming behaviour’, Mar. 2017, doi: [10.1145/3017680.3017790](https://doi.org/10.1145/3017680.3017790).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Estey, Anthony
+> **Author**:: Keuning, Hieke
+> **Author**:: Coady, Yvonne
+~
+> **Title**:: Automatically classifying students in need of support by detecting changes in programming behaviour
+> **Year**:: 2017
+> **Citekey**:: estey_2017_automatically
+> **itemType**:: journalArticle
+> **Journal**:: **
+> **DOI**:: 10.1145/3017680.3017790
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
 Trajectory metric evaluated over 4 semesters; reduces the false-positive rate for struggle detection to 11%, justifying the trajectory slope component in the struggle model.
 
 Cited in: [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]]
@@ -59,8 +90,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-02T16:58:27.458+01:00 %%
+%% Import Date: 2026-05-02T19:06:10.624+01:00 %%
 %% End annotations %%

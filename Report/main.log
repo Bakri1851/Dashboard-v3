@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.14)  2 MAY 2026 17:17
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.14)  2 MAY 2026 19:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -435,19 +435,19 @@ Package hyperref Info: Link coloring OFF on input line 35.
 *geometry* detected driver: pdftex
 *geometry* verbose mode - [ preamble ] result:
 * driver: pdftex
-* paper: a4paper
+* paper: <default>
 * layout: <same size as paper>
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
-* modes: includehead 
-* h-part:(L,W,R)=(54.2025pt, 489.10287pt, 54.2025pt)
-* v-part:(T,H,B)=(21.68121pt, 801.68442pt, 21.68121pt)
-* \paperwidth=597.50787pt
-* \paperheight=845.04684pt
-* \textwidth=489.10287pt
-* \textheight=764.68442pt
-* \oddsidemargin=-18.06749pt
-* \evensidemargin=-18.06749pt
-* \topmargin=-50.58878pt
+* modes: 
+* h-part:(L,W,R)=(92.14519pt, 430.00462pt, 92.14519pt)
+* v-part:(T,H,B)=(95.39737pt, 556.47656pt, 143.09605pt)
+* \paperwidth=614.295pt
+* \paperheight=794.96999pt
+* \textwidth=430.00462pt
+* \textheight=556.47656pt
+* \oddsidemargin=19.8752pt
+* \evensidemargin=19.8752pt
+* \topmargin=-13.87262pt
 * \headheight=12.0pt
 * \headsep=25.0pt
 * \topskip=10.0pt
@@ -472,7 +472,7 @@ Package hyperref Info: Link coloring OFF on input line 35.
 File: title-page/lboro-logo.png Graphic file (type png)
 <use title-page/lboro-logo.png>
 Package pdftex.def Info: title-page/lboro-logo.png  used on input line 3.
-(pdftex.def)             Requested size: 366.82715pt x 206.33554pt.
+(pdftex.def)             Requested size: 322.50346pt x 181.40788pt.
 LaTeX Font Info:    Trying to load font information for U+msa on input line 10.
 
 
@@ -498,58 +498,101 @@ l.46 \newpage
               [1
 
 
-] (main.toc [2] [3] [4])
+] (main.toc [2] [3] [4] [5])
 \tf@toc=\write5
 \openout5 = `main.toc'.
 
- [5]
+ [6]
 \openout2 = `main-sections/introduction.aux'.
 
- (main-sections/introduction.tex
-Excluding 'comment' comment.
-Overfull \hbox (18.20747pt too wide) in paragraph at lines 60--61
-[]\OT1/cmr/bx/n/10 Identify rel-e-vant lit-er-a-ture and ex-ist-ing sys-tems \O
-T1/cmr/m/n/10 re-lated to learn-ing an-a-lyt-ics, real-time data vi-su-al-i-sa-
-tion,
- []
 
-
-Overfull \hbox (3.77628pt too wide) in paragraph at lines 63--64
-[]\OT1/cmr/bx/n/10 Design sys-tem ar-chi-tec-ture \OT1/cmr/m/n/10 to sup-port l
-ive data in-ges-tion, pri-ori-ti-sa-tion and pre-sen-ta-tion while re-main-ing
- []
-
-[6
+(main-sections/introduction.tex Excluding 'comment' comment. [7
 
 ]
-Overfull \hbox (8.23763pt too wide) in paragraph at lines 66--67
-[]\OT1/cmr/bx/n/10 Evaluate ap-proach \OT1/cmr/m/n/10 through func-tional and n
-on-functional as-pects to de-ter-mine the fea-si-bil-ity and use-ful-ness
+Overfull \hbox (6.79234pt too wide) in paragraph at lines 56--57
+[]\OT1/cmr/m/n/10 The sec-ondary aim is to ex-tend our sys-tem to smart de-vice
+s. Whilst the core sys-tem is a desktop-based
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 82--82
+Overfull \hbox (3.558pt too wide) in paragraph at lines 66--67
+[]\OT1/cmr/bx/n/10 Evaluate ap-proach \OT1/cmr/m/n/10 through func-tional and n
+on-functional as-pects to de-ter-mine the fea-si-bil-ity
+ []
+
+
+Underfull \hbox (badness 4242) in paragraph at lines 82--82
 []\OT1/cmr/m/n/10 Latency in real-time data
  []
 
 
-Underfull \hbox (badness 1603) in paragraph at lines 82--82
-\OT1/cmr/m/n/10 can re-duce the use-ful-ness and
+Underfull \hbox (badness 10000) in paragraph at lines 82--82
+[]\OT1/cmr/m/n/10 Delays in up-dat-ing the
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 88--88
-[]\OT1/cmr/m/n/10 Unable to im-ple-ment smart
+Underfull \hbox (badness 3701) in paragraph at lines 82--82
+\OT1/cmr/m/n/10 dash-board can re-duce the
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 88--89
-[]\OT1/cmr/m/n/10 Explore smart-watch so-lu-tions or
+Underfull \hbox (badness 8056) in paragraph at lines 82--82
+\OT1/cmr/m/n/10 use-ful-ness and im-pact of
  []
 
 
-Underfull \hbox (badness 2318) in paragraph at lines 88--89
-\OT1/cmr/m/n/10 sim-plify what goes into the smart
+Underfull \hbox (badness 10000) in paragraph at lines 82--83
+[]\OT1/cmr/m/n/10 Ensure there are lightweight
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 84--84
+[]\OT1/cmr/m/n/10 Unstable strug-gle and
+ []
+
+
+Underfull \hbox (badness 3009) in paragraph at lines 84--84
+\OT1/cmr/m/n/10 dif-fi-culty es-ti-mates due to
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 84--84
+[]\OT1/cmr/m/n/10 Irregular in-ter-ac-tions may
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 86--86
+[]\OT1/cmr/m/n/10 Overly com-pli-cated
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 86--86
+[]\OT1/cmr/m/n/10 Overcomplicating the
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 86--86
+\OT1/cmr/m/n/10 dash-board may be more
+ []
+
+
+Underfull \hbox (badness 2134) in paragraph at lines 86--87
+[]\OT1/cmr/m/n/10 Seek con-stant feed-back on the
+ []
+
+
+Underfull \hbox (badness 2158) in paragraph at lines 86--87
+\OT1/cmr/m/n/10 UI so that we can im-ple-ment
+ []
+
+
+Underfull \hbox (badness 1082) in paragraph at lines 86--87
+\OT1/cmr/m/n/10 it cor-rectly and fo-cus on main
+ []
+
+
+Underfull \hbox (badness 1558) in paragraph at lines 88--88
+\OT1/cmr/m/n/10 in-te-grate the dash-board to
  []
 
 
@@ -558,182 +601,229 @@ Underfull \hbox (badness 10000) in paragraph at lines 90--90
  []
 
 
-Underfull \hbox (badness 1902) in paragraph at lines 90--90
-\OT1/cmr/m/n/10 model may not work well on
+Underfull \hbox (badness 10000) in paragraph at lines 90--91
+[]\OT1/cmr/m/n/10 Design mod-els over generic
  []
 
 
-Overfull \hbox (11.5508pt too wide) in paragraph at lines 78--93
+Overfull \hbox (14.50499pt too wide) in paragraph at lines 78--93
  [][] 
  []
 
-) [7]
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (13.76466pt too wide) in paragraph at lines 103--105
+[]\OT1/cmr/m/n/10 The next stage fo-cused on sys-tem de-sign. This in-cluded de
+fin-ing the sys-tem ar-chi-tec-ture, un-der-stand-ing
+ []
+
+[8]
+Overfull \hbox (1.774pt too wide) in paragraph at lines 106--110
+[]\OT1/cmr/m/n/10 Implementation then pro-gressed from core func-tion-al-ity to
+ in-creas-ing the com-plex-ity of our an-a-lyt-ics.
+ []
+
+
+Overfull \hbox (11.62582pt too wide) in paragraph at lines 106--110
+\OT1/cmr/m/n/10 his-tor-i-cal ses-sions and as-sis-tant co-or-di-na-tion. More 
+ad-vanced an-a-lyt-i-cal com-po-nents were im-ple-mented
+ []
+
+) [9]
 \openout2 = `main-sections/requirements-specification.aux'.
 
- (main-sections/requirements-specification.tex
-<figures/requirements-specification/Edsight-Dashboard-1.png, id=689, 250.43562p
+ (main-sections/requirements-specification.tex [10
+
+
+
+]
+Overfull \hbox (1.07933pt too wide) in paragraph at lines 39--40
+\OT1/cmr/m/n/10 teach-ers are pre-sented with all the prac-ti-cal mea-sure data
+ they have col-lected thus far, the class-rooms
+ []
+
+<figures/requirements-specification/Edsight-Dashboard-1.png, id=709, 250.43562p
 t x 114.4275pt>
 File: figures/requirements-specification/Edsight-Dashboard-1.png Graphic file (
 type png)
 <use figures/requirements-specification/Edsight-Dashboard-1.png>
 Package pdftex.def Info: figures/requirements-specification/Edsight-Dashboard-1
 .png  used on input line 43.
-(pdftex.def)             Requested size: 489.10287pt x 223.50287pt.
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-<figures/requirements-specification/Edsight-Dashboard-2.png, id=690, 396.48125p
+(pdftex.def)             Requested size: 430.00462pt x 196.49716pt.
+<figures/requirements-specification/Edsight-Dashboard-2.png, id=710, 396.48125p
 t x 108.405pt>
 File: figures/requirements-specification/Edsight-Dashboard-2.png Graphic file (
 type png)
 <use figures/requirements-specification/Edsight-Dashboard-2.png>
 Package pdftex.def Info: figures/requirements-specification/Edsight-Dashboard-2
 .png  used on input line 53.
-(pdftex.def)             Requested size: 489.10287pt x 133.73268pt.
-[8
-
-
-
-]
-Overfull \hbox (28.78697pt too wide) in paragraph at lines 64--65
+(pdftex.def)             Requested size: 430.00462pt x 117.57353pt.
+[11 <./figures/requirements-specification/Edsight-Dashboard-1.png>]
+Overfull \hbox (15.88507pt too wide) in paragraph at lines 64--65
 []\OT1/cmr/m/n/10 Real-time an-a-lyt-ics has emerged as a piv-otal tool across 
-mul-ti-ple sec-tors, in-clud-ing re-tail, rev-o-lu-tion-is-ing decision-making
+mul-ti-ple sec-tors, in-clud-ing re-tail, rev-o-lu-tion-is-ing
  []
 
-<figures/requirements-specification/Attention-Dashboard.png, id=719, 343.2825pt
+<figures/requirements-specification/Attention-Dashboard.png, id=730, 343.2825pt
  x 279.0425pt>
 File: figures/requirements-specification/Attention-Dashboard.png Graphic file (
 type png)
 <use figures/requirements-specification/Attention-Dashboard.png>
 Package pdftex.def Info: figures/requirements-specification/Attention-Dashboard
 .png  used on input line 68.
-(pdftex.def)             Requested size: 489.10287pt x 397.57155pt.
-[9 <./figures/requirements-specification/Edsight-Dashboard-1.png> <./figures/re
-quirements-specification/Edsight-Dashboard-2.png>]
-Overfull \hbox (2.70366pt too wide) in paragraph at lines 87--88
-[]\OT1/cmr/m/n/10 Another ap-proach uses ma-chine learn-ing to build a graph-i-
-cal model of how stu-dents nav-i-gate through pro-gram-ming
+(pdftex.def)             Requested size: 430.00462pt x 349.5346pt.
+[12 <./figures/requirements-specification/Edsight-Dashboard-2.png>]
+Overfull \hbox (1.82835pt too wide) in paragraph at lines 76--80
+\OT1/cmr/m/n/10 A key chal-lenge in sup-port-ing stu-dents dur-ing lab ses-sion
+s is iden-ti-fy-ing which stu-dents are strug-gling
  []
 
-[10 <./figures/requirements-specification/Attention-Dashboard.png>] [11]
-Excluding 'comment' comment.
-Overfull \hbox (11.73152pt too wide) in paragraph at lines 156--157
-\OT1/cmr/m/n/10 re-port-ing, au-toma-tion, and de-liv-ery of ed-u-ca-tional cou
-rses, train-ing pro-grams, ma-te-ri-als or learn-ing and de-vel-op-ment
+[13 <./figures/requirements-specification/Attention-Dashboard.png>] [14]
+Overfull \hbox (2.44061pt too wide) in paragraph at lines 121--122
+\OT1/cmr/m/n/10 cor-rect-ness, time, at-tempts, and progression-related in-for-
+ma-tion rather than from a sin-gle de-scrip-tive
  []
 
-<figures/requirements-specification/Piwik-Analytics.png, id=780, 374.90062pt x 
+
+Overfull \hbox (8.19064pt too wide) in paragraph at lines 125--128
+\OT1/cmr/m/n/10 rec-om-men-da-tion tech-nol-ogy sig-nif-i-cantly en-hances re-s
+ource util-i-sa-tion and the over-all stu-dent learn-ing
+ []
+
+[15] Excluding 'comment' comment.
+Overfull \hbox (0.38402pt too wide) in paragraph at lines 156--157
+\OT1/cmr/m/n/10 A learn-ing man-age-ment sys-tem is a soft-ware ap-pli-ca-tion 
+used for the ad-min-is-tra-tion, doc-u-men-ta-tion,
+ []
+
+[16]
+<figures/requirements-specification/Piwik-Analytics.png, id=799, 374.90062pt x 
 232.36812pt>
 File: figures/requirements-specification/Piwik-Analytics.png Graphic file (type
  png)
 <use figures/requirements-specification/Piwik-Analytics.png>
 Package pdftex.def Info: figures/requirements-specification/Piwik-Analytics.png
   used on input line 168.
-(pdftex.def)             Requested size: 489.10287pt x 303.17056pt.
-[12]
-<figures/requirements-specification/MM-Dashboard.png, id=789, 482.30188pt x 131
+(pdftex.def)             Requested size: 430.00462pt x 266.53693pt.
+<figures/requirements-specification/MM-Dashboard.png, id=801, 482.30188pt x 131
 .49126pt>
 File: figures/requirements-specification/MM-Dashboard.png Graphic file (type pn
 g)
 <use figures/requirements-specification/MM-Dashboard.png>
 Package pdftex.def Info: figures/requirements-specification/MM-Dashboard.png  u
 sed on input line 176.
-(pdftex.def)             Requested size: 489.10287pt x 133.34883pt.
-
-Overfull \hbox (0.67369pt too wide) in paragraph at lines 173--179
-[]\OT1/cmr/m/n/10 Another im-ple-men-ta-tion of a learn-ing dash-board is the M
-ulti-Modal (MM) teacher dash-board, the MM dash-board:
+(pdftex.def)             Requested size: 430.00462pt x 117.2375pt.
+ [17 <./figures/requirements-specification/Piwik-Analytics.png>] [18 <./figures
+/requirements-specification/MM-Dashboard.png>] [19] [20]
+Overfull \hbox (3.89822pt too wide) in paragraph at lines 277--278
+ []\OT1/cmr/bx/n/10 NFR4: Scal-a-bil-ity[] \OT1/cmr/m/n/10 The sys-tem should b
+e ca-pa-ble of op-er-at-ing ef-fi-ciently in var-i-ous labs re-gard-less
  []
 
 
-Overfull \hbox (21.96284pt too wide) in paragraph at lines 173--179
-\OT1/cmr/m/n/10 rel-e-vant cog-ni-tive, af-fec-tive, and phys-i-o-log-i-cal mea
--sure-ments; 3) syn-chro-nises and vi-su-alises the re-sult-ing mea-sure-ments
- []
-
-[13 <./figures/requirements-specification/Piwik-Analytics.png> <./figures/requi
-rements-specification/MM-Dashboard.png>] [14]
-Overfull \hbox (2.79305pt too wide) in paragraph at lines 264--265
- []\OT1/cmr/bx/n/10 NFR2: In-ter-pretabil-ity[] \OT1/cmr/m/n/10 Out-puts should
- be in-ter-pretable by in-struc-tors with-out re-quir-ing spe-cial-ist knowl-ed
-ge
+Overfull \hbox (13.80179pt too wide) in paragraph at lines 283--284
+\OT1/cmr/m/n/10 ad-di-tional data sources or met-rics with-out re-quir-ing a fu
+n-da-men-tal re-design, en-abling fu-ture ex-ten-sions. 
  []
 
 
-Overfull \hbox (47.99251pt too wide) in paragraph at lines 286--307
+Overfull \hbox (47.99341pt too wide) in paragraph at lines 293--314
  [][] 
  []
 
-) [15]
+) [21]
 \openout2 = `main-sections/design-and-architecture.aux'.
 
  (main-sections/design-and-architecture.tex
-Overfull \hbox (22.47209pt too wide) in paragraph at lines 6--7
-\OT1/cmr/m/n/10 lab en-vi-ron-ments. The ar-chi-tec-ture sep-a-rates data gen-e
-r-a-tion, data in-ges-tion and pro-cess-ing, as well as decision-making
+Overfull \hbox (0.66277pt too wide) in paragraph at lines 6--7
+\OT1/cmr/m/n/10 pro-cess-ing, as well as decision-making and ac-tion, into thre
+e dis-tinct lay-ers, en-sur-ing each com-po-nent
  []
 
-<figures/design-and-architecture/architecture-diagram.png, id=840, 797.98125pt 
+<figures/design-and-architecture/architecture-diagram.png, id=865, 797.98125pt 
 x 493.845pt>
 File: figures/design-and-architecture/architecture-diagram.png Graphic file (ty
 pe png)
 <use figures/design-and-architecture/architecture-diagram.png>
 Package pdftex.def Info: figures/design-and-architecture/architecture-diagram.p
 ng  used on input line 10.
-(pdftex.def)             Requested size: 489.10287pt x 302.6918pt.
-[16
+(pdftex.def)             Requested size: 430.00462pt x 266.1147pt.
+[22
 
 
 
  <./figures/design-and-architecture/architecture-diagram.png>]
-<figures/design-and-architecture/data-entry.png, id=852, 1053.9375pt x 691.5837
+<figures/design-and-architecture/data-entry.png, id=875, 1053.9375pt x 691.5837
 6pt>
 File: figures/design-and-architecture/data-entry.png Graphic file (type png)
 <use figures/design-and-architecture/data-entry.png>
 Package pdftex.def Info: figures/design-and-architecture/data-entry.png  used o
 n input line 35.
-(pdftex.def)             Requested size: 489.10287pt x 320.94995pt.
- [17 <./figures/design-and-architecture/data-entry.png (PNG copy)>] [18] [19] [
-20] [21]
-<figures/design-and-architecture/figma1.png, id=934, 1112.65688pt x 587.19376pt
+(pdftex.def)             Requested size: 430.00462pt x 282.16876pt.
+ [23] [24 <./figures/design-and-architecture/data-entry.png (PNG copy)>] [25]
+Overfull \hbox (6.48483pt too wide) in paragraph at lines 138--139
+ []\OT1/cmr/bx/n/10 Interpretation of model[] \OT1/cmr/m/n/10 Higher val-ues of
+ $\OML/cmm/m/it/10 S[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 s; ^^[\OT1/cmr/m/n/10 )
+$ in-di-cate that stu-dent $\OML/cmm/m/it/10 s$ \OT1/cmr/m/n/10 is ex-pe-ri-enc
+-ing sus-tained
+ []
+
+[26] [27]
+Overfull \hbox (4.64929pt too wide) in paragraph at lines 229--230
+ []\OT1/cmr/bx/n/10 Student Sim-i-lar-ity Mea-sure[] \OT1/cmr/m/n/10 To quan-ti
+fy how sim-i-lar two stu-dents are, we ap-ply co-sine sim-i-lar-ity
+ []
+
+[28]
+Underfull \hbox (badness 10000) in paragraph at lines 295--295
+[]\OT1/cmr/m/n/10 Computational
+ []
+
+[29] [30]
+<figures/design-and-architecture/figma1.png, id=972, 1112.65688pt x 587.19376pt
 >
 File: figures/design-and-architecture/figma1.png Graphic file (type png)
 <use figures/design-and-architecture/figma1.png>
 Package pdftex.def Info: figures/design-and-architecture/figma1.png  used on in
 put line 339.
-(pdftex.def)             Requested size: 489.10287pt x 258.12413pt.
-
-[22]
-<figures/design-and-architecture/figma2.png, id=940, 1117.67563pt x 602.25pt>
+(pdftex.def)             Requested size: 430.00462pt x 226.93492pt.
+<figures/design-and-architecture/figma2.png, id=974, 1117.67563pt x 602.25pt>
 File: figures/design-and-architecture/figma2.png Graphic file (type png)
 <use figures/design-and-architecture/figma2.png>
 Package pdftex.def Info: figures/design-and-architecture/figma2.png  used on in
 put line 347.
-(pdftex.def)             Requested size: 489.10287pt x 263.54805pt.
-<figures/design-and-architecture/figma3.png, id=942, 735.24687pt x 275.52937pt>
+(pdftex.def)             Requested size: 430.00462pt x 231.70615pt.
+ [31 <./figures/design-and-architecture/figma1.png>]
+<figures/design-and-architecture/figma3.png, id=982, 735.24687pt x 275.52937pt>
 
 File: figures/design-and-architecture/figma3.png Graphic file (type png)
 <use figures/design-and-architecture/figma3.png>
 Package pdftex.def Info: figures/design-and-architecture/figma3.png  used on in
 put line 356.
-(pdftex.def)             Requested size: 489.10287pt x 183.29199pt.
- [23 <./figures/design-and-architecture/figma1.png> <./figures/design-and-archi
-tecture/figma2.png>]
-Overfull \hbox (61.99251pt too wide) in paragraph at lines 371--380
+(pdftex.def)             Requested size: 430.00462pt x 161.14409pt.
+
+Overfull \hbox (61.9934pt too wide) in paragraph at lines 371--380
  [][] 
  []
 
-
-Overfull \hbox (61.99251pt too wide) in paragraph at lines 386--395
+[32 <./figures/design-and-architecture/figma2.png> <./figures/design-and-archit
+ecture/figma3.png>]
+Overfull \hbox (61.9934pt too wide) in paragraph at lines 386--395
  [][] 
  []
 
-) [24 <./figures/design-and-architecture/figma3.png>]
+) [33]
 \openout2 = `main-sections/implementation.aux'.
 
+ (main-sections/implementation.tex
+Overfull \hbox (0.20906pt too wide) in paragraph at lines 7--10
+[]\OT1/cmr/m/n/10 The im-ple-men-ta-tion is interval-based rather than event-ba
+sed. How-ever, it pro-vides a full end-to-end
+ []
 
-(main-sections/implementation.tex
+
 Underfull \hbox (badness 10000) in paragraph at lines 30--30
 []\OT1/cmr/m/n/10 PHP-based HTTP
  []
@@ -768,22 +858,35 @@ Underfull \hbox (badness 10000) in paragraph at lines 42--42
 []\OT1/cmr/m/n/10 Deployment
  []
 
+[34
 
-LaTeX Warning: Reference `tab: selection table' on page 25 undefined on input l
+
+
+]
+
+LaTeX Warning: Reference `tab: selection table' on page 35 undefined on input l
 ine 49.
 
-[25
+[35]
+Overfull \hbox (1.13431pt too wide) in paragraph at lines 61--62
+[]\OT1/cmr/bx/n/10 Data Struc-tur-ing: \OT1/cmr/m/n/10 Parsed records are trans
+-formed into an im-me-di-ate rep-re-sen-ta-tion suit-able
+ []
 
 
+Overfull \hbox (0.3509pt too wide) in paragraph at lines 63--64
+[]\OT1/cmr/bx/n/10 Dashboard Up-date: \OT1/cmr/m/n/10 The dash-board is re-fres
+hed us-ing the newly com-puted val-ues, pro-vid-ing
+ []
 
-] Excluding 'comment' comment.) [26] [27]
-Overfull \vbox (97.35861pt too high) has occurred while \output is active []
+Excluding 'comment' comment.) [36] [37]
+Overfull \vbox (305.56647pt too high) has occurred while \output is active []
 
 
-[28]
+[38]
 \openout2 = `main-sections/results-and-evaluation.aux'.
 
- (main-sections/results-and-evaluation.tex) [29
+ (main-sections/results-and-evaluation.tex) [39
 
 
 
@@ -791,7 +894,7 @@ Overfull \vbox (97.35861pt too high) has occurred while \output is active []
 \openout2 = `main-sections/conclusion.aux'.
 
 
-(main-sections/conclusion.tex) [30
+(main-sections/conclusion.tex) [40
 
 
 
@@ -799,14 +902,14 @@ Overfull \vbox (97.35861pt too high) has occurred while \output is active []
 \openout2 = `appendix-sections/code-snippets.aux'.
 
  (appendix-sections/code-snippets.tex)
-[31
+[41
 
 
 
 ]
 \openout2 = `appendix-sections/ui-screenshots.aux'.
 
- (appendix-sections/ui-screenshots.tex) [32
+ (appendix-sections/ui-screenshots.tex) [42
 
 
 
@@ -814,7 +917,7 @@ Overfull \vbox (97.35861pt too high) has occurred while \output is active []
 \openout2 = `appendix-sections/detailed-test-results.aux'.
 
 
-(appendix-sections/detailed-test-results.tex) [33
+(appendix-sections/detailed-test-results.tex) [43
 
 
 
@@ -823,33 +926,28 @@ Overfull \vbox (97.35861pt too high) has occurred while \output is active []
 
 
 (appendix-sections/themes-and-references.tex
-Underfull \hbox (badness 5954) in paragraph at lines 11--11
-[]\OT1/cmr/m/n/10 Learning An-a-lyt-ics in Higher
- []
-
-
 Underfull \hbox (badness 10000) in paragraph at lines 13--13
 []\OT1/cmr/m/n/10 Dashboards for Learn-ing
  []
 
 
-Underfull \hbox (badness 1460) in paragraph at lines 15--15
-[]\OT1/cmr/m/n/10 Real-Time Data An-a-lyt-ics and
+Underfull \hbox (badness 7308) in paragraph at lines 15--15
+[]\OT1/cmr/m/n/10 Real-Time Data An-a-lyt-ics
  []
 
 
-Underfull \hbox (badness 5771) in paragraph at lines 28--28
-[]\OT1/cmr/m/n/10 Early Warn-ing and At Risk
+Underfull \hbox (badness 10000) in paragraph at lines 24--24
+[]\OT1/cmr/m/n/10 Learning Man-age-ment
  []
 
-) [34
+) [44
 
 
 
 ]
 \openout2 = `appendix-sections/formulae.aux'.
 
- (appendix-sections/formulae.tex) [35
+ (appendix-sections/formulae.tex) [45
 
 
 
@@ -857,20 +955,26 @@ Underfull \hbox (badness 5771) in paragraph at lines 28--28
 \openout2 = `appendix-sections/formulae-derivation.aux'.
 
 
-(appendix-sections/formulae-derivation.tex) [36
+(appendix-sections/formulae-derivation.tex) [46
 
 
 
-] (main.bbl [37
+] (main.bbl
+Underfull \hbox (badness 1540) in paragraph at lines 17--22
+\OT1/cmr/m/n/10 B. De-paire, and M. Thomas, ``Af-for-dances and lim-i-ta-tions 
+of learn-ing an-a-lyt-ics for
+ []
+
+[47
 
 
 ]
-Underfull \hbox (badness 1681) in paragraph at lines 157--160
-[]\OT1/cmr/m/n/10 J. Li and Z. Ye, ``Course rec-om-men-da-tions in on-line ed-u
--ca-tion based on col-lab-o-ra-tive fil-ter-ing
+Underfull \hbox (badness 1024) in paragraph at lines 121--124
+[]\OT1/cmr/m/n/10 S. Lee-Cultura, K. Sharma, and M. N. Gi-an-nakos, ``Mul-ti-Mo
+dal teacher dash-boards:
  []
 
-) [38] (main.aux (title-page/title.aux) (main-sections/introduction.aux)
+[48]) [49] (main.aux (title-page/title.aux) (main-sections/introduction.aux)
 (main-sections/requirements-specification.aux)
 (main-sections/design-and-architecture.aux) (main-sections/implementation.aux)
 (main-sections/results-and-evaluation.aux) (main-sections/conclusion.aux)
@@ -893,13 +997,13 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: 103C18CD093793BBEF48A21EBCBCAAA4;22981.
  ) 
 Here is how much of TeX's memory you used:
- 13239 strings out of 467867
- 227893 string characters out of 5418334
- 626034 words of memory out of 5000000
+ 13250 strings out of 467867
+ 228098 string characters out of 5418334
+ 623041 words of memory out of 5000000
  41598 multiletter control sequences out of 15000+600000
  633451 words of font info for 61 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,12n,79p,1188b,590s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,12n,79p,1188b,592s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\Bakri\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm
 1000.pk><C:/Users/Bakri/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfon
 ts/cm/cmbx10.pfb><C:/Users/Bakri/AppData/Local/Programs/MiKTeX/fonts/type1/publ
@@ -917,9 +1021,9 @@ msfonts/cm/cmsy5.pfb><C:/Users/Bakri/AppData/Local/Programs/MiKTeX/fonts/type1/
 public/amsfonts/cm/cmsy7.pfb><C:/Users/Bakri/AppData/Local/Programs/MiKTeX/font
 s/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/Bakri/AppData/Local/Programs/Mi
 KTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on main.pdf (39 pages, 1653843 bytes).
+Output written on main.pdf (50 pages, 1666366 bytes).
 PDF statistics:
- 1173 PDF objects out of 1200 (max. 8388607)
- 281 named destinations out of 1000 (max. 500000)
+ 1221 PDF objects out of 1440 (max. 8388607)
+ 292 named destinations out of 1000 (max. 500000)
  1032 words of extra memory for PDF output out of 10000 (max. 10000000)
 

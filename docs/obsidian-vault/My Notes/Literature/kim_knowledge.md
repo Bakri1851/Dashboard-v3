@@ -47,6 +47,35 @@ D. Kim, S. Kim, and Y. Jo, ‘Knowledge tracing in programming education integra
 # Notes%% begin annotations %%
 ## Summary
 
+> [!Cite]
+> [1]
+
+D. Kim, S. Kim, and Y. Jo, ‘Knowledge tracing in programming education integrating students’ questions’.
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Kim, Doyoun
+> **Author**:: Kim, Suin
+> **Author**:: Jo, Yohan
+~
+> **Title**:: Knowledge tracing in programming education integrating students' questions
+> **Year**:: Error: `format` can only be applied to dates. Tried for format object
+> **Citekey**:: kim_knowledge
+> **itemType**:: document
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
 Knowledge tracing using student-generated questions with auto-extracted skills; extends BKT toward richer knowledge representations that go beyond fixed skill taxonomies.
 
 Cited in: [[Ch2 – Background and Requirements]] · [[BKT Mastery Logic]]
@@ -56,8 +85,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-02T16:58:27.746+01:00 %%
+%% Import Date: 2026-05-02T19:06:11.009+01:00 %%
 %% End annotations %%

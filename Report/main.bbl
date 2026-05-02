@@ -47,9 +47,6 @@ S.~Govaerts, K.~Leuven, E.~Duval, and K.~Verbert, ``The student activity meter
 J.~Ahn, F.~Campos, M.~Hays, and D.~Digiacomo, ``The journal of learning
   analytics works under a creative commons license,'' vol.~6, pp.~70--85, 2019.
 
-\bibitem{a2023_real}
-Databricks, ``Real time analytics,'' June 2023.
-
 \bibitem{marr_2021_what}
 B.~Marr, ``What is real-time data analytics (and why it's so important)?,''
   July 2021.
@@ -125,8 +122,10 @@ S.~{Lee-Cultura}, K.~Sharma, and M.~N. Giannakos, ``{{MultiModal}} teacher
   dashboards: {{Challenges}} and opportunities of enhancing teacher insights
   through a case study,'' pp.~1--19, Jan. 2023.
 
-\bibitem{a2022_early}
-W.~Contributors, ``Early warning system,'' Oct. 2022.
+\bibitem{macfadyenMiningLMSData2010}
+L.~P. Macfadyen and S.~Dawson, ``Mining {{LMS}} data to develop an ``early
+  warning system'' for educators: {{A}} proof of concept,'' {\em Computers \&
+  Education}, vol.~54, pp.~588--599, Feb. 2010.
 
 \bibitem{baeres_2020_an}
 D.~Ba{\~n}eres, M.~E. Rodr{\'i}guez, A.~E. {Guerrero-Rold{\'a}n}, and
@@ -136,6 +135,19 @@ D.~Ba{\~n}eres, M.~E. Rodr{\'i}guez, A.~E. {Guerrero-Rold{\'a}n}, and
 \bibitem{a2020_atrisk}
 {edInsight}, ``At-risk students early reporting system - {{edInsight}},'' Sept.
   2020.
+
+\bibitem{arnoldCourseSignalsPurdue2012a}
+K.~E. Arnold and M.~D. Pistilli, ``Course signals at {{Purdue}}: Using learning
+  analytics to increase student success,'' in {\em Proceedings of the 2nd
+  {{International Conference}} on {{Learning Analytics}} and {{Knowledge}}},
+  {{LAK}} '12, (New York, NY, USA), pp.~267--270, Association for Computing
+  Machinery, Apr. 2012.
+
+\bibitem{jayaprakashEarlyAlertAcademically2014}
+S.~M. Jayaprakash, E.~W. Moody, E.~J.~M. Laur{\'i}a, J.~R. Regan, and J.~D.
+  Baron, ``Early {{Alert}} of {{Academically At-Risk Students}}: {{An Open
+  Source Analytics Initiative}},'' {\em Journal of Learning Analytics}, vol.~1,
+  pp.~6--47, May 2014.
 
 \bibitem{schafer_2007_collaborative}
 J.~B. Schafer, D.~Frankowski, J.~Herlocker, and S.~Sen, ``Collaborative
@@ -157,8 +169,5 @@ M.~Desch{\^e}nes, ``Recommender systems to support learners' {{Agency}} in a
 J.~Li and Z.~Ye, ``Course recommendations in online education based on
   collaborative filtering recommendation algorithm,'' {\em Complexity},
   vol.~2020, p.~e6619249, Dec. 2020.
-
-\bibitem{liu_open}
-Z.~Liu, Y.~Lafifi, and C.~Chen, ``Open access edited by.''
 
 \end{thebibliography}

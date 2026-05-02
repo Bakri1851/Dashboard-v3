@@ -53,6 +53,37 @@ C. Piech, M. Sahami, D. Koller, S. Cooper, and P. Blikstein, ‘Modeling how stu
 # Notes%% begin annotations %%
 ## Summary
 
+> [!Cite]
+> [1]
+
+C. Piech, M. Sahami, D. Koller, S. Cooper, and P. Blikstein, ‘Modeling how students learn to program’.
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Piech, Chris
+> **Author**:: Sahami, Mehran
+> **Author**:: Koller, Daphne
+> **Author**:: Cooper, Stephen
+> **Author**:: Blikstein, Paulo
+~
+> **Title**:: Modeling how students learn to program
+> **Year**:: Error: `format` can only be applied to dates. Tried for format object
+> **Citekey**:: piech_modeling
+> **itemType**:: document
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
 Graphical model of student progression paths through skills; informs the improved struggle model's longitudinal perspective on knowledge acquisition.
 
 Cited in: [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] · [[Improved Struggle Logic]]
@@ -62,8 +93,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-02T16:58:28.134+01:00 %%
+%% Import Date: 2026-05-02T19:06:11.754+01:00 %%
 %% End annotations %%

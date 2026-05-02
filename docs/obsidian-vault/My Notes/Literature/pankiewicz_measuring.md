@@ -46,6 +46,33 @@ M. Pankiewicz, ‘Measuring task difficulty for online learning environments whe
 # Notes%% begin annotations %%
 ## Summary
 
+> [!Cite]
+> [1]
+
+M. Pankiewicz, ‘Measuring task difficulty for online learning environments where multiple attempts are allowed -the Elo rating algorithm approach’. Accessed: Apr. 03, 2026. [Online]. Available: [https://educationaldatamining.org/files/conferences/EDM2020/papers/paper_204.pdf](https://educationaldatamining.org/files/conferences/EDM2020/papers/paper_204.pdf)
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Pankiewicz, Maciej
+~
+> **Title**:: Measuring task difficulty for online learning environments where multiple attempts are allowed -the Elo rating algorithm approach
+> **Year**:: Error: `format` can only be applied to dates. Tried for format object
+> **Citekey**:: pankiewicz_measuring
+> **itemType**:: document
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
 Repeated attempts complicate straightforward incorrect-rate difficulty measures; informs the multi-signal difficulty formula and motivates IRT as a complementary approach.
 
 Cited in: [[Ch2 – Background and Requirements]] · [[IRT Difficulty Logic]] · [[Question Difficulty Logic]]
@@ -55,8 +82,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-02T16:58:28.102+01:00 %%
+%% Import Date: 2026-05-02T19:06:11.703+01:00 %%
 %% End annotations %%

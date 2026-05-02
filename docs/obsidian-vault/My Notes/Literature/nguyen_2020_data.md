@@ -51,6 +51,38 @@ A. Nguyen, L. Gardner, and D. Sheridan, ‘Data analytics in higher education: A
 # Notes%% begin annotations %%
 ## Summary
 
+> [!Cite]
+> [1]
+
+A. Nguyen, L. Gardner, and D. Sheridan, ‘Data analytics in higher education: An integrated view’, _Journal of Information Systems Education_, vol. 31, pp. 61–71, 2020.
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Nguyen, A
+> **Author**:: Gardner, L
+> **Author**:: Sheridan, D
+~
+> **Title**:: Data analytics in higher education: An integrated view
+> **Year**:: 2020
+> **Citekey**:: nguyen_2020_data
+> **itemType**:: journalArticle
+> **Journal**:: *Journal of Information Systems Education*
+> **Volume**:: 31
+> **Pages**:: 61-71
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
 Data-driven approaches in educational contexts; frames the broader motivation for analytics-based intervention in live learning environments.
 
 Cited in: [[Ch2 – Background and Requirements]]
@@ -60,8 +92,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-02T16:58:28.053+01:00 %%
+%% Import Date: 2026-05-02T19:06:11.623+01:00 %%
 %% End annotations %%

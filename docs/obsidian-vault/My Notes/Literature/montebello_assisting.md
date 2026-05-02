@@ -45,6 +45,33 @@ M. Montebello, ‘Assisting education through real-time learner analytics’. 20
 # Notes%% begin annotations %%
 ## Summary
 
+> [!Cite]
+> [1]
+
+M. Montebello, ‘Assisting education through real-time learner analytics’. 2018.
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Montebello, Matthew
+~
+> **Title**:: Assisting education through real-time learner analytics
+> **Year**:: 2018
+> **Citekey**:: montebello_assisting
+> **itemType**:: document
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
 AI-assisted support mechanisms for instructors and students in educational environments; informs the design of the lab assistant system and intelligent prioritisation features.
 
 Cited in: [[Ch2 – Background and Requirements]]
@@ -54,8 +81,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-02T16:58:27.974+01:00 %%
+%% Import Date: 2026-05-02T19:06:11.514+01:00 %%
 %% End annotations %%
