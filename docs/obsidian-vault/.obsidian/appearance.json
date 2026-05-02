@@ -1,5 +1,6 @@
 {
   "theme": "obsidian",
   "accentColor": "#bd0000",
-  "cssTheme": "Cupertino"
+  "cssTheme": "Cupertino",
+  "enabledCssSnippets": []
 }

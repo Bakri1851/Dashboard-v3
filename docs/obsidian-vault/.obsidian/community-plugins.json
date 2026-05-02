@@ -1,5 +1,9 @@
 [
   "obsidian-zotero-desktop-connector",
   "3d-graph",
-  "obsidian-importer"
+  "obsidian-importer",
+  "obsidian-pandoc-reference-list",
+  "dataview",
+  "obsidian-pandoc",
+  "obsidian-admonition"
 ]

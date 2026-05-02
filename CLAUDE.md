@@ -88,6 +88,20 @@ Streamlit cannot mutate `st.session_state` after widget instantiation in the sam
 
 Keep updated with code and report changes, male new notes if needed, this is the user's knowledge base
 
+## Literature & Citation Sync
+
+`scripts/sync_literature.py` keeps the Obsidian vault's literature notes (`docs/obsidian-vault/My Notes/Literature/*.md`) in sync with `Report/references.bib` and the `\cite{}` calls in `Report/**/*.tex`. It writes each note's frontmatter (`citekey`, `status`, `in_zotero`, `cited_in_tex`, `cited_in_planned`, `last_synced`) and regenerates `Literature/coverage.md` — a static markdown index showing which references are active / planned / stale, plus broken-cite and missing-note diagnostics.
+
+Re-run `python scripts/sync_literature.py` after:
+
+- re-exporting `references.bib` from Better BibTeX in Zotero
+- adding/removing `\cite{}` calls in any `.tex` file
+- creating/renaming literature notes (manually or via the Obsidian Zotero Integration plugin's "Import & Replace")
+
+The script is idempotent and non-destructive: the only body mutation is a one-time wrap of each in-Zotero note's existing summary inside `%% Begin annotations %%` / `%% End annotations %%` markers, so the Zotero Integration plugin preserves the hand-written summary across re-imports.
+
+The Zotero Integration plugin's import template lives at `docs/obsidian-vault/My Notes/_templates/zotero-literature.md` (Phelan-style Nunjucks; PDF annotations append inside the `annotations` persist block).
+
 ## graphify
 
 This project has a graphify knowledge graph at graphify-out/.

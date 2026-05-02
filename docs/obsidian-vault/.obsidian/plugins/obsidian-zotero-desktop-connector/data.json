@@ -1,0 +1,27 @@
+{
+  "database": "Zotero",
+  "noteImportFolder": "",
+  "pdfExportImageDPI": 120,
+  "pdfExportImageFormat": "jpg",
+  "pdfExportImageQuality": 90,
+  "citeFormats": [
+    {
+      "name": "Pandoc cite",
+      "format": "pandoc",
+      "brackets": true
+    }
+  ],
+  "exportFormats": [
+    {
+      "name": "Lit Note",
+      "outputPathTemplate": "My Notes/Literature/{{citekey}}.md",
+      "imageOutputPathTemplate": "",
+      "imageBaseNameTemplate": "image",
+      "cslStyle": "ieee-with-url",
+      "templatePath": "My Notes/_templates/zotero-literature.md"
+    }
+  ],
+  "citeSuggestTemplate": "[[{{citekey}}]]",
+  "openNoteAfterImport": false,
+  "whichNotesToOpenAfterImport": "first-imported-note"
+}

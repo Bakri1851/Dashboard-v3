@@ -6,21 +6,21 @@ High-level chapter status and recommended writing order for the final thesis sub
 
 ## Chapter status
 
-| Section | Status | Work needed | Effort |
-|---|---|---|---|
-| Ch1 — Introduction | ✅ Written | Update risk mitigations table | Small |
-| Ch2 — Background & Requirements | ✅ Written | Uncomment & revise research gaps §2.1.7; add FR/NFR implementation status column | Small |
-| Ch3 — Design & Modelling | Partial | Update formulas (struggle: 5→7 components, difficulty: 4→5); replace Figma mockups with screenshots; update CF section; add IRT/BKT/improved struggle sections | Medium |
-| Ch4 — Implementation | Outdated | Full rewrite — currently describes V1 prototype only; V2 has ~10 new features | Large |
-| Ch5 — Results & Evaluation | Empty | Write from scratch — evaluation design, functional testing, NFR testing, results, discussion | Large |
-| Ch6 — Conclusion | Empty | Write from scratch — summary of contributions, future work | Medium |
-| Appendix A — Code Snippets | Empty | Add key implementation excerpts to support Ch4 | Small |
-| Appendix B — UI Screenshots | Empty | Screenshot every dashboard view; needed for Ch4 and Ch5 | Small |
-| Appendix C — Test Results | Empty | Document smoke test outcomes and any evaluation evidence | Medium |
-| Appendix D — References | Done | Nothing needed | — |
-| Appendix E — Formulae | Empty | Collect all model formulas in one reference | Small |
-| Appendix F — Formula Derivations | Empty | Derivation steps for struggle, difficulty, IRT, BKT | Medium |
-| Ch5 — CF Evaluation | Missing | Draft offline evaluation subsection: RMSE, precision@k, coverage using held-out sessions as proxy ground truth | Medium |
+| Section                          | Status    | Work needed                                                                                                                                                    | Effort |
+| -------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Ch1 — Introduction               | ✅ Written | Update risk mitigations table                                                                                                                                  | Small  |
+| Ch2 — Background & Requirements  | ✅ Written | Uncomment & revise research gaps §2.1.7; add FR/NFR implementation status column                                                                               | Small  |
+| Ch3 — Design & Modelling         | Partial   | Update formulas (struggle: 5→7 components, difficulty: 4→5); replace Figma mockups with screenshots; update CF section; add IRT/BKT/improved struggle sections | Medium |
+| Ch4 — Implementation             | Outdated  | Full rewrite — currently describes V1 prototype only; V2 has ~10 new features                                                                                  | Large  |
+| Ch5 — Results & Evaluation       | Empty     | Write from scratch — evaluation design, functional testing, NFR testing, results, discussion                                                                   | Large  |
+| Ch6 — Conclusion                 | Empty     | Write from scratch — summary of contributions, future work                                                                                                     | Medium |
+| Appendix A — Code Snippets       | Empty     | Add key implementation excerpts to support Ch4                                                                                                                 | Small  |
+| Appendix B — UI Screenshots      | Empty     | Screenshot every dashboard view; needed for Ch4 and Ch5                                                                                                        | Small  |
+| Appendix C — Test Results        | Empty     | Document smoke test outcomes and any evaluation evidence                                                                                                       | Medium |
+| Appendix D — References          | Done      | Nothing needed                                                                                                                                                 | —      |
+| Appendix E — Formulae            | Empty     | Collect all model formulas in one reference                                                                                                                    | Small  |
+| Appendix F — Formula Derivations | Empty     | Derivation steps for struggle, difficulty, IRT, BKT                                                                                                            | Medium |
+| Ch5 — CF Evaluation              | Missing   | Draft offline evaluation subsection: RMSE, precision@k, coverage using held-out sessions as proxy ground truth                                                 | Medium |
 
 ---
 
