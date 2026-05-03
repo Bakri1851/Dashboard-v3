@@ -7,11 +7,11 @@
 ## Summary
 
 - Active (cited in thesis): **36**
-- Planned (note + plan, no `\cite{}` yet): **49**
-- Stale (note but no plan, no cite): **1**
-- In Zotero but not cited in thesis: **17**
+- Planned (note + plan, no `\cite{}` yet): **44**
+- Stale (note but no plan, no cite): **0**
+- In Zotero but not cited in thesis: **43**
 - Cited in thesis but missing bib entry (broken): **0**
-- In Zotero but no literature note: **17**
+- In Zotero but no literature note: **0**
 
 ## Active — cited in thesis
 
@@ -48,7 +48,7 @@
 | [[pitts_a]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/main-sections/requirements-specification.tex:97` | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] |
 | [[schafer_2007_collaborative]] | `Report/appendix-sections/themes-and-references.tex:22` | [[Ch2 – Background and Requirements]] · [[Analytics Engine]] |
 | [[tzimas_2021_ethical]] | `Report/appendix-sections/themes-and-references.tex:11`, `Report/main-sections/requirements-specification.tex:25`, `Report/main-sections/requirements-specification.tex:31` | [[Ch2 – Background and Requirements]] |
-| [[verbert_2020_learning]] | `Report/appendix-sections/themes-and-references.tex:13`, `Report/main-sections/requirements-specification.tex:35`, `Report/main-sections/requirements-specification.tex:37`, `Report/main-sections/requirements-specification.tex:58` | [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]] |
+| [[verbert_2013_learning]] | `Report/appendix-sections/themes-and-references.tex:13`, `Report/main-sections/requirements-specification.tex:35`, `Report/main-sections/requirements-specification.tex:37`, `Report/main-sections/requirements-specification.tex:58` | [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]] |
 | [[vieira_2018_visual]] | `Report/appendix-sections/themes-and-references.tex:11`, `Report/main-sections/requirements-specification.tex:11`, `Report/main-sections/requirements-specification.tex:15`, `Report/main-sections/requirements-specification.tex:18`, …(+2) | [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]] |
 | [[wikipediacontributors_2019_learning_analytics]] | `Report/appendix-sections/themes-and-references.tex:11`, `Report/main-sections/requirements-specification.tex:10` | [[Ch2 – Background and Requirements]] |
 | [[wikipediacontributors_2019_learning_management_systems]] | `Report/appendix-sections/themes-and-references.tex:24`, `Report/main-sections/requirements-specification.tex:156` | — |
@@ -58,79 +58,100 @@
 
 | Citekey | Planned for | In Zotero |
 |---|---|---|
-| [[arthur_2007_kmeanspp]] | [[Question Difficulty Logic]] | ❌ |
-| [[baker_2008_why]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]] | ❌ |
-| [[beck_2013_wheelspinning]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]] | ❌ |
-| [[black_1998_assessment]] | [[Ch2 – Background and Requirements]] · [[Ch1 – Introduction]] · [[Student Struggle Logic]] | ❌ |
-| [[byrd_1995_a]] | [[Ch3 – Design and Modelling]] · [[Ch4 – Implementation]] · [[IRT Difficulty Logic]] | ❌ |
-| [[chiang_2023_can]] | [[Ch2 – Background and Requirements]] · [[Ch5 – Results and Evaluation]] | ❌ |
-| [[clow_2013_an]] | [[Ch2 – Background and Requirements]] · [[Ch1 – Introduction]] | ❌ |
-| [[cohen_1960_a]] | [[Ch5 – Results and Evaluation]] · [[Evaluation Plan]] | ❌ |
-| [[corbett_1995_knowledge]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[BKT Mastery Logic]] · [[Improved Struggle Logic]] | ❌ |
-| [[crocker_1986_introduction]] | [[Ch3 – Design and Modelling]] · [[Analytics Engine]] | ❌ |
-| [[draper_1998_applied]] | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] | ❌ |
-| [[efron_1977_stein]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]] | ❌ |
-| [[fawcett_2006_an]] | [[Ch5 – Results and Evaluation]] · [[Evaluation Plan]] | ❌ |
-| [[fisher_1922_on]] | [[Ch3 – Design and Modelling]] · [[IRT Difficulty Logic]] | ❌ |
-| [[gelman_2013_bayesian]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]] | ❌ |
-| [[gilardi_2023_chatgpt]] | [[Ch2 – Background and Requirements]] · [[Ch5 – Results and Evaluation]] | ❌ |
-| [[han_2011_data]] | [[Ch2 – Background and Requirements]] | ❌ |
-| [[hanley_1982_the]] | [[Ch5 – Results and Evaluation]] · [[Evaluation Plan]] | ❌ |
-| [[hattie_2007_the]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[RAG Pipeline - Two-Layer Retrieval]] | ❌ |
-| [[herlocker_1999_an]] | [[Ch2 – Background and Requirements]] · [[Analytics Engine]] | ❌ |
-| [[holstein_2017_intelligent]] | [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]] · [[Lab Assistant System]] | ❌ |
-| [[holstein_2018_student]] | [[Ch2 – Background and Requirements]] · [[Ch1 – Introduction]] · [[Instructor Dashboard]] | ❌ |
-| [[hunter_1986_the]] | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] | ❌ |
-| [[kasneci_2023_chatgpt]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Ch5 – Results and Evaluation]] · [[RAG Pipeline - Two-Layer Retrieval]] | ❌ |
-| [[koren_2009_collaborative]] | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] | ❌ |
-| [[lewis_2020_retrievalaugmented]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Ch4 – Implementation]] · [[RAG Pipeline - Two-Layer Retrieval]] | ❌ |
-| [[little_2002_statistical]] | [[Ch3 – Design and Modelling]] · [[Improved Struggle Logic]] | ❌ |
-| [[liu_2023_geval]] | [[Ch2 – Background and Requirements]] · [[Ch4 – Implementation]] | ❌ |
-| [[lloyd_1982_least]] | [[Question Difficulty Logic]] | ❌ |
-| [[lord_1968_statistical]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[IRT Difficulty Logic]] | ❌ |
-| [[macqueen_1967_some]] | [[Ch2 – Background and Requirements]] · [[Question Difficulty Logic]] | ❌ |
-| [[malkov_2020_efficient]] | [[Ch4 – Implementation]] · [[RAG Pipeline - Two-Layer Retrieval]] | ❌ |
-| [[manning_2008_introduction]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Question Difficulty Logic]] | ❌ |
-| [[oecd_2008_handbook]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]] · [[Question Difficulty Logic]] | ❌ |
-| [[piech_2015_deep]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[BKT Mastery Logic]] | ❌ |
-| [[rasch_1960_probabilistic]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[IRT Difficulty Logic]] | ❌ |
-| [[reimers_2019_sentencebert]] | [[Ch2 – Background and Requirements]] · [[Ch4 – Implementation]] · [[RAG Pipeline - Two-Layer Retrieval]] | ❌ |
-| [[resnick_1994_grouplens]] | [[Ch2 – Background and Requirements]] · [[Analytics Engine]] | ❌ |
-| [[romero_2020_educational]] | [[Ch2 – Background and Requirements]] | ❌ |
-| [[rousseeuw_1987_silhouettes]] | [[Ch2 – Background and Requirements]] · [[Question Difficulty Logic]] | ❌ |
-| [[saisana_2005_uncertainty]] | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] | ❌ |
-| [[salton_1975_a]] | [[Ch2 – Background and Requirements]] · [[Question Difficulty Logic]] | ❌ |
-| [[salton_1983_introduction]] | [[Ch2 – Background and Requirements]] · [[Question Difficulty Logic]] | ❌ |
-| [[shute_2008_focus]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[RAG Pipeline - Two-Layer Retrieval]] | ❌ |
-| [[siemens_2013_learning]] | [[Ch2 – Background and Requirements]] | ❌ |
-| [[spearman_1904_the]] | [[Ch5 – Results and Evaluation]] · [[Evaluation Plan]] | ❌ |
-| [[wright_1979_best]] | [[Ch3 – Design and Modelling]] · [[IRT Difficulty Logic]] | ❌ |
-| [[yudelson_2013_individualized]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[BKT Mastery Logic]] | ❌ |
-| [[zheng_2023_judging]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Ch4 – Implementation]] · [[Analytics Engine]] | ❌ |
+| [[CoefficientAgreementNominal]] | [[Ch5 – Results and Evaluation]] · [[Evaluation Plan]] | ✅ |
+| [[LimitedMemoryAlgorithm]] | [[Ch3 – Design and Modelling]] · [[Ch4 – Implementation]] · [[IRT Difficulty Logic]] | ✅ |
+| [[MacQueen1967SomeMF]] | [[Ch2 – Background and Requirements]] · [[Question Difficulty Logic]] | ✅ |
+| [[arthurKmeansAdvantagesCareful]] | [[Question Difficulty Logic]] | ✅ |
+| [[bakerDevelopingGeneralizableDetector2008]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]] | ✅ |
+| [[beckWheelSpinningStudentsWho2013]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]] | ✅ |
+| [[blackAssessmentClassroomLearning1998]] | [[Ch2 – Background and Requirements]] · [[Ch1 – Introduction]] · [[Student Struggle Logic]] | ✅ |
+| [[chiangCanLargeLanguage2023]] | [[Ch2 – Background and Requirements]] · [[Ch5 – Results and Evaluation]] | ✅ |
+| [[clowOverviewLearningAnalytics2013]] | [[Ch2 – Background and Requirements]] · [[Ch1 – Introduction]] | ✅ |
+| [[corbettKnowledgeTracingModeling1995]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[BKT Mastery Logic]] · [[Improved Struggle Logic]] | ✅ |
+| [[efronSteinsParadoxStatistics1977]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]] | ✅ |
+| [[fawcettIntroductionROCAnalysis2006]] | [[Ch5 – Results and Evaluation]] · [[Evaluation Plan]] | ✅ |
+| [[fisherMathematicalFoundationsTheoretical1922]] | [[Ch3 – Design and Modelling]] · [[IRT Difficulty Logic]] | ✅ |
+| [[gelmanBayesianDataAnalysis2013]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]] | ✅ |
+| [[gilardiChatGPTOutperformsCrowd2023]] | [[Ch2 – Background and Requirements]] · [[Ch5 – Results and Evaluation]] | ✅ |
+| [[hanleyMeaningUseArea1982]] | [[Ch5 – Results and Evaluation]] · [[Evaluation Plan]] | ✅ |
+| [[hattiePowerFeedback2007]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[RAG Pipeline - Two-Layer Retrieval]] | ✅ |
+| [[herlockerAlgorithmicFrameworkPerforming1999]] | [[Ch2 – Background and Requirements]] · [[Analytics Engine]] | ✅ |
+| [[holsteinIntelligentTutorsTeachers2017a]] | [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]] · [[Lab Assistant System]] | ✅ |
+| [[holsteinStudentLearningBenefits2018]] | [[Ch2 – Background and Requirements]] · [[Ch1 – Introduction]] · [[Instructor Dashboard]] | ✅ |
+| [[hunterExponentiallyWeightedMoving1986]] | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] | ✅ |
+| [[kasneciChatGPTGoodOpportunities2023]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Ch5 – Results and Evaluation]] · [[RAG Pipeline - Two-Layer Retrieval]] | ✅ |
+| [[khajahHowDeepKnowledge2016]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[BKT Mastery Logic]] | ✅ |
+| [[khajah_2014_incorporating]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[BKT Mastery Logic]] | ❌ |
+| [[korenCollaborativeFilteringTemporal2010]] | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] | ✅ |
+| [[lewisRetrievalAugmentedGenerationKnowledgeIntensive2020]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Ch4 – Implementation]] · [[RAG Pipeline - Two-Layer Retrieval]] | ✅ |
+| [[little2014statistical]] | [[Ch3 – Design and Modelling]] · [[Improved Struggle Logic]] | ✅ |
+| [[liuGEvalNLGEvaluation2023]] | [[Ch2 – Background and Requirements]] · [[Ch4 – Implementation]] | ✅ |
+| [[lord1968statistical]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[IRT Difficulty Logic]] | ✅ |
+| [[malkovEfficientRobustApproximate2016]] | [[Ch4 – Implementation]] · [[RAG Pipeline - Two-Layer Retrieval]] | ✅ |
+| [[manningIntroductionInformationRetrieval2008]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Question Difficulty Logic]] | ✅ |
+| [[oecdHandbookConstructingComposite2008]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]] · [[Question Difficulty Logic]] | ✅ |
+| [[piechDeepKnowledgeTracing2015]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[BKT Mastery Logic]] | ✅ |
+| [[rasch1960probabilistic]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[IRT Difficulty Logic]] | ✅ |
+| [[reimersSentenceBERTSentenceEmbeddings2019]] | [[Ch2 – Background and Requirements]] · [[Ch4 – Implementation]] · [[RAG Pipeline - Two-Layer Retrieval]] | ✅ |
+| [[resnickGroupLensOpenArchitecture1994]] | [[Ch2 – Background and Requirements]] · [[Analytics Engine]] | ✅ |
+| [[romeroEducationalDataMining2020]] | [[Ch2 – Background and Requirements]] | ✅ |
+| [[rousseeuwSilhouettesGraphicalAid1987]] | [[Ch2 – Background and Requirements]] · [[Question Difficulty Logic]] | ✅ |
+| [[saisanaUncertaintySensitivityAnalysis2005]] | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] | ✅ |
+| [[saltonVectorSpaceModel1975]] | [[Ch2 – Background and Requirements]] · [[Question Difficulty Logic]] | ✅ |
+| [[siemensLearningAnalyticsEmergence2013]] | [[Ch2 – Background and Requirements]] | ✅ |
+| [[spearmanProofMeasurementAssociation1904]] | [[Ch5 – Results and Evaluation]] · [[Evaluation Plan]] | ✅ |
+| [[yudelsonIndividualizedBayesianKnowledge2013]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[BKT Mastery Logic]] | ✅ |
+| [[zhengJudgingLLMasaJudgeMTBench2023]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Ch4 – Implementation]] · [[Analytics Engine]] | ✅ |
 
 ## Stale — note but no plan, no cite
 
-- [[_import_checklist]]
+_None — every note has either a `Cited in:` line or a `\cite{}` call._
 
 ## Issues
 
-### In Zotero but not cited in thesis (17)
+### In Zotero but not cited in thesis (43)
 
 - `CoefficientAgreementNominal`
 - `LimitedMemoryAlgorithm`
+- `MacQueen1967SomeMF`
+- `arthurKmeansAdvantagesCareful`
+- `bakerDevelopingGeneralizableDetector2008`
+- `beckWheelSpinningStudentsWho2013`
+- `blackAssessmentClassroomLearning1998`
 - `chiangCanLargeLanguage2023`
 - `clowOverviewLearningAnalytics2013`
 - `corbettKnowledgeTracingModeling1995`
 - `efronSteinsParadoxStatistics1977`
+- `fawcettIntroductionROCAnalysis2006`
+- `fisherMathematicalFoundationsTheoretical1922`
 - `gelmanBayesianDataAnalysis2013`
 - `gilardiChatGPTOutperformsCrowd2023`
+- `hanleyMeaningUseArea1982`
+- `hattiePowerFeedback2007`
 - `herlockerAlgorithmicFrameworkPerforming1999`
+- `holsteinIntelligentTutorsTeachers2017a`
+- `holsteinStudentLearningBenefits2018`
+- `hunterExponentiallyWeightedMoving1986`
+- `kasneciChatGPTGoodOpportunities2023`
+- `khajahHowDeepKnowledge2016`
+- `korenCollaborativeFilteringTemporal2010`
+- `lewisRetrievalAugmentedGenerationKnowledgeIntensive2020`
+- `little2014statistical`
 - `liuGEvalNLGEvaluation2023`
+- `lord1968statistical`
+- `malkovEfficientRobustApproximate2016`
+- `manningIntroductionInformationRetrieval2008`
 - `oecdHandbookConstructingComposite2008`
 - `piechDeepKnowledgeTracing2015`
+- `rasch1960probabilistic`
+- `reimersSentenceBERTSentenceEmbeddings2019`
 - `resnickGroupLensOpenArchitecture1994`
 - `romeroEducationalDataMining2020`
+- `rousseeuwSilhouettesGraphicalAid1987`
+- `saisanaUncertaintySensitivityAnalysis2005`
+- `saltonVectorSpaceModel1975`
 - `siemensLearningAnalyticsEmergence2013`
+- `spearmanProofMeasurementAssociation1904`
 - `yudelsonIndividualizedBayesianKnowledge2013`
 - `zhengJudgingLLMasaJudgeMTBench2023`
 
@@ -138,167 +159,149 @@
 
 _None — every `\cite{}` resolves to a bib entry._
 
-### In Zotero but no literature note (17)
+### In Zotero but no literature note (0)
 
-- `CoefficientAgreementNominal`
-- `LimitedMemoryAlgorithm`
-- `chiangCanLargeLanguage2023`
-- `clowOverviewLearningAnalytics2013`
-- `corbettKnowledgeTracingModeling1995`
-- `efronSteinsParadoxStatistics1977`
-- `gelmanBayesianDataAnalysis2013`
-- `gilardiChatGPTOutperformsCrowd2023`
-- `herlockerAlgorithmicFrameworkPerforming1999`
-- `liuGEvalNLGEvaluation2023`
-- `oecdHandbookConstructingComposite2008`
-- `piechDeepKnowledgeTracing2015`
-- `resnickGroupLensOpenArchitecture1994`
-- `romeroEducationalDataMining2020`
-- `siemensLearningAnalyticsEmergence2013`
-- `yudelsonIndividualizedBayesianKnowledge2013`
-- `zhengJudgingLLMasaJudgeMTBench2023`
+_None — every bib entry has a literature note._
 
 ## By chapter / topic
 
 Citations grouped by the `Cited in:` line in each literature note.
 
-### [[Analytics Engine]] (6)
+### [[Analytics Engine]] (5)
 
-- 🟡 [[crocker_1986_introduction]]
 - ✅ [[deschnes_2020_recommender]]
-- 🟡 [[herlocker_1999_an]]
-- 🟡 [[resnick_1994_grouplens]]
+- 🟡 [[herlockerAlgorithmicFrameworkPerforming1999]]
+- 🟡 [[resnickGroupLensOpenArchitecture1994]]
 - ✅ [[schafer_2007_collaborative]]
-- 🟡 [[zheng_2023_judging]]
+- 🟡 [[zhengJudgingLLMasaJudgeMTBench2023]]
 
-### [[BKT Mastery Logic]] (5)
+### [[BKT Mastery Logic]] (7)
 
-- 🟡 [[corbett_1995_knowledge]]
+- 🟡 [[corbettKnowledgeTracingModeling1995]]
+- 🟡 [[khajahHowDeepKnowledge2016]]
+- 🟡 [[khajah_2014_incorporating]]
 - ✅ [[khajah_supercharging]]
 - ✅ [[kim_knowledge]]
-- 🟡 [[piech_2015_deep]]
-- 🟡 [[yudelson_2013_individualized]]
+- 🟡 [[piechDeepKnowledgeTracing2015]]
+- 🟡 [[yudelsonIndividualizedBayesianKnowledge2013]]
 
 ### [[Ch1 – Introduction]] (3)
 
-- 🟡 [[black_1998_assessment]]
-- 🟡 [[clow_2013_an]]
-- 🟡 [[holstein_2018_student]]
+- 🟡 [[blackAssessmentClassroomLearning1998]]
+- 🟡 [[clowOverviewLearningAnalytics2013]]
+- 🟡 [[holsteinStudentLearningBenefits2018]]
 
-### [[Ch2 – Background and Requirements]] (69)
+### [[Ch2 – Background and Requirements]] (67)
 
+- 🟡 [[MacQueen1967SomeMF]]
 - ✅ [[a2020_atrisk]]
 - ✅ [[ahn_2019_the]]
 - ✅ [[baeres_2020_an]]
-- 🟡 [[baker_2008_why]]
-- 🟡 [[beck_2013_wheelspinning]]
-- 🟡 [[black_1998_assessment]]
-- 🟡 [[chiang_2023_can]]
-- 🟡 [[clow_2013_an]]
-- 🟡 [[corbett_1995_knowledge]]
+- 🟡 [[bakerDevelopingGeneralizableDetector2008]]
+- 🟡 [[beckWheelSpinningStudentsWho2013]]
+- 🟡 [[blackAssessmentClassroomLearning1998]]
+- 🟡 [[chiangCanLargeLanguage2023]]
+- 🟡 [[clowOverviewLearningAnalytics2013]]
+- 🟡 [[corbettKnowledgeTracingModeling1995]]
 - ✅ [[dannath_evaluating]]
 - ✅ [[dasilva_2022_a]]
 - ✅ [[deschnes_2020_recommender]]
 - ✅ [[dong_using]]
-- 🟡 [[draper_1998_applied]]
-- 🟡 [[efron_1977_stein]]
+- 🟡 [[efronSteinsParadoxStatistics1977]]
 - ✅ [[estey_2017_automatically]]
 - ✅ [[frederikbaucks_2024_gaining]]
 - ✅ [[gelan_2018_affordances]]
-- 🟡 [[gelman_2013_bayesian]]
-- 🟡 [[gilardi_2023_chatgpt]]
+- 🟡 [[gelmanBayesianDataAnalysis2013]]
+- 🟡 [[gilardiChatGPTOutperformsCrowd2023]]
 - ✅ [[govaerts_the]]
-- 🟡 [[han_2011_data]]
-- 🟡 [[hattie_2007_the]]
-- 🟡 [[herlocker_1999_an]]
-- 🟡 [[holstein_2017_intelligent]]
-- 🟡 [[holstein_2018_student]]
-- 🟡 [[hunter_1986_the]]
-- 🟡 [[kasneci_2023_chatgpt]]
+- 🟡 [[hattiePowerFeedback2007]]
+- 🟡 [[herlockerAlgorithmicFrameworkPerforming1999]]
+- 🟡 [[holsteinIntelligentTutorsTeachers2017a]]
+- 🟡 [[holsteinStudentLearningBenefits2018]]
+- 🟡 [[hunterExponentiallyWeightedMoving1986]]
+- 🟡 [[kasneciChatGPTGoodOpportunities2023]]
+- 🟡 [[khajahHowDeepKnowledge2016]]
+- 🟡 [[khajah_2014_incorporating]]
 - ✅ [[khajah_supercharging]]
 - ✅ [[kiatxin_development]]
 - ✅ [[kim_knowledge]]
 - ✅ [[klerkx_2017_learning]]
-- 🟡 [[koren_2009_collaborative]]
+- 🟡 [[korenCollaborativeFilteringTemporal2010]]
 - ✅ [[koutcheme_using]]
 - ✅ [[leecultura_2023_multimodal]]
-- 🟡 [[lewis_2020_retrievalaugmented]]
+- 🟡 [[lewisRetrievalAugmentedGenerationKnowledgeIntensive2020]]
 - ✅ [[li_2020_course]]
-- 🟡 [[liu_2023_geval]]
-- 🟡 [[lord_1968_statistical]]
-- 🟡 [[macqueen_1967_some]]
-- 🟡 [[manning_2008_introduction]]
+- 🟡 [[liuGEvalNLGEvaluation2023]]
+- 🟡 [[lord1968statistical]]
+- 🟡 [[manningIntroductionInformationRetrieval2008]]
 - ✅ [[marr_2021_what]]
 - ✅ [[montebello_assisting]]
 - ✅ [[mustafaayobamiraji_2024_realtime]]
 - ✅ [[nguyen_2020_data]]
-- 🟡 [[oecd_2008_handbook]]
+- 🟡 [[oecdHandbookConstructingComposite2008]]
 - ✅ [[or_2024_exploring]]
 - ✅ [[pankiewicz_measuring]]
-- 🟡 [[piech_2015_deep]]
+- 🟡 [[piechDeepKnowledgeTracing2015]]
 - ✅ [[piech_modeling]]
 - ✅ [[pitts_a]]
-- 🟡 [[rasch_1960_probabilistic]]
-- 🟡 [[reimers_2019_sentencebert]]
-- 🟡 [[resnick_1994_grouplens]]
-- 🟡 [[romero_2020_educational]]
-- 🟡 [[rousseeuw_1987_silhouettes]]
-- 🟡 [[saisana_2005_uncertainty]]
-- 🟡 [[salton_1975_a]]
-- 🟡 [[salton_1983_introduction]]
+- 🟡 [[rasch1960probabilistic]]
+- 🟡 [[reimersSentenceBERTSentenceEmbeddings2019]]
+- 🟡 [[resnickGroupLensOpenArchitecture1994]]
+- 🟡 [[romeroEducationalDataMining2020]]
+- 🟡 [[rousseeuwSilhouettesGraphicalAid1987]]
+- 🟡 [[saisanaUncertaintySensitivityAnalysis2005]]
+- 🟡 [[saltonVectorSpaceModel1975]]
 - ✅ [[schafer_2007_collaborative]]
-- 🟡 [[shute_2008_focus]]
-- 🟡 [[siemens_2013_learning]]
+- 🟡 [[siemensLearningAnalyticsEmergence2013]]
 - ✅ [[tzimas_2021_ethical]]
-- ✅ [[verbert_2020_learning]]
+- ✅ [[verbert_2013_learning]]
 - ✅ [[vieira_2018_visual]]
 - ✅ [[wikipediacontributors_2019_learning_analytics]]
 - ✅ [[wilson_2017_learning]]
-- 🟡 [[yudelson_2013_individualized]]
-- 🟡 [[zheng_2023_judging]]
+- 🟡 [[yudelsonIndividualizedBayesianKnowledge2013]]
+- 🟡 [[zhengJudgingLLMasaJudgeMTBench2023]]
 
-### [[Ch3 – Design and Modelling]] (21)
+### [[Ch3 – Design and Modelling]] (20)
 
-- 🟡 [[baker_2008_why]]
-- 🟡 [[beck_2013_wheelspinning]]
-- 🟡 [[byrd_1995_a]]
-- 🟡 [[corbett_1995_knowledge]]
-- 🟡 [[crocker_1986_introduction]]
-- 🟡 [[efron_1977_stein]]
-- 🟡 [[fisher_1922_on]]
-- 🟡 [[gelman_2013_bayesian]]
-- 🟡 [[hattie_2007_the]]
-- 🟡 [[kasneci_2023_chatgpt]]
-- 🟡 [[lewis_2020_retrievalaugmented]]
-- 🟡 [[little_2002_statistical]]
-- 🟡 [[lord_1968_statistical]]
-- 🟡 [[manning_2008_introduction]]
-- 🟡 [[oecd_2008_handbook]]
-- 🟡 [[piech_2015_deep]]
-- 🟡 [[rasch_1960_probabilistic]]
-- 🟡 [[shute_2008_focus]]
-- 🟡 [[wright_1979_best]]
-- 🟡 [[yudelson_2013_individualized]]
-- 🟡 [[zheng_2023_judging]]
+- 🟡 [[LimitedMemoryAlgorithm]]
+- 🟡 [[bakerDevelopingGeneralizableDetector2008]]
+- 🟡 [[beckWheelSpinningStudentsWho2013]]
+- 🟡 [[corbettKnowledgeTracingModeling1995]]
+- 🟡 [[efronSteinsParadoxStatistics1977]]
+- 🟡 [[fisherMathematicalFoundationsTheoretical1922]]
+- 🟡 [[gelmanBayesianDataAnalysis2013]]
+- 🟡 [[hattiePowerFeedback2007]]
+- 🟡 [[kasneciChatGPTGoodOpportunities2023]]
+- 🟡 [[khajahHowDeepKnowledge2016]]
+- 🟡 [[khajah_2014_incorporating]]
+- 🟡 [[lewisRetrievalAugmentedGenerationKnowledgeIntensive2020]]
+- 🟡 [[little2014statistical]]
+- 🟡 [[lord1968statistical]]
+- 🟡 [[manningIntroductionInformationRetrieval2008]]
+- 🟡 [[oecdHandbookConstructingComposite2008]]
+- 🟡 [[piechDeepKnowledgeTracing2015]]
+- 🟡 [[rasch1960probabilistic]]
+- 🟡 [[yudelsonIndividualizedBayesianKnowledge2013]]
+- 🟡 [[zhengJudgingLLMasaJudgeMTBench2023]]
 
 ### [[Ch4 – Implementation]] (6)
 
-- 🟡 [[byrd_1995_a]]
-- 🟡 [[lewis_2020_retrievalaugmented]]
-- 🟡 [[liu_2023_geval]]
-- 🟡 [[malkov_2020_efficient]]
-- 🟡 [[reimers_2019_sentencebert]]
-- 🟡 [[zheng_2023_judging]]
+- 🟡 [[LimitedMemoryAlgorithm]]
+- 🟡 [[lewisRetrievalAugmentedGenerationKnowledgeIntensive2020]]
+- 🟡 [[liuGEvalNLGEvaluation2023]]
+- 🟡 [[malkovEfficientRobustApproximate2016]]
+- 🟡 [[reimersSentenceBERTSentenceEmbeddings2019]]
+- 🟡 [[zhengJudgingLLMasaJudgeMTBench2023]]
 
 ### [[Ch5 – Results and Evaluation]] (7)
 
-- 🟡 [[chiang_2023_can]]
-- 🟡 [[cohen_1960_a]]
-- 🟡 [[fawcett_2006_an]]
-- 🟡 [[gilardi_2023_chatgpt]]
-- 🟡 [[hanley_1982_the]]
-- 🟡 [[kasneci_2023_chatgpt]]
-- 🟡 [[spearman_1904_the]]
+- 🟡 [[CoefficientAgreementNominal]]
+- 🟡 [[chiangCanLargeLanguage2023]]
+- 🟡 [[fawcettIntroductionROCAnalysis2006]]
+- 🟡 [[gilardiChatGPTOutperformsCrowd2023]]
+- 🟡 [[hanleyMeaningUseArea1982]]
+- 🟡 [[kasneciChatGPTGoodOpportunities2023]]
+- 🟡 [[spearmanProofMeasurementAssociation1904]]
 
 ### [[Data Loading and Session Persistence]] (2)
 
@@ -307,86 +310,81 @@ Citations grouped by the `Cited in:` line in each literature note.
 
 ### [[Evaluation Plan]] (4)
 
-- 🟡 [[cohen_1960_a]]
-- 🟡 [[fawcett_2006_an]]
-- 🟡 [[hanley_1982_the]]
-- 🟡 [[spearman_1904_the]]
+- 🟡 [[CoefficientAgreementNominal]]
+- 🟡 [[fawcettIntroductionROCAnalysis2006]]
+- 🟡 [[hanleyMeaningUseArea1982]]
+- 🟡 [[spearmanProofMeasurementAssociation1904]]
 
-### [[IRT Difficulty Logic]] (8)
+### [[IRT Difficulty Logic]] (7)
 
+- 🟡 [[LimitedMemoryAlgorithm]]
 - ✅ [[baeres_2020_an]]
-- 🟡 [[byrd_1995_a]]
-- 🟡 [[fisher_1922_on]]
+- 🟡 [[fisherMathematicalFoundationsTheoretical1922]]
 - ✅ [[frederikbaucks_2024_gaining]]
-- 🟡 [[lord_1968_statistical]]
+- 🟡 [[lord1968statistical]]
 - ✅ [[pankiewicz_measuring]]
-- 🟡 [[rasch_1960_probabilistic]]
-- 🟡 [[wright_1979_best]]
+- 🟡 [[rasch1960probabilistic]]
 
 ### [[Improved Struggle Logic]] (6)
 
-- 🟡 [[corbett_1995_knowledge]]
+- 🟡 [[corbettKnowledgeTracingModeling1995]]
 - ✅ [[dong_using]]
 - ✅ [[khajah_supercharging]]
 - ✅ [[koutcheme_using]]
-- 🟡 [[little_2002_statistical]]
+- 🟡 [[little2014statistical]]
 - ✅ [[piech_modeling]]
 
 ### [[Instructor Dashboard]] (6)
 
 - ✅ [[govaerts_the]]
-- 🟡 [[holstein_2017_intelligent]]
-- 🟡 [[holstein_2018_student]]
+- 🟡 [[holsteinIntelligentTutorsTeachers2017a]]
+- 🟡 [[holsteinStudentLearningBenefits2018]]
 - ✅ [[klerkx_2017_learning]]
-- ✅ [[verbert_2020_learning]]
+- ✅ [[verbert_2013_learning]]
 - ✅ [[vieira_2018_visual]]
 
 ### [[Lab Assistant System]] (1)
 
-- 🟡 [[holstein_2017_intelligent]]
+- 🟡 [[holsteinIntelligentTutorsTeachers2017a]]
 
-### [[Question Difficulty Logic]] (11)
+### [[Question Difficulty Logic]] (9)
 
-- 🟡 [[arthur_2007_kmeanspp]]
+- 🟡 [[MacQueen1967SomeMF]]
+- 🟡 [[arthurKmeansAdvantagesCareful]]
 - ✅ [[dannath_evaluating]]
 - ✅ [[frederikbaucks_2024_gaining]]
-- 🟡 [[lloyd_1982_least]]
-- 🟡 [[macqueen_1967_some]]
-- 🟡 [[manning_2008_introduction]]
-- 🟡 [[oecd_2008_handbook]]
+- 🟡 [[manningIntroductionInformationRetrieval2008]]
+- 🟡 [[oecdHandbookConstructingComposite2008]]
 - ✅ [[pankiewicz_measuring]]
-- 🟡 [[rousseeuw_1987_silhouettes]]
-- 🟡 [[salton_1975_a]]
-- 🟡 [[salton_1983_introduction]]
+- 🟡 [[rousseeuwSilhouettesGraphicalAid1987]]
+- 🟡 [[saltonVectorSpaceModel1975]]
 
-### [[RAG Pipeline - Two-Layer Retrieval]] (6)
+### [[RAG Pipeline - Two-Layer Retrieval]] (5)
 
-- 🟡 [[hattie_2007_the]]
-- 🟡 [[kasneci_2023_chatgpt]]
-- 🟡 [[lewis_2020_retrievalaugmented]]
-- 🟡 [[malkov_2020_efficient]]
-- 🟡 [[reimers_2019_sentencebert]]
-- 🟡 [[shute_2008_focus]]
+- 🟡 [[hattiePowerFeedback2007]]
+- 🟡 [[kasneciChatGPTGoodOpportunities2023]]
+- 🟡 [[lewisRetrievalAugmentedGenerationKnowledgeIntensive2020]]
+- 🟡 [[malkovEfficientRobustApproximate2016]]
+- 🟡 [[reimersSentenceBERTSentenceEmbeddings2019]]
 
-### [[Student Struggle Logic]] (17)
+### [[Student Struggle Logic]] (16)
 
 - ✅ [[ahn_2019_the]]
-- 🟡 [[baker_2008_why]]
-- 🟡 [[beck_2013_wheelspinning]]
-- 🟡 [[black_1998_assessment]]
+- 🟡 [[bakerDevelopingGeneralizableDetector2008]]
+- 🟡 [[beckWheelSpinningStudentsWho2013]]
+- 🟡 [[blackAssessmentClassroomLearning1998]]
 - ✅ [[dong_using]]
-- 🟡 [[draper_1998_applied]]
-- 🟡 [[efron_1977_stein]]
+- 🟡 [[efronSteinsParadoxStatistics1977]]
 - ✅ [[estey_2017_automatically]]
-- 🟡 [[gelman_2013_bayesian]]
-- 🟡 [[hunter_1986_the]]
-- 🟡 [[koren_2009_collaborative]]
+- 🟡 [[gelmanBayesianDataAnalysis2013]]
+- 🟡 [[hunterExponentiallyWeightedMoving1986]]
+- 🟡 [[korenCollaborativeFilteringTemporal2010]]
 - ✅ [[koutcheme_using]]
-- 🟡 [[oecd_2008_handbook]]
+- 🟡 [[oecdHandbookConstructingComposite2008]]
 - ✅ [[or_2024_exploring]]
 - ✅ [[piech_modeling]]
 - ✅ [[pitts_a]]
-- 🟡 [[saisana_2005_uncertainty]]
+- 🟡 [[saisanaUncertaintySensitivityAnalysis2005]]
 
 ---
 _Regenerated 2026-05-03 by `scripts/sync_literature.py`._

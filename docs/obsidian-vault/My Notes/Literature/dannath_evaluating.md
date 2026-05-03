@@ -4,7 +4,7 @@ citekey: dannath_evaluating
 year: Error: `format` can only be applied to dates. Tried for format object
 in_zotero: true
 status: active
-last_imported: 2026-05-02
+last_imported: 2026-05-03
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:18
   - Report/appendix-sections/themes-and-references.tex:20
@@ -19,6 +19,37 @@ last_synced: 2026-05-03
 # Evaluating task-level struggle detection methods in intelligent tutoring systems for programming
 
 %% Begin annotations %%
+## Summary
+
+> [!Cite]
+> [1]
+
+J. Dannath, A. Deriyeva, and B. Paaßen, ‘Evaluating task-level struggle detection methods in intelligent tutoring systems for programming’, doi: [10.18420/delfi2024_07](https://doi.org/10.18420/delfi2024_07).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Dannath, Jesper
+> **Author**:: Deriyeva, Alina
+> **Author**:: Paaßen, Benjamin
+~
+> **Title**:: Evaluating task-level struggle detection methods in intelligent tutoring systems for programming
+> **Year**:: Error: `format` can only be applied to dates. Tried for format object
+> **Citekey**:: dannath_evaluating
+> **itemType**:: journalArticle
+> **Journal**:: **
+> **DOI**:: 10.18420/delfi2024_07
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
 ## Summary
 
 > [!Cite]
@@ -98,8 +129,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-02T19:06:10.377+01:00 %%
+%% Import Date: 2026-05-03T03:46:45.927+01:00 %%
 %% End annotations %%

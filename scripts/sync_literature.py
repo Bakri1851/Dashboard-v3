@@ -330,7 +330,10 @@ def main() -> int:
     print(f"Bib entries:        {len(in_zotero)}")
     print(f"Cite calls:         {sum(len(v) for v in tex_usage.values())} across {len(tex_usage)} unique keys")
 
-    notes = sorted(p for p in LIT_DIR.glob("*.md") if p.stem not in ("index", "coverage"))
+    notes = sorted(
+        p for p in LIT_DIR.glob("*.md")
+        if p.stem not in ("index", "coverage") and not p.stem.startswith("_")
+    )
     print(f"Literature notes:   {len(notes)}")
 
     records = []

@@ -4,7 +4,7 @@ citekey: schafer_2007_collaborative
 year: 2007
 in_zotero: true
 status: active
-last_imported: 2026-05-02
+last_imported: 2026-05-03
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:22
 cited_in_planned:
@@ -15,6 +15,40 @@ last_synced: 2026-05-03
 # Collaborative filtering recommender systems
 
 %% Begin annotations %%
+## Summary
+
+> [!Cite]
+> [1]
+
+J. B. Schafer, D. Frankowski, J. Herlocker, and S. Sen, ‘Collaborative filtering recommender systems’, _The Adaptive Web_, vol. 4321, pp. 291–324, 2007, doi: [10.1007/978-3-540-72079-9_9](https://doi.org/10.1007/978-3-540-72079-9_9).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Schafer, J. Ben
+> **Author**:: Frankowski, Dan
+> **Author**:: Herlocker, Jon
+> **Author**:: Sen, Shilad
+~
+> **Title**:: Collaborative filtering recommender systems
+> **Year**:: 2007
+> **Citekey**:: schafer_2007_collaborative
+> **itemType**:: journalArticle
+> **Journal**:: *The Adaptive Web*
+> **Volume**:: 4321
+> **Pages**:: 291-324
+> **DOI**:: 10.1007/978-3-540-72079-9_9
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
 ## Summary
 
 > [!Cite]
@@ -100,8 +134,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-02T19:06:11.843+01:00 %%
+%% Import Date: 2026-05-03T03:47:10.675+01:00 %%
 %% End annotations %%

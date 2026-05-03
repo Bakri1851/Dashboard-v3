@@ -4,7 +4,7 @@ citekey: kim_knowledge
 year: Error: `format` can only be applied to dates. Tried for format object
 in_zotero: true
 status: active
-last_imported: 2026-05-02
+last_imported: 2026-05-03
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:18
   - Report/main-sections/requirements-specification.tex:92
@@ -16,6 +16,35 @@ last_synced: 2026-05-03
 # Knowledge tracing in programming education integrating students' questions
 
 %% Begin annotations %%
+## Summary
+
+> [!Cite]
+> [1]
+
+D. Kim, S. Kim, and Y. Jo, ‘Knowledge tracing in programming education integrating students’ questions’.
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Kim, Doyoun
+> **Author**:: Kim, Suin
+> **Author**:: Jo, Yohan
+~
+> **Title**:: Knowledge tracing in programming education integrating students' questions
+> **Year**:: Error: `format` can only be applied to dates. Tried for format object
+> **Citekey**:: kim_knowledge
+> **itemType**:: document
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
 ## Summary
 
 > [!Cite]
@@ -91,8 +120,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-02T19:06:11.009+01:00 %%
+%% Import Date: 2026-05-03T03:46:56.704+01:00 %%
 %% End annotations %%

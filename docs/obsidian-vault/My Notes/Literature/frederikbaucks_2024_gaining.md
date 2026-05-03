@@ -4,7 +4,7 @@ citekey: frederikbaucks_2024_gaining
 year: 2024
 in_zotero: true
 status: active
-last_imported: 2026-05-02
+last_imported: 2026-05-03
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:20
   - Report/main-sections/requirements-specification.tex:117
@@ -17,6 +17,37 @@ last_synced: 2026-05-03
 # Gaining insights into course difficulty variations using item response theory
 
 %% Begin annotations %%
+## Summary
+
+> [!Cite]
+> [1]
+
+F. Baucks, R. Schmucker, and L. Wiskott, ‘Gaining insights into course difficulty variations using item response theory’, Mar. 2024, doi: [10.1145/3636555.3636902](https://doi.org/10.1145/3636555.3636902).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Baucks, Frederik
+> **Author**:: Schmucker, Robin
+> **Author**:: Wiskott, Laurenz
+~
+> **Title**:: Gaining insights into course difficulty variations using item response theory
+> **Year**:: 2024
+> **Citekey**:: frederikbaucks_2024_gaining
+> **itemType**:: journalArticle
+> **Journal**:: **
+> **DOI**:: 10.1145/3636555.3636902
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
 ## Summary
 
 > [!Cite]
@@ -96,8 +127,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-02T19:06:10.666+01:00 %%
+%% Import Date: 2026-05-03T03:46:47.937+01:00 %%
 %% End annotations %%

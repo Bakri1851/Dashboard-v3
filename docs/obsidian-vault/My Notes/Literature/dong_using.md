@@ -4,7 +4,7 @@ citekey: dong_using
 year: Error: `format` can only be applied to dates. Tried for format object
 in_zotero: true
 status: active
-last_imported: 2026-05-02
+last_imported: 2026-05-03
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:18
   - Report/main-sections/requirements-specification.tex:78
@@ -18,6 +18,37 @@ last_synced: 2026-05-03
 # Using student trace logs to determine meaningful progress and struggle during programming problem solving
 
 %% Begin annotations %%
+## Summary
+
+> [!Cite]
+> [1]
+
+Y. Dong, S. Marwan, P. Shabrina, T. Price, and T. Barnes, ‘Using student trace logs to determine meaningful progress and struggle during programming problem solving’.
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Dong, Yihuan
+> **Author**:: Marwan, Samiha
+> **Author**:: Shabrina, Preya
+> **Author**:: Price, Thomas
+> **Author**:: Barnes, Tiffany
+~
+> **Title**:: Using student trace logs to determine meaningful progress and struggle during programming problem solving
+> **Year**:: Error: `format` can only be applied to dates. Tried for format object
+> **Citekey**:: dong_using
+> **itemType**:: document
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
 ## Summary
 
 > [!Cite]
@@ -97,8 +128,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-02T19:06:10.590+01:00 %%
+%% Import Date: 2026-05-03T03:46:47.014+01:00 %%
 %% End annotations %%
