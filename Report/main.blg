@@ -38,45 +38,45 @@ Warning--empty journal in dannath_evaluating
 Warning--empty year in dannath_evaluating
 Warning--empty journal in frederikbaucks_2024_gaining
 Warning--empty journal in leecultura_2023_multimodal
-You've used 36 entries,
+You've used 49 entries,
             1876 wiz_defined-function locations,
-            667 strings with 10913 characters,
-and the built_in function-call counts, 8370 in all, are:
-= -- 776
-> -- 390
+            759 strings with 14652 characters,
+and the built_in function-call counts, 12573 in all, are:
+= -- 1165
+> -- 609
 < -- 0
-+ -- 145
-- -- 109
-* -- 601
-:= -- 1195
-add.period$ -- 28
-call.type$ -- 36
-change.case$ -- 36
++ -- 222
+- -- 173
+* -- 928
+:= -- 1788
+add.period$ -- 43
+call.type$ -- 49
+change.case$ -- 47
 chr.to.int$ -- 0
-cite$ -- 43
-duplicate$ -- 382
-empty$ -- 791
-format.name$ -- 109
-if$ -- 2007
+cite$ -- 56
+duplicate$ -- 579
+empty$ -- 1170
+format.name$ -- 173
+if$ -- 3017
 int.to.chr$ -- 0
-int.to.str$ -- 36
-missing$ -- 23
-newline$ -- 111
-num.names$ -- 36
-pop$ -- 136
+int.to.str$ -- 49
+missing$ -- 36
+newline$ -- 152
+num.names$ -- 53
+pop$ -- 187
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 345
+skip$ -- 498
 stack$ -- 0
-substring$ -- 457
-swap$ -- 153
+substring$ -- 731
+swap$ -- 240
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 7
-while$ -- 81
-width$ -- 38
-write$ -- 298
+while$ -- 121
+width$ -- 51
+write$ -- 428
 (There were 7 warnings)

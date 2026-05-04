@@ -1,14 +1,14 @@
 \section{Background and Requirements}
 
-\subsection{Learning Analytics and Dashboards}
+\subsection{Literature}
 
 \subsubsection{Learning Analytics in Higher Education}
 
 
 
 In 2012, the use of data analytics was shown to improve student success by providing real-time feedback, demonstrating the impact of data informed intervention in higher education \cite{nguyen_2020_data}.
-Learning analytics is the measurement, collection, analysis, and reporting of data about learners and their contexts in order to understand and optimise learning and the environment in which it occurs \cite{wikipediacontributors_2019_learning_analytics,nguyen_2020_data,siemensLearningAnalyticsEmergence2013,clowOverviewLearningAnalytics2013}. 
-The growth of online education since the 1990s has contributed significantly to the advancement of learning analytics, as student data can now be captured and analysed enabling educators to make more data-driven decisions \cite{nguyen_2020_data,vieira_2018_visual,romeroEducationalDataMining2020}. 
+Learning analytics is the measurement, collection, analysis, and reporting of data about learners and their contexts in order to understand and optimise learning and the environment in which it occurs \cite{wikipediacontributors_2019_learning_analytics,nguyen_2020_data}. 
+The growth of online education since the 1990s has contributed significantly to the advancement of learning analytics, as student data can now be captured and analysed enabling educators to make more data-driven decisions \cite{nguyen_2020_data,vieira_2018_visual}. 
 Learning analytics allows educators to make data-driven decisions. 
 
 Learning analytics leverages data sources; many types of data sources have been explored and used to help educators. 
@@ -72,8 +72,6 @@ Real-time analytics has emerged as a pivotal tool across multiple sectors, inclu
 
 Applying real-time analytics in computer labs will prove to be very beneficial for students and teachers alike. By collecting and processing data as it comes in, we will be able to update dashboards in real time and provide teachers with the most up-to-date information, enabling relevant, timely support. This would be better than a traditional data analysis approach, in which we review the data after the lab has finished, because our findings may not be relevant by then \cite{montebello_assisting,mustafaayobamiraji_2024_realtime}.
 
-\subsection{Modelling Student Behaviour}
-
 \subsubsection{Modelling Student Struggle}
 A key challenge in supporting students during lab sessions is identifying which students are struggling and may require timely intervention.
 Studies in education have approached struggle detection at different temporal scales, ranging from within-assignment detection to course-level.
@@ -88,7 +86,11 @@ Their trajectory metric reduced this false-positive rate to 11\%, demonstrating 
 
 Another approach uses machine learning to build a graphical model of how students navigate through programming assignments. By capturing the full solution trajectory, Piech et al.\ showed that a student's progression path is predictive of later difficulty, motivating the inclusion of the student's trajectory to track changes in answer quality across submissions \cite{piech_modeling}.
 
-A complementary approach is knowledge tracing which models how a student's mastery of underlying skills progresses over time and it is examined in the next subsection.
+A related but distinct line of work is knowledge tracing, which models how a student's mastery of underlying skills changes over time.
+Bayesian Knowledge Tracing (BKT) remains attractive because it is interpretable and computationally manageable.
+Khajah shows that BKT can be strengthened by adopting a multidimensional, generalisable structure similar to that of Item Response Theory (IRT), suggesting that knowledge-state models can benefit from more expressive representations of questions and skills \cite{khajah_supercharging}.
+In programming education, Kim et al.\ propose a knowledge tracing approach that integrates students' questions and automatically extracted skill information, showing that textual interaction data can provide useful signals about understanding misconception patterns \cite{kim_knowledge}.
+This is relevant to the current project, as it suggests that struggles during computer labs should not be treated solely as repeated failures but also as informed by temporal behaviour, how the student develops, and question-specific context.  
 
 Recent work on Large Language Models (LLMs) is also relevant as AI-generated feedback can provide more valuable insights than raw correctness alone.
 Koutcheme et al.\ show that language models LLMs that are better at helping repair student programs also provide better explanations of coding issues, suggesting that the quality of LLM feedback can be studied empirically rather than assumed \cite{koutcheme_using}
@@ -97,26 +99,6 @@ More broadly, Pitts et al.\ survey LLM-based applications in programming educati
 Together, these works demonstrate different methods for evaluating struggle. These metrics are best captured through a combination of temporal, correctness-based and behavioural signals.
 
 \subsubsection{Knowledge Tracing and Bayesian Student Models}
-A related but distinct line of work is knowledge tracing, which models how a student's mastery of underlying skills progresses over time.
-Bayesian Knowledge Tracing (BKT) remains attractive because it is interpretable and computationally manageable.
-Khajah shows that BKT can gain a performance boost by merging it with Item Response Theory (IRT) to model multidimensional problem difficulties and student abilities, without fitting student specific parameters, allowing the model to be generalisable to new students \cite{khajah_supercharging}.
-In programming education, Kim et al.\ propose a knowledge tracing approach that integrates students' questions and automatically extracted skill information, showing that textual interaction data can provide useful signals about understanding misconception patterns \cite{kim_knowledge}.
-This is relevant to the current project, as it suggests that struggles during computer labs should not be treated solely as repeated failures but also as informed by temporal behaviour, how the student develops, and question-specific context.  
-
-Bayesian Knowledge Tracing was formalised by Corbett and Anderson in the context of an intelligent programming tutor, which treats the student's knowledge of each skill as either in a learned state or an unlearned state that can transition from unlearned to learned based on the student's interactions \cite{corbettKnowledgeTracingModeling1995}.
-The model is governed by four interpretable parameters: an initial-learning probability, $p(L_0)$, an acquisition probability, $p(T)$ that a skill transitions from unlearned to learned at each practice opportunity, a guess probability, $p(G)$ for correct responses without mastery and a slip probability, $p(S)$ for incorrect responses despite mastery. The probability of a correct response on the next opportunity is then 
-\begin{equation}
-    p(C) = p(L) \cdot (1 - p(S)) + (1 - p(L)) \cdot p(G),
-    \label{eq:bkt-prediction}
-\end{equation} 
-where $p(L)$ is the current estimate of mastery \cite{corbettKnowledgeTracingModeling1995}.
-The original formulation assumes no forgetting, so the latent state cannot transition from learned back to unlearned. 
-
-Yudelson et al.\ extended BKT by individualising parameters across students and showed across KDD datasets that this yielded tangible improvements when predicting unseen student data \cite{yudelsonIndividualizedBayesianKnowledge2013}. They found that individualising the speed of learning $p(T)$ produced consistent gains in predictive accuracy, while individualising the prior $p(L_0)$ alone had no measurable effect, suggesting learning rate is the more important axis of student variation for BKT to exploit.
-
-More recent work has explored neural alternatives to BKT such as deep learning approaches. Piech et al.\ proposed Deep Knowledge Tracing (DKT),  with two different types of Recurrent Neural Networks (RNNs): a Long Short Term Memory (LSTM) based model and a vanilla RNN model with sigmoid unit. These models predict a student's future performance based on their past activity. This resulted in a 25\% gain in the area under the curve (AUC) over the best previous result on a knowledge tracing benchmark as well as showing that knowledge tracing models do not need expert annotations \cite{piechDeepKnowledgeTracing2015}.
-However, Khajah et al.\ subsequently showed that BKT extended with forgetting, latent student abilities, and automatic skill discovery matches DKT performance on average across four different data sets, arguing that the gains of deep approaches stem from added flexibility rather than from any representation discovery \cite{khajahHowDeepKnowledge2016}.
-For an instructor facing dashboard, where the interpretability of mastery estimates is essential, BKT remains a defensible choice.
 
 \subsubsection{Modelling Task Difficulty}
 
@@ -129,31 +111,42 @@ Additionally, if most of the class is struggling with a problem, it will be fast
 Task difficulty can be inferred from indicators such as failure rate, average time spent, number of attempts and the amount of feedback used before reaching a correct answer \cite{dannath_evaluating,piech_modeling}.
 These measures are useful as they are directly observable and can be updated during a live session with low cost, but they do not separate question difficulty from variation in student ability.
 
-Alternatively, we can model difficulty using Item Response Theory (IRT), which offers a more principled approach by accounting for how difficult a question actually is, rather than raw counts, as well as a student's latent ability \cite{rasch1960probabilistic,lord1968statistical}. 
+Alternatively, we can model difficulty using Item Response Theory (IRT), which offers a more principled approach by accounting for how difficult a question actually is, rather than raw counts, as well as a student's latent ability. 
 Baucks et al.\ uses IRT to analyse course difficulty variation and show how applying latent variable models can uncover meaning patterns in course rigor that is hidden when relying on simple metrics \cite{frederikbaucks_2024_gaining}. 
 In online learning environments that allow multiple attempts, Pankiewicz argues that measuring task difficulty becomes more complex because task difficulty and feedback shape how it should be interpreted, motivating methods that go beyond raw metrics. \cite{pankiewicz_measuring}  
 These works support the view that question difficulty should be modelled separately from student struggle and, where possible, that composite measures should be used rather than a single measure.
 
 Overall, the literature suggests that task difficulty should be deduced from a combination of correctness, time, attempts, and progression-related information rather than from a single descriptive statistic \cite{dannath_evaluating,piech_modeling}.
 
-\subsection{Data-Driven Personalisation}
-
 \subsubsection{Collaborative Filtering}
 
 Beyond parametric approaches discussed in the previous subsection, more sophisticated data-driven methods have been explored in the educational recommender systems literature.
-Collaborative filtering is an alternative method used for personalising user experiences \cite{resnickGroupLensOpenArchitecture1994}.
-Unlike methods that rely on parameters, Collaborative filtering leverages the collective behaviour of users with similar histories to create preferences, on the principle that users with similar histories share similar needs. This method has been applied primarily in educational contexts to provide more efficient and accurate course suggestions than traditional methods. This can be done with different types of models, such as linear regression and factor decomposers. It is evident that integrating intelligent recommendation technology significantly enhances resource utilisation and the overall student learning experience
+Collaborative filtering is an alternative method used for personalising user experiences.
+Unlike methods that rely on parameters, Collaborative filtering leverages the collective behaviour of users with similar histories to create preferences, on the principle that users with similar histories share similar needs. This method has been applied primarily in educational contexts to provide more efficient and accurate course suggestions than traditional methods. This can be done with different types of models, such as linear regression and factor decomposers. It is evident that integrating intelligent recommendation technology significantly enhances resource utilisation and the overall student learning experience.
 
-A user-based collaborative filtering method identifies a set of $k$ nearest neighbours for a given student based on a similarity measure over their profiles \cite{herlockerAlgorithmicFrameworkPerforming1999}. The behaviour of the neighbours are aggregated to produce a prediction. The approach is shown to be effective in sparse datasets, where explicit ratings are unavailable and implicit signals such as time-on-task and submission frequency must serve as proxies for preference. A known limitation is that when a student has little interaction history, similarity cannot be computed reliably, leading to unstable early-session predictions.
+A user-based collaborative filtering method identifies a set of $k$ nearest neighbours for a given student based on a similarity measure over their profiles. The behaviour of the neighbours are aggregated to produce a prediction. The approach is shown to be effective in sparse datasets, where explicit ratings are unavailable and implicit signals such as time-on-task and submission frequency must serve as proxies for preference. A known limitation is that when a student has little interaction history, similarity cannot be computed reliably, leading to unstable early-session predictions  
 
 In the context of lab struggle detection, collaborative filtering offers a strong alternative to our scoring approach. Rather than computing a fixed weighted score for each student, it can identify students whose interaction patterns closely resemble peers who need help, inferring that they too may need help. However applying collaborative filtering to a live computer lab comes with its constraints as students who may need help is limited and the start of the session will have very limited data. These constraints backs the use of a scoring approach, whilst the collaborative filtering approach is a strong alternative.
 
 
 \subsubsection{Text Mining and Mistake Pattern Recovery}
 
+\subsubsection{Retrieval-Augmented Generation for Instructor and Assistant Feedback}
+
+\subsubsection{Summary of Identified Research Gaps}
 
 
-\subsection{Retrieval-Augmented Feedback}
+
+\begin{comment}
+    
+    This subsection reviewed a range of relevant literature. Learning analytics has proved incredibly useful in higher education by providing data on MOOC completion rates, click counts, and time spent, which have significantly aided pedagogical decision-making. Learning dashboards have also emerged as the primary output of learning analytics, enabling educators to gain insight into how different students are performing through an intuitive user interface. Real-time analytics has enabled processing data as it arrives, benefiting multiple sectors. Although all this work has proven highly beneficial in education and other sectors where data use is extremely valuable, there are various gaps we will address in this thesis.
+    
+    In particular, computer labs face a distinct challenge that existing approaches don't address well. In these settings, teachers and assistants have no way to swiftly identify those who need help and must rely on those who put their hands up. The problem with this is that it does not account for shy students who may not want to put their hands up, causing them to spend too much time on a question. Also, current dashboards focus on data collected towards the end of the lab; this data may not be as valid afterwards. By creating a dashboard that uses real-time analytics, we can efficiently leverage this data to support students during lessons.
+    
+    Furthermore, there has been no use of AI to classify data and provide a new metric, which could remove the need for educators to read every solution. This metric can be used to assess how close the student is to the correct answer and can provide a valuable indicator of how much a student is struggling. Combining this with other metrics, such as attempts and time spent, will help improve student outcomes. Research on struggle detection highlights that existing approaches operate on a course level rather than within live sessions and rely solely on threshold-based criteria that do not capture most factors that affect student difficulty.
+    Furthermore, whilst collaborative filtering has been explored as a similarity-driven alternative to the scoring method in the educational context, its application to real-time lab struggle detection remains unaddressed due to constraints imposed by data sparseness and unreliability at the start of sessions.
+    There is also a lack of dashboards that integrate with smart devices in computer labs. This can be used to send data from the dashboard to lab assistants' smart devices, such as phones, watches, or even glasses, to indicate which students they can help. This motivates the development of a real-time learning analytics dashboard that supports instructor awareness and prioritisation through smart device integration.
+\end{comment}
 
 \subsection{Existing Systems}
 
@@ -166,7 +159,7 @@ A limitation of these systems are that the analytics are typically reviewed afte
 
  Learning management systems often incorporate dashboards to track student or user progress, helping teachers better understand knowledge gaps \cite{kiatxin_development}. Dashboards provide insight into student progress through visualisation and scores derived from data generated during teaching and learning activities. As a result, dashboards are at the centre of learning analytics, integrated with learning management systems \cite{kiatxin_development}.
 
-Existing learning dashboards, such as Blocks: Progress Bar, report on student progress rather than student struggle at the live lab level \cite{kiatxin_development}. Dashboards like these show user active time, assignment progress, learning progress, marks, and assignment submissions \cite{kiatxin_development,holsteinIntelligentTutorsTeachers2017a,holsteinStudentLearningBenefits2018}. Visual components such as the progress bar aid in the understanding of student progress, removing all the complexity that is going on behind the scenes. Although these are useful, they don't directly present the user with more complex questions compared to others, and students struggle.
+Existing learning dashboards, such as Blocks: Progress Bar, report on student progress rather than student struggle at the live lab level \cite{kiatxin_development}. Dashboards like these show user active time, assignment progress, learning progress, marks, and assignment submissions \cite{kiatxin_development}. Visual components such as the progress bar aid in the understanding of student progress, removing all the complexity that is going on behind the scenes. Although these are useful, they don't directly present the user with more complex questions compared to others, and students struggle.
 
 \begin{figure}[H]
     \centering
@@ -226,21 +219,19 @@ Jayaprakash et al.\ generalises this further with an open-source initiative, the
 
 Although the system is beneficial for identifying students who are struggling at the course level, it does not necessarily help identify students at the lab level, as its design assumptions do not align with the demands of lab sessions. Educators working in real-time sessions require live data. Hence, they have immediate awareness of which students are currently struggling, rather than future failure. However, we can apply the same concepts used in at-risk systems to identify students who are struggling the most and questions that have the most difficulty. As a result, as a result while traditional at risk systems are not designed for lab sessions, the underlying principles can be adapted to meet the needs of real-time lab analytics.
 
-\subsection{Research Gaps}
+% \subsection{Mathematical Modelling of Student Struggle and Difficulty}
+
+% % \subsubsection{Modelling Student Struggling}
 
 
 
-\begin{comment}
-    
-    This subsection reviewed a range of relevant literature. Learning analytics has proved incredibly useful in higher education by providing data on MOOC completion rates, click counts, and time spent, which have significantly aided pedagogical decision-making. Learning dashboards have also emerged as the primary output of learning analytics, enabling educators to gain insight into how different students are performing through an intuitive user interface. Real-time analytics has enabled processing data as it arrives, benefiting multiple sectors. Although all this work has proven highly beneficial in education and other sectors where data use is extremely valuable, there are various gaps we will address in this thesis.
-    
-    In particular, computer labs face a distinct challenge that existing approaches don't address well. In these settings, teachers and assistants have no way to swiftly identify those who need help and must rely on those who put their hands up. The problem with this is that it does not account for shy students who may not want to put their hands up, causing them to spend too much time on a question. Also, current dashboards focus on data collected towards the end of the lab; this data may not be as valid afterwards. By creating a dashboard that uses real-time analytics, we can efficiently leverage this data to support students during lessons.
-    
-    Furthermore, there has been no use of AI to classify data and provide a new metric, which could remove the need for educators to read every solution. This metric can be used to assess how close the student is to the correct answer and can provide a valuable indicator of how much a student is struggling. Combining this with other metrics, such as attempts and time spent, will help improve student outcomes. Research on struggle detection highlights that existing approaches operate on a course level rather than within live sessions and rely solely on threshold-based criteria that do not capture most factors that affect student difficulty.
-    Furthermore, whilst collaborative filtering has been explored as a similarity-driven alternative to the scoring method in the educational context, its application to real-time lab struggle detection remains unaddressed due to constraints imposed by data sparseness and unreliability at the start of sessions.
-    There is also a lack of dashboards that integrate with smart devices in computer labs. This can be used to send data from the dashboard to lab assistants' smart devices, such as phones, watches, or even glasses, to indicate which students they can help. This motivates the development of a real-time learning analytics dashboard that supports instructor awareness and prioritisation through smart device integration.
-\end{comment}
+% % \subsubsection{Modelling Task Difficulty}
 
+% % \subsubsection{Predictive Models}
+
+% % \subsubsection{Role of AI in Modelling}
+
+% \subsection{Identified Gaps}
 
 \subsection{Requirements Specification}
 

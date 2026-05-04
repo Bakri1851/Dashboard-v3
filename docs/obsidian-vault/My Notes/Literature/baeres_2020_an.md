@@ -7,9 +7,12 @@ status: active
 last_imported: 2026-05-03
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:28
-  - Report/main-sections/requirements-specification.tex:190
-  - Report/main-sections/requirements-specification.tex:191
-  - Report/main-sections/requirements-specification.tex:194
+  - Report/main-sections/requirements-specification-old.tex:188
+  - Report/main-sections/requirements-specification-old.tex:189
+  - Report/main-sections/requirements-specification-old.tex:192
+  - Report/main-sections/requirements-specification.tex:177
+  - Report/main-sections/requirements-specification.tex:178
+  - Report/main-sections/requirements-specification.tex:181
 cited_in_planned:
   - Ch2 – Background and Requirements
   - IRT Difficulty Logic

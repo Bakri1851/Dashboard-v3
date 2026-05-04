@@ -5,155 +5,157 @@
 \contentsline {subsection}{\numberline {1.4}Risks and Mitigation}{8}{subsection.1.4}%
 \contentsline {subsection}{\numberline {1.5}Project Approach}{8}{subsection.1.5}%
 \contentsline {section}{\numberline {2}Background and Requirements}{10}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Literature}{10}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.1}Learning Analytics and Dashboards}{10}{subsection.2.1}%
 \contentsline {subsubsection}{\numberline {2.1.1}Learning Analytics in Higher Education}{10}{subsubsection.2.1.1}%
 \contentsline {subsubsection}{\numberline {2.1.2}Dashboards for Learning Analytics}{10}{subsubsection.2.1.2}%
 \contentsline {subsubsection}{\numberline {2.1.3}Real-Time Data Analytics and Visualisation}{12}{subsubsection.2.1.3}%
-\contentsline {subsubsection}{\numberline {2.1.4}Modelling Student Struggle}{13}{subsubsection.2.1.4}%
-\contentsline {subsubsection}{\numberline {2.1.5}Knowledge Tracing and Bayesian Student Models}{15}{subsubsection.2.1.5}%
-\contentsline {subsubsection}{\numberline {2.1.6}Modelling Task Difficulty}{15}{subsubsection.2.1.6}%
-\contentsline {subsubsection}{\numberline {2.1.7}Collaborative Filtering}{15}{subsubsection.2.1.7}%
-\contentsline {subsubsection}{\numberline {2.1.8}Text Mining and Mistake Pattern Recovery}{16}{subsubsection.2.1.8}%
-\contentsline {subsubsection}{\numberline {2.1.9}Retrieval-Augmented Generation for Instructor and Assistant Feedback}{16}{subsubsection.2.1.9}%
-\contentsline {subsubsection}{\numberline {2.1.10}Summary of Identified Research Gaps}{16}{subsubsection.2.1.10}%
-\contentsline {subsection}{\numberline {2.2}Existing Systems}{16}{subsection.2.2}%
-\contentsline {subsubsection}{\numberline {2.2.1}Learning Management System }{16}{subsubsection.2.2.1}%
-\contentsline {subsubsection}{\numberline {2.2.2}Instructor Facing Dashboards}{16}{subsubsection.2.2.2}%
-\contentsline {subsubsection}{\numberline {2.2.3}Early Warning and At-Risk Student Systems}{18}{subsubsection.2.2.3}%
-\contentsline {subsection}{\numberline {2.3}Requirements Specification}{19}{subsection.2.3}%
-\contentsline {subsubsection}{\numberline {2.3.1}Functional Requirements}{19}{subsubsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.2}Modelling Student Behaviour}{13}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}Modelling Student Struggle}{13}{subsubsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {2.2.2}Knowledge Tracing and Bayesian Student Models}{14}{subsubsection.2.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.3}Modelling Task Difficulty}{15}{subsubsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.3}Data-Driven Personalisation}{16}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {2.3.1}Collaborative Filtering}{16}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.3.2}Text Mining and Mistake Pattern Recovery}{17}{subsubsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.4}Retrieval-Augmented Feedback}{17}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Existing Systems}{17}{subsection.2.5}%
+\contentsline {subsubsection}{\numberline {2.5.1}Learning Management System }{17}{subsubsection.2.5.1}%
+\contentsline {subsubsection}{\numberline {2.5.2}Instructor Facing Dashboards}{17}{subsubsection.2.5.2}%
+\contentsline {subsubsection}{\numberline {2.5.3}Early Warning and At-Risk Student Systems}{19}{subsubsection.2.5.3}%
+\contentsline {subsection}{\numberline {2.6}Research Gaps}{20}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}Requirements Specification}{20}{subsection.2.7}%
+\contentsline {subsubsection}{\numberline {2.7.1}Functional Requirements}{20}{subsubsection.2.7.1}%
 \contentsline {paragraph}{FR1: Live ingestion of Lab data}{20}{section*.9}%
-\contentsline {paragraph}{FR2: Computation of student struggle}{20}{section*.10}%
-\contentsline {paragraph}{FR3: Computation of question difficulty}{20}{section*.11}%
-\contentsline {paragraph}{FR4: Real-time prioritisation}{20}{section*.12}%
-\contentsline {paragraph}{FR5: Present Relevant Analytics}{20}{section*.13}%
-\contentsline {paragraph}{FR6: Smart Device}{20}{section*.14}%
-\contentsline {paragraph}{FR7: Lab Assistant Ranking System}{20}{section*.15}%
-\contentsline {subsubsection}{\numberline {2.3.2}Non-Functional Requirements}{20}{subsubsection.2.3.2}%
-\contentsline {paragraph}{NFR1: Real Time Performance }{20}{section*.16}%
+\contentsline {paragraph}{FR2: Computation of student struggle}{21}{section*.10}%
+\contentsline {paragraph}{FR3: Computation of question difficulty}{21}{section*.11}%
+\contentsline {paragraph}{FR4: Real-time prioritisation}{21}{section*.12}%
+\contentsline {paragraph}{FR5: Present Relevant Analytics}{21}{section*.13}%
+\contentsline {paragraph}{FR6: Smart Device}{21}{section*.14}%
+\contentsline {paragraph}{FR7: Lab Assistant Ranking System}{21}{section*.15}%
+\contentsline {subsubsection}{\numberline {2.7.2}Non-Functional Requirements}{21}{subsubsection.2.7.2}%
+\contentsline {paragraph}{NFR1: Real Time Performance }{21}{section*.16}%
 \contentsline {paragraph}{NFR2: Interpretability}{21}{section*.17}%
 \contentsline {paragraph}{NFR3: Robustness to noisy data}{21}{section*.18}%
-\contentsline {paragraph}{NFR4: Scalability}{21}{section*.19}%
-\contentsline {paragraph}{NFR5: Privacy and Ethical}{21}{section*.20}%
-\contentsline {paragraph}{NFR6: Extensibility and Maintainability}{21}{section*.21}%
-\contentsline {subsubsection}{\numberline {2.3.3}Requirements Prioritisation (MoSCoW)}{21}{subsubsection.2.3.3}%
-\contentsline {section}{\numberline {3}Design and Modelling}{22}{section.3}%
-\contentsline {subsection}{\numberline {3.1}System Architecture}{22}{subsection.3.1}%
-\contentsline {paragraph}{Data Generation Layer}{22}{section*.24}%
-\contentsline {paragraph}{Data Ingestion and Processing Layer}{23}{section*.25}%
-\contentsline {paragraph}{Decision and Action Layer}{23}{section*.26}%
-\contentsline {subsection}{\numberline {3.2}Data Endpoint}{23}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Baseline Analytics Design}{24}{subsection.3.3}%
-\contentsline {subsubsection}{\numberline {3.3.1}Student Struggle Model}{25}{subsubsection.3.3.1}%
-\contentsline {paragraph}{Modelling Objective}{25}{section*.28}%
-\contentsline {paragraph}{Identified Variables}{25}{section*.29}%
-\contentsline {paragraph}{AI-Based Answer Rating}{25}{section*.30}%
-\contentsline {paragraph}{Normalisation}{25}{section*.31}%
-\contentsline {paragraph}{Give recent submissions more importance}{26}{section*.32}%
-\contentsline {paragraph}{Struggle Score Definition}{26}{section*.33}%
-\contentsline {paragraph}{Temporal updating for real-time operation}{26}{section*.34}%
-\contentsline {paragraph}{Interpretation of model}{26}{section*.35}%
-\contentsline {subsubsection}{\numberline {3.3.2}Temporal Smoothing}{26}{subsubsection.3.3.2}%
-\contentsline {subsubsection}{\numberline {3.3.3}Question Difficulty Model}{26}{subsubsection.3.3.3}%
-\contentsline {paragraph}{Modelling Objective}{26}{section*.36}%
-\contentsline {paragraph}{Identified Variables}{27}{section*.37}%
-\contentsline {paragraph}{Normalisation}{27}{section*.38}%
-\contentsline {paragraph}{Difficult Task Definition}{27}{section*.39}%
-\contentsline {paragraph}{Temporal updating for real-time operation}{27}{section*.40}%
-\contentsline {paragraph}{Interpretation of Model}{27}{section*.41}%
-\contentsline {subsubsection}{\numberline {3.3.4}Alternative Modelling Approach: Collaborative Filtering}{28}{subsubsection.3.3.4}%
-\contentsline {paragraph}{Motivation}{28}{section*.42}%
-\contentsline {paragraph}{Student Interaction Matrix}{28}{section*.43}%
-\contentsline {paragraph}{Student Similarity Measure}{28}{section*.44}%
-\contentsline {paragraph}{Help-Seeking as a Proxy for Struggle}{28}{section*.45}%
-\contentsline {paragraph}{Predicted Help Need with $k$-Nearest Neighbours}{29}{section*.46}%
-\contentsline {paragraph}{Comparison with Parameter-Based Model}{29}{section*.47}%
-\contentsline {paragraph}{Justification for Current Approach}{29}{section*.49}%
-\contentsline {subsubsection}{\numberline {3.3.5}Mistake Clustering}{30}{subsubsection.3.3.5}%
-\contentsline {subsection}{\numberline {3.4}Advanced Model Design}{30}{subsection.3.4}%
-\contentsline {subsubsection}{\numberline {3.4.1}Measurement Confidence}{30}{subsubsection.3.4.1}%
-\contentsline {subsubsection}{\numberline {3.4.2}Item Response Theory}{30}{subsubsection.3.4.2}%
-\contentsline {subsubsection}{\numberline {3.4.3}Bayesian Knowledge Training}{30}{subsubsection.3.4.3}%
-\contentsline {subsubsection}{\numberline {3.4.4}Improved Struggle Model}{30}{subsubsection.3.4.4}%
-\contentsline {subsection}{\numberline {3.5}Retrieval-Augmented Generation Feedback Design}{30}{subsection.3.5}%
-\contentsline {subsection}{\numberline {3.6}Interaction and UI Designs}{30}{subsection.3.6}%
-\contentsline {subsubsection}{\numberline {3.6.1}Design Principles}{30}{subsubsection.3.6.1}%
-\contentsline {subsubsection}{\numberline {3.6.2}Instructor Views}{31}{subsubsection.3.6.2}%
-\contentsline {subsubsection}{\numberline {3.6.3}Lab Assistant View}{33}{subsubsection.3.6.3}%
-\contentsline {subsubsection}{\numberline {3.6.4}Visual Encoding of Metrics}{33}{subsubsection.3.6.4}%
-\contentsline {section}{\numberline {4}Implementation}{34}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Implementation Overview}{34}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Technology Stack and Software Selection}{35}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}System Structure}{35}{subsection.4.3}%
-\contentsline {subsubsection}{\numberline {4.3.1}Instructor System}{35}{subsubsection.4.3.1}%
-\contentsline {subsubsection}{\numberline {4.3.2}Assistant System}{35}{subsubsection.4.3.2}%
-\contentsline {subsubsection}{\numberline {4.3.3}Shared Runtime State}{35}{subsubsection.4.3.3}%
-\contentsline {subsection}{\numberline {4.4}Data Pipeline}{35}{subsection.4.4}%
-\contentsline {subsubsection}{\numberline {4.4.1}Endpoint Retrieval and Parsing}{38}{subsubsection.4.4.1}%
-\contentsline {subsubsection}{\numberline {4.4.2}Data Normalisation and Structuring}{38}{subsubsection.4.4.2}%
-\contentsline {subsection}{\numberline {4.5}Session Management}{38}{subsection.4.5}%
-\contentsline {subsubsection}{\numberline {4.5.1}Live Session Lifecycle}{38}{subsubsection.4.5.1}%
-\contentsline {subsubsection}{\numberline {4.5.2}Saved Session History and Restoration}{38}{subsubsection.4.5.2}%
-\contentsline {subsection}{\numberline {4.6}Analytics Implementation}{38}{subsection.4.6}%
-\contentsline {subsubsection}{\numberline {4.6.1}Incorrectness Scoring}{38}{subsubsection.4.6.1}%
-\contentsline {subsubsection}{\numberline {4.6.2}Baseline Student Struggle Model}{38}{subsubsection.4.6.2}%
-\contentsline {subsubsection}{\numberline {4.6.3}Baseline Question Difficulty Model}{38}{subsubsection.4.6.3}%
-\contentsline {subsubsection}{\numberline {4.6.4}Collaborative Filtering}{38}{subsubsection.4.6.4}%
-\contentsline {subsubsection}{\numberline {4.6.5}Mistake Clustering}{38}{subsubsection.4.6.5}%
-\contentsline {subsection}{\numberline {4.7}RAG Suggested Feedback}{38}{subsection.4.7}%
-\contentsline {subsubsection}{\numberline {4.7.1}Hybrid Two-Layer Architecture}{38}{subsubsection.4.7.1}%
-\contentsline {subsubsection}{\numberline {4.7.2}Embedding Model (all-MiniLM-L6-v2)}{38}{subsubsection.4.7.2}%
-\contentsline {subsubsection}{\numberline {4.7.3}Generation and Prompting}{38}{subsubsection.4.7.3}%
-\contentsline {subsubsection}{\numberline {4.7.4}Suggestion Caching}{38}{subsubsection.4.7.4}%
-\contentsline {subsubsection}{\numberline {4.7.5}Graceful Degradation and Privacy}{38}{subsubsection.4.7.5}%
-\contentsline {subsection}{\numberline {4.8}Advanced Model Implementation}{38}{subsection.4.8}%
-\contentsline {subsubsection}{\numberline {4.8.1}Measurement Confidence}{38}{subsubsection.4.8.1}%
-\contentsline {subsubsection}{\numberline {4.8.2}Item Response Theory (IRT) Difficulty}{38}{subsubsection.4.8.2}%
-\contentsline {subsubsection}{\numberline {4.8.3}Bayesian Knowledge Training (BKT) Mastery}{38}{subsubsection.4.8.3}%
-\contentsline {subsubsection}{\numberline {4.8.4}Improved Struggle Model}{38}{subsubsection.4.8.4}%
-\contentsline {subsection}{\numberline {4.9}Lab Instructor System}{38}{subsection.4.9}%
-\contentsline {subsubsection}{\numberline {4.9.1}In Class View}{38}{subsubsection.4.9.1}%
-\contentsline {subsubsection}{\numberline {4.9.2}Student Detail View}{38}{subsubsection.4.9.2}%
-\contentsline {subsubsection}{\numberline {4.9.3}Question Detail View}{38}{subsubsection.4.9.3}%
-\contentsline {subsubsection}{\numberline {4.9.4}Data Analysis View}{38}{subsubsection.4.9.4}%
-\contentsline {subsubsection}{\numberline {4.9.5}Comparison View}{38}{subsubsection.4.9.5}%
-\contentsline {subsubsection}{\numberline {4.9.6}Settings View}{38}{subsubsection.4.9.6}%
-\contentsline {subsubsection}{\numberline {4.9.7}Previous Sessions View}{38}{subsubsection.4.9.7}%
-\contentsline {subsection}{\numberline {4.10}Lab Assistant System}{38}{subsection.4.10}%
-\contentsline {subsubsection}{\numberline {4.10.1}Session Join Flow}{38}{subsubsection.4.10.1}%
-\contentsline {subsubsection}{\numberline {4.10.2}Waiting and Assignment States}{38}{subsubsection.4.10.2}%
-\contentsline {subsubsection}{\numberline {4.10.3}Live Assistant Allocation}{38}{subsubsection.4.10.3}%
-\contentsline {subsection}{\numberline {4.11}Problems Encountered and Solutions}{38}{subsection.4.11}%
-\contentsline {section}{\numberline {5}Evaluation}{39}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Evaluation Design}{39}{subsection.5.1}%
-\contentsline {subsubsection}{\numberline {5.1.1}Scope of Evaluation}{39}{subsubsection.5.1.1}%
-\contentsline {subsubsection}{\numberline {5.1.2}Evidence Sources}{39}{subsubsection.5.1.2}%
-\contentsline {subsubsection}{\numberline {5.1.3}Retrospective Evaluation Protocol}{39}{subsubsection.5.1.3}%
-\contentsline {subsubsection}{\numberline {5.1.4}Limitations of Evaluation}{39}{subsubsection.5.1.4}%
-\contentsline {subsection}{\numberline {5.2}Functional Testing}{39}{subsection.5.2}%
-\contentsline {subsubsection}{\numberline {5.2.1}Data Ingestion and Session Handling}{39}{subsubsection.5.2.1}%
-\contentsline {subsubsection}{\numberline {5.2.2}Analytics and Model Behaviour}{39}{subsubsection.5.2.2}%
-\contentsline {subsubsection}{\numberline {5.2.3}Instructor Dashboard Features}{39}{subsubsection.5.2.3}%
-\contentsline {subsubsection}{\numberline {5.2.4}Lab Assistant Workflow}{39}{subsubsection.5.2.4}%
-\contentsline {subsection}{\numberline {5.3}Non-Functional Testing}{39}{subsection.5.3}%
-\contentsline {subsubsection}{\numberline {5.3.1}Performance and Refresh Behaviour}{39}{subsubsection.5.3.1}%
-\contentsline {subsubsection}{\numberline {5.3.2}Usability and Interpretability}{39}{subsubsection.5.3.2}%
-\contentsline {subsubsection}{\numberline {5.3.3}Robustness and Failure Handling}{39}{subsubsection.5.3.3}%
-\contentsline {subsection}{\numberline {5.4}Results}{39}{subsection.5.4}%
-\contentsline {subsubsection}{\numberline {5.4.1}Baseline System Results}{39}{subsubsection.5.4.1}%
-\contentsline {subsubsection}{\numberline {5.4.2}Advanced Model Comparison}{39}{subsubsection.5.4.2}%
-\contentsline {subsubsection}{\numberline {5.4.3}Observed Strengths and Weaknesses}{39}{subsubsection.5.4.3}%
-\contentsline {subsection}{\numberline {5.5}Discussion}{39}{subsection.5.5}%
-\contentsline {subsubsection}{\numberline {5.5.1}Model Disagreement}{39}{subsubsection.5.5.1}%
-\contentsline {subsubsection}{\numberline {5.5.2}Limitations}{39}{subsubsection.5.5.2}%
-\contentsline {section}{\numberline {6}Conclusion}{40}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Summary of the Project}{40}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Key Findings Contributions}{40}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}Future Work}{40}{subsection.6.3}%
-\contentsline {section}{\numberline {A}Code Snippets}{41}{appendix.A}%
-\contentsline {section}{\numberline {B}User Interface Screenshots}{42}{appendix.B}%
-\contentsline {section}{\numberline {C}Detailed Test Results}{43}{appendix.C}%
-\contentsline {section}{\numberline {D}Themes and References}{44}{appendix.D}%
-\contentsline {section}{\numberline {E}Formulae}{45}{appendix.E}%
-\contentsline {section}{\numberline {F}Formulae Derivation}{46}{appendix.F}%
-\contentsline {section}{References}{47}{section*.57}%
+\contentsline {paragraph}{NFR4: Scalability}{22}{section*.19}%
+\contentsline {paragraph}{NFR5: Privacy and Ethical}{22}{section*.20}%
+\contentsline {paragraph}{NFR6: Extensibility and Maintainability}{22}{section*.21}%
+\contentsline {subsubsection}{\numberline {2.7.3}Requirements Prioritisation (MoSCoW)}{22}{subsubsection.2.7.3}%
+\contentsline {section}{\numberline {3}Design and Modelling}{23}{section.3}%
+\contentsline {subsection}{\numberline {3.1}System Architecture}{23}{subsection.3.1}%
+\contentsline {paragraph}{Data Generation Layer}{23}{section*.24}%
+\contentsline {paragraph}{Data Ingestion and Processing Layer}{24}{section*.25}%
+\contentsline {paragraph}{Decision and Action Layer}{24}{section*.26}%
+\contentsline {subsection}{\numberline {3.2}Data Endpoint}{24}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Baseline Analytics Design}{25}{subsection.3.3}%
+\contentsline {subsubsection}{\numberline {3.3.1}Student Struggle Model}{26}{subsubsection.3.3.1}%
+\contentsline {paragraph}{Modelling Objective}{26}{section*.28}%
+\contentsline {paragraph}{Identified Variables}{26}{section*.29}%
+\contentsline {paragraph}{AI-Based Answer Rating}{26}{section*.30}%
+\contentsline {paragraph}{Normalisation}{26}{section*.31}%
+\contentsline {paragraph}{Give recent submissions more importance}{27}{section*.32}%
+\contentsline {paragraph}{Struggle Score Definition}{27}{section*.33}%
+\contentsline {paragraph}{Temporal updating for real-time operation}{27}{section*.34}%
+\contentsline {paragraph}{Interpretation of model}{27}{section*.35}%
+\contentsline {subsubsection}{\numberline {3.3.2}Temporal Smoothing}{27}{subsubsection.3.3.2}%
+\contentsline {subsubsection}{\numberline {3.3.3}Question Difficulty Model}{27}{subsubsection.3.3.3}%
+\contentsline {paragraph}{Modelling Objective}{27}{section*.36}%
+\contentsline {paragraph}{Identified Variables}{28}{section*.37}%
+\contentsline {paragraph}{Normalisation}{28}{section*.38}%
+\contentsline {paragraph}{Difficult Task Definition}{28}{section*.39}%
+\contentsline {paragraph}{Temporal updating for real-time operation}{28}{section*.40}%
+\contentsline {paragraph}{Interpretation of Model}{28}{section*.41}%
+\contentsline {subsubsection}{\numberline {3.3.4}Alternative Modelling Approach: Collaborative Filtering}{29}{subsubsection.3.3.4}%
+\contentsline {paragraph}{Motivation}{29}{section*.42}%
+\contentsline {paragraph}{Student Interaction Matrix}{29}{section*.43}%
+\contentsline {paragraph}{Student Similarity Measure}{29}{section*.44}%
+\contentsline {paragraph}{Help-Seeking as a Proxy for Struggle}{29}{section*.45}%
+\contentsline {paragraph}{Predicted Help Need with $k$-Nearest Neighbours}{30}{section*.46}%
+\contentsline {paragraph}{Comparison with Parameter-Based Model}{30}{section*.47}%
+\contentsline {paragraph}{Justification for Current Approach}{30}{section*.49}%
+\contentsline {subsubsection}{\numberline {3.3.5}Mistake Clustering}{31}{subsubsection.3.3.5}%
+\contentsline {subsection}{\numberline {3.4}Advanced Model Design}{31}{subsection.3.4}%
+\contentsline {subsubsection}{\numberline {3.4.1}Measurement Confidence}{31}{subsubsection.3.4.1}%
+\contentsline {subsubsection}{\numberline {3.4.2}Item Response Theory}{31}{subsubsection.3.4.2}%
+\contentsline {subsubsection}{\numberline {3.4.3}Bayesian Knowledge Training}{31}{subsubsection.3.4.3}%
+\contentsline {subsubsection}{\numberline {3.4.4}Improved Struggle Model}{31}{subsubsection.3.4.4}%
+\contentsline {subsection}{\numberline {3.5}Retrieval-Augmented Generation Feedback Design}{31}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.6}Interaction and UI Designs}{31}{subsection.3.6}%
+\contentsline {subsubsection}{\numberline {3.6.1}Design Principles}{31}{subsubsection.3.6.1}%
+\contentsline {subsubsection}{\numberline {3.6.2}Instructor Views}{32}{subsubsection.3.6.2}%
+\contentsline {subsubsection}{\numberline {3.6.3}Lab Assistant View}{34}{subsubsection.3.6.3}%
+\contentsline {subsubsection}{\numberline {3.6.4}Visual Encoding of Metrics}{34}{subsubsection.3.6.4}%
+\contentsline {section}{\numberline {4}Implementation}{35}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Implementation Overview}{35}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Technology Stack and Software Selection}{36}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}System Structure}{36}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Instructor System}{36}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Assistant System}{36}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.3}Shared Runtime State}{36}{subsubsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.4}Data Pipeline}{36}{subsection.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.1}Endpoint Retrieval and Parsing}{39}{subsubsection.4.4.1}%
+\contentsline {subsubsection}{\numberline {4.4.2}Data Normalisation and Structuring}{39}{subsubsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.5}Session Management}{39}{subsection.4.5}%
+\contentsline {subsubsection}{\numberline {4.5.1}Live Session Lifecycle}{39}{subsubsection.4.5.1}%
+\contentsline {subsubsection}{\numberline {4.5.2}Saved Session History and Restoration}{39}{subsubsection.4.5.2}%
+\contentsline {subsection}{\numberline {4.6}Analytics Implementation}{39}{subsection.4.6}%
+\contentsline {subsubsection}{\numberline {4.6.1}Incorrectness Scoring}{39}{subsubsection.4.6.1}%
+\contentsline {subsubsection}{\numberline {4.6.2}Baseline Student Struggle Model}{39}{subsubsection.4.6.2}%
+\contentsline {subsubsection}{\numberline {4.6.3}Baseline Question Difficulty Model}{39}{subsubsection.4.6.3}%
+\contentsline {subsubsection}{\numberline {4.6.4}Collaborative Filtering}{39}{subsubsection.4.6.4}%
+\contentsline {subsubsection}{\numberline {4.6.5}Mistake Clustering}{39}{subsubsection.4.6.5}%
+\contentsline {subsection}{\numberline {4.7}RAG Suggested Feedback}{39}{subsection.4.7}%
+\contentsline {subsubsection}{\numberline {4.7.1}Hybrid Two-Layer Architecture}{39}{subsubsection.4.7.1}%
+\contentsline {subsubsection}{\numberline {4.7.2}Embedding Model (all-MiniLM-L6-v2)}{39}{subsubsection.4.7.2}%
+\contentsline {subsubsection}{\numberline {4.7.3}Generation and Prompting}{39}{subsubsection.4.7.3}%
+\contentsline {subsubsection}{\numberline {4.7.4}Suggestion Caching}{39}{subsubsection.4.7.4}%
+\contentsline {subsubsection}{\numberline {4.7.5}Graceful Degradation and Privacy}{39}{subsubsection.4.7.5}%
+\contentsline {subsection}{\numberline {4.8}Advanced Model Implementation}{39}{subsection.4.8}%
+\contentsline {subsubsection}{\numberline {4.8.1}Measurement Confidence}{39}{subsubsection.4.8.1}%
+\contentsline {subsubsection}{\numberline {4.8.2}Item Response Theory (IRT) Difficulty}{39}{subsubsection.4.8.2}%
+\contentsline {subsubsection}{\numberline {4.8.3}Bayesian Knowledge Training (BKT) Mastery}{39}{subsubsection.4.8.3}%
+\contentsline {subsubsection}{\numberline {4.8.4}Improved Struggle Model}{39}{subsubsection.4.8.4}%
+\contentsline {subsection}{\numberline {4.9}Lab Instructor System}{39}{subsection.4.9}%
+\contentsline {subsubsection}{\numberline {4.9.1}In Class View}{39}{subsubsection.4.9.1}%
+\contentsline {subsubsection}{\numberline {4.9.2}Student Detail View}{39}{subsubsection.4.9.2}%
+\contentsline {subsubsection}{\numberline {4.9.3}Question Detail View}{39}{subsubsection.4.9.3}%
+\contentsline {subsubsection}{\numberline {4.9.4}Data Analysis View}{39}{subsubsection.4.9.4}%
+\contentsline {subsubsection}{\numberline {4.9.5}Comparison View}{39}{subsubsection.4.9.5}%
+\contentsline {subsubsection}{\numberline {4.9.6}Settings View}{39}{subsubsection.4.9.6}%
+\contentsline {subsubsection}{\numberline {4.9.7}Previous Sessions View}{39}{subsubsection.4.9.7}%
+\contentsline {subsection}{\numberline {4.10}Lab Assistant System}{39}{subsection.4.10}%
+\contentsline {subsubsection}{\numberline {4.10.1}Session Join Flow}{39}{subsubsection.4.10.1}%
+\contentsline {subsubsection}{\numberline {4.10.2}Waiting and Assignment States}{39}{subsubsection.4.10.2}%
+\contentsline {subsubsection}{\numberline {4.10.3}Live Assistant Allocation}{39}{subsubsection.4.10.3}%
+\contentsline {subsection}{\numberline {4.11}Problems Encountered and Solutions}{39}{subsection.4.11}%
+\contentsline {section}{\numberline {5}Evaluation}{40}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Evaluation Design}{40}{subsection.5.1}%
+\contentsline {subsubsection}{\numberline {5.1.1}Scope of Evaluation}{40}{subsubsection.5.1.1}%
+\contentsline {subsubsection}{\numberline {5.1.2}Evidence Sources}{40}{subsubsection.5.1.2}%
+\contentsline {subsubsection}{\numberline {5.1.3}Retrospective Evaluation Protocol}{40}{subsubsection.5.1.3}%
+\contentsline {subsubsection}{\numberline {5.1.4}Limitations of Evaluation}{40}{subsubsection.5.1.4}%
+\contentsline {subsection}{\numberline {5.2}Functional Testing}{40}{subsection.5.2}%
+\contentsline {subsubsection}{\numberline {5.2.1}Data Ingestion and Session Handling}{40}{subsubsection.5.2.1}%
+\contentsline {subsubsection}{\numberline {5.2.2}Analytics and Model Behaviour}{40}{subsubsection.5.2.2}%
+\contentsline {subsubsection}{\numberline {5.2.3}Instructor Dashboard Features}{40}{subsubsection.5.2.3}%
+\contentsline {subsubsection}{\numberline {5.2.4}Lab Assistant Workflow}{40}{subsubsection.5.2.4}%
+\contentsline {subsection}{\numberline {5.3}Non-Functional Testing}{40}{subsection.5.3}%
+\contentsline {subsubsection}{\numberline {5.3.1}Performance and Refresh Behaviour}{40}{subsubsection.5.3.1}%
+\contentsline {subsubsection}{\numberline {5.3.2}Usability and Interpretability}{40}{subsubsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.3}Robustness and Failure Handling}{40}{subsubsection.5.3.3}%
+\contentsline {subsection}{\numberline {5.4}Results}{40}{subsection.5.4}%
+\contentsline {subsubsection}{\numberline {5.4.1}Baseline System Results}{40}{subsubsection.5.4.1}%
+\contentsline {subsubsection}{\numberline {5.4.2}Advanced Model Comparison}{40}{subsubsection.5.4.2}%
+\contentsline {subsubsection}{\numberline {5.4.3}Observed Strengths and Weaknesses}{40}{subsubsection.5.4.3}%
+\contentsline {subsection}{\numberline {5.5}Discussion}{40}{subsection.5.5}%
+\contentsline {subsubsection}{\numberline {5.5.1}Model Disagreement}{40}{subsubsection.5.5.1}%
+\contentsline {subsubsection}{\numberline {5.5.2}Limitations}{40}{subsubsection.5.5.2}%
+\contentsline {section}{\numberline {6}Conclusion}{41}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Summary of the Project}{41}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Key Findings Contributions}{41}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Future Work}{41}{subsection.6.3}%
+\contentsline {section}{\numberline {A}Code Snippets}{42}{appendix.A}%
+\contentsline {section}{\numberline {B}User Interface Screenshots}{43}{appendix.B}%
+\contentsline {section}{\numberline {C}Detailed Test Results}{44}{appendix.C}%
+\contentsline {section}{\numberline {D}Themes and References}{45}{appendix.D}%
+\contentsline {section}{\numberline {E}Formulae}{46}{appendix.E}%
+\contentsline {section}{\numberline {F}Formulae Derivation}{47}{appendix.F}%
+\contentsline {section}{References}{48}{section*.57}%

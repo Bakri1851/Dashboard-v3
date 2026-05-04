@@ -8,6 +8,9 @@ last_imported: 2026-05-03
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:18
   - Report/appendix-sections/themes-and-references.tex:20
+  - Report/main-sections/requirements-specification-old.tex:107
+  - Report/main-sections/requirements-specification-old.tex:111
+  - Report/main-sections/requirements-specification-old.tex:119
   - Report/main-sections/requirements-specification.tex:109
   - Report/main-sections/requirements-specification.tex:113
   - Report/main-sections/requirements-specification.tex:121

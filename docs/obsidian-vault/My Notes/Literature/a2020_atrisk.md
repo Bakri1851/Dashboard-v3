@@ -7,8 +7,10 @@ status: active
 last_imported: 2026-05-03
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:28
-  - Report/main-sections/requirements-specification.tex:196
-  - Report/main-sections/requirements-specification.tex:217
+  - Report/main-sections/requirements-specification-old.tex:194
+  - Report/main-sections/requirements-specification-old.tex:215
+  - Report/main-sections/requirements-specification.tex:183
+  - Report/main-sections/requirements-specification.tex:204
 cited_in_planned:
   - Ch2 – Background and Requirements
 last_synced: 2026-05-03

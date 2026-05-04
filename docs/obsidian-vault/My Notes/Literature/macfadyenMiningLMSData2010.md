@@ -7,7 +7,8 @@ status: active
 last_imported: 2026-05-03
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:28
-  - Report/main-sections/requirements-specification.tex:189
+  - Report/main-sections/requirements-specification-old.tex:187
+  - Report/main-sections/requirements-specification.tex:176
 cited_in_planned: []
 last_synced: 2026-05-03
 ---

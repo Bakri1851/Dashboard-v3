@@ -7,8 +7,10 @@ status: active
 last_imported: 2026-05-03
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:18
-  - Report/main-sections/requirements-specification.tex:78
-  - Report/main-sections/requirements-specification.tex:79
+  - Report/main-sections/requirements-specification-old.tex:78
+  - Report/main-sections/requirements-specification-old.tex:79
+  - Report/main-sections/requirements-specification.tex:80
+  - Report/main-sections/requirements-specification.tex:81
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Student Struggle Logic

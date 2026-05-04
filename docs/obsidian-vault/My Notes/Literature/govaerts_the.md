@@ -7,6 +7,7 @@ status: active
 last_imported: 2026-05-03
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:13
+  - Report/main-sections/requirements-specification-old.tex:37
   - Report/main-sections/requirements-specification.tex:37
 cited_in_planned:
   - Ch2 – Background and Requirements

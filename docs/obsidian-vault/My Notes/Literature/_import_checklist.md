@@ -185,3 +185,87 @@ All three optional Ch1 cites (`clow_2013_an`, `holstein_2018_student`, `black_19
    - **Cited but missing bib** → 0
    - **In Zotero but no literature note** → 0
 5. Tell me which chapter is unlocked — I'll start writing that stage.
+
+---
+
+## Phase 2 — Software & foundational citations (34 additions)
+
+> [!note] Phase 2 Progress
+> **0 / 34 imported (0%)** · 34 to go
+> `░░░░░░░░░░░░░░░░░░░░`
+>
+> Software: 0/9 · IRT: 0/2 · Shrinkage: 0/1 · BKT/HMM: 0/4 · RAG: 0/3 · Eval: 0/5 · Dashboard: 0/5 · Ethics: 0/2 · ITS: 0/1 · CSEd: 0/1 · Analogue: 0/1
+
+Triggered by 2026-05-03 audit + user-supplied research list. Closes three real gaps in the existing pool: software citations (currently zero), HMM/EM machinery underlying BKT (Baum-Welch and Rabiner missing), and dashboard-design + ethics literature (currently sparse).
+
+**Dropped from the original 38-item list:**
+
+- Robertson & Zaragoza 2009 (BM25), Bruch et al. 2023 (hybrid fusion), Cormack et al. 2009 (RRF) — RAG implementation is pure dense (ChromaDB + SBERT), no sparse retrieval. Importing these would misrepresent the architecture.
+- Bodily & Verbert 2017 (LAK '17 conference paper) — the journal review version covers the same ground at greater depth.
+
+## Software stack — Ch4 Implementation (9)
+
+- [ ] **Pedregosa et al. (2011)** — Scikit-learn: Machine Learning in Python · *JMLR* — used in `code/learning_dashboard/analytics.py:14-17` (KMeans, TfidfVectorizer, silhouette, cosine kNN CF)
+- [ ] **Harris et al. (2020)** — Array Programming with NumPy · *Nature* — underpins all numerical routines (`analytics.py:10`, `models/irt.py:5`)
+- [ ] **McKinney (2010)** — Data Structures for Statistical Computing in Python · *SciPy proceedings* — student-interaction dataframes and temporal slicing
+- [ ] **Virtanen et al. (2020)** — SciPy 1.0: Fundamental Algorithms for Scientific Computing in Python · *Nature Methods* — `scipy.optimize.minimize(method='L-BFGS-B')` for IRT MLE (`models/irt.py:145-151`); `scipy.stats.wilcoxon` for Ch5 paired tests
+- [ ] **Streamlit** — software citation, GitHub/website — Ch4 frontend; both `app.py` and `lab_app.py` are Streamlit apps
+- [ ] **Chroma / ChromaDB** — software citation, GitHub repo — Ch4 RAG vector store (`code2/learning_dashboard/rag.py:68,160`)
+- [ ] **OpenAI (2023)** — GPT-4 Technical Report · arXiv `2303.08774` — Ch3/Ch4 RAG generation; canonical GPT-4-family reference
+- [ ] **OpenAI (2024)** — GPT-4o System Card — Ch4 RAG implementation; pairs with GPT-4 TR for the `gpt-4o-mini` model used (`code2/learning_dashboard/config.py:14`)
+- [ ] **Wang et al. (2020)** — MiniLM: Deep Self-Attention Distillation for Task-Agnostic Compression of Pre-Trained Transformers · *NeurIPS 2020* · arXiv `2002.10957` — distillation method behind `all-MiniLM-L6-v2` (`config.py:173`); pairs with Reimers & Gurevych 2019
+
+## IRT / measurement theory — Ch3 §3.3.5 (2)
+
+- [ ] **Bock & Aitkin (1981)** — Marginal Maximum Likelihood Estimation of Item Parameters: Application of an EM Algorithm · *Psychometrika* — methodological grounding for L-BFGS-B Rasch fit beyond Rasch 1960 and Lord & Novick 1968
+- [ ] **Birnbaum (1968)** — Some Latent Trait Models and Their Use in Inferring an Examinee's Ability — book chapter in Lord & Novick 1968 — original 2PL/3PL formulation; "why Rasch among the IRT family" reference
+
+## Bayesian shrinkage — Ch3 §3.3 / Ch2 §2.1.4 (1)
+
+- [ ] **James & Stein (1961)** — Estimation with Quadratic Loss · *Berkeley Symp. Math. Stat.* — original Stein/James-Stein shrinkage paper; peer-reviewed counterpart to Efron & Morris 1977 (already cited)
+
+## BKT / Knowledge Tracing — HMM/EM machinery — Ch3 §3.3.6 (4)
+
+- [ ] **Pardos & Heffernan (2010)** — Modeling Individualization in a Bayesian Networks Implementation of Knowledge Tracing · *UMAP 2010* — canonical extension of BKT with per-student parameters; direct precedent for individualised 4-parameter HMM BKT
+- [ ] **Reye (2004)** — Student Modelling Based on Belief Networks · *Int. J. AIED* — DBN/HMM formulation justifying BKT as a special case
+- [ ] **Baum, Petrie, Soules & Weiss (1970)** — A Maximization Technique Occurring in the Statistical Analysis of Probabilistic Functions of Markov Chains · *Annals of Mathematical Statistics* — original Baum-Welch / EM-for-HMM paper; primary HMM citation currently missing in §3.3.6
+- [ ] **Rabiner (1989)** — A Tutorial on Hidden Markov Models and Selected Applications in Speech Recognition · *Proc. IEEE* — universal HMM tutorial; pairs with Baum 1970 to ground forward-backward / Viterbi machinery underlying BKT inference
+
+## RAG architecture — Ch2 §2.1.9 / Ch3 §3.5 (3)
+
+- [ ] **Gao et al. (2023)** — Retrieval-Augmented Generation for Large Language Models: A Survey · arXiv `2312.10997` — standard modern RAG survey; provides Naive/Advanced/Modular taxonomy
+- [ ] **Karpukhin et al. (2020)** — Dense Passage Retrieval for Open-Domain Question Answering · *EMNLP 2020* · arXiv `2004.04906` — foundational dense-retrieval paper; justifies embedding-based retrieval layer
+- [ ] **Izacard & Grave (2021)** — Leveraging Passage Retrieval with Generative Models for Open Domain Question Answering · *EACL 2021* · arXiv `2007.01282` — Fusion-in-Decoder; justifies retrieve-then-generate two-stage pattern
+
+## CF + statistical evaluation — Ch5 (5)
+
+- [ ] **Herlocker, Konstan, Terveen & Riedl (2004)** — Evaluating Collaborative Filtering Recommender Systems · *ACM TOIS* — canonical CF evaluation paper (MAE/RMSE, precision@k, coverage); Dr. Batmaz request
+- [ ] **Shani & Gunawardana (2011)** — Evaluating Recommendation Systems — chapter in *Recommender Systems Handbook* — comprehensive evaluation-properties framework
+- [ ] **Gama, Sebastião & Rodrigues (2013)** — On Evaluating Stream Learning Algorithms · *Machine Learning* — canonical reference for prequential / time-aware evaluation
+- [ ] **Wilcoxon (1945)** — Individual Comparisons by Ranking Methods · *Biometrics Bulletin* — original signed-rank test; Ch5 paired comparison anchor
+- [ ] **Demšar (2006)** — Statistical Comparisons of Classifiers over Multiple Data Sets · *JMLR* — methodological justification for Wilcoxon (and Friedman/Nemenyi) for paired ML/IR system comparison
+
+## Dashboard design — Ch2 §2.1.2 / §2.2.2 / Ch3 UI (5)
+
+- [ ] **Few (2006)** — Information Dashboard Design: The Effective Visual Communication of Data · O'Reilly — book — visual rationale for Streamlit layout choices
+- [ ] **Schwendimann et al. (2017)** — Perceiving Learning at a Glance: A Systematic Literature Review of Learning Dashboard Research · *IEEE TLT* — defining SLR of learning dashboards
+- [ ] **Bodily & Verbert (2017)** — Review of Research on Student-Facing Learning Analytics Dashboards and Educational Recommender Systems · *IEEE TLT* (journal review only — LAK '17 variant dropped) — pairs LADs and educational recsys
+- [ ] **Matcha, Uzir, Gašević & Pardo (2020)** — A Systematic Review of Empirical Studies on Learning Analytics Dashboards: A Self-Regulated Learning Perspective · *IEEE TLT* — most recent SLR with empirical baselines; replaces `kiatxin_development` if removed
+- [ ] **Jivet, Scheffel, Specht & Drachsler (2018)** — License to Evaluate: Preparing Learning Analytics Dashboards for Educational Practice · *LAK '18* — theory-grounded LAD evaluation criteria for Ch5
+
+## Ethics — Ch1 / Ch6 (2)
+
+- [ ] **Slade & Prinsloo (2013)** — Learning Analytics: Ethical Issues and Dilemmas · *American Behavioral Scientist* — seminal LA-ethics paper on consent, classification, student agency; closes a gap currently only Tzimas 2021 covers
+- [ ] **Pardo & Siemens (2014)** — Ethical and Privacy Principles for Learning Analytics · *Br. J. Educational Technology* — cornerstone principles paper (transparency, student-as-agent, accountability); pairs with Slade & Prinsloo
+
+## ITS framing — Ch1 / Ch6 (1)
+
+- [ ] **VanLehn (2011)** — The Relative Effectiveness of Human Tutoring, Intelligent Tutoring Systems, and Other Tutoring Systems · *Educational Psychologist* — standard effect-size benchmark (~0.76σ for ITS) for positioning Dashboard-v3's lab-assistant intervention
+
+## CS education context — Ch2 (1)
+
+- [ ] **Robins, Rountree & Rountree (2003)** — Learning and Teaching Programming: A Review and Discussion · *Computer Science Education* — canonical novice-programmer review; standard background citation in CSEd theses on lab support
+
+## Direct system analogue — Ch2 / Ch6 (1)
+
+- [ ] **Kazemitabaar et al. (2024)** — CodeAid: Evaluating a Classroom Deployment of an LLM-based Programming Assistant that Balances Student and Educator Needs · *CHI 2024* — most rigorous in-the-wild evaluation (700 students, 12 weeks) of an LLM coding assistant with RAG over instructor-verified content; closest direct system analogue to Dashboard-v3

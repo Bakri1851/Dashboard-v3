@@ -6,10 +6,10 @@
 
 ## Summary
 
-- Active (cited in thesis): **36**
-- Planned (note + plan, no `\cite{}` yet): **44**
+- Active (cited in thesis): **45**
+- Planned (note + plan, no `\cite{}` yet): **35**
 - Stale (note but no plan, no cite): **0**
-- In Zotero but not cited in thesis: **43**
+- In Zotero but not cited in thesis: **34**
 - Cited in thesis but missing bib entry (broken): **0**
 - In Zotero but no literature note: **0**
 
@@ -17,42 +17,51 @@
 
 | Citekey | Where cited (`file:line`) | Planned for |
 |---|---|---|
-| [[a2020_atrisk]] | `Report/appendix-sections/themes-and-references.tex:28`, `Report/main-sections/requirements-specification.tex:196`, `Report/main-sections/requirements-specification.tex:217` | [[Ch2 – Background and Requirements]] |
-| [[ahn_2019_the]] | `Report/appendix-sections/themes-and-references.tex:13`, `Report/main-sections/requirements-specification.tex:39`, `Report/main-sections/requirements-specification.tex:58` | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] |
-| [[arnoldCourseSignalsPurdue2012a]] | `Report/appendix-sections/themes-and-references.tex:28`, `Report/main-sections/requirements-specification.tex:218` | — |
-| [[baeres_2020_an]] | `Report/appendix-sections/themes-and-references.tex:28`, `Report/main-sections/requirements-specification.tex:190`, `Report/main-sections/requirements-specification.tex:191`, `Report/main-sections/requirements-specification.tex:194` | [[Ch2 – Background and Requirements]] · [[IRT Difficulty Logic]] |
-| [[dannath_evaluating]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/appendix-sections/themes-and-references.tex:20`, `Report/main-sections/requirements-specification.tex:109`, `Report/main-sections/requirements-specification.tex:113`, …(+1) | [[Ch2 – Background and Requirements]] · [[Question Difficulty Logic]] |
+| [[a2020_atrisk]] | `Report/appendix-sections/themes-and-references.tex:28`, `Report/main-sections/requirements-specification-old.tex:194`, `Report/main-sections/requirements-specification-old.tex:215`, `Report/main-sections/requirements-specification.tex:183`, …(+1) | [[Ch2 – Background and Requirements]] |
+| [[ahn_2019_the]] | `Report/appendix-sections/themes-and-references.tex:13`, `Report/main-sections/requirements-specification-old.tex:39`, `Report/main-sections/requirements-specification-old.tex:58`, `Report/main-sections/requirements-specification.tex:39`, …(+1) | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] |
+| [[arnoldCourseSignalsPurdue2012a]] | `Report/appendix-sections/themes-and-references.tex:28`, `Report/main-sections/requirements-specification-old.tex:216`, `Report/main-sections/requirements-specification.tex:205` | — |
+| [[baeres_2020_an]] | `Report/appendix-sections/themes-and-references.tex:28`, `Report/main-sections/requirements-specification-old.tex:188`, `Report/main-sections/requirements-specification-old.tex:189`, `Report/main-sections/requirements-specification-old.tex:192`, …(+3) | [[Ch2 – Background and Requirements]] · [[IRT Difficulty Logic]] |
+| [[clowOverviewLearningAnalytics2013]] | `Report/main-sections/requirements-specification.tex:10` | [[Ch2 – Background and Requirements]] · [[Ch1 – Introduction]] |
+| [[dannath_evaluating]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/appendix-sections/themes-and-references.tex:20`, `Report/main-sections/requirements-specification-old.tex:107`, `Report/main-sections/requirements-specification-old.tex:111`, …(+4) | [[Ch2 – Background and Requirements]] · [[Question Difficulty Logic]] |
 | [[dasilva_2022_a]] | `Report/appendix-sections/themes-and-references.tex:22` | [[Ch2 – Background and Requirements]] |
 | [[deschnes_2020_recommender]] | `Report/appendix-sections/themes-and-references.tex:22` | [[Ch2 – Background and Requirements]] · [[Analytics Engine]] |
-| [[dong_using]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/main-sections/requirements-specification.tex:78`, `Report/main-sections/requirements-specification.tex:79` | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] · [[Improved Struggle Logic]] |
-| [[estey_2017_automatically]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/main-sections/requirements-specification.tex:83`, `Report/main-sections/requirements-specification.tex:85` | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] |
-| [[frederikbaucks_2024_gaining]] | `Report/appendix-sections/themes-and-references.tex:20`, `Report/main-sections/requirements-specification.tex:117` | [[Ch2 – Background and Requirements]] · [[IRT Difficulty Logic]] · [[Question Difficulty Logic]] |
-| [[gelan_2018_affordances]] | `Report/appendix-sections/themes-and-references.tex:11`, `Report/main-sections/requirements-specification.tex:22` | [[Ch2 – Background and Requirements]] |
-| [[govaerts_the]] | `Report/appendix-sections/themes-and-references.tex:13`, `Report/main-sections/requirements-specification.tex:37` | [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]] |
-| [[jayaprakashEarlyAlertAcademically2014]] | `Report/appendix-sections/themes-and-references.tex:28`, `Report/main-sections/requirements-specification.tex:219` | — |
-| [[khajah_supercharging]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/main-sections/requirements-specification.tex:91` | [[Ch2 – Background and Requirements]] · [[BKT Mastery Logic]] · [[Improved Struggle Logic]] |
-| [[kiatxin_development]] | `Report/appendix-sections/themes-and-references.tex:26`, `Report/main-sections/requirements-specification.tex:162`, `Report/main-sections/requirements-specification.tex:164` | [[Ch2 – Background and Requirements]] |
-| [[kim_knowledge]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/main-sections/requirements-specification.tex:92` | [[Ch2 – Background and Requirements]] · [[BKT Mastery Logic]] |
-| [[klerkx_2017_learning]] | `Report/appendix-sections/themes-and-references.tex:13`, `Report/main-sections/requirements-specification.tex:35`, `Report/main-sections/requirements-specification.tex:58` | [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]] |
-| [[koutcheme_using]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/main-sections/requirements-specification.tex:96` | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] · [[Improved Struggle Logic]] |
-| [[leecultura_2023_multimodal]] | `Report/appendix-sections/themes-and-references.tex:26`, `Report/main-sections/requirements-specification.tex:173`, `Report/main-sections/requirements-specification.tex:180`, `Report/main-sections/requirements-specification.tex:182` | [[Ch2 – Background and Requirements]] |
+| [[dong_using]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/main-sections/requirements-specification-old.tex:78`, `Report/main-sections/requirements-specification-old.tex:79`, `Report/main-sections/requirements-specification.tex:80`, …(+1) | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] · [[Improved Struggle Logic]] |
+| [[estey_2017_automatically]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/main-sections/requirements-specification-old.tex:83`, `Report/main-sections/requirements-specification-old.tex:85`, `Report/main-sections/requirements-specification.tex:85`, …(+1) | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] |
+| [[frederikbaucks_2024_gaining]] | `Report/appendix-sections/themes-and-references.tex:20`, `Report/main-sections/requirements-specification-old.tex:115`, `Report/main-sections/requirements-specification.tex:117` | [[Ch2 – Background and Requirements]] · [[IRT Difficulty Logic]] · [[Question Difficulty Logic]] |
+| [[gelan_2018_affordances]] | `Report/appendix-sections/themes-and-references.tex:11`, `Report/main-sections/requirements-specification-old.tex:22`, `Report/main-sections/requirements-specification.tex:22` | [[Ch2 – Background and Requirements]] |
+| [[govaerts_the]] | `Report/appendix-sections/themes-and-references.tex:13`, `Report/main-sections/requirements-specification-old.tex:37`, `Report/main-sections/requirements-specification.tex:37` | [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]] |
+| [[herlockerAlgorithmicFrameworkPerforming1999]] | `Report/main-sections/requirements-specification.tex:131` | [[Ch2 – Background and Requirements]] · [[Analytics Engine]] |
+| [[holsteinIntelligentTutorsTeachers2017a]] | `Report/main-sections/requirements-specification.tex:151` | [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]] · [[Lab Assistant System]] |
+| [[holsteinStudentLearningBenefits2018]] | `Report/main-sections/requirements-specification.tex:151` | [[Ch2 – Background and Requirements]] · [[Ch1 – Introduction]] · [[Instructor Dashboard]] |
+| [[jayaprakashEarlyAlertAcademically2014]] | `Report/appendix-sections/themes-and-references.tex:28`, `Report/main-sections/requirements-specification-old.tex:217`, `Report/main-sections/requirements-specification.tex:206` | — |
+| [[khajah_supercharging]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/main-sections/requirements-specification-old.tex:91`, `Report/main-sections/requirements-specification.tex:93` | [[Ch2 – Background and Requirements]] · [[BKT Mastery Logic]] · [[Improved Struggle Logic]] |
+| [[kiatxin_development]] | `Report/appendix-sections/themes-and-references.tex:26`, `Report/main-sections/requirements-specification-old.tex:160`, `Report/main-sections/requirements-specification-old.tex:162`, `Report/main-sections/requirements-specification.tex:149`, …(+1) | [[Ch2 – Background and Requirements]] |
+| [[kim_knowledge]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/main-sections/requirements-specification-old.tex:92`, `Report/main-sections/requirements-specification.tex:94` | [[Ch2 – Background and Requirements]] · [[BKT Mastery Logic]] |
+| [[klerkx_2017_learning]] | `Report/appendix-sections/themes-and-references.tex:13`, `Report/main-sections/requirements-specification-old.tex:35`, `Report/main-sections/requirements-specification-old.tex:58`, `Report/main-sections/requirements-specification.tex:35`, …(+1) | [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]] |
+| [[koutcheme_using]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/main-sections/requirements-specification-old.tex:96`, `Report/main-sections/requirements-specification.tex:98` | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] · [[Improved Struggle Logic]] |
+| [[leecultura_2023_multimodal]] | `Report/appendix-sections/themes-and-references.tex:26`, `Report/main-sections/requirements-specification-old.tex:171`, `Report/main-sections/requirements-specification-old.tex:178`, `Report/main-sections/requirements-specification-old.tex:180`, …(+3) | [[Ch2 – Background and Requirements]] |
 | [[li_2020_course]] | `Report/appendix-sections/themes-and-references.tex:22` | [[Ch2 – Background and Requirements]] |
-| [[macfadyenMiningLMSData2010]] | `Report/appendix-sections/themes-and-references.tex:28`, `Report/main-sections/requirements-specification.tex:189` | — |
-| [[marr_2021_what]] | `Report/appendix-sections/themes-and-references.tex:15`, `Report/main-sections/requirements-specification.tex:62` | [[Ch2 – Background and Requirements]] · [[Data Loading and Session Persistence]] |
-| [[montebello_assisting]] | `Report/appendix-sections/themes-and-references.tex:15`, `Report/main-sections/requirements-specification.tex:64`, `Report/main-sections/requirements-specification.tex:73` | [[Ch2 – Background and Requirements]] |
-| [[mustafaayobamiraji_2024_realtime]] | `Report/appendix-sections/themes-and-references.tex:15`, `Report/main-sections/requirements-specification.tex:64`, `Report/main-sections/requirements-specification.tex:73` | [[Ch2 – Background and Requirements]] · [[Data Loading and Session Persistence]] |
-| [[nguyen_2020_data]] | `Report/appendix-sections/themes-and-references.tex:11`, `Report/main-sections/requirements-specification.tex:9`, `Report/main-sections/requirements-specification.tex:10`, `Report/main-sections/requirements-specification.tex:11` | [[Ch2 – Background and Requirements]] |
-| [[or_2024_exploring]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/main-sections/requirements-specification.tex:82` | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] |
-| [[pankiewicz_measuring]] | `Report/appendix-sections/themes-and-references.tex:20`, `Report/main-sections/requirements-specification.tex:118` | [[Ch2 – Background and Requirements]] · [[IRT Difficulty Logic]] · [[Question Difficulty Logic]] |
-| [[piech_modeling]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/appendix-sections/themes-and-references.tex:20`, `Report/main-sections/requirements-specification.tex:87`, `Report/main-sections/requirements-specification.tex:113`, …(+1) | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] · [[Improved Struggle Logic]] |
-| [[pitts_a]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/main-sections/requirements-specification.tex:97` | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] |
+| [[lord1968statistical]] | `Report/main-sections/requirements-specification.tex:116` | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[IRT Difficulty Logic]] |
+| [[macfadyenMiningLMSData2010]] | `Report/appendix-sections/themes-and-references.tex:28`, `Report/main-sections/requirements-specification-old.tex:187`, `Report/main-sections/requirements-specification.tex:176` | — |
+| [[marr_2021_what]] | `Report/appendix-sections/themes-and-references.tex:15`, `Report/main-sections/requirements-specification-old.tex:62`, `Report/main-sections/requirements-specification.tex:62` | [[Ch2 – Background and Requirements]] · [[Data Loading and Session Persistence]] |
+| [[montebello_assisting]] | `Report/appendix-sections/themes-and-references.tex:15`, `Report/main-sections/requirements-specification-old.tex:64`, `Report/main-sections/requirements-specification-old.tex:73`, `Report/main-sections/requirements-specification.tex:64`, …(+1) | [[Ch2 – Background and Requirements]] |
+| [[mustafaayobamiraji_2024_realtime]] | `Report/appendix-sections/themes-and-references.tex:15`, `Report/main-sections/requirements-specification-old.tex:64`, `Report/main-sections/requirements-specification-old.tex:73`, `Report/main-sections/requirements-specification.tex:64`, …(+1) | [[Ch2 – Background and Requirements]] · [[Data Loading and Session Persistence]] |
+| [[nguyen_2020_data]] | `Report/appendix-sections/themes-and-references.tex:11`, `Report/main-sections/requirements-specification-old.tex:9`, `Report/main-sections/requirements-specification-old.tex:10`, `Report/main-sections/requirements-specification-old.tex:11`, …(+3) | [[Ch2 – Background and Requirements]] |
+| [[or_2024_exploring]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/main-sections/requirements-specification-old.tex:82`, `Report/main-sections/requirements-specification.tex:84` | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] |
+| [[pankiewicz_measuring]] | `Report/appendix-sections/themes-and-references.tex:20`, `Report/main-sections/requirements-specification-old.tex:116`, `Report/main-sections/requirements-specification.tex:118` | [[Ch2 – Background and Requirements]] · [[IRT Difficulty Logic]] · [[Question Difficulty Logic]] |
+| [[piech_modeling]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/appendix-sections/themes-and-references.tex:20`, `Report/main-sections/requirements-specification-old.tex:87`, `Report/main-sections/requirements-specification-old.tex:111`, …(+4) | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] · [[Improved Struggle Logic]] |
+| [[pitts_a]] | `Report/appendix-sections/themes-and-references.tex:18`, `Report/main-sections/requirements-specification-old.tex:97`, `Report/main-sections/requirements-specification.tex:99` | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] |
+| [[rasch1960probabilistic]] | `Report/main-sections/requirements-specification.tex:116` | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[IRT Difficulty Logic]] |
+| [[resnickGroupLensOpenArchitecture1994]] | `Report/main-sections/requirements-specification.tex:128` | [[Ch2 – Background and Requirements]] · [[Analytics Engine]] |
+| [[romeroEducationalDataMining2020]] | `Report/main-sections/requirements-specification.tex:11` | [[Ch2 – Background and Requirements]] |
 | [[schafer_2007_collaborative]] | `Report/appendix-sections/themes-and-references.tex:22` | [[Ch2 – Background and Requirements]] · [[Analytics Engine]] |
-| [[tzimas_2021_ethical]] | `Report/appendix-sections/themes-and-references.tex:11`, `Report/main-sections/requirements-specification.tex:25`, `Report/main-sections/requirements-specification.tex:31` | [[Ch2 – Background and Requirements]] |
-| [[verbert_2013_learning]] | `Report/appendix-sections/themes-and-references.tex:13`, `Report/main-sections/requirements-specification.tex:35`, `Report/main-sections/requirements-specification.tex:37`, `Report/main-sections/requirements-specification.tex:58` | [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]] |
-| [[vieira_2018_visual]] | `Report/appendix-sections/themes-and-references.tex:11`, `Report/main-sections/requirements-specification.tex:11`, `Report/main-sections/requirements-specification.tex:15`, `Report/main-sections/requirements-specification.tex:18`, …(+2) | [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]] |
-| [[wikipediacontributors_2019_learning_analytics]] | `Report/appendix-sections/themes-and-references.tex:11`, `Report/main-sections/requirements-specification.tex:10` | [[Ch2 – Background and Requirements]] |
-| [[wikipediacontributors_2019_learning_management_systems]] | `Report/appendix-sections/themes-and-references.tex:24`, `Report/main-sections/requirements-specification.tex:156` | — |
-| [[wilson_2017_learning]] | `Report/appendix-sections/themes-and-references.tex:11`, `Report/main-sections/requirements-specification.tex:24`, `Report/main-sections/requirements-specification.tex:25`, `Report/main-sections/requirements-specification.tex:31` | [[Ch2 – Background and Requirements]] |
+| [[siemensLearningAnalyticsEmergence2013]] | `Report/main-sections/requirements-specification.tex:10` | [[Ch2 – Background and Requirements]] |
+| [[tzimas_2021_ethical]] | `Report/appendix-sections/themes-and-references.tex:11`, `Report/main-sections/requirements-specification-old.tex:25`, `Report/main-sections/requirements-specification-old.tex:31`, `Report/main-sections/requirements-specification.tex:25`, …(+1) | [[Ch2 – Background and Requirements]] |
+| [[verbert_2013_learning]] | `Report/appendix-sections/themes-and-references.tex:13`, `Report/main-sections/requirements-specification-old.tex:35`, `Report/main-sections/requirements-specification-old.tex:37`, `Report/main-sections/requirements-specification-old.tex:58`, …(+3) | [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]] |
+| [[vieira_2018_visual]] | `Report/appendix-sections/themes-and-references.tex:11`, `Report/main-sections/requirements-specification-old.tex:11`, `Report/main-sections/requirements-specification-old.tex:15`, `Report/main-sections/requirements-specification-old.tex:18`, …(+7) | [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]] |
+| [[wikipediacontributors_2019_learning_analytics]] | `Report/appendix-sections/themes-and-references.tex:11`, `Report/main-sections/requirements-specification-old.tex:10`, `Report/main-sections/requirements-specification.tex:10` | [[Ch2 – Background and Requirements]] |
+| [[wikipediacontributors_2019_learning_management_systems]] | `Report/appendix-sections/themes-and-references.tex:24`, `Report/main-sections/requirements-specification-old.tex:154`, `Report/main-sections/requirements-specification.tex:143` | — |
+| [[wilson_2017_learning]] | `Report/appendix-sections/themes-and-references.tex:11`, `Report/main-sections/requirements-specification-old.tex:24`, `Report/main-sections/requirements-specification-old.tex:25`, `Report/main-sections/requirements-specification-old.tex:31`, …(+3) | [[Ch2 – Background and Requirements]] |
 
 ## Planned — note + intent, no `\cite{}` yet
 
@@ -66,7 +75,6 @@
 | [[beckWheelSpinningStudentsWho2013]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]] | ✅ |
 | [[blackAssessmentClassroomLearning1998]] | [[Ch2 – Background and Requirements]] · [[Ch1 – Introduction]] · [[Student Struggle Logic]] | ✅ |
 | [[chiangCanLargeLanguage2023]] | [[Ch2 – Background and Requirements]] · [[Ch5 – Results and Evaluation]] | ✅ |
-| [[clowOverviewLearningAnalytics2013]] | [[Ch2 – Background and Requirements]] · [[Ch1 – Introduction]] | ✅ |
 | [[corbettKnowledgeTracingModeling1995]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[BKT Mastery Logic]] · [[Improved Struggle Logic]] | ✅ |
 | [[efronSteinsParadoxStatistics1977]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]] | ✅ |
 | [[fawcettIntroductionROCAnalysis2006]] | [[Ch5 – Results and Evaluation]] · [[Evaluation Plan]] | ✅ |
@@ -75,9 +83,6 @@
 | [[gilardiChatGPTOutperformsCrowd2023]] | [[Ch2 – Background and Requirements]] · [[Ch5 – Results and Evaluation]] | ✅ |
 | [[hanleyMeaningUseArea1982]] | [[Ch5 – Results and Evaluation]] · [[Evaluation Plan]] | ✅ |
 | [[hattiePowerFeedback2007]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[RAG Pipeline - Two-Layer Retrieval]] | ✅ |
-| [[herlockerAlgorithmicFrameworkPerforming1999]] | [[Ch2 – Background and Requirements]] · [[Analytics Engine]] | ✅ |
-| [[holsteinIntelligentTutorsTeachers2017a]] | [[Ch2 – Background and Requirements]] · [[Instructor Dashboard]] · [[Lab Assistant System]] | ✅ |
-| [[holsteinStudentLearningBenefits2018]] | [[Ch2 – Background and Requirements]] · [[Ch1 – Introduction]] · [[Instructor Dashboard]] | ✅ |
 | [[hunterExponentiallyWeightedMoving1986]] | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] | ✅ |
 | [[kasneciChatGPTGoodOpportunities2023]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Ch5 – Results and Evaluation]] · [[RAG Pipeline - Two-Layer Retrieval]] | ✅ |
 | [[khajahHowDeepKnowledge2016]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[BKT Mastery Logic]] | ✅ |
@@ -86,19 +91,14 @@
 | [[lewisRetrievalAugmentedGenerationKnowledgeIntensive2020]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Ch4 – Implementation]] · [[RAG Pipeline - Two-Layer Retrieval]] | ✅ |
 | [[little2014statistical]] | [[Ch3 – Design and Modelling]] · [[Improved Struggle Logic]] | ✅ |
 | [[liuGEvalNLGEvaluation2023]] | [[Ch2 – Background and Requirements]] · [[Ch4 – Implementation]] | ✅ |
-| [[lord1968statistical]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[IRT Difficulty Logic]] | ✅ |
 | [[malkovEfficientRobustApproximate2016]] | [[Ch4 – Implementation]] · [[RAG Pipeline - Two-Layer Retrieval]] | ✅ |
 | [[manningIntroductionInformationRetrieval2008]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Question Difficulty Logic]] | ✅ |
 | [[oecdHandbookConstructingComposite2008]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]] · [[Question Difficulty Logic]] | ✅ |
 | [[piechDeepKnowledgeTracing2015]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[BKT Mastery Logic]] | ✅ |
-| [[rasch1960probabilistic]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[IRT Difficulty Logic]] | ✅ |
 | [[reimersSentenceBERTSentenceEmbeddings2019]] | [[Ch2 – Background and Requirements]] · [[Ch4 – Implementation]] · [[RAG Pipeline - Two-Layer Retrieval]] | ✅ |
-| [[resnickGroupLensOpenArchitecture1994]] | [[Ch2 – Background and Requirements]] · [[Analytics Engine]] | ✅ |
-| [[romeroEducationalDataMining2020]] | [[Ch2 – Background and Requirements]] | ✅ |
 | [[rousseeuwSilhouettesGraphicalAid1987]] | [[Ch2 – Background and Requirements]] · [[Question Difficulty Logic]] | ✅ |
 | [[saisanaUncertaintySensitivityAnalysis2005]] | [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]] | ✅ |
 | [[saltonVectorSpaceModel1975]] | [[Ch2 – Background and Requirements]] · [[Question Difficulty Logic]] | ✅ |
-| [[siemensLearningAnalyticsEmergence2013]] | [[Ch2 – Background and Requirements]] | ✅ |
 | [[spearmanProofMeasurementAssociation1904]] | [[Ch5 – Results and Evaluation]] · [[Evaluation Plan]] | ✅ |
 | [[yudelsonIndividualizedBayesianKnowledge2013]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[BKT Mastery Logic]] | ✅ |
 | [[zhengJudgingLLMasaJudgeMTBench2023]] | [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Ch4 – Implementation]] · [[Analytics Engine]] | ✅ |
@@ -109,7 +109,7 @@ _None — every note has either a `Cited in:` line or a `\cite{}` call._
 
 ## Issues
 
-### In Zotero but not cited in thesis (43)
+### In Zotero but not cited in thesis (34)
 
 - `CoefficientAgreementNominal`
 - `LimitedMemoryAlgorithm`
@@ -119,7 +119,6 @@ _None — every note has either a `Cited in:` line or a `\cite{}` call._
 - `beckWheelSpinningStudentsWho2013`
 - `blackAssessmentClassroomLearning1998`
 - `chiangCanLargeLanguage2023`
-- `clowOverviewLearningAnalytics2013`
 - `corbettKnowledgeTracingModeling1995`
 - `efronSteinsParadoxStatistics1977`
 - `fawcettIntroductionROCAnalysis2006`
@@ -128,9 +127,6 @@ _None — every note has either a `Cited in:` line or a `\cite{}` call._
 - `gilardiChatGPTOutperformsCrowd2023`
 - `hanleyMeaningUseArea1982`
 - `hattiePowerFeedback2007`
-- `herlockerAlgorithmicFrameworkPerforming1999`
-- `holsteinIntelligentTutorsTeachers2017a`
-- `holsteinStudentLearningBenefits2018`
 - `hunterExponentiallyWeightedMoving1986`
 - `kasneciChatGPTGoodOpportunities2023`
 - `khajahHowDeepKnowledge2016`
@@ -138,19 +134,14 @@ _None — every note has either a `Cited in:` line or a `\cite{}` call._
 - `lewisRetrievalAugmentedGenerationKnowledgeIntensive2020`
 - `little2014statistical`
 - `liuGEvalNLGEvaluation2023`
-- `lord1968statistical`
 - `malkovEfficientRobustApproximate2016`
 - `manningIntroductionInformationRetrieval2008`
 - `oecdHandbookConstructingComposite2008`
 - `piechDeepKnowledgeTracing2015`
-- `rasch1960probabilistic`
 - `reimersSentenceBERTSentenceEmbeddings2019`
-- `resnickGroupLensOpenArchitecture1994`
-- `romeroEducationalDataMining2020`
 - `rousseeuwSilhouettesGraphicalAid1987`
 - `saisanaUncertaintySensitivityAnalysis2005`
 - `saltonVectorSpaceModel1975`
-- `siemensLearningAnalyticsEmergence2013`
 - `spearmanProofMeasurementAssociation1904`
 - `yudelsonIndividualizedBayesianKnowledge2013`
 - `zhengJudgingLLMasaJudgeMTBench2023`
@@ -170,8 +161,8 @@ Citations grouped by the `Cited in:` line in each literature note.
 ### [[Analytics Engine]] (5)
 
 - ✅ [[deschnes_2020_recommender]]
-- 🟡 [[herlockerAlgorithmicFrameworkPerforming1999]]
-- 🟡 [[resnickGroupLensOpenArchitecture1994]]
+- ✅ [[herlockerAlgorithmicFrameworkPerforming1999]]
+- ✅ [[resnickGroupLensOpenArchitecture1994]]
 - ✅ [[schafer_2007_collaborative]]
 - 🟡 [[zhengJudgingLLMasaJudgeMTBench2023]]
 
@@ -188,8 +179,8 @@ Citations grouped by the `Cited in:` line in each literature note.
 ### [[Ch1 – Introduction]] (3)
 
 - 🟡 [[blackAssessmentClassroomLearning1998]]
-- 🟡 [[clowOverviewLearningAnalytics2013]]
-- 🟡 [[holsteinStudentLearningBenefits2018]]
+- ✅ [[clowOverviewLearningAnalytics2013]]
+- ✅ [[holsteinStudentLearningBenefits2018]]
 
 ### [[Ch2 – Background and Requirements]] (67)
 
@@ -201,7 +192,7 @@ Citations grouped by the `Cited in:` line in each literature note.
 - 🟡 [[beckWheelSpinningStudentsWho2013]]
 - 🟡 [[blackAssessmentClassroomLearning1998]]
 - 🟡 [[chiangCanLargeLanguage2023]]
-- 🟡 [[clowOverviewLearningAnalytics2013]]
+- ✅ [[clowOverviewLearningAnalytics2013]]
 - 🟡 [[corbettKnowledgeTracingModeling1995]]
 - ✅ [[dannath_evaluating]]
 - ✅ [[dasilva_2022_a]]
@@ -215,9 +206,9 @@ Citations grouped by the `Cited in:` line in each literature note.
 - 🟡 [[gilardiChatGPTOutperformsCrowd2023]]
 - ✅ [[govaerts_the]]
 - 🟡 [[hattiePowerFeedback2007]]
-- 🟡 [[herlockerAlgorithmicFrameworkPerforming1999]]
-- 🟡 [[holsteinIntelligentTutorsTeachers2017a]]
-- 🟡 [[holsteinStudentLearningBenefits2018]]
+- ✅ [[herlockerAlgorithmicFrameworkPerforming1999]]
+- ✅ [[holsteinIntelligentTutorsTeachers2017a]]
+- ✅ [[holsteinStudentLearningBenefits2018]]
 - 🟡 [[hunterExponentiallyWeightedMoving1986]]
 - 🟡 [[kasneciChatGPTGoodOpportunities2023]]
 - 🟡 [[khajahHowDeepKnowledge2016]]
@@ -232,7 +223,7 @@ Citations grouped by the `Cited in:` line in each literature note.
 - 🟡 [[lewisRetrievalAugmentedGenerationKnowledgeIntensive2020]]
 - ✅ [[li_2020_course]]
 - 🟡 [[liuGEvalNLGEvaluation2023]]
-- 🟡 [[lord1968statistical]]
+- ✅ [[lord1968statistical]]
 - 🟡 [[manningIntroductionInformationRetrieval2008]]
 - ✅ [[marr_2021_what]]
 - ✅ [[montebello_assisting]]
@@ -244,15 +235,15 @@ Citations grouped by the `Cited in:` line in each literature note.
 - 🟡 [[piechDeepKnowledgeTracing2015]]
 - ✅ [[piech_modeling]]
 - ✅ [[pitts_a]]
-- 🟡 [[rasch1960probabilistic]]
+- ✅ [[rasch1960probabilistic]]
 - 🟡 [[reimersSentenceBERTSentenceEmbeddings2019]]
-- 🟡 [[resnickGroupLensOpenArchitecture1994]]
-- 🟡 [[romeroEducationalDataMining2020]]
+- ✅ [[resnickGroupLensOpenArchitecture1994]]
+- ✅ [[romeroEducationalDataMining2020]]
 - 🟡 [[rousseeuwSilhouettesGraphicalAid1987]]
 - 🟡 [[saisanaUncertaintySensitivityAnalysis2005]]
 - 🟡 [[saltonVectorSpaceModel1975]]
 - ✅ [[schafer_2007_collaborative]]
-- 🟡 [[siemensLearningAnalyticsEmergence2013]]
+- ✅ [[siemensLearningAnalyticsEmergence2013]]
 - ✅ [[tzimas_2021_ethical]]
 - ✅ [[verbert_2013_learning]]
 - ✅ [[vieira_2018_visual]]
@@ -276,11 +267,11 @@ Citations grouped by the `Cited in:` line in each literature note.
 - 🟡 [[khajah_2014_incorporating]]
 - 🟡 [[lewisRetrievalAugmentedGenerationKnowledgeIntensive2020]]
 - 🟡 [[little2014statistical]]
-- 🟡 [[lord1968statistical]]
+- ✅ [[lord1968statistical]]
 - 🟡 [[manningIntroductionInformationRetrieval2008]]
 - 🟡 [[oecdHandbookConstructingComposite2008]]
 - 🟡 [[piechDeepKnowledgeTracing2015]]
-- 🟡 [[rasch1960probabilistic]]
+- ✅ [[rasch1960probabilistic]]
 - 🟡 [[yudelsonIndividualizedBayesianKnowledge2013]]
 - 🟡 [[zhengJudgingLLMasaJudgeMTBench2023]]
 
@@ -321,9 +312,9 @@ Citations grouped by the `Cited in:` line in each literature note.
 - ✅ [[baeres_2020_an]]
 - 🟡 [[fisherMathematicalFoundationsTheoretical1922]]
 - ✅ [[frederikbaucks_2024_gaining]]
-- 🟡 [[lord1968statistical]]
+- ✅ [[lord1968statistical]]
 - ✅ [[pankiewicz_measuring]]
-- 🟡 [[rasch1960probabilistic]]
+- ✅ [[rasch1960probabilistic]]
 
 ### [[Improved Struggle Logic]] (6)
 
@@ -337,15 +328,15 @@ Citations grouped by the `Cited in:` line in each literature note.
 ### [[Instructor Dashboard]] (6)
 
 - ✅ [[govaerts_the]]
-- 🟡 [[holsteinIntelligentTutorsTeachers2017a]]
-- 🟡 [[holsteinStudentLearningBenefits2018]]
+- ✅ [[holsteinIntelligentTutorsTeachers2017a]]
+- ✅ [[holsteinStudentLearningBenefits2018]]
 - ✅ [[klerkx_2017_learning]]
 - ✅ [[verbert_2013_learning]]
 - ✅ [[vieira_2018_visual]]
 
 ### [[Lab Assistant System]] (1)
 
-- 🟡 [[holsteinIntelligentTutorsTeachers2017a]]
+- ✅ [[holsteinIntelligentTutorsTeachers2017a]]
 
 ### [[Question Difficulty Logic]] (9)
 
