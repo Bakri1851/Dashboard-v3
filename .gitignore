@@ -20,3 +20,22 @@ code/.streamlit/secrets.toml
 code2/.streamlit/secrets.toml
 **/.streamlit/secrets.toml
 .secrets/
+
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.toc
+*.out
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+*.synctex.gz
+*.nav
+*.snm
+*.vrb
+# Keep the compiled PDF? If yes, leave this commented:
+# *.pdf
