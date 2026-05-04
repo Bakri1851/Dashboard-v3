@@ -102,6 +102,8 @@ The script is idempotent and non-destructive: the only body mutation is a one-ti
 
 The Zotero Integration plugin's import template lives at `docs/obsidian-vault/My Notes/_templates/zotero-literature.md` (Phelan-style Nunjucks; PDF annotations append inside the `annotations` persist block).
 
+When looking at literature, give it all a deep look and verify that everything you said exists so there is no hallucination
+
 ## graphify
 
 This project has a graphify knowledge graph at graphify-out/.
