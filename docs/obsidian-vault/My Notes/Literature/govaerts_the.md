@@ -4,19 +4,39 @@ citekey: govaerts_the
 year: 2012
 in_zotero: true
 status: active
-last_imported: 2026-05-03
-cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:13
-  - Report/main-sections/requirements-specification-old.tex:37
-  - Report/main-sections/requirements-specification.tex:37
-cited_in_planned:
-  - Ch2 – Background and Requirements
-  - Instructor Dashboard
-last_synced: 2026-05-03
+last_imported: 2026-05-04
 ---
+
 # The student activity meter for awareness and self-reflection
 
-%% Begin annotations %%
+> [!Cite]
+> [1]
+
+S. Govaerts, K. Leuven, E. Duval, and K. Verbert, ‘The student activity meter for awareness and self-reflection’. May 05, 2012.
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Govaerts, Sten
+> **Author**:: Leuven, K
+> **Author**:: Duval, Erik
+> **Author**:: Verbert, Katrien
+~
+> **Title**:: The student activity meter for awareness and self-reflection
+> **Year**:: 2012
+> **Citekey**:: govaerts_the
+> **itemType**:: document
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
 ## Summary
 
 > [!Cite]
@@ -130,8 +150,13 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-03T03:46:48.974+01:00 %%
-%% End annotations %%
+%% Import Date: 2026-05-04T22:59:11.570+01:00 %%

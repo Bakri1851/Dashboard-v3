@@ -1,15 +1,49 @@
 ---
+category: literaturenote
 citekey: little2014statistical
-status: planned
+year: 2014
 in_zotero: true
-cited_in_tex: []
-cited_in_planned:
-  - Ch3 – Design and Modelling
-  - Improved Struggle Logic
-last_synced: 2026-05-03
+status: active
+last_imported: 2026-05-04
 ---
-# Little & Rubin — Statistical Analysis with Missing Data
 
-Canonical treatment of missing-data mechanisms and imputation; grounds the mean-imputation of missing BKT mastery values in `improved_struggle.py:_compute_mastery_gap`.
+# Statistical analysis with missing data
 
-Cited in: [[Ch3 – Design and Modelling]] · [[Improved Struggle Logic]]
+> [!Cite]
+> [1]
+
+R. J. A. Little and D. B. Rubin, _Statistical analysis with missing data_. in Wiley series in probability and statistics. Wiley, 2014. [Online]. Available: [https://books.google.co.uk/books?id=AyVeBAAAQBAJ](https://books.google.co.uk/books?id=AyVeBAAAQBAJ)
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Little, R.J.A.
+> **Author**:: Rubin, D.B.
+~
+> **Title**:: Statistical analysis with missing data
+> **Year**:: 2014
+> **Citekey**:: little2014statistical
+> **itemType**:: book
+> **Publisher**:: Wiley
+> **ISBN**:: 978-1-118-62588-0
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
+%% end annotations %%
+
+
+%% Import Date: 2026-05-04T22:59:12.473+01:00 %%

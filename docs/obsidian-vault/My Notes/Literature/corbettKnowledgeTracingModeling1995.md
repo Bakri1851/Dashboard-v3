@@ -1,17 +1,52 @@
 ---
+category: literaturenote
 citekey: corbettKnowledgeTracingModeling1995
-status: planned
+year: 1995
 in_zotero: true
-cited_in_tex: []
-cited_in_planned:
-  - Ch2 – Background and Requirements
-  - Ch3 – Design and Modelling
-  - BKT Mastery Logic
-  - Improved Struggle Logic
-last_synced: 2026-05-03
+status: active
+last_imported: 2026-05-04
 ---
-# Corbett & Anderson — Knowledge Tracing: Modeling the Acquisition of Procedural Knowledge
 
-Seminal paper introducing Bayesian Knowledge Tracing with the four canonical parameters (P_init, P_learn, P_guess, P_slip); primary citation for Ch3 §3.4.3 and `models/bkt.py`.
+# Knowledge tracing: Modeling the acquisition of procedural knowledge
 
-Cited in: [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[BKT Mastery Logic]] · [[Improved Struggle Logic]]
+> [!Cite]
+> [1]
+
+A. T. Corbett and J. R. Anderson, ‘Knowledge tracing: Modeling the acquisition of procedural knowledge’, _User Model User-Adap Inter_, vol. 4, no. 4, pp. 253–278, 1995, doi: [10.1007/BF01099821](https://doi.org/10.1007/BF01099821).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Corbett, Albert T.
+> **Author**:: Anderson, John R.
+~
+> **Title**:: Knowledge tracing: Modeling the acquisition of procedural knowledge
+> **Year**:: 1995
+> **Citekey**:: corbettKnowledgeTracingModeling1995
+> **itemType**:: journalArticle
+> **Journal**:: *User Modelling and User-Adapted Interaction*
+> **Volume**:: 4
+> **Issue**:: 4
+> **Pages**:: 253-278
+> **DOI**:: 10.1007/BF01099821
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
+%% end annotations %%
+
+
+%% Import Date: 2026-05-04T22:59:10.841+01:00 %%

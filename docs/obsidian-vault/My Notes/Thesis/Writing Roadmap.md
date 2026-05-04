@@ -1,6 +1,6 @@
 # Writing Roadmap
 
-> [!info] **Self-contained handoff doc.** This file is designed to let any future chat pick up the thesis-writing work without losing context. Last updated 2026-05-04 after Ch2 restructure + Stage 1c + Stage 1b §2.2.2.
+> [!info] **Self-contained handoff doc.** This file is designed to let any future chat pick up the thesis-writing work without losing context. Last updated 2026-05-04 after Ch2 restructure + Stage 1c + Stage 1b §2.2.2 + Stage 1b §2.3.2.
 >
 > Companions: [[Rewrite Queue]] (granular edits), [[Report Sync]] (code↔thesis mismatch table), [[Evidence Bank]] (eval evidence checklist), [[Figures and Tables]] (figure inventory), and `docs/obsidian-vault/My Notes/Literature/_import_checklist.md` (live import progress).
 
@@ -8,23 +8,23 @@
 
 ## Order of operations
 
-| # | Task | Status | Notes |
-| --- | --- | --- | --- |
-| 1 | Ch2 restructure | ✅ | Promoted thematic groups to subsections; old file preserved as `requirements-specification-old.tex` |
-| 2 | Stage 1c §2.2.1 struggle paragraphs | ✅ | Composite indicators, time-decay, Bayesian shrinkage |
-| 3 | Stage 1c cite-only adds | ✅ | §2.1.1 LA in HE, §2.2.3 Difficulty (IRT), §2.3.1 CF, §2.5.2 Instructor Dashboards |
-| 4 | Stage 1b §2.2.2 Knowledge Tracing | ✅ | Relocation move + Corbett (with Eq. 2) + Yudelson + Piech/Khajah; grounded in 4 source PDFs |
-| 5 | Stage 1b §2.3.2 Text Mining | 🔄 NEXT | TF-IDF + K-means + silhouette; ~300 w |
-| 6 | Stage 1b §2.4 RAG | ⏳ | Dense embeddings + HNSW; ~400 w |
-| 7 | Stage 1b §2.6 Research Gaps | ⏳ | Uncomment commented draft + refresh against V2 features |
-| 8 | Stage 2 Ch3 stubs | ⏳ | 7 stub subsections; start with §3.4 advanced models |
-| 9 | Phase 2 imports (34 refs) | ⏳ | Interleave; required before Ch4 §4.7/§4.8 prose |
-| 10 | Stage 3 Ch4 implementation rewrite | ⏳ | **Largest single task** — full V1→V2 rewrite |
-| 11 | Stage 4 Ch5 evaluation | ⏳ | Empty chapter; needs smoke tests + screenshots first |
-| 12 | Stage 5 Ch1 cite adds + tense fixes | ⏳ | Lightweight; mostly drop-in cites |
-| 13 | Ch6 Conclusion | ⏳ | Summary + contributions + future work |
-| 14 | Appendices A–F | ⏳ | Code, screenshots, tests, formulae, derivations |
-| 15 | Final polish pass | ⏳ | Terminology, figure numbering, LaTeX compile |
+| #   | Task                                | Status  | Notes                                                                                                                                                                                                                               |
+| --- | ----------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Ch2 restructure                     | ✅       | Promoted thematic groups to subsections; old file preserved as `requirements-specification-old.tex`                                                                                                                                 |
+| 2   | Stage 1c §2.2.1 struggle paragraphs | ✅       | Composite indicators, time-decay, Bayesian shrinkage                                                                                                                                                                                |
+| 3   | Stage 1c cite-only adds             | ✅       | §2.1.1 LA in HE, §2.2.3 Difficulty (IRT), §2.3.1 CF, §2.5.2 Instructor Dashboards                                                                                                                                                   |
+| 4   | Stage 1b §2.2.2 Knowledge Tracing   | ✅       | Relocation move + Corbett (with Eq. 2) + Yudelson + Piech/Khajah; grounded in 4 source PDFs                                                                                                                                         |
+| 5   | Stage 1b §2.3.2 Text Mining         | ✅       | TF-IDF + K-means + silhouette + LLM labelling. Manning 2006 added at TF-IDF formula; k-means objective re-attributed to Arthur & Vassilvitskii potential function; Wang/Shang/Zhong 2023 grounds the closing LLM-labelling sentence |
+| 6   | Stage 1b §2.4 RAG                   | 🔄 NEXT | Dense embeddings + HNSW; ~400 w                                                                                                                                                                                                     |
+| 7   | Stage 1b §2.6 Research Gaps         | ⏳       | Uncomment commented draft + refresh against V2 features                                                                                                                                                                             |
+| 8   | Stage 2 Ch3 stubs                   | ⏳       | 7 stub subsections; start with §3.4 advanced models                                                                                                                                                                                 |
+| 9   | Phase 2 imports (34 refs)           | ⏳       | Interleave; required before Ch4 §4.7/§4.8 prose                                                                                                                                                                                     |
+| 10  | Stage 3 Ch4 implementation rewrite  | ⏳       | **Largest single task** — full V1→V2 rewrite                                                                                                                                                                                        |
+| 11  | Stage 4 Ch5 evaluation              | ⏳       | Empty chapter; needs smoke tests + screenshots first                                                                                                                                                                                |
+| 12  | Stage 5 Ch1 cite adds + tense fixes | ⏳       | Lightweight; mostly drop-in cites                                                                                                                                                                                                   |
+| 13  | Ch6 Conclusion                      | ⏳       | Summary + contributions + future work                                                                                                                                                                                               |
+| 14  | Appendices A–F                      | ⏳       | Code, screenshots, tests, formulae, derivations                                                                                                                                                                                     |
+| 15  | Final polish pass                   | ⏳       | Terminology, figure numbering, LaTeX compile                                                                                                                                                                                        |
 
 Cosmetic backlog (do at any point, ~2 min each): Ch6 §6.2 heading missing "and"; Ch3 §3.3.4 wordy heading; Ch4 §4.12/§4.13 likely overlapping subsections (resolve at Ch4 rewrite time).
 
@@ -38,9 +38,10 @@ Cosmetic backlog (do at any point, ~2 min each): Ch6 §6.2 heading missing "and"
 - **Ch2 restructured 2026-05-04.** Promoted thematic groups from subsubsections to subsections. New numbering: §2.1 LA & Dashboards, §2.2 Modelling Student Behaviour, §2.3 Data-Driven Personalisation, §2.4 RAG, §2.5 Existing Systems, §2.6 Research Gaps, §2.7 Requirements. Old `requirements-specification.tex` preserved as `requirements-specification-old.tex`.
 - **Stage 1c ✅ COMPLETE.** Three method paragraphs (composite indicators, time-decay, Bayesian shrinkage) landed in §2.2.1. All cite-only adds done in §2.1.1, §2.2.3, §2.3.1, §2.5.2.
 - **Stage 1b §2.2.2 Knowledge Tracing ✅ COMPLETE.** Relocation move done; 3 new paragraphs (Corbett BKT formal definition + Eq. 2 prediction equation, Yudelson individualisation, Piech DKT + Khajah rebuttal) grounded in the four uploaded source PDFs.
-- **Thesis chapter state:** Ch1 written, Ch2 partial (§2.3.2/§2.4/§2.6 still pending), Ch3 partial, Ch4 outdated (V1), Ch5 empty, Ch6 empty.
+- **Stage 1b §2.3.2 Text Mining ✅ COMPLETE.** TF-IDF + k-means + k-means++ + silhouette grounded; closing LLM-labelling sentence cites Wang/Shang/Zhong 2023 (PAS / GoalEx). TF-IDF formula attributed to Manning 2006 not Salton 1975 (factual fix). k-means objective uses Arthur & Vassilvitskii's potential-function form. Rewritten in literature voice (no "submission"/"mistake patterns" dashboard-vocab).
+- **Thesis chapter state:** Ch1 written, Ch2 partial (§2.4/§2.6 still pending), Ch3 partial, Ch4 outdated (V1), Ch5 empty, Ch6 empty.
 
-The next concrete writing task is **Stage 1b §2.3.2 Text Mining and Mistake Pattern Recovery** — TF-IDF + K-means + silhouette grounding for the mistake-clustering pipeline. All cites already in the bib.
+The next concrete writing task is **Stage 1b §2.4 RAG for Instructor Feedback** — RAG framing + dense embeddings + HNSW + LLMs-in-education. Lewis/Reimers/Malkov/Kasneci already in the bib; gao2023retrieval, karpukhin2020dense, izacard2021leveraging, wang2020minilm pending Phase 2 import.
 
 ---
 
@@ -203,21 +204,20 @@ This eliminates the BKT/IRT duplication risk between §2.1.4 (struggle) and §2.
 
 After Phase 2 imports land, also weave in `pardoModelingIndividualization2010` (per-student precedent) and `reye2004student` (DBN/HMM formulation) to deepen paras 3 and 2 respectively.
 
-#### 1b-ii. §2.1.8 Text Mining and Mistake Pattern Recovery (line 134)
+#### 1b-ii. §2.3.2 Text Mining and Mistake Pattern Recovery ✅ COMPLETE
 
-NEW subsection grounding the TF-IDF + K-means + silhouette + OpenAI labelling pipeline used in mistake clustering.
+Subsection lives at lines 152–182 of `requirements-specification.tex`. Grounds the TF-IDF + K-means + silhouette + LLM-labelling pipeline used in mistake clustering, written in literature voice (no dashboard-specific vocabulary).
 
-**Cites:** `saltonVectorSpaceModel1975` (TF-IDF / vector space — replaces the earlier Salton & McGill 1983 plan), `manningIntroductionInformationRetrieval2008` (modern IR textbook), `MacQueen1967SomeMF` (k-means origin), `arthurKmeansAdvantagesCareful` (k-means++), `rousseeuwSilhouettesGraphicalAid1987` (silhouette).
+**Final cites used:** `saltonVectorSpaceModel1975` (vector space model framing only), `manningIntroductionInformationRetrieval2006` (TF-IDF formula — *not* Salton, per fact-check), `MacQueen1967SomeMF` (k-means origin, objective-only attribution), `arthurKmeansAdvantagesCareful` (k-means++ + the potential-function form $\phi = \sum_x \min_c \|x-c\|^2$ used in the equation), `rousseeuwSilhouettesGraphicalAid1987` (silhouette), `wangGoalDrivenExplainableClustering2023` (LLM cluster-explanation labelling — newly imported).
 
-**Dropped from earlier plan:** Lloyd 1982, Han Kamber Pei 2011, Salton & McGill 1983 (Salton/Wong/Yang 1975 covers the same role).
+**Key decisions made during writing:**
 
-**Structure** (~300 words, 3 paragraphs):
+- **TF-IDF formula attribution corrected.** Salton 1975 introduces VSM but does *not* contain the `tf · log(N/df)` formula in this form (that's later — Salton & Buckley 1988 / Manning 2008 are the textbook attributions). Cite Manning at the formula; cite Salton 1975 at the VSM framing only.
+- **K-means objective re-attributed to Arthur & Vassilvitskii.** The form $\phi = \sum_x \min_c \|x-c\|^2$ is their potential-function notation, not MacQueen's. Cite Arthur at the equation, MacQueen at the prose ("MacQueen's $k$-means... minimise within-cluster variance") for objective-only attribution. This neutralises the MacQueen-vs-Lloyd algorithmic blur.
+- **Closing LLM-labelling sentence reframed as literature claim.** Originally read as a forward-link to dashboard implementation ("a Large Language Model can label each centroid... to produce interpretable mistake categories"). Rewritten as a literature claim — "Once clusters are formed, a large language model can produce natural-language cluster explanations" — with `wangGoalDrivenExplainableClustering2023` (PAS / GoalEx). Kept Ch2 voice clean.
+- **Three display equations retained** (TF-IDF, k-means, silhouette). Editorial rule (one core equation per technique) is being relaxed across Ch2 — §2.2.2 already has the BKT prediction equation. Three equations in §2.3.2 is the cap.
 
-| Para | Purpose | Cites |
-|---|---|---|
-| 1 | TF-IDF + vector-space framing for clustering free-text answers | `saltonVectorSpaceModel1975`, `manningIntroductionInformationRetrieval2008` |
-| 2 | K-means partitioning + k-means++ initialisation | `MacQueen1967SomeMF`, `arthurKmeansAdvantagesCareful` |
-| 3 | Silhouette-based auto-k selection; close by noting LLM labelling of cluster centroids gives interpretable mistake categories | `rousseeuwSilhouettesGraphicalAid1987`; LLM labelling cite via existing `koutcheme_using` or `kasneciChatGPTGoodOpportunities2023` |
+**Future-use papers (Phase 2 candidates):** `viswanathanLargeLanguageModelsEnable2023` (NOT yet in bib) — three-stage LLM-clustering taxonomy (before/during/after); fits Ch3 §3.3.5 / Ch4 §4.6 as system-design precedent. Wang/Shang/Zhong already imported, so it's available for Ch3 §3.3.5 too. Both pair Lloyd 1982 + Arthur 2007 in their k-means baselines, which is the modern citation norm — flag for Ch3/Ch4 when writing Stage 2/3.
 
 #### 1b-iii. §2.1.9 RAG for Instructor Feedback (line 136)
 
@@ -363,6 +363,10 @@ Anything that took deliberation and shouldn't be relitigated:
 12. **Phase 2 Bodily & Verbert 2017 LAK paper dropped.** The journal review variant covers the same ground at greater depth; one is enough.
 13. **Verbert 2020 → Verbert 2013** rename. Better BibTeX assigned the wrong year initially; user corrected.
 14. **§2.1.4 → §2.1.5 KT paragraph relocation** is the standard fix for the BKT/IRT duplication risk between subsections. Cut lines 89–93 from §2.1.4, paste into §2.1.5, replace with a one-line bridge.
+15. **TF-IDF formula attributed to Manning 2006, not Salton 1975** in §2.3.2. Salton 1975 introduces VSM but not the `tf · log(N/df)` form. Cite Salton at the VSM framing, Manning at the formula. This is a factual correction, not just a citation-style preference.
+16. **K-means equation cites Arthur & Vassilvitskii, not MacQueen** in §2.3.2. The form $\phi = \sum_x \min_c \|x-c\|^2$ is Arthur's potential-function notation. MacQueen retains an objective-only prose citation. Avoids the MacQueen-vs-Lloyd algorithmic blur (MacQueen's original procedure is online/sequential, not the batch assign-update of Lloyd 1957/1982).
+17. **Closing LLM-labelling sentence in §2.3.2 framed as literature claim, not implementation forward-link.** Cites `wangGoalDrivenExplainableClustering2023` (PAS / GoalEx) — newly imported. Kept Ch2 in literature voice; dashboard-specific framing of the same step ("OpenAI labels each centroid...") belongs in Ch3 §3.3.5 / Ch4.
+18. **`viswanathanLargeLanguageModelsEnable2023` (Few-Shot Clustering) flagged for Ch3 §3.3.5 / Ch4 §4.6, not §2.3.2.** Three-stage LLM-clustering taxonomy (before/during/after) fits system-design framing better than literature review. Add to Phase 2 import checklist if not already there.
 
 ---
 

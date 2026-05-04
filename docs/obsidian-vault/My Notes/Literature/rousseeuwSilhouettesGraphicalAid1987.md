@@ -1,15 +1,50 @@
 ---
+category: literaturenote
 citekey: rousseeuwSilhouettesGraphicalAid1987
-status: planned
+year: 1987
 in_zotero: true
-cited_in_tex: []
-cited_in_planned:
-  - Ch2 – Background and Requirements
-  - Question Difficulty Logic
-last_synced: 2026-05-03
+status: active
+last_imported: 2026-05-04
 ---
-# Rousseeuw — Silhouettes: A Graphical Aid to Interpretation and Validation of Cluster Analysis
 
-Introduces the silhouette score as a cluster-quality metric; directly grounds the auto-k selection step (k=1..5, pick best silhouette) in mistake clustering.
+# Silhouettes: A graphical aid to the interpretation and validation of cluster analysis
 
-Cited in: [[Ch2 – Background and Requirements]] · [[Question Difficulty Logic]]
+> [!Cite]
+> [1]
+
+P. J. Rousseeuw, ‘Silhouettes: A graphical aid to the interpretation and validation of cluster analysis’, _Journal of Computational and Applied Mathematics_, vol. 20, pp. 53–65, Nov. 1987, doi: [10.1016/0377-0427(87)90125-7](https://doi.org/10.1016/0377-0427\(87\)90125-7).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Rousseeuw, Peter J.
+~
+> **Title**:: Silhouettes: A graphical aid to the interpretation and validation of cluster analysis
+> **Year**:: 1987
+> **Citekey**:: rousseeuwSilhouettesGraphicalAid1987
+> **itemType**:: journalArticle
+> **Journal**:: *Journal of Computational and Applied Mathematics*
+> **Volume**:: 20
+> **Pages**:: 53-65
+> **DOI**:: 10.1016/0377-0427(87)90125-7
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
+%% end annotations %%
+
+
+%% Import Date: 2026-05-04T22:59:13.353+01:00 %%

@@ -657,11 +657,10 @@
   keywords = {Computer Vision and Pattern Recognition (cs.CV),Data Structures and Algorithms (cs.DS),FOS: Computer and information sciences,Information Retrieval (cs.IR),Social and Information Networks (cs.SI)}
 }
 
-@book{manningIntroductionInformationRetrieval2008,
+@book{manningIntroductionInformationRetrieval2006,
   title = {Introduction to {{Information Retrieval}}},
   author = {Manning, Christopher D. and Raghavan, Prabhakar and Sch{\"u}tze, Hinrich},
-  year = 2008,
-  month = jul,
+  year = 2006,
   edition = {1},
   publisher = {Cambridge University Press},
   doi = {10.1017/CBO9780511809071},
@@ -956,6 +955,19 @@
   publisher = {Elsevier BV},
   doi = {10.1016/j.compedu.2018.03.018},
   urldate = {2025-12-28}
+}
+
+@misc{wangGoalDrivenExplainableClustering2023,
+  title = {Goal-{{Driven Explainable Clustering}} via {{Language Descriptions}}},
+  author = {Wang, Zihan and Shang, Jingbo and Zhong, Ruiqi},
+  year = 2023,
+  publisher = {arXiv},
+  doi = {10.48550/ARXIV.2305.13749},
+  url = {https://arxiv.org/abs/2305.13749},
+  urldate = {2026-05-04},
+  abstract = {Unsupervised clustering is widely used to explore large corpora, but existing formulations neither consider the users' goals nor explain clusters' meanings. We propose a new task formulation, "Goal-Driven Clustering with Explanations" (GoalEx), which represents both the goal and the explanations as free-form language descriptions. For example, to categorize the errors made by a summarization system, the input to GoalEx is a corpus of annotator-written comments for system-generated summaries and a goal description "cluster the comments based on why the annotators think the summary is imperfect.''; the outputs are text clusters each with an explanation ("this cluster mentions that the summary misses important context information."), which relates to the goal and precisely explain which comments should (not) belong to a cluster. To tackle GoalEx, we prompt a language model with "[corpus subset] + [goal] + Brainstorm a list of explanations each representing a cluster."; then we classify whether each sample belongs to a cluster based on its explanation; finally, we use integer linear programming to select a subset of candidate clusters to cover most samples while minimizing overlaps. Under both automatic and human evaluation on corpora with or without labels, our method produces more accurate and goal-related explanations than prior methods. We release our data and implementation at https://github.com/ZihanWangKi/GoalEx.},
+  copyright = {Creative Commons Attribution 4.0 International},
+  keywords = {Computation and Language (cs.CL),FOS: Computer and information sciences}
 }
 
 @misc{wikipediacontributors_2019_learning_analytics,

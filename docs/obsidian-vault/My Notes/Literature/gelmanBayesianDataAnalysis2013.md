@@ -1,18 +1,54 @@
 ---
+category: literaturenote
 citekey: gelmanBayesianDataAnalysis2013
-status: planned
+year: 2013
 in_zotero: true
-cited_in_tex: []
-cited_in_planned:
-  - Ch2 – Background and Requirements
-  - Ch3 – Design and Modelling
-  - Student Struggle Logic
-last_synced: 2026-05-03
+status: active
+last_imported: 2026-05-04
 ---
-# Gelman, Carlin, Stern, Dunson, Vehtari & Rubin — Bayesian Data Analysis, 3rd Edition
 
-Canonical textbook reference for Bayesian methods. Chapter 5 derives the conjugate normal–normal posterior, which produces the shrinkage formula `n/(n+K)` used directly in `analytics.py` (with `SHRINKAGE_K = 5` from `config.py`). This is the actual formula used in the dashboard, distinct from the Stein/Efron empirical-Bayes intuition (`efron_1977_stein`, kept as motivation).
+# Bayesian Data Analysis
 
-Replaces `morris_1983_parametric` because Morris addresses *empirical* Bayes (estimating the prior from data), whereas the dashboard uses a fixed pseudo-count K — i.e. conjugate Bayes with a known hyperparameter, which is the textbook case in Gelman BDA.
+> [!Cite]
+> [1]
 
-Cited in: [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]]
+A. Gelman, J. B. Carlin, H. S. Stern, D. B. Dunson, A. Vehtari, and D. B. Rubin, _Bayesian Data Analysis_, 0 edn. Chapman and Hall/CRC, 2013. doi: [10.1201/b16018](https://doi.org/10.1201/b16018).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Gelman, Andrew
+> **Author**:: Carlin, John B.
+> **Author**:: Stern, Hal S.
+> **Author**:: Dunson, David B.
+> **Author**:: Vehtari, Aki
+> **Author**:: Rubin, Donald B.
+~
+> **Title**:: Bayesian Data Analysis
+> **Year**:: 2013
+> **Citekey**:: gelmanBayesianDataAnalysis2013
+> **itemType**:: book
+> **Publisher**:: Chapman and Hall/CRC
+> **DOI**:: 10.1201/b16018
+> **ISBN**:: 978-0-429-11307-9
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
+%% end annotations %%
+
+
+%% Import Date: 2026-05-04T22:59:11.527+01:00 %%

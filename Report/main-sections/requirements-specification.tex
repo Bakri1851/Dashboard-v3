@@ -151,8 +151,39 @@ In the context of lab struggle detection, collaborative filtering offers a stron
 
 \subsubsection{Text Mining and Mistake Pattern Recovery}
 
+Where student responses are free-text rather than numerical or categorical,
+ identifying common mistake patterns requires text-mining techniques that combine information retrieval and unsupervised clustering.
+Salton et al.\ introduced the vector space model for information retrieval, which represents documents and queries as vectors in a vector space, allowing for the computation of similarity between them \cite{saltonVectorSpaceModel1975}.
+The standard weighting scheme is term frequency-inverse document frequency (TF-IDF) formalised in modern information retrieval as
+\begin{equation}
+    \mathrm{tf-idf}_{t, d} = \mathrm{tf}_{t, d} \cdot \log\frac{N}{\mathrm{df}_t},
+    \label{eq:tfidf}
+\end{equation}
+where $\mathrm{tf}_{t, d}$ is the frequency of term $t$ in document $d$, $N$ is the total number of documents, and $\mathrm{df}_t$ is the number of documents containing term $t$ \cite{manningIntroductionInformationRetrieval2006}.
+
+Once each document is represented as a TF-IDF vector, similar documents can be partitioned into clusters that share characteristic content.
+MacQueen's $k$-means algorithm partitions $n$ points into $k$ clusters to minimise within cluster variance
+\cite{MacQueen1967SomeMF}. 
+Formally, this corresponds to choosing $k$ centers $C$ that minimise the sum of squared distances from each point to its closest center,
+\begin{equation}
+    \phi = \sum_{x \in X} \min_{c \in C} \|x - c\|^2,
+    \label{eq:kmeans}
+\end{equation}
+where $X$ is the set of data points \cite{arthurKmeansAdvantagesCareful}.
+Because this objective is non-convex and sensitive to initialisation, Arthur and Vassilvitskii's $k$-means++ seeds initial centers by selecting each new center with probability proportional to its squared distance from the nearest already-chosen center, yielding provable approximation guarantees and faster convergence in practice \cite{arthurKmeansAdvantagesCareful}.
+
+Choosing the number of clusters $k$ is itself a problem. Rousseeuw's silhouette coefficient quantifies how well each point fits its assigned cluster relative to the next-nearest cluster:
+\begin{equation}
+    s(i) = \frac{b(i) - a(i)}{\max\{a(i), b(i)\}},
+    \label{eq:silhouette}
+\end{equation}
+where $a(i)$ is the mean intra-cluster distance for point $i$ and $b(i)$ is the mean distance from $i$ to all points in the nearest other cluster, with values close to $+1$ indicating tight well separated clusters \cite{rousseeuwSilhouettesGraphicalAid1987}. 
+Sweeping $k$ and selecting the value that maximises the mean silhouette gives a principled auto-selection rule.
+Once clusters are formed, a large language model can produce natural-language cluster explanations \cite{wangGoalDrivenExplainableClustering2023}.
 
 \subsection{Retrieval-Augmented Feedback}
+
+
 
 \subsection{Existing Systems}
 

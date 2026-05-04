@@ -1,15 +1,51 @@
 ---
+category: literaturenote
 citekey: hunterExponentiallyWeightedMoving1986
-status: planned
+year: 1986
 in_zotero: true
-cited_in_tex: []
-cited_in_planned:
-  - Ch2 – Background and Requirements
-  - Student Struggle Logic
-last_synced: 2026-05-03
+status: active
+last_imported: 2026-05-04
 ---
-# Hunter — The Exponentially Weighted Moving Average
 
-Standard reference for the EWMA recursion; grounds the exponential time-decay weighting in `A_raw` (30-minute half-life) and the future EWMA smoothing layer over the live struggle signal.
+# The Exponentially Weighted Moving Average
 
-Cited in: [[Ch2 – Background and Requirements]] · [[Student Struggle Logic]]
+> [!Cite]
+> [1]
+
+J. S. Hunter, ‘The Exponentially Weighted Moving Average’, _Journal of Quality Technology_, vol. 18, no. 4, pp. 203–210, Oct. 1986, doi: [10.1080/00224065.1986.11979014](https://doi.org/10.1080/00224065.1986.11979014).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Hunter, J. Stuart
+~
+> **Title**:: The Exponentially Weighted Moving Average
+> **Year**:: 1986
+> **Citekey**:: hunterExponentiallyWeightedMoving1986
+> **itemType**:: journalArticle
+> **Journal**:: *Journal of Quality Technology*
+> **Volume**:: 18
+> **Issue**:: 4
+> **Pages**:: 203-210
+> **DOI**:: 10.1080/00224065.1986.11979014
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
+%% end annotations %%
+
+
+%% Import Date: 2026-05-04T22:59:11.708+01:00 %%

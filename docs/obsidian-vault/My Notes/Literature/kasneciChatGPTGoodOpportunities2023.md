@@ -1,17 +1,73 @@
 ---
+category: literaturenote
 citekey: kasneciChatGPTGoodOpportunities2023
-status: planned
+year: 2023
 in_zotero: true
-cited_in_tex: []
-cited_in_planned:
-  - Ch2 – Background and Requirements
-  - Ch3 – Design and Modelling
-  - Ch5 – Results and Evaluation
-  - RAG Pipeline - Two-Layer Retrieval
-last_synced: 2026-05-03
+status: active
+last_imported: 2026-05-04
 ---
-# Kasneci et al. — ChatGPT for Good? Opportunities and Challenges of Large Language Models for Education
 
-Surveys opportunities and risks of LLMs in educational settings; justifies the dashboard's use of gpt-4o-mini for incorrectness scoring and the RAG suggested-feedback layer while flagging calibration and hallucination concerns.
+# ChatGPT for good? On opportunities and challenges of large language models for education
 
-Cited in: [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Ch5 – Results and Evaluation]] · [[RAG Pipeline - Two-Layer Retrieval]]
+> [!Cite]
+> [1]
+
+E. Kasneci _et al._, ‘ChatGPT for good? On opportunities and challenges of large language models for education’, _Learning and Individual Differences_, vol. 103, p. 102274, Apr. 2023, doi: [10.1016/j.lindif.2023.102274](https://doi.org/10.1016/j.lindif.2023.102274).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Kasneci, Enkelejda
+> **Author**:: Sessler, Kathrin
+> **Author**:: Küchemann, Stefan
+> **Author**:: Bannert, Maria
+> **Author**:: Dementieva, Daryna
+> **Author**:: Fischer, Frank
+> **Author**:: Gasser, Urs
+> **Author**:: Groh, Georg
+> **Author**:: Günnemann, Stephan
+> **Author**:: Hüllermeier, Eyke
+> **Author**:: Krusche, Stephan
+> **Author**:: Kutyniok, Gitta
+> **Author**:: Michaeli, Tilman
+> **Author**:: Nerdel, Claudia
+> **Author**:: Pfeffer, Jürgen
+> **Author**:: Poquet, Oleksandra
+> **Author**:: Sailer, Michael
+> **Author**:: Schmidt, Albrecht
+> **Author**:: Seidel, Tina
+> **Author**:: Stadler, Matthias
+> **Author**:: Weller, Jochen
+> **Author**:: Kuhn, Jochen
+> **Author**:: Kasneci, Gjergji
+~
+> **Title**:: ChatGPT for good? On opportunities and challenges of large language models for education
+> **Year**:: 2023
+> **Citekey**:: kasneciChatGPTGoodOpportunities2023
+> **itemType**:: journalArticle
+> **Journal**:: *Learning and Individual Differences*
+> **Volume**:: 103
+> **Pages**:: 102274
+> **DOI**:: 10.1016/j.lindif.2023.102274
+
+> [!LINK]
+>
+> [Submitted Version](file://C:\Users\Bakri\Zotero\storage\UWCAVL8K\Kasneci%20et%20al.%20-%202023%20-%20ChatGPT%20for%20good%20On%20opportunities%20and%20challenges%20of%20large%20language%20models%20for%20education.pdf)
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
+%% end annotations %%
+
+
+%% Import Date: 2026-05-04T22:59:11.811+01:00 %%

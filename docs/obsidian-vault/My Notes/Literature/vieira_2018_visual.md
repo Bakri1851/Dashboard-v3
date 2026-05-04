@@ -4,27 +4,43 @@ citekey: vieira_2018_visual
 year: 2018
 in_zotero: true
 status: active
-last_imported: 2026-05-03
-cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:11
-  - Report/main-sections/requirements-specification-old.tex:11
-  - Report/main-sections/requirements-specification-old.tex:15
-  - Report/main-sections/requirements-specification-old.tex:18
-  - Report/main-sections/requirements-specification-old.tex:21
-  - Report/main-sections/requirements-specification-old.tex:31
-  - Report/main-sections/requirements-specification.tex:11
-  - Report/main-sections/requirements-specification.tex:15
-  - Report/main-sections/requirements-specification.tex:18
-  - Report/main-sections/requirements-specification.tex:21
-  - Report/main-sections/requirements-specification.tex:31
-cited_in_planned:
-  - Ch2 – Background and Requirements
-  - Instructor Dashboard
-last_synced: 2026-05-03
+last_imported: 2026-05-04
 ---
+
 # Visual learning analytics of educational data: A systematic literature review and research agenda
 
-%% Begin annotations %%
+> [!Cite]
+> [1]
+
+C. Vieira, P. Parsons, and V. Byrd, ‘Visual learning analytics of educational data: A systematic literature review and research agenda’, _Computers &amp; Education_, vol. 122, pp. 119–135, Jul. 2018, doi: [10.1016/j.compedu.2018.03.018](https://doi.org/10.1016/j.compedu.2018.03.018).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Vieira, Camilo
+> **Author**:: Parsons, Paul
+> **Author**:: Byrd, Vetria
+~
+> **Title**:: Visual learning analytics of educational data: A systematic literature review and research agenda
+> **Year**:: 2018
+> **Citekey**:: vieira_2018_visual
+> **itemType**:: journalArticle
+> **Journal**:: *Computers &amp; Education*
+> **Volume**:: 122
+> **Publisher**:: Elsevier BV
+> **Pages**:: 119-135
+> **DOI**:: 10.1016/j.compedu.2018.03.018
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
 ## Summary
 
 > [!Cite]
@@ -150,8 +166,13 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-03T03:47:13.408+01:00 %%
-%% End annotations %%
+%% Import Date: 2026-05-04T22:59:13.773+01:00 %%

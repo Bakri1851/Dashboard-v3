@@ -1,16 +1,50 @@
 ---
+category: literaturenote
 citekey: LimitedMemoryAlgorithm
-status: planned
+year: 1995
 in_zotero: true
-cited_in_tex: []
-cited_in_planned:
-  - Ch3 – Design and Modelling
-  - Ch4 – Implementation
-  - IRT Difficulty Logic
-last_synced: 2026-05-03
+status: active
+last_imported: 2026-05-04
 ---
-# Byrd et al. — A Limited Memory Algorithm for Bound Constrained Optimization
 
-Describes the L-BFGS-B bounded quasi-Newton solver used via `scipy.optimize.minimize` to fit the Rasch 1PL model in `models/irt.py`.
+# A Limited Memory Algorithm for Bound Constrained Optimization
 
-Cited in: [[Ch3 – Design and Modelling]] · [[Ch4 – Implementation]] · [[IRT Difficulty Logic]]
+> [!Cite]
+> [1]
+
+R. Byrd, P. Lu, J. Nocedal, and Z. Ciyou, ‘A Limited Memory Algorithm for Bound Constrained Optimization’. Accessed: May 02, 2026. [Online]. Available: [https://epubs.siam.org/doi/epdf/10.1137/0916069](https://epubs.siam.org/doi/epdf/10.1137/0916069)
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Byrd, Richard
+> **Author**:: Lu, Peihuang
+> **Author**:: Nocedal, Jorge
+> **Author**:: Ciyou, Zhu
+~
+> **Title**:: A Limited Memory Algorithm for Bound Constrained Optimization
+> **Year**:: 1995
+> **Citekey**:: LimitedMemoryAlgorithm
+> **itemType**:: webpage
+> **DOI**:: 10.1137/0916069
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
+%% end annotations %%
+
+
+%% Import Date: 2026-05-04T22:59:12.403+01:00 %%

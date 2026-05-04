@@ -4,20 +4,38 @@ citekey: koutcheme_using
 year: Error: `format` can only be applied to dates. Tried for format object
 in_zotero: true
 status: active
-last_imported: 2026-05-03
-cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:18
-  - Report/main-sections/requirements-specification-old.tex:96
-  - Report/main-sections/requirements-specification.tex:98
-cited_in_planned:
-  - Ch2 – Background and Requirements
-  - Student Struggle Logic
-  - Improved Struggle Logic
-last_synced: 2026-05-03
+last_imported: 2026-05-04
 ---
+
 # Using program repair as a proxy for language models' feedback ability in programming education
 
-%% Begin annotations %%
+> [!Cite]
+> [1]
+
+C. Koutcheme, N. Dainese, and A. Hellas, ‘Using program repair as a proxy for language models’ feedback ability in programming education’. p. 2024. Accessed: Apr. 03, 2026. [Online]. Available: [https://aclanthology.org/2024.bea-1.15.pdf](https://aclanthology.org/2024.bea-1.15.pdf)
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Koutcheme, Charles
+> **Author**:: Dainese, Nicola
+> **Author**:: Hellas, Arto
+~
+> **Title**:: Using program repair as a proxy for language models' feedback ability in programming education
+> **Year**:: Error: `format` can only be applied to dates. Tried for format object
+> **Citekey**:: koutcheme_using
+> **itemType**:: document
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
 ## Summary
 
 > [!Cite]
@@ -128,8 +146,13 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-03T03:46:57.155+01:00 %%
-%% End annotations %%
+%% Import Date: 2026-05-04T22:59:12.098+01:00 %%

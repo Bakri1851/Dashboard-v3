@@ -1,15 +1,47 @@
 ---
+category: literaturenote
 citekey: CoefficientAgreementNominal
-status: planned
+year: 1960
 in_zotero: true
-cited_in_tex: []
-cited_in_planned:
-  - Ch5 – Results and Evaluation
-  - Evaluation Plan
-last_synced: 2026-05-03
+status: active
+last_imported: 2026-05-04
 ---
-# Cohen — A Coefficient of Agreement for Nominal Scales
 
-Introduces Cohen's κ for chance-corrected categorical agreement; candidate metric for Ch5 §5.4 level-agreement reporting (baseline vs improved struggle classification).
+# A Coefficient of Agreement for Nominal Scales
 
-Cited in: [[Ch5 – Results and Evaluation]] · [[Evaluation Plan]]
+> [!Cite]
+> [1]
+
+J. Cohen, ‘A Coefficient of Agreement for Nominal Scales’. Accessed: May 02, 2026. [Online]. Available: [https://journals.sagepub.com/doi/epdf/10.1177/001316446002000104](https://journals.sagepub.com/doi/epdf/10.1177/001316446002000104)
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Cohen, Jacob
+~
+> **Title**:: A Coefficient of Agreement for Nominal Scales
+> **Year**:: 1960
+> **Citekey**:: CoefficientAgreementNominal
+> **itemType**:: webpage
+> **DOI**:: 10.1177/001316446002000104
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
+%% end annotations %%
+
+
+%% Import Date: 2026-05-04T22:59:10.824+01:00 %%

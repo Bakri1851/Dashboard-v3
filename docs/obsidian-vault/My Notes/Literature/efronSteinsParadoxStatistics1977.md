@@ -1,16 +1,52 @@
 ---
+category: literaturenote
 citekey: efronSteinsParadoxStatistics1977
-status: planned
+year: 1977
 in_zotero: true
-cited_in_tex: []
-cited_in_planned:
-  - Ch2 – Background and Requirements
-  - Ch3 – Design and Modelling
-  - Student Struggle Logic
-last_synced: 2026-05-03
+status: active
+last_imported: 2026-05-04
 ---
-# Efron & Morris — Stein's Paradox in Statistics
 
-Accessible exposition of James-Stein shrinkage: pulling noisy individual estimates toward the group mean improves aggregate accuracy; theoretical basis for the `n/(n+K)` shrinkage in struggle scoring.
+# Stein's Paradox in Statistics
 
-Cited in: [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]]
+> [!Cite]
+> [1]
+
+B. Efron and C. Morris, ‘Stein’s Paradox in Statistics’, _Sci Am_, vol. 236, no. 5, pp. 119–127, May 1977, doi: [10.1038/scientificamerican0577-119](https://doi.org/10.1038/scientificamerican0577-119).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Efron, Bradley
+> **Author**:: Morris, Carl
+~
+> **Title**:: Stein's Paradox in Statistics
+> **Year**:: 1977
+> **Citekey**:: efronSteinsParadoxStatistics1977
+> **itemType**:: journalArticle
+> **Journal**:: *Scientific American*
+> **Volume**:: 236
+> **Issue**:: 5
+> **Pages**:: 119-127
+> **DOI**:: 10.1038/scientificamerican0577-119
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
+%% end annotations %%
+
+
+%% Import Date: 2026-05-04T22:59:11.071+01:00 %%

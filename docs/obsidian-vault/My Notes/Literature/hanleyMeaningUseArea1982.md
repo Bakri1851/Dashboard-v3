@@ -1,15 +1,52 @@
 ---
+category: literaturenote
 citekey: hanleyMeaningUseArea1982
-status: planned
+year: 1982
 in_zotero: true
-cited_in_tex: []
-cited_in_planned:
-  - Ch5 – Results and Evaluation
-  - Evaluation Plan
-last_synced: 2026-05-03
+status: active
+last_imported: 2026-05-04
 ---
-# Hanley & McNeil — The Meaning and Use of the Area under a Receiver Operating Characteristic (ROC) Curve
 
-Defines AUC as the probability that a classifier ranks a random positive above a random negative; paired with Fawcett (2006) as the AUC reference.
+# The meaning and use of the area under a receiver operating characteristic (ROC) curve.
 
-Cited in: [[Ch5 – Results and Evaluation]] · [[Evaluation Plan]]
+> [!Cite]
+> [1]
+
+J. A. Hanley and B. J. McNeil, ‘The meaning and use of the area under a receiver operating characteristic (ROC) curve.’, _Radiology_, vol. 143, no. 1, pp. 29–36, Apr. 1982, doi: [10.1148/radiology.143.1.7063747](https://doi.org/10.1148/radiology.143.1.7063747).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Hanley, J A
+> **Author**:: McNeil, B J
+~
+> **Title**:: The meaning and use of the area under a receiver operating characteristic (ROC) curve.
+> **Year**:: 1982
+> **Citekey**:: hanleyMeaningUseArea1982
+> **itemType**:: journalArticle
+> **Journal**:: *Radiology*
+> **Volume**:: 143
+> **Issue**:: 1
+> **Pages**:: 29-36
+> **DOI**:: 10.1148/radiology.143.1.7063747
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
+%% end annotations %%
+
+
+%% Import Date: 2026-05-04T22:59:11.588+01:00 %%

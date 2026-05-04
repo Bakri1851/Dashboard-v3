@@ -1,16 +1,52 @@
 ---
+category: literaturenote
 citekey: blackAssessmentClassroomLearning1998
-status: planned
+year: 1998
 in_zotero: true
-cited_in_tex: []
-cited_in_planned:
-  - Ch2 – Background and Requirements
-  - Ch1 – Introduction
-  - Student Struggle Logic
-last_synced: 2026-05-03
+status: active
+last_imported: 2026-05-04
 ---
-# Black & Wiliam — Assessment and Classroom Learning
 
-Seminal paper defining formative assessment as a learning loop of elicit-interpret-act; grounds the real-time monitor-and-intervene premise of the instructor dashboard.
+# Assessment and Classroom Learning
 
-Cited in: [[Ch2 – Background and Requirements]] · [[Ch1 – Introduction]] · [[Student Struggle Logic]]
+> [!Cite]
+> [1]
+
+P. Black and D. Wiliam, ‘Assessment and Classroom Learning’, _Assessment in Education: Principles, Policy & Practice_, vol. 5, no. 1, pp. 7–74, Mar. 1998, doi: [10.1080/0969595980050102](https://doi.org/10.1080/0969595980050102).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Black, Paul
+> **Author**:: Wiliam, Dylan
+~
+> **Title**:: Assessment and Classroom Learning
+> **Year**:: 1998
+> **Citekey**:: blackAssessmentClassroomLearning1998
+> **itemType**:: journalArticle
+> **Journal**:: *Assessment in Education: Principles, Policy & Practice*
+> **Volume**:: 5
+> **Issue**:: 1
+> **Pages**:: 7-74
+> **DOI**:: 10.1080/0969595980050102
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
+%% end annotations %%
+
+
+%% Import Date: 2026-05-04T22:59:10.753+01:00 %%

@@ -1,15 +1,46 @@
 ---
+category: literaturenote
 citekey: MacQueen1967SomeMF
-status: planned
+year: 1967
 in_zotero: true
-cited_in_tex: []
-cited_in_planned:
-  - Ch2 – Background and Requirements
-  - Question Difficulty Logic
-last_synced: 2026-05-03
+status: active
+last_imported: 2026-05-04
 ---
-# MacQueen — Some Methods for Classification and Analysis of Multivariate Observations
 
-Original K-means algorithm; foundational reference for the clustering step in `cluster_question_mistakes()`.
+# Some methods for classification and analysis of multivariate observations
 
-Cited in: [[Ch2 – Background and Requirements]] · [[Question Difficulty Logic]]
+> [!Cite]
+> [1]
+
+J. MacQueen, ‘Some methods for classification and analysis of multivariate observations’, 1967. [Online]. Available: [https://api.semanticscholar.org/CorpusID:6278891](https://api.semanticscholar.org/CorpusID:6278891)
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: MacQueen, J.
+~
+> **Title**:: Some methods for classification and analysis of multivariate observations
+> **Year**:: 1967
+> **Citekey**:: MacQueen1967SomeMF
+> **itemType**:: conferencePaper
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
+%% end annotations %%
+
+
+%% Import Date: 2026-05-04T22:59:12.628+01:00 %%

@@ -1,17 +1,51 @@
 ---
+category: literaturenote
 citekey: oecdHandbookConstructingComposite2008
-status: planned
+year: 2008
 in_zotero: true
-cited_in_tex: []
-cited_in_planned:
-  - Ch2 – Background and Requirements
-  - Ch3 – Design and Modelling
-  - Student Struggle Logic
-  - Question Difficulty Logic
-last_synced: 2026-05-03
+status: active
+last_imported: 2026-05-04
 ---
-# OECD / JRC — Handbook on Constructing Composite Indicators
 
-Reference methodology for building composite indicators from heterogeneous signals; grounds the weighted-sum construction of the 7-signal struggle and 5-signal difficulty scores.
+# Handbook on Constructing Composite Indicators: Methodology and User Guide
 
-Cited in: [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[Student Struggle Logic]] · [[Question Difficulty Logic]]
+> [!Cite]
+> [1]
+
+OECD, European Union, and Joint Research Centre - European Commission, _Handbook on Constructing Composite Indicators: Methodology and User Guide_. OECD, 2008. doi: [10.1787/9789264043466-en](https://doi.org/10.1787/9789264043466-en).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: OECD
+> **Author**:: European Union
+> **Author**:: Joint Research Centre - European Commission
+~
+> **Title**:: Handbook on Constructing Composite Indicators: Methodology and User Guide
+> **Year**:: 2008
+> **Citekey**:: oecdHandbookConstructingComposite2008
+> **itemType**:: book
+> **Publisher**:: OECD
+> **DOI**:: 10.1787/9789264043466-en
+> **ISBN**:: 978-92-64-04345-9 978-92-64-04346-6
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
+%% end annotations %%
+
+
+%% Import Date: 2026-05-04T22:59:13.001+01:00 %%

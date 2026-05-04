@@ -1,16 +1,56 @@
 ---
+category: literaturenote
 citekey: piechDeepKnowledgeTracing2015
-status: planned
+year: 2015
 in_zotero: true
-cited_in_tex: []
-cited_in_planned:
-  - Ch2 – Background and Requirements
-  - Ch3 – Design and Modelling
-  - BKT Mastery Logic
-last_synced: 2026-05-03
+status: active
+last_imported: 2026-05-04
+tags: [Artificial Intelligence (cs.AI), Computers and Society (cs.CY), FOS: Computer and information sciences, K.3.1, Machine Learning (cs.LG)]
 ---
-# Piech et al. — Deep Knowledge Tracing
 
-Recurrent-neural-network model of knowledge tracing that outperforms BKT on standard benchmarks; referenced in Ch3 §3.4.3 as the modern baseline against which BKT was chosen for interpretability and low-data tractability.
+# Deep Knowledge Tracing
 
-Cited in: [[Ch2 – Background and Requirements]] · [[Ch3 – Design and Modelling]] · [[BKT Mastery Logic]]
+> [!Cite]
+> [1]
+
+C. Piech _et al._, ‘Deep Knowledge Tracing’, 2015, _arXiv_. doi: [10.48550/ARXIV.1506.05908](https://doi.org/10.48550/ARXIV.1506.05908).
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Piech, Chris
+> **Author**:: Spencer, Jonathan
+> **Author**:: Huang, Jonathan
+> **Author**:: Ganguli, Surya
+> **Author**:: Sahami, Mehran
+> **Author**:: Guibas, Leonidas
+> **Author**:: Sohl-Dickstein, Jascha
+~
+> **Title**:: Deep Knowledge Tracing
+> **Year**:: 2015
+> **Citekey**:: piechDeepKnowledgeTracing2015
+> **itemType**:: preprint
+> **DOI**:: 10.48550/ARXIV.1506.05908
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+> Knowledge tracing---where a machine models the knowledge of a student as they interact with coursework---is a well established problem in computer supported education. Though effectively modeling student knowledge would have high educational impact, the task has many inherent challenges. In this paper we explore the utility of using Recurrent Neural Networks (RNNs) to model student learning. The RNN family of models have important advantages over previous methods in that they do not require the explicit encoding of human domain knowledge, and can capture more complex representations of student knowledge. Using neural networks results in substantial improvements in prediction performance on a range of knowledge tracing datasets. Moreover the learned model can be used for intelligent curriculum design and allows straightforward interpretation and discovery of structure in student tasks. These results suggest a promising new line of research for knowledge tracing and an exemplary application task for RNNs.
+>
+
+# Notes%% begin annotations %%
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
+%% end annotations %%
+
+
+%% Import Date: 2026-05-04T22:59:13.101+01:00 %%
