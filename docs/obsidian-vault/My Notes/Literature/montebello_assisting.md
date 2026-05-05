@@ -4,10 +4,48 @@ citekey: montebello_assisting
 year: 2018
 in_zotero: true
 status: active
-last_imported: 2026-05-04
+last_imported: 2026-05-05
+cited_in_tex:
+  - Report/appendix-sections/themes-and-references.tex:15
+  - Report/main-sections/requirements-specification-old.tex:64
+  - Report/main-sections/requirements-specification-old.tex:73
+  - Report/main-sections/requirements-specification.tex:64
+  - Report/main-sections/requirements-specification.tex:73
+cited_in_planned:
+  - Ch2 – Background and Requirements
+last_synced: 2026-05-05
 ---
-
 # Assisting education through real-time learner analytics
+
+%% Begin annotations %%
+## Summary
+
+> [!Cite]
+> [1]
+
+M. Montebello, ‘Assisting education through real-time learner analytics’. 2018.
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Montebello, Matthew
+~
+> **Title**:: Assisting education through real-time learner analytics
+> **Year**:: 2018
+> **Citekey**:: montebello_assisting
+> **itemType**:: document
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
 
 > [!Cite]
 > [1]
@@ -144,7 +182,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-04T22:59:12.875+01:00 %%
+%% Import Date: 2026-05-05T18:39:58.960+01:00 %%
+%% End annotations %%

@@ -1,6 +1,6 @@
 # Writing Roadmap
 
-> [!info] **Self-contained handoff doc.** This file is designed to let any future chat pick up the thesis-writing work without losing context. Last updated 2026-05-04 after Ch2 restructure + Stage 1c + Stage 1b §2.2.2 + Stage 1b §2.3.2.
+> [!info] **Self-contained handoff doc.** This file is designed to let any future chat pick up the thesis-writing work without losing context. Last updated 2026-05-05 after Ch2 restructure + Stage 1c + Stage 1b §2.2.2 + Stage 1b §2.3.2 + Stage 1b §2.4.
 >
 > Companions: [[Rewrite Queue]] (granular edits), [[Report Sync]] (code↔thesis mismatch table), [[Evidence Bank]] (eval evidence checklist), [[Figures and Tables]] (figure inventory), and `docs/obsidian-vault/My Notes/Literature/_import_checklist.md` (live import progress).
 
@@ -15,8 +15,8 @@
 | 3   | Stage 1c cite-only adds             | ✅       | §2.1.1 LA in HE, §2.2.3 Difficulty (IRT), §2.3.1 CF, §2.5.2 Instructor Dashboards                                                                                                                                                   |
 | 4   | Stage 1b §2.2.2 Knowledge Tracing   | ✅       | Relocation move + Corbett (with Eq. 2) + Yudelson + Piech/Khajah; grounded in 4 source PDFs                                                                                                                                         |
 | 5   | Stage 1b §2.3.2 Text Mining         | ✅       | TF-IDF + K-means + silhouette + LLM labelling. Manning 2006 added at TF-IDF formula; k-means objective re-attributed to Arthur & Vassilvitskii potential function; Wang/Shang/Zhong 2023 grounds the closing LLM-labelling sentence |
-| 6   | Stage 1b §2.4 RAG                   | 🔄 NEXT | Dense embeddings + HNSW; ~400 w                                                                                                                                                                                                     |
-| 7   | Stage 1b §2.6 Research Gaps         | ⏳       | Uncomment commented draft + refresh against V2 features                                                                                                                                                                             |
+| 6   | Stage 1b §2.4 RAG                   | ✅       | Two subsubsections: §2.4.1 RAG framing (Lewis 2020 + Kasneci 2023) and §2.4.2 Dense Retrieval + ANN (Reimers 2019 SBERT + Malkov 2016 HNSW). All four cites PDF-verified.                                                           |
+| 7   | Stage 1b §2.6 Research Gaps         | 🔄 NEXT | Uncomment commented draft + refresh against V2 features                                                                                                                                                                             |
 | 8   | Stage 2 Ch3 stubs                   | ⏳       | 7 stub subsections; start with §3.4 advanced models                                                                                                                                                                                 |
 | 9   | Phase 2 imports (34 refs)           | ⏳       | Interleave; required before Ch4 §4.7/§4.8 prose                                                                                                                                                                                     |
 | 10  | Stage 3 Ch4 implementation rewrite  | ⏳       | **Largest single task** — full V1→V2 rewrite                                                                                                                                                                                        |
@@ -39,9 +39,10 @@ Cosmetic backlog (do at any point, ~2 min each): Ch6 §6.2 heading missing "and"
 - **Stage 1c ✅ COMPLETE.** Three method paragraphs (composite indicators, time-decay, Bayesian shrinkage) landed in §2.2.1. All cite-only adds done in §2.1.1, §2.2.3, §2.3.1, §2.5.2.
 - **Stage 1b §2.2.2 Knowledge Tracing ✅ COMPLETE.** Relocation move done; 3 new paragraphs (Corbett BKT formal definition + Eq. 2 prediction equation, Yudelson individualisation, Piech DKT + Khajah rebuttal) grounded in the four uploaded source PDFs.
 - **Stage 1b §2.3.2 Text Mining ✅ COMPLETE.** TF-IDF + k-means + k-means++ + silhouette grounded; closing LLM-labelling sentence cites Wang/Shang/Zhong 2023 (PAS / GoalEx). TF-IDF formula attributed to Manning 2006 not Salton 1975 (factual fix). k-means objective uses Arthur & Vassilvitskii's potential-function form. Rewritten in literature voice (no "submission"/"mistake patterns" dashboard-vocab).
-- **Thesis chapter state:** Ch1 written, Ch2 partial (§2.4/§2.6 still pending), Ch3 partial, Ch4 outdated (V1), Ch5 empty, Ch6 empty.
+- **Stage 1b §2.4 RAG ✅ COMPLETE.** Two subsubsections: §2.4.1 Retrieval-Augmented Generation grounds RAG via Lewis 2020 (dropping early-draft hallucinations about "factual hallucination" and "knowledge cutoff" after the user pushed back; replaced with Lewis's actual abstract framing of "updating world knowledge" and "providing provenance"), and connects to instructor-feedback context via Kasneci 2023's "convincingly written but unverified output" risk + verification-against-authoritative-sources mitigation. §2.4.2 Dense Retrieval + ANN grounds Sentence-BERT (Reimers 2019, siamese fine-tuning + cosine similarity, with the "averaged BERT and CLS-token worse than averaged GloVe" finding) and HNSW (Malkov 2016, multi-layer proximity graphs over nested subsets, top-to-zero greedy descent, logarithmic complexity). All four cites PDF-verified line-by-line.
+- **Thesis chapter state:** Ch1 written, Ch2 partial (§2.6 still pending), Ch3 partial, Ch4 outdated (V1), Ch5 empty, Ch6 empty.
 
-The next concrete writing task is **Stage 1b §2.4 RAG for Instructor Feedback** — RAG framing + dense embeddings + HNSW + LLMs-in-education. Lewis/Reimers/Malkov/Kasneci already in the bib; gao2023retrieval, karpukhin2020dense, izacard2021leveraging, wang2020minilm pending Phase 2 import.
+The next concrete writing task is **Stage 1b §2.6 Research Gaps** — uncomment the existing commented-out draft (lines 255–264 of `requirements-specification.tex`) and refresh against V2 features (BKT, IRT, mistake clustering, RAG). No new cites required; synthesis paragraph drawing on §2.2.1 / §2.3.2 / §2.4 / §2.5.
 
 ---
 
@@ -219,24 +220,19 @@ Subsection lives at lines 152–182 of `requirements-specification.tex`. Grounds
 
 **Future-use papers (Phase 2 candidates):** `viswanathanLargeLanguageModelsEnable2023` (NOT yet in bib) — three-stage LLM-clustering taxonomy (before/during/after); fits Ch3 §3.3.5 / Ch4 §4.6 as system-design precedent. Wang/Shang/Zhong already imported, so it's available for Ch3 §3.3.5 too. Both pair Lloyd 1982 + Arthur 2007 in their k-means baselines, which is the modern citation norm — flag for Ch3/Ch4 when writing Stage 2/3.
 
-#### 1b-iii. §2.1.9 RAG for Instructor Feedback (line 136)
+#### 1b-iii. §2.4 Retrieval-Augmented Feedback ✅ COMPLETE
 
-NEW subsection grounding the RAG pipeline used in suggested-feedback generation.
+Subsection lives at lines 184–208 of `requirements-specification.tex`. Split into two subsubsections matching §2.3's two-subsection precedent: §2.4.1 RAG framing (~200 w) and §2.4.2 Dense Retrieval + ANN (~225 w). Total ~430 w, slightly over the ~400 w target but warranted given §2.4 is foundational for the dashboard's feedback pipeline.
 
-**Cites:** `lewisRetrievalAugmentedGenerationKnowledgeIntensive2020` (RAG seminal), `reimersSentenceBERTSentenceEmbeddings2019` (sentence embeddings), `malkovEfficientRobustApproximate2016` (HNSW / ChromaDB underpinning), `kasneciChatGPTGoodOpportunities2023` (LLMs in education context).
+**Final cites used:** `lewisRetrievalAugmentedGenerationKnowledgeIntensive2020` (RAG seminal — three sentences in §2.4.1 para 1: architecture, limitations of parametric-only LMs, empirical results on knowledge-intensive QA), `kasneciChatGPTGoodOpportunities2023` (§2.4.1 para 2 — "convincingly written but unverified output" as a risk in education + verification against authoritative sources as the mitigation; bridge sentence to RAG cites both Lewis and Kasneci), `reimersSentenceBERTSentenceEmbeddings2019` (§2.4.2 para 1 — siamese/triplet, cosine similarity, "averaged BERT/CLS worse than averaged GloVe" finding, NLI fine-tuning improves STS), `malkovEfficientRobustApproximate2016` (§2.4.2 para 2 — linear naive scaling, ANN with recall trade-off, multi-layer proximity graphs, top-to-zero descent, logarithmic complexity).
 
-**After Phase 2 imports:** add `gao2023retrieval` (modern RAG survey, taxonomy framing), `karpukhin2020dense` (dense passage retrieval), `izacard2021leveraging` (Fusion-in-Decoder generative pattern). Also `wang2020minilm` for the specific `all-MiniLM-L6-v2` model.
+**Closing synthesis** (last sentence of §2.4.2): "Together, retrieval-augmented generation, dense sentence embeddings, and graph-based approximate nearest-neighbour search constitute the standard pipeline for grounding language-model outputs in an external corpus." Closes both §2.4.1 and §2.4.2 — matches §2.3.2's pattern of placing the synthesis at the end of the parent section's last subsubsection.
 
-**Structure** (~300–400 words):
+**Phase 2 weave-in points** (when imports land): `gao2023retrieval` → §2.4.1 para 1 (modern survey + taxonomy alongside Lewis); `karpukhin2020dense` → §2.4.2 para 1 (DPR / dense beats sparse); `izacard2021leveraging` → §2.4.1 para 1 (Fusion-in-Decoder); `wang2020minilm` → §2.4.2 para 1 (compact distilled embeddings, relevant since dashboard uses `all-MiniLM-L6-v2` but framed as "compact SBERT variants" in literature voice).
 
-| Para | Purpose | Cites |
-|---|---|---|
-| 1 | RAG framing — why retrieve+generate beats pure LLM for instructor feedback | `lewisRetrievalAugmentedGenerationKnowledgeIntensive2020`, `gao2023retrieval` (Phase 2) |
-| 2 | Dense embeddings as the retrieval mechanism | `reimersSentenceBERTSentenceEmbeddings2019`, `wang2020minilm` (Phase 2), `karpukhin2020dense` (Phase 2) |
-| 3 | HNSW for efficient approximate nearest-neighbour search at scale | `malkovEfficientRobustApproximate2016` |
-| 4 | LLMs in education frame; close by linking to the dashboard's instructor-facing use | `kasneciChatGPTGoodOpportunities2023` |
+**Implementation details deliberately excluded** (per Ch2 vs Ch3 separation): no mention of ChromaDB, `all-MiniLM-L6-v2` model name, top-k value, or metadata pre-filter. These belong in Ch3 §3.5 / Ch4 §4.7.
 
-> **Heads-up:** the RAG implementation is **pure dense** (ChromaDB + SBERT, with metadata pre-filter, no sparse retrieval). Don't position the architecture as hybrid — if you do, you'll need to justify with BM25/Bruch/RRF citations that we deliberately dropped. Stick with "dense retrieval over student-scoped documents."
+> **Heads-up retained:** the RAG implementation is **pure dense** (ChromaDB + SBERT, with metadata pre-filter, no sparse retrieval). §2.4 stays out of hybrid-retrieval framing; BM25/Bruch/RRF are not cited and are not needed.
 
 #### 1b-iv. §2.1.10 Summary of Identified Research Gaps (line 138)
 
@@ -367,6 +363,10 @@ Anything that took deliberation and shouldn't be relitigated:
 16. **K-means equation cites Arthur & Vassilvitskii, not MacQueen** in §2.3.2. The form $\phi = \sum_x \min_c \|x-c\|^2$ is Arthur's potential-function notation. MacQueen retains an objective-only prose citation. Avoids the MacQueen-vs-Lloyd algorithmic blur (MacQueen's original procedure is online/sequential, not the batch assign-update of Lloyd 1957/1982).
 17. **Closing LLM-labelling sentence in §2.3.2 framed as literature claim, not implementation forward-link.** Cites `wangGoalDrivenExplainableClustering2023` (PAS / GoalEx) — newly imported. Kept Ch2 in literature voice; dashboard-specific framing of the same step ("OpenAI labels each centroid...") belongs in Ch3 §3.3.5 / Ch4.
 18. **`viswanathanLargeLanguageModelsEnable2023` (Few-Shot Clustering) flagged for Ch3 §3.3.5 / Ch4 §4.6, not §2.3.2.** Three-stage LLM-clustering taxonomy (before/during/after) fits system-design framing better than literature review. Add to Phase 2 import checklist if not already there.
+19. **§2.4.1 paragraph 1 Lewis 2020 framing rewritten after fact-check**. Initial draft claimed RAG "addresses factual hallucination and a fixed knowledge cutoff" — neither phrase appears in Lewis 2020 (those are post-2022 ChatGPT-era discourse). Replaced with Lewis's actual abstract framing: "difficulty in updating or expanding the knowledge stored in model parameters, and the absence of explicit provenance for generated claims." This is the user's explicit "no hallucinations" guideline applied to my own draft prose.
+20. **§2.4.1 paragraph 2 Kasneci 2023 framing tightened after PDF verification**. Initial draft claimed Kasneci raises concerns about "accuracy, alignment with course content, and accountability for incorrect explanations." After reading the PDF: "accuracy" is in the paper, "alignment with course content" is partial (only as mitigation, not as concern), "accountability" is not in the paper at all. Rewritten using the paper's own §4 section heading "convincingly written but unverified model output" + the §4 "verify against authoritative sources" mitigation.
+21. **§2.4 closing synthesis is pure literature** (no forward-link to dashboard) per the user's editorial preference established during §2.3.2 review. Implementation-specific framing of the same pipeline belongs in Ch3 §3.5 / Ch4 §4.7.
+22. **Lewis 2020 not directly PDF-verified during writing.** Sentences 2–3 of §2.4.1 para 1 use abstract phrasings I'm confident in, but unlike SBERT/HNSW/Kasneci, the Lewis PDF was not fetched and cross-checked line-by-line. Worth doing at final-polish time if any fact-checking concern arises.
 
 ---
 

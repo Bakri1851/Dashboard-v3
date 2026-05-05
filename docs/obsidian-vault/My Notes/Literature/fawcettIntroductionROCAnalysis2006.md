@@ -3,8 +3,11 @@ category: literaturenote
 citekey: fawcettIntroductionROCAnalysis2006
 year: 2006
 in_zotero: true
-status: active
-last_imported: 2026-05-04
+status: stale
+last_imported: 2026-05-05
+cited_in_tex: []
+cited_in_planned: []
+last_synced: 2026-05-05
 ---
 
 # An introduction to ROC analysis
@@ -45,7 +48,13 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-04T22:59:11.275+01:00 %%
+%% Import Date: 2026-05-05T18:39:57.982+01:00 %%

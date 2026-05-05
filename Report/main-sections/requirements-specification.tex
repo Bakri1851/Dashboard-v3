@@ -183,7 +183,29 @@ Once clusters are formed, a large language model can produce natural-language cl
 
 \subsection{Retrieval-Augmented Feedback}
 
+\subsubsection{Retrieval-Augmented Generation}
 
+Lewis et al.\ introduced Retrieval-Augmented Generation (RAG) as a way to combine parametric language models with a non-parametric retriever over an external source, allowing the generator to condition its output on relevant evidence retrieved at query time \cite{lewisRetrievalAugmentedGenerationKnowledgeIntensive2020}.
+ Additionally, RAG models hallucinate less and generate factually more correct text than BART \cite{lewisRetrievalAugmentedGenerationKnowledgeIntensive2020}.
+Lewis et al.\ showed that RAG outperformed parametric models on knowledge intensive tasks, including open-domain QA tasks  \cite{lewisRetrievalAugmentedGenerationKnowledgeIntensive2020}.
+
+In educational contexts, the case for retrieval is even stronger. 
+Kasneci et al.\ survey the opportunities and challenges of large language models in education, noting that there is a difficulty in distinguishing between real knowledge and convincingly written but unverified model output due to the ability of LLMs to generate human-like text which can make it difficultt for students to distinguish between real knowledge and unverified model output leading students to accept false or misleading information as true. 
+To mitigate this risk, it is recommended we provide education on how information can be evaluated critically and teach students exploration, investigation, verification and corroboration strategies \cite{kasneciChatGPTGoodOpportunities2023}.
+Retrieval-augmented generation can help mitigate this risk by grounding the model's output in verifiable sources, allowing students to trace the information back to its origin and evaluate its credibility \cite{lewisRetrievalAugmentedGenerationKnowledgeIntensive2020,kasneciChatGPTGoodOpportunities2023}.
+
+\subsubsection{Dense Retrieval and Approximate Nearest Neighbour Search}
+
+Before the retrieval step in RAG, we need a representation that captures semantic similarity between documents and queries.
+Reimers and Gurevych proposed Sentence-BERT (SBERT), which is a modification of pre-trained BERT that uses siamese and triplet network structures to derive semantically meaningful sentence embeddings that can be compared using cosine similarity \cite{reimersSentenceBERTSentenceEmbeddings2019}.
+In the paper they show that commonly used approaches to derive sentence embeddings from BERT such as CLS-token outputs or averaging the BERT output embeddings perform worse than averaged GloVe embeddings on standard semantic textual similarity benchmarks. Siamese fine-tuning on natural language inference data substantially improves correlation on STS benchmarks and outperforms sentence-embedding methods such as InferSent and Universal Sentence Encoder \cite{reimersSentenceBERTSentenceEmbeddings2019}.
+
+Once documents are embedded, exact nearest neighbour search scales linearly with the number of documents which is unfeasible for large retrieval over large collections.
+To relax this, Approximate Nearest Neighbours Search (K-ANNS) was proposed, which relaxes the condition of the exact search by allowing a small number of errors in exchange for faster than linear time complexity \cite{malkovEfficientRobustApproximate2016}.
+Malkov and Yashunin proposed Hierarchical Navigable Small World (HNSW) graphs, which are a fully graph based ANN index that incrementally builds a multi-layer structure of proximity graphs for nested subsets of the stored elements \cite{malkovEfficientRobustApproximate2016}.
+As queries descend greedily from top to the zero layer, logarithmic complexity is achieved, with the evaluation showing that HNSW outperforms previous open source vector only approaches \cite{malkovEfficientRobustApproximate2016}.
+
+Together retrieval-augmented generation, dense sentence embeddings, and approximate nearest neighbour search build the standard pipeline for grounding LLM output.
 
 \subsection{Existing Systems}
 

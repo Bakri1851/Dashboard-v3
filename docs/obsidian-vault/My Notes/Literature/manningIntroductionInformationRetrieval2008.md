@@ -1,13 +1,13 @@
 ---
 citekey: manningIntroductionInformationRetrieval2008
 status: planned
-in_zotero: true
+in_zotero: false
 cited_in_tex: []
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Ch3 – Design and Modelling
   - Question Difficulty Logic
-last_synced: 2026-05-03
+last_synced: 2026-05-05
 ---
 # Manning, Raghavan & Schütze — Introduction to Information Retrieval
 

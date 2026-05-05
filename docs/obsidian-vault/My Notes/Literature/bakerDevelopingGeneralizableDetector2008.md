@@ -3,8 +3,11 @@ category: literaturenote
 citekey: bakerDevelopingGeneralizableDetector2008
 year: 2008
 in_zotero: true
-status: active
-last_imported: 2026-05-04
+status: stale
+last_imported: 2026-05-05
+cited_in_tex: []
+cited_in_planned: []
+last_synced: 2026-05-05
 ---
 
 # Developing a generalizable detector of when students game the system
@@ -48,7 +51,13 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-04T22:59:10.705+01:00 %%
+%% Import Date: 2026-05-05T18:39:57.637+01:00 %%

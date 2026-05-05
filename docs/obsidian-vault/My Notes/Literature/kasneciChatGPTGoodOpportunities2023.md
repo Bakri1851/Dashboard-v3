@@ -4,10 +4,17 @@ citekey: kasneciChatGPTGoodOpportunities2023
 year: 2023
 in_zotero: true
 status: active
-last_imported: 2026-05-04
+last_imported: 2026-05-05
+cited_in_tex:
+  - Report/main-sections/requirements-specification.tex:194
+  - Report/main-sections/requirements-specification.tex:195
+cited_in_planned: []
+last_synced: 2026-05-05
 ---
-
 # ChatGPT for good? On opportunities and challenges of large language models for education
+
+%% Begin annotations %%
+## Summary
 
 > [!Cite]
 > [1]
@@ -67,7 +74,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-04T22:59:11.811+01:00 %%
+%% Import Date: 2026-05-05T18:39:58.322+01:00 %%
+%% End annotations %%

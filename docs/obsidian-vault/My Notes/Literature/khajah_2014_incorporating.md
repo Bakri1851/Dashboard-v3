@@ -7,7 +7,7 @@ cited_in_planned:
   - Ch2 – Background and Requirements
   - Ch3 – Design and Modelling
   - BKT Mastery Logic
-last_synced: 2026-05-03
+last_synced: 2026-05-05
 ---
 # Khajah, Wing, Lindsey & Mozer — Incorporating Latent Factors Into Knowledge Tracing
 

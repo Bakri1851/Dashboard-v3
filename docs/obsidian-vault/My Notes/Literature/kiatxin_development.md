@@ -4,10 +4,52 @@ citekey: kiatxin_development
 year: 2021
 in_zotero: true
 status: active
-last_imported: 2026-05-04
+last_imported: 2026-05-05
+cited_in_tex:
+  - Report/appendix-sections/themes-and-references.tex:26
+  - Report/main-sections/requirements-specification-old.tex:160
+  - Report/main-sections/requirements-specification-old.tex:162
+  - Report/main-sections/requirements-specification.tex:219
+  - Report/main-sections/requirements-specification.tex:221
+cited_in_planned:
+  - Ch2 – Background and Requirements
+last_synced: 2026-05-05
 ---
-
 # Development of learning analytics dashboard based on moodle learning management system
+
+%% Begin annotations %%
+## Summary
+
+> [!Cite]
+> [1]
+
+O. Kiat Xin and D. Singh, ‘Development of learning analytics dashboard based on moodle learning management system’, _IJACSA) International Journal of Advanced Computer Science and Applications_, vol. 12, p. 2021, Jan. 2021.
+
+> [!Synth]
+> **Contribution**::
+>
+> **Related**:: 
+
+> [!md]
+> **FirstAuthor**:: Kiat Xin, Ong
+> **Author**:: Singh, Dalbir
+~
+> **Title**:: Development of learning analytics dashboard based on moodle learning management system
+> **Year**:: 2021
+> **Citekey**:: kiatxin_development
+> **itemType**:: journalArticle
+> **Journal**:: *IJACSA) International Journal of Advanced Computer Science and Applications*
+> **Volume**:: 12
+> **Pages**:: 2021
+
+> [!LINK]
+>
+
+> [!Abstract]
+>
+
+# Notes%% begin annotations %%
+## Summary
 
 > [!Cite]
 > [1]
@@ -160,7 +202,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-04T22:59:12.008+01:00 %%
+%% Import Date: 2026-05-05T18:39:58.404+01:00 %%
+%% End annotations %%

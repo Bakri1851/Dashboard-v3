@@ -4,11 +4,18 @@ citekey: reimersSentenceBERTSentenceEmbeddings2019
 year: 2019
 in_zotero: true
 status: active
-last_imported: 2026-05-04
+last_imported: 2026-05-05
 tags: [Computation and Language (cs.CL), FOS: Computer and information sciences]
+cited_in_tex:
+  - Report/main-sections/requirements-specification.tex:200
+  - Report/main-sections/requirements-specification.tex:201
+cited_in_planned: []
+last_synced: 2026-05-05
 ---
-
 # Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks
+
+%% Begin annotations %%
+## Summary
 
 > [!Cite]
 > [1]
@@ -45,7 +52,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-04T22:59:13.226+01:00 %%
+%% Import Date: 2026-05-05T18:39:59.374+01:00 %%
+%% End annotations %%

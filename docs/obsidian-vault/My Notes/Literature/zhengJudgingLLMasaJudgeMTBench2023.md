@@ -3,9 +3,12 @@ category: literaturenote
 citekey: zhengJudgingLLMasaJudgeMTBench2023
 year: 2023
 in_zotero: true
-status: active
-last_imported: 2026-05-04
+status: stale
+last_imported: 2026-05-05
 tags: [Artificial Intelligence (cs.AI), Computation and Language (cs.CL), FOS: Computer and information sciences]
+cited_in_tex: []
+cited_in_planned: []
+last_synced: 2026-05-05
 ---
 
 # Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena
@@ -56,7 +59,13 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-04T22:59:14.109+01:00 %%
+%% Import Date: 2026-05-05T18:40:00.369+01:00 %%

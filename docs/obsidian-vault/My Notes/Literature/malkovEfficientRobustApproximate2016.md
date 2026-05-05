@@ -4,11 +4,19 @@ citekey: malkovEfficientRobustApproximate2016
 year: 2016
 in_zotero: true
 status: active
-last_imported: 2026-05-04
+last_imported: 2026-05-05
 tags: [Computer Vision and Pattern Recognition (cs.CV), Data Structures and Algorithms (cs.DS), FOS: Computer and information sciences, Information Retrieval (cs.IR), Social and Information Networks (cs.SI)]
+cited_in_tex:
+  - Report/main-sections/requirements-specification.tex:204
+  - Report/main-sections/requirements-specification.tex:205
+  - Report/main-sections/requirements-specification.tex:206
+cited_in_planned: []
+last_synced: 2026-05-05
 ---
-
 # Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs
+
+%% Begin annotations %%
+## Summary
 
 > [!Cite]
 > [1]
@@ -45,7 +53,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-04T22:59:12.648+01:00 %%
+%% Import Date: 2026-05-05T18:39:58.825+01:00 %%
+%% End annotations %%

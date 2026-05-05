@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "My Notes/Thesis/Writing Roadmap.md",
+                "file": "My Notes/Literature/coverage.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Writing Roadmap"
+              "title": "coverage"
             }
           }
         ]
@@ -94,6 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "My Notes/Literature/coverage.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for coverage"
             }
           },
           {
@@ -184,16 +185,26 @@
   },
   "active": "21618e99d70cb1ec",
   "lastOpenFiles": [
+    "My Notes/Literature/ahn_2019_the.md",
+    "My Notes/Literature/a2020_atrisk.md",
+    "My Notes/Literature/arthurKmeansAdvantagesCareful.md",
+    "My Notes/Literature/arnoldCourseSignalsPurdue2012a.md",
+    "My Notes/Literature/khajah_supercharging.md",
+    "My Notes/Literature/kiatxin_development.md",
+    "My Notes/Literature/klerkx_2017_learning.md",
+    "My Notes/Literature/liuGEvalNLGEvaluation2023.md",
+    "My Notes/Literature/MacQueen1967SomeMF.md",
+    "My Notes/Thesis/Writing Roadmap.md",
+    "My Notes/Thesis/Weekly Plan.md",
+    "My Notes/Literature/_import_checklist.md",
+    "My Notes/Literature/coverage.md",
     "My Notes/Literature/chiangCanLargeLanguage2023.md",
     "My Notes/Literature/bakerDevelopingGeneralizableDetector2008.md",
-    "My Notes/Thesis/Writing Roadmap.md",
     "My Notes/Literature/wangGoalDrivenExplainableClustering2023.md",
     "My Notes/Literature/manningIntroductionInformationRetrieval2006.md",
     "My Notes/Thesis/Writing Roadmap.md.tmp.21128.1777931661151",
     "My Notes/Thesis/Writing Roadmap.md.tmp.12584.1777855059118",
-    "My Notes/Literature/coverage.md",
     "My Notes/Literature/hanleyMeaningUseArea1982.md",
-    "My Notes/Literature/_import_checklist.md",
     "My Notes/Literature/index.md",
     "My Notes/Literature/_import_checklist.md.tmp.12060.1777776598917",
     "My Notes/Literature/zhengJudgingLLMasaJudgeMTBench2023.md",
@@ -203,16 +214,6 @@
     "My Notes/Literature/saltonVectorSpaceModel1975.md",
     "My Notes/Literature/saisanaUncertaintySensitivityAnalysis2005.md",
     "My Notes/Literature/rousseeuwSilhouettesGraphicalAid1987.md",
-    "My Notes/Literature/romeroEducationalDataMining2020.md",
-    "My Notes/Literature/resnickGroupLensOpenArchitecture1994.md",
-    "My Notes/Literature/reimersSentenceBERTSentenceEmbeddings2019.md",
-    "My Notes/Literature/rasch1960probabilistic.md",
-    "My Notes/Literature/piechDeepKnowledgeTracing2015.md",
-    "My Notes/Literature/oecdHandbookConstructingComposite2008.md",
-    "My Notes/Literature/manningIntroductionInformationRetrieval2008.md",
-    "My Notes/Literature/malkovEfficientRobustApproximate2016.md",
-    "My Notes/Literature/MacQueen1967SomeMF.md",
-    "My Notes/Literature/lord1968statistical.md",
     "My Notes/Literature/_import_checklist.md.tmp.12060.1777775522633",
     "My Notes/Literature/_import_checklist.md.tmp.12060.1777775473325",
     "My Notes/Literature/_import_checklist.md.tmp.20340.1777774964383",

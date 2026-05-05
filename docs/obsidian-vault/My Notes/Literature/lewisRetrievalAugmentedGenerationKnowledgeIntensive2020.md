@@ -4,11 +4,20 @@ citekey: lewisRetrievalAugmentedGenerationKnowledgeIntensive2020
 year: 2020
 in_zotero: true
 status: active
-last_imported: 2026-05-04
+last_imported: 2026-05-05
 tags: [Computation and Language (cs.CL), FOS: Computer and information sciences, Machine Learning (cs.LG)]
+cited_in_tex:
+  - Report/main-sections/requirements-specification.tex:188
+  - Report/main-sections/requirements-specification.tex:189
+  - Report/main-sections/requirements-specification.tex:190
+  - Report/main-sections/requirements-specification.tex:195
+cited_in_planned: []
+last_synced: 2026-05-05
 ---
-
 # Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks
+
+%% Begin annotations %%
+## Summary
 
 > [!Cite]
 > [1]
@@ -55,7 +64,14 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-04T22:59:12.266+01:00 %%
+%% Import Date: 2026-05-05T18:39:58.562+01:00 %%
+%% End annotations %%

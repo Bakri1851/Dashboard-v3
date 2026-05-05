@@ -3,8 +3,11 @@ category: literaturenote
 citekey: liuGEvalNLGEvaluation2023
 year: 2023
 in_zotero: true
-status: active
-last_imported: 2026-05-04
+status: stale
+last_imported: 2026-05-05
+cited_in_tex: []
+cited_in_planned: []
+last_synced: 2026-05-05
 ---
 
 # G-Eval: NLG Evaluation using Gpt-4 with Better Human Alignment
@@ -50,7 +53,13 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 
+## Summary
+
+_Hand-written summary lives here. Survives re-imports. PDF annotations append below._
+
+
+
 %% end annotations %%
 
 
-%% Import Date: 2026-05-04T22:59:12.502+01:00 %%
+%% Import Date: 2026-05-05T18:39:58.691+01:00 %%
