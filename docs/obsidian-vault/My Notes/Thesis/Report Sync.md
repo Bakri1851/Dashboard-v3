@@ -53,31 +53,70 @@ See [[Ch2 – Background and Requirements]] for full chapter analysis.
 
 ---
 
-## Ch3 Design and Modelling — Status: Partial
+## Ch3 Design and Modelling — Status: Partial (in active rewrite — 2026-05-18)
 
 **What the report says:** 3-layer architecture (data generation, ingestion/processing, decision/action). Data endpoint description. Student struggle model with 5 components (n, t, e, f, A_raw) as a convex combination with temporal smoothing. Question difficulty with 4 components (c, t, a, f). CF alternative with cosine similarity and k-NN. Figma mockups of dashboard. Visual encoding tables (threshold colours).
 
 **What the project does:** Architecture matches conceptually. Struggle model has 7 components (adds r_hat retry rate, d_hat trajectory, rep_hat repetition). Difficulty has 5 components (adds p_tilde first-attempt failure). CF is fully implemented as a toggleable secondary feature, not just an alternative. Dashboard is real, not a mockup.
 
-**Mismatches:**
-- Struggle formula: thesis has 5 components, code has 7 — missing `r_hat`, `d_hat`, `rep_hat`
-- Difficulty formula: thesis has 4 components, code has 5 — missing `p_tilde`
-- Thesis uses temporal smoothing (exponential) — code has a stub for this (`SMOOTHING_ENABLED = False`) but does not actively use it
-- CF is described as "alternative" that "is still going to be implemented" — it IS implemented and enabled by default
-- 3 Figma mockups (Figs 8-10) are explicitly labeled "conceptual design rather than a fully implemented system" — the actual dashboard exists and looks different
-- Architecture mentions event-driven pipeline "currently under exploration" — still interval-based in V2
-- IRT, BKT, improved struggle model, mistake clustering — none mentioned in design chapter
-- No mention of saved sessions, data analysis views, sound effects, academic calendar, settings page
+**Active rewrite — Step 3 of [[Full Roadmap]]:**
 
-**Sections needing rewrite:**
-- Update struggle formula to 7 components with actual weights (0.10, 0.10, 0.20, 0.10, 0.38, 0.05, 0.07)
-- Update difficulty formula to 5 components with actual weights (0.28, 0.12, 0.20, 0.20, 0.20)
-- Add Bayesian shrinkage to struggle model description
-- Update CF section — it is implemented, describe how it works as secondary feature
-- Replace Figma mockups with actual dashboard screenshots
-- Add sections for IRT, BKT, improved struggle model
-- Add mistake clustering design
-- Remove or update temporal smoothing claims (stub exists but not active)
+| Sub-task | Status | Anchor |
+| --- | --- | --- |
+| §3.1 / §3.3 intro re-tense; drop "event-driven under exploration" | **Done 2026-05-18** | `design-and-architecture.tex:2, 6, 47` |
+| Tbl 6 / Tbl 7 visual-encoding label + traffic-light recolour | **Done (uncommitted)** | `design-and-architecture.tex:369-393` |
+| `\usepackage[table]{xcolor}` + `tlGreen/tlAmber/tlOrange/tlRed` palette in `main.tex` | **Done (uncommitted)** | `main.tex:17, 23-27` |
+| §3.3.1 Identified Variables — add `r_{s,σ}`, `d_{s,σ}`, `rep_{s,σ}`; rename `e → i` (mean incorrectness) | **Done 2026-05-18** | `design-and-architecture.tex:58-67` |
+| §3.3.1 Normalisation — derive `\tilde{r}`, `\tilde{rep}`; uniform min-max across all 7 signals | **Done 2026-05-18** | `design-and-architecture.tex:80-111` |
+| §3.3.1 Recent submissions paragraph — convex weights → exponential time decay (half-life 1800 s) | **Done 2026-05-18** | `design-and-architecture.tex:114-132` |
+| §3.3.1 Struggle Score equation — 5-term → 7-term with default weights + weights table | **Done 2026-05-18** | `design-and-architecture.tex:134-194` |
+| §3.3.1 New "Bayesian shrinkage" paragraph — applied to `S^raw`, cite Efron 1977 + Morris 1983 | **Done 2026-05-18** (bib entry for Morris 1983 missing — see housekeeping below) | `design-and-architecture.tex:196-207` |
+| §3.3.2 Temporal Smoothing — fill empty stub; distinguish per-submission decay from EWMA across refresh | **Done 2026-05-18** | `design-and-architecture.tex:223-269` |
+| §3.3.3 Question Difficulty — 4-signal → 5-signal (add `p̃` first-attempt failure) | **Done 2026-05-19** | `design-and-architecture.tex:266-367` |
+| §3.3.4 CF — re-tense "is still going to be implemented" → "is implemented, toggleable" | **Done 2026-05-19** | `design-and-architecture.tex:476, 478` |
+| §3.3.5 Mistake Clustering — fill empty stub (TF-IDF + k-means + silhouette + LLM labels) | **Done 2026-05-19** | `design-and-architecture.tex:480-503` |
+| §3.4.1 Measurement Confidence — fill empty stub (2 factors + base, not 3; cite Lord & Novick 1968) | **Done 2026-05-19** | `design-and-architecture.tex:506-521` |
+| §3.4.2 IRT — fill empty stub (Rasch 1PL via L-BFGS-B) | **Done 2026-05-19** | `design-and-architecture.tex:523-558` |
+| §3.4.3 BKT — fill empty stub (typo "Training" was also fixed) | **Done 2026-05-19** | `design-and-architecture.tex:560-601` |
+| §3.4.4 Improved Struggle — fill empty stub (3-bucket + graceful-degradation matrix) | **Done 2026-05-19** | `design-and-architecture.tex:603-679` |
+| §3.5 RAG Feedback Design — fill empty stub (hybrid pandas + ChromaDB + HNSW) | Pending | `design-and-architecture.tex:320` |
+| §3.6.2 Figma figures — annotate `[TODO: replace with screenshot]`; drop "conceptual design" | Pending | `design-and-architecture.tex:334-360` |
+| §3.6.3 Lab Assistant View — fill empty stub (Join / Waiting / Assigned states) | Pending | `design-and-architecture.tex:362` |
+| §3.1 architecture diagram — redraw for V2 (`models/`, RAG, lab assistant, `lab_session.json`) | Queued for Step 8a | `figures/design-and-architecture/architecture-diagram.png` |
+
+**Standing mismatches still present** (will close as sub-tasks above complete):
+
+- IRT, BKT, improved struggle model, mistake clustering — none in design chapter yet
+- No mention of saved sessions, data analysis views, sound effects, academic calendar, settings page (some may be deferred to Ch4 implementation rather than Ch3 design)
+- Figma mockups still rendered as designs rather than completed system
+
+**Resolved by the 2026-05-18 work** (no longer mismatches):
+
+- Struggle variable list is 7-signal — matches `STRUGGLE_WEIGHT_*` in `config.py:19-26`
+- Normalisation paragraph correctly describes the uniform min-max step that `analytics.py:322-330` applies (raw → `_hat`/`_norm` columns feeding the weighted sum)
+- `e` (binary count) replaced by `i` (cumulative mean of LLM incorrectness scores) — symbol now matches `analytics.py:281` (`i_hat = group["incorrectness"].mean()`)
+- `A^raw` reframed as exponential time-decay (half-life 1800 s) — replaces the older position-based convex weights `[0.35, 0.25, 0.20, 0.12, 0.08]` superseded in `config.py:30-32`
+- 7-term Struggle Score equation displayed with default weights ($\alpha=0.10,\beta=0.10,\gamma=0.20,\delta=0.10,\eta=0.38,\zeta=0.05,\theta=0.07$); accompanying weights table inserted (`tab: struggle weights`)
+- Bayesian shrinkage paragraph added: $S^{\mathrm{shrunk}} = (n/(n+K))S^{\mathrm{raw}} + (K/(n+K))\bar{S}^{\mathrm{raw}}_\sigma$ with $K=5$ — matches `analytics.py:346-350` exactly; applied at aggregate level not per-signal; cited `efronSteinsParadoxStatistics1977`
+- §3.3.2 Temporal Smoothing stub filled — opening paragraph names the two noise sources; per-submission decay paragraph cross-references `eq:time-decay-weight` and `eq:a-raw`; EWMA paragraph cross-references `eq: temporal struggle` (the single canonical EWMA equation, now in §3.3.1 with `S^{\mathrm{shrunk}}` on the RHS — duplicate equation eliminated). Comparison table `tab: temporal smoothing` contrasts the two mechanisms.
+- §3.3.3 Question Difficulty extended from 4-signal to 5-signal — adds first-attempt failure rate `$p_q$` (count) and `$	ilde{p}_q = p_q/n_q$` (rate) as the new fifth signal with weight $\epsilon = 0.20$. New weights table `tab: difficulty weights` mirrors `tab: struggle weights`. Equation labelled `eq:difficulty-raw` (replaces the old duplicate `eq:placeholder_label`). EWMA equation gets `eq: temporal difficulty` label. Threshold definition added: "a submission is treated as correct if $i_{s,\sigma,k} < 	au$ with $	au = 0.5$" — pins down what `$c_q$` and `$p_q$` mean. Pre-existing sentence-fragment after `ef{sec: data endpoint}` fixed in the Identified Variables intro.
+- §3.3.4 Collaborative Filtering closing paragraph re-tensed — "is still going to be implemented" replaced with "is implemented alongside the parameter-based model"; UI exposure described in present tense ("exposed through the Settings panel", "is enabled by default with $k=3$ nearest neighbours and a configurable elevation threshold, and can be turned off"); UK spelling ("neighbours"); hyphenated "parameter-based"; redundant final sentence about small-class unreliability dropped (the limitation is already covered in the preceding paragraph). Pre-existing missing-verb error fixed in the same paragraph ("collaborative filtering approach results are not reliable" → "approach produces results that are not reliable").
+- §3.3.5 Mistake Clustering empty stub filled — pipeline (TF-IDF vectorisation → $k$-means clustering → silhouette-based auto-$k$ selection → LLM cluster labelling) with cross-reference to Ch2 §2.3.2 for the formal math; auto-$k$ selection equation `eq:cluster-auto-k` displayed; parameter values stated ($N_{\min} = 3$, $K_{\max} = 5$, "up to three representative answers"); interpretation paragraph positions clustering as complementary to the parametric difficulty signal. Six citations resolved: Salton 1975, Manning 2006, MacQueen 1967, Arthur & Vassilvitskii (k-means++), Rousseeuw 1987, Wang 2023.
+- **Chapter-wide constants policy decision (Option 1)** — all `	exttt{CONSTANT\_NAME}` references stripped from Ch3 prose and tables. The struggle weights table and difficulty weights table reduced from 4 columns to 3 columns (Symbol / Meaning / Weight); the rightmost "config.py key" column removed. §3.3.5 already authored without constant names. Numeric parameter values ($N_{\min} = 3$, $K_{\max} = 5$, $K = 5$ for shrinkage, $	au = 0.5$, half-life $H = 1800$ s, $\lambda = 0.3$) stay — these are design choices, not implementation names. **Ch4 implementation chapter (Step 5 of [[Full Roadmap]]) is now where these constants should be reintroduced** alongside the configuration-module description.
+- §3.4.1 Measurement Confidence empty stub filled. Important correction from the original brief: the live formula has **two factors + base multiplier**, not three. Code reality (`models/measurement.py:46-50`): `confidence = MEASUREMENT_CONFIDENCE_BASE * length_factor * (0.5 + 0.5 * extremity_factor)`. There is **no "model agreement" factor** despite the Rewrite Queue having claimed so — that was a misreading of the code. Section now states $\kappa = \kappa_0 \cdot \mathrm{length} \cdot (	frac{1}{2} + 	frac{1}{2}\,\mathrm{extremity})$ with the empty/missing feedback edge case (forced to 0) called out explicitly. Cite `lord1968statistical`. Half-and-half scaling justified as smooth-degradation design choice. Surfacing as green/amber/grey indicator in Question Detail view described as a colon-delimited list rather than the original "which" pronoun.
+- §3.4.2 Item Response Theory empty stub filled. Rasch 1PL model $P(X_{s,q}=1) = \sigma(	heta_s - eta_q)$ presented with the Bernoulli log-likelihood maximised by L-BFGS-B (`models/irt.py:67-163`); ability-centring used to break additive identifiability degeneracy. Logit-scale $\hateta_q$ mapped to $[0,1]$ via sigmoid as $D^{\mathrm{IRT}}(q) = \sigma(\hateta_q)$ for UI comparability with the baseline $D_t(q)$. Graceful degradation when response matrix too sparse — falls back to baseline difficulty. Cited `rasch1960probabilistic`, `lord1968statistical`, `fisherMathematicalFoundationsTheoretical1922`; Byrd 1995 (L-BFGS-B) is still missing from `references.bib`. Forward reference `sec: improved struggle` will resolve when J (§3.4.4) lands.
+- §3.4.3 Bayesian Knowledge Tracing empty stub filled. 2-state HMM with 4 parameters per skill: $P(L_0), P(T), P(G), P(S)$, identifiability constraint $P(G) + P(S) < 1$ enforced via $[0, 0.5]$ bounds on guess and slip. Update equation eq:bkt-update combines Bayesian posterior with learning transition; predictive equation eq:bkt-predict gives expected next-attempt correctness. Global parameter fit by L-BFGS-B against forward-algorithm log-likelihood (`models/bkt.py:195-337`); fitting refused when fewer than `BKT_FIT_MIN_OBSERVATIONS` (50) attempts or when all attempts are graded the same way. Per-(student, question) mastery and aggregate summary feed the improved struggle model. Cited `corbettKnowledgeTracingModeling1995`, `yudelsonIndividualizedBayesianKnowledge2013` (the latter for the per-student extension not implemented here). Bonus: §3.4.3 subsection heading typo Training fixed.
+- §3.4.4 Improved Struggle Model empty stub filled. Three-bucket convex combination (behavioural composite, mastery gap, difficulty-adjusted score) with default weights 0.45/0.30/0.25; equation eq:improved-struggle. Behavioural composite is the equal-weighted mean of four cohort-normalised baseline sub-signals. Mastery gap is one-sided: max(mean BKT mastery minus recent correctness, 0). Difficulty-adjusted score weights recent incorrectness inversely by IRT difficulty; coverage-weighted shrinkage toward cohort mean for sparse users. Graceful-degradation table (tab: improved struggle degradation) covers four scenarios with weight redistribution preserving the sum-to-one invariant. Mean imputation for missing BKT mastery cites Little & Rubin. Final Bayesian shrinkage toward cohort mean uses the same n/(n+K) form with K=5 as baseline. Closes the cross-references forward from IRT (§3.4.2) and BKT (§3.4.3).
+- §3.3.3 follow-up: difficulty model `$	ilde{p}_q$` denominator corrected from `$n_q$` (total attempts) to `$|\mathcal{S}_q|$` (unique students) to match `analytics.py:573` (`p_tilde = failed_first / unique_students`). Equation at line 294 and table description at line 353 both updated; the original brief was wrong about the denominator.
+- §3.1 intro and §3.3 intro re-tensed to present tense; "event-driven pipeline under exploration" removed
+- Label hygiene: `eq:struggle-raw` and `eq:struggle-shrunk` introduced (replacing the old duplicate `eq:placeholder_label`); pre-existing `eq: temporal sturggle` typo corrected to `eq: temporal struggle`; `S^{raw}` → `S^{\mathrm{raw}}` consistency restored
+- **LaTeX build resolved**: stale `Report/main.out` was causing a hyperref `\@@BOOKMARK` runaway-argument error on the "Measurement Confidence" subsubsection bookmark; deleting `.out` (and auxiliary regenerated from scratch on next compile) cleared it. PDF now builds at 52 pages without compile errors.
+
+**Housekeeping carried forward**:
+
+- `\cite{morrisParametricEmpiricalBayes1983}` at `design-and-architecture.tex:206` references a bib key that does not exist in `references.bib`. Will render `[?]` in PDF after `bibtex` pass. Either add the bib entry (Morris, C. N. 1983, JASA 78(381), 47-55) or swap to `[BIB MISSING: Morris 1983]` placeholder for Step 12 polish.
+
+**Code-state correction** (was outdated in this note before 2026-05-18): `SMOOTHING_ENABLED = True` in `config.py:74` (α = 0.3). The previous note claimed it was `False` and unused — that was stale. The stub IS active across refresh cycles. Thesis §3.3.2 should describe it as implemented; per-submission decay inside `A^{\mathrm{raw}}` is a separate mechanism (half-life 1800 s from `DECAY_HALFLIFE_SECONDS`).
 
 **Evidence needed:** Screenshots of actual dashboard. Side-by-side: thesis formula vs implemented formula.
 

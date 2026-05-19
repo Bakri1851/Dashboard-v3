@@ -46,11 +46,12 @@ The biggest remaining coding task. Produces the model comparison view needed for
 
 Surgical edits — the chapter structure is solid, specific sections need updating. Where figures reference Appendix B screenshots, insert `[TODO: insert figure]` placeholders; these will be replaced at step 8.
 
-- [ ] Update struggle formula to 7 components + Bayesian shrinkage (was 5 in thesis)
-- [ ] Update difficulty formula to 5 components (was 4 in thesis)
+- [x] Update struggle formula to 7 components + Bayesian shrinkage (was 5 in thesis) — *Done 2026-05-18; §3.3.1 closed.*
+- [x] Update difficulty formula to 5 components (was 4 in thesis) — *Done 2026-05-19; §3.3.3 closed.*
 - [ ] Mark Figs 8–10 (Figma mockups) for replacement — add `[TODO: replace with screenshot]` annotations
-- [ ] Update CF section — it is implemented, not "to be implemented"
-- [ ] Add sections for IRT, BKT, improved struggle, mistake clustering
+- [x] Update CF section — it is implemented, not "to be implemented" — *Done 2026-05-19; §3.3.4 closed.*
+- [x] Add sections for IRT, BKT, improved struggle, mistake clustering — *All four done 2026-05-19. §3.3.5 (clustering), §3.4.2 (IRT), §3.4.3 (BKT), §3.4.4 (improved struggle) all closed.*
+- [x] Fill §3.3.2 Temporal Smoothing stub (distinguish per-submission decay from EWMA across refresh) — *Done 2026-05-18.*
 
 *Unblocks: Ch1&2 language fixes are easier once Ch3 narrative is settled.*
 
@@ -122,6 +123,116 @@ Take screenshots of every dashboard and mobile view now that all chapters are wr
 - [ ] Replace all `[TODO: insert figure]` placeholders in Ch3 and Ch4 with actual figures
 
 *Unblocks: Appendix C (screenshots confirm system is in final state for smoke testing).*
+
+---
+
+### 8a. Figures backlog `Evidence · Medium`
+
+Per-chapter figure work consolidated from [[Figures and Tables]] (which holds the full inventory and rationale). Tackle each block in the order the parent writing step needs it — Ch3 figures during Step 3, Ch4 screenshots during Step 5, etc. The Step 8 screenshot pass produces the raw assets; this section is the per-chapter insertion checklist.
+
+**Verification basis:** every non-optional / non-conditional figure below is justified by either (a) an existing `\includegraphics` placeholder in the `.tex` source, or (b) an existing subsection header whose subject is intrinsically visual (a UI view, a model-output panel, a workflow state). Nothing speculative.
+
+**Ch1 — Introduction (Step 4)**
+
+- [ ] Tbl 1 (Risks) — update mitigations to actual V2 decisions (Bayesian shrinkage, modular `models/`, graceful degradation, FR6 scoped out)
+
+**Ch2 — Requirements Specification (Step 4)**
+
+- [ ] Tbl 3 (MoSCoW) — review FR6 status (currently "Should Have", unimplemented)
+- Figures 1–5 (literature dashboards): no action, keep as-is
+
+**Ch3 — Design (Step 3)**
+
+- [ ] Fig 6 (architecture diagram) — update to show `models/` package, RAG, lab assistant
+- [ ] Fig 8 — replace Figma mockup 1 with V2 In Class view screenshot (`design-and-architecture.tex:339`)
+- [ ] Fig 9 — replace Figma mockup 2 with V2 lab-assistant allocation screenshot (`design-and-architecture.tex:347`)
+- [ ] Fig 10 — replace Figma mockup 3 with V2 assistant leaderboard screenshot (`design-and-architecture.tex:356`)
+- [ ] NEW Tbl — Struggle formula 7-signal table (signal × symbol × weight × `config.py` key)
+- [ ] NEW Tbl — Difficulty formula 5-signal table (signal × symbol × weight × `config.py` key)
+- [ ] NEW Tbl — Improved-struggle weight redistribution matrix (4 collapse cases, rows sum to 1.00)
+- [ ] NEW Tbl — BKT parameter defaults vs fitted values
+- [ ] Tbl 4 (Tech stack) — add OpenAI, filelock, scikit-learn, scipy, streamlit-autorefresh, chromadb, sentence-transformers
+- [ ] Tbl 5 (CF comparison) — change wording to "implemented" not "proposed"
+- [ ] Tbl 6 (Struggle thresholds) — update labels (None/Low/Medium/High → On Track / Minor Issues / Struggling / Needs Help) and values [0.00–0.20 / 0.20–0.35 / 0.35–0.50 / 0.50–1.00]
+- [ ] (optional) Graceful-degradation trace screenshot — improved-struggle with mastery data sparse; place in §3.4.4 or Ch5 §5.5
+
+**Ch4 — Implementation (Step 5)** — each maps 1:1 to an existing subsection header in `implementation.tex`
+
+- [ ] Screenshot: In Class view → §4.4.1
+- [ ] Screenshot: Student Detail view → §4.4.2
+- [ ] Screenshot: Question Detail view (with mistake clusters labelled) → §4.4.3
+- [ ] Screenshot: Data Analysis view → §4.4.4
+- [ ] Screenshot: Model Comparison view (student + question tabs) → §4.4.5
+- [ ] Screenshot: Settings view (model toggles + CF config + BKT sliders) → §4.4.6
+- [ ] Screenshot: Previous Sessions view → §4.4.7
+- [ ] Screenshot: Lab assistant — Session Join → §4.5.1
+- [ ] Screenshot: Lab assistant — Waiting / Unassigned → §4.5.2
+- [ ] Screenshot: Lab assistant — Assigned (with student card + RAG suggestions) → §4.5.3
+- [ ] (optional) Tooltip-in-action screenshot — one chart with on-hover explanation visible
+
+**Ch5 — Results & Evaluation (Step 6)**
+
+- [ ] Model Comparison panel screenshot — Rank Concordance (Spearman ρ) + Top-10 Overlap + Agreement split + scatter plot. Capture from `/api/models/compare` → ComparisonView → §5.4.2
+- [ ] NEW Tbl — Requirements traceability (FR1–FR7 / NFR1–NFR6 mapped to implementation status + evidence location) → §5.2 / §5.3
+- [ ] NEW Tbl — Model comparison results (baseline vs IRT, baseline vs improved struggle: ρ, top-k overlap, agreement %) → §5.4
+- [ ] (optional) Performance / refresh-latency chart → §5.3
+- [ ] (optional) Test results summary — pass/fail by FR + NFR; could be a table instead of a chart
+
+**Ch6 — Conclusion (Step 7)**
+
+- No new figures expected. If Ch6 §6.3 names the React/FastAPI alternative as future work, the V3 architecture diagram from the conditional block below could be reused.
+
+**Appendix B — UI Screenshots (Step 8)**
+
+- This appendix is the host for the screenshots above. Decide policy: each figure appears in Appendix B as the full gallery AND once in-chapter, OR each appears only once. Apply consistently across all 10+ screenshots.
+
+**Removed if Progress Report stays excluded (already commented out in `main.tex:62`)**
+
+- Fig 11 (Gantt chart) — remove
+- Tbl 8 (Gantt summary) — remove
+
+**Cross-cutting**
+
+- [ ] After all chapter screenshots are inserted, run a renumbering pass — figure count goes from 11 → ~20, so `\ref{fig:...}` calls and the List of Figures need a clean compile check.
+- [ ] Update [[Figures and Tables]] after each batch so it stays the source of truth.
+
+**Table colouring backlog (extra polish, not blocking)**
+
+Add `\usepackage[table]{xcolor}` to `main.tex` once; then colour the following tables traffic-light style. Palette: `tlGreen #10A15D · tlAmber #FFCC00 · tlOrange #FF6600 · tlRed #FF2D55` (matches dashboard UI hex codes from [config.py:39-42](code/learning_dashboard/config.py#L39-L42) and [config.py:54-57](code/learning_dashboard/config.py#L54-L57)). For non-traffic-light tables, define ad-hoc named colours alongside.
+
+- [ ] Tbl 6 (Ch3 §3.6.4 Struggle visual encoding) — colour Colour row with `tlGreen/tlAmber/tlOrange/tlRed`
+- [ ] Tbl 7 (Ch3 §3.6.4 Difficulty visual encoding) — same palette mapped Easy → Very Hard
+- [ ] Tbl 1 (Ch1 §1.4 Risks) — severity column: `tlRed` high · `tlAmber` medium · `tlGreen` accepted
+- [ ] Tbl 3 (Ch2 §2.3.3 MoSCoW) — priority column: `tlGreen` Must · light blue (`#BBDEFB`) Should · light grey (`#E0E0E0`) Could · light red (`#FFCDD2`) Won't
+- [ ] NEW Tbl Requirements Traceability (Ch5 §5.2) — status column: `tlGreen` implemented + tested · `tlAmber` implemented partial evidence · `tlRed` not implemented (FR6)
+- [ ] (optional) NEW Tbl Model comparison results (Ch5 §5.4) — agreement % column: `tlGreen` ≥0.8 · `tlAmber` 0.5–0.8 · `tlRed` <0.5
+
+Skip: Tbl 2 (Grade Scoring — literature reproduction), Tbl 4 (Tech Stack — no ordinal), Tbl 5 (CF Comparison — qualitative), Tbl 9 (Themes — reference only), and the new formula tables (Struggle 7-signal / Difficulty 5-signal / Weight redistribution / BKT params) where colour would obscure the numbers.
+
+**Deferred extras — visual polish on tables**
+
+Pulled out as a separate pass so it doesn't block chapter writing. Needs `\usepackage[table]{xcolor}` in `main.tex` and a 4-colour traffic-light palette (`tlGreen #10A15D`, `tlAmber #FFCC00`, `tlOrange #FF6600`, `tlRed #FF2D55`) matching `config.py` UI hexes.
+
+- [ ] Ch3 §3.6.4 Visual Encoding tables (struggle + difficulty) — colour the threshold cells / column headers using the traffic-light palette. Most natural fit since the tables are literally about colour encoding.
+- [ ] Ch1 Tbl 1 (Risks) — colour the severity column (red / amber / green).
+- [ ] Ch2 Tbl 3 (MoSCoW) — colour the priority column (Must / Should / Could / Won't); needs two extra named colours outside the traffic-light set (`#BBDEFB` light blue for Should, `#E0E0E0` grey for Could).
+- [ ] Ch5 NEW Requirements Traceability table — colour the status column once the table is drafted.
+- [ ] Ch5 NEW Model comparison results table — conditional formatting on the agreement % column if the numbers split usefully.
+
+*Skip on purpose: Tech Stack, CF comparison, Tech-themes appendix table, the new formula tables — colour would be noise on neutral / numerical content.*
+
+**Conditional — only if Ch4 or Ch6 explicitly names the React/FastAPI `code2/` frontend**
+
+- [ ] V3 architecture diagram (3 frontends + 1 shared core + 1 shared state file)
+- [ ] V3 theme gallery (7 themes: paper / newsprint / solar / scifi / blueprint / matrix / cyberpunk)
+- [ ] V3 In Class / Student detail / Question detail / Lab coordination screenshots
+- [ ] SessionProgression timeline screenshot (`code2/` 9th view, no V2 equivalent)
+- [ ] Swagger UI screenshot — `/docs` endpoint listing
+- [ ] Theme × accent matrix (7 themes × 5 accents in one grid)
+- [ ] NEW Tbl — API endpoint map (≥22 routes × HTTP method × `learning_dashboard.*` delegate × cache TTL)
+- [ ] NEW Tbl — Theme × accent combinations (35 valid pairs with accessibility class)
+
+*Unblocks: Step 9 (Appendix C) can begin once the screenshot batch is captured, since the smoke test runs on the same final UI state.*
 
 ---
 
@@ -207,6 +318,19 @@ Implemented as an isolated `rag.py` module:
 
 Ch4 and Ch5 sections needed. See [[RAG Pipeline - Two-Layer Retrieval]] and [[Suggested Focus Areas Panel]].
 
+### Labelled data collection + supervised weight optimisation `Research · Ambitious`
+
+The seven struggle weights (`α=0.10, β=0.10, γ=0.20, δ=0.10, η=0.38, ζ=0.05, θ=0.07`), the five difficulty weights (`0.28, 0.12, 0.20, 0.20, 0.20`), and the three improved-struggle bucket weights (`0.45, 0.30, 0.25`) are set by trial and error. With labelled ground truth available — instructor annotations of "this student is struggling / not struggling" captured during real sessions, or post-hoc retrospective labelling of recorded sessions — the same weights could be fitted by supervised ML (logistic regression, gradient boosting, or Bayesian hyperparameter search such as Optuna), giving the model a proper empirical foundation.
+
+Pre-requisites that put this out of scope for the current submission:
+
+- Ethics-approval extension to collect or share labelled session data
+- Recruitment of instructor labellers (or a defensible auto-labelling proxy)
+- Train/test split infrastructure (currently no automated test suite exists)
+- A held-out evaluation protocol (Cohen's κ for inter-rater agreement, ROC-AUC for the fitted classifier)
+
+Identified as the most significant methodological limitation in [[Future Work Inventory]] (#3, Ch6 Candidate #1) and called out by Dr Batmaz in Meeting 3 as the natural follow-on once labelled data exists. Discussed honestly in Ch5 §5.5 Limitations and proposed for Ch6 §6.3 Future Work.
+
 ### Phase 10 — In-app Help system (instructor dashboard)
 
 Help section under Settings covering Quick Tour, Help Centre, Model Guide, contextual tooltips, and reliability indicators. Not feasible to implement before deadline given the writing workload.
@@ -227,12 +351,13 @@ Lightweight mobile Help panel for lab assistants covering join guide, student ca
 | --- | --- | --- | --- | --- |
 | 1 | Phase 7 — Surface hidden data | Coding | Small | Done |
 | 2 | Phase 5 — Comparison UI | Coding | Large | **Done** |
-| 3 | Ch3 — Design updates | Writing | Medium | Not started |
+| 3 | Ch3 — Design updates | Writing | Medium | **In progress (2026-05-18)** |
 | 4 | Ch1 & Ch2 — Language cleanup | Writing | Small | Not started |
 | 5 | Ch4 — Implementation rewrite | Writing | Large | Not started |
 | 6 | Ch5 — Results & Evaluation | Writing | Large | Not started |
 | 7 | Ch6 — Conclusion | Writing | Medium | Not started |
 | 8 | Appendix B — Screenshots | Evidence | Small | Not started |
+| 8a | Figures backlog (per-chapter insertion) | Evidence | Medium | Not started |
 | 9 | Appendix C — Test Results | Evidence | Medium | Not started |
 | 10 | Appendices E & F — Formulae | Writing | Small–Medium | Not started |
 | 11 | Appendix A — Code Snippets | Writing | Small | Not started |
@@ -242,6 +367,7 @@ Lightweight mobile Help panel for lab assistants covering join guide, student ca
 | — | Phase 9 — RAG suggested feedback | Coding | Large | **Done** (2026-04-14) |
 | — | Phase 10 — In-app Help (instructor) | Coding | Large | Out of scope / Future work |
 | — | Phase 11 — In-app Help (assistant) | Coding | Medium | Out of scope / Future work |
+| — | Labelled data + supervised weight optimisation | Research | Ambitious | Out of scope / Future work |
 
 ---
 

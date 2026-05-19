@@ -14,10 +14,17 @@
 \usepackage[none]{hyphenat}
 \usepackage{geometry}
 \usepackage{comment}
+\usepackage[table]{xcolor}
+
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.6em}     % Space between paragraphs
 
 %\geometry{a4paper, includehead, left=0.75in, right=0.75in, top=0.3in, bottom=0.3in} % Page margins, change as you need
+% Traffic-light palette — matches dashboard UI hex codes from config.py
+\definecolor{tlGreen}{HTML}{10A15D}    % On Track / Easy
+\definecolor{tlAmber}{HTML}{FFCC00}    % Minor Issues / Medium
+\definecolor{tlOrange}{HTML}{FF6600}   % Struggling / Hard
+\definecolor{tlRed}{HTML}{FF2D55}      % Needs Help / Very Hard
 
 
 \pagestyle{fancy}

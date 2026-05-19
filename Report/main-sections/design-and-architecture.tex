@@ -1,9 +1,10 @@
 \section{Design and Modelling}
-This section describes the design and architecture of the lab dashboard, highlighting how various components will be implemented. Additionally, we will talk about the data endpoint, defining what data enters the system and in what form. We will then discuss the mathematical models we plan to leverage for the project. Finally, we will discuss how we will expose the analytics to educators to provide an intuitive solution.
-
+This section describes the design and architecture of the lab dashboard, highlighting how various components are implemented. It covers the data endpoint, defining what data enters the system and in what form, the mathematical models used to derive struggle and difficulty and the user interface design which exposes the analytics to educators. 
+ 
 \subsection{System Architecture}
 
-The proposed system adopts a layered architecture designed to support real-time learning analytics in computer lab environments. The architecture separates data generation, data ingestion and processing, as well as decision-making and action, into three distinct layers, ensuring each component can evolve independently. Although this focuses on an interval-based approach to the data, an event-driven pipeline is currently under exploration.
+The proposed system adopts a layered architecture designed to support real-time learning analytics in computer lab environments. 
+The architecture separates data generation, data ingestion and processing, as well as decision-making and action, into three distinct layers, ensuring each component can evolve independently. 
 
 \begin{figure}[H]
     \centering
@@ -44,8 +45,7 @@ It is essential to consider that we may receive incomplete or noisy data during 
 
 
 \subsection{Baseline Analytics Design}
-In this section, we will describe what we will measure and what available data will aid in measuring these.
-
+This section describes the baseline metrics, student struggle and question difficulty and the data from the endpoint that is used to derive them.
 \subsubsection{Student Struggle Model} \label{sec: student struggle}
 
 \paragraph{Modelling Objective}
@@ -58,10 +58,12 @@ The student struggle function will allow us to quantify the degree of difficulty
 \paragraph{Identified Variables}
 From the session-based interaction data described in Section \ref{sec: data endpoint}. We can derive the following quantities:
 \begin{itemize}
-    \item $n_{s,\sigma}$ - The total number of submissions made by a student s during session $\sigma$
+    \item $n_{s,\sigma}$ - The total number of submissions made by a student $s$ during session $\sigma$
     \item $t_{s,\sigma}$ - The total active time elapsed during session $\sigma$
-    \item $e_{s,\sigma}$ - The number of incorrect submissions with session $\sigma$
-    \item $f_{s,\sigma}$ - The number of AI feedback requests within the session $\sigma$
+    \item $i_{s,\sigma}$ - The average AI incorrectness measure for student $s$ during session $\sigma$, derived from AI-Based answer ratings
+    \item $r_{s,\sigma}$ - The number of retry submissions within session $\sigma$
+    \item $d_{s,\sigma}$ - The regression slope of incorrectness scores against the submission index, which captures whether a student is improving or deteriorating across the session
+    \item $\mathrm{rep}_{s,\sigma}$ - The number of exact-match repeated submissions within session $\sigma$
 \end{itemize}
 By leveraging metrics linked to student struggle, we can produce a student struggle score
 
@@ -76,68 +78,190 @@ where $c_{s,\sigma,k}$ is the correctness measure that measures the quality of a
 \end{equation}
 
 \paragraph{Normalisation}
-We will define maximum and minimum amounts as such:
+
+The retry rate, repetition rate and trajectory slope are derived from the counts identified earlier:
+
 \begin{equation*}
-    n_{min} = \min_{s \in S} n_{s,\sigma}, \quad n_{max} = \max_{s \in S} n_{s,\sigma}
-\end{equation*}
-We can apply the same definitions to other metrics where relevant.
-To ensure we can compare the metrics, it is necessary to normalise our quantities:
-\begin{equation*}
-    \begin{aligned}
-        \hat{n_{s,q}} &= \frac{n_{s,\sigma} - n_{min}}{n_{max}-n_{min}},\quad \hat{t_{s,q}} = \frac{t_{s,\sigma} - t_{min}}{t_{max}-t_{min}} \\
-        \hat{e_{s,q}} &= \frac{e_{s,\sigma}}{n_{s,\sigma}},  \quad \hat{f_{s,q}} = \frac{f_{s,\sigma}}{n_{s,\sigma}}
-    \end{aligned}
-\end{equation*}
-Hence,
-\begin{equation*}
-    \hat{n_{s,\sigma}},\hat{t_{s,\sigma}},\hat{e_{s,\sigma}},\hat{f_{s,\sigma}} \in [0,1]
+    \tilde{r}_{s,\sigma} = \frac{r_{s,\sigma}}{n_{s,\sigma}} \in [0,1], \qquad
+    \tilde{\mathrm{rep}}_{s,\sigma} = \frac{\mathrm{rep}_{s,\sigma}}{n_{s,\sigma}} \in [0,1].
 \end{equation*}
 
-\paragraph{Give recent submissions more importance}
-To reflect that recent submissions are the most relevant thing in the live setting, we will aggregate the most recent $m$ submissions using convex weights $w_i$:
-\begin{equation}
-    A^{raw}(s,\sigma) = \sum^{m-1}_{i=0}w_i i_{s,\sigma,k-i}, \quad w_i \geqslant 0,\sum^{m-1}_{i=0}w_i =1
-\end{equation}
-Since $i_{s,\sigma,k-i} \in [0,1]$, it follows that:
+The trajectory slope $d_{s,\sigma}$ is signed (negative values indicate improvement, positive values indicate deterioration) and therefore unbounded by definition. The mean incorrectness $i_{s,\sigma}$ and the time decayed recent-incorrectness $A^{raw}(s,\sigma)$ are already bounded to $[0,1]$ by construction as each is an average of values already in $[0,1]$.
+
+To ensure each component contributes the weighting intended, every signal is min-max normalised across the cohort for the session with:
 \begin{equation*}
-    A^{raw}(s,\sigma) \in [0,1]
+    \hat{x}_{s,\sigma}
+    = \frac{x_{s,\sigma} - x_{\min}}{x_{\max} - x_{\min}},
+    \qquad
+    x_{\min} = \min_{s' \in S} x_{s',\sigma}, \quad
+    x_{\max} = \max_{s' \in S} x_{s',\sigma}.
 \end{equation*}
+Applied to the seven signals introduced earlier, we have:
+\begin{equation*}
+    \hat{n}_{s,\sigma},\;
+    \hat{t}_{s,\sigma},\;
+    \hat{\imath}_{s,\sigma},\;
+    \hat{\tilde{r}}_{s,\sigma},\;
+    \widehat{A^{\mathrm{raw}}}(s,\sigma),\;
+    \hat{d}_{s,\sigma},\;
+    \widehat{\tilde{\mathrm{rep}}}_{s,\sigma}
+    \;\in\; [0,1].
+\end{equation*}
+Min-max normalisation is applied even to signals already bounded to $[0,1]$, because the configured weights only match the effective contribution of each signal when every signal occupies the full $[0,1]$ range, otherwise a signal that clusters in a sub-interval would contribute less than the weight implied. 
+When $x_{\min} = x_{\max}$, the normalised value is conventionally set to $0$.
+
+
+\paragraph{Recent submissions weighted by time decay}
+To reflect that recent submissions are more indicative of current struggle than older submissions in a live setting, each submission is weighted by an exponential decay in the time elapsed since it was made, rather than its position in its submission sequence. 
+Let $\Delta_{s,\sigma,k}$ denote the elapsed time in seconds between submission $k$ and the current refresh. The time-decay weight is defined as:
+\begin{equation}
+    w_{s,\sigma,k} = \exp\!\left(-\frac{\ln 2}{H}\,\Delta_{s,\sigma,k}\right),
+    \label{eq:time-decay-weight}
+\end{equation}
+where $H = 1800$ s is the half-life; a submission made 30 minutes ago contributes half the weight of a submission made just now. 
+The recent-incorrectness signal is then the time-decay weighted mean of the per-submission incorrectness:
+
+\begin{equation}
+    A^{\mathrm{raw}}(s,\sigma)
+    = \frac{\sum_{k=1}^{n_{s,\sigma}} w_{s,\sigma,k}\, i_{s,\sigma,k}}
+           {\sum_{k=1}^{n_{s,\sigma}} w_{s,\sigma,k}}
+    \;\in\; [0,1].
+    \label{eq:a-raw}
+\end{equation}
+Time-based decay is preferred over position-based weighting because students submit at irregular intervals. Weighting by elapsed time gives a more accurate reflection of current struggle rather than submission position. 
+Since each $i_{s,\sigma,k} \in [0,1]$, and the weights are positive, the convex combination $A^{\mathrm{raw}}(s,\sigma)$ is bounded in $[0,1]$ by construction, and does not require normalisation.
     
 \paragraph{Struggle Score Definition}
-Define the raw struggle score as a convex combination of the defined bounded components:
-
+The raw student struggle is a convex combination of the seven bounded components:
 \begin{equation}
-    \label{eq:placeholder_label}
-    \mathbf{S}^{\mathrm{raw}}(s,\sigma)
+    \label{eq:struggle-raw}
+    S^{\mathrm{raw}}(s,\sigma)
     = \alpha \hat{n}_{s,\sigma}
-    + \beta \hat{t}_{s,\sigma}
-    + \gamma \hat{e}_{s,\sigma}
-    + \delta \hat{f}_{s,\sigma}
-    + \eta A^{\mathrm{raw}}(s,\sigma),
+    + \beta  \hat{t}_{s,\sigma}
+    + \gamma \hat{\imath}_{s,\sigma}
+    + \delta \hat{\tilde{r}}_{s,\sigma}
+    + \eta   \widehat{A^{\mathrm{raw}}}(s,\sigma)
+    + \zeta  \hat{d}_{s,\sigma}
+    + \theta \widehat{\tilde{\mathrm{rep}}}_{s,\sigma},
 \end{equation}
-where:
+where the coefficients are non-negative and sum to one:
 \begin{equation*}
-    \alpha,\beta,\gamma,\delta,\eta  \geqslant 0, \quad \alpha + \beta +\gamma +\delta +\eta = 1
+    \alpha,\beta,\gamma,\delta,\eta,\zeta,\theta \geqslant 0,
+    \qquad
+    \alpha+\beta+\gamma+\delta+\eta+\zeta+\theta = 1.
 \end{equation*}
-Since we are using normalised values it follows that:
+The default values used in the deployed system are:
 \begin{equation*}
-    S^{raw}(s,\sigma) \in [0,1]
+    \alpha = 0.10, \quad
+    \beta = 0.10, \quad
+    \gamma = 0.20, \quad
+    \delta = 0.10, \quad
+    \eta = 0.38, \quad
+    \zeta = 0.05, \quad
+    \theta = 0.07,
 \end{equation*}
+summarised by signal in Table \ref{tab: struggle weights}. The recent-incorrectness signal carries the largest weight ($\eta = 0.38$) because the model prioritises within-session struggle over cumulative behaviour. 
+The longer tail signals (trajectory and repetition) carry small but non-zero weights so they can break ties between students who look similar on the headline metrics. 
+The weights were tuned by trial and error in the absence of labelled ground-truth data. 
+Since every component is bounded in $[0,1]$ and all the weights are convex,
+\begin{equation*}
+    S^{\mathrm{raw}}(s,\sigma) \in [0,1].
+\end{equation*}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{0.15\textwidth}|p{0.55\textwidth}|p{0.20\textwidth}|}
+    \hline
+    \textbf{Symbol} & \textbf{Meaning} & \textbf{Weight} \\
+    \hline
+    $\hat{n}_{s,\sigma}$ & Submission count (min-max normalised) & $\alpha = 0.10$ \\
+    \hline
+    $\hat{t}_{s,\sigma}$ & Active time (min-max normalised) & $\beta = 0.10$ \\
+    \hline
+    $\hat{\imath}_{s,\sigma}$ & Mean LLM incorrectness (min-max normalised) & $\gamma = 0.20$ \\
+    \hline
+    $\hat{\tilde{r}}_{s,\sigma}$ & Retry rate (min-max normalised) & $\delta = 0.10$ \\
+    \hline
+    $\widehat{A^{\mathrm{raw}}}(s,\sigma)$ & Time-decayed recent incorrectness (min-max normalised) & $\eta = 0.38$ \\
+    \hline
+    $\hat{d}_{s,\sigma}$ & Improvement-trajectory slope (min-max normalised) & $\zeta = 0.05$ \\
+    \hline
+    $\widehat{\tilde{\mathrm{rep}}}_{s,\sigma}$ & Answer-repetition rate (min-max normalised) & $\theta = 0.07$ \\
+    \hline
+    \end{tabular}
+    \caption{Seven signals contributing to the baseline student struggle score $S^{\mathrm{raw}}(s,\sigma)$, with default weights; weights sum to $1.00$}
+    \label{tab: struggle weights}
+\end{table}
+
+\paragraph{Bayesian shrinkage towards the class mean}
+A student with very few submissions can produce a $S^{\mathrm{raw}}$ that is dominated by noise; a student with two submissions may register a $100\%$ retry rate purely because the second submission was a repeat of a question, without that being indicative of struggle. 
+To stabilise scores when the per-student observation count is small, $S^{\mathrm{raw}}$ is shrunk toward the class mean with a weight that depends on the student's submission count $n_{s,\sigma}$:
+\begin{equation}
+    S^{\mathrm{shrunk}}(s,\sigma)
+    = \frac{n_{s,\sigma}}{n_{s,\sigma} + K}\,S^{\mathrm{raw}}(s,\sigma)
+    + \frac{K}{n_{s,\sigma} + K}\,\bar{S}^{\mathrm{raw}}_{\sigma},
+    \label{eq:struggle-shrunk}
+\end{equation}
+where $\bar{S}^{\mathrm{raw}}_{\sigma}$ is the cohort mean of the raw struggle in session $\sigma$ and $K$ is a hyper-parameter controlling the strength of the shrinkage. The default value is $K=5$, so a student with $n_{s,\sigma} \gg 5$ submissions is essentially unaffected while a student with $n_{s,\sigma} \ll 5$ submissions is shrunk close to the class mean. 
+The technique is the classical empirical Bayes shrinkage estimator in the tradition of James-Stein and Efron \& Morris \cite{efronSteinsParadoxStatistics1977}, here in the conjugate-prior form in which $K$ acts as a prior count \cite{morrisParametricEmpiricalBayes1983}. It is applied here at the level of the aggregate struggle score rather than at the level of the individual signals. 
+Shrinkage and temporal smoothing serve complementary roles, where shrinkage handles cold-start uncertainty and temporal smoothing handles noise when refreshing scores within a session.
 
 \paragraph{Temporal updating for real-time operation}
 To provide a responsive, stable indicator, we will update struggle with exponential smoothing:
 \begin{equation}
-    S_t(s,\sigma) = (1-\lambda)S_{t-1}(s,\sigma) + \lambda S^{raw}(s,\sigma), \quad \lambda \in (0,1]
-\end{equation} \label{eq: temporal sturggle}
+    S_t(s,\sigma) = (1-\lambda)S_{t-1}(s,\sigma) + \lambda S^{\mathrm{shrunk}}(s,\sigma), \quad \lambda \in (0,1]
+    \label{eq: temporal struggle}
+\end{equation} 
 It follows that the update preserves boundaries, giving:
 \begin{equation*}
     S_t(s,\sigma) \in [0,1], \quad  \forall t
 \end{equation*}
 
 \paragraph{Interpretation of model}
-Higher values of $S_t(s,\sigma)$ indicate that student $s$ is experiencing sustained difficulty in the current session. The metric in Equation \ref{eq: temporal sturggle} will prove to be valuable in real-time prioritisation of help in lab sessions. This measure does not indicate student ability in the cohort but rather in lab struggle.
+Higher values of $S_t(s,\sigma)$ indicate that student $s$ is experiencing sustained difficulty in the current session. The metric in Equation \ref{eq: temporal struggle} will prove to be valuable in real-time prioritisation of help in lab sessions. This measure does not indicate student ability in the cohort but rather in lab struggle.
 
 \subsubsection{Temporal Smoothing}
+Live struggle scores carry noise from two sources. Within a single score computation, submissions arrive at irregular intervals, so recent submissions should count more than older ones. Across refresh cycles, a student's score can change even when nothing meaningful has happened.
+Both techniques were introduced in the previous section; this subsection names them explicitly and contrasts their roles.
+
+\paragraph{Per-submission time decay inside $A^{\mathrm{raw}}$}
+
+The first mechanism reweights submissions within a single computation of $S^{\mathrm{raw}}$.
+Each submission contributes to the recent-incorrectness signal $A^{\mathrm{raw}}(s,\sigma)$ with a weight that decays exponentially with the time elapsed since the submission was made, as defined in Equations~\ref{eq:time-decay-weight} and~\ref{eq:a-raw}. 
+The half-life is fixed at $H = 1800$ s, so a submission made 30 minutes ago contributes half the weight of a submission made just now. 
+Because students submit at irregular intervals, time-based decay gives a more accurate reflection of current struggle than index-based weighting.
+
+\paragraph{Exponentially Weighted Moving Average (EWMA) across refresh cycles applied to $S^{\mathrm{shrunk}}$}
+
+The second mechanism stabilises the score in between refresh cycles. 
+After the raw struggle score is computed and shrunk toward the cohort mean (Equation~\ref{eq:struggle-shrunk}), the resulting $S^{\mathrm{shrunk}}$ is smoothed across refresh cycles using a standard exponentially weighted moving average (EWMA), as given by Equation~\ref{eq: temporal struggle}.
+
+The smoothing rate $\lambda = 0.3$ is fixed by the configuration constant \texttt{SMOOTHING\_ALPHA}, gated on by \texttt{SMOOTHING\_ENABLED} (which will be left active by default but can be toggled off). 
+A small $\lambda$ trusts past observations more, giving a smoother trajectory, while a larger $\lambda$ trusts the current shrunk score more, giving a more responsive trajectory. 
+The chosen value of $\lambda = 0.3$ was tuned by trial and error to give a good balance between responsiveness and stability, in the absence of labelled ground-truth data. 
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{0.22\textwidth}|p{0.34\textwidth}|p{0.34\textwidth}|}
+    \hline
+    \textbf{Property} & \textbf{Per-submission decay} & \textbf{EWMA across refresh} \\
+    \hline
+    What it smooths & Submissions inside one $A^{\mathrm{raw}}$ computation & The final score $S$ across refresh cycles \\
+    \hline
+    Granularity & Per submission (seconds) & Per refresh tick (typically every few seconds) \\
+    \hline
+    Decay parameter & Half-life $H = 1800$ s & Smoothing rate $\lambda = 0.3$ \\
+    \hline
+    Recurrence form & Weight $\exp(-\ln 2 / H \cdot \Delta)$ on each submission & $S_t = (1-\lambda)S_{t-1} + \lambda S^{\mathrm{shrunk}}$ \\
+    \hline
+    Noise it suppresses & Old submissions dominating a still-active student & Score fluctuations across refresh ticks \\
+    \hline
+    Source of the problem & Irregular submission intervals within one session & Single-submission fluctuations between refreshes \\
+    \hline
+    \end{tabular}
+    \caption{The two temporal-smoothing mechanisms in the baseline struggle model and the role each plays.}
+    \label{tab: temporal smoothing}
+\end{table}
 
 \subsubsection{Question Difficulty Model} \label{sec: task difficulty}
 
@@ -149,48 +273,96 @@ To model question difficulty, let $q$ denote a question during the lab session, 
 The question difficulty function will allow us to quantify the degree of difficulty of a question $q$, that the students in the $\mathcal{S}_q$ set are finding the hardest, based on the observable data from the endpoint in Section \ref{sec: data endpoint}. The model will support real-time prioritisation in computer labs
 
 \paragraph{Identified Variables}
-From the session based interaction data described in Section \ref{sec: data endpoint}. We can derive the following quantities:
+From the session based interaction data described in Section \ref{sec: data endpoint}, the following quantities are derived. 
+A submission is treated as correct if its LLM-derived incorrectness score $i_{s,\sigma,k}$ is below a fixed threshold of $\tau$. 
+The system uses $\tau = 0.5$ by default.
 \begin{itemize}
     \item $n_{q}$ - The total number of attempts on question $q$
     \item $c_{q}$ - The total number of correct attempts on question $q$
     \item $t_{q}$ - The average time spent on question $q$
     \item $a_{q}$ - The average number of attempts spent on question $q$
     \item $f_{q}$ - Average AI incorrectness measure for $q$, derived from AI-Based answer ratings
+    \item $p_{q}$ - The number of students whose first attempt at $q$ was incorrect
 \end{itemize}
 By leveraging metrics linked to question difficulty, we can produce a question difficulty score.
 
 \paragraph{Normalisation}
-To ensure we can compare the metrics, it is necessary to normalise our quantities:
+The incorrect rate and first-attempt failure rate are derived from the counts identified above: 
 \begin{equation*}
-    \begin{aligned}
-            \tilde{c_{q}}  &= 1 - \frac{c_{q}}{n_{q}} \\
-            \tilde{t_{q}} &= \frac{t_{q} - t_{min}}{t_{max} - t_{min}} \quad \tilde{a_{q}} = \frac{a_{q} - a_{min}}{a_{max} - a_{min}}
-    \end{aligned}
+    \tilde{c}_{q} = 1 - \frac{c_{q}}{n_{q}} \in [0,1], 
+    \qquad
+    \tilde{p}_{q} = \frac{p_{q}}{|\mathcal{S}_{q}|} \in [0,1],
 \end{equation*}
-$f_{q}$ is already bounded so:
+The average time and average attempts are min-max normalised across the cohort of questions in the current session:
 \begin{equation*}
-    \tilde{f_{q}} = f_{q} \in [0,1]
+    \tilde{t}_{q} = \frac{t_{q} - t_{\min}}{t_{\max} - t_{\min}} \in [0,1],
+    \qquad
+    \tilde{a}_{q} = \frac{a_{q} - a_{\min}}{a_{\max} - a_{\min}} \in [0,1].
 \end{equation*}
+The average LLM incorrectness $f_{q}$ is already bounded by construction, so:
+\begin{equation*}
+    \tilde{f}_{q} = f_{q} \in [0,1].
+\end{equation*}
+
+
 
 \paragraph{Difficult Task Definition}
-Define question difficulty as a convex combination of the bounded components:
+Question difficulty is defined as a convex combination of the five bounded components:
 \begin{equation}
-    D^{\text{raw}}(q) = \alpha \tilde{c}_{q} + \beta \tilde{t}_{q} + \gamma \tilde{a}_{q} + \delta \tilde{f}_{q}
-    \label{eq:placeholder_label}
+    D^{\mathrm{raw}}(q)
+    = \alpha\,\tilde{c}_{q}
+    + \beta\,\tilde{t}_{q}
+    + \gamma\,\tilde{a}_{q}
+    + \delta\,\tilde{f}_{q}
+    + \epsilon\,\tilde{p}_{q},
+    \label{eq:difficulty-raw}
 \end{equation}
-where:
+where the coefficients are non-negative and sum to one:
 \begin{equation*}
-    \alpha,\beta,\gamma,\delta \geqslant 0 , \quad \alpha + \beta + \gamma + \delta = 1
+    \alpha,\beta,\gamma,\delta,\epsilon \geqslant 0,
+    \qquad
+    \alpha+\beta+\gamma+\delta+\epsilon = 1.
 \end{equation*}
-Since we are using normalised values it follows that:
-\begin{equation}
-    D^{raw}(q) \in [0,1]
-\end{equation}
+The default values used in the deployed system are:
+\begin{equation*}
+    \alpha = 0.28, \quad
+    \beta  = 0.12, \quad
+    \gamma = 0.20, \quad
+    \delta = 0.20, \quad
+    \epsilon = 0.20,
+\end{equation*}
+summarised by signal in Table \ref{tab: difficulty weights}.  Since every component is bounded in $[0,1]$ and the combination is convex:
+\begin{equation*}
+    D^{\mathrm{raw}}(q) \in [0,1].
+\end{equation*}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{0.15\textwidth}|p{0.55\textwidth}|p{0.20\textwidth}|}
+    \hline
+    \textbf{Symbol} & \textbf{Meaning} & \textbf{Weight} \\
+    \hline
+    $\tilde{c}_{q}$ & Incorrect rate, $1 - c_q/n_q$ & $\alpha = 0.28$ \\
+    \hline
+    $\tilde{t}_{q}$ & Average time per student (min-max normalised) & $\beta = 0.12$ \\
+    \hline
+    $\tilde{a}_{q}$ & Average attempts per student (min-max normalised) & $\gamma = 0.20$ \\
+    \hline
+    $\tilde{f}_{q}$ & Average LLM incorrectness score & $\delta = 0.20$ \\
+    \hline
+    $\tilde{p}_{q}$ & First-attempt failure rate, $p_q/|\mathcal{S}_q|$ & $\epsilon = 0.20$ \\
+    \hline
+    \end{tabular}
+    \caption{Five signals contributing to the baseline question difficulty score $D^{\mathrm{raw}}(q)$, with default weights; weights sum to $1.00$.}
+    \label{tab: difficulty weights}
+\end{table}
+
 
 \paragraph{Temporal updating for real-time operation}
-To provide a responsive stable indicator, we will update question difficulty with exponential smoothing:
+To provide a responsive stable indicator, we will update question difficulty with exponential smoothing across refresh cycles:
 \begin{equation}
-    D_t(q) = (1-\lambda)D_{t-1}(q) + \lambda D^{raw}(q), \quad \lambda \in (0,1)
+    D_t(q) = (1-\lambda)\,D_{t-1}(q) + \lambda\,D^{\mathrm{raw}}(q), \quad \lambda \in (0,1].
+    \label{eq: temporal difficulty}
 \end{equation}
 
 \paragraph{Interpretation of Model}
@@ -301,21 +473,211 @@ primary approach.
 \end{table}
 
 \paragraph{Justification for Current Approach}
-The parameter-based model is adopted as the primary approach for several reasons. This approach does not require a minimum class size to be considered viable, making it robust to sessions with few students where the similarity matrix $\mathbf{W}$ would be unreliable. Additionally, it produces more reliable results immediately, whereas a collaborative filtering approach results are not reliable at the start. 
+The parameter-based model is adopted as the primary approach for several reasons. This approach does not require a minimum class size to be considered viable, making it robust to sessions with few students where the similarity matrix $\mathbf{W}$ would be unreliable. Additionally, it produces more reliable results immediately, whereas a collaborative filtering approach produces results that are not reliable at the start of a session. 
 
-Nevertheless, the collaborative filtering approach is still going to be implemented alongside the parameter-based approach as a secondary indicator, where like the Bloomberg Terminal, we will allow users to toggle whether they would like this feature on or off.
+The collaborative filtering approach is implemented alongside the parameter-based model as a secondary indicator, exposed through the Settings panel as a user-toggle option like Bloomberg's terminal; it is enabled by default with $k=3$ nearest neighbours and a configurable elevation threshold, and can be turned off if the instructor prefers the parametric model.
 
-\subsubsection{Mistake Clustering}
+\subsubsection{Mistake Clustering} \label{sec: mistake clustering}
+
+Beyond aggregate difficulty, instructors benefit from seeing what kind of mistakes students are making on a given question. 
+The system clusters incorrect submissions per question so that dominant error patterns are surfaced rather than left hidden behind a single “incorrect” count. 
+The pipeline combines three standard text-mining techniques --- TF-IDF vectorisation, $k$-means clustering, and silhouette-based model selection --- followed by an LLM labelling step that attaches human-readable descriptions to the clusters. The formal definitions of TF-IDF \cite{saltonVectorSpaceModel1975,manningIntroductionInformationRetrieval2006}, $k$-means \cite{MacQueen1967SomeMF,arthurKmeansAdvantagesCareful}, and the silhouette coefficient \cite{rousseeuwSilhouettesGraphicalAid1987} are described in Section~\ref{sec: text mining}; this section describes the design choices specific to the lab setting.
+
+\paragraph{Pipeline} 
+For each question $q$, the incorrect submissions (those whose LLM-derived incorrectness score $i_{s,\sigma,k}$ is above the threshold $\tau$) are vectorised using TF-IDF over their answer text. 
+$k$-means clustering is then applied for each $k$ in a small range, and the value that maximises the mean silhouette coefficient is selected automatically, removing the need for the instructor to specify a target cluster count.  
+\begin{equation}
+    k^\star = \arg\max_{k \in \{2,\ldots,K_{\max}\}} \frac{1}{|X_q|} \sum_{x \in X_q} s(x; k),
+    \label{eq:cluster-auto-k}
+\end{equation}
+Once clusters are formed, a generative model is prompted with a sample of representative answers from each cluster to produce a short natural language label \cite{wangGoalDrivenExplainableClustering2023}, which is displayed alongside the cluster in the Question Detail View. 
+
+\paragraph{Parameters and Gating}
+Clustering is only attempted when at least $N_{\min} = 3$ incorrect submissions are available for question $q$; below this threshold the noise in cluster assignments outweighs any pattern they might reveal, and the question is shown without clusters. 
+The silhouette sweep evaluates $k \in \{2, \ldots, K_{\max}\}$ with $K_{\max} = 5$; mistake patterns within a single lab question rarely partition into more than five qualitatively distinct groups. 
+For each surfaced cluster, up to three representative answers are shown in the UI so the instructor can verify the cluster's coherence at a glance.
+
+\paragraph{Interpretation}
+Where the question difficulty score $D_t(q)$ indicates whether a question is causing trouble, the mistake clustering provides insight into what kind of trouble it is causing. 
+This complements the parametric difficulty signal: a question may register as "Medium" overall but reveal a single dominant error pattern affecting most struggling students, in which case the appropriate intervention is to address that misconception with a class-wide explanation rather than helping students one-on-one.
 
 \subsection{Advanced Model Design}
 
-\subsubsection{Measurement Confidence}
+\subsubsection{Measurement Confidence} \label{sec: measurement confidence}
 
-\subsubsection{Item Response Theory}
+Every incorrectness score $i_{s,\sigma,k}$ in this design is derived from an LLM judgement that is uncertain. To prevent the instructor from over-interpreting unreliable scores, each submission also carries a confidence measurement value $\kappa_{s,\sigma,k} \in [0,1]$ that quantifies how trustworthy the corresponding incorrectness estimate is, in the spirit of classical test theory \cite{lord1968statistical}.
 
-\subsubsection{Bayesian Knowledge Training}
+The confidence is composed of two factors and a base multiplier:
+\begin{equation}
+    \kappa_{s,\sigma,k}
+    = \kappa_0 \cdot \mathrm{length}(A_{s,\sigma,k}) \cdot \Big(\tfrac{1}{2} + \tfrac{1}{2}\,\mathrm{extremity}(i_{s,\sigma,k})\Big),
+    \label{eq:measurement-confidence}
+\end{equation}
+where $\kappa_0 \in [0,1]$ is a base confidence value and each of the two factors is bounded in $[0,1]$. The $\mathrm{length}$ factor penalises very short submissions for which the model has little signal to work with; the $\mathrm{extremity}$ factor rewards scores near the endpoints $0$ and $1$ over middling values, reflecting that the model is most certain when an answer is clearly correct or wrong and least certain when an answer is borderline. Submissions with empty or missing feedback are assigned $\kappa = 0$. The half-and-half scaling on the extremity term ensures that valid submissions with mid-range scores still receive at least half of the base confidence, prioritising smooth degradation over hard cut-offs.
 
-\subsubsection{Improved Struggle Model}
+
+In the dashboard, $\kappa$ is surfaced as a coloured indicator next to the incorrectness value in the Question Detail view: green when $\kappa$ exceeds a high threshold (trust the score), amber for intermediate values (verify before acting), and grey when $\kappa$ falls below a low threshold (the score should not drive intervention decisions on its own). This makes the uncertainty visible to the instructor without requiring them to read the underlying score.
+
+
+\subsubsection{Item Response Theory}  \label{sec: irt}
+The baseline difficulty score $D_t(q)$ defined in Section \ref{sec: task difficulty} is a heuristic combination of observable metrics; however, it does not separate the difficulty of the question from the ability of the students who attempted it. A question registering as hard may have attracted a weaker subset of the cohort. To make this distinction, the dashboard offers an alternative difficulty score based on Item Response Theory (IRT) \cite{lord1968statistical}, where question difficulty and student ability are estimated jointly as latent variables.
+
+\paragraph{Rasch 1-parameter logistic model}
+The simplest IRT model is the Rasch model \cite{rasch1960probabilistic}, which assigns each student $s$ a latent ability $\theta_s \in \mathbb{R}$ and each question $q$ a latent difficulty $\beta_q \in \mathbb{R}$. The probability of student $s$ answering question $q$ correctly is the sigmoid of the ability-difficulty gap:
+\begin{equation}
+    P(X_{s,q} = 1 \mid \theta_s, \beta_q)
+    = \sigma(\theta_s - \beta_q)
+    = \frac{1}{1 + e^{-(\theta_s - \beta_q)}},
+    \label{eq:rasch-1pl}
+\end{equation}
+where $X_{s,q} \in \{0, 1\}$ is the binary response (correct or incorrect). 
+A larger $\beta_q$ pushes the probability of correctness down; a larger $\theta_s$ pushes it up.
+
+\paragraph{Fitting via joint maximum likelihood}
+To estimate $(\theta_s, \beta_q)$ from observed responses, the binary response matrix $X$ is first built from the session data: for each student-question pair, the best (lowest-incorrectness) attempt is selected and coded $X_{s,q} = 1$ iff the incorrectness score falls below the threshold $\tau$. Rows and columns with too few observations are dropped to ensure stable estimation. The Bernoulli log-likelihood across the observed entries,
+\begin{equation}
+    \ell(\theta, \beta)
+    = \sum_{(s, q) \in \mathcal{O}}
+      \Big[\, X_{s,q} \log \sigma(\theta_s - \beta_q)
+          + (1 - X_{s,q}) \log \big(1 - \sigma(\theta_s - \beta_q)\big) \Big],
+    \label{eq:rasch-loglik}
+\end{equation}
+is maximised by a bounded quasi-Newton method, specifically L-BFGS-B \cite{fisherMathematicalFoundationsTheoretical1922}, with an explicit gradient supplied for efficiency. The abilities $\theta$ are centred to zero mean at every iteration to resolve the additive identifiability degeneracy: only the difference $\theta_s - \beta_q$ enters the likelihood, so the absolute level of either parameter is unidentified without an anchor.
+
+\paragraph{Mapping back to the dashboard scale}
+The fitted difficulties $\hat{\beta}_q$ are on the logit scale and can take any real value. 
+To make them comparable to the baseline difficulty score $D_t(q) \in [0,1]$ and re-use the same threshold classifier, each estimate is mapped through the sigmoid:
+\begin{equation}
+    D^{\mathrm{IRT}}(q) = \sigma(\hat{\beta}_q) \in [0, 1].
+    \label{eq:irt-difficulty}
+\end{equation}
+This is the value displayed on the IRT-based difficulty leaderboard and used as input to the improved struggle model in Section \ref{sec: improved struggle}. 
+
+\paragraph{Graceful degradation}
+The joint MLE requires sufficient overlap between students and questions to converge. 
+When the response matrix is too sparse --- few questions with enough responses, or few students with enough attempts --- the fit produces an empty result and the system falls back to the baseline difficulty signal. The improved struggle model builds on top of the IRT difficulty and incorporates its own weight-redistribution logic when the IRT layer is unavailable.
+
+\subsubsection{Bayesian Knowledge Tracing} \label{sec: bkt}
+The struggle and difficulty models defined so far summarise behaviour within a single snapshot of a session. 
+They do not, however, model how a student's understanding evolves across successive attempts. 
+Bayesian Knowledge Tracing (BKT) \cite{corbettKnowledgeTracingModeling1995} fills this gap by treating each (student, question) sequence as a learning trajectory under a two-state hidden Markov model: at any point the student either has or has not mastered the skill, and each attempt is an observation that updates the posterior belief over those two states.
+
+\paragraph{Model Parameters}
+Each skill (here taken as a single question) carries four parameters:
+\begin{itemize}
+    \item $P(L_0)$: the prior probability that a student has mastered the skill before any attempts
+    \item $P(T)$: the probability of transitioning from not-mastered to mastered between attempts
+    \item $P(G)$: the probability of guessing correctly when not mastered
+    \item $P(S)$: the probability of slipping (answering incorrectly) when mastered
+\end{itemize}
+All four are bounded in $[0,1]$, with the additional identifiability constraint that $P(G) + P(S) < 1$ enforced in practice by bounding both above by $0.5$.
+
+\paragraph{Update Step}
+On each attempt the system observes $X_{s,q,k} \in \{0,1\}$, the correctness indicator derived from $i_{s,\sigma,k} < \tau$ as in Section \ref{sec: task difficulty}. 
+The posterior probability of mastery is updated by Bayes' rule conditioned on the observation, and then advanced by the learning transition:
+\begin{equation}
+    P(L_{k+1})
+    = P(L_k \mid X_{s,q,k})
+      + \big(1 - P(L_k \mid X_{s,q,k})\big) \cdot P(T),
+    \label{eq:bkt-update}
+\end{equation}
+where the Bayesian posterior depends on whether the attempt was correct: with probability $P(L_k)(1-P(S))$ the student knew and did not slip, and with probability $(1-P(L_k))\,P(G)$ the student did not know and guessed.
+
+\paragraph{Predictive Probability}
+Before observing the next attempt, the model's predicted probability of correctness is
+\begin{equation}
+    P(\text{correct}_{k+1})
+    = P(L_k)\,(1 - P(S)) + (1 - P(L_k))\,P(G),
+    \label{eq:bkt-predict}
+\end{equation}
+which combines the chance of demonstrating mastery (right because they know) with the chance of guessing (right despite not knowing). 
+This quantity is used for diagnostics (ROC-AUC against the actual outcomes) and as a per-attempt feature for downstream models.
+
+\paragraph{Parameter fitting and graceful degradation}
+Rather than fit per-skill parameters, the system estimates a single global $P(L_0), P(T), P(G), P(S)$ across all questions. The forward-algorithm log-likelihood is maximised by L-BFGS-B with the identifiability bounds described above. 
+Fitting is skipped when fewer than a minimum number of observations are available, or when every attempt in the current view is graded the same way: with a single outcome class the learning dynamics become unidentifiable, and the system retains the previously fitted parameters rather than producing spurious estimates. 
+Per-question and per-student mastery values feed the improved struggle model in Section \ref{sec: improved struggle}, and an aggregate (mean mastery, minimum mastery, number of questions above a mastery threshold) is shown alongside the student's struggle score in the Student Detail view.
+
+Yudelson et al.~\cite{yudelsonIndividualizedBayesianKnowledge2013} extend BKT with per-student parameters; the system implements only the global-parameter version for the reasons of identifiability and data sufficiency just described.
+
+\subsubsection{Improved Struggle Model} \label{sec: improved struggle}
+The baseline struggle score $S_t(s,\sigma)$ in Section \ref{sec: student struggle} draws only on observable behaviour such as how often a student submits, how recently they have been wrong, how often they retry the same question. 
+It does not consult the latent quantities developed in this chapter such as the student's BKT-estimated mastery (Section \ref{sec: bkt}) or the IRT-estimated question difficulty of the question they are attempting (Section \ref{sec: irt}). 
+The improved struggle score combines all three signal groups into a single mastery-aware, difficulty-adjusted score.
+
+\paragraph{Improved Struggle Score}
+The improved struggle score combines the three components as a convex combination:
+\begin{equation}
+    S^{\mathrm{imp}}(s,\sigma)
+    = w_{\mathrm{beh}} \cdot B_s
+    + w_{\mathrm{mg}} \cdot M_s
+    + w_{\mathrm{da}} \cdot D_s,
+    \qquad
+    w_{\mathrm{beh}} + w_{\mathrm{mg}} + w_{\mathrm{da}} = 1,
+    \label{eq:improved-struggle}
+\end{equation}
+with default weights $w_{\mathrm{beh}} = 0.45$, $w_{\mathrm{mg}} = 0.30$, $w_{\mathrm{da}} = 0.25$.
+The behavioural component carries the largest weight because it is the most data-efficient and reliable signal, while the mastery and difficulty components provide complementary information that enhances the score's sensitivity to underlying learning dynamics.
+
+\paragraph{Behavioural composite}
+The behavioural component $B_s$ is the equal-weighted mean of four cohort-normalised sub-signals from the baseline model: the time-decayed incorrectness $\widehat{A^{\mathrm{raw}}}_s$, the retry rate $\hat{\tilde{r}}_s$, the trajectory slope $\hat{d}_s$, and the repetition rate $\widehat{\tilde{\mathrm{rep}}}_s$.
+Each is defined in Section~\ref{sec: student struggle}. $B_s$ captures the behavioural surface of struggle without consulting any latent-trait estimate.
+
+\paragraph{Mastery gap}
+The mastery gap $M_s$ quantifies how much a student is underperforming relative to the mastery BKT attributes to them. 
+Let $\bar{m}_s$ denote the student's mean mastery across attempted questions, and let $1 - A^{\mathrm{raw}}_s$ be their recent correctness rate. 
+The gap takes the positive part of the difference between the two:
+\begin{equation*}
+    M_s = \max\!\Big(\bar{m}_s - \big(1 - A^{\mathrm{raw}}_s\big),\, 0\Big) \in [0, 1].
+\end{equation*}
+A non-zero value indicates that the student's recent demonstrated correctness falls below what their estimated mastery would predict; this asymmetry is often the earliest sign of transient disengagement or a momentary block.
+The signal is one-sided by construction: students who outperform their mastery estimate are not penalised, since this scenario reflects faster-than-expected learning rather than struggle.
+
+\paragraph{Difficulty-adjusted score}
+The difficulty-adjusted component $D_s$ weights each inversely by the difficulty of the question that produced it. 
+Let $\tilde{\beta}_q$ denote the normalised IRT difficulty from Section \ref{sec: irt}, and let $\mathcal{R}_s$ denote the student's recent submission set. 
+The score is the per-user weighted mean of the difficulty-adjusted incorrectness:
+\begin{equation*}
+    D_s
+    = \frac{1}{|\mathcal{R}_s|} \sum_{k \in \mathcal{R}_s} i_{s,\sigma,k} \cdot \big(1 - \tilde{\beta}_q\big) \in [0, 1].
+\end{equation*}
+Failing an easy question contributes more to $D_s$ than failing a hard one; failing only the hardest questions produces a near-zero score, since the cohort has already validated their difficulty. 
+To prevent single-submission variance from dominating a sparse student's score, the per-user mean is shrunk toward the cohort mean by the coverage ratio $|\mathcal{R}_s^{\mathrm{covered}}|/|\mathcal{R}_s|$: a student whose recent submissions are fully covered by the IRT layer retains their own mean, while a student with sparse coverage leans towards the cohort.
+
+\paragraph{Graceful degradation under missing signals}
+The IRT and BKT layers cannot always converge: IRT fails when the response matrix is too sparse and BKT fails when too few observations are available or when all attempts are graded the same way. 
+Rather than setting the values to zero and shrinking the total contribution, the improved model redistributes the unavailable weight back to the behavioural component; this preserves the weight-sum invariant $w_{\mathrm{beh}} + w_{\mathrm{mg}} + w_{\mathrm{da}} = 1$ in every degraded scenario, so configured weights continue to match effective contributions. 
+Table~\ref{tab: improved struggle degradation} summarises the four cases:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{0.32\textwidth}|p{0.18\textwidth}|p{0.18\textwidth}|p{0.18\textwidth}|}
+    \hline
+    \textbf{Scenario} & $w_{\mathrm{beh}}$ & $w_{\mathrm{mg}}$ & $w_{\mathrm{da}}$ \\
+    \hline
+    All signals available & $0.45$ & $0.30$ & $0.25$ \\
+    \hline
+    BKT mastery unavailable (or coverage $< 50\%$) & $0.75$ & $0.00$ & $0.25$ \\
+    \hline
+    IRT difficulty unavailable (or single distinct value) & $0.70$ & $0.30$ & $0.00$ \\
+    \hline
+    Neither signal available & $1.00$ & $0.00$ & $0.00$ \\
+    \hline
+    \end{tabular}
+    \caption{Effective weights of the improved struggle model under each combination of available latent-trait signals; redistribution preserves the weight-sum invariant so that configured weights match effective contributions even when the system degrades.}
+    \label{tab: improved struggle degradation}
+\end{table}
+
+\paragraph{Missing-value treatment for partial mastery}
+The 50\% coverage guard handles wholesale unavailability of the mastery signal; the more common case is partial coverage, in which some users have a mastery record and some do not.
+The improved model imputes missing $\bar{m}_s$ values with the cohort mean rather than zero \cite{little2014statistical}; using zero would make it so every uncovered student has zero mastery, biasing their mastery gap upwards and over-flagging them.
+Mean imputation preserves the cohort-level scale and remains neutral on the affected sub-population.
+
+
+\paragraph{Final shrinkage}
+
+The combined score $S^{\mathrm{imp}}(s,\sigma)$ is shrunk towards the cohort mean by the same Bayesian estimator used in Section \ref{sec: student struggle}, with the same shrinkage strength $K = 5$. 
+Students with very few submissions are therefore stabilised by the same mechanism in both models; this prevents an unstable mastery gap or difficulty-adjusted estimate on a low-$n$ student from producing a misleading headline score in the dashboard.
+
 
 \subsection{Retrieval-Augmented Generation Feedback Design}
 
@@ -370,11 +732,9 @@ By deciding on thresholds, we can highlight a student by degree of struggle or h
     \centering
     \begin{tabular}{|p{0.2\textwidth}||p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|}
     \hline
-        Degree & None & Low & Medium & High\\
+        Degree & \cellcolor{tlGreen}On Track & \cellcolor{tlAmber}Minor Issues & \cellcolor{tlOrange}Struggling & \cellcolor{tlRed}Needs Help \\
     \hline
         Threshold & $0 \leqslant S_t(s,\sigma) \leqslant t_{s1}$ & $t_{s1} < S_t(s,\sigma) \leqslant t_{s2}$&  $t_{s2} < S_t(s,\sigma) \leqslant t_{s3}$ &  $t_{s3} < S_t(s,\sigma) \leqslant 1 $\\
-    \hline
-        Colour & Green & Yellow & Orange & Red\\
     \hline
     \end{tabular}
     \caption{Table Highlighting how thresholds can be indicated for struggle}
@@ -385,11 +745,9 @@ By deciding on thresholds, we can highlight a student by degree of struggle or h
     \centering
     \begin{tabular}{|p{0.2\textwidth}||p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|}
     \hline
-        Degree & Easy & Medium & Hard & Very Hard\\
+        Degree & \cellcolor{tlGreen}Easy & \cellcolor{tlAmber}Medium & \cellcolor{tlOrange}Hard & \cellcolor{tlRed}Very Hard\\
     \hline
         Threshold & $0 \leqslant D_t(q) \leqslant t_{s1}$ & $t_{s1} < D_t(q) \leqslant t_{s2}$&  $t_{s2} < D_t(q) \leqslant t_{s3}$ &  $t_{s3} < D_t(q) \leqslant 1 $\\
-    \hline
-        Colour & Green & Yellow & Orange & Red\\
     \hline
     \end{tabular}
     \caption{Table Highlighting how thresholds can be indicated for difficulty}

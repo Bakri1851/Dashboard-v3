@@ -55,9 +55,44 @@ Components: submission count, time active, incorrect submissions, feedback reque
 | — | rep_hat (exact-answer repetition) | Added in V2: submitting identical answers repeatedly |
 
 **Other differences:**
-- Thesis proposes temporal smoothing via exponential smoothing — V2 has a stub (`SMOOTHING_ENABLED = False`) but does not use it
-- Thesis does not mention Bayesian shrinkage — V2 applies `w_n = n / (n + 5)` to pull low-data scores toward class mean
+
+- Thesis proposes exponential smoothing as a *future* step — V2 has two distinct mechanisms that should be described separately: (a) per-submission exponential time-decay inside `A^{raw}` with `DECAY_HALFLIFE_SECONDS = 1800`; (b) EWMA across refresh cycles applied to the final struggle score, gated by `SMOOTHING_ENABLED = True` and `SMOOTHING_ALPHA = 0.3` in `config.py:73-74` (active, not a dead stub — earlier draft of this note had the value wrong).
+- Thesis does not mention Bayesian shrinkage — V2 applies `w_n = n / (n + 5)` to pull the final `struggle_score` toward the class mean of `struggle_score` (see `analytics.py:346-349`). The shrinkage is on the *aggregate* score, not per-signal.
 - Thesis does not mention score clipping to [0, 1]
+- Thesis does not describe the **uniform min-max step across all 7 signals** that `analytics.py:322-330` applies before the weighted sum (raw → `_hat`/`_norm`); without it the configured weights would not match the effective contributions.
+
+**Rewrite progress — 2026-05-18 (Step 3 of [[Full Roadmap]]):**
+
+§3.3.1 **closed**:
+
+- ✅ `Identified Variables` itemize extended to 7 signals (n, t, i, r, d, rep) — `design-and-architecture.tex:58-67`
+- ✅ `e` renamed to `i` (mean incorrectness, matching `analytics.py:281`)
+- ✅ Normalisation paragraph rewritten with uniform min-max across cohort — `design-and-architecture.tex:80-111`
+- ✅ `A^{raw}` reframed as exponential time-decay with $H = 1800$ s half-life — `design-and-architecture.tex:114-132`. Replaces the old position-based convex weights `[0.35, 0.25, 0.20, 0.12, 0.08]` superseded in `config.py:30-32`.
+- ✅ Struggle Score equation extended to 7-term form with default weights `α=0.10, β=0.10, γ=0.20, δ=0.10, η=0.38, ζ=0.05, θ=0.07` and accompanying weights table (`tab: struggle weights`) — `design-and-architecture.tex:134-194`
+- ✅ Bayesian shrinkage paragraph added — $S^{\mathrm{shrunk}} = (n/(n+K)) S^{\mathrm{raw}} + (K/(n+K)) \bar{S}^{\mathrm{raw}}_\sigma$ with $K = 5$, applied to the aggregate score; cited `efronSteinsParadoxStatistics1977`. Matches `analytics.py:346-350` exactly. — `design-and-architecture.tex:196-207`
+- ✅ Label hygiene: `eq:struggle-raw` and `eq:struggle-shrunk` introduced; old duplicate `eq:placeholder_label` resolved on struggle side (difficulty side D will close out the duplicate); pre-existing `eq: temporal sturggle` typo fixed
+- ✅ `S^{raw}` → `S^{\mathrm{raw}}` consistency restored across the section
+
+Outstanding housekeeping carried forward:
+
+- ⚠ `\cite{morrisParametricEmpiricalBayes1983}` at `design-and-architecture.tex:206` references a bib key absent from `references.bib`. Decision: add bib entry (Morris, C. N. 1983, JASA 78(381), 47-55) or swap to `[BIB MISSING: Morris 1983]` placeholder for Step 12 polish.
+
+§3.3.2 onwards:
+
+- ✅ §3.3.2 Temporal Smoothing — **closed 2026-05-18**. Opening paragraph names the two noise sources (within-score and across-refresh). Per-submission decay paragraph cross-references `eq:time-decay-weight` and `eq:a-raw` from §3.3.1. EWMA paragraph cross-references `eq: temporal struggle` from §3.3.1 (single canonical EWMA equation; duplicate eliminated by deleting the §3.3.2 displayed copy). Housekeeping completed: §3.3.1 Temporal updating equation now has `S^{\mathrm{shrunk}}` on the RHS, and `\label{eq: temporal struggle}` moved inside the equation environment. Comparison table `tab: temporal smoothing` contrasts the two mechanisms. `labelled truth data` corrected to `labelled ground-truth data` (also in the §3.3.1 Struggle Score Definition).
+- ✅ §3.3.3 Question Difficulty — **closed 2026-05-19**. 5-signal extension: $p_q$ added to variable list, $	ilde{p}_q$ derived, equation now $D^{\mathrm{raw}} = lpha	ilde{c} + eta	ilde{t} + \gamma	ilde{a} + \delta	ilde{f} + \epsilon	ilde{p}$ with default weights $0.28, 0.12, 0.20, 0.20, 0.20$. Weights table `tab: difficulty weights` inserted. Labels `eq:difficulty-raw` and `eq: temporal difficulty` added (placeholder label resolved). $	au = 0.5$ threshold defined explicitly.
+- ✅ §3.3.4 Collaborative Filtering — **closed 2026-05-19**. Closing paragraph re-tensed to present: CF is "implemented alongside the parameter-based model" rather than "still going to be implemented"; live parameters ($k=3$, configurable elevation threshold, default-on) surfaced; Settings-panel toggle described as live; UK "neighbours"; missing verb in the preceding small-class sentence fixed.
+- ✅ §3.3.5 Mistake Clustering — **closed 2026-05-19**. Pipeline (TF-IDF → $k$-means → silhouette auto-$k$ → LLM labelling) described as a design choice with cross-reference to Ch2 §2.3.2 for the math. Auto-$k$ equation `eq:cluster-auto-k` displayed. Parameters $N_{\min} = 3$, $K_{\max} = 5$ stated as values without naming the constants. Interpretation paragraph positions clustering as complementary to the parametric $D_t(q)$ signal.
+- ✅ **Chapter-wide constants cleanup (2026-05-19)** — Option 1 applied uniformly: `	exttt{CONSTANT\_NAME}` references removed from §3.3.1 / §3.3.3 weights tables (now 3-column) and §3.3.5 prose. Numeric design values retained. Constants reintroduction deferred to Ch4 (Step 5).
+- ✅ §3.4.1 Measurement Confidence — **closed 2026-05-19**. Two-factor + base formula $\kappa = \kappa_0 \cdot \mathrm{length} \cdot (	frac{1}{2} + 	frac{1}{2}\,\mathrm{extremity})$ matching `measurement.py:46-50`. No third "agreement" factor (the Rewrite Queue description was wrong). Empty/missing feedback → $\kappa = 0$ stated. Cited `lord1968statistical`. Surfaced as green/amber/grey indicator in Question Detail view.
+- ✅ §3.3.3 follow-up: `$	ilde{p}_q$` denominator corrected to `$|\mathcal{S}_q|$` (unique students) at line 294 and line 353. The original brief gave `$n_q$` (total attempts), which did not match the code.
+- ✅ §3.4.2 Item Response Theory — **closed 2026-05-19**. Rasch 1PL with $P(X_{s,q}=1) = \sigma(	heta_s - eta_q)$; joint MLE via L-BFGS-B with ability-centring; sigmoid mapping to $D^{\mathrm{IRT}}(q) \in [0,1]$ for UI consistency; graceful fallback to baseline when response matrix sparse. Bonus: "Bayesian Knowledge **Training**" → "**Tracing**" typo fixed in §3.4.3 header.
+- ✅ §3.4.3 Bayesian Knowledge Tracing — **closed 2026-05-19**. Two-state HMM with 4 parameters per skill ($P(L_0), P(T), P(G), P(S)$); update + predictive equations displayed; global MLE via L-BFGS-B with $[0, 0.5]$ bounds on guess/slip to enforce $P(G)+P(S)<1$; graceful degradation on insufficient or single-class data. Cited Corbett & Anderson 1995, Yudelson et al. 2013. Subsection heading Training typo fixed.
+- ✅ §3.4.4 Improved Struggle Model — **closed 2026-05-19**. Three-bucket convex combination (behavioural 0.45, mastery gap 0.30, difficulty-adjusted 0.25); mastery gap is one-sided max; difficulty-adjusted uses coverage-weighted shrinkage; graceful-degradation table covers four scenarios; missing-BKT-mastery imputed with cohort mean (Little & Rubin); final Bayesian shrinkage K=5. Closes forward refs from H (IRT) and I (BKT).
+- ⏳ §3.5 onwards as previously logged (K / L / M).
+
+See [[Report Sync#Ch3 Design and Modelling — Status Partial (in active rewrite — 2026-05-18)]] for the full sub-task tracker.
 
 #### 3.3.2 Question Difficulty — FORMULA MISMATCH
 
