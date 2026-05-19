@@ -48,7 +48,7 @@ Surgical edits — the chapter structure is solid, specific sections need updati
 
 - [x] Update struggle formula to 7 components + Bayesian shrinkage (was 5 in thesis) — *Done 2026-05-18; §3.3.1 closed.*
 - [x] Update difficulty formula to 5 components (was 4 in thesis) — *Done 2026-05-19; §3.3.3 closed.*
-- [ ] Mark Figs 8–10 (Figma mockups) for replacement — add `[TODO: replace with screenshot]` annotations
+- [~] Reframe §3.6.2 Figma mockups — *updated 2026-05-19. Mockups stay in Ch3 as design artifacts (correct placement); not replaced by screenshots. Typo pass on §3.6 done; caveat-softening deferred to chapter-wide design-vs-implementation reframe pass after Step 3 closes.*
 - [x] Update CF section — it is implemented, not "to be implemented" — *Done 2026-05-19; §3.3.4 closed.*
 - [x] Add sections for IRT, BKT, improved struggle, mistake clustering — *All four done 2026-05-19. §3.3.5 (clustering), §3.4.2 (IRT), §3.4.3 (BKT), §3.4.4 (improved struggle) all closed.*
 - [x] Fill §3.3.2 Temporal Smoothing stub (distinguish per-submission decay from EWMA across refresh) — *Done 2026-05-18.*
@@ -351,7 +351,7 @@ Lightweight mobile Help panel for lab assistants covering join guide, student ca
 | --- | --- | --- | --- | --- |
 | 1 | Phase 7 — Surface hidden data | Coding | Small | Done |
 | 2 | Phase 5 — Comparison UI | Coding | Large | **Done** |
-| 3 | Ch3 — Design updates | Writing | Medium | **In progress (2026-05-18)** |
+| 3 | Ch3 — Design updates | Writing | Medium | **Done 2026-05-19** (Figma PNGs + design-vs-implementation reframe deferred) |
 | 4 | Ch1 & Ch2 — Language cleanup | Writing | Small | Not started |
 | 5 | Ch4 — Implementation rewrite | Writing | Large | Not started |
 | 6 | Ch5 — Results & Evaluation | Writing | Large | Not started |

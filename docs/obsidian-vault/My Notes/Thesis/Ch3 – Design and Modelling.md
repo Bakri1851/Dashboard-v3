@@ -5,7 +5,7 @@ Thesis chapter covering system architecture, data endpoint, mathematical models,
 Related: [[Thesis Overview]], [[Report Sync]], [[Architecture]], [[Analytics Engine]], [[Student Struggle Logic]], [[Question Difficulty Logic]], [[IRT Difficulty Logic]]
 
 **Source file:** `main sections/design and architecture.tex`
-**Status:** Draft — architecture broadly correct, formulas outdated, Figma mockups need replacing
+**Status:** **Closed at prose level 2026-05-19** — all sub-sections filled or updated; Figma mockups for §3.6.3 outstanding (user generating); §3.6.2 caveat softening deferred to chapter-wide design-vs-implementation reframe pass.
 
 > **Sync note (2026-04-18):** "Current contents" below reflects the thesis state *before* the Phase 6 tex-skeleton additions (2026-04-12). For the current tex subsection tree and the active writing backlog, see [[Rewrite Queue#Phase 6 additions (2026-04-12)]] and the toolkit's Status panel §6 Source reconciliation.
 
@@ -90,7 +90,10 @@ Outstanding housekeeping carried forward:
 - ✅ §3.4.2 Item Response Theory — **closed 2026-05-19**. Rasch 1PL with $P(X_{s,q}=1) = \sigma(	heta_s - eta_q)$; joint MLE via L-BFGS-B with ability-centring; sigmoid mapping to $D^{\mathrm{IRT}}(q) \in [0,1]$ for UI consistency; graceful fallback to baseline when response matrix sparse. Bonus: "Bayesian Knowledge **Training**" → "**Tracing**" typo fixed in §3.4.3 header.
 - ✅ §3.4.3 Bayesian Knowledge Tracing — **closed 2026-05-19**. Two-state HMM with 4 parameters per skill ($P(L_0), P(T), P(G), P(S)$); update + predictive equations displayed; global MLE via L-BFGS-B with $[0, 0.5]$ bounds on guess/slip to enforce $P(G)+P(S)<1$; graceful degradation on insufficient or single-class data. Cited Corbett & Anderson 1995, Yudelson et al. 2013. Subsection heading Training typo fixed.
 - ✅ §3.4.4 Improved Struggle Model — **closed 2026-05-19**. Three-bucket convex combination (behavioural 0.45, mastery gap 0.30, difficulty-adjusted 0.25); mastery gap is one-sided max; difficulty-adjusted uses coverage-weighted shrinkage; graceful-degradation table covers four scenarios; missing-BKT-mastery imputed with cohort mean (Little & Rubin); final Bayesian shrinkage K=5. Closes forward refs from H (IRT) and I (BKT).
-- ⏳ §3.5 onwards as previously logged (K / L / M).
+- ✅ §3.5 Retrieval-Augmented Generation Feedback Design — **closed 2026-05-19**. Hybrid two-layer retrieval (structured pre-filter then semantic search) at design-register only — generic concept names, library/model specifics deferred to Ch4. TikZ figure (`fig: rag architecture`) added. Two-audience design (assistant and instructor surfaces sharing one pipeline). Cited Lewis 2020, Kasneci 2023, Reimers & Gurevych 2019, Malkov & Yashunin 2020. Supervisor attribution removed from body per new memory rule.
+- ⚠ §3.6.2 — **partial 2026-05-19**. Typo pass cleaned (stray backtick, `is will allow`, `based off`, `have been help`). Design-vs-implementation reframe deferred: the Figma mockups stay in Ch3 as design artifacts (correct placement); only the `conceptual design rather than a fully implemented system` caveat needs softening, which is bundled with the chapter-wide reframe pass after Step 3.
+- ✅ §3.6.3 Lab Assistant View — **closed 2026-05-19**. Three states (join, waiting, assigned) described in design-register; three mockup figures consolidated into one subfigure row at 0.31\linewidth each (halves the page footprint). Three Figma PNGs outstanding for image rendering but figure block is in place.
+- **Step 3 closed at prose level. Step 4 (Ch1 & Ch2 polish) is the natural next.**
 
 See [[Report Sync#Ch3 Design and Modelling — Status Partial (in active rewrite — 2026-05-18)]] for the full sub-task tracker.
 

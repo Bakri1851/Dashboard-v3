@@ -481,7 +481,7 @@ The collaborative filtering approach is implemented alongside the parameter-base
 
 Beyond aggregate difficulty, instructors benefit from seeing what kind of mistakes students are making on a given question. 
 The system clusters incorrect submissions per question so that dominant error patterns are surfaced rather than left hidden behind a single “incorrect” count. 
-The pipeline combines three standard text-mining techniques --- TF-IDF vectorisation, $k$-means clustering, and silhouette-based model selection --- followed by an LLM labelling step that attaches human-readable descriptions to the clusters. The formal definitions of TF-IDF \cite{saltonVectorSpaceModel1975,manningIntroductionInformationRetrieval2006}, $k$-means \cite{MacQueen1967SomeMF,arthurKmeansAdvantagesCareful}, and the silhouette coefficient \cite{rousseeuwSilhouettesGraphicalAid1987} are described in Section~\ref{sec: text mining}; this section describes the design choices specific to the lab setting.
+The pipeline combines three standard text-mining techniques - TF-IDF vectorisation, $k$-means clustering, and silhouette-based model selection - followed by an LLM labelling step that attaches human-readable descriptions to the clusters. The formal definitions of TF-IDF \cite{saltonVectorSpaceModel1975,manningIntroductionInformationRetrieval2006}, $k$-means \cite{MacQueen1967SomeMF,arthurKmeansAdvantagesCareful}, and the silhouette coefficient \cite{rousseeuwSilhouettesGraphicalAid1987} are described in Section~\ref{sec: text mining}; this section describes the design choices specific to the lab setting.
 
 \paragraph{Pipeline} 
 For each question $q$, the incorrect submissions (those whose LLM-derived incorrectness score $i_{s,\sigma,k}$ is above the threshold $\tau$) are vectorised using TF-IDF over their answer text. 
@@ -555,7 +555,7 @@ This is the value displayed on the IRT-based difficulty leaderboard and used as 
 
 \paragraph{Graceful degradation}
 The joint MLE requires sufficient overlap between students and questions to converge. 
-When the response matrix is too sparse --- few questions with enough responses, or few students with enough attempts --- the fit produces an empty result and the system falls back to the baseline difficulty signal. The improved struggle model builds on top of the IRT difficulty and incorporates its own weight-redistribution logic when the IRT layer is unavailable.
+When the response matrix is too sparse - few questions with enough responses, or few students with enough attempts - the fit produces an empty result and the system falls back to the baseline difficulty signal. The improved struggle model builds on top of the IRT difficulty and incorporates its own weight-redistribution logic when the IRT layer is unavailable.
 
 \subsubsection{Bayesian Knowledge Tracing} \label{sec: bkt}
 The struggle and difficulty models defined so far summarise behaviour within a single snapshot of a session. 
@@ -669,7 +669,7 @@ Table~\ref{tab: improved struggle degradation} summarises the four cases:
 
 \paragraph{Missing-value treatment for partial mastery}
 The 50\% coverage guard handles wholesale unavailability of the mastery signal; the more common case is partial coverage, in which some users have a mastery record and some do not.
-The improved model imputes missing $\bar{m}_s$ values with the cohort mean rather than zero \cite{little2014statistical}; using zero would make it so every uncovered student has zero mastery, biasing their mastery gap upwards and over-flagging them.
+The improved model fills in missing $\bar{m}_s$ values with the cohort mean rather than zero \cite{little2014statistical}; using zero would make it so every uncovered student has zero mastery, biasing their mastery gap upwards and over-flagging them.
 Mean imputation preserves the cohort-level scale and remains neutral on the affected sub-population.
 
 
@@ -681,8 +681,99 @@ Students with very few submissions are therefore stabilised by the same mechanis
 
 \subsection{Retrieval-Augmented Generation Feedback Design}
 
+This section describes the retrieval-augmented generation (RAG) layer that produces coaching suggestions for the lab assistants and instructors.
+The architecture adopts a hybrid two-layer retrieval architecture, in which a structured pre-filter narrows the candidate set before a semantic search ranks it (Figure~\ref{fig: rag architecture}).
+The design grounds LLM output in the session's own submission history; this mitigates the hallucination risk that has been flagged as a major concern when deploying generative models in educational settings \cite{lewisRetrievalAugmentedGenerationKnowledgeIntensive2020,kasneciChatGPTGoodOpportunities2023}.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        node distance = 0.9cm and 1.0cm,
+        component/.style = {
+            rectangle, draw, rounded corners=2pt,
+            minimum width=5.0cm, minimum height=1.0cm,
+            align=center, font=\small, fill=blue!4
+        },
+        sidenote/.style = {
+            rectangle, draw, dashed, rounded corners=2pt,
+            minimum width=3.8cm, minimum height=1.0cm,
+            align=center, font=\footnotesize\itshape, fill=gray!8
+        },
+        output/.style = {
+            rectangle, draw, rounded corners=2pt,
+            minimum width=4.0cm, minimum height=1.0cm,
+            align=center, font=\small, fill=green!6
+        },
+        flow/.style = {-{Stealth[length=2.5mm]}, thick},
+        grouplabel/.style = {font=\footnotesize\itshape, anchor=west}
+    ]
+        % - Input -
+        \node[component] (input) {Session data\\\footnotesize\itshape submissions, struggle scores, mistake clusters};
+
+        % - Layer 1: structured pre-filter -
+        \node[component, below=of input] (prefilter) {\textbf{Layer~1} - Structured pre-filter\\\footnotesize\itshape by student (assistant) \;|\; by question (instructor)};
+
+        % - Layer 2: semantic retrieval -
+        \node[component, below=of prefilter] (semantic) {\textbf{Layer~2} - Semantic retrieval\\\footnotesize\itshape embedding model \,+\, ANN index over vector store};
+
+        % - Side-fed struggle context -
+        \node[sidenote, right=1.6cm of semantic] (struggle) {Struggle context\\score, level,\\top-incorrect questions};
+
+        % - Prompt assembly -
+        \node[component, below=of semantic] (prompt) {Prompt assembly\\\footnotesize\itshape retrieved snippets \,+\, struggle context};
+
+        % - Language model -
+        \node[component, below=of prompt] (lm) {Language model\\\footnotesize\itshape generates short bulleted output};
+
+        % - Output branches -
+        \node[output, below left = 1.0cm and -0.4cm of lm] (assistant)
+            {Assistant card\\\footnotesize\itshape coaching bullets};
+        \node[output, below right = 1.0cm and -0.4cm of lm] (instructor)
+            {Question Detail view\\\footnotesize\itshape misconception bullets};
+
+        % - Dashed group around the two-layer retrieval -
+        \begin{scope}[on background layer]
+            \node[draw, dashed, rounded corners=4pt,
+                  fit=(prefilter)(semantic),
+                  inner sep=0.4cm] (retgroup) {};
+        \end{scope}
+        \node[grouplabel] at (retgroup.north east) [xshift=2mm] {Two-layer retrieval};
+
+        % - Arrows -
+        \draw[flow] (input)     -- (prefilter);
+        \draw[flow] (prefilter) -- (semantic);
+        \draw[flow] (semantic)  -- (prompt);
+        \draw[flow] (struggle.west) -- (prompt.east);
+        \draw[flow] (prompt)    -- (lm);
+        \draw[flow] (lm.south)  -- ++(0,-0.4) -| (assistant.north);
+        \draw[flow] (lm.south)  -- ++(0,-0.4) -| (instructor.north);
+    \end{tikzpicture}
+    \caption{Two-layer retrieval-augmented generation pipeline describing the whole process from session data to final output for both assistants and instructors.}
+    \label{fig: rag architecture}
+\end{figure}
+
+
+\paragraph{Two-layer retrieval}
+Each layer in the architecture applies a different selection mechanism, and the two together narrow down the search space before generation.
+\begin{itemize}
+    \item \textbf{Layer 1: Structured Filter -} A query about a single student is restricted to that student's submissions, and a query about a single question is restricted to submissions on that question. The pre-filter operates over the structured attributes already present in the session data, returning only the rows relevant to the query.
+    \item \textbf{Layer 2: Semantic Search -} The pre-filtered submissions are ranked by similarity to the query in a vector embedding space \cite{reimersSentenceBERTSentenceEmbeddings2019}, with an approximate nearest neighbour index \cite{malkovEfficientRobustApproximate2016} used in place of exact search to keep retrieval within the dashboard's interactive refresh rate. The structured filter is repeated at this layer through metadata constraints so the two layers cannot disagree.
+\end{itemize}
+
+The pre-filter narrows the candidate set to documents that are relevant to the request; the semantic layer then ranks that smaller set by content similarity.
+The reverse ordering, where the semantic search is first and the structured filter is second, would embed every submission, retrieve a globally similar subset, and then discard most of it, which wastes embedding effort on submissions that were never going to satisfy the structured constraints.
+
+\paragraph{Prompt construction and outputs}
+The retrieved documents are passed to an LLM alongside structured context derived from the rest of the dashboard: the student's struggle score and level, their highest incorrectness questions, and the retrieved submission snippets themselves. The model is instructed to return a short bulleted summary for both assistants and instructors.
+
+\paragraph{Tailoring the pipeline to two audiences}
+The same RAG pipeline serves two distinct audiences with different needs: lab assistants and instructors. 
+On the assistant side, the structured pre-filter narrows to a single student and the output is framed as one-on-one coaching advice.
+On the instructor side, the pre-filter narrows to a single question and the output is framed as class-wide feedback on common mistakes and misconceptions grounded in the mistake clusters from Section \ref{sec: mistake clustering}. 
+Sharing the pipeline avoids duplicating the embedding and retrieval infrastructure, while the surface-specific prompts keep each output relevant to its audience.
+
 \subsection{Interaction and UI Designs}
-This section describes how the output of our models defined in Section \ref{sec: student struggle} and \ref{sec: task difficulty} is presented to instructors in a way that enables quick dec`ision-making during lab sessions. The design is intended to provide an intuitive view.
+This section describes how the output of our models defined in Section \ref{sec: student struggle} and \ref{sec: task difficulty} is presented to instructors in a way that enables quick decision-making during lab sessions. The design is intended to provide an intuitive view.
 
 \subsubsection{Design Principles}
 The user interface is driven by the requirement to expose the model outputs defined in Sections \ref{sec: student struggle} and \ref{sec: task difficulty} in a form that enables rapid, intuitive interpretation and decision-making. Unlike the previous dashboard we explored, this one will be more intuitive and will be used primarily for computer labs.
@@ -694,12 +785,12 @@ A further objective is to allocate lab assistants to students so they can help p
 Finally, the system focuses on supporting decision-making rather than explanatory analysis. The dashboard is intended to guide instructors towards timely intervention by highlighting students and tasks requiring attention and enabling efficient allocation of lab assistants.
 
 \subsubsection{Instructor Views}
-The dashboard provides a real-time overview of student struggles and question difficulty during the computer labs. The dashboard is will allow the instructor to make quick decisions and aid those in need. To illustrate the proposed interface, a dashboard mock-up was created using Figma. The mock-up represents a conceptual design rather than a fully implemented system.
+The dashboard provides a real-time overview of student struggles and question difficulty during the computer labs. The dashboard will allow the instructor to make quick decisions and aid those in need. To illustrate the proposed interface, three Figma mock-ups are presented in Figma~\ref{fig: figma} - \ref{fig: figma3}. The deployed implementation that follows this design is described in the implementation chapter.  
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{figures/design-and-architecture/figma1.png}
-    \caption{Views based off student struggle and question difficulty}
+    \caption{Views based on student struggle and question difficulty}
     \label{fig: figma1}
 \end{figure}
 As shown in Figure \ref{fig: figma1}, our dashboard has two key views: the first shows a list of students whose struggles are at certain thresholds, hence the colour; the second shows a list of questions based on difficulty at a threshold, thus the colour. The values used for comparison against the thresholds are derived from our student struggle and question difficulty equations. The view also allows instructors to go over additional information.
@@ -716,12 +807,46 @@ In Figure \ref{fig: figma2}, we can select a lab assistant and then press a stud
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{figures/design-and-architecture/figma3.png}
-    \caption{Assistant leaderboard, based on how many students have been help}
+    \caption{Assistant leaderboard, based on how many students have been helped}
     \label{fig: figma3}
 \end{figure}
 In Figure \ref{fig: figma3}, we can see that lab assistants are displayed based on their contributions. By gamifying the helping process, we can incentivise assistants to help more students.
 
 \subsubsection{Lab Assistant View}
+
+The lab assistant view is the mobile interface designed for assistants moving between students during a live session. Unlike the lab instructor dashboard, which assumes a stationary screen and wide canvas, the assistant view is built for short interactions on a handheld device. The interface presents one of three states at any moment, each scoped to the assistant's current responsibility: joining a session, waiting for an assignment, or helping the student they have been assigned. Figure~\ref{fig: assistant views} shows the three states in sequence.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[t]{0.31\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/design-and-architecture/figma4.png}
+        \caption{Session join}
+        \label{fig: figma4}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.31\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/design-and-architecture/figma5.png}
+        \caption{Waiting for assignment}
+        \label{fig: figma5}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.31\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/design-and-architecture/figma6.png}
+        \caption{Assigned student}
+        \label{fig: figma6}
+    \end{subfigure}
+    \caption{The three states of the lab assistant view: \subref{fig: figma4} the session-join screen where the assistant enters the session code and their name; \subref{fig: figma5} the waiting state with a priority list of unassigned struggling students; \subref{fig: figma6} the assigned-student card showing struggle context, prioritised questions, and coaching prompts from the RAG layer.}
+    \label{fig: assistant views}
+\end{figure}
+
+On first access (Figure~\ref{fig: figma4}), the assistant enters the session code shown on the instructor dashboard and provides their name. The session code is short enough to be read aloud by the instructor and typed without errors; the name is recorded so subsequent allocation decisions can address assistants individually. Once joined, the assistant is enrolled in the session and remains until they leave, are removed, or the session ends.
+
+Between assignments (Figure~\ref{fig: figma5}), the assistant sees a ranked list of students currently flagged for help, ordered by their struggle score. The assistant may wait for the instructor to allocate them directly, or self-claim a student from the list when the instructor has enabled this. The same list is visible to every joined assistant; once a student is claimed, they are removed from the unassigned pool so two assistants cannot end up at the same desk.
+
+Once a student is assigned (Figure~\ref{fig: figma6}), the view collapses to a single student card carrying the information the assistant needs at the desk: the student's current struggle context, the questions they are most incorrect on, and a short list of coaching prompts retrieved from the RAG layer described in Section~\ref{sec: rag}. A \emph{Mark Helped} action returns the assistant to the unassigned state.
 
 \subsubsection{Visual Encoding of Metrics}
 
