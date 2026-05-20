@@ -22,7 +22,7 @@ from backend import demo_data
 from backend.cache import load_active_struggle_df
 from backend.deps import TimeWindow, get_dataframe, get_time_window
 from backend.schemas import RagSuggestions
-from backend import analytics, lab_state, rag
+from backend import clustering, incorrectness, lab_state, rag
 
 router = APIRouter(prefix="/rag", tags=["rag"])
 
@@ -116,9 +116,9 @@ async def question_suggestions(
     def _work() -> list[str]:
         local = q_df
         if "incorrectness" not in local.columns:
-            local["incorrectness"] = analytics.compute_incorrectness_column(local)
+            local["incorrectness"] = incorrectness.compute_incorrectness_column(local)
         try:
-            clusters = analytics.cluster_question_mistakes(local, question_id) or []
+            clusters = clustering.cluster_question_mistakes(local, question_id) or []
         except Exception:
             clusters = []
         try:

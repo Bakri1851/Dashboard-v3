@@ -178,7 +178,7 @@ RAG_MIN_SUBMISSIONS: int = 2                     # min student submissions befor
 # tens of seconds on CPU. The shared `submissions` ChromaDB collection holds
 # a stratified per-ISO-week sample instead of the full dataframe. Set
 # RAG_SAMPLE_PER_WEEK = 0 to disable sampling and embed the entire dataset.
-RAG_SAMPLE_PER_WEEK: int = 500
+RAG_SAMPLE_PER_WEEK: int = 150
 RAG_SAMPLE_SEED: int = 42
 
 

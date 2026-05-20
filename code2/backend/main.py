@@ -40,7 +40,7 @@ if not os.environ.get("OPENAI_API_KEY"):
 
 from backend.cache import load_dataframe, load_difficulty_df, load_struggle_df
 from backend.routers import analysis, cf, lab, live, meta, models_cmp, question, rag, sessions, settings, student
-from backend import analytics, lab_state
+from backend import analytics, incorrectness, lab_state
 from backend import rag as rag_module
 from backend.models import bkt as _bkt
 
@@ -94,7 +94,7 @@ async def lifespan(app: FastAPI):
                 feedbacks = df["ai_feedback"].astype(str).str.strip()
                 unique_fbs = [t for t in feedbacks.unique() if t]
                 if unique_fbs:
-                    cached_count = sum(1 for t in unique_fbs if t in analytics._incorrectness_cache)
+                    cached_count = sum(1 for t in unique_fbs if t in incorrectness._incorrectness_cache)
                     warm_ratio = cached_count / len(unique_fbs)
                 else:
                     warm_ratio = 1.0
@@ -105,13 +105,13 @@ async def lifespan(app: FastAPI):
                         100.0 * warm_ratio, cached_count if unique_fbs else 0, len(unique_fbs),
                     )
                     try:
-                        df["incorrectness"] = analytics.compute_incorrectness_column(df, score_new=False)
+                        df["incorrectness"] = incorrectness.compute_incorrectness_column(df, score_new=False)
                     except Exception as e:  # noqa: BLE001
                         logger.warning("prewarm: lookup-only scoring raised: %s", e)
                 else:
                     t_score = _time.monotonic()
                     try:
-                        df["incorrectness"] = analytics.compute_incorrectness_column(df, max_new_scores=0)
+                        df["incorrectness"] = incorrectness.compute_incorrectness_column(df, max_new_scores=0)
                         logger.info("prewarm: full incorrectness scoring done in %.1fs", _time.monotonic() - t_score)
                     except Exception as e:  # noqa: BLE001
                         logger.warning("prewarm: full scoring raised: %s", e)

@@ -14,7 +14,7 @@ from backend.schemas import (
     StudentQuestionRow,
     StudentRecentRow,
 )
-from backend import analytics, config
+from backend import config, incorrectness
 
 router = APIRouter(tags=["student"])
 
@@ -71,7 +71,7 @@ def get_student(
 
     # --- trajectory (up to last 10 incorrectness scores, chronological) ----
     if "incorrectness" not in user_df.columns:
-        user_df["incorrectness"] = analytics.compute_incorrectness_column(user_df)
+        user_df["incorrectness"] = incorrectness.compute_incorrectness_column(user_df)
     ts = pd.to_datetime(user_df["timestamp"], errors="coerce", utc=True)
     user_df = user_df.assign(_ts=ts).sort_values("_ts", kind="stable")
     trajectory = user_df["incorrectness"].dropna().tail(10).astype(float).tolist()

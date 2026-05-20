@@ -23,12 +23,12 @@ from backend.schemas import (
     CFElevatedStudent,
     SimilarStudent,
 )
-from backend import analytics
+from backend import collab
 
 router = APIRouter(tags=["cf"])
 
 
-_CF_FEATURES = analytics.CF_FEATURES  # ["n_hat", "t_hat", "i_norm", "A_norm", "d_hat"]
+_CF_FEATURES = collab.CF_FEATURES  # ["n_hat", "t_hat", "i_norm", "A_norm", "d_hat"]
 # Graceful fallback if struggle_df doesn't expose *_norm variants — use raw.
 _CF_FEATURE_FALLBACKS = {
     "i_norm": "i_hat",
@@ -76,7 +76,7 @@ def get_cf(window: TimeWindow = Depends(get_time_window)) -> CFDiagnostics:
 
     # Run the analytics function directly to reuse its logic.
     try:
-        _cf_series, diagnostics = analytics.compute_cf_struggle_scores(
+        _cf_series, diagnostics = collab.compute_cf_struggle_scores(
             struggle_df, threshold=rc.cf_threshold, k=3
         )
     except Exception as e:
@@ -86,7 +86,7 @@ def get_cf(window: TimeWindow = Depends(get_time_window)) -> CFDiagnostics:
             fallback=True, reason=f"{type(e).__name__}: {e}", elevated_students=[],
         )
 
-    # Shape the elevated list for the UI. analytics.compute_cf_struggle_scores
+    # Shape the elevated list for the UI. collab.compute_cf_struggle_scores
     # emits rows keyed for the legacy table schema ("Student" / "Parametric
     # Score" / "CF Score"); the React frontend expects snake_case, and level
     # isn't carried in the dict, so look it up from struggle_df.

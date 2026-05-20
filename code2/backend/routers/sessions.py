@@ -33,7 +33,7 @@ from backend.schemas import (
     SavedSession,
     SessionProgression,
 )
-from backend import analytics, data_loader, paths
+from backend import data_loader, difficulty, paths, struggle
 
 logger = logging.getLogger("backend.sessions")
 
@@ -316,11 +316,11 @@ def get_session_progression(
         slice_df = working.iloc[:end_idx].drop(columns=["_ts"])
 
         try:
-            struggle_df = analytics.compute_student_struggle_scores(slice_df)
+            struggle_df = struggle.compute_student_struggle_scores(slice_df)
         except Exception:
             struggle_df = pd.DataFrame()
         try:
-            difficulty_df = analytics.compute_question_difficulty_scores(slice_df)
+            difficulty_df = difficulty.compute_question_difficulty_scores(slice_df)
         except Exception:
             difficulty_df = pd.DataFrame()
 

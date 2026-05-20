@@ -30,7 +30,7 @@ from backend.schemas import (
     StrugglingQuestionRow,
     StudentIdRequest,
 )
-from backend import analytics, lab_state
+from backend import incorrectness, lab_state
 
 router = APIRouter(prefix="/lab", tags=["lab"])
 
@@ -203,7 +203,7 @@ def struggling_questions(
         return []
 
     if "incorrectness" not in student_df.columns:
-        student_df["incorrectness"] = analytics.compute_incorrectness_column(student_df)
+        student_df["incorrectness"] = incorrectness.compute_incorrectness_column(student_df)
 
     q_scores = (
         student_df.groupby("question")["incorrectness"]

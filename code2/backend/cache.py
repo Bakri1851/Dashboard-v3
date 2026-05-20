@@ -15,7 +15,7 @@ from typing import Optional
 import pandas as pd
 from cachetools import TTLCache
 
-from backend import analytics, config, data_loader, lab_classes
+from backend import config, data_loader, difficulty, incorrectness, lab_classes, struggle
 from backend.models import bkt, improved_struggle, irt
 
 logger = logging.getLogger("backend.cache")
@@ -118,7 +118,7 @@ def _load_dataframe_uncached() -> tuple[pd.DataFrame, str]:
         # call). Uncached feedbacks resolve to 0.5 here and upgrade to real
         # scores on the next cache expiry once the prewarm has populated them.
         try:
-            df["incorrectness"] = analytics.compute_incorrectness_column(df, score_new=False)
+            df["incorrectness"] = incorrectness.compute_incorrectness_column(df, score_new=False)
         except Exception:
             pass
 
@@ -182,7 +182,7 @@ def load_struggle_df(
             return _struggle_cache[key]
         df, _ = load_dataframe()
         sliced = _slice_df(df, from_, to_, module)
-        result = analytics.compute_student_struggle_scores(sliced)
+        result = struggle.compute_student_struggle_scores(sliced)
         _struggle_cache[key] = result
         return result
 
@@ -201,7 +201,7 @@ def load_difficulty_df(
             return _difficulty_cache[key]
         df, _ = load_dataframe()
         sliced = _slice_df(df, from_, to_, module)
-        result = analytics.compute_question_difficulty_scores(sliced)
+        result = difficulty.compute_question_difficulty_scores(sliced)
         _difficulty_cache[key] = result
         return result
 

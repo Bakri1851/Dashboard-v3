@@ -11,29 +11,43 @@ V2 builds on V1, with every feature from V1 reimplemented in V2, additional feat
 V1 is the first iteration of the dashboard, which served as a proof of concept and testbed for core features and design decisions.
 V2 is the second iteration, which is a complete rewrite of V1 to address its limitations and scale up to a production-ready system. 
 
-Both versions use an identical analytical core \texttt{learning\_dashboard/} which covers data ingestion, scoring, modelling RAG feedback generation and the saved session history. Both 
 
-\subsection{Technology Stack}
+%A single analytical core sits behind both versions. The Python package \texttt{learning\_dashboard/} --- covering data ingestion, scoring, modelling, retrieval-augmented feedback, and saved-session persistence --- is reused by V2 unchanged, as a physical copy under \texttt{code2/learning\_dashboard/}. The only divergence between the two copies is a four-line refactor to the OpenAI-key guard that allows V2's FastAPI startup probe to verify dependencies without the application secrets present; no scoring code, no model code, and no retrieval code differs across the two versions. The two versions further share a single runtime-state file, \texttt{data/lab\_session.json}, coordinated through the \texttt{filelock} library: the live-session metadata, the joined-assistant roster, and the student-to-assistant assignment map are written and read by all three processes (V1 instructor, V1 assistant, V2 backend) under a five-second exclusive lock, so a session started in V1 becomes visible to V2 within approximately five seconds and vice versa. The implication is that the analytical contribution of this work is genuinely decoupled from the presentation layer, and the existence of V2 is itself evidence of that decoupling.
+
+The motivation behind the second iteration of the dashboard is highlighted later on in the section. The first iteration had a Streamlit foundation that was ideal for rapid prototyping and early user feedback, but was limiting in terms of performance, scalability and flexibility. The limitation of rerunning the entire script on every interaction meant that the system struggled to maintain a responsive user experience which complicates asynchronous work. 
+The second iteration addresses these limitations by moving these constraints to the presentation layer to React and the backend to FastAPI whilst keeping the analytical core untouched. 
+The comparison between V1 and V2 is a recurring theme in the implementation section, as it provides a useful lens to explain the rationale behind design decisions and the trade-offs involved. 
+
+This chapter is organised top-down so that Section \ref{sec:techstack} describes the tech stack used by both versions. 
+Section \ref{sec:structure} describes the runtime processes, the shared runtime state and the deferred-actions pattern that underpins V1's reactive interactions. 
+Section \ref{sec:pipeline} and \ref{sec:session} cover the data pipeline from the lab endpoint to the in-memory dataframe and the live and saved-session lifecycles. 
+Section \ref{sec:analytics} covers the baseline analytics and Section \ref{sec:advanced} covers the advanced modelling layer of measurement confidence, item-response-theory difficulty, Bayesian knowledge-tracing mastery, and the improved struggle model that combines them. 
+Section \ref{sec:rag} covers the retrieval-augmented feedback layer that produces real-time coaching suggestions for the lab assistant.
+Section \ref{sec:views} and \ref{sec:assistant} walk through the instructor views and the lab-assistant flows respectively. 
+Section \ref{sec:problems} highlights the implementation problems encountered and the resolutions adopted.
+
+
+\subsection{Technology Stack} \label{sec:techstack}
 
 % TODO: write per Ch4 Rewrite Brief §4.2 — drop in tab:techstack-v2 from Part H when ready
 
-\subsection{System Structure}
+\subsection{System Structure} \label{sec:structure}
 
 % TODO: write per Ch4 Rewrite Brief §4.3 — opening paragraph; reference fig:arch-v2 (architecture diagram)
 
-\subsubsection{V1 - Instructor Process (Streamlit)}
+\subsubsection{V1 - Instructor Process (Streamlit)} 
 
 % TODO: write per Ch4 Rewrite Brief §4.3.1
 
-\subsubsection{V1 - Assistant Process (Streamlit, mobile)}
-
+\subsubsection{V1 - Assistant Process (Streamlit, mobile)} 
 % TODO: write per Ch4 Rewrite Brief §4.3.2
 
-\subsubsection{V2 - React + FastAPI}
+\subsubsection{V2 - React + FastAPI} \label{sec:v2-react-fastapi}
 
 % TODO: write per Ch4 Rewrite Brief §4.3.3 — open with the "Why V2?" paragraph naming concrete V1 limitations
 
-\subsubsection{Shared Runtime State}
+\subsubsection{Shared Runtime State} 
+
 
 % TODO: write per Ch4 Rewrite Brief §4.3.4
 

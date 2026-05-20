@@ -14,7 +14,7 @@ from backend.schemas import (
     QuestionRecentAttempt,
     QuestionStudentRow,
 )
-from backend import analytics, config
+from backend import clustering, config, incorrectness
 
 router = APIRouter(tags=["question"])
 
@@ -53,7 +53,7 @@ def get_question(
 
     # --- ensure incorrectness column for cluster + rate calcs -------------
     if "incorrectness" not in q_df.columns:
-        q_df["incorrectness"] = analytics.compute_incorrectness_column(q_df)
+        q_df["incorrectness"] = incorrectness.compute_incorrectness_column(q_df)
 
     wrong_mask = q_df["incorrectness"] > config.CORRECT_THRESHOLD
     incorrect_rate = float(wrong_mask.mean()) if len(q_df) else 0.0
@@ -69,7 +69,7 @@ def get_question(
 
     # --- clusters ---------------------------------------------------------
     try:
-        clusters = analytics.cluster_question_mistakes(q_df, question_id) or []
+        clusters = clustering.cluster_question_mistakes(q_df, question_id) or []
     except Exception:
         clusters = []
     mistake_clusters = [

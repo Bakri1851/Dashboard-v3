@@ -39,7 +39,7 @@ class StudentRecentRow(BaseModel):
 
 
 class MistakeCluster(BaseModel):
-    """One mistake cluster from `analytics.cluster_question_mistakes`."""
+    """One mistake cluster from `clustering.cluster_question_mistakes`."""
     label: str
     count: int
     percent_of_wrong: float

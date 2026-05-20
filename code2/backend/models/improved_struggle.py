@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 from scipy.special import expit
 
-from .. import analytics, config
+from .. import analytics, config, incorrectness, struggle
 
 
 # ------------------------------------------------------------------
@@ -59,12 +59,12 @@ def compute_improved_struggle_scores(
 
     work = df.copy()
     if "incorrectness" not in work.columns:
-        work["incorrectness"] = analytics.compute_incorrectness_column(work)
+        work["incorrectness"] = incorrectness.compute_incorrectness_column(work)
     # Attach per-row measurement confidence so the behavioral signals
     # (A_raw via compute_recent_incorrectness, and the difficulty-adjusted
     # branch) downweight low-confidence rows.
     if "incorrectness_confidence" not in work.columns:
-        work["incorrectness_confidence"] = analytics.compute_feedback_confidence(
+        work["incorrectness_confidence"] = incorrectness.compute_feedback_confidence(
             work["ai_feedback"] if "ai_feedback" in work.columns else pd.Series("", index=work.index),
             work["incorrectness"],
         )
@@ -100,8 +100,8 @@ def compute_improved_struggle_scores(
     for user, group in grouped:
         n = len(group)
 
-        a_raw = analytics.compute_recent_incorrectness(group)
-        d_raw = analytics._compute_slope(group)
+        a_raw = struggle.compute_recent_incorrectness(group)
+        d_raw = struggle._compute_slope(group)
 
         unique_q = group["question"].nunique()
         r_hat = 1.0 - (unique_q / n) if n > 0 else 0.0
@@ -139,7 +139,7 @@ def compute_improved_struggle_scores(
     # dominant-module label, minority-module students collapse to single-
     # member groups where every signal snaps to 0.5, producing a struggle
     # score of exactly 0.5 → "Needs Help" for every such student. See
-    # analytics.compute_student_struggle_scores for the full rationale.
+    # struggle.compute_student_struggle_scores for the full rationale.
     result["d_hat"] = analytics.min_max_normalize(result["d_raw"])
     result["A_norm"] = analytics.min_max_normalize(result["A_raw"])
     result["r_norm"] = analytics.min_max_normalize(result["r_hat"])
