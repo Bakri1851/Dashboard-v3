@@ -21,11 +21,11 @@ Related: [[Thesis Overview]], [[Rewrite Queue]], [[Evidence Bank]], [[Figures an
 **What the project does:** The dashboard is built and operational. Most objectives are addressed by the V2 codebase.
 
 **Mismatches:**
-- Future tense throughout — reads as a proposal, not a description of a built system
-- Risk table mitigations are generic ("seek constant feedback", "explore smartwatch solutions") rather than describing what was actually done
+- Future tense throughout — reads as a proposal, not a description of a built system (Rewrite Queue line 37 marks this **done**; Full Roadmap Step 4 item 1 is stale and should be ticked off)
+- Risk table mitigations are generic ("seek constant feedback", "explore smartwatch solutions") rather than describing what was actually done — **row-by-row brief landed in [[Rewrite Queue]] 2026-05-19; awaiting LaTeX transcription into `introduction.tex:75-95`**
 - Objective 7 ("evaluate approach") has no evaluation chapter written yet
 
-**Sections needing rewrite:** Review future-tense phrasing across all subsections. Update risk mitigations to reflect actual decisions made.
+**Sections needing rewrite:** Risk-table mitigation rewrite is briefed and ready to transcribe; future-tense pass already closed. No further Ch1 rewrite tasks pending.
 
 **Evidence needed:** None specific — this is framing content.
 
@@ -40,12 +40,12 @@ See [[Ch1 – Introduction]] for full chapter analysis.
 **What the project does:** FR1-FR5 are fully implemented. FR6 (smart devices) is not implemented. FR7 (assistant ranking) is partially implemented (leaderboard concept exists in assistant system but no ranking by student satisfaction).
 
 **Mismatches:**
-- `[FILL IN]` placeholder at research gaps (line 119) — a commented-out draft exists immediately below but needs review and uncommenting
+- Research gaps section (now §2.6 at `requirements-specification.tex:281`) — `[FILL IN]` placeholder is gone; commented-out draft at `:285-294` still wrapped in `\begin{comment}...\end{comment}`. **Row-by-row revision brief landed in [[Rewrite Queue]] 2026-05-19; awaiting uncomment + paragraph-level rewrite.**
 - Requirements have no implementation status mapping — reader cannot tell which are done
 - FR6 (smart devices) is listed as "Should Have" but is completely unimplemented
-- Literature review is solid and mostly version-independent
+- Literature review is solid; the three new methods subsections (KT/BKT, Text Mining, RAG + Dense Retrieval) were landed earlier and are no longer outstanding.
 
-**Sections needing rewrite:** Fill research gaps. Add implementation status to requirements. Clarify FR6 status honestly.
+**Sections needing rewrite:** Research gaps — uncomment + revise per brief. Add implementation-status column to FR/NFR tables. Move FR6 from "Should Have" to "Won't Have" (or rewrite as honest future work).
 
 **Evidence needed:** Requirements traceability matrix showing FR/NFR to code mapping.
 
@@ -82,7 +82,7 @@ See [[Ch2 – Background and Requirements]] for full chapter analysis.
 | §3.5 RAG Feedback Design — fill empty stub (hybrid two-layer retrieval, design-level register) | **Done 2026-05-19** | `design-and-architecture.tex:682-773`
 | §3.6.2 Figma figures — typos cleaned 2026-05-19; design-vs-implementation reframe deferred (mockups stay in Ch3 as design artifacts, NOT replaced by screenshots) | **Partial — typos done** | `design-and-architecture.tex:788-813` |
 | §3.6.3 Lab Assistant View — fill empty stub (Join / Waiting / Assigned states) + subfigure-row consolidation | **Done 2026-05-19** (Figma mockups pending) | `design-and-architecture.tex:815-848`
-| §3.1 architecture diagram — redraw for V2 (`models/`, RAG, lab assistant, `lab_session.json`) | Queued for Step 8a | `figures/design-and-architecture/architecture-diagram.png` |
+| §3.1 architecture diagram — redraw for V2 (`models/`, RAG, lab assistant, `lab_session.json`) | **Done 2026-05-20** — TikZ inline replaces the V1 PNG; old PNG no longer referenced (file kept on disk). | inline TikZ in `design-and-architecture.tex:9-93` |
 
 **Standing mismatches still present** (will close as sub-tasks above complete):
 
@@ -128,7 +128,13 @@ See [[Ch3 – Design and Modelling]] for full chapter analysis.
 
 ---
 
-## Ch4 Implementation — Status: Outdated (CRITICAL)
+## Ch4 Implementation — Status: Brief delivered, user authoring (2026-05-20)
+
+> **Update 2026-05-20:** Full-rewrite brief delivered at [[Ch4 Rewrite Brief]] — a single vault note covering every subsection of the new chapter outline, with maths recap lines, drop-in LaTeX tables, figure slots (11 UI screenshots + 2 architecture/flow + 4 code-snippet images + 6 typeset tables), citation hooks, and a closing section explaining how Marker 1 / Marker 2 feedback on F221611 was folded into the brief. User to author `Report/main-sections/implementation.tex` against the brief; chapter-level status remains "Outdated" until the LaTeX is rewritten, but no further analysis work is needed.
+>
+> **Framing decision 2026-05-20:** The thesis brands the Streamlit stack (`code/`) as **V1** and the React + FastAPI stack (`code2/`) as **V2**. V2 is the evolution of V1's presentation layer, not an "alternative". Both are deployed and demonstrable; V1 is not a prototype. The brief's §4.3.3 carries a "Why V2?" paragraph naming concrete V1 limitations (single-threaded reruns, weak theming, no native async, no SPA navigation) and the §4.9.0 `tab:views-comparison` table compares V1 and V2 view-by-view. The "What the report says / What the project does / Mismatches" notes below remain as the rationale for the rewrite — they are no longer a punch-list.
+
+### Original analysis (pre-brief, retained for context)
 
 **What the report says:** Explicitly describes "Version 1" — a prototype with basic data pipeline, simple threshold-based indicators, Streamlit+Plotly stack, interval-based refresh. States: "Most advanced features, such as model-driven prioritisation, assistant allocation and smart device notifications, are to be implemented in the later iteration." Lists current V1 as proof of concept.
 

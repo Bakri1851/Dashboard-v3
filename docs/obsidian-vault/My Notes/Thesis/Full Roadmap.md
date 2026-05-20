@@ -59,11 +59,11 @@ Surgical edits — the chapter structure is solid, specific sections need updati
 
 ### 4. Ch1 & Ch2 — Language and framing `Writing · Small`
 
-- [ ] Convert future tense in Ch1 §1.2, §1.3, §1.5 to past/present
+- [x] Convert future tense in Ch1 §1.2, §1.3, §1.5 to past/present
 - [ ] Update Table 1 risk mitigations with actual decisions made
 - [ ] Fill Ch2 §2.1.7 research gaps (uncomment and revise draft at lines 121–130)
 - [ ] Add implementation status column to FR/NFR tables; clarify FR6 is unimplemented
-- [ ] **Add three new Ch2 subsections (Knowledge Tracing, Text Mining, RAG) + citation extensions to §2.1.4/§2.1.6/§2.1.7** — see "Methods lit-review backlog (2026-04-18)" in [[Rewrite Queue]].
+- [x] **Add three new Ch2 subsections (Knowledge Tracing, Text Mining, RAG) + citation extensions to §2.1.4/§2.1.6/§2.1.7** — see "Methods lit-review backlog (2026-04-18)" in [[Rewrite Queue]]. *Done — KT at `requirements-specification.tex:99`, Text Mining at `:152`, RAG at `:186`, bonus Dense Retrieval & ANN at `:197`. Citation extensions to §2.1.4/§2.1.6/§2.1.7 still tracked separately in the Rewrite Queue methods lit-review backlog.*
 
 *Unblocks: Ch4 — existing chapter framing is now consistent before the implementation chapter is rewritten.*
 
@@ -72,6 +72,8 @@ Surgical edits — the chapter structure is solid, specific sections need updati
 ### 5. Ch4 — Implementation rewrite `Writing · Large`
 
 Rewrite the entire chapter — it currently describes V1 only. Cover the full V2 system. Add `[TODO: insert figure]` placeholders for Appendix B screenshots; these will be filled in at step 8.
+
+*Brief delivered 2026-05-20 at [[Ch4 Rewrite Brief]] — single vault note, ~12 subsection blocks, drop-in LaTeX for tables, 11 figure slots with pre-written captions + `\label{}` keys, citation hooks listed, Marker 1 (no math-modelling) and Marker 2 (no comparison study) lessons from F221611 folded in. **Thesis branding decision 2026-05-20: Streamlit stack (`code/`) = V1, React + FastAPI stack (`code2/`) = V2.** V2 is presented as evolution of V1, not "alternative"; both are deployed and V1 is not a prototype. User authors `Report/main-sections/implementation.tex` against the brief; tick the items below as each subsection lands.*
 
 - [ ] Replace scope/introduction section — remove "proof of concept" framing
 - [ ] Update technology stack table to reflect V2 dependencies (filelock, openai, scipy, streamlit-autorefresh)
@@ -353,7 +355,7 @@ Lightweight mobile Help panel for lab assistants covering join guide, student ca
 | 2 | Phase 5 — Comparison UI | Coding | Large | **Done** |
 | 3 | Ch3 — Design updates | Writing | Medium | **Done 2026-05-19** (Figma PNGs + design-vs-implementation reframe deferred) |
 | 4 | Ch1 & Ch2 — Language cleanup | Writing | Small | Not started |
-| 5 | Ch4 — Implementation rewrite | Writing | Large | Not started |
+| 5 | Ch4 — Implementation rewrite | Writing | Large | **Brief delivered 2026-05-20** — [[Ch4 Rewrite Brief]] ready; user authoring |
 | 6 | Ch5 — Results & Evaluation | Writing | Large | Not started |
 | 7 | Ch6 — Conclusion | Writing | Medium | Not started |
 | 8 | Appendix B — Screenshots | Evidence | Small | Not started |

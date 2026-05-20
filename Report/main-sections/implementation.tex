@@ -1,156 +1,193 @@
 \section{Implementation}
 
-This chapter describes the implemented version of the real-time lab support system.
-Earlier work focused on validating the endpoint, testing the data pipeline, and establishing a working dashboard with basic dashboard prototype.
-The current implementation Version 2 (v2) builds on this foundation, allowing for a live instructor dashboard, a lab assistant application that works with the instructor dashboard, session history as well as both baseline and more advanced models.
-
-The implementation is interval-based rather than event-based.
-However, it provides a full end-to-end workflow, from endpoint ingestion, parsing, normalisation to live scoring, student prioritisation and assistant coordination.
-The system represents a functional tool to support instructors and assistants during labs allowing for improved learning outcomes, with the potential for further refinement and expansion in future iterations.
+% TODO: write per Ch4 Rewrite Brief §4.1 — chapter intro paragraph(s) (V1/V2 framing)
 
 \subsection{Implementation Overview}
-The implementation represents Version 1 of the dashboard. Version 1 was implemented to ensure end-to-end functionality worked as planned and to experiment with data visualisation rather than to deploy the whole system proposed.
 
-Version 1 focused on establishing a working data pipeline capable of processing live interaction data during labs, aggregating student activity at the lab level, and presenting indicators in near real time. This provides the foundation for the proposed system. By working on Version 1, I have familiarised myself with the relevant technology and the data pipeline.
+The dashboard is deployed in two versions, both are fully featured and runnable in parallel from a single working tree. 
+Version~1 (\texttt{code/}) is a Streamlit implementation that consists of two separate apps: one for instructors and one for lab assistants, each running their own Python process. 
+Version~2 (\texttt{code2/}) is a single app, FastAPI process that servers both an asynchronous HTTP API at \texttt{/api/} and two buld React single-page applications (SPAs) for instructors and assistants respectively. 
+V2 builds on V1, with every feature from V1 reimplemented in V2, additional features added on top and performance improvements. 
+V1 is the first iteration of the dashboard, which served as a proof of concept and testbed for core features and design decisions.
+V2 is the second iteration, which is a complete rewrite of V1 to address its limitations and scale up to a production-ready system. 
 
-The implemented system addresses the core objectives of the project by supporting live monitoring of student progress, prioritisation of students who are struggling, identifications of difficult questions so that lab teachers can go through those questions as a class, and allocation of lab assistants during sessions.
+Both versions use an identical analytical core \texttt{learning\_dashboard/} which covers data ingestion, scoring, modelling RAG feedback generation and the saved session history. Both 
 
-The implementation is made up of a number of components essential to the system's functionality. First 
+\subsection{Technology Stack}
 
-\subsection{Technology Stack and Software Selection}
-
-
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|p{3.5cm}|p{3.5cm}|p{6cm}|}
-    \hline
-   System Component & Technology Used & Purpose and Justification \\
-    \hline
-    \hline
-    Data Source& PHP-based HTTP endpoint & Existing lab infrastructure exposes student interaction as an endpoint\\
-    \hline
-    Data Format& JSON with embedded XML & JSON allows lightweight transport, whilst XML stores structured session-level submission\\
-    \hline
-    Data Processing& Python & Provides strong support for parsing of JSON data and performing numerical computations\\
-    \hline
-    Analytics Logic& Python & Version 1 has simple indicators for student struggle based on thresholds\\
-    \hline
-    Dashboard Framework& Streamlit & Enables fast development of interactive dashboards\\
-    \hline
-    Visualisation library& Plotly & Provides interactive visualisations which are intuitive\\
-    \hline
-    Deployment Environment& Personal Computer & Suitable for testing and prototyping\\
-    \hline
-    \end{tabular}
-    \caption{What was used for each technical aspect and how}
-    \label{tab: selection table}
-\end{table}
-
-The stack highlighted in Table \ref{tab: selection table} enables a unified development workflow, in which data ingestion, processing and visualisation are implemented within a single Python environment. Whilst Version 1 relies on refreshing, the architecture will be largely consistent with the proposed system.
+% TODO: write per Ch4 Rewrite Brief §4.2 — drop in tab:techstack-v2 from Part H when ready
 
 \subsection{System Structure}
-\subsubsection{Instructor System}
-\subsubsection{Assistant System}
+
+% TODO: write per Ch4 Rewrite Brief §4.3 — opening paragraph; reference fig:arch-v2 (architecture diagram)
+
+\subsubsection{V1 - Instructor Process (Streamlit)}
+
+% TODO: write per Ch4 Rewrite Brief §4.3.1
+
+\subsubsection{V1 - Assistant Process (Streamlit, mobile)}
+
+% TODO: write per Ch4 Rewrite Brief §4.3.2
+
+\subsubsection{V2 - React + FastAPI}
+
+% TODO: write per Ch4 Rewrite Brief §4.3.3 — open with the "Why V2?" paragraph naming concrete V1 limitations
+
 \subsubsection{Shared Runtime State}
 
+% TODO: write per Ch4 Rewrite Brief §4.3.4
+
+\subsubsection{Deferred-Actions Pattern}
+
+% TODO: write per Ch4 Rewrite Brief §4.3.5
+
 \subsection{Data Pipeline}
-Version 1 implements an interval-based data pipeline designed to support near real-time monitoring during lab sessions. The pipeline proceeds as follows:
-\begin{enumerate}
-    \item \textbf{Data Retrieval: }At fixed intervals the Python application re-requests the full dataset from the existing PHP endpoint. This refresh is implemented within the Python code. The refresh helps ensure that metrics are up to date.
-    \item \textbf{Data Parsing: }The retrieved response, formatted as JSON with embedded XML strings, is parsed within Python. Relevant fields such as question, student and timestamps are extracted
-    \item \textbf{Data Structuring: }Parsed records are transformed into an immediate representation suitable for analysis
-    \item \textbf{Metric Computation: }A naive metric approach was used, where thresholds are used for the attempt amount of a question. This was done to demonstrate the concept
-    \item \textbf{Dashboard Update: }The dashboard is refreshed using the newly computed values, providing an updated view of lab activity each time the Python refresh executes
-\end{enumerate}
-More advanced modelling described in the Design Chapter is not yet integrated and is reserved for the proposed system.
+
+% TODO: write per Ch4 Rewrite Brief §4.4 — opening paragraph; reference fig:pipeline-flow
 
 \subsubsection{Endpoint Retrieval and Parsing}
 
+% TODO: write per Ch4 Rewrite Brief §4.4.1
+
 \subsubsection{Data Normalisation and Structuring}
+
+% TODO: write per Ch4 Rewrite Brief §4.4.2
+
+\subsubsection{Caching Strategy}
+
+% TODO: write per Ch4 Rewrite Brief §4.4.3
 
 \subsection{Session Management}
 
+% TODO: write per Ch4 Rewrite Brief §4.5
+
 \subsubsection{Live Session Lifecycle}
+
+% TODO: write per Ch4 Rewrite Brief §4.5.1
 
 \subsubsection{Saved Session History and Restoration}
 
+% TODO: write per Ch4 Rewrite Brief §4.5.2
+
 \subsection{Analytics Implementation}
+
+% TODO: write per Ch4 Rewrite Brief §4.6
 
 \subsubsection{Incorrectness Scoring}
 
+% TODO: write per Ch4 Rewrite Brief §4.6.1 — REQUIRED maths recap line (Marker-1 check)
+
 \subsubsection{Baseline Student Struggle Model}
+
+% TODO: write per Ch4 Rewrite Brief §4.6.2 — REQUIRED maths recap line; drop in tab:struggle-7sig
 
 \subsubsection{Baseline Question Difficulty Model}
 
+% TODO: write per Ch4 Rewrite Brief §4.6.3 — REQUIRED maths recap line; drop in tab:difficulty-5sig
+
 \subsubsection{Collaborative Filtering}
+
+% TODO: write per Ch4 Rewrite Brief §4.6.4 — REQUIRED maths recap line
 
 \subsubsection{Mistake Clustering}
 
-\subsection{RAG Suggested Feedback}
-
-\subsubsection{Hybrid Two-Layer Architecture}
-
-\subsubsection{Embedding Model (all-MiniLM-L6-v2)}
-
-\subsubsection{Generation and Prompting}
-
-\subsubsection{Suggestion Caching}
-
-\subsubsection{Graceful Degradation and Privacy}
+% TODO: write per Ch4 Rewrite Brief §4.6.5
 
 \subsection{Advanced Model Implementation}
 
+% TODO: write per Ch4 Rewrite Brief §4.7
+
 \subsubsection{Measurement Confidence}
+
+% TODO: write per Ch4 Rewrite Brief §4.7.1 — REQUIRED maths recap line
 
 \subsubsection{Item Response Theory (IRT) Difficulty}
 
-\subsubsection{Bayesian Knowledge Training (BKT) Mastery}
+% TODO: write per Ch4 Rewrite Brief §4.7.2 — REQUIRED maths recap line; \cite{byrdLBFGSB1995}
+
+\subsubsection{Bayesian Knowledge Tracing (BKT) Mastery}
+
+% TODO: write per Ch4 Rewrite Brief §4.7.3 — REQUIRED maths recap line; \cite{corbettKnowledgeTracingModeling1995}; drop in tab:bkt-defaults
 
 \subsubsection{Improved Struggle Model}
 
-\subsection{Lab Instructor System}
+% TODO: write per Ch4 Rewrite Brief §4.7.4 — REQUIRED maths recap line
 
-\subsubsection{In Class View}
+\subsection{RAG Suggested Feedback}
+
+% TODO: write per Ch4 Rewrite Brief §4.8 — no inline supervisor attribution
+
+\subsubsection{Hybrid Two-Layer Architecture}
+
+% TODO: write per Ch4 Rewrite Brief §4.8.1 — include \cite{lewisRetrievalAugmentedGenerationKnowledgeIntensive2020}
+
+\subsubsection{Embedding Model (all-MiniLM-L6-v2)}
+
+% TODO: write per Ch4 Rewrite Brief §4.8.2
+
+\subsubsection{Generation and Prompting}
+
+% TODO: write per Ch4 Rewrite Brief §4.8.3
+
+\subsubsection{Suggestion Caching}
+
+% TODO: write per Ch4 Rewrite Brief §4.8.4
+
+\subsubsection{Graceful Degradation and Privacy}
+
+% TODO: write per Ch4 Rewrite Brief §4.8.5
+
+\subsection{Instructor System Views}
+
+% TODO: write per Ch4 Rewrite Brief §4.9.0 — opening paragraph + drop in tab:views-comparison (V1 vs V2 parity)
+
+\subsubsection{In-Class View}
+
+% TODO: write per Ch4 Rewrite Brief §4.9.1
 
 \subsubsection{Student Detail View}
 
+% TODO: write per Ch4 Rewrite Brief §4.9.2
+
 \subsubsection{Question Detail View}
+
+% TODO: write per Ch4 Rewrite Brief §4.9.3
 
 \subsubsection{Data Analysis View}
 
-\subsubsection{Comparison View}
+% TODO: write per Ch4 Rewrite Brief §4.9.4
+
+\subsubsection{Model Comparison View}
+
+% TODO: write per Ch4 Rewrite Brief §4.9.5
 
 \subsubsection{Settings View}
 
+% TODO: write per Ch4 Rewrite Brief §4.9.6
+
 \subsubsection{Previous Sessions View}
+
+% TODO: write per Ch4 Rewrite Brief §4.9.7
 
 \subsection{Lab Assistant System}
 
+% TODO: write per Ch4 Rewrite Brief §4.10
+
 \subsubsection{Session Join Flow}
+
+% TODO: write per Ch4 Rewrite Brief §4.10.1
 
 \subsubsection{Waiting and Assignment States}
 
-\subsubsection{Live Assistant Allocation}
+% TODO: write per Ch4 Rewrite Brief §4.10.2
 
+\subsubsection{Live Assistant Allocation and Mark-Helped}
 
+% TODO: write per Ch4 Rewrite Brief §4.10.3
 
 \subsection{Problems Encountered and Solutions}
 
-\begin{comment}
- 
-\subsection{User Interface and Interaction Design}
+% TODO: write per Ch4 Rewrite Brief §4.11 — drop in tab:problems
+% Note: sound-effects discussion now lives inside §4.9.6 Settings View (the toggle is there); old standalone §4.11 Sound Effects subsection removed during 2026-05-20 layout refinement.
 
-\subsubsection{Auto Refresh and State Persistence}
-
-\subsubsection{Sound Effects and Visual Theme}
-    
-\subsection{Dashboard and UI}
-The Version 1 dashboard provides a live visual overview of student activity. It is implemented as a Streamlit application that integrates data retrieval, metric computation and visualisation in a Python workflow.
-
-The primary aim of the dashboard is to support fast awareness for instructors and lab assistants. Visualisations focus on simple, predictable indicators, some of which are not relevant but are a proof of concept and testing of the data. The indicators are presented through interactive Plotly charts, providing an intuitive user interface.
-
-Basic interactivity is supported through Streamlit controls, enabling users to switch between different views. The dashboard refreshes automatically, following each refresh cycle, ensuring up-to-date information is displayed.
-
-At this stage, the dashboard serves as a functional prototype for testing and validating the feasibility of live monitoring during labs. Most advanced features, such as model-driven prioritisation, assistant allocation and smart device notifications, are to be implemented in the later iteration.
-
-\end{comment}
+% Old V1-prototype draft prose has been moved to implementation-old.tex (sidecar, not \include'd in main.tex). Decision 2026-05-20: nothing in there is being reused.

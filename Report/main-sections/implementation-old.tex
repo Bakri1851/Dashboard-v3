@@ -1,0 +1,84 @@
+% =============================================================
+% implementation-old.tex
+%
+% Archived prose from the previous V1-prototype draft of
+% Chapter 4 (Implementation).  Sidecar file in the style of
+% requirements-specification-old.tex — NOT \include'd in main.tex,
+% so this file does not render in the build.  Kept as a recoverable
+% reference; safe to delete after the new chapter is finalised.
+%
+% Decision (2026-05-20): nothing inside is being reused in the new
+% chapter.  The active chapter lives in implementation.tex.
+% =============================================================
+
+
+% --- Old chapter opening prose ---
+This chapter describes the implemented version of the real-time lab support system.
+Earlier work focused on validating the endpoint, testing the data pipeline, and establishing a working dashboard with basic dashboard prototype.
+The current implementation Version 2 (v2) builds on this foundation, allowing for a live instructor dashboard, a lab assistant application that works with the instructor dashboard, session history as well as both baseline and more advanced models.
+
+The implementation is interval-based rather than event-based.
+However, it provides a full end-to-end workflow, from endpoint ingestion, parsing, normalisation to live scoring, student prioritisation and assistant coordination.
+The system represents a functional tool to support instructors and assistants during labs allowing for improved learning outcomes, with the potential for further refinement and expansion in future iterations.
+
+
+% --- Old §4.1 body (contradicted itself: "Version 2" above, "Version 1" here) ---
+The implementation represents Version 1 of the dashboard. Version 1 was implemented to ensure end-to-end functionality worked as planned and to experiment with data visualisation rather than to deploy the whole system proposed.
+
+Version 1 focused on establishing a working data pipeline capable of processing live interaction data during labs, aggregating student activity at the lab level, and presenting indicators in near real time. This provides the foundation for the proposed system. By working on Version 1, I have familiarised myself with the relevant technology and the data pipeline.
+
+The implemented system addresses the core objectives of the project by supporting live monitoring of student progress, prioritisation of students who are struggling, identifications of difficult questions so that lab teachers can go through those questions as a class, and allocation of lab assistants during sessions.
+
+The implementation is made up of a number of components essential to the system's functionality. First
+
+
+% --- Old §4.2 tech-stack table (V1-only) ---
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{3.5cm}|p{3.5cm}|p{6cm}|}
+    \hline
+   System Component & Technology Used & Purpose and Justification \\
+    \hline
+    \hline
+    Data Source& PHP-based HTTP endpoint & Existing lab infrastructure exposes student interaction as an endpoint\\
+    \hline
+    Data Format& JSON with embedded XML & JSON allows lightweight transport, whilst XML stores structured session-level submission\\
+    \hline
+    Data Processing& Python & Provides strong support for parsing of JSON data and performing numerical computations\\
+    \hline
+    Analytics Logic& Python & Version 1 has simple indicators for student struggle based on thresholds\\
+    \hline
+    Dashboard Framework& Streamlit & Enables fast development of interactive dashboards\\
+    \hline
+    Visualisation library& Plotly & Provides interactive visualisations which are intuitive\\
+    \hline
+    Deployment Environment& Personal Computer & Suitable for testing and prototyping\\
+    \hline
+    \end{tabular}
+    \caption{What was used for each technical aspect and how}
+    \label{tab: selection table}
+\end{table}
+
+The stack highlighted in Table \ref{tab: selection table} enables a unified development workflow, in which data ingestion, processing and visualisation are implemented within a single Python environment. Whilst Version 1 relies on refreshing, the architecture will be largely consistent with the proposed system.
+
+
+% --- Old §4.4 data-pipeline enum (V1-only narrative) ---
+Version 1 implements an interval-based data pipeline designed to support near real-time monitoring during lab sessions. The pipeline proceeds as follows:
+\begin{enumerate}
+    \item \textbf{Data Retrieval: }At fixed intervals the Python application re-requests the full dataset from the existing PHP endpoint. This refresh is implemented within the Python code. The refresh helps ensure that metrics are up to date.
+    \item \textbf{Data Parsing: }The retrieved response, formatted as JSON with embedded XML strings, is parsed within Python. Relevant fields such as question, student and timestamps are extracted
+    \item \textbf{Data Structuring: }Parsed records are transformed into an immediate representation suitable for analysis
+    \item \textbf{Metric Computation: }A naive metric approach was used, where thresholds are used for the attempt amount of a question. This was done to demonstrate the concept
+    \item \textbf{Dashboard Update: }The dashboard is refreshed using the newly computed values, providing an updated view of lab activity each time the Python refresh executes
+\end{enumerate}
+More advanced modelling described in the Design Chapter is not yet integrated and is reserved for the proposed system.
+
+
+% --- Old placeholder block (was already commented out at the end of the file) ---
+The Version 1 dashboard provides a live visual overview of student activity. It is implemented as a Streamlit application that integrates data retrieval, metric computation and visualisation in a Python workflow.
+
+The primary aim of the dashboard is to support fast awareness for instructors and lab assistants. Visualisations focus on simple, predictable indicators, some of which are not relevant but are a proof of concept and testing of the data. The indicators are presented through interactive Plotly charts, providing an intuitive user interface.
+
+Basic interactivity is supported through Streamlit controls, enabling users to switch between different views. The dashboard refreshes automatically, following each refresh cycle, ensuring up-to-date information is displayed.
+
+At this stage, the dashboard serves as a functional prototype for testing and validating the feasibility of live monitoring during labs. Most advanced features, such as model-driven prioritisation, assistant allocation and smart device notifications, are to be implemented in the later iteration.

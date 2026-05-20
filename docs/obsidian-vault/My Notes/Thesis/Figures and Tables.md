@@ -15,7 +15,7 @@ Related: [[Report Sync]], [[Rewrite Queue]], [[Evidence Bank]], [[Thesis Overvie
 | 3 | Ch2 §2.1.3 | Attention Dashboard — Learning Analytics Interface | Literature (external) | Keep |
 | 4 | Ch2 §2.2.2 | Piwik Analytics dashboard | Literature (external) | Keep |
 | 5 | Ch2 §2.2.2 | MM Dashboard — SSV, ASV, RSV views | Literature (external) | Keep |
-| 6 | Ch3 §3.1 | System Architecture Diagram | Original — `figures/design and architecture/architecture diagram.png` | Review — may need updating if architecture section changes |
+| 6 | Ch3 §3.1 | System Architecture Diagram | Original — TikZ inline at `design-and-architecture.tex:9-93` | **Done 2026-05-20** — V2 TikZ inline replaces the V1 Streamlit-only PNG. PNG file kept on disk but no longer referenced. Spec note [[V2 Architecture Diagram Spec]] retained for posterity. |
 | 7 | Ch3 §3.2 | Data Entry Structure (session-based interaction data) | Original — `figures/design and architecture/data entry.png` | Keep — data format unchanged |
 | 8 | Ch3 §3.4.2 | Figma mockup — student struggle + question difficulty views | Figma design — `figures/design and architecture/figma1.png` | **Replace** with actual dashboard screenshot |
 | 9 | Ch3 §3.4.2 | Figma mockup — lab assistant allocation | Figma design — `figures/design and architecture/figma2.png` | **Replace** with actual dashboard screenshot |
@@ -34,7 +34,7 @@ New figures needed for the rewritten Ch4 and Ch5:
 | V2 Data analysis | Example analysis chart | Screenshot |
 | V2 Settings | Model toggles and CF configuration | Screenshot |
 | V2 Lab assistant views | Join, waiting, assigned screens | Screenshot |
-| V2 Architecture diagram | Updated to show models/ package | New diagram (optional) |
+| V2 Architecture diagram | Three-layer pipeline: ingest + caches → baseline + advanced + RAG → instructor + lab-assistant surfaces with file-locked shared state | **Done 2026-05-20** — TikZ inline in `design-and-architecture.tex` keeps the `\label{fig: system architecture}` Figure 6 slot. |
 
 ---
 

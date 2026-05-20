@@ -8,8 +8,102 @@ The architecture separates data generation, data ingestion and processing, as we
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\linewidth]{figures/design-and-architecture/architecture-diagram.png}
-    \caption{Diagram showing the architecture of the proposed system}
+    \resizebox{\linewidth}{!}{%
+    \begin{tikzpicture}[
+        node distance = 0.9cm and 0.7cm,
+        process/.style = {
+            rectangle, draw, rounded corners=2pt,
+            minimum width=2.7cm, minimum height=1.2cm,
+            align=center, font=\small, fill=blue!4
+        },
+        store/.style = {
+            rectangle, draw, rounded corners=2pt,
+            minimum width=2.7cm, minimum height=1.2cm,
+            align=center, font=\small, fill=gray!12
+        },
+        ui/.style = {
+            rectangle, draw, rounded corners=2pt,
+            minimum width=5.6cm, minimum height=1.4cm,
+            align=center, font=\small, fill=violet!8
+        },
+        external/.style = {
+            rectangle, draw, rounded corners=2pt,
+            minimum width=2.7cm, minimum height=1.2cm,
+            align=center, font=\small, fill=orange!12
+        },
+        flow/.style = {-{Stealth[length=2.4mm]}, thick},
+        biflow/.style = {{Stealth[length=2.4mm]}-{Stealth[length=2.4mm]}, thick},
+        grouplabel/.style = {font=\footnotesize\itshape, anchor=south, text=black!70},
+        edgelabel/.style = {font=\scriptsize\itshape, fill=white, inner sep=1pt},
+        layerlabel/.style = {font=\footnotesize\bfseries\itshape, anchor=east, text=black!60}
+    ]
+        % ===== Layer 1 - Data Generation =====
+        \node[external] (students) {Students};
+        \node[external, right=2.6cm of students] (endpoint) {AI Feedback\\Platform};
+        \draw[flow] (students) -- node[edgelabel, above]{submissions} (endpoint);
+
+        % ===== Layer 2 - Ingestion \& Processing =====
+        \node[process, below=2.2cm of students] (ingest) {Data\\Ingestion};
+        \node[store, right=of ingest] (caches) {Raw \&\\incorrectness\\caches};
+        \node[process, right=of caches] (baseline) {Baseline\\Analytics};
+        \node[process, right=of baseline] (advanced) {Advanced\\Models};
+        \node[process, right=of advanced] (rag) {RAG\\Pipeline};
+
+        % External LLM service, above the right end of the pipeline
+        \node[external, above=1.3cm of rag] (llm) {LLM service\\(OpenAI)};
+
+        % Dashed group around the swappable models cluster
+        \begin{scope}[on background layer]
+            \node[draw, dashed, rounded corners=3pt,
+                  fit=(advanced),
+                  inner sep=0.25cm] (modelgroup) {};
+        \end{scope}
+        \node[grouplabel] at (modelgroup.north) [yshift=2mm] {swappable subsystem};
+
+        % Layer 2 internal flows
+        \draw[flow] (endpoint.south) -- ++(0,-0.5) -| (ingest.north)
+            node[edgelabel, pos=0.25, above]{poll};
+        \draw[flow] (ingest) -- (caches);
+        \draw[flow] (caches) -- (baseline);
+        \draw[flow] (baseline) -- (advanced);
+        \draw[flow] (advanced) -- (rag);
+        \draw[flow] (baseline.north) to[bend left=35]
+            node[edgelabel, pos=0.55]{incorrectness} (llm.west);
+        \draw[flow] (rag.north) -- node[edgelabel, right]{generation} (llm.south);
+
+        % ===== Layer 3 - Decision \& Action =====
+        % Shared session state placed BETWEEN the two UIs so the file-locked
+        % coordination between Instructor and Assistant is visually obvious.
+        \node[ui, below=3.4cm of baseline, xshift=-5.2cm] (instructor)
+            {Instructor Dashboard\\\footnotesize\itshape in-class, student detail, question detail};
+        \node[store, right=0.5cm of instructor, minimum width=4.0cm, minimum height=1.4cm] (state)
+            {Shared session state\\\footnotesize\itshape \texttt{lab\_session.json}\\(file-locked)};
+        \node[ui, right=0.5cm of state] (assistant)
+            {Lab Assistant Interface\\\footnotesize\itshape join, waiting, assigned};
+
+        % Layer 2 -> Layer 3 flows (staggered bend depths per arrow to avoid shared horizontal channels)
+        % Baseline -> Instructor (short L, near source)
+        \draw[flow] (baseline.south) -- ++(0,-0.3) -|
+            node[edgelabel, pos=0.25, above]{scores} (instructor.north);
+        % Baseline -> Assistant (cross right, mid-depth bend)
+        \draw[flow] (baseline.south) -- ++(0,-0.7) -| (assistant.north);
+
+        % RAG -> Assistant (short L, near source)
+        \draw[flow] (rag.south) -- ++(0,-0.3) -|
+            node[edgelabel, pos=0.25, above]{feedback} (assistant.north);
+        % RAG -> Instructor (cross far left, deepest bend)
+        \draw[flow] (rag.south) -- ++(0,-1.0) -| (instructor.north);
+
+        % Inter-UI coordination via file-locked shared session state (horizontal row)
+        \draw[biflow] (instructor.east) -- (state.west);
+        \draw[biflow] (state.east) -- (assistant.west);
+
+        % Layer labels in the left margin
+        \node[layerlabel] at ([xshift=-0.6cm]students.west) {Layer 1};
+        \node[layerlabel] at ([xshift=-0.6cm]ingest.west) {Layer 2};
+        \node[layerlabel] at ([xshift=-0.6cm]instructor.west) {Layer 3};
+    \end{tikzpicture}}
+    \caption{V2 system architecture: a three-layer pipeline from data ingestion through baseline and advanced analytics and the RAG pipeline to the instructor and lab-assistant surfaces, coordinated via the file-locked shared session state.}
     \label{fig: system architecture}
 \end{figure}
 
