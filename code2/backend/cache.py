@@ -15,8 +15,8 @@ from typing import Optional
 import pandas as pd
 from cachetools import TTLCache
 
-from learning_dashboard import analytics, config, data_loader, lab_classes
-from learning_dashboard.models import bkt, improved_struggle, irt
+from backend import analytics, config, data_loader, lab_classes
+from backend.models import bkt, improved_struggle, irt
 
 logger = logging.getLogger("backend.cache")
 

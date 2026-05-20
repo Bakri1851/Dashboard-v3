@@ -53,7 +53,7 @@ but need either Firat or Bakri to confirm.
 
 4. **Canonical implementation — `code/` or `code2/`?**
    [[CLAUDE.md]] names `code/` as the canonical reference, but `code/learning_dashboard/analytics.py:25`
-   reads `st.secrets`, blocking headless runs. `code2/learning_dashboard/analytics.py`
+   reads `st.secrets`, blocking headless runs. `code2/backend/analytics.py`
    is Streamlit-free and otherwise mirrors `code/`. Resolution: the evaluator
    imports from `code2/`, and we run one cross-validation pass where both
    stacks score the same cohort and we assert numerical equality to ±1e-9.
@@ -106,7 +106,7 @@ mean of **parametric-derived** binary help-need labels.
 
 | Obstacle | Location | Workaround |
 |---|---|---|
-| `st.secrets` read on OpenAI client init | `code/learning_dashboard/analytics.py:25` | Import from `code2/learning_dashboard/analytics.py:23-27` (uses `os.environ`). |
+| `st.secrets` read on OpenAI client init | `code/learning_dashboard/analytics.py:25` | Import from `code2/backend/analytics.py:23-27` (uses `os.environ`). |
 | Temporal smoothing `α=0.3` is ON (per [[Full Roadmap]] Step 1, 2026-04-10) | analytics / config | Runs are reported with smoothing both ON and OFF — ablation, not footnote. |
 | Bayesian shrinkage `K=5` dominates at low *n* | `config.py` `SHRINKAGE_K` | Ablation with `K=0`. At T=10% most students have <5 submissions → shrinkage flattens the ranking. |
 | Threshold labels at low *n* are noise-dominated | `config.py` struggle thresholds | Don't evaluate only the default 0.50 "Needs Help" threshold. See §3.1. |
@@ -225,7 +225,7 @@ code/evaluation/                      # new package
 ```
 
 - **Entry point:** `python -m evaluation.run_evaluation --out data/evaluation_runs/2026-04-21`
-- **Imports from `code2/learning_dashboard/`** for headlessness.
+- **Imports from `code2/backend/`** for headlessness.
 - **Outputs** under `data/evaluation_runs/{iso-date}/`: `results.parquet`,
   `figures/*.png`, `tables/*.csv`, `summary.md`.
 - **Frozen cache:** `data/incorrectness_cache_v1.json`, read-only to the harness.

@@ -7,7 +7,7 @@ from fastapi import APIRouter, Query
 
 from backend.cache import load_dataframe
 from backend.schemas import LabClass
-from learning_dashboard import lab_classes
+from backend import lab_classes
 
 router = APIRouter(tags=["classes"])
 

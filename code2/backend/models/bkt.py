@@ -19,7 +19,7 @@ import pandas as pd
 from scipy.optimize import minimize
 from sklearn.metrics import roc_auc_score
 
-from learning_dashboard import config
+from .. import config
 
 import logging
 

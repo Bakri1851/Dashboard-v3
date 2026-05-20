@@ -6,7 +6,7 @@ struggle pipeline and this public wrapper share a single definition.
 
 import pandas as pd
 
-from learning_dashboard import analytics, config
+from .. import analytics, config
 
 
 def compute_incorrectness_with_confidence(df: pd.DataFrame) -> pd.DataFrame:

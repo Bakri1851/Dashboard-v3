@@ -1,6 +1,6 @@
 """GET /api/rag/student/{id} and /api/rag/question/{id} — coaching suggestions.
 
-Both flavours wrap `learning_dashboard.rag`, which swallows all errors into an
+Both flavours wrap `backend.rag`, which swallows all errors into an
 empty list so the UI never breaks if ChromaDB / sentence-transformers / OpenAI
 are unavailable. The handlers are `async` and execute the blocking RAG work in
 a worker thread — required because first-time `build_rag_collection` can take
@@ -22,7 +22,7 @@ from backend import demo_data
 from backend.cache import load_active_struggle_df
 from backend.deps import TimeWindow, get_dataframe, get_time_window
 from backend.schemas import RagSuggestions
-from learning_dashboard import analytics, lab_state, rag
+from backend import analytics, lab_state, rag
 
 router = APIRouter(prefix="/rag", tags=["rag"])
 

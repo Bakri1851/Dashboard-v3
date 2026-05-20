@@ -17,7 +17,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import silhouette_score
 from sklearn.metrics.pairwise import cosine_similarity
 
-from learning_dashboard import config, paths
+from . import config, paths
 
 logger = logging.getLogger(__name__)
 

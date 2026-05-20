@@ -19,9 +19,9 @@ from typing import TYPE_CHECKING, Any
 
 from cachetools import TTLCache
 
-from learning_dashboard import config
-from learning_dashboard import paths
-from learning_dashboard.analytics import _get_openai_client
+from . import config
+from . import paths
+from .analytics import _get_openai_client
 
 if TYPE_CHECKING:
     pass

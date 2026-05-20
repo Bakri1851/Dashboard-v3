@@ -24,7 +24,7 @@ from backend.schemas import (
     QuestionDifficulty,
     StudentStruggle,
 )
-from learning_dashboard import data_loader
+from backend import data_loader
 
 router = APIRouter(tags=["live"])
 

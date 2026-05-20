@@ -21,7 +21,7 @@ from backend.schemas import (
     StruggleWeights,
     Thresholds,
 )
-from learning_dashboard import config
+from backend import config
 
 router = APIRouter(tags=["settings"])
 

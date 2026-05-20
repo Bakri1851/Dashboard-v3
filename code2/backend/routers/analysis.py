@@ -17,7 +17,7 @@ from backend.schemas import (
     UserActivityRow,
     WeekActivityCell,
 )
-from learning_dashboard import academic_calendar
+from backend import academic_calendar
 
 router = APIRouter(tags=["analysis"])
 

@@ -23,7 +23,7 @@ from backend.schemas import (
     CFElevatedStudent,
     SimilarStudent,
 )
-from learning_dashboard import analytics
+from backend import analytics
 
 router = APIRouter(tags=["cf"])
 

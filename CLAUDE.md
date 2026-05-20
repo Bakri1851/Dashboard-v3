@@ -6,8 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A learning analytics dashboard for monitoring student struggle and question difficulty during university lab sessions. Shipped as two separate stacks that coexist in this repo:
 
-- **`code/`** — original Streamlit dashboard (instructor on 8501, mobile lab assistant on 8502). This is the canonical reference implementation and the fallback for the defence demo. Do not work on it but look into it if needed
-- **`code2/`** — alternative React + FastAPI frontend (single FastAPI process on 8000 serves both the API and the built React SPA; Vite dev server on 5173 during frontend development). Feature-parity with `code/` was reached in Phase 9 (see `code2/CHECKLIST.md`). `code2/` has **no Streamlit UI** — the old `code2/app.py`, `code2/lab_app.py`, `code2/learning_dashboard/{instructor_app,assistant_app}.py`, and `code2/learning_dashboard/ui/` were removed; only the analytical core (`learning_dashboard/{analytics,data_loader,rag,models,…}`) remains, imported by the FastAPI routers.
+- **`code/`** — **V1**, the original Streamlit dashboard (instructor on 8501, mobile lab assistant on 8502). Canonical reference implementation and the fallback for the defence demo. The analytical core lives at `code/learning_dashboard/` alongside `code/learning_dashboard/ui/` (Streamlit views). Do not work on it but look into it if needed.
+- **`code2/`** — **V2**, the evolved React + FastAPI implementation (single FastAPI process on 8000 serves both the API and the built React SPA; Vite dev server on 5173 during frontend development). Feature-parity with V1 was reached in Phase 9 (archived log: `docs/recap_toolkit/archive/code2-CHECKLIST.md`). Layout is now `code2/{backend/, frontend/, requirements.txt}` only — the analytical core has been **flattened directly into `backend/`** (analytics.py, data_loader.py, lab_state.py, config.py, paths.py, academic_calendar.py, rag.py, lab_classes.py, models/) since the FastAPI process is itself the analytical backend; there is no separate `learning_dashboard/` package in V2.
 
 Both stacks share live state through `data/lab_session.json` — a file-locked JSON file coordinated through `lab_state.py` and `filelock`, so a Streamlit app in `code/` and the FastAPI backend in `code2/` can run side by side.
 
@@ -29,7 +29,7 @@ cd code2/frontend && npm run build                           # build SPA into di
 
 # --- Syntax check all source files ---
 python -m py_compile code/app.py code/lab_app.py code/learning_dashboard/*.py code/learning_dashboard/ui/*.py
-python -m py_compile code2/backend/*.py code2/backend/routers/*.py code2/learning_dashboard/*.py code2/learning_dashboard/models/*.py
+python -m py_compile code2/backend/*.py code2/backend/routers/*.py code2/backend/models/*.py
 ```
 
 There are no automated tests. Validation is manual smoke testing (see README.md checklist).

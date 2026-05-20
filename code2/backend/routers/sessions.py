@@ -33,7 +33,7 @@ from backend.schemas import (
     SavedSession,
     SessionProgression,
 )
-from learning_dashboard import analytics, data_loader, paths
+from backend import analytics, data_loader, paths
 
 logger = logging.getLogger("backend.sessions")
 
@@ -158,7 +158,7 @@ def list_sessions() -> list[SavedSession]:
 def save_session(req: SaveSessionRequest) -> SavedSession:
     """Retroactive save — builds a record from the frontend's current filter
     window and persists it through `data_loader.save_session_record`."""
-    from learning_dashboard.lab_classes import (
+    from backend.lab_classes import (
         class_id_for_timestamp,
         class_label_for_timestamp,
     )

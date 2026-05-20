@@ -8,7 +8,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from backend.schemas import AcademicPeriod, FilterPreset
-from learning_dashboard import academic_calendar
+from backend import academic_calendar
 
 router = APIRouter(prefix="/meta", tags=["meta"])
 

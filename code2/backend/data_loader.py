@@ -10,7 +10,7 @@ from uuid import uuid4
 import pandas as pd
 import requests
 
-from learning_dashboard import config, paths
+from . import config, paths
 
 logger = logging.getLogger(__name__)
 
@@ -185,7 +185,7 @@ def normalize_and_clean(records: list[dict]) -> pd.DataFrame:
     df = df.sort_values("timestamp").reset_index(drop=True)
 
     # Add academic period label
-    from learning_dashboard.academic_calendar import add_academic_period_column
+    from .academic_calendar import add_academic_period_column
     df = add_academic_period_column(df)
 
     return df
@@ -287,7 +287,7 @@ def _backfill_saved_session_class_ids(
     assuming module=``default_module`` (the only module historically present
     in saved_sessions.json). Idempotent.
     """
-    from learning_dashboard.lab_classes import (
+    from .lab_classes import (
         class_id_for_timestamp,
         class_label_for_timestamp,
     )

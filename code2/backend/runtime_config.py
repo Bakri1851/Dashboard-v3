@@ -11,7 +11,7 @@ from dataclasses import asdict, dataclass, field, replace
 from threading import Lock
 from typing import Any
 
-from learning_dashboard import config
+from backend import config
 
 
 @dataclass

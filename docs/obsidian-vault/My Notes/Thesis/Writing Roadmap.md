@@ -355,7 +355,7 @@ Anything that took deliberation and shouldn't be relitigated:
 8. **Draper & Smith 1998 dropped from §2.1.4.** Improvement-trajectory description belongs in Ch3 not Ch2.
 9. **Hallucinated "Agnihotri, Ott & Pazzani 2015" stub deleted.** Created speculatively in a prior chat session; no such paper exists. Replaced with Arnold 2012 + Jayaprakash 2014.
 10. **`liu_open` dropped** by user choice; not used.
-11. **Phase 2 hybrid-retrieval cluster (BM25 + Bruch + Cormack) dropped.** RAG implementation in `code2/learning_dashboard/rag.py` is pure dense (ChromaDB + SBERT, metadata pre-filter only). Importing these would misrepresent the architecture.
+11. **Phase 2 hybrid-retrieval cluster (BM25 + Bruch + Cormack) dropped.** RAG implementation in `code2/backend/rag.py` is pure dense (ChromaDB + SBERT, metadata pre-filter only). Importing these would misrepresent the architecture.
 12. **Phase 2 Bodily & Verbert 2017 LAK paper dropped.** The journal review variant covers the same ground at greater depth; one is enough.
 13. **Verbert 2020 → Verbert 2013** rename. Better BibTeX assigned the wrong year initially; user corrected.
 14. **§2.1.4 → §2.1.5 KT paragraph relocation** is the standard fix for the BKT/IRT duplication risk between subsections. Cut lines 89–93 from §2.1.4, paste into §2.1.5, replace with a one-line bridge.

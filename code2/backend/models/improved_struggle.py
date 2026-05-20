@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 from scipy.special import expit
 
-from learning_dashboard import analytics, config
+from .. import analytics, config
 
 
 # ------------------------------------------------------------------

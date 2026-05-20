@@ -8,7 +8,7 @@ import pandas as pd
 from fastapi import Depends, HTTPException, Query
 
 from backend.cache import filter_df, load_dataframe
-from learning_dashboard import data_loader
+from backend import data_loader
 
 
 @dataclass

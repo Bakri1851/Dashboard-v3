@@ -1,8 +1,8 @@
 """Lab-session coordination endpoints.
 
-Every endpoint delegates to `learning_dashboard.lab_state`, which uses a
-`FileLock` on `data/lab_session.json` — so all three processes (code/
-instructor + mobile, and this FastAPI) share the same source of truth. The
+Every endpoint delegates to `backend.lab_state`, which uses a `FileLock` on
+`data/lab_session.json` — so all three processes (V1 instructor + mobile
+Streamlit apps, and this V2 FastAPI) share the same source of truth. The
 React SPA reads state through this backend, not the file directly.
 
 POST endpoints return the fresh `LabState` so React can optimistically refresh
@@ -30,7 +30,7 @@ from backend.schemas import (
     StrugglingQuestionRow,
     StudentIdRequest,
 )
-from learning_dashboard import analytics, lab_state
+from backend import analytics, lab_state
 
 router = APIRouter(prefix="/lab", tags=["lab"])
 
@@ -79,7 +79,7 @@ def start(req: StartLabSessionRequest | None = None) -> LabState:
     clabel = req.class_label if req else None
     if (not cid or not clabel) and req and req.module:
         from datetime import datetime as _dt
-        from learning_dashboard import lab_classes
+        from backend import lab_classes
         now = _dt.now()
         cid = cid or lab_classes.class_id_for_timestamp(req.module, now)
         clabel = clabel or lab_classes.class_label_for_timestamp(req.module, now)

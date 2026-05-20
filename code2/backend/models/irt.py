@@ -18,10 +18,10 @@ import pandas as pd
 from scipy.optimize import minimize
 from scipy.special import expit  # sigmoid
 
-from learning_dashboard import config
-from learning_dashboard.analytics import classify_score
+from .. import config
+from ..analytics import classify_score
 
-logger = logging.getLogger("learning_dashboard.irt")
+logger = logging.getLogger("backend.models.irt")
 
 # Column schema for the output DataFrame (used for empty-data fallback).
 # irt_discrimination is the 2PL ``a_j`` (positive; 1.0 = Rasch-equivalent).

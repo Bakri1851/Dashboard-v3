@@ -19,7 +19,7 @@ from typing import Optional
 
 import pandas as pd
 
-from learning_dashboard.academic_calendar import get_academic_period
+from .academic_calendar import get_academic_period
 
 
 _GAP_THRESHOLD_SECONDS = 45 * 60   # split clusters where consecutive records gap > 45 min

@@ -27,7 +27,7 @@ from backend.schemas import (
     StudentRecentRow,
     StudentStruggle,
 )
-from learning_dashboard import lab_state
+from backend import lab_state
 
 
 # (id, level, score, submissions, recent, trend)

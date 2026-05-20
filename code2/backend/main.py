@@ -1,10 +1,11 @@
-"""FastAPI entry point for the code2 alternative frontend.
+"""FastAPI entry point for V2 (the code2/ React + FastAPI frontend).
 
 Launch with:
     uvicorn backend.main:app --app-dir code2 --port 8000 --reload
 
-`--app-dir code2` puts code2/ on sys.path so both `backend.*` and
-`learning_dashboard.*` resolve.
+`--app-dir code2` puts code2/ on sys.path so `backend.*` resolves; the
+analytical core lives directly under `backend/` (analytics, models, lab_state,
+config, etc.) rather than in a separate `learning_dashboard/` package as V1.
 """
 from __future__ import annotations
 
@@ -39,31 +40,22 @@ if not os.environ.get("OPENAI_API_KEY"):
 
 from backend.cache import load_dataframe, load_difficulty_df, load_struggle_df
 from backend.routers import analysis, cf, lab, live, meta, models_cmp, question, rag, sessions, settings, student
-from learning_dashboard import analytics, lab_state
-from learning_dashboard import rag as rag_module
-from learning_dashboard.models import bkt as _bkt
+from backend import analytics, lab_state
+from backend import rag as rag_module
+from backend.models import bkt as _bkt
 
 logger = logging.getLogger("backend")
-# Attach a console handler so prewarm / RAG diagnostics actually print under
-# uvicorn (which only configures its own "uvicorn.*" loggers by default).
+# Attach a single console handler at the `backend` root so prewarm / RAG /
+# IRT / BKT diagnostics actually print under uvicorn (which only configures
+# its own "uvicorn.*" loggers by default). Every submodule's
+# logging.getLogger(__name__) call produces a `backend.*` logger that
+# propagates up to this handler.
 if not logger.handlers:
     _h = logging.StreamHandler()
     _h.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s", datefmt="%H:%M:%S"))
     logger.addHandler(_h)
     logger.setLevel(logging.INFO)
     logger.propagate = False
-# Attach a single handler at the learning_dashboard root so every submodule
-# (rag, irt, bkt, improved_struggle, ...) logs through uvicorn's stderr with
-# the same format. Without this, uvicorn silently drops all INFO logs from
-# the learning_dashboard.* namespace because its own config only covers
-# "uvicorn.*" loggers.
-_ld_logger = logging.getLogger("learning_dashboard")
-if not _ld_logger.handlers:
-    _ldh = logging.StreamHandler()
-    _ldh.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s", datefmt="%H:%M:%S"))
-    _ld_logger.addHandler(_ldh)
-    _ld_logger.setLevel(logging.INFO)
-    _ld_logger.propagate = False
 
 _openai_key_present = bool(os.environ.get("OPENAI_API_KEY"))
 logger.info(

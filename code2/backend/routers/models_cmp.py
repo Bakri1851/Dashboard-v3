@@ -26,7 +26,7 @@ from backend.schemas import (
     ModelPairRow,
     ModelRow,
 )
-from learning_dashboard import config
+from backend import config
 
 router = APIRouter(tags=["models"])
 

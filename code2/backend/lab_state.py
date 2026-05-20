@@ -10,7 +10,7 @@ from typing import Any, Optional
 
 from filelock import FileLock
 
-from learning_dashboard import config, paths
+from . import config, paths
 
 
 _LOCK_TIMEOUT_SECONDS = 5

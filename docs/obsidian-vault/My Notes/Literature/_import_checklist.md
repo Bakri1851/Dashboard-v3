@@ -210,9 +210,9 @@ Triggered by 2026-05-03 audit + user-supplied research list. Closes three real g
 - [ ] **McKinney (2010)** — Data Structures for Statistical Computing in Python · *SciPy proceedings* — student-interaction dataframes and temporal slicing
 - [ ] **Virtanen et al. (2020)** — SciPy 1.0: Fundamental Algorithms for Scientific Computing in Python · *Nature Methods* — `scipy.optimize.minimize(method='L-BFGS-B')` for IRT MLE (`models/irt.py:145-151`); `scipy.stats.wilcoxon` for Ch5 paired tests
 - [ ] **Streamlit** — software citation, GitHub/website — Ch4 frontend; both `app.py` and `lab_app.py` are Streamlit apps
-- [ ] **Chroma / ChromaDB** — software citation, GitHub repo — Ch4 RAG vector store (`code2/learning_dashboard/rag.py:68,160`)
+- [ ] **Chroma / ChromaDB** — software citation, GitHub repo — Ch4 RAG vector store (`code2/backend/rag.py:68,160`)
 - [ ] **OpenAI (2023)** — GPT-4 Technical Report · arXiv `2303.08774` — Ch3/Ch4 RAG generation; canonical GPT-4-family reference
-- [ ] **OpenAI (2024)** — GPT-4o System Card — Ch4 RAG implementation; pairs with GPT-4 TR for the `gpt-4o-mini` model used (`code2/learning_dashboard/config.py:14`)
+- [ ] **OpenAI (2024)** — GPT-4o System Card — Ch4 RAG implementation; pairs with GPT-4 TR for the `gpt-4o-mini` model used (`code2/backend/config.py:14`)
 - [ ] **Wang et al. (2020)** — MiniLM: Deep Self-Attention Distillation for Task-Agnostic Compression of Pre-Trained Transformers · *NeurIPS 2020* · arXiv `2002.10957` — distillation method behind `all-MiniLM-L6-v2` (`config.py:173`); pairs with Reimers & Gurevych 2019
 
 ## IRT / measurement theory — Ch3 §3.3.5 (2)

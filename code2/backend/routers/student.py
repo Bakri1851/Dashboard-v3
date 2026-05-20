@@ -14,7 +14,7 @@ from backend.schemas import (
     StudentQuestionRow,
     StudentRecentRow,
 )
-from learning_dashboard import analytics, config
+from backend import analytics, config
 
 router = APIRouter(tags=["student"])
 
