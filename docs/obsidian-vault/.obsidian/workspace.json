@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "My Notes/Thesis/Ch4 Rewrite Brief.md",
+                "file": "My Notes/Thesis/Figures and Tables.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Ch4 Rewrite Brief"
+              "title": "Figures and Tables"
             }
           }
         ],
@@ -68,7 +68,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "views-comparison",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -89,7 +89,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -200,6 +201,13 @@
   },
   "active": "21618e99d70cb1ec",
   "lastOpenFiles": [
+    "My Notes/Thesis/Ch4 Rewrite Brief.md.tmp.4356.487eb4f1a8f4",
+    "My Notes/Thesis/Full Roadmap.md",
+    "My Notes/Thesis/Figures and Tables.md",
+    "My Notes/Thesis/Evaluation Plan.md",
+    "My Notes/Thesis/Ch5 – Results and Evaluation.md",
+    "My Notes/Thesis/V2 Architecture Diagram Spec.md",
+    "My Notes/Thesis/Ch4 Rewrite Brief.md",
     "My Notes/Thesis/sed6h6SQ5",
     "My Notes/Thesis/sedzKBhQc",
     "My Notes/Thesis/sedWr7G1I",
@@ -210,16 +218,11 @@
     "My Notes/Literature/sedgYr6WP",
     "My Notes/Literature/sedDPCcHy",
     "My Notes/Literature/sedWg9ikO",
-    "My Notes/Literature/sedsDUA8f",
-    "My Notes/Thesis/Full Roadmap.md",
-    "My Notes/Thesis/Ch4 Rewrite Brief.md",
-    "My Notes/Thesis/V2 Architecture Diagram Spec.md",
     "My Notes/Literature/dong_using.md",
     "My Notes/Literature/coverage.md",
     "My Notes/Literature/corbettKnowledgeTracingModeling1995.md",
     "My Notes/Literature/arnoldCourseSignalsPurdue2012a.md",
     "My Notes/Thesis/Writing Roadmap.md",
-    "My Notes/Thesis/Evaluation Plan.md",
     "My Notes/Literature/ahn_2019_the.md",
     "My Notes/Literature/a2020_atrisk.md",
     "My Notes/Literature/arthurKmeansAdvantagesCareful.md",
@@ -234,8 +237,6 @@
     "My Notes/Literature/bakerDevelopingGeneralizableDetector2008.md",
     "My Notes/Literature/wangGoalDrivenExplainableClustering2023.md",
     "My Notes/Literature/manningIntroductionInformationRetrieval2006.md",
-    "My Notes/Literature/hanleyMeaningUseArea1982.md",
-    "My Notes/Literature/index.md",
     "Untitled.canvas",
     "My Notes/Code/Assistant App/Operations/Pasted image 20260414004425.png",
     "My Notes/Code/Assistant App/Operations/Pasted image 20260414004418.png",

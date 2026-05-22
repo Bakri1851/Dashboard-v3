@@ -1,21 +1,26 @@
 \section{Implementation}
 
-% TODO: write per Ch4 Rewrite Brief §4.1 — chapter intro paragraph(s) (V1/V2 framing)
+% TODO: write per Ch4 Rewrite Brief §4.1 - chapter intro paragraph(s) (V1/V2 framing)
 
-\subsection{Implementation Overview}
+\subsection{Implementation Overview} \label{sec:overview}
 
 The dashboard is deployed in two versions, both are fully featured and runnable in parallel from a single working tree. 
 Version~1 (\texttt{code/}) is a Streamlit implementation that consists of two separate apps: one for instructors and one for lab assistants, each running their own Python process. 
-Version~2 (\texttt{code2/}) is a single app, FastAPI process that servers both an asynchronous HTTP API at \texttt{/api/} and two buld React single-page applications (SPAs) for instructors and assistants respectively. 
-V2 builds on V1, with every feature from V1 reimplemented in V2, additional features added on top and performance improvements. 
-V1 is the first iteration of the dashboard, which served as a proof of concept and testbed for core features and design decisions.
-V2 is the second iteration, which is a complete rewrite of V1 to address its limitations and scale up to a production-ready system. 
+Version~2 (\texttt{code2/}) is a single app, FastAPI process that serves both an asynchronous HTTP API at \texttt{/api/} and two built React single-page applications (SPAs) for instructors and assistants respectively. 
+V2 builds on V1, with every feature from V1 reimplemented in V2, additional features added on top and performance improvements.
 
+An identical analytical design sits behind both iterations of the dashboard. 
+Data ingestion, scoring, the advanced model layer, RAG feedback and saved sessions are realised in V1 as the \texttt{learning\_dashboard/} package under \texttt{code/}, and in V2 within the \texttt{backend/} package under \texttt{code2/}. V2 splits V1's monolithic \texttt{analytics.py} into per-signal files and adds a thin infrastructure layer (Pydantic schemas, dependency injection, a disk-backed scoring cache) required by the stateless request model. 
+The data pipeline, the runtime-state sharing, and the threshold-classification machinery (the bands and the \texttt{classify\_score} helper) carry across both versions unchanged. 
+The scoring outputs, however, have developed in several places: V2 fits a 2PL IRT model that also estimates student abilities where V1 fits a Rasch (1PL) model,
+V2 fits BKT parameters once at FastAPI startup with the \texttt{lifespan} handler and holds them in an in-process cache, so the four-parameter model is fit once per process lifetime and reused across stateless requests where V1 leaves the parameters at their configured defaults from \texttt{config.py} (unless changed through the Settings sliders),
+V2's improved struggle model adds an IRT-residual difficulty adjusted path (\texttt{expected\_correct} - \texttt{observed\_correct} using the 2PL ability and discrimination) that V1 has no equivalent for, and V2 weights the baseline struggle signal by per-row measurement confidence where V1 takes the unweighted mean. 
+Both versions share a single runtime-state file, \texttt{data/lab\_session.json}, coordinated through the \texttt{filelock} library under a five-second exclusive lock, so that a session started in V1 becomes visible to V2 within a few seconds and vice versa. 
+The implication is that the analytical contribution is decoupled from the presentation layer, and where V2 extends V1 it does so within the same analytical framework with the same signal categories, the same threshold bands, the same combination structure, whilst refining the numerics that feed into each.
 
-%A single analytical core sits behind both versions. The Python package \texttt{learning\_dashboard/} --- covering data ingestion, scoring, modelling, retrieval-augmented feedback, and saved-session persistence --- is reused by V2 unchanged, as a physical copy under \texttt{code2/learning\_dashboard/}. The only divergence between the two copies is a four-line refactor to the OpenAI-key guard that allows V2's FastAPI startup probe to verify dependencies without the application secrets present; no scoring code, no model code, and no retrieval code differs across the two versions. The two versions further share a single runtime-state file, \texttt{data/lab\_session.json}, coordinated through the \texttt{filelock} library: the live-session metadata, the joined-assistant roster, and the student-to-assistant assignment map are written and read by all three processes (V1 instructor, V1 assistant, V2 backend) under a five-second exclusive lock, so a session started in V1 becomes visible to V2 within approximately five seconds and vice versa. The implication is that the analytical contribution of this work is genuinely decoupled from the presentation layer, and the existence of V2 is itself evidence of that decoupling.
-
-The motivation behind the second iteration of the dashboard is highlighted later on in the section. The first iteration had a Streamlit foundation that was ideal for rapid prototyping and early user feedback, but was limiting in terms of performance, scalability and flexibility. The limitation of rerunning the entire script on every interaction meant that the system struggled to maintain a responsive user experience which complicates asynchronous work. 
-The second iteration addresses these limitations by moving these constraints to the presentation layer to React and the backend to FastAPI whilst keeping the analytical core untouched. 
+The motivation behind the second iteration of the dashboard is highlighted later on in the section. The first iteration had a Streamlit foundation that was ideal for rapid iteration and early user feedback, but was limiting in terms of performance, scalability and flexibility. 
+The limitation of rerunning the entire script on every interaction meant that the system struggled to maintain a responsive user experience which complicates asynchronous work. 
+The second iteration addresses these limitations by moving the presentation layer to React and the backend to FastAPI whilst keeping the analytical core untouched. 
 The comparison between V1 and V2 is a recurring theme in the implementation section, as it provides a useful lens to explain the rationale behind design decisions and the trade-offs involved. 
 
 This chapter is organised top-down so that Section \ref{sec:techstack} describes the tech stack used by both versions. 
@@ -29,111 +34,606 @@ Section \ref{sec:problems} highlights the implementation problems encountered an
 
 \subsection{Technology Stack} \label{sec:techstack}
 
-% TODO: write per Ch4 Rewrite Brief §4.2 — drop in tab:techstack-v2 from Part H when ready
+The analytical core, written in Python 3.11, is shared between both versions of the dashboard whilst relying on pandas and NumPy for in-memory data manipulation, SciPy for model fitting, ChromaDB and sentence-transformers for the RAG layer, and the OpenAI Python SDK for LLM interactions. 
+The presentation and service layers are where the systems diverge, with V1 using Streamlit for the instructor and assistant dashboards and V2 using FastAPI to serve a React single-page application built with Vite and TypeScript.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{0.22\textwidth}|p{0.58\textwidth}|p{0.12\textwidth}|}
+    \hline
+    \textbf{Component} & \textbf{Role} & \textbf{Version} \\
+    \hline
+    \hline
+    Python 3.11 & Implementation language for the analytical core and both backends & Both \\
+    \hline
+    Streamlit & Instructor and assistant dashboard UI; session-state model & V1 \\
+    \hline
+    streamlit-autorefresh & Browser-side polling for live updates & V1 \\
+    \hline
+    Plotly & Interactive charts and leaderboards & V1 \\
+    \hline
+    FastAPI & HTTP API exposing the analytical core to the React frontend & V2 \\
+    \hline
+    Uvicorn & ASGI server (with reload) for FastAPI & V2 \\
+    \hline
+    React 19 + Vite + TypeScript & Single-page application; seven runtime themes & V2 \\
+    \hline
+    pandas, NumPy & In-memory data frame and vectorised scoring & Both \\
+    \hline
+    SciPy & L-BFGS-B optimiser for IRT (Rasch 1PL in V1, 2PL in V2) and BKT MLE fits & Both \\
+    \hline
+    scikit-learn & TF-IDF + KMeans for mistake clustering; \texttt{roc\_auc\_score} for BKT predictive AUC & Both \\
+    \hline
+    OpenAI Python SDK & Batched incorrectness scoring (gpt-4o-mini) and RAG generation & Both \\
+    \hline
+    sentence-transformers, ChromaDB & Local MiniLM-L6-v2 embeddings + persistent vector store for RAG & Both \\
+    \hline
+    filelock & Cross-process write lock for the shared lab-session JSON & Both \\
+    \hline
+    requests & HTTP client against the lab data endpoint & Both \\
+    \hline
+    cachetools & TTL cache for the FastAPI analytical layer & V2 \\
+    \hline
+    \end{tabular}
+    \caption{Technologies and libraries used in V1 (Streamlit) and V2 (React + FastAPI)}
+    \label{tab:techstack-v2}
+\end{table}
 
 \subsection{System Structure} \label{sec:structure}
 
-% TODO: write per Ch4 Rewrite Brief §4.3 — opening paragraph; reference fig:arch-v2 (architecture diagram)
+
+In this section, we describe the overall structure of the dashboard system, including the runtime processes, the shared runtime state and the deferred-actions pattern. 
+V1's Streamlit foundation means that the instructor and assistant dashboards run in separate Python processes, each with its own memory space and runtime state. 
+V2's FastAPI backend serves both the instructor and assistant React frontends from a single process as seen in Figure \ref{fig:arch-v2}.
+All three apps share one runtime-state file (\texttt{data/lab\_session.json}) for live session coordination. 
+
+\begin{figure}[H]
+    \centering
+    \resizebox{\linewidth}{!}{%
+    \begin{tikzpicture}[
+        node distance = 1.1cm and 0.8cm,
+        process/.style = {
+            rectangle, draw, rounded corners=2pt,
+            minimum width=3.3cm, minimum height=1.5cm,
+            align=center, font=\small, fill=blue!4
+        },
+        store/.style = {
+            rectangle, draw, rounded corners=2pt,
+            minimum width=6.5cm, minimum height=1.3cm,
+            align=center, font=\small, fill=gray!12
+        },
+        external/.style = {
+            rectangle, draw, rounded corners=2pt,
+            minimum width=2.8cm, minimum height=1.2cm,
+            align=center, font=\small, fill=orange!12
+        },
+        flow/.style = {-{Stealth[length=2.4mm]}, thick},
+        biflow/.style = {{Stealth[length=2.4mm]}-{Stealth[length=2.4mm]}, thick},
+        edgelabel/.style = {font=\scriptsize\itshape, fill=white, inner sep=1pt},
+        layerlabel/.style = {font=\footnotesize\bfseries\itshape, anchor=east, text=black!60}
+    ]
+        % ===== Top row - external systems =====
+        \node[external] (endpoint) {Lab endpoint API\\\footnotesize\itshape retrievalEndpoint.php};
+        \node[external, right=2.0cm of endpoint] (openai) {OpenAI\\\footnotesize\itshape gpt-4o-mini};
+        \node[external, right=2.0cm of openai] (chroma) {ChromaDB\\\footnotesize\itshape local, persistent};
+
+        % ===== Middle row - the three runtime processes =====
+        \node[process, below=3.2cm of endpoint] (v1inst)
+            {V1 Instructor\\\footnotesize\itshape Streamlit};
+        \node[process, right=of v1inst] (v1asst)
+            {V1 Assistant\\\footnotesize\itshape Streamlit (mobile)};
+        \node[process, right=of v1asst] (v2api)
+            {V2 FastAPI\\\footnotesize\itshape Uvicorn};
+
+        % ===== Bottom row - shared runtime state =====
+        \node[store, below=1.8cm of v1asst] (state)
+            {\texttt{data/lab\_session.json}\\\footnotesize\itshape filelock};
+
+        % ===== External -> processes (curved bends so each arrow has a unique arc angle) =====
+        \draw[flow] (endpoint.south) -- (v1inst.north);
+        \draw[flow] (endpoint.south) to[out=-90, in=90, looseness=0.6] (v1asst.north);
+        \draw[flow] (endpoint.south) to[out=-90, in=90, looseness=0.6] (v2api.north);
+
+        \draw[flow] (openai.south) to[out=-90, in=90, looseness=0.6] (v1inst.north);
+        \draw[flow] (openai.south) to[out=-90, in=90, looseness=0.6] (v2api.north);
+
+        \draw[flow] (chroma.south) to[out=-90, in=90, looseness=0.6] (v1inst.north);
+        \draw[flow] (chroma.south) -- (v2api.north);
+
+        % ===== Processes <-> shared state (read/write label on the clean central biflow) =====
+        \draw[biflow] (v1inst.south) |- (state.west);
+        \draw[biflow] (v1asst.south) -- node[edgelabel, pos=0.5]{read/write} (state.north);
+        \draw[biflow] (v2api.south) |- (state.east);
+
+        % Layer labels (Shared state pulled further left so the V1 Instructor -> state biflow does not cross it)
+        \node[layerlabel] at ([xshift=-0.6cm]endpoint.west) {External};
+        \node[layerlabel] at ([xshift=-0.6cm]v1inst.west) {Processes};
+        \node[layerlabel] at ([xshift=-1.4cm]state.west) {Shared state};
+    \end{tikzpicture}}
+    \caption{Architecture of the deployed system showing V1 (two Streamlit processes) and V2 (one FastAPI process) sharing the file-locked \texttt{data/lab\_session.json}.}
+    \label{fig:arch-v2}
+\end{figure}
 
 \subsubsection{V1 - Instructor Process (Streamlit)} 
 
-% TODO: write per Ch4 Rewrite Brief §4.3.1
+The V1 instructor process is entered through \texttt{code/app.py}, a thin wrapper that calls \texttt{main()} entry point in \texttt{learning\_dashboard.instructor\_app}. 
+Streamlit's execution model is single-threaded meaning that simultaneous users each receive their own server-side \texttt{st.session\_state} keyed by Streamlit's session identifier.
+The sidebar drives both the filtering (temporal and module filters) and the live-session controls (start, end, the six-character lab code and the joined-assistants roster). 
+View routing is held in the \texttt{current\_view} session-state key, updated through a callback whenever the user picks from the view selector; the main pane renders one of the seven views described in Section \ref{sec:views} based on this value.
+
 
 \subsubsection{V1 - Assistant Process (Streamlit, mobile)} 
-% TODO: write per Ch4 Rewrite Brief §4.3.2
+
+The V1 lab assistant process is entered through \texttt{code/lab\_app.py}, a thin wrapper around the \texttt{main()} entry point in \texttt{learning\_dashboard.assistant\_app}, intended for phone-sized viewports.
+Assistant identity is persisted across reloads through a URL \texttt{?aid=<slug>\_<nnnn>} query parameter (for example, \texttt{?aid=alice\_4827}), set when the assistant first joins and read on every subsequent render.
+The page auto-refreshes every five seconds via the \texttt{st\_autorefresh} helper from \texttt{streamlit-autorefresh}, independently of the instructor app's refresh cycle.
+Each render reads the shared lab-session state described in Section \ref{sec:shared-state} and forwards to one of three views: a join screen when no \texttt{aid} is present (Figure \ref{fig:asst-join}), an unassigned standby view when an \texttt{aid} is present but no student is assigned (Figure \ref{fig:asst-unassigned}) or the assigned view when the assistant has been assigned to a student (Figure \ref{fig:asst-assigned}).
 
 \subsubsection{V2 - React + FastAPI} \label{sec:v2-react-fastapi}
 
-% TODO: write per Ch4 Rewrite Brief §4.3.3 — open with the "Why V2?" paragraph naming concrete V1 limitations
+V2 further refines V1's architecture by addressing four limitations encountered after V1 reached feature completion.
+Streamlit's execution model reruns the entire script on every interaction, so long-running operations such as the RAG collection build or the BKT Maximum Likelihood Estimation (MLE) fit block the user-interface thread and force the cold start mitigation described later in Section \ref{sec:pipeline} and Section \ref{sec:analytics}.
+There is no native support for asynchronous code, so awaiting an OpenAI or ChromaDB response would block the entire app, which is particularly problematic for the lab assistant's real-time coaching suggestions.
+The theming model is limited in contrast to the seven-theme palette and accent colour toggle added in V2, and implementing a custom theme switcher in Streamlit would have required a non-trivial amount of custom CSS and JavaScript injection.
+Multi-page navigation in Streamlit is route-based with a full-page reload, so V1 works around this by holding the active view in session state and switching the rendered pane on each rerun.
 
-\subsubsection{Shared Runtime State} 
+
+V2 consolidates the two V1 processes into a single FastAPI process entered through \texttt{code2/backend/main.py}. 
+The same process exposes the analytical core at \texttt{/api/*} and serves two HTML entry points from the built \texttt{frontend/dist/} directory: \texttt{index.html} is the instructor counterpart to V1's \texttt{code/app.py}, and \texttt{mobile.html} is the lab-assistant counterpart to V1's \texttt{code/lab\_app.py}.
+The two entry points share the same React bundle but have different route components and separate routing trees.
+View-level descriptions for both flows live in Section \ref{sec:views} and Section \ref{sec:assistant}, with the V1 versus V2 comparison captured in Table \ref{tab:views-comparison}.
+
+Eleven routers under \texttt{code2/backend/routers/} adapt the analytical core to HTTP: \texttt{live}, \texttt{student}, \texttt{question}, \texttt{analysis}, \texttt{sessions}, \texttt{settings}, \texttt{models\_cmp}, \texttt{lab}, \texttt{rag}, \texttt{meta} and \texttt{cf}. 
+The \texttt{mobile.html} bundle calls \texttt{/api/lab/*}; the \texttt{index.html} bundle calls the others. 
+The frontend is Vite, React and TypeScript with nine top-level views, eight of them are on the instructor side and one for the lab assistant; the eight instructor views include all the ones V1 carries with the addition of a \texttt{SessionProgression} view that replays struggle evolution across the session, an interaction pattern V1's rerun model cannot express.
+V2 also adds a seven-theme runtime palette (paper, newsprint, solar, scifi, blueprint, matrix, cyberpunk) swappable from the settings view through React Context and CSS custom properties; the accent colour is picked separately and persisted to \texttt{localStorage}.
+A FastAPI \texttt{lifespan} handler runs at startup and prewarms the data frame, incorrectness scores, the struggle and difficulty leaderboards, the BKT and IRT fits and the ChromaDB embedding collection so that the first user request is not subject to cold-start latency. Figure \ref{fig:v2-inclass} shows the V2 In-Class view in the scifi theme. 
+
+\begin{figure}[H]
+    \centering
+    \IfFileExists{figures/implementation/v2-inclass.png}{%
+        \includegraphics[width=1\linewidth]{figures/implementation/v2-inclass.png}%
+    }{%
+        \fbox{\parbox{1\textwidth}{\centering\vspace{4em}\textbf{Figure placeholder: V2 In-Class view}\\\textit{Screenshot of the V2 instructor In-Class view, showing live struggle and difficulty leaderboards rendered through React.}\\\footnotesize Drop \texttt{figures/implementation/v2-inclass.png} into the repo to auto-resolve this figure.\vspace{4em}}}%
+    }
+    \caption{Screenshot of V2 (React + FastAPI) showing the In-Class view in the scifi theme; the analytical layer is reused from V1 with the divergences noted in Section \ref{sec:overview}.}
+    \label{fig:v2-inclass}
+\end{figure}
 
 
-% TODO: write per Ch4 Rewrite Brief §4.3.4
+V2 carries the same analytical design as V1 with the same signal categories, the same threshold bands, the same pipeline and same retrieval procedure. 
+The V1 modules live inside the \texttt{learning\_dashboard/} package under \texttt{code/} and the V2 modules live inside the \texttt{backend/} package under \texttt{code2/}, alongside \texttt{main.py} and the routers (Table \ref{tab:pkg-structure}). 
+The scoring outputs evolve in four places between the two versions, as detailed in Section \ref{sec:overview}: V2's IRT, BKT, improved struggle and baseline struggle each carry refinements over V1.
+The threshold classification is unchanged, allowing the V1 and V2 visual encodings to remain consistent.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{0.22\textwidth}|p{0.34\textwidth}|p{0.36\textwidth}|}
+    \hline
+    \textbf{Concern} & \textbf{V1 (\texttt{code/learning\_dashboard/})} & \textbf{V2 (\texttt{code2/backend/})} \\
+    \hline
+    \hline
+    Entry point(s) & \texttt{instructor\_app.py}, \texttt{assistant\_app.py} & \texttt{main.py} (FastAPI) \\
+    \hline
+    Data ingestion & \texttt{data\_loader.py} & \texttt{data\_loader.py} \\
+    \hline
+    Analytical core & \texttt{analytics.py} (monolithic) & \texttt{analytics.py} plus per-signal split: \texttt{incorrectness.py}, \texttt{struggle.py}, \texttt{difficulty.py}, \texttt{clustering.py}, \texttt{collab.py} \\
+    \hline
+    Shared session state & \texttt{lab\_state.py} & \texttt{lab\_state.py} \\
+    \hline
+    Configuration & \texttt{config.py}, \texttt{paths.py} & \texttt{config.py}, \texttt{paths.py}, \texttt{runtime\_config.py} \\
+    \hline
+    Academic calendar & \texttt{academic\_calendar.py} & \texttt{academic\_calendar.py} \\
+    \hline
+    RAG & \texttt{rag.py} & \texttt{rag.py} \\
+    \hline
+    Class tagging & \texttt{lab\_classes.py} & \texttt{lab\_classes.py} \\
+    \hline
+    Audio cues & \texttt{sound.py} &  (browser-side in V2) \\
+    \hline
+    Advanced models & \texttt{models/} (\texttt{irt}, \texttt{bkt}, \texttt{improved\_struggle}, \texttt{measurement}) & \texttt{models/} (same four files) \\
+    \hline
+    UI / presentation & \texttt{ui/} (\texttt{views}, \texttt{components}, \texttt{theme}) - Streamlit & \texttt{frontend/} - separate React + Vite tree \\
+    \hline
+    HTTP layer & & \texttt{routers/} (11: \texttt{live}, \texttt{student}, \texttt{question}, \texttt{analysis}, \texttt{sessions}, \texttt{settings}, \texttt{models\_cmp}, \texttt{lab}, \texttt{rag}, \texttt{meta}, \texttt{cf}) \\
+    \hline
+    Request schemas &  & \texttt{schemas.py} \\
+    \hline
+    Dependency injection & & \texttt{deps.py} \\
+    \hline
+    In-process cache &  & \texttt{cache.py} \\
+    \hline
+    Demo data & & \texttt{demo\_data.py} \\
+    \hline
+    \end{tabular}
+    \caption{Module organisation of the analytical core in V1 (left column) and V2 (right column)}
+    \label{tab:pkg-structure}
+\end{table}
+
+\subsubsection{Shared Runtime State} \label{sec:shared-state}
+
+
+
+All three apps share a single runtime-state file at \texttt{data/lab\_session.json}, accessed through the \texttt{filelock} library under a five-second exclusive lock.   
+Writes are atomic, meaning that the new state is written to a \texttt{.tmp} file first and then renamed via \texttt{os.replace}, so a reader never observes a partial JSON file (Figure \ref{fig:code-lablock}).
+The file holds the active session metadata, the roster of joined assistants keyed by identifier, and an assignment map from student to assistant with a \texttt{helping} or \texttt{helped} status.
+A change made by any process becomes visible to the others within one refresh cycle.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.92\linewidth}
+\begin{lstlisting}[firstnumber=38]
+def _lock() -> FileLock:
+    lock_file = paths.lab_session_lock_path()
+    lock_file.parent.mkdir(parents=True, exist_ok=True)
+    return FileLock(str(lock_file), timeout=_LOCK_TIMEOUT_SECONDS)
+\end{lstlisting}
+
+\begin{lstlisting}[firstnumber=131]
+def _read_state_unlocked() -> dict[str, Any]:
+    state_file = paths.lab_session_path()
+    if not state_file.exists():
+        return _default_state()
+    try:
+        raw = json.loads(state_file.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return _default_state()
+    return _normalize_state(raw)
+\end{lstlisting}
+
+\begin{lstlisting}[firstnumber=142]
+def _write_state_unlocked(state: dict[str, Any]) -> None:
+    state_file = paths.lab_session_path()
+    state_file.parent.mkdir(parents=True, exist_ok=True)
+    normalised = _normalise_state(state)
+    tmp_file = state_file.with_suffix(".tmp")
+    tmp_file.write_text(json.dumps(normalised, indent=2), encoding="utf-8")
+    tmp_file.replace(state_file)
+\end{lstlisting}
+    \end{minipage}
+    \caption{File-locked read/write pattern for the shared lab-session state}
+    \label{fig:code-lablock}
+\end{figure}
 
 \subsubsection{Deferred-Actions Pattern}
 
-% TODO: write per Ch4 Rewrite Brief §4.3.5
+% Streamlit forbids mutating \texttt{st.session\_state} after a widget has been instantiated in the same run; doing so raises a \texttt{StreamlitAPIException}.
+% V1 sidesteps this constraint through a deferred-actions pattern: callbacks and post-widget click handlers do not mutate session state directly, but instead set a \texttt{pending\_*} flag on session state (for example, \texttt{pending\_session\_load\_record}, \texttt{pending\_return\_to\_live\_data} or \texttt{pending\_remove\_assistant\_id}) describing the change to be made.
+% The next rerun reads those flags at the top of \texttt{main()}, before any widget is constructed, applies the mutation and clears the flag.
+% This avoids extra threads or queues for state coordination, and keeps each transition atomic in the sense that one rerun applies one change.
+% V2 does not need this pattern, as React and FastAPI do not impose the same widget-instantiation rule.
 
-\subsection{Data Pipeline}
+Streamlit forbids modifying \texttt{st.session\_state} after a widget has been instantiated in the same run; doing so raises a \texttt{StreamlitAPIException}. 
+V1 deals with this constraint through a deferred-actions pattern where callbacks and post-widget click handlers do not modify the session state directly, but instead set a \texttt{pending\_*} flag on the session state describing the change to be made.
+The next rerun reads those flags inside \texttt{main()}, before the sidebar widgets that consume these flags are constructed, applies the changes and clears the flag.
+This pattern avoids the need for extra threads or queues for state coordination, and keeps each transition atomic in the sense that one rerun applies one change (Figure \ref{fig:code-deferred}).
+V2 does not need this pattern, as React and FastAPI do not impose the same widget-instantiation rule.
 
-% TODO: write per Ch4 Rewrite Brief §4.4 — opening paragraph; reference fig:pipeline-flow
 
-\subsubsection{Endpoint Retrieval and Parsing}
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.92\linewidth}
+        \textbf{(a)} Button callback inside the Previous Sessions view sets the \texttt{pending\_*} flag and reruns:
+\begin{lstlisting}[firstnumber=927]
+if st.button("Load", key=f"load_session_{session_id}"):
+    st.session_state["pending_session_load_record"] = record
+    st.session_state["pending_delete_session_id"] = None
+    st.rerun()
+\end{lstlisting}
 
-% TODO: write per Ch4 Rewrite Brief §4.4.1
+        \textbf{(b)} Inside \texttt{main()} on the next rerun, \emph{before} the sidebar widgets bound to these keys are constructed: read, apply, clear.
+\begin{lstlisting}[firstnumber=763]
+pending_record = st.session_state.get("pending_session_load_record")
+if isinstance(pending_record, dict):
+    available_modules = (
+        ["All Modules"] + sorted(df["module"].unique().tolist())
+        if not df.empty
+        else ["All Modules"]
+    )
+    data_loader.apply_saved_session_to_state(
+        pending_record,
+        available_modules=available_modules,
+    )
+    st.session_state["pending_session_load_record"] = None
+    st.session_state["_nav_loading"] = True
+    st.rerun()
+\end{lstlisting}
+    \end{minipage}
+    \caption{The deferred-actions pattern used to mutate session state without violating Streamlit's widget-instantiation rule. Block (a) is the click handler, block (b) is the matching apply-and-clear.}
+    \label{fig:code-deferred}
+\end{figure}
 
-\subsubsection{Data Normalisation and Structuring}
+\subsection{Data Pipeline} \label{sec:pipeline}
 
-% TODO: write per Ch4 Rewrite Brief §4.4.2
 
-\subsubsection{Caching Strategy}
+The data pipeline is a five-step path from the lab endpoint to the in-memory dataframe which gets consumed by the scoring layer: endpoint polling, detection of the JSON-vs-XML payload, parse, normalise, cache.
+Both V1 and V2 use the same modules for the first four steps and diverge only at the caching layer, where V1 relies on Streamlit's \texttt{@st.cache\_data} decorator and an in-process dictionary whilst V2 layers \texttt{cachetools} time-to-live (TTL) caches over a disk-persisted incorrectness cache that survives process restarts (Figure \ref{fig:pipeline-flow}).
 
-% TODO: write per Ch4 Rewrite Brief §4.4.3
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        node distance = 0.55cm and 1.0cm,
+        stage/.style = {
+            rectangle, draw, rounded corners=2pt,
+            minimum width=5.0cm, minimum height=1.0cm,
+            align=center, font=\normalsize, fill=blue!4
+        },
+        cache/.style = {
+            rectangle, draw, rounded corners=2pt,
+            minimum width=6.0cm, minimum height=1.4cm,
+            align=center, font=\normalsize, fill=gray!12
+        },
+        endpoint/.style = {
+            rectangle, draw, rounded corners=2pt,
+            minimum width=5.0cm, minimum height=1.0cm,
+            align=center, font=\normalsize, fill=orange!12
+        },
+        output/.style = {
+            rectangle, draw, rounded corners=2pt,
+            minimum width=5.0cm, minimum height=1.0cm,
+            align=center, font=\normalsize, fill=green!8
+        },
+        flow/.style = {-{Stealth[length=2.8mm]}, thick}
+    ]
+        % ===== Shared upstream pipeline (vertical chain) =====
+        \node[endpoint]                (api)       {Lab endpoint};
+        \node[stage, below=of api]     (fetch)     {\texttt{fetch\_raw\_data}};
+        \node[stage, below=of fetch]   (detect)    {\texttt{detect\_format}};
+        \node[stage, below=of detect]  (parse)     {\texttt{parse\_*\_response}};
+        \node[stage, below=of parse]   (normalise) {\texttt{normalise\_and\_clean}};
 
-\subsection{Session Management}
+        % ===== Cache fork: two parallel branches below normalise =====
+        \node[cache] at ([xshift=-3.2cm,yshift=-1.8cm]normalise.south) (v1cache)
+            {\textbf{V1 cache}};
+        \node[cache] at ([xshift=3.2cm,yshift=-1.8cm]normalise.south) (v2cache)
+            {\textbf{V2 cache}};
 
-% TODO: write per Ch4 Rewrite Brief §4.5
+        % ===== Output =====
+        \node[output] at ([yshift=-4.2cm]normalise.south) (df)
+            {In-memory \texttt{DataFrame}};
 
-\subsubsection{Live Session Lifecycle}
+        % ===== Arrows: shared pipeline =====
+        \draw[flow] (api)       -- (fetch);
+        \draw[flow] (fetch)     -- (detect);
+        \draw[flow] (detect)    -- (parse);
+        \draw[flow] (parse)     -- (normalise);
 
-% TODO: write per Ch4 Rewrite Brief §4.5.1
+        % ===== Fork + converge =====
+        \draw[flow] (normalise.south) -- (v1cache.north);
+        \draw[flow] (normalise.south) -- (v2cache.north);
+        \draw[flow] (v1cache.south)   -- (df.north);
+        \draw[flow] (v2cache.south)   -- (df.north);
+    \end{tikzpicture}
+    \caption{Data pipeline from the lab endpoint to the in-memory DataFrame. The fetch, format-detection, parse and normalise stages are shared between V1 and V2; the cache stage forks into V1's two-tier in-memory cache and V2's layered \texttt{TTLCache} stack plus disk-persisted incorrectness cache.}
+    \label{fig:pipeline-flow}
+\end{figure}
 
-\subsubsection{Saved Session History and Restoration}
+\paragraph{Endpoint retrieval and parsing}
+The endpoint is Loughborough's existing PHP retrieval URL, named in \texttt{config.py} as \texttt{API\_URL}; the same URL is used by both versions.
+The HTTP fetch is a synchronous \texttt{requests.get()} call with a 30-second timeout (\texttt{API\_TIMEOUT = 30}).
+Under normal operation the endpoint returns newline-delimited JSON, with a pure-XML payload retained as a fallback for legacy endpoint behaviour; format detection is a single-attempt JSON parse on the first non-empty line.
+Each JSON record carries the outer fields \texttt{module}, \texttt{question}, \texttt{session} and \texttt{user}, plus an inner \texttt{xml} string.
+The inner XML carries one or more \texttt{<submission>} elements, each with a \texttt{timestamp} attribute, an \texttt{<srep>} element (the student's answer), and a \texttt{<feedback>} element (the AI feedback text consumed downstream by the incorrectness scorer); the pipeline emits one DataFrame row per submission element.
+Embedded XML is parsed with the standard-library \texttt{xml.etree.ElementTree} (Figure \ref{fig:code-parsexml}).
 
-% TODO: write per Ch4 Rewrite Brief §4.5.2
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.92\linewidth}
+\begin{lstlisting}[firstnumber=59]
+xml_field = obj.get("xml", "")
+if xml_field and isinstance(xml_field, str) and xml_field.strip():
+    try:
+        root = ET.fromstring(f"<root>{xml_field}</root>")
+        submissions = root.findall(".//submission")
+        if submissions:
+            for sub in submissions:
+                record = base.copy()
+                record["timestamp"] = sub.get(
+                    "timestamp", obj.get("timestamp", "")
+                )
+                srep = sub.find("srep")
+                record["student_answer"] = (
+                    srep.text if srep is not None and srep.text else ""
+                )
+                feedback_el = sub.find("feedback")
+                record["ai_feedback"] = (
+                    feedback_el.text
+                    if feedback_el is not None and feedback_el.text
+                    else ""
+                )
+                records.append(record)
+\end{lstlisting}
+    \end{minipage}
+    \caption{The embedded-XML extraction inside \texttt{parse\_json\_response()}: the per-record \texttt{xml} string is wrapped in a synthetic \texttt{<root>} so \texttt{xml.etree.ElementTree} can iterate the contained \texttt{<submission>} elements, each producing one DataFrame row.}
+    \label{fig:code-parsexml}
+\end{figure}
 
-\subsection{Analytics Implementation}
+\paragraph{Data normalisation and structuring}
+All records collapse into a single pandas \texttt{DataFrame} with seven columns: \texttt{module}, \texttt{question}, \texttt{timestamp}, \texttt{student\_answer}, \texttt{ai\_feedback}, \texttt{session} and \texttt{user}.
+An eighth column, \texttt{academic\_period}, is added by \texttt{academic\_calendar.add\_academic\_period\_column()} and maps each row's timestamp to a Loughborough 2025/26 academic-week label which is consumed by the Data Analysis view in Section \ref{sec:views}.
+The excluded modules filter (\texttt{EXCLUDED\_MODULES}) drops test and admin modules before any scoring and modelling steps.
+Timestamps are parsed with \texttt{pandas.to\_datetime(\dots, errors="coerce")}, rows with unparseable timestamps are dropped and the DataFrame is sorted by timestamp.
+% A boolean \texttt{has\_feedback} column is then added by \texttt{add\_feedback\_flag()} and consumed by the incorrectness scorer in Section \ref{sec:analytics}: rows with empty \texttt{ai\_feedback} are short-circuited to the neutral fallback $x_i = 0.5$ rather than dispatched to the OpenAI batch call.
+
+\paragraph{Caching}
+V1 caches at two layers.
+\texttt{fetch\_raw\_data()} is wrapped in \texttt{@st.cache\_data(ttl=CACHE\_TTL)} with \texttt{CACHE\_TTL = 10} seconds, so successive sidebar reruns within the same refresh cycle do not re-hit the endpoint.
+A session-state shortcut in \texttt{load\_data()} hashes the raw response and skips the parse and normalise steps when the hash is unchanged from the previous render.
+The incorrectness scorer in Section \ref{sec:analytics} maintains its own in-process dictionary \texttt{\_incorrectness\_cache} in \texttt{analytics.py}, which is keyed by feedback text; it is local to the process and does not survive a restart.
+The Streamlit auto-refresh widget runs on a separate cadence (\texttt{AUTO\_REFRESH\_INTERVAL\_DEFAULT = 300} seconds, configurable from five seconds up to five minutes), the 10-second \texttt{CACHE\_TTL} deduplicates within one refresh cycle, whilst the chosen auto-refresh interval controls how often a fresh cycle happens.
+
+V2 retains the same in-process scorer cache but enhances the storage in three places.
+The raw-DataFrame cache becomes a \texttt{cachetools.TTLCache} with \texttt{maxsize=1} and a 60-second TTL (\texttt{CACHE\_TTL = 60} in \texttt{code2/backend/config.py}), since FastAPI's stateless request model would otherwise rebuild the DataFrame on every endpoint hit.
+Above that, four additional \texttt{TTLCache} layers sit one level higher in the call stack: \texttt{\_struggle\_cache} and \texttt{\_difficulty\_cache} at 15 minutes, \texttt{\_improved\_cache} and \texttt{\_irt\_difficulty\_cache} at 10 minutes, each caching the scoring outputs per session identifier.
+On top of both, V2 also adds a disk-persisted incorrectness cache at \texttt{data/incorrectness\_cache.json}, written through \texttt{code2/backend/incorrectness.py}.
+A FastAPI \texttt{lifespan} handler runs at startup, loads the DataFrame, computes the warm ratio (the fraction of pending feedback strings already on disk) and if the warm ratio is at least 0.95 it short-circuits the scoring pass entirely, otherwise it batches the missing feedback strings to OpenAI and updates the cache file (Figure \ref{fig:code-warmratio}).
+The same handler then fits the BKT and IRT models once and stashes their parameters in memory for reuse across requests.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.92\linewidth}
+\begin{lstlisting}[firstnumber=94]
+feedbacks = df["ai_feedback"].astype(str).str.strip()
+unique_fbs = [t for t in feedbacks.unique() if t]
+if unique_fbs:
+    cached_count = sum(
+        1 for t in unique_fbs
+        if t in incorrectness._incorrectness_cache
+    )
+    warm_ratio = cached_count / len(unique_fbs)
+else:
+    warm_ratio = 1.0
+if warm_ratio >= 0.95:
+    df["incorrectness"] = incorrectness.compute_incorrectness_column(
+        df, score_new=False
+    )
+else:
+    df["incorrectness"] = incorrectness.compute_incorrectness_column(
+        df, max_new_scores=0
+    )
+\end{lstlisting}
+    \end{minipage}
+    \caption{V2 startup warm-ratio short-circuit. The fraction of unique feedback strings already present in the disk-persisted cache is computed; at $\geq 95\%$ the lookup-only path runs (no OpenAI calls), otherwise the full scoring pass runs once.}
+    \label{fig:code-warmratio}
+\end{figure}
+
+The net effect is that V2's cold-start cost is paid once per process restart rather than once per Streamlit rerun, converting the rerun-time scoring cost that V1's per-run cap (\texttt{SCORING\_PER\_RUN\_CAP = 500}) is built to absorb into a one-shot startup cost paid before any user request reaches the routers. V2 therefore runs significantly faster than the V1 and give a greater user experience (Table \ref{tab:cache-hierarchy}).
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|>{\raggedright\arraybackslash}p{0.31\textwidth}|>{\raggedright\arraybackslash}p{0.24\textwidth}|c|c|c|}
+\hline
+\textbf{Cache} & \textbf{Scope} & \textbf{TTL} & \textbf{Persists} & \textbf{Version} \\
+\hline\hline
+\texttt{@st.cache\_data} on \texttt{fetch\_raw\_data} & Raw endpoint response & 10\,s & In-memory & V1 \\
+\hline
+\texttt{\_df\_hash} session-state skip & Parsed DataFrame & Per-render & In-memory & V1 \\
+\hline
+\texttt{\_incorrectness\_cache} dict & Feedback $\to$ score & Process & In-memory & V1 \\
+\hline
+\texttt{\_df\_cache} & Raw DataFrame & 60\,s & In-memory & V2 \\
+\hline
+\texttt{\_struggle\_cache}, \texttt{\_difficulty\_cache} & Per-session scoring output & 15\,min & In-memory & V2 \\
+\hline
+\texttt{\_improved\_cache}, \texttt{\_irt\_difficulty\_cache} & Per-session advanced model & 10\,min & In-memory & V2 \\
+\hline
+\texttt{incorrectness\_cache.json} & Feedback $\to$ score & --- & On disk & V2 \\
+\hline
+\end{tabular}
+\caption{Caches in the data pipeline across V1 (Streamlit) and V2 (FastAPI).}
+\label{tab:cache-hierarchy}
+\end{table}
+
+
+\subsection{Session Management} \label{sec:session}
+
+A session in this system is a bounded window of submissions used for the in-class workflow, which is recorded so it can be revisited later on.
+The live session lives in \texttt{data/lab\_session.json} (covered in Section \ref{sec:shared-state}); once ended, the record is appended to \texttt{data/saved\_sessions.json} for review later in the Previous Sessions view.
+
+The session lifecycle is coordinated through the file-locked state from Section \ref{sec:shared-state}, with every mutation atomic under the write lock.
+\begin{enumerate}
+    \item The instructor clicks ``Start Session'' in the sidebar, which calls \texttt{lab\_state.start\_lab\_session()}; this generates a six-character code with \texttt{generate\_session\_code()} and writes the session metadata (\texttt{session\_code}, \texttt{session\_active=True}, \texttt{session\_start}, \texttt{class\_id}, \texttt{class\_label}) under the file-locked write helper.
+    \item Assistants enter the code and a display name on the lab assistant app, which calls \texttt{join\_session(session\_code, name)} and either mints a new \texttt{assistant\_id} or reuses an existing one if a matching display name is already in the roster, then appends them to the roster.
+    \item Assignment is bidirectional: the dashboard calls \texttt{assign\_student(student\_id, assistant\_id)} or, if the lab instructor has enabled self-allocation, the assistant calls \texttt{self\_claim\_student(student\_id, assistant\_id)} from the lab app; both adjust the same assignment map under the write lock, and completion is signalled by \texttt{mark\_student\_helped(student\_id)}, which stamps \texttt{status="helped"} and \texttt{helped\_at}.
+    \item Ending the session calls \texttt{end\_lab\_session()}, which sets \texttt{session\_active=False}, clears the \texttt{assignments} map and nulls each assistant's \texttt{assigned\_student}; the session is then optionally persisted as a saved record.
+\end{enumerate}
+The session code is drawn uniformly from \texttt{string.ascii\_uppercase + string.digits}, giving $\log_2(36^6) \approx 31$ bits of entropy, which is more than sufficient for the expected scale of use and allows for a short and human-friendly code.
+During a live session the instructor sidebar shows the join code on a card with the elapsed time in \texttt{HH:MM:SS} format, the class label and an ``End Session'' button (Figure \ref{fig:session-live}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{figures/implementation/v2-live-session.png}
+    \caption{Instructor sidebar during a live session, showing the join code, the elapsed-time timer and the End Session button.}
+    \label{fig:session-live}
+\end{figure}
+
+Each ended session is appended to \texttt{data/saved\_sessions.json} through \texttt{save\_session\_record(record)}; each record carries an \texttt{id} (uuid), a display \texttt{name}, \texttt{start\_time}, \texttt{end\_time}, \texttt{duration\_seconds}, \texttt{class\_id}, \texttt{class\_label} and a nested \texttt{context} dict (Figure \ref{fig:saved-session-json}).
+The \texttt{context} dict carries only the UI filter state; the assistant roster and assignment map are not persisted, since they live in the live-state file \texttt{data/lab\_session.json} which is cleared on \texttt{end\_lab\_session()}.
+This is a deliberate scope split: saved sessions are for retrospective analysis of submissions in a time window and not for replaying assistant allocations.
+CRUD operations live in \texttt{data\_loader.py} in both versions and persist through \texttt{\_write\_saved\_sessions\_payload()}, which uses the same atomic \texttt{.tmp} $\to$ \texttt{path.replace(\dots)} pattern as the live-state writer (Figure \ref{fig:code-lablock}). 
+In V1, \texttt{apply\_saved\_session\_to\_state(record, available\_modules)} restores the saved filter state to \texttt{st.session\_state} through the deferred-actions \texttt{pending\_session\_load\_record} flag covered in Section \ref{sec:structure}, the next rerun reads the flag, applies the filter state and routes back to the In-Class view at that historical window. V2 has no equivalent server-side function; the React Previous Sessions view re-applies the filter state client-side from the \texttt{GET /api/s/\{id\}} response, sidestepping Streamlit's widget-instantiation rule entirely.
+
+
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.92\linewidth}
+\begin{lstlisting}[language=json]
+{
+  "id": "5e3a-...-9c2f",
+  "name": "Week 18 - 25COA122 Monday lab",
+  "class_id": "25COA122-mon-14:00",
+  "class_label": "25COA122 - Monday 14:00",
+  "start_time": "2026-02-09T14:01:23Z",
+  "end_time":   "2026-02-09T15:55:12Z",
+  "duration_seconds": 6829,
+  "context": {
+    "dashboard_view":          "in_class",
+    "secondary_module_filter": "25COA122",
+    "time_filter_preset":      "Custom",
+    "time_date_range":         ["2026-02-09", "2026-02-09"],
+    "time_start":              "14:00",
+    "time_end":                "16:00"
+  }
+}
+\end{lstlisting}
+    \end{minipage}
+    \caption{An example record from \texttt{data/saved\_sessions.json}. The \texttt{context} dict holds only the UI filter state.}
+    \label{fig:saved-session-json}
+\end{figure}
+
+\subsection{Analytics Implementation} \label{sec:analytics}
 
 % TODO: write per Ch4 Rewrite Brief §4.6
 
 \subsubsection{Incorrectness Scoring}
 
-% TODO: write per Ch4 Rewrite Brief §4.6.1 — REQUIRED maths recap line (Marker-1 check)
+% TODO: write per Ch4 Rewrite Brief §4.6.1 - REQUIRED maths recap line (Marker-1 check)
 
 \subsubsection{Baseline Student Struggle Model}
 
-% TODO: write per Ch4 Rewrite Brief §4.6.2 — REQUIRED maths recap line; drop in tab:struggle-7sig
+% TODO: write per Ch4 Rewrite Brief §4.6.2 - REQUIRED maths recap line; drop in tab:struggle-7sig
 
 \subsubsection{Baseline Question Difficulty Model}
 
-% TODO: write per Ch4 Rewrite Brief §4.6.3 — REQUIRED maths recap line; drop in tab:difficulty-5sig
+% TODO: write per Ch4 Rewrite Brief §4.6.3 - REQUIRED maths recap line; drop in tab:difficulty-5sig
 
 \subsubsection{Collaborative Filtering}
 
-% TODO: write per Ch4 Rewrite Brief §4.6.4 — REQUIRED maths recap line
+% TODO: write per Ch4 Rewrite Brief §4.6.4 - REQUIRED maths recap line
 
 \subsubsection{Mistake Clustering}
 
 % TODO: write per Ch4 Rewrite Brief §4.6.5
 
-\subsection{Advanced Model Implementation}
+\subsection{Advanced Model Implementation} \label{sec:advanced}
 
 % TODO: write per Ch4 Rewrite Brief §4.7
 
 \subsubsection{Measurement Confidence}
 
-% TODO: write per Ch4 Rewrite Brief §4.7.1 — REQUIRED maths recap line
+% TODO: write per Ch4 Rewrite Brief §4.7.1 - REQUIRED maths recap line
 
 \subsubsection{Item Response Theory (IRT) Difficulty}
 
-% TODO: write per Ch4 Rewrite Brief §4.7.2 — REQUIRED maths recap line; \cite{byrdLBFGSB1995}
+% TODO: write per Ch4 Rewrite Brief §4.7.2 - REQUIRED maths recap line; \cite{byrdLBFGSB1995}
 
 \subsubsection{Bayesian Knowledge Tracing (BKT) Mastery}
 
-% TODO: write per Ch4 Rewrite Brief §4.7.3 — REQUIRED maths recap line; \cite{corbettKnowledgeTracingModeling1995}; drop in tab:bkt-defaults
+% TODO: write per Ch4 Rewrite Brief §4.7.3 - REQUIRED maths recap line; \cite{corbettKnowledgeTracingModeling1995}; drop in tab:bkt-defaults
 
 \subsubsection{Improved Struggle Model}
 
-% TODO: write per Ch4 Rewrite Brief §4.7.4 — REQUIRED maths recap line
+% TODO: write per Ch4 Rewrite Brief §4.7.4 - REQUIRED maths recap line
 
-\subsection{RAG Suggested Feedback}
+\subsection{RAG Suggested Feedback} \label{sec:rag}
 
-% TODO: write per Ch4 Rewrite Brief §4.8 — no inline supervisor attribution
+% TODO: write per Ch4 Rewrite Brief §4.8 - no inline supervisor attribution
 
 \subsubsection{Hybrid Two-Layer Architecture}
 
-% TODO: write per Ch4 Rewrite Brief §4.8.1 — include \cite{lewisRetrievalAugmentedGenerationKnowledgeIntensive2020}
+% TODO: write per Ch4 Rewrite Brief §4.8.1 - include \cite{lewisRetrievalAugmentedGenerationKnowledgeIntensive2020}
 
 \subsubsection{Embedding Model (all-MiniLM-L6-v2)}
 
@@ -151,9 +651,16 @@ Section \ref{sec:problems} highlights the implementation problems encountered an
 
 % TODO: write per Ch4 Rewrite Brief §4.8.5
 
-\subsection{Instructor System Views}
+\subsection{Instructor System Views} \label{sec:views}
 
-% TODO: write per Ch4 Rewrite Brief §4.9.0 — opening paragraph + drop in tab:views-comparison (V1 vs V2 parity)
+% TODO: write per Ch4 Rewrite Brief §4.9.0 - opening paragraph + drop in tab:views-comparison (V1 vs V2 parity)
+
+\begin{table}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{3em}\textbf{Table placeholder: V1 vs V2 instructor view parity}\\\textit{Row-per-view comparison of the seven V1 instructor views and the eight V2 instructor views, noting parity, V2-only additions (e.g. SessionProgression) and any V1 features deferred in V2.}\\\footnotesize Replace this box with the populated tabular environment when §4.9 is written.\vspace{3em}}}
+    \caption{Parity comparison of instructor views between V1 (Streamlit) and V2 (React + FastAPI).}
+    \label{tab:views-comparison}
+\end{table}
 
 \subsubsection{In-Class View}
 
@@ -183,7 +690,7 @@ Section \ref{sec:problems} highlights the implementation problems encountered an
 
 % TODO: write per Ch4 Rewrite Brief §4.9.7
 
-\subsection{Lab Assistant System}
+\subsection{Lab Assistant System} \label{sec:assistant}
 
 % TODO: write per Ch4 Rewrite Brief §4.10
 
@@ -191,17 +698,50 @@ Section \ref{sec:problems} highlights the implementation problems encountered an
 
 % TODO: write per Ch4 Rewrite Brief §4.10.1
 
+\begin{figure}[H]
+    \centering
+    \IfFileExists{figures/implementation/asst-join.png}{%
+        \includegraphics[width=0.5\linewidth]{figures/implementation/asst-join.png}%
+    }{%
+        \fbox{\parbox{0.6\textwidth}{\centering\vspace{4em}\textbf{Figure placeholder: Lab assistant join screen}\\\textit{Mobile-viewport screenshot of the lab assistant join page (no \texttt{aid} query parameter present), showing the session-code field and the assistant-name field.}\\\footnotesize Drop \texttt{figures/implementation/asst-join.png} into the repo to auto-resolve this figure.\vspace{4em}}}%
+    }
+    \caption{Lab assistant join screen, entered when no \texttt{aid} query parameter is bound to the URL.}
+    \label{fig:asst-join}
+\end{figure}
+
 \subsubsection{Waiting and Assignment States}
 
 % TODO: write per Ch4 Rewrite Brief §4.10.2
+
+\begin{figure}[H]
+    \centering
+    \IfFileExists{figures/implementation/asst-unassigned.png}{%
+        \includegraphics[width=0.5\linewidth]{figures/implementation/asst-unassigned.png}%
+    }{%
+        \fbox{\parbox{0.6\textwidth}{\centering\vspace{4em}\textbf{Figure placeholder: Lab assistant standby view}\\\textit{Mobile-viewport screenshot of the lab assistant standby view (\texttt{aid} present but no student assigned), showing the joined-assistant indicator and the list of students available to self-claim.}\\\footnotesize Drop \texttt{figures/implementation/asst-unassigned.png} into the repo to auto-resolve this figure.\vspace{4em}}}%
+    }
+    \caption{Lab assistant standby view shown once the assistant has joined but before any student is assigned.}
+    \label{fig:asst-unassigned}
+\end{figure}
 
 \subsubsection{Live Assistant Allocation and Mark-Helped}
 
 % TODO: write per Ch4 Rewrite Brief §4.10.3
 
-\subsection{Problems Encountered and Solutions}
+\begin{figure}[H]
+    \centering
+    \IfFileExists{figures/implementation/asst-assigned.png}{%
+        \includegraphics[width=0.5\linewidth]{figures/implementation/asst-assigned.png}%
+    }{%
+        \fbox{\parbox{0.6\textwidth}{\centering\vspace{4em}\textbf{Figure placeholder: Lab assistant assigned view}\\\textit{Mobile-viewport screenshot of the lab assistant assigned view (\texttt{aid} present and student assigned), showing the assigned student's card with the \emph{mark helped} action.}\\\footnotesize Drop \texttt{figures/implementation/asst-assigned.png} into the repo to auto-resolve this figure.\vspace{4em}}}%
+    }
+    \caption{Lab assistant assigned view, showing the student card and \emph{mark helped} action used to close the assignment.}
+    \label{fig:asst-assigned}
+\end{figure}
 
-% TODO: write per Ch4 Rewrite Brief §4.11 — drop in tab:problems
+\subsection{Problems Encountered and Solutions} \label{sec:problems}
+
+% TODO: write per Ch4 Rewrite Brief §4.11 - drop in tab:problems
 % Note: sound-effects discussion now lives inside §4.9.6 Settings View (the toggle is there); old standalone §4.11 Sound Effects subsection removed during 2026-05-20 layout refinement.
 
 % Old V1-prototype draft prose has been moved to implementation-old.tex (sidecar, not \include'd in main.tex). Decision 2026-05-20: nothing in there is being reused.

@@ -35,7 +35,7 @@ from sentence_transformers import SentenceTransformer
 from learning_dashboard import config
 from learning_dashboard.data_loader import (
     detect_format,
-    normalize_and_clean,
+    normalise_and_clean,
     parse_json_response,
     parse_xml_response,
 )
@@ -47,7 +47,7 @@ def fetch_and_parse():
     raw = requests.get(config.API_URL, timeout=config.API_TIMEOUT).text
     fmt = detect_format(raw)
     records = parse_json_response(raw) if fmt == "json" else parse_xml_response(raw)
-    df = normalize_and_clean(records)
+    df = normalise_and_clean(records)
     return df
 
 

@@ -151,7 +151,7 @@ def compute_incorrectness_column(df: pd.DataFrame) -> pd.Series:
 
 # Min-Max Normalization
 
-def min_max_normalize(series: pd.Series) -> pd.Series:
+def min_max_normalise(series: pd.Series) -> pd.Series:
     """(x - min) / (max - min), clamped to [0, 1].
 
     Returns 0.5 if min == max — the neutral midpoint preserves the feature's
@@ -319,16 +319,16 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
 
     result = pd.DataFrame(rows)
 
-    # Min-max normalize every composite input so the configured weights match
+    # Min-max normalise every composite input so the configured weights match
     # the effective weights. Raw [0, 1] rates (i_hat, r_hat, A_raw, rep_hat)
     # are retained for display; the _norm columns feed the weighted sum.
-    result["n_hat"] = min_max_normalize(result["n_raw"])
-    result["t_hat"] = min_max_normalize(result["t_raw"])
-    result["d_hat"] = min_max_normalize(result["d_raw"])  # positive = getting worse
-    result["i_norm"] = min_max_normalize(result["i_hat"])
-    result["r_norm"] = min_max_normalize(result["r_hat"])
-    result["A_norm"] = min_max_normalize(result["A_raw"])
-    result["rep_norm"] = min_max_normalize(result["rep_hat"])
+    result["n_hat"] = min_max_normalise(result["n_raw"])
+    result["t_hat"] = min_max_normalise(result["t_raw"])
+    result["d_hat"] = min_max_normalise(result["d_raw"])  # positive = getting worse
+    result["i_norm"] = min_max_normalise(result["i_hat"])
+    result["r_norm"] = min_max_normalise(result["r_hat"])
+    result["A_norm"] = min_max_normalise(result["A_raw"])
+    result["rep_norm"] = min_max_normalise(result["rep_hat"])
 
     # Compute S_raw
     result["struggle_score"] = (
@@ -371,7 +371,7 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
 # -----------------------------------------------------------------
 
 # All CF features must be on the same cohort-relative [0, 1] scale for
-# cosine similarity to be meaningful — use the normalized columns added in M1.
+# cosine similarity to be meaningful — use the normalised columns added in M1.
 CF_FEATURES = ["n_hat", "t_hat", "i_norm", "A_norm", "d_hat"]
 
 
@@ -409,7 +409,7 @@ def compute_cf_struggle_scores(
             return struggle_df["struggle_score"].copy(), diagnostics
 
         # Interaction matrix from normalised features. Guard against NaN
-        # leaking in from upstream (e.g. min_max_normalize on all-equal
+        # leaking in from upstream (e.g. min_max_normalise on all-equal
         # columns in degenerate cohorts) — cosine_similarity returns NaN
         # rows when fed NaN, which would silently collapse scores to 0.
         X = np.nan_to_num(struggle_df[CF_FEATURES].values, nan=0.0)
@@ -586,14 +586,14 @@ def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
 
     result = pd.DataFrame(rows)
 
-    # Min-max normalize every composite input so configured weights match
+    # Min-max normalise every composite input so configured weights match
     # effective weights. Raw rates (c_tilde, f_tilde, p_tilde) are retained
     # for display (incorrect_rate_pct); _norm columns feed the weighted sum.
-    result["t_tilde"] = min_max_normalize(result["t_raw"])
-    result["a_tilde"] = min_max_normalize(result["a_raw"])
-    result["c_norm"] = min_max_normalize(result["c_tilde"])
-    result["f_norm"] = min_max_normalize(result["f_tilde"])
-    result["p_norm"] = min_max_normalize(result["p_tilde"])
+    result["t_tilde"] = min_max_normalise(result["t_raw"])
+    result["a_tilde"] = min_max_normalise(result["a_raw"])
+    result["c_norm"] = min_max_normalise(result["c_tilde"])
+    result["f_norm"] = min_max_normalise(result["f_tilde"])
+    result["p_norm"] = min_max_normalise(result["p_tilde"])
 
     # Compute D_raw
     result["difficulty_score"] = (

@@ -623,7 +623,7 @@ def get_plotly_layout_defaults() -> dict:
 
 @functools.lru_cache(maxsize=1)
 def get_mobile_css() -> str:
-    """Mobile-optimized CSS for lab_app.py. Designed for 375px+ phone screens."""
+    """Mobile-optimised CSS for lab_app.py. Designed for 375px+ phone screens."""
     c = config.COLORS
     fh = config.FONT_HEADING
     fb = config.FONT_BODY

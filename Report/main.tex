@@ -16,18 +16,49 @@
 \usepackage{comment}
 \usepackage[table]{xcolor}
 \usepackage{tikz}
+\usepackage{listings}
+\usepackage{tabularx}
 
 \usetikzlibrary{positioning, fit, backgrounds, arrows.meta, shapes.geometric}
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.6em}     % Space between paragraphs
 
-\geometry{a4paper, includehead, left=0.75in, right=0.75in, top=0.3in, bottom=0.3in} % Page margins, change as you need
-% Traffic-light palette — matches dashboard UI hex codes from config.py
+\geometry{a4paper, includehead, includefoot, left=1in, right=1in, top=1in, bottom=1in} % Page margins, change as you need
+% Traffic-light palette - matches dashboard UI hex codes from config.py
 \definecolor{tlGreen}{HTML}{10A15D}    % On Track / Easy
 \definecolor{tlAmber}{HTML}{FFCC00}    % Minor Issues / Medium
 \definecolor{tlOrange}{HTML}{FF6600}   % Struggling / Hard
 \definecolor{tlRed}{HTML}{FF2D55}      % Needs Help / Very Hard
+
+% Python listings style (Ch4 code snippets, Appendix A re-use)
+\lstdefinestyle{thesisPython}{
+    language=Python,
+    basicstyle=\footnotesize\ttfamily,
+    keywordstyle=\color{blue!60!black}\bfseries,
+    commentstyle=\color{gray!70}\itshape,
+    stringstyle=\color{tlOrange!85!black},
+    showstringspaces=false,
+    breaklines=true,
+    breakatwhitespace=true,
+    frame=single,
+    framesep=4pt,
+    rulecolor=\color{gray!40},
+    xleftmargin=2.0em,
+    numbers=left,
+    numberstyle=\tiny\color{gray!60},
+    numbersep=8pt,
+    captionpos=b,
+    aboveskip=0.4em,
+    belowskip=0.4em,
+}
+\lstset{style=thesisPython}
+
+% JSON language definition (saved-session record figure in Ch4 §4.5)
+\lstdefinelanguage{json}{
+    morestring=[b]",
+    morecomment=[l]{//},
+}
 
 
 \pagestyle{fancy}

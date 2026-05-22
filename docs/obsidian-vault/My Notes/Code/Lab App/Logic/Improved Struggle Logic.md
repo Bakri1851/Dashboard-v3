@@ -1,6 +1,6 @@
 # Improved Struggle Logic
 
-The improved struggle model (Phase 4) combines behavioral signals with BKT mastery and IRT difficulty to produce a richer struggle estimate. It runs alongside the baseline struggle model and does not replace it.
+The improved struggle model (Phase 4) combines behavioural signals with BKT mastery and IRT difficulty to produce a richer struggle estimate. It runs alongside the baseline struggle model and does not replace it.
 
 Related: [[Student Struggle Logic]], [[BKT Mastery Logic]], [[IRT Difficulty Logic]], [[Analytics Engine]], [[Next Steps]]
 
@@ -8,13 +8,13 @@ Academic foundations: [[piech_modeling|Piech et al.]] (progression path modellin
 
 ## Relationship to baseline
 
-The baseline model in `analytics.py` uses seven weighted behavioral signals to produce a struggle score. The improved model reduces the behavioral component to four signals and adds two new signal groups: mastery gap (from BKT) and difficulty-adjusted incorrectness (from IRT). This addresses the known issue where using `1 - mean_mastery` alone caused scores to cluster near 1.0, because mastery is now one signal rather than the sole metric.
+The baseline model in `analytics.py` uses seven weighted behavioural signals to produce a struggle score. The improved model reduces the behavioural component to four signals and adds two new signal groups: mastery gap (from BKT) and difficulty-adjusted incorrectness (from IRT). This addresses the known issue where using `1 - mean_mastery` alone caused scores to cluster near 1.0, because mastery is now one signal rather than the sole metric.
 
 ## Design rationale
 
-The improved model addresses a limitation of the baseline: all seven behavioral signals measure current-session activity, so the baseline cannot distinguish a student who is struggling despite demonstrated competence from one who has always been weak. By incorporating BKT mastery (a longitudinal signal) and IRT difficulty (a question-level signal), the improved model can detect mastery regression and penalise failures on objectively easy questions — neither of which the baseline captures.
+The improved model addresses a limitation of the baseline: all seven behavioural signals measure current-session activity, so the baseline cannot distinguish a student who is struggling despite demonstrated competence from one who has always been weak. By incorporating BKT mastery (a longitudinal signal) and IRT difficulty (a question-level signal), the improved model can detect mastery regression and penalise failures on objectively easy questions — neither of which the baseline captures.
 
-The three-group weighting (behavioral 0.45, mastery gap 0.30, difficulty-adjusted 0.25) was chosen to keep behavioral signals dominant (since they update in real time) while giving meaningful weight to the model-derived signals. Graceful degradation ensures the model remains usable when IRT or BKT data is unavailable, collapsing smoothly to a behavioral-only estimate. This design is not covered in the current thesis draft — see [[Report Sync]] and [[Ch3 – Design and Modelling]] for the mismatch.
+The three-group weighting (behavioural 0.45, mastery gap 0.30, difficulty-adjusted 0.25) was chosen to keep behavioural signals dominant (since they update in real time) while giving meaningful weight to the model-derived signals. Graceful degradation ensures the model remains usable when IRT or BKT data is unavailable, collapsing smoothly to a behavioural-only estimate. This design is not covered in the current thesis draft — see [[Report Sync]] and [[Ch3 – Design and Modelling]] for the mismatch.
 
 ## Three signal groups
 
@@ -26,7 +26,7 @@ Four sub-signals, equally weighted:
 - `d_hat`: min-max normalized improvement trajectory slope (reuses `analytics._compute_slope()`)
 - `rep_hat`: exact-answer repetition rate
 
-`behavioral = (A_raw + r_hat + d_hat + rep_hat) / 4`
+`behavioural = (A_raw + r_hat + d_hat + rep_hat) / 4`
 
 ### 2. Mastery gap (weight 0.30)
 
@@ -53,9 +53,9 @@ Computed over the student's last `RECENT_SUBMISSION_COUNT` submissions. Failing 
 
 ## Graceful degradation
 
-If BKT mastery is unavailable (too few submissions or feature disabled), the mastery gap weight (0.30) is redistributed to the behavioral composite. If IRT difficulty is unavailable, the difficulty-adjusted weight (0.25) is redistributed similarly. At the extreme, the model collapses to a behavioral-only model with weight 1.0.
+If BKT mastery is unavailable (too few submissions or feature disabled), the mastery gap weight (0.30) is redistributed to the behavioural composite. If IRT difficulty is unavailable, the difficulty-adjusted weight (0.25) is redistributed similarly. At the extreme, the model collapses to a behavioural-only model with weight 1.0.
 
-The three fallback cases produce these effective weight vectors (behavioral / mastery-gap / difficulty-adjusted):
+The three fallback cases produce these effective weight vectors (behavioural / mastery-gap / difficulty-adjusted):
 
 | Case | Trigger | Effective weights |
 |---|---|---|
@@ -69,7 +69,7 @@ The invariant assertion at `improved_struggle.py:168-171` guarantees that whiche
 ## Final assembly
 
 ```
-struggle_score = w_beh * behavioral + w_mg * mastery_gap + w_da * difficulty_adjusted
+struggle_score = w_beh * behavioural + w_mg * mastery_gap + w_da * difficulty_adjusted
 ```
 
 Bayesian shrinkage is applied: `w_n = n / (n + SHRINKAGE_K)`, pulling low-submission students toward the class mean. Scores are clipped to [0, 1] and classified using the standard `STRUGGLE_THRESHOLDS`.
@@ -84,7 +84,7 @@ Compatible with the baseline `struggle_df` schema:
 | `struggle_score` | float | Weighted composite score [0, 1] |
 | `struggle_level` | str | On Track / Minor Issues / Struggling / Needs Help |
 | `struggle_color` | str | Hex color for the level |
-| `behavioral_composite` | float | Behavioral sub-score [0, 1] |
+| `behavioural_composite` | float | Behavioral sub-score [0, 1] |
 | `mastery_gap` | float | BKT mastery gap [0, 1] |
 | `difficulty_adjusted_score` | float | IRT-adjusted score [0, 1] |
 

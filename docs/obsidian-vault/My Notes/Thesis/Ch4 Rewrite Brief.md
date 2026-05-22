@@ -236,7 +236,6 @@ Open the section with one paragraph summarising the pipeline: poll the lab endpo
 **Cover:**
 - All records collapse into a single pandas `DataFrame` with one row per submission and columns: `user`, `question`, `answer`, `ai_feedback`, `timestamp`, `time_taken`, `attempt`, `module`.
 - Excluded module list (`EXCLUDED_MODULES`) drops test/admin modules (`24COB231`, `24WSC701`) before scoring.
-- One historical module rename is applied (`MODULE_RENAME_MAP`: `25COA504 → 25COP504`) so a module that was relabelled mid-year is not split into two cohorts.
 - A boolean `has_feedback` column flags rows the OpenAI scorer should attempt; rows with empty `ai_feedback` fall back to incorrectness 0.5 (the neutral value used when scoring is unavailable, see §4.6.1).
 
 **Voice/length:** 1 paragraph.
@@ -437,20 +436,33 @@ where $\mathrm{ramp}_{\ell, 0, L}$ rises linearly from 0 to 1 over $[0, L]$ char
 
 #### §4.7.2  Item Response Theory (IRT) Difficulty
 
-**Maths recap:** A 1-parameter logistic (Rasch) model:
+**Maths recap:** V1 fits a 1-parameter logistic (Rasch) model:
 $$P(\text{student } s \text{ correct on question } q) = \sigma(\theta_s - \beta_q)$$
-with $\theta_s$ student ability, $\beta_q$ question difficulty, and $\sigma$ the logistic sigmoid. Joint MLE over all $\theta_s$ and $\beta_q$ simultaneously.
+with $\theta_s$ student ability, $\beta_q$ question difficulty, and $\sigma$ the logistic sigmoid (Ch3 eq.\ \eqref{eq:rasch-1pl}). V2 evolves this to the 2PL form
+$$P(\dots) = \sigma\!\big(\alpha_q(\theta_s - \beta_q)\big)$$
+adding a per-question discrimination $\alpha_q$ (Ch3 eq.\ \eqref{eq:irt-2pl}). Both fits use joint MLE over all latent parameters simultaneously.
 
-**Cover:**
-- Implementation in [`models/irt.py`](../../../../code/learning_dashboard/models/irt.py); the fit calls `scipy.optimize.minimize` with `method="L-BFGS-B"`\footnote{\cite{byrdLBFGSB1995}}.
+**Cover (V1 — Rasch):**
+- Implementation in [`code/learning_dashboard/models/irt.py`](../../../../code/learning_dashboard/models/irt.py); `fit_rasch_model` at line 67; fit calls `scipy.optimize.minimize` with `method="L-BFGS-B"` \cite{byrdLimitedMemoryAlgorithm1995}.
 - Response matrix: one row per student, one column per question, value 1 if best-attempt incorrectness < 0.5, else 0; NaN if no attempt.
 - Filtering: questions with fewer than `IRT_MIN_ATTEMPTS_PER_QUESTION = 2` responding students are dropped; students with fewer than `IRT_MIN_ATTEMPTS_PER_STUDENT = 2` answered questions are dropped. Filter is applied iteratively until both minima are satisfied.
 - Optimiser max iterations `IRT_MAX_ITER = 100`; convergence is reported back to the UI.
 - Output: logit-scale $\beta_q$, mapped to $[0,1]$ via sigmoid for the leaderboard. Threshold bands match the baseline (`IRT_DIFFICULTY_THRESHOLDS`).
 
-**Citations:** `\cite{byrdLBFGSB1995}` for L-BFGS-B (verify bibkey; add if missing in Step 12). Rasch citation if the user wants the original 1960 work cited.
+**Cover (V2 — 2PL evolution):**
+- Implementation in [`code2/backend/models/irt.py`](../../../../code2/backend/models/irt.py); `fit_2pl_model` at line 133, `compute_irt_model` at line 269 (orchestrator), `compute_irt_difficulty_scores` at line 330 (V1-compatible output), `compute_irt_abilities` at line 348 (new V2-only output exposing $\hat{\theta}_s$).
+- Parameter vector layout: `[θ (n_students), b (n_questions), log_a (n_questions)]` — `log_a` keeps $a > 0$ without box constraints. Box bound on raw `log_a ∈ [−5, +5]` to prevent the optimiser parking on degenerate-discrimination items.
+- Identifiability: `mean(θ) = 0` AND `mean(log a) = 0` (geomean(a) = 1), reapplied at every gradient evaluation via the `_unpack` projection (lines 191–196).
+- Same response-matrix construction as V1, plus an additional iterative pass that drops single-class questions and students (rows/columns where every entry is the same) — these make the MLE unbounded and the gradient vanishes (lines 80–127).
+- Output: `difficulty_df` with `[question, irt_difficulty, irt_discrimination, irt_difficulty_level, irt_difficulty_color]`; `ability_df` with `[user, theta]`; `convergence: bool`; `log_likelihood: float`.
+- Bad-item diagnostic: $\alpha_q$ near zero flags items that fail to separate the cohort, exposed via the `irt_discrimination` column.
 
-**Voice/length:** Maths recap + 2 paragraphs.
+**Analytical commentary (third lens per Brief Part G):**
+The 1PL → 2PL evolution is one of the two genuine algorithmic differences between V1 and V2 (the other is BKT parameter persistence, §4.7.3). Note in this subsection that 2PL collapses to Rasch when all $\alpha_q = 1$, so V2 is a strict generalisation of V1 and any V1 result can be reproduced in V2 by clamping $\alpha = 1$.
+
+**Citations:** `\cite{byrdLimitedMemoryAlgorithm1995}` — added to references.bib in the IRT pass. `\cite{rasch1960probabilistic}` already in references.bib (line 783).
+
+**Voice/length:** Maths recap + 3 paragraphs (one per version + one analytical-lens paragraph framing the evolution).
 
 #### §4.7.3  Bayesian Knowledge Tracing (BKT) Mastery
 

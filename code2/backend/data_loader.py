@@ -1,4 +1,4 @@
-# data_loader.py — API fetching, parsing, normalization, cleaning
+# data_loader.py — API fetching, parsing, normalisation, cleaning
 import json
 import logging
 import xml.etree.ElementTree as ET
@@ -151,7 +151,7 @@ def _xml_text(element: ET.Element, tag: str) -> str:
     return ""
 
 
-def normalize_and_clean(records: list[dict]) -> pd.DataFrame:
+def normalise_and_clean(records: list[dict]) -> pd.DataFrame:
     """Convert records to DataFrame and apply cleaning rules."""
     if not records:
         return pd.DataFrame(
@@ -173,9 +173,6 @@ def normalize_and_clean(records: list[dict]) -> pd.DataFrame:
 
     # Exclude modules
     df = df[~df["module"].isin(config.EXCLUDED_MODULES)].copy()
-
-    # Rename modules
-    df["module"] = df["module"].replace(config.MODULE_RENAME_MAP)
 
     # Parse timestamps
     df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")

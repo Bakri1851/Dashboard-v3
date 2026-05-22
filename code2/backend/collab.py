@@ -14,7 +14,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 # All CF features must be on the same cohort-relative [0, 1] scale for
-# cosine similarity to be meaningful — use the normalized columns added in M1.
+# cosine similarity to be meaningful — use the normalised columns added in M1.
 CF_FEATURES = ["n_hat", "t_hat", "i_norm", "A_norm", "d_hat"]
 
 
@@ -52,7 +52,7 @@ def compute_cf_struggle_scores(
             return struggle_df["struggle_score"].copy(), diagnostics
 
         # Interaction matrix from normalised features. Guard against NaN
-        # leaking in from upstream (e.g. min_max_normalize on all-equal
+        # leaking in from upstream (e.g. min_max_normalise on all-equal
         # columns in degenerate cohorts) — cosine_similarity returns NaN
         # rows when fed NaN, which would silently collapse scores to 0.
         X = np.nan_to_num(struggle_df[CF_FEATURES].values, nan=0.0)

@@ -127,3 +127,87 @@ New figures and tables prompted by post-Phase-11 code surface (commits `54d45b7`
 | Ch3 Tbl 7 (Difficulty visual encoding) | Use current thresholds: Easy [0.00, 0.35] · Medium [0.35, 0.50] · Hard [0.50, 0.75] · Very Hard [0.75, 1.00]. |
 | Ch3 Tbl 4 (Tech stack) | Add to "Key libraries": openai, filelock, scikit-learn, scipy, streamlit-autorefresh, chromadb, sentence-transformers, fastapi, uvicorn, react, vite, typescript. Drop any V1-only rows. |
 | Ch1 Tbl 1 (Risks and mitigations) | Replace generic mitigations with actual ones: Bayesian shrinkage for small-n; modular `models/` package for extensibility; graceful-degradation for missing inputs; FR6 scoped out honestly. |
+
+---
+
+## 2026-05-21 — Ch4 implementation chapter pinned figure inventory
+
+Authoritative list per [Ch4 Rewrite Brief Part C](Ch4%20Rewrite%20Brief.md). All `\label{}` names match the figure-pass step (Brief Roadmap Step 8). Captured here so each figure has a known slot, label, version target, and current status. Status updates as figures land.
+
+### Family 1 — UI screenshots (12)
+
+| § | Slot | Label | Version | Status |
+|---|---|---|---|---|
+| 4.3.3 | V2 In-Class view (scifi theme) | `fig:v2-inclass` | V2 | TODO |
+| 4.5.1 | Instructor sidebar during live session | `fig:session-live` | V1 (per Brief) | TODO |
+| 4.9.1 | In-Class view | `fig:ui-inclass` | open question (see below) | TODO |
+| 4.9.2 | Student Detail view | `fig:ui-studentdetail` | open question | TODO |
+| 4.9.3 | Question Detail view (with clusters) | `fig:ui-questiondetail` | open question | TODO |
+| 4.9.4 | Data Analysis view | `fig:ui-dataanalysis` | open question | TODO |
+| 4.9.5 | Model Comparison view (both tabs) | `fig:ui-comparison` | open question | TODO |
+| 4.9.6 | Settings view | `fig:ui-settings` | open question | TODO |
+| 4.9.7 | Previous Sessions view | `fig:ui-previoussessions` | open question | TODO |
+| 4.10.1 | Assistant join screen | `fig:asst-join` | open question | TODO |
+| 4.10.2 | Assistant unassigned / waiting queue | `fig:asst-unassigned` | open question | TODO |
+| 4.10.3 | Assistant assigned card (with RAG) | `fig:asst-assigned` | open question | TODO |
+
+### Family 2 — Architecture / data-flow diagrams (2)
+
+| § | Slot | Label | Type | Status |
+|---|---|---|---|---|
+| 4.3 opening | System architecture: V1 instructor (Streamlit, 8501) + V1 assistant (Streamlit, 8502) + V2 FastAPI (8000), shared `data/lab_session.json` in the centre via filelock, external lab endpoint + OpenAI + ChromaDB on the perimeter | `fig:arch-v2` | TikZ | **Placeholder in place** at `implementation.tex:92-98`. Real TikZ diagram pending Step 8. |
+| 4.4 opening | Data pipeline flow: endpoint → parse → normalise → cache → scoring | `fig:pipeline-flow` | TikZ | TODO |
+
+### Family 3 — Code-snippet images (4)
+
+Editor screenshots (dark theme, syntax highlighting), not `lstlisting`. Take after the de-AI cleanup pass (Brief Part F).
+
+| § | Slot | Label | Source | Status |
+|---|---|---|---|---|
+| 4.3.4 | `lab_state` filelock read/write pattern | `fig:code-lablock` | `code/learning_dashboard/lab_state.py` (`_lock()` helper + one read + one write call) | TODO |
+| 4.3.5 | Deferred-actions pattern | `fig:code-deferred` | `code/learning_dashboard/instructor_app.py` (one `pending_*` flag set in a callback + the apply-and-clear at top of `main()`) | TODO |
+| 4.6.1 | OpenAI batch incorrectness call | `fig:code-openai` | `code/learning_dashboard/analytics.py` (`_call_openai_batch` or wrapper) | TODO |
+| 4.8.3 | RAG generation prompt | `fig:code-ragprompt` | `code/learning_dashboard/rag.py` (the prompt template inside `generate_assistant_suggestions`) | TODO |
+
+### Family 4 — Tables (6 + 2 optional)
+
+| § | Slot | Label | Status |
+|---|---|---|---|
+| 4.2 | Technology stack (V1 + V2) | `tab:techstack-v2` | **Done** — pasted at `implementation.tex:42-82` (with React 19 + 2PL/Rasch corrections) |
+| 4.6.2 | 7-signal struggle | `tab:struggle-7sig` | TODO |
+| 4.6.3 | 5-signal difficulty | `tab:difficulty-5sig` | TODO |
+| 4.7.3 | BKT parameter defaults | `tab:bkt-defaults` | TODO (Brief has paste-ready block) |
+| 4.9.0 | V1 vs V2 views comparison | `tab:views-comparison` | TODO (Marker-2 anchor) |
+| 4.11 | Problems and resolutions | `tab:problems` | TODO |
+| 4.4.3 (optional) | Cache hierarchy | `tab:cache-hierarchy` | optional |
+| 4.7.4 (optional) | Improved struggle weight redistribution | `tab:improved-redistribution` | optional |
+
+### Family 5 — Optional UML (1)
+
+| § | Slot | Label | Status |
+|---|---|---|---|
+| 4.3.3 paragraph 4 | Package diagram: V1 `learning_dashboard/` package vs V2 flat `backend/` modules, side-by-side | `fig:pkg-structure` | Optional. Skip if prose-only is enough. |
+
+### Open question — V1 vs V2 capture for §4.9 / §4.10 screenshots
+
+Brief doesn't specify which version each `fig:ui-*` and `fig:asst-*` comes from. Three options:
+
+1. **All V2** (recommended): seven-theme polish, analytical-layer reuse surfaced verbally per subsection. `tab:views-comparison` at §4.9.0 covers the V1 side.
+2. **All V1**: keeps canonical demo visible. V2 then has just `fig:v2-inclass` for visual continuity.
+3. **Side-by-side V1 + V2 per view**: doubles count to 24. Strongest Marker-2 answer but expensive.
+
+Defer the decision until §4.9 is being authored.
+
+### Capture-time order (figure pass, Step 8)
+
+When figures get drawn / captured in one sitting, the suggested order is:
+
+1. **TikZ first** — `fig:arch-v2` (replaces the placeholder), then `fig:pipeline-flow`, then the optional `fig:pkg-structure`. Drawing one TikZ figure unlocks style reuse for the others.
+2. **Code-snippet images** — `fig:code-lablock`, `fig:code-deferred`, `fig:code-openai`, `fig:code-ragprompt`. Take all four in one editor session for consistent theming.
+3. **UI screenshots** — last, since the V1-vs-V2 decision above needs to be settled first. Take per the chosen option in one capture session per app (V1 instructor port 8501, V1 assistant port 8502, V2 unified on port 8000).
+
+### Cross-references
+
+- Brief Part C inventory: [Ch4 Rewrite Brief.md §Part C](Ch4%20Rewrite%20Brief.md)
+- Plan file with the chat-level details: `~/.claude/plans/i-m-continuing-work-on-reactive-goblet.md`
+- Implementation file: `Report/main-sections/implementation.tex`

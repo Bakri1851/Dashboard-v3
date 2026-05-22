@@ -8,7 +8,6 @@ CACHE_TTL: int = 10            # seconds
 # --- Data Cleaning ---
 #EXCLUDED_MODULES: list[str] = ["AI_TEST", "24COB231", "24WSC701"]
 EXCLUDED_MODULES: list[str] = ["24COB231", "24WSC701"]
-MODULE_RENAME_MAP: dict[str, str] = {"25COA504": "25COP504"}
 
 # --- OpenAI Configuration ---
 OPENAI_MODEL: str = "gpt-4o-mini"  # matches code2; gpt-5.4-mini is not a real model and silently 500s every call

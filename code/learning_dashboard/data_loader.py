@@ -1,4 +1,4 @@
-# data_loader.py — API fetching, parsing, normalization, cleaning
+# data_loader.py — API fetching, parsing, normalisation, cleaning
 import json
 import xml.etree.ElementTree as ET
 from datetime import date as dt_date, datetime, time as dt_time
@@ -149,7 +149,7 @@ def _xml_text(element: ET.Element, tag: str) -> str:
     return ""
 
 
-def normalize_and_clean(records: list[dict]) -> pd.DataFrame:
+def normalise_and_clean(records: list[dict]) -> pd.DataFrame:
     """Convert records to DataFrame and apply cleaning rules."""
     if not records:
         return pd.DataFrame(
@@ -171,9 +171,6 @@ def normalize_and_clean(records: list[dict]) -> pd.DataFrame:
 
     # Exclude modules
     df = df[~df["module"].isin(config.EXCLUDED_MODULES)].copy()
-
-    # Rename modules
-    df["module"] = df["module"].replace(config.MODULE_RENAME_MAP)
 
     # Parse timestamps
     df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
@@ -214,7 +211,7 @@ def load_data() -> tuple[pd.DataFrame, str]:
     except Exception as e:
         return empty_df, f"API connection failed: {type(e).__name__} - {e}"
 
-    # Skip parse/normalize when raw data hasn't changed since last render
+    # Skip parse/normalise when raw data hasn't changed since last render
     raw_hash = hash(raw)
     if st.session_state.get("_df_hash") == raw_hash and "_df" in st.session_state:
         return st.session_state["_df"], ""
@@ -247,12 +244,12 @@ def load_data() -> tuple[pd.DataFrame, str]:
                 )
 
     try:
-        df = normalize_and_clean(records)
+        df = normalise_and_clean(records)
         st.session_state["_df_hash"] = raw_hash
         st.session_state["_df"] = df
         return df, ""
     except Exception as e:
-        return empty_df, f"Data normalization failed: {type(e).__name__} - {e}"
+        return empty_df, f"Data normalisation failed: {type(e).__name__} - {e}"
 
 def _saved_sessions_path() -> Path:
     """Absolute path to the local saved-session store."""

@@ -7,7 +7,7 @@
 #   - `_compute_slope` (improvement-trajectory linear regression)
 #
 # Depends on `incorrectness` for the per-row scoring and confidence
-# weighting; depends on `analytics` for the shared `min_max_normalize`
+# weighting; depends on `analytics` for the shared `min_max_normalise`
 # and `classify_score` helpers.
 import math
 from typing import Optional
@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 
 from . import config
-from .analytics import classify_score, min_max_normalize
+from .analytics import classify_score, min_max_normalise
 from .incorrectness import (
     _CONFIDENCE_FLOOR,
     _confidence_weighted_mean,
@@ -225,16 +225,16 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
 
     result = pd.DataFrame(rows)
 
-    # Min-max normalize every composite input so the configured weights match
+    # Min-max normalise every composite input so the configured weights match
     # the effective weights. Raw [0, 1] rates (i_hat, r_hat, A_raw, rep_hat)
     # are retained for display; the _norm columns feed the weighted sum.
-    result["n_hat"] = min_max_normalize(result["n_raw"])
-    result["t_hat"] = min_max_normalize(result["t_raw"])
-    result["d_hat"] = min_max_normalize(result["d_raw"])  # positive = getting worse
-    result["i_norm"] = min_max_normalize(result["i_hat"])
-    result["r_norm"] = min_max_normalize(result["r_hat"])
-    result["A_norm"] = min_max_normalize(result["A_raw"])
-    result["rep_norm"] = min_max_normalize(result["rep_hat"])
+    result["n_hat"] = min_max_normalise(result["n_raw"])
+    result["t_hat"] = min_max_normalise(result["t_raw"])
+    result["d_hat"] = min_max_normalise(result["d_raw"])  # positive = getting worse
+    result["i_norm"] = min_max_normalise(result["i_hat"])
+    result["r_norm"] = min_max_normalise(result["r_hat"])
+    result["A_norm"] = min_max_normalise(result["A_raw"])
+    result["rep_norm"] = min_max_normalise(result["rep_hat"])
 
     # Compute S_raw
     result["struggle_score"] = (

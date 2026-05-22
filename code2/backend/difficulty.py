@@ -4,13 +4,13 @@
 # Holds `compute_question_difficulty_scores` — the only public symbol.
 #
 # Depends on `incorrectness.compute_incorrectness_column` for the per-row
-# scoring and on `analytics.{min_max_normalize_grouped, classify_score}`
+# scoring and on `analytics.{min_max_normalise_grouped, classify_score}`
 # for the shared normalisation and band-labelling helpers.
 import numpy as np
 import pandas as pd
 
 from . import config
-from .analytics import classify_score, min_max_normalize_grouped
+from .analytics import classify_score, min_max_normalise_grouped
 from .incorrectness import compute_incorrectness_column
 
 
@@ -88,17 +88,17 @@ def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
 
     result = pd.DataFrame(rows)
 
-    # Min-max normalize every composite input so configured weights match
+    # Min-max normalise every composite input so configured weights match
     # effective weights. Raw rates (c_tilde, f_tilde, p_tilde) are retained
     # for display (incorrect_rate_pct); _norm columns feed the weighted sum.
     # Grouped by module — a "hard" CS question is not commensurable with a
     # "hard" maths question when both appear on the global leaderboard.
     modules = result["module"] if "module" in result.columns else None
-    result["t_tilde"] = min_max_normalize_grouped(result["t_raw"], modules)
-    result["a_tilde"] = min_max_normalize_grouped(result["a_raw"], modules)
-    result["c_norm"] = min_max_normalize_grouped(result["c_tilde"], modules)
-    result["f_norm"] = min_max_normalize_grouped(result["f_tilde"], modules)
-    result["p_norm"] = min_max_normalize_grouped(result["p_tilde"], modules)
+    result["t_tilde"] = min_max_normalise_grouped(result["t_raw"], modules)
+    result["a_tilde"] = min_max_normalise_grouped(result["a_raw"], modules)
+    result["c_norm"] = min_max_normalise_grouped(result["c_tilde"], modules)
+    result["f_norm"] = min_max_normalise_grouped(result["f_tilde"], modules)
+    result["p_norm"] = min_max_normalise_grouped(result["p_tilde"], modules)
 
     # Compute D_raw
     result["difficulty_score"] = (

@@ -103,7 +103,7 @@ def _load_dataframe_uncached() -> tuple[pd.DataFrame, str]:
         except Exception as e:
             return _EMPTY_DF.copy(), f"XML parse failed: {type(e).__name__} - {e}"
 
-    df = data_loader.normalize_and_clean(records)
+    df = data_loader.normalise_and_clean(records)
 
     if not df.empty:
         try:

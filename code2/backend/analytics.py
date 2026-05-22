@@ -13,9 +13,9 @@
 # What stays here:
 #   _get_openai_client       — shared OpenAI client factory (also imported by
 #                              rag.py and clustering.py)
-#   min_max_normalize        — clamped [0, 1] normalisation; used by struggle
+#   min_max_normalise        — clamped [0, 1] normalisation; used by struggle
 #                              and improved_struggle
-#   min_max_normalize_grouped — within-group variant; used by difficulty
+#   min_max_normalise_grouped — within-group variant; used by difficulty
 #   classify_score           — threshold-band lookup; used by struggle,
 #                              difficulty, irt
 #   apply_temporal_smoothing — EWMA smoother kept for completeness; not on
@@ -38,7 +38,7 @@ def _get_openai_client() -> OpenAI:
 
 # Min-Max Normalization
 
-def min_max_normalize(series: pd.Series) -> pd.Series:
+def min_max_normalise(series: pd.Series) -> pd.Series:
     """(x - min) / (max - min), clamped to [0, 1].
 
     Returns 0.5 if min == max — the neutral midpoint preserves the feature's
@@ -53,7 +53,7 @@ def min_max_normalize(series: pd.Series) -> pd.Series:
     return result.clip(0.0, 1.0)
 
 
-def min_max_normalize_grouped(
+def min_max_normalise_grouped(
     series: pd.Series,
     groups: Optional[pd.Series],
 ) -> pd.Series:
@@ -65,16 +65,16 @@ def min_max_normalize_grouped(
     when the global leaderboard mixes cohorts.
 
     A single-group input (or ``groups=None``) is equivalent to
-    ``min_max_normalize``. Groups of size 1 or with all-equal values
+    ``min_max_normalise``. Groups of size 1 or with all-equal values
     return 0.5 for each member (same semantics as the ungrouped helper).
     """
     if groups is None:
-        return min_max_normalize(series)
+        return min_max_normalise(series)
     groups = groups.reindex(series.index)
     out = pd.Series(0.5, index=series.index, dtype=float)
     for _label, idx in groups.groupby(groups, dropna=False).groups.items():
         sub = series.loc[idx]
-        out.loc[idx] = min_max_normalize(sub).values
+        out.loc[idx] = min_max_normalise(sub).values
     return out
 
 

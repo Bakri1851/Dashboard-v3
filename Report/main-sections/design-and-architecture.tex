@@ -636,7 +636,7 @@ To estimate $(\theta_s, \beta_q)$ from observed responses, the binary response m
           + (1 - X_{s,q}) \log \big(1 - \sigma(\theta_s - \beta_q)\big) \Big],
     \label{eq:rasch-loglik}
 \end{equation}
-is maximised by a bounded quasi-Newton method, specifically L-BFGS-B \cite{fisherMathematicalFoundationsTheoretical1922}, with an explicit gradient supplied for efficiency. The abilities $\theta$ are centred to zero mean at every iteration to resolve the additive identifiability degeneracy: only the difference $\theta_s - \beta_q$ enters the likelihood, so the absolute level of either parameter is unidentified without an anchor.
+is maximised by a bounded quasi-Newton method, specifically L-BFGS-B \cite{byrdLimitedMemoryAlgorithm1995}, with an explicit gradient supplied for efficiency. The abilities $\theta$ are centred to zero mean at every iteration to resolve the additive identifiability degeneracy: only the difference $\theta_s - \beta_q$ enters the likelihood, so the absolute level of either parameter is unidentified without an anchor.
 
 \paragraph{Mapping back to the dashboard scale}
 The fitted difficulties $\hat{\beta}_q$ are on the logit scale and can take any real value. 
@@ -645,7 +645,21 @@ To make them comparable to the baseline difficulty score $D_t(q) \in [0,1]$ and 
     D^{\mathrm{IRT}}(q) = \sigma(\hat{\beta}_q) \in [0, 1].
     \label{eq:irt-difficulty}
 \end{equation}
-This is the value displayed on the IRT-based difficulty leaderboard and used as input to the improved struggle model in Section \ref{sec: improved struggle}. 
+This is the value displayed on the IRT-based difficulty leaderboard and used as input to the improved struggle model in 
+Section \ref{sec: improved struggle}. 
+
+\paragraph{Two parameter extension in V2}
+The second iteration of the dashboard upgrades the Rasch model to the two-parameter logistic (2PL) variant of the model. 
+Each question $q$ now carries both a difficulty $\beta_q$ and a positive discrimination parameter $\alpha_q$ and the response probability becomes
+\begin{equation}
+    P(X_{s,q} = 1 \mid \theta_s, \alpha_q, \beta_q)
+    = \sigma\!\big(\alpha_q (\theta_s - \beta_q)\big),
+    \label{eq:irt-2pl}
+\end{equation}
+which recovers equation \ref{eq:rasch-1pl} when $\alpha_q = 1$. 
+The discrimination $\alpha_q$ measures how sharply the question separates the ability of students, values near zero flag non-discriminating items. 
+Identifiability now requires anchoring both location and scale: V2 enforces $\sum_s \theta_s = 0$ and $\sum_q \log \alpha_q = 0$ (equivalently that the geometric mean of $\alpha$ is 1). 
+The optimiser is unchanged but $\alpha_q$ is reparameterised through $\log \alpha_q$ so that the positivity constraint is automatically satisfied. 
 
 \paragraph{Graceful degradation}
 The joint MLE requires sufficient overlap between students and questions to converge. 
@@ -879,7 +893,7 @@ A further objective is to allocate lab assistants to students so they can help p
 Finally, the system focuses on supporting decision-making rather than explanatory analysis. The dashboard is intended to guide instructors towards timely intervention by highlighting students and tasks requiring attention and enabling efficient allocation of lab assistants.
 
 \subsubsection{Instructor Views}
-The dashboard provides a real-time overview of student struggles and question difficulty during the computer labs. The dashboard will allow the instructor to make quick decisions and aid those in need. To illustrate the proposed interface, three Figma mock-ups are presented in Figma~\ref{fig: figma} - \ref{fig: figma3}. The deployed implementation that follows this design is described in the implementation chapter.  
+The dashboard provides a real-time overview of student struggles and question difficulty during the computer labs. The dashboard will allow the instructor to make quick decisions and aid those in need. To illustrate the proposed interface, three Figma mock-ups are presented in Figma~\ref{fig: figma1} - \ref{fig: figma3}. The deployed implementation that follows this design is described in the implementation chapter.  
 
 \begin{figure}[H]
     \centering
@@ -940,7 +954,7 @@ On first access (Figure~\ref{fig: figma4}), the assistant enters the session cod
 
 Between assignments (Figure~\ref{fig: figma5}), the assistant sees a ranked list of students currently flagged for help, ordered by their struggle score. The assistant may wait for the instructor to allocate them directly, or self-claim a student from the list when the instructor has enabled this. The same list is visible to every joined assistant; once a student is claimed, they are removed from the unassigned pool so two assistants cannot end up at the same desk.
 
-Once a student is assigned (Figure~\ref{fig: figma6}), the view collapses to a single student card carrying the information the assistant needs at the desk: the student's current struggle context, the questions they are most incorrect on, and a short list of coaching prompts retrieved from the RAG layer described in Section~\ref{sec: rag}. A \emph{Mark Helped} action returns the assistant to the unassigned state.
+Once a student is assigned (Figure~\ref{fig: figma6}), the view collapses to a single student card carrying the information the assistant needs at the desk: the student's current struggle context, the questions they are most incorrect on, and a short list of coaching prompts retrieved from the RAG layer described in Section~\ref{sec:rag}. A \emph{Mark Helped} action returns the assistant to the unassigned state.
 
 \subsubsection{Visual Encoding of Metrics}
 
@@ -949,7 +963,7 @@ By deciding on thresholds, we can highlight a student by degree of struggle or h
 
 \begin{table}[H]
     \centering
-    \begin{tabular}{|p{0.2\textwidth}||p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|}
+    \begin{tabular}{|p{0.1\textwidth}||p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|}
     \hline
         Degree & \cellcolor{tlGreen}On Track & \cellcolor{tlAmber}Minor Issues & \cellcolor{tlOrange}Struggling & \cellcolor{tlRed}Needs Help \\
     \hline
@@ -962,7 +976,7 @@ By deciding on thresholds, we can highlight a student by degree of struggle or h
 
 \begin{table}[H]
     \centering
-    \begin{tabular}{|p{0.2\textwidth}||p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|}
+    \begin{tabular}{|p{0.1\textwidth}||p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|}
     \hline
         Degree & \cellcolor{tlGreen}Easy & \cellcolor{tlAmber}Medium & \cellcolor{tlOrange}Hard & \cellcolor{tlRed}Very Hard\\
     \hline

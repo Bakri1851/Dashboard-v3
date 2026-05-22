@@ -89,7 +89,7 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
             _irt_df = st.session_state.get("_irt_difficulty_df")
             if _irt_df is not None and not _irt_df.empty:
                 difficulty_df = _irt_df.copy()
-                difficulty_df["difficulty_score"] = analytics.min_max_normalize(
+                difficulty_df["difficulty_score"] = analytics.min_max_normalise(
                     difficulty_df["irt_difficulty"]
                 )
                 _d_classified = difficulty_df["difficulty_score"].apply(
@@ -630,8 +630,8 @@ def settings_view(df: pd.DataFrame) -> None:
         "Student Struggle Model",
         "struggle_model",
         ["Baseline", "Improved"],
-        help="**Baseline:** 7-signal weighted behavioral score.  \n"
-             "**Improved:** behavioral + BKT mastery gap + IRT difficulty adjustment.",
+        help="**Baseline:** 7-signal weighted behavioural score.  \n"
+             "**Improved:** behavioural + BKT mastery gap + IRT difficulty adjustment.",
     )
     _setting_selectbox(
         "Question Difficulty Model",

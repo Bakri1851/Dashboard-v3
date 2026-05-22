@@ -42,7 +42,7 @@ def _lock() -> FileLock:
     return FileLock(str(lock_file), timeout=_LOCK_TIMEOUT_SECONDS)
 
 
-def _normalize_state(raw_state: Any) -> dict[str, Any]:
+def _normalise_state(raw_state: Any) -> dict[str, Any]:
     state = _default_state()
     if not isinstance(raw_state, dict):
         return state
@@ -138,15 +138,15 @@ def _read_state_unlocked() -> dict[str, Any]:
         raw = json.loads(state_file.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return _default_state()
-    return _normalize_state(raw)
+    return _normalise_state(raw)
 
 
 def _write_state_unlocked(state: dict[str, Any]) -> None:
     state_file = paths.lab_session_path()
     state_file.parent.mkdir(parents=True, exist_ok=True)
-    normalized = _normalize_state(state)
+    normalised = _normalise_state(state)
     tmp_file = state_file.with_suffix(".tmp")
-    tmp_file.write_text(json.dumps(normalized, indent=2), encoding="utf-8")
+    tmp_file.write_text(json.dumps(normalised, indent=2), encoding="utf-8")
     tmp_file.replace(state_file)
 
 

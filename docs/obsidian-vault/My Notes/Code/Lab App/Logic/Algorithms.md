@@ -221,7 +221,7 @@ See [[BKT Mastery Logic#Parameter fitting (MLE)]] for the honest-framing discuss
 Combines behavioral signals, BKT mastery gap, and IRT difficulty-adjusted incorrectness into a richer struggle estimate.
 
 **Input:** `struggle_df` (baseline behavioral components), `_mastery_summary_df` (BKT), IRT difficulty values  
-**Output:** `_improved_struggle_df` — same schema as `struggle_df` plus `behavioral_composite`, `mastery_gap`, `difficulty_adjusted_score`
+**Output:** `_improved_struggle_df` — same schema as `struggle_df` plus `behavioural_composite`, `mastery_gap`, `difficulty_adjusted_score`
 
 **Steps:**
 1. **Behavioral composite:** `(A_raw + r_hat + d_hat + rep_hat) / 4`

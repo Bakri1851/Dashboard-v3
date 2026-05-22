@@ -14,7 +14,7 @@
 ## Key constants
 
 - **API:** `API_URL`, `API_TIMEOUT`, `CACHE_TTL`
-- **Data cleaning:** `EXCLUDED_MODULES`, `MODULE_RENAME_MAP`
+- **Data cleaning:** `EXCLUDED_MODULES`
 - **Baseline struggle weights:** `STRUGGLE_WEIGHT_N/T/I/R/A/D/REP` — sum to 1.00
 - **Baseline difficulty weights:** `DIFFICULTY_WEIGHT_C/T/A/F/P`
 - **Recent-incorrectness decay:** `DECAY_HALFLIFE_SECONDS = 1800`

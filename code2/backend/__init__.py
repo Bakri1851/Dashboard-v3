@@ -14,8 +14,8 @@ Analytical core (carved from the old monolithic `analytics.py` during the
     difficulty.py    — 5-signal baseline question difficulty + within-module normalisation
     collab.py        — collaborative-filtering similar-students lookup
     clustering.py    — TF-IDF + KMeans mistake clustering + OpenAI cluster labelling
-    analytics.py     — shared helpers: _get_openai_client, min_max_normalize,
-                       min_max_normalize_grouped, classify_score, apply_temporal_smoothing
+    analytics.py     — shared helpers: _get_openai_client, min_max_normalise,
+                       min_max_normalise_grouped, classify_score, apply_temporal_smoothing
     rag.py           — retrieval-augmented feedback layer (ChromaDB + sentence-transformers)
     data_loader.py · lab_state.py · config.py · paths.py · academic_calendar.py · lab_classes.py
     models/          — irt.py · bkt.py · improved_struggle.py · measurement.py
