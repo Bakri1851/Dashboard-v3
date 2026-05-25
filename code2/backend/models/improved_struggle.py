@@ -8,15 +8,63 @@ Combines three signal groups:
 
 Graceful degradation: unavailable signal groups redistribute their weight
 to the behavioural composite.
+
+Phase 5: accepts optional `mix_weights` override for the v2 toggle.
+`_load_v2_weights` reads the trained JSON; the 3-element tuple replaces
+the config defaults when supplied. Trained v2 weights may be NEGATIVE
+(LR coefficients L1-normalised, may flip sign vs. v1's positive convex
+combination) — graceful redistribution is disabled in v2 mode so the
+trained sign structure is preserved.
 """
 
 from __future__ import annotations
+
+import json
+import logging
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 from scipy.special import expit
 
 from .. import analytics, config, incorrectness, struggle
+
+logger = logging.getLogger(__name__)
+
+
+def _load_v2_weights() -> Optional[tuple[float, float, float]]:
+    """Read data/eval/optimised_improved_weights_v2.json. Returns
+    (w_B, w_M, w_D) tuple or None if missing/malformed/stub-deferred."""
+    path = config.IMPROVED_WEIGHTS_V2_PATH
+    if not path.exists():
+        logger.info("v2 improved weights file not found at %s; falling back to v1", path)
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning("v2 improved weights load failed (%s): %s", type(exc).__name__, exc)
+        return None
+    if payload.get("status") == "DEFERRED":
+        logger.info("v2 improved weights file is a DEFERRED stub; falling back to v1")
+        return None
+    if payload.get("model_class") != "LogisticRegression":
+        logger.warning(
+            "v2 improved weights model_class=%r != LogisticRegression; refusing",
+            payload.get("model_class"),
+        )
+        return None
+    weights = payload.get("weights")
+    if not isinstance(weights, dict):
+        return None
+    try:
+        return (
+            float(weights["w_B"]),
+            float(weights["w_M"]),
+            float(weights["w_D"]),
+        )
+    except (KeyError, TypeError, ValueError):
+        logger.warning("v2 improved weights missing w_B/w_M/w_D keys or non-numeric")
+        return None
 
 
 # ------------------------------------------------------------------
@@ -28,6 +76,7 @@ def compute_improved_struggle_scores(
     mastery_summary: pd.DataFrame | None = None,
     irt_difficulty: pd.DataFrame | None = None,
     irt_ability: pd.DataFrame | None = None,
+    mix_weights: Optional[tuple[float, float, float]] = None,
 ) -> pd.DataFrame:
     """Return a struggle DataFrame compatible with the baseline schema.
 
@@ -41,9 +90,21 @@ def compute_improved_struggle_scores(
     student's last N submissions. Otherwise it falls back to the legacy
     ``incorrectness × (1 − norm_diff)`` formulation.
 
+    Parameters
+    ----------
+    mix_weights : optional 3-tuple ``(w_B, w_M, w_D)`` overriding the
+        v1 config defaults. Typically the result of ``_load_v2_weights()``
+        passed by ``cache.load_improved_struggle_df`` when the runtime
+        ``improved_struggle_weights_version`` toggle is "v2". Trained v2
+        weights may be NEGATIVE (LR coefficients L1-normalised). In v2
+        mode the graceful-degradation redistribution is **disabled** so
+        the trained sign structure is preserved; the loader-side guard
+        on missing BKT/IRT availability is left to the caller.
+
     Note: the weight-sum invariant (``w_beh + w_mg + w_da == 1``) is asserted
-    only on the non-empty code path — empty-input early returns bypass it
-    by design.
+    only on the non-empty code path AND only in v1 mode — v2 weights are
+    L1-normalised which may give a sum != 1 (or even negative), so the
+    invariant doesn't apply.
     """
     _columns = [
         "user", "struggle_score", "struggle_level", "struggle_color",
@@ -69,10 +130,18 @@ def compute_improved_struggle_scores(
             work["incorrectness"],
         )
 
-    # --- Determine effective weights with graceful degradation ---
-    w_beh = config.IMPROVED_STRUGGLE_WEIGHT_BEHAVIORAL
-    w_mg = config.IMPROVED_STRUGGLE_WEIGHT_MASTERY_GAP
-    w_da = config.IMPROVED_STRUGGLE_WEIGHT_DIFFICULTY_ADJ
+    # --- Determine effective weights ---
+    # v2 mode: use trained mix_weights as-is. Skip graceful redistribution
+    # (preserves the trained sign structure, which may include negative
+    # weights on M_s and D_s per the Phase 4c findings).
+    # v1 mode: use config defaults and redistribute when BKT/IRT unavailable.
+    v2_mode = mix_weights is not None
+    if v2_mode:
+        w_beh, w_mg, w_da = mix_weights
+    else:
+        w_beh = config.IMPROVED_STRUGGLE_WEIGHT_BEHAVIORAL
+        w_mg = config.IMPROVED_STRUGGLE_WEIGHT_MASTERY_GAP
+        w_da = config.IMPROVED_STRUGGLE_WEIGHT_DIFFICULTY_ADJ
 
     has_mastery = mastery_summary is not None and not mastery_summary.empty
     # Require >1 distinct IRT difficulty value — with a single value, the
@@ -86,12 +155,16 @@ def compute_improved_struggle_scores(
         and irt_difficulty["irt_difficulty"].nunique() > 1
     )
 
-    if not has_mastery:
-        w_beh += w_mg
-        w_mg = 0.0
-    if not has_irt:
-        w_beh += w_da
-        w_da = 0.0
+    if not v2_mode:
+        # v1-only redistribution. In v2 mode we leave w_mg/w_da intact —
+        # if the underlying signal is unavailable, the corresponding score
+        # contribution drops to 0 naturally via the later code paths.
+        if not has_mastery:
+            w_beh += w_mg
+            w_mg = 0.0
+        if not has_irt:
+            w_beh += w_da
+            w_da = 0.0
 
     # --- Per-student behavioural signals ---
     rows: list[dict] = []
@@ -163,8 +236,10 @@ def compute_improved_struggle_scores(
         coverage = result["mean_mastery"].notna().mean()
         if coverage < 0.5:
             has_mastery = False
-            w_beh += w_mg
-            w_mg = 0.0
+            if not v2_mode:
+                # v1-only redistribution; v2 keeps the trained sign structure
+                w_beh += w_mg
+                w_mg = 0.0
             result["mastery_gap"] = 0.0
         else:
             # Impute uncovered users with the class mean rather than 0.0 —
@@ -200,12 +275,15 @@ def compute_improved_struggle_scores(
             )
 
     # --- Weighted combination ---
-    # Invariant: redistribution above must preserve sum-to-one so configured
-    # weights match effective weights.
-    assert abs((w_beh + w_mg + w_da) - 1.0) < 1e-9, (
-        f"improved_struggle weights do not sum to 1.0: "
-        f"w_beh={w_beh}, w_mg={w_mg}, w_da={w_da}"
-    )
+    # Invariant (v1 only): redistribution above must preserve sum-to-one so
+    # configured weights match effective weights. v2 weights are
+    # L1-normalised LR coefficients which may have mixed signs and sum != 1
+    # — the .clip(0, 1) on struggle_score handles out-of-range output.
+    if not v2_mode:
+        assert abs((w_beh + w_mg + w_da) - 1.0) < 1e-9, (
+            f"improved_struggle v1 weights do not sum to 1.0: "
+            f"w_beh={w_beh}, w_mg={w_mg}, w_da={w_da}"
+        )
     result["struggle_score"] = (
         w_beh * result["behavioural_composite"]
         + w_mg * result["mastery_gap"]

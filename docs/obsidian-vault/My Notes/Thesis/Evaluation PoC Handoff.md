@@ -1,8 +1,8 @@
 ---
 tags: [thesis, evaluation, ch5, implementation, handoff, live]
 date: 2026-05-25
-status: 🟢 Phase 2 complete (1306 snapshots + 72 difficulty entries) · Phase 3 next
-source: Conversation 2026-05-24 + 2026-05-25 (Bakri + Claude)
+status: 🟢 Phase 6 done — notebooks/eval_main.ipynb runs end-to-end; 10 figures + data/eval/results.md generated. Phase 7 (writing-chat briefs) next
+source: Conversation 2026-05-24 + 2026-05-25 (human + Claude)
 related: [[Evaluation Plan]], [[Ch5 – Results and Evaluation]], [[Evidence Bank]], [[Report Sync]], [[Improved Struggle Logic]], [[BKT Mastery Logic]], [[IRT Difficulty Logic]], [[Student Struggle Logic]], [[Setup and Runbook]], [[Full Roadmap]]
 ---
 
@@ -10,7 +10,7 @@ related: [[Evaluation Plan]], [[Ch5 – Results and Evaluation]], [[Evidence Ban
 
 > **Purpose.** Capture the entire live state of the v2 weights and
 > hyperparams implementation. Self-contained — a fresh Claude chat
-> (or future Bakri) can pick up the work without re-deriving anything
+> (or future human) can pick up the work without re-deriving anything
 > from prior conversation.
 
 > **Scope.** Real production implementation (was originally scoped as
@@ -20,10 +20,10 @@ related: [[Evaluation Plan]], [[Ch5 – Results and Evaluation]], [[Evidence Ban
 
 > **Status as of 2026-05-25.** Phase 0 (this note) being rewritten now.
 > Phase 1 (`scripts/eval_fetch.py`) script written but my environment
-> can't reach the Loughborough internal API — needs Bakri to run
+> can't reach the Loughborough internal API — needs human to run
 > locally and paste the sanity output.
 
-> **Authoritative plan** lives at `C:\Users\Bakri\.claude\plans\
+> **Authoritative plan** lives at `C:\Users\human\.claude\plans\
 > crispy-finding-valiant.md`. This vault note is the user-facing live
 > mirror; the plan file is the implementation contract.
 
@@ -104,7 +104,7 @@ The three label families serve two purposes in this implementation:
 - **Family C** is the cleanest training target: each label is a single
   judgement made by an independent intelligent rater that does not
   share parameters with the model being trained. Calibrated against
-  Bakri's 50 self-labels via Cohen's $\kappa$.
+  human's 50 self-labels via Cohen's $\kappa$.
 
 ### 3.3 Thesis framing (for §5.1.3)
 
@@ -168,8 +168,8 @@ batched-call pattern as `incorrectness.py`.
 | `L_difficulty_llm(q)` | GPT's 1–5 difficulty rating (continuous) |
 | `L_high_diff_llm(q)` | 1 iff `L_difficulty_llm(q) ≥ 4` |
 
-**Bakri self-labels:** 50 snapshots drawn from the LLM-labelled 2000,
-labelled independently by Bakri; Cohen's $\kappa$ reported against
+**human self-labels:** 50 snapshots drawn from the LLM-labelled 2000,
+labelled independently by human; Cohen's $\kappa$ reported against
 the LLM on the shared 50. $\kappa < 0.3$ → flagged as limitation,
 training still proceeds with caveat.
 
@@ -219,7 +219,12 @@ clean: V2 React is where v2 lives.
 | **0** | Rewrite this vault note for new scope | ✅ done (2026-05-25) | This file + `v2 Methodology Journal.md` |
 | **1** | `scripts/eval_fetch.py` + sanity check | ✅ done (2026-05-25) | `data/eval_submissions.parquet` (42,443 rows, spans 2025-10-06 → 2026-05-15, 21/23 healthy sessions) |
 | **2** | `scripts/eval_common.py` + ~2000-snapshot fixture | ✅ done (2026-05-25) | `data/eval_snapshots.json` — 1306 struggle snapshots + 72 difficulty entries. Band split: 13 On Track / 120 Minor / 470 Struggling / 703 Needs Help. Family B positive rates: L_top20_obs 10.0%, L_needs_help_obs 21.1%, L_struggling_plus_obs 26.1% |
-| **3** | `scripts/eval_label.py` (GPT-4o-mini, mirrors `incorrectness.py` pattern) + Bakri self-labels 50 + Cohen's $\kappa$ | 🟡 NEXT | `data/llm_struggle_labels.json`, `data/llm_difficulty_labels.json`, `data/self_labels.json` |
+| **3 (LLM labels)** | `scripts/eval_label.py --mode struggle` + `--mode difficulty`. GPT-4o-mini, schema_version 2 (4-band scale). API key auto-loaded from `.secrets/secrets.toml` via loader added to script | ✅ done (2026-05-25) | **`data/eval/llm_struggle_labels.json`** — 1306 labels, 262/262 batches succeeded, 0 parse failures. **`data/eval/llm_difficulty_labels.json`** — 72 labels, 15/15 batches succeeded, 0 parse failures. Total: 1378 LLM labels, 100% batch success, ~$0.20 OpenAI spend |
+| **3 (self-label)** | `scripts/eval_label.py --mode self-label` | ✅ done (2026-05-25) | `data/eval/self_labels.json` — **50/50 labels saved** (schema_v2 4-band). CLI display widened mid-run after first 7 labels: `<br>` rendered as newlines, no answer/feedback truncation. The first 7 labels remain valid (judgement was based on what was visible at the time) |
+| **3 (κ)** | `scripts/eval_label.py --mode kappa` | ✅ done (2026-05-25) | `data/eval/kappa_report.json`. **κ_intervene = 0.103, κ_band_linear = 0.111, κ_band_quad = 0.094** (all "poor" by Landis-Koch). Exact intervene agreement = 58% (29/50); band exact = 34%; **band within-1-step = 70% (35/50)** — directional agreement, divergence on precise boundary. Distributions both lean upper bands: human intervene 60%, LLM intervene 66%; both put 17/50 in Needs Help. Reported as §5.5 limitation; v2 weights documented as "indicative not validated" against human judgement |
+| **4a** | `scripts/optimise_v2_weights.py --kind struggle` | ✅ done (2026-05-25) | `data/eval/optimised_struggle_weights_v2.json`. **AUC mean = 0.836, 95% CI [0.762, 0.911]** across 5 session-grouped folds. All 5 folds converged; best C consistently 0.1. Per-fold weight std tight (0.015–0.032) → stable solution. **Notable findings**: (1) `n_hat` and `t_hat` flipped from positive (+0.10 each in v1) to NEGATIVE (−0.04, −0.13 in v2) — activity proxies as engaged-self-recovery, not struggling-persistence; (2) v1's $\eta = 0.38$ on recency dropped to 0.26 in v2; (3) mean incorrectness bumped from 0.20 → 0.26 (now co-equal with recency); (4) `rep_norm` also flipped sign |
+| **4b** | `scripts/optimise_v2_weights.py --kind difficulty` | ✅ done (2026-05-25) — **NEGATIVE FINDING** | `data/eval/optimised_difficulty_weights_v2.json`. **AUC pooled = 0.345** (worse than random). Target reframed to `Very Hard only` after the original `{Hard, Very Hard}` gave 98.6% positive and crashed LOO. Even with the reframe (76% pos), the LR cannot discriminate Very Hard from Hard using the 5 v1 features — the LR weights are likely noise-fitting at N=72 (e.g. `t_tilde` = −0.39, claiming "more time → less likely Very Hard", almost certainly spurious). **Honest publishable finding: v1 hand-set difficulty weights are near-optimal on this cohort; the 5-feature space saturates at COA122's uniformly-hard distribution and offers no headroom for empirical improvement.** Frontend toggle for `difficulty_weights_version` should default to v1 and warn that v2 is experimental / worse on held-out evaluation |
+| **4c** | `scripts/optimise_v2_weights.py --kind improved` | ✅ done REAL (2026-05-25) — **NEGATIVE FINDING** | `data/eval/optimised_improved_weights_v2.json`. Snapshot extension implemented (`compute_improved_components_at_t` in eval_common.py fits BKT + IRT per (session, cutoff) and attaches B_s/M_s/D_s to each snapshot). Training: **AUC = 0.637 [0.572, 0.703]** across 5 session-grouped folds. **Blend weights: w_B = +0.42, w_M = −0.44, w_D = −0.14.** Two of three blend weights flipped negative — LR puts negative weight on BKT mastery_gap and IRT-adjusted exposure components. Per-fold weight std 0.04–0.16 (noisier than struggle pass). Three reading: (1) BKT/IRT capture knowledge-state/challenge-level, not "needs help right now"; (2) per-cutoff BKT/IRT fits are noisy at small slices, propagating to blend; (3) behavioural composite already saturates predictive signal. All three support: **improved-v2 blend should default OFF; v1 blend is the better choice**. Headline AUC (0.637) is worse than baseline struggle-v2 (0.836), suggesting the blend HURTS at this N |
 | **4a** | `scripts/optimise_v2_weights.py` struggle mode | ⏳ pending | `data/optimised_struggle_weights_v2.json` |
 | **4b** | Same script, difficulty mode | ⏳ pending | `data/optimised_difficulty_weights_v2.json` |
 | **4c** | Same script, improved-struggle mixing mode | ⏳ pending | `data/optimised_improved_weights_v2.json` |
@@ -230,7 +235,7 @@ clean: V2 React is where v2 lives.
 | **7** | Writing-chat briefs (Ch3 + Ch4 amendments, Ch5 §5.4 numbers) | ⏳ pending | Brief paragraphs handed to other chat |
 | **8** | Literature `\cite{}` additions + `sync_literature.py` | ⏳ pending | Updated `Report/references.bib` + coverage notes |
 
-**Total estimate:** ~16.5 h Claude time + ~45 min Bakri time + ~$15–25 OpenAI spend.
+**Total estimate:** ~16.5 h Claude time + ~45 min human time + ~$15–25 OpenAI spend.
 
 ### 6.1 Per-phase status update protocol
 After each phase completes, update:
@@ -248,7 +253,7 @@ After each phase completes, update:
 | LLM rater model | GPT-4o-mini | Same as `rag.py:6`; cheap and capable enough for snapshot rating |
 | LLM client pattern | Reuse `_get_openai_client()` from `analytics.py` + batched-call + disk cache, exactly mirroring `incorrectness.py` | Consistency with existing OpenAI integration; same error handling and retry behaviour |
 | Sessions to use | All 23 saved sessions | User imported these on 2026-05-25; gives broadest coverage |
-| Snapshot count | ~2000 (struggle) + ~50–100 (difficulty per question) + 50 (Bakri self-label calibration) | 2000 supports stable AUC CIs with 4-fold split; 50 supports kappa estimate with reasonable CI |
+| Snapshot count | ~2000 (struggle) + ~50–100 (difficulty per question) + 50 (human self-label calibration) | 2000 supports stable AUC CIs with 4-fold split; 50 supports kappa estimate with reasonable CI |
 | Model class for training | Logistic regression (primary), gradient boosting fallback if LR AUC < 0.55 | Preserves "weighted sum" functional form → v1 vs v2 directly comparable |
 | Cross-validation | Group K-fold ($K=5$) with session as group for struggle / improved-blend; LOO-on-question for difficulty | Prevents train/test leakage on students; appropriate for question-level N |
 | Regularisation | L2 (Ridge), $\lambda$ tuned by nested CV | Handles signal correlation (esp. $I$ vs $A$ in struggle) |
@@ -272,7 +277,7 @@ Claude's sandbox this connection times out after 30 s — the endpoint
 is on Loughborough's internal network and likely requires VPN /
 campus presence.
 
-**The fix.** Bakri runs the existing script on a machine that can
+**The fix.** human runs the existing script on a machine that can
 reach the API (the same machine you deploy the dashboard from):
 
 ```powershell
@@ -289,7 +294,7 @@ This produces:
 Paste the console output back to Claude and the pipeline resumes
 from Phase 2 entirely offline.
 
-**Status:** waiting on Bakri (2026-05-25).
+**Status:** waiting on human (2026-05-25).
 
 ---
 
@@ -336,7 +341,7 @@ code/, V2 React+FastAPI at code2/).
 
 THREE authoritative documents to read before doing anything:
 
-1. C:\Users\Bakri\.claude\plans\crispy-finding-valiant.md
+1. C:\Users\human\.claude\plans\crispy-finding-valiant.md
    — the implementation contract; what gets built and how
 
 2. docs/obsidian-vault/My Notes/Thesis/Evaluation PoC Handoff.md
@@ -353,9 +358,35 @@ improved-struggle blend weights, scalar hyperparams). Wire each as a
 runtime-toggleable v2 option in the V2 React Settings view; all
 default v1. Both versions reported in Ch5 §5.4.
 
-Current state: read §6 and §8 of the vault handoff note. If §8 still
-shows the API-reachability blocker, the next step is for Bakri to run
-`python scripts/eval_fetch.py` locally and paste the sanity output.
+Current state (2026-05-25): Phase 0 → Phase 3 self-label all DONE.
+Next steps in order:
+
+  1. python scripts/eval_label.py --mode kappa
+     (instant — reports Cohen's κ between human and LLM on shared 50)
+
+  2. python scripts/optimise_v2_weights.py --kind struggle
+     python scripts/optimise_v2_weights.py --kind difficulty
+     python scripts/optimise_v2_weights.py --kind improved
+     (~30 sec each; struggle and difficulty produce real weights,
+      improved writes a stub — see §6 for the snapshot-extension
+      caveat needed to make it real)
+
+  3. Decide whether to also write scripts/optimise_hyperparams.py
+     (Phase 4d). Adds ~1.5h. Optional if 4a/4b give good enough
+     numbers on their own.
+
+  4. Phase 5a + 5b (V2 backend + frontend toggles). Phase 6
+     (evaluation notebook with plots styled per
+     [[previous-works/F221611.ipynb]]). Phase 7 (briefs to writing
+     chat). Phase 8 (literature sync).
+
+Cached data on disk:
+  - data/eval/submissions.parquet     42,443 rows
+  - data/eval/snapshots.json          1306 struggle + 72 difficulty
+  - data/eval/llm_struggle_labels.json   1306 labels, schema_v2
+  - data/eval/llm_difficulty_labels.json   72 labels, schema_v2
+  - data/eval/self_labels.json          50 human labels, schema_v2
+  - data/eval/optimised_*_v2.json     (next — written by Phase 4)
 
 Decisions already made (do not reopen — see §7 of the vault note):
 - GPT-4o-mini as labeller; mirror incorrectness.py's client+cache pattern
@@ -428,7 +459,7 @@ live continuation surface.
 | `data/eval_snapshots.json` | 2000 frozen snapshots | 2 |
 | `data/llm_struggle_labels.json` | GPT-4o-mini struggle ratings | 3 |
 | `data/llm_difficulty_labels.json` | GPT-4o-mini difficulty ratings | 3 |
-| `data/self_labels.json` | Bakri's 50 self-labels | 3 |
+| `data/self_labels.json` | human's 50 self-labels | 3 |
 | `data/optimised_struggle_weights_v2.json` | Optimised $S$ weights | 4a |
 | `data/optimised_difficulty_weights_v2.json` | Optimised $D$ weights | 4b |
 | `data/optimised_improved_weights_v2.json` | Optimised improved-blend weights | 4c |
@@ -439,6 +470,15 @@ live continuation surface.
 
 ## 12 · Changelog
 
+- **2026-05-25 (P6 done — eval notebook + figures + results.md)** — `notebooks/eval_main.ipynb` runs end-to-end in ~30 s. 10 figures saved to `data/eval/figures/` (cohort_distributions, kappa, weights_struggle_v1_vs_v2, per_fold_auc_struggle, roc_struggle, calibration_struggle, weight_heatmap_struggle, confusion_bands, negative_findings, model_disagreement). `data/eval/results.md` (76 lines, 6 tables) ready for writing chat to lift verbatim into §5.4 / §5.5 / §5.6 prose. **Bonus finding (only visible after notebook re-derives v1 vs v2 predictions on same snapshots): 31.2% of students reclassified into a different struggle band under v2 (408/1306); split is balanced (15.9% upgrades, 15.3% downgrades) — v2 is not systematically harsher or more lenient than v1.** This is a §5.6.1 model-disagreement headline. Notebook uses F221611-styled plots (paired bars with value annotations, text-box AUC overlays, ConfusionMatrixDisplay with RdGy cmap, grid alpha 0.3). Mid-run bug caught and fixed: results-export cell had a Python indentation error in the kappa-table block which the syntax-check script flagged before execution. Phase 7 (writing-chat briefs) next.
+- **2026-05-25 (P5 done — backend + frontend toggles live)** — V2 React stack now has the four v2 toggles wired end-to-end. **Backend** (8 files): `config.py` (4 V2 path constants + `SHRINKAGE_K_DEFAULT`), `runtime_config.py` (4 `*_version` + `shrinkage_k` fields + `_load_optimised_hyperparams()` helper + `update()` side-effects on hp-version flip), `schemas.py` (`RuntimeSettings` extended), `struggle.py` + `difficulty.py` + `models/improved_struggle.py` (each gained `_load_v2_weights()` + override params with v2-mode redistribution gating), `cache.py` (`load_*_df` pass overrides through + cache key includes version), `routers/settings.py` (`_to_runtime_settings` surfaces 5 new fields). **Frontend** (2 files): `types/api.ts` extended; `views/SettingsView.tsx` added "Optimised Weights (v2)" section (n=5) with 4 `<ToggleRow>` selects + `V2InfoBlock` subcomponent (green-ok / red-warn / neutral-info variants reflecting Phase 4 findings). All defaults stay v1 → no breaking change. Verified live by user: section visible, toggles flip backend, leaderboards re-rank. **Iterative-refinement narrative now demonstrable in defence demo.** Phase 6 (eval notebook + plots) next.
+- **2026-05-25 (P4c real done — NEGATIVE FINDING)** — Upgraded from stub. `scripts/eval_common.py` extended with `compute_improved_components_at_t` (fits BKT + IRT at each (session, cutoff), attaches `improved_components` field per snapshot). Snapshots regenerated (~15 min wallclock for 252 BKT/IRT fits). `optimise_v2_weights.py --kind improved` now trains real 3-weight LR. **Result: AUC = 0.637 [0.572, 0.703]; w_B = +0.42, w_M = −0.44, w_D = −0.14.** Two of three blend weights flipped NEGATIVE — LR doesn't trust the BKT/IRT components. Headline AUC of 0.637 is WORSE than baseline struggle-v2 (0.836), meaning the improved blend actively hurts at this N. Three interpretations all support: improved-blend v2 should default OFF in deployment, v1 (0.45/0.30/0.25) stays as the recommended blend. Symmetric to Phase 4b's negative finding for difficulty: **two negative findings + one positive (struggle) gives a complete, honest §5.4 story**.
+- **2026-05-25 (P4b done — NEGATIVE FINDING)** — v2 difficulty weights trained with reframed `Very Hard only` target. **AUC pooled = 0.345** (worse than random). LR cannot discriminate Very Hard from Hard using the 5 v1 features at N=72. Weights show noise-fitting patterns (e.g. `t_tilde` = −0.39 — "more time = less likely Very Hard", spurious). **Honest publishable finding**: v1 hand-set difficulty weights are near-optimal for COA122; no headroom for empirical improvement given the available features. Symmetric to Phase 4a's struggle finding: where struggle showed v1 weights need redistribution (publishable positive finding), difficulty shows v1 weights are already correct (publishable negative finding). The difficulty toggle in Phase 5 should default to v1 with a UI warning that v2 is experimental + worse on held-out evaluation. Metadata `target` string in script updated to reflect the reframe.
+- **2026-05-25 (P4b cohort finding)** — **COA122 is uniformly hard.** LLM difficulty band distribution: Easy 0, Medium 1, Hard 16, **Very Hard 55** (n=72). v1 dashboard on same data: Easy 3, Medium 21, Hard 46, Very Hard 2. The LLM is dramatically harsher than v1 thresholds (sees "Very Hard" where v1 sees "Hard"). Two interpretations: (a) v1 thresholds calibrated generously, (b) LLM over-rates difficulty from aggregate stats. Both worth reporting in §5.4 — this is a publishable cohort-characteristics finding. Original `band ∈ {Hard, Very Hard}` training target gave 98.6% positive (untrainable, LOO crashed); reframed to `band == 'Very Hard'` (76% positive) — same data, sharper question: *"what distinguishes the very hardest from the merely hard?"*. Script also gained a single-class-fold safety guard.
+- **2026-05-25 (P4a done)** — v2 struggle weights trained. **AUC = 0.836 [0.762, 0.911]** across 5 session-grouped folds. Weight vector stable (per-fold std 0.015–0.032). Headline finding: hand-set $\eta = 0.38$ on recency was over-weighted; LR redistributes to ≈0.26 on each of mean incorrectness and recency. Submission count + time active flipped sign (positive in v1, negative in v2) — activity proxies engaged self-recovery in LR's view, not struggling persistence. Publishable finding. sklearn `FutureWarning` spam fix added to `scripts/optimise_v2_weights.py`. Phase 4b/4c next.
+- **2026-05-25 (P3 κ)** — Kappa report: **κ_intervene = 0.10, κ_band_linear = 0.11, κ_band_quad = 0.09** — all "poor" by Landis-Koch thresholds. Exact intervene agreement 58%, band within-1-step 70%. Both raters skewed toward Needs Help / Struggling, which inflates chance agreement and pulls κ down. Documented as §5.5 limitation; v2 weights framed as "indicative not validated against human judgement, trained against LLM second-opinion judgement". `data/eval/kappa_report.json` persists the numbers for §5.4 citation.
+- **2026-05-25 (P3 done)** — Phase 3 self-label complete: 50/50 labels saved to `data/eval/self_labels.json`. CLI display improved mid-run after the first 7 labels (full answer + feedback, `<br>` → newlines, wider Q column); first 7 still valid. Kappa report queued next. Phase 4 scripts (`scripts/optimise_v2_weights.py`) written and ready to fire as soon as κ runs.
+- **2026-05-25 (P3 LLM)** — Phase 3 LLM labels complete: 1306 struggle labels (262/262 batches, 0 failures) + 72 difficulty labels (15/15 batches, 0 failures) under 4-band schema. ~$0.20 OpenAI spend. Mid-conversation scale change: switched from 1–5 severity to 4-band ordinal (`On Track / Minor Issues / Struggling / Needs Help` and `Easy / Medium / Hard / Very Hard`) to match deployed dashboard semantics. Schema version bumped to 2; old cache auto-discarded. Author identifier replaced with "human" across script + vault notes for neutral attribution. `.secrets/secrets.toml` loader added to `eval_label.py` so the script auto-resolves the API key. Self-label (n=50) + Cohen's $\kappa$ pending. Next: Phase 4 (optimisation scripts) being written in parallel.
 - **2026-05-25 (P2 done)** — Phase 2 complete. `scripts/eval_common.py`
   written; sampler produced 1306 struggle snapshots + 72 difficulty
   entries to `data/eval_snapshots.json`. Band distribution skews
@@ -447,7 +487,7 @@ live continuation surface.
   positive rates within healthy 10–26% range. Methodology journal
   `v2 Methodology Journal.md` created as supplementary source
   material for the writing chat. Next: Phase 3 (`scripts/eval_label.py`).
-- **2026-05-25 (P1 done)** — Phase 1 complete. Bakri ran
+- **2026-05-25 (P1 done)** — Phase 1 complete. human ran
   `scripts/eval_fetch.py` locally and cached 42,443 rows to
   `data/eval_submissions.parquet` (time range 2025-10-06 →
   2026-05-15). 21/23 sessions healthy; 2 small sessions
@@ -457,7 +497,7 @@ live continuation surface.
   pivot from PoC to full implementation. Plan file
   `crispy-finding-valiant.md` rewritten to cover four v2 toggles,
   training procedure, Ch3/4 amendments, literature sync. Phase 1
-  `scripts/eval_fetch.py` written; blocked on Bakri-local API access
+  `scripts/eval_fetch.py` written; blocked on human-local API access
   (resolved same day). Vault note title changed from
   "Evaluation PoC Handoff" to "Evaluation Implementation Handoff"
   (filename preserved for cross-link stability).

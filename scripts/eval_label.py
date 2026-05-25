@@ -10,8 +10,8 @@ Modes::
 
     python scripts/eval_label.py --mode struggle    # label 1306 struggle snapshots
     python scripts/eval_label.py --mode difficulty  # label 72 difficulty questions
-    python scripts/eval_label.py --mode self-label  # CLI: Bakri labels 50 struggle snapshots
-    python scripts/eval_label.py --mode kappa       # Cohen's kappa: Bakri vs LLM on shared 50
+    python scripts/eval_label.py --mode self-label  # CLI: Human labels 50 struggle snapshots
+    python scripts/eval_label.py --mode kappa       # Cohen's kappa: Human vs LLM on shared 50
 
 All modes are idempotent — cached labels are reused on re-run; only the
 uncached subset is sent to the API. The cache discards itself on
@@ -23,6 +23,7 @@ import argparse
 import hashlib
 import json
 import logging
+import os
 import re
 import sys
 import threading
@@ -34,6 +35,31 @@ from typing import Any, Optional
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "code2"))
 
+
+def _load_secrets() -> None:
+    """Read .secrets/secrets.toml and populate os.environ.
+
+    Mirrors how Streamlit's secrets are surfaced to V2's `_get_openai_client`
+    which reads from os.environ. We never overwrite an existing env var, so
+    `$env:OPENAI_API_KEY=...` set at the shell still wins.
+    """
+    secrets_path = REPO_ROOT / ".secrets" / "secrets.toml"
+    if not secrets_path.exists():
+        return
+    line_re = re.compile(r'^\s*([A-Z_][A-Z0-9_]*)\s*=\s*"([^"]*)"\s*$')
+    try:
+        for line in secrets_path.read_text(encoding="utf-8").splitlines():
+            m = line_re.match(line)
+            if m:
+                key, value = m.group(1), m.group(2)
+                if key and value and key not in os.environ:
+                    os.environ[key] = value
+    except OSError:
+        pass
+
+
+_load_secrets()
+
 from backend import config, paths  # noqa: E402
 from backend.analytics import _get_openai_client  # noqa: E402
 
@@ -41,17 +67,31 @@ logger = logging.getLogger("eval_label")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(message)s")
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2  # v2: 4-band ordinal scale matching the dashboard (was 1-5 integer)
 SAVE_DEBOUNCE_S = 30.0
 BATCH_SIZE_STRUGGLE = 5
 BATCH_SIZE_DIFFICULTY = 5
 REQUEST_TIMEOUT_S = 30.0
 
+STRUGGLE_BANDS = ["On Track", "Minor Issues", "Struggling", "Needs Help"]
+BAND_INDEX = {b: i for i, b in enumerate(STRUGGLE_BANDS)}
+BAND_BY_SHORTCUT = {
+    "1": "On Track", "t": "On Track", "on track": "On Track",
+    "2": "Minor Issues", "m": "Minor Issues", "minor issues": "Minor Issues", "minor": "Minor Issues",
+    "3": "Struggling", "s": "Struggling", "struggling": "Struggling",
+    "4": "Needs Help", "n": "Needs Help", "needs help": "Needs Help", "needs": "Needs Help",
+}
+
+DIFFICULTY_BANDS = ["Easy", "Medium", "Hard", "Very Hard"]
+DIFF_INDEX = {b: i for i, b in enumerate(DIFFICULTY_BANDS)}
+
 
 # -------------------- Cache layer (mirrors incorrectness.py) --------------------
 
 def _cache_path(kind: str) -> Path:
-    return paths.DATA_DIR / f"llm_{kind}_labels.json"
+    eval_dir = paths.DATA_DIR / "eval"
+    eval_dir.mkdir(parents=True, exist_ok=True)
+    return eval_dir / f"llm_{kind}_labels.json"
 
 
 def _load_cache(kind: str) -> dict[str, dict]:
@@ -118,12 +158,18 @@ def _struggle_prompt(snapshots: list[dict]) -> str:
     parts = [
         "You are a teaching assistant observing students during a programming lab.",
         "Each numbered block below describes one (student, moment-in-time) snapshot.",
-        "Based on the submission evidence alone, judge whether you would walk",
-        "over to help this student right now.",
+        "Based on the submission evidence alone, give two judgements:",
+        "  1. Would you walk over to help this student right now? (binary)",
+        "  2. Which struggle band best describes them right now? (4-band ordinal)",
+        "",
+        "The four struggle bands match the deployed dashboard's classification:",
+        '  "On Track"      — clearly progressing, few or recoverable errors',
+        '  "Minor Issues"  — some errors but recovering on their own',
+        '  "Struggling"    — sustained difficulty, slow progress',
+        '  "Needs Help"    — stuck or abandoned, unlikely to recover without intervention',
         "",
         "For EACH snapshot, output one JSON object with EXACTLY these keys:",
-        '  {"intervene": true|false, "rating": 1-5, "reason": "<= 20 word justification"}',
-        "Where rating is 1 (on track) to 5 (severely stuck).",
+        '  {"intervene": true|false, "band": "On Track"|"Minor Issues"|"Struggling"|"Needs Help", "reason": "<= 20 word justification"}',
         "",
         f"Return a JSON ARRAY of exactly {len(snapshots)} objects in the same order as the snapshots.",
         "Return ONLY the JSON array, no surrounding text.",
@@ -167,9 +213,14 @@ def _difficulty_prompt(questions: list[dict]) -> str:
         "You are an instructor judging the difficulty of programming questions",
         "based on observed student performance on them.",
         "",
+        "The four difficulty bands match the deployed dashboard's classification:",
+        '  "Easy"      — most students solve quickly on first or second attempt',
+        '  "Medium"    — moderate retries; majority eventually solve',
+        '  "Hard"      — many retries; significant failure rate',
+        '  "Very Hard" — very few solve; high failure rate even with multiple attempts',
+        "",
         "For EACH numbered question, output one JSON object with EXACTLY these keys:",
-        '  {"difficulty": 1-5, "reason": "<= 20 word justification"}',
-        "Where difficulty is 1 (very easy) to 5 (very hard).",
+        '  {"band": "Easy"|"Medium"|"Hard"|"Very Hard", "reason": "<= 20 word justification"}',
         "",
         f"Return a JSON ARRAY of exactly {len(questions)} objects in the same order.",
         "Return ONLY the JSON array.",
@@ -225,23 +276,23 @@ def _parse_label_array(text: str, expected_len: int, kind: str) -> Optional[list
                 ok = False
                 break
             if kind == "struggle":
-                rating = item.get("rating")
+                band = item.get("band")
                 intervene = item.get("intervene")
-                if not isinstance(rating, (int, float)) or not isinstance(intervene, bool):
+                if not isinstance(intervene, bool) or band not in STRUGGLE_BANDS:
                     ok = False
                     break
                 out.append({
                     "intervene": bool(intervene),
-                    "rating": int(max(1, min(5, round(float(rating))))),
+                    "band": band,
                     "reason": str(item.get("reason", ""))[:200],
                 })
             else:  # difficulty
-                diff = item.get("difficulty")
-                if not isinstance(diff, (int, float)):
+                band = item.get("band")
+                if band not in DIFFICULTY_BANDS:
                     ok = False
                     break
                 out.append({
-                    "difficulty": int(max(1, min(5, round(float(diff))))),
+                    "band": band,
                     "reason": str(item.get("reason", ""))[:200],
                 })
         if ok:
@@ -360,16 +411,24 @@ def label_difficulty_questions(
 def self_label_cli(snapshots: list[dict], n: int = 50, seed: int = 42) -> dict[str, dict]:
     import numpy as np
 
-    self_path = paths.DATA_DIR / "self_labels.json"
+    self_path = paths.DATA_DIR / "eval" / "self_labels.json"
+    self_path.parent.mkdir(parents=True, exist_ok=True)
+    existing: dict[str, dict] = {}
     if self_path.exists():
         try:
             payload = json.loads(self_path.read_text(encoding="utf-8"))
-            existing = payload.get("labels", {})
-            print(f"Found existing {self_path.name} with {len(existing)} entries. Resuming.")
-        except Exception:
+            on_disk_version = payload.get("schema_version")
+            if on_disk_version != SCHEMA_VERSION:
+                print(
+                    f"self_labels.json schema_version={on_disk_version!r} != current "
+                    f"{SCHEMA_VERSION} — discarding {len(payload.get('labels', {}))} old labels."
+                )
+            else:
+                existing = payload.get("labels", {})
+                print(f"Found existing {self_path.name} with {len(existing)} entries. Resuming.")
+        except Exception as exc:
+            print(f"Could not read {self_path.name} ({type(exc).__name__}): {exc}. Starting fresh.")
             existing = {}
-    else:
-        existing = {}
 
     rng = np.random.default_rng(seed)
     pool_idx = rng.choice(len(snapshots), size=min(n, len(snapshots)), replace=False)
@@ -400,14 +459,18 @@ def self_label_cli(snapshots: list[dict], n: int = 50, seed: int = 42) -> dict[s
             print()
             print(f"  Recent trail (up to 5 most recent):")
             for j, sub in enumerate(trail[:5], 1):
-                print(f"    {j}. [{sub.get('timestamp', '')[:19]}]  Q={sub.get('question', '')[:30]}  "
+                print(f"    {j}. [{sub.get('timestamp', '')[:19]}]  Q={sub.get('question', '')[:50]}  "
                       f"inc={sub.get('incorrectness', 0):.2f}")
-                ans = sub.get('answer_excerpt', '')[:80]
-                fb = sub.get('feedback_excerpt', '')[:120]
+                ans = sub.get('answer_excerpt', '')
+                fb = sub.get('feedback_excerpt', '')
                 if ans:
-                    print(f"       Answer:   {ans}")
+                    print(f"       Answer:")
+                    for line in ans.replace('<br>', '\n').splitlines():
+                        print(f"         {line}")
                 if fb:
-                    print(f"       Feedback: {fb}")
+                    print(f"       Feedback:")
+                    for line in fb.replace('<br>', '\n').splitlines():
+                        print(f"         {line}")
             print()
 
             while True:
@@ -418,22 +481,21 @@ def self_label_cli(snapshots: list[dict], n: int = 50, seed: int = 42) -> dict[s
                     break
                 print("    (y for yes, n for no, q to save+quit)")
 
-            while True:
-                rating_str = input("  Severity 1-5: ").strip()
-                if rating_str == "q":
+            band: Optional[str] = None
+            while band is None:
+                band_str = input(
+                    "  Band [1=On Track, 2=Minor Issues, 3=Struggling, 4=Needs Help, q=quit]: "
+                ).strip().lower()
+                if band_str == "q":
                     raise KeyboardInterrupt
-                try:
-                    rating = int(rating_str)
-                    if 1 <= rating <= 5:
-                        break
-                except ValueError:
-                    pass
-                print("    (integer 1-5; q to save+quit)")
+                band = BAND_BY_SHORTCUT.get(band_str)
+                if band is None:
+                    print("    (1/2/3/4 or t/m/s/n or full band name; q to save+quit)")
 
             existing[snap["snapshot_id"]] = {
                 "snapshot_id": snap["snapshot_id"],
                 "intervene": resp == "y",
-                "rating": rating,
+                "band": band,
                 "labelled_by": "user",
             }
             # save after every label so a Ctrl+C doesn't lose progress
@@ -454,7 +516,8 @@ def self_label_cli(snapshots: list[dict], n: int = 50, seed: int = 42) -> dict[s
 def cohen_kappa_report() -> None:
     from sklearn.metrics import cohen_kappa_score  # type: ignore[import-untyped]
 
-    self_path = paths.DATA_DIR / "self_labels.json"
+    self_path = paths.DATA_DIR / "eval" / "self_labels.json"
+    self_path.parent.mkdir(parents=True, exist_ok=True)
     if not self_path.exists():
         print("No self_labels.json yet. Run `--mode self-label` first.")
         return
@@ -467,35 +530,73 @@ def cohen_kappa_report() -> None:
         print(f"No overlap between self_labels (n={len(self_labels)}) and llm cache (n={len(llm_cache)}).")
         return
 
-    bakri_intervene = [int(self_labels[k]["intervene"]) for k in shared]
+    human_intervene = [int(self_labels[k]["intervene"]) for k in shared]
     llm_intervene = [int(llm_cache[k]["intervene"]) for k in shared]
-    bakri_rating = [int(self_labels[k]["rating"]) for k in shared]
-    llm_rating = [int(llm_cache[k]["rating"]) for k in shared]
+    human_band = [self_labels[k]["band"] for k in shared]
+    llm_band = [llm_cache[k]["band"] for k in shared]
+    human_band_idx = [BAND_INDEX[b] for b in human_band]
+    llm_band_idx = [BAND_INDEX[b] for b in llm_band]
 
-    kappa_intervene = cohen_kappa_score(bakri_intervene, llm_intervene)
-    kappa_rating = cohen_kappa_score(bakri_rating, llm_rating, weights="linear")
-    kappa_rating_quad = cohen_kappa_score(bakri_rating, llm_rating, weights="quadratic")
+    kappa_intervene = cohen_kappa_score(human_intervene, llm_intervene)
+    kappa_band = cohen_kappa_score(human_band_idx, llm_band_idx, weights="linear")
+    kappa_band_quad = cohen_kappa_score(human_band_idx, llm_band_idx, weights="quadratic")
 
     print(f"\nCohen's kappa over shared n={len(shared)} snapshots:")
     print(f"  intervene (binary):           kappa = {kappa_intervene:.3f}")
-    print(f"  rating 1-5 (linear weights):  kappa = {kappa_rating:.3f}")
-    print(f"  rating 1-5 (quadratic):       kappa = {kappa_rating_quad:.3f}")
+    print(f"  band (linear weights):        kappa = {kappa_band:.3f}")
+    print(f"  band (quadratic weights):     kappa = {kappa_band_quad:.3f}")
 
     # Agreement breakdown
-    agree_intervene = sum(1 for b, l in zip(bakri_intervene, llm_intervene) if b == l)
-    agree_rating_exact = sum(1 for b, l in zip(bakri_rating, llm_rating) if b == l)
-    agree_rating_within1 = sum(1 for b, l in zip(bakri_rating, llm_rating) if abs(b - l) <= 1)
+    agree_intervene = sum(1 for b, l in zip(human_intervene, llm_intervene) if b == l)
+    agree_band_exact = sum(1 for b, l in zip(human_band, llm_band) if b == l)
+    agree_band_within1 = sum(
+        1 for b, l in zip(human_band_idx, llm_band_idx) if abs(b - l) <= 1
+    )
     print()
     print(f"  intervene exact agreement:    {agree_intervene}/{len(shared)} ({agree_intervene/len(shared):.1%})")
-    print(f"  rating exact agreement:       {agree_rating_exact}/{len(shared)} ({agree_rating_exact/len(shared):.1%})")
-    print(f"  rating within ±1 agreement:   {agree_rating_within1}/{len(shared)} ({agree_rating_within1/len(shared):.1%})")
+    print(f"  band exact agreement:         {agree_band_exact}/{len(shared)} ({agree_band_exact/len(shared):.1%})")
+    print(f"  band within 1 step agreement: {agree_band_within1}/{len(shared)} ({agree_band_within1/len(shared):.1%})")
 
     # Distribution check
     print()
-    print(f"  Bakri intervene rate: {sum(bakri_intervene)}/{len(shared)} ({sum(bakri_intervene)/len(shared):.1%})")
+    print(f"  Human intervene rate: {sum(human_intervene)}/{len(shared)} ({sum(human_intervene)/len(shared):.1%})")
     print(f"  LLM intervene rate:   {sum(llm_intervene)}/{len(shared)} ({sum(llm_intervene)/len(shared):.1%})")
-    print(f"  Bakri rating distribution: {dict(Counter(bakri_rating))}")
-    print(f"  LLM   rating distribution: {dict(Counter(llm_rating))}")
+    print(f"  Human band distribution: {dict(Counter(human_band))}")
+    print(f"  LLM   band distribution: {dict(Counter(llm_band))}")
+
+    # Persist the numbers so they survive across runs and feed §5.4 prose
+    report_path = paths.DATA_DIR / "eval" / "kappa_report.json"
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_payload = {
+        "model": config.OPENAI_MODEL,
+        "schema_version": SCHEMA_VERSION,
+        "n_shared": len(shared),
+        "kappa_intervene_unweighted": float(kappa_intervene),
+        "kappa_band_linear_weighted": float(kappa_band),
+        "kappa_band_quadratic_weighted": float(kappa_band_quad),
+        "exact_agreement": {
+            "intervene": {
+                "count": agree_intervene, "rate": agree_intervene / len(shared)
+            },
+            "band": {
+                "count": agree_band_exact, "rate": agree_band_exact / len(shared)
+            },
+        },
+        "within_1_band_agreement": {
+            "count": agree_band_within1,
+            "rate": agree_band_within1 / len(shared),
+        },
+        "distributions": {
+            "human_intervene_rate": sum(human_intervene) / len(shared),
+            "llm_intervene_rate": sum(llm_intervene) / len(shared),
+            "human_band": dict(Counter(human_band)),
+            "llm_band": dict(Counter(llm_band)),
+        },
+        "shared_snapshot_ids": shared,
+    }
+    report_path.write_text(json.dumps(report_payload, indent=2), encoding="utf-8")
+    print()
+    print(f"Saved to {report_path}")
 
 
 # -------------------- Main --------------------
@@ -508,7 +609,7 @@ def main() -> int:
         choices=["struggle", "difficulty", "self-label", "kappa", "all"],
         help="Which labelling pass to run.",
     )
-    parser.add_argument("--snapshots", type=Path, default=paths.DATA_DIR / "eval_snapshots.json")
+    parser.add_argument("--snapshots", type=Path, default=paths.DATA_DIR / "eval" / "snapshots.json")
     parser.add_argument("--n-self", type=int, default=50, help="Number of snapshots to self-label (self-label mode).")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--batch-size", type=int, default=BATCH_SIZE_STRUGGLE)

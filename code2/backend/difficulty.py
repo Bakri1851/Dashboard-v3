@@ -6,6 +6,14 @@
 # Depends on `incorrectness.compute_incorrectness_column` for the per-row
 # scoring and on `analytics.{min_max_normalise_grouped, classify_score}`
 # for the shared normalisation and band-labelling helpers.
+#
+# Phase 5: `compute_question_difficulty_scores` accepts an optional `weights`
+# override (mirrors the pattern in struggle.py); `_load_v2_weights` reads the
+# trained JSON with graceful fallback to v1.
+import json
+import logging
+from typing import Optional
+
 import numpy as np
 import pandas as pd
 
@@ -13,11 +21,56 @@ from . import config
 from .analytics import classify_score, min_max_normalise_grouped
 from .incorrectness import compute_incorrectness_column
 
+logger = logging.getLogger(__name__)
 
-def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
+
+def _load_v2_weights() -> Optional[dict[str, float]]:
+    """Read data/eval/optimised_difficulty_weights_v2.json. Returns the
+    5-element weight dict or None if missing/malformed."""
+    path = config.DIFFICULTY_WEIGHTS_V2_PATH
+    if not path.exists():
+        logger.info("v2 difficulty weights file not found at %s; falling back to v1", path)
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning("v2 difficulty weights load failed (%s): %s", type(exc).__name__, exc)
+        return None
+    if payload.get("model_class") != "LogisticRegression":
+        logger.warning(
+            "v2 difficulty weights model_class=%r != LogisticRegression; refusing",
+            payload.get("model_class"),
+        )
+        return None
+    weights = payload.get("weights")
+    if not isinstance(weights, dict):
+        return None
+    expected_keys = {"c_norm", "t_tilde", "a_tilde", "f_norm", "p_norm"}
+    if not expected_keys.issubset(weights.keys()):
+        logger.warning(
+            "v2 difficulty weights missing keys: have %s, need %s",
+            set(weights.keys()), expected_keys,
+        )
+        return None
+    return {k: float(v) for k, v in weights.items() if k in expected_keys}
+
+
+def compute_question_difficulty_scores(
+    df: pd.DataFrame,
+    weights: Optional[dict[str, float]] = None,
+) -> pd.DataFrame:
     """
     Compute difficulty scores for all questions in the DataFrame.
     Returns a DataFrame with one row per question.
+
+    Parameters
+    ----------
+    df : DataFrame of submissions to score.
+    weights : optional dict with keys ``{c_norm, t_tilde, a_tilde, f_norm,
+        p_norm}`` — when provided, overrides v1 ``config.DIFFICULTY_WEIGHT_*``.
+        Typically the result of ``_load_v2_weights()`` passed through by
+        ``cache.load_difficulty_df`` when ``difficulty_weights_version=="v2"``.
+        v2 weights may be negative; the .clip(0, 1) handles out-of-range.
     """
     if df.empty:
         return pd.DataFrame(columns=[
@@ -100,13 +153,26 @@ def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
     result["f_norm"] = min_max_normalise_grouped(result["f_tilde"], modules)
     result["p_norm"] = min_max_normalise_grouped(result["p_tilde"], modules)
 
-    # Compute D_raw
+    # Compute D_raw. Use v2 weights if provided, else fall back to v1 hand-set.
+    if weights is None:
+        w_c = config.DIFFICULTY_WEIGHT_C
+        w_t = config.DIFFICULTY_WEIGHT_T
+        w_a = config.DIFFICULTY_WEIGHT_A
+        w_f = config.DIFFICULTY_WEIGHT_F
+        w_p = config.DIFFICULTY_WEIGHT_P
+    else:
+        w_c = weights.get("c_norm", config.DIFFICULTY_WEIGHT_C)
+        w_t = weights.get("t_tilde", config.DIFFICULTY_WEIGHT_T)
+        w_a = weights.get("a_tilde", config.DIFFICULTY_WEIGHT_A)
+        w_f = weights.get("f_norm", config.DIFFICULTY_WEIGHT_F)
+        w_p = weights.get("p_norm", config.DIFFICULTY_WEIGHT_P)
+
     result["difficulty_score"] = (
-        config.DIFFICULTY_WEIGHT_C * result["c_norm"]
-        + config.DIFFICULTY_WEIGHT_T * result["t_tilde"]
-        + config.DIFFICULTY_WEIGHT_A * result["a_tilde"]
-        + config.DIFFICULTY_WEIGHT_F * result["f_norm"]
-        + config.DIFFICULTY_WEIGHT_P * result["p_norm"]
+        w_c * result["c_norm"]
+        + w_t * result["t_tilde"]
+        + w_a * result["a_tilde"]
+        + w_f * result["f_norm"]
+        + w_p * result["p_norm"]
     ).clip(0.0, 1.0)
 
     # Classify

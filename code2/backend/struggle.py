@@ -9,6 +9,13 @@
 # Depends on `incorrectness` for the per-row scoring and confidence
 # weighting; depends on `analytics` for the shared `min_max_normalise`
 # and `classify_score` helpers.
+#
+# Phase 5: `compute_student_struggle_scores` accepts optional `weights` and
+# `shrinkage_k` overrides so cache.py can pass v2-trained values through
+# when the runtime toggle is on. `_load_v2_weights` reads the trained JSON
+# with graceful fallback to v1.
+import json
+import logging
 import math
 from typing import Optional
 
@@ -23,6 +30,47 @@ from .incorrectness import (
     compute_feedback_confidence,
     compute_incorrectness_column,
 )
+
+logger = logging.getLogger(__name__)
+
+
+def _load_v2_weights() -> Optional[dict[str, float]]:
+    """Read data/eval/optimised_struggle_weights_v2.json. Returns the 7-element
+    weight dict on success, None if missing/malformed/wrong-model-class.
+
+    Cached lookup at call time (cheap — file is small + JSON parse is fast),
+    so a Settings toggle flip is reflected on the next request without an
+    app restart. The cache.py callers pass the result through to
+    `compute_student_struggle_scores` only when `runtime_config.struggle_weights_version == "v2"`.
+    """
+    path = config.STRUGGLE_WEIGHTS_V2_PATH
+    if not path.exists():
+        logger.info("v2 struggle weights file not found at %s; falling back to v1", path)
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning("v2 struggle weights load failed (%s): %s", type(exc).__name__, exc)
+        return None
+    if payload.get("model_class") != "LogisticRegression":
+        # Defensive: the loader assumes linear LR coefficients; refuse if file
+        # was produced by a different model class (e.g. gradient boosting).
+        logger.warning(
+            "v2 struggle weights model_class=%r != LogisticRegression; refusing to use",
+            payload.get("model_class"),
+        )
+        return None
+    weights = payload.get("weights")
+    if not isinstance(weights, dict):
+        return None
+    expected_keys = {"n_hat", "t_hat", "i_norm", "r_norm", "A_norm", "d_hat", "rep_norm"}
+    if not expected_keys.issubset(weights.keys()):
+        logger.warning(
+            "v2 struggle weights missing keys: have %s, need %s",
+            set(weights.keys()), expected_keys,
+        )
+        return None
+    return {k: float(v) for k, v in weights.items() if k in expected_keys}
 
 
 # -----------------------------------------------------------------
@@ -122,10 +170,29 @@ def _compute_slope(student_submissions: pd.DataFrame) -> float:
 # Student Struggle Score (7 signals, Bayesian shrinkage)
 # -----------------------------------------------------------------
 
-def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
+def compute_student_struggle_scores(
+    df: pd.DataFrame,
+    weights: Optional[dict[str, float]] = None,
+    shrinkage_k: Optional[int] = None,
+) -> pd.DataFrame:
     """
     Compute struggle scores for all students in the DataFrame.
     Returns a DataFrame with one row per student.
+
+    Parameters
+    ----------
+    df : DataFrame of submissions to score.
+    weights : optional dict with keys ``{n_hat, t_hat, i_norm, r_norm,
+        A_norm, d_hat, rep_norm}`` — when provided, overrides the v1
+        hand-set weights in ``config.STRUGGLE_WEIGHT_*``. Typically the
+        result of ``_load_v2_weights()`` passed through by
+        ``cache.load_struggle_df`` when the runtime
+        ``struggle_weights_version`` toggle is "v2". Note: v2 weights may
+        be NEGATIVE (LR coefficients normalised to L1=1), so the resulting
+        struggle_score is clipped to [0, 1] AFTER the weighted sum.
+    shrinkage_k : optional override for ``config.SHRINKAGE_K`` — passed
+        through by cache.py when the runtime ``hyperparams_version`` toggle
+        is "v2". Defaults to ``config.SHRINKAGE_K``.
     """
     if df.empty:
         return pd.DataFrame(columns=[
@@ -236,21 +303,43 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
     result["A_norm"] = min_max_normalise(result["A_raw"])
     result["rep_norm"] = min_max_normalise(result["rep_hat"])
 
-    # Compute S_raw
+    # Compute S_raw. Use v2 weights if provided, else fall back to v1 hand-set.
+    # v2 weights may be NEGATIVE (LR coefficients L1-normalised); the .clip(0,1)
+    # below handles out-of-range weighted sums.
+    if weights is None:
+        w_n_struct = config.STRUGGLE_WEIGHT_N
+        w_t = config.STRUGGLE_WEIGHT_T
+        w_i = config.STRUGGLE_WEIGHT_I
+        w_r = config.STRUGGLE_WEIGHT_R
+        w_a = config.STRUGGLE_WEIGHT_A
+        w_d = config.STRUGGLE_WEIGHT_D
+        w_rep = config.STRUGGLE_WEIGHT_REP
+    else:
+        w_n_struct = weights.get("n_hat", config.STRUGGLE_WEIGHT_N)
+        w_t = weights.get("t_hat", config.STRUGGLE_WEIGHT_T)
+        w_i = weights.get("i_norm", config.STRUGGLE_WEIGHT_I)
+        w_r = weights.get("r_norm", config.STRUGGLE_WEIGHT_R)
+        w_a = weights.get("A_norm", config.STRUGGLE_WEIGHT_A)
+        w_d = weights.get("d_hat", config.STRUGGLE_WEIGHT_D)
+        w_rep = weights.get("rep_norm", config.STRUGGLE_WEIGHT_REP)
+
     result["struggle_score"] = (
-        config.STRUGGLE_WEIGHT_N * result["n_hat"]
-        + config.STRUGGLE_WEIGHT_T * result["t_hat"]
-        + config.STRUGGLE_WEIGHT_I * result["i_norm"]
-        + config.STRUGGLE_WEIGHT_R * result["r_norm"]
-        + config.STRUGGLE_WEIGHT_A * result["A_norm"]
-        + config.STRUGGLE_WEIGHT_D * result["d_hat"]
-        + config.STRUGGLE_WEIGHT_REP * result["rep_norm"]
+        w_n_struct * result["n_hat"]
+        + w_t * result["t_hat"]
+        + w_i * result["i_norm"]
+        + w_r * result["r_norm"]
+        + w_a * result["A_norm"]
+        + w_d * result["d_hat"]
+        + w_rep * result["rep_norm"]
     ).clip(0.0, 1.0)
 
     # Bayesian shrinkage: pull low-n scores toward the class mean to reduce noise.
     # w_n = n / (n + K) → students with few submissions are shrunk more strongly.
+    # K comes from runtime_config (passed via cache.py) when hyperparams v2 is on;
+    # otherwise falls back to the config default.
+    effective_k = shrinkage_k if shrinkage_k is not None else config.SHRINKAGE_K
     s_class_mean = result["struggle_score"].mean()
-    w_n = result["n_raw"] / (result["n_raw"] + config.SHRINKAGE_K)
+    w_n = result["n_raw"] / (result["n_raw"] + effective_k)
     result["struggle_score"] = (
         w_n * result["struggle_score"] + (1 - w_n) * s_class_mean
     ).clip(0.0, 1.0)

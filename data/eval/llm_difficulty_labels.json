@@ -1,0 +1,366 @@
+{
+  "model": "gpt-4o-mini",
+  "schema_version": 2,
+  "labels": {
+    "11. multiple tables - AI Copy": {
+      "band": "Very Hard",
+      "reason": "High incorrect rate and first-attempt failure; few students succeed.",
+      "question": "11. multiple tables - AI Copy"
+    },
+    "12. multiple tables except - AI Copy": {
+      "band": "Very Hard",
+      "reason": "Extremely high incorrect rate; no students succeed on first attempt.",
+      "question": "12. multiple tables except - AI Copy"
+    },
+    "8. Alter the view": {
+      "band": "Very Hard",
+      "reason": "High incorrectness and failure rate; significant struggle observed.",
+      "question": "8. Alter the view"
+    },
+    "1. JOIN - AI Copy": {
+      "band": "Very Hard",
+      "reason": "High incorrect rate and first-attempt failure; many students fail.",
+      "question": "1. JOIN - AI Copy"
+    },
+    "10. UNION 4 + ORDER - AI Copy": {
+      "band": "Very Hard",
+      "reason": "High incorrectness and failure rate; very few succeed.",
+      "question": "10. UNION 4 + ORDER - AI Copy"
+    },
+    "6. Create a view called SALES2": {
+      "band": "Very Hard",
+      "reason": "High incorrect rate and first-attempt failure; few students succeed.",
+      "question": "6. Create a view called SALES2"
+    },
+    "3. Create a view called BOSS": {
+      "band": "Hard",
+      "reason": "Significant retries and high incorrect attempt rate.",
+      "question": "3. Create a view called BOSS"
+    },
+    "1. Add a new record (AI Copy)": {
+      "band": "Very Hard",
+      "reason": "High incorrect rate and first-attempt failure; few students succeed.",
+      "question": "1. Add a new record (AI Copy)"
+    },
+    "1. max, min and mean (AI Copy)": {
+      "band": "Hard",
+      "reason": "Moderate retries with a high incorrect attempt rate.",
+      "question": "1. max, min and mean (AI Copy)"
+    },
+    "9. UNION 3 - AI Copy": {
+      "band": "Hard",
+      "reason": "High incorrect attempt rate with moderate retries.",
+      "question": "9. UNION 3 - AI Copy"
+    },
+    "12. Not NULL": {
+      "band": "Very Hard",
+      "reason": "High incorrect rate and first-attempt failure; few students succeed.",
+      "question": "12. Not NULL"
+    },
+    "4. Delete the views.": {
+      "band": "Very Hard",
+      "reason": "Extremely high incorrect rate and first-attempt failure; minimal success.",
+      "question": "4. Delete the views."
+    },
+    "4. display WHERE comparison": {
+      "band": "Very Hard",
+      "reason": "Near total failure rate; almost all students struggle significantly.",
+      "question": "4. display WHERE comparison"
+    },
+    "10. order by": {
+      "band": "Very Hard",
+      "reason": "High incorrect rate and first-attempt failure; very few succeed.",
+      "question": "10. order by"
+    },
+    "4. GROUP BY HAVING (AI Copy)": {
+      "band": "Very Hard",
+      "reason": "High incorrect rate and first-attempt failure; significant struggle.",
+      "question": "4. GROUP BY HAVING (AI Copy)"
+    },
+    "1. Create a view": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate.",
+      "question": "1. Create a view"
+    },
+    "GROUP BY, HAVING  and JOIN - AI Copy": {
+      "band": "Very Hard",
+      "reason": "Significant retries with a high incorrect-attempt rate.",
+      "question": "GROUP BY, HAVING  and JOIN - AI Copy"
+    },
+    "2. CLIENTS table with primary key + Existing Data": {
+      "band": "Very Hard",
+      "reason": "Extremely high incorrect-attempt rate and first-attempt failure.",
+      "question": "2. CLIENTS table with primary key + Existing Data"
+    },
+    "3. WHERE AND - AI Copy": {
+      "band": "Very Hard",
+      "reason": "Consistently high incorrect-attempt rate and retries.",
+      "question": "3. WHERE AND - AI Copy"
+    },
+    "2. Create a view called DEPTSUM": {
+      "band": "Hard",
+      "reason": "Moderate incorrect-attempt rate with some retries.",
+      "question": "2. Create a view called DEPTSUM"
+    },
+    "10. Display the data (AI Copy)": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate.",
+      "question": "10. Display the data (AI Copy)"
+    },
+    "5. WHERE GROUP BY (AI Copy)": {
+      "band": "Very Hard",
+      "reason": "Significant incorrect-attempt rate with no successful first attempts.",
+      "question": "5. WHERE GROUP BY (AI Copy)"
+    },
+    "8. UNION 2 - AI Copy": {
+      "band": "Very Hard",
+      "reason": "Consistently high failure rates and multiple attempts needed.",
+      "question": "8. UNION 2 - AI Copy"
+    },
+    "3. GROUP BY (AI Copy)": {
+      "band": "Very Hard",
+      "reason": "Extremely high incorrect-attempt rate and first-attempt failure.",
+      "question": "3. GROUP BY (AI Copy)"
+    },
+    "6. GROUP BY HAVING (AI Copy)": {
+      "band": "Very Hard",
+      "reason": "Similar high failure rates and no successful first attempts.",
+      "question": "6. GROUP BY HAVING (AI Copy)"
+    },
+    "5. Create a view called SALES1": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate.",
+      "question": "5. Create a view called SALES1"
+    },
+    "3. display WHERE =": {
+      "band": "Hard",
+      "reason": "Moderate retries with significant incorrect-attempt rate.",
+      "question": "3. display WHERE ="
+    },
+    "3. EMP table with primary key + Existing Data": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate.",
+      "question": "3. EMP table with primary key + Existing Data"
+    },
+    "2. display columns": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate.",
+      "question": "2. display columns"
+    },
+    "5. display WHERE LIKE": {
+      "band": "Hard",
+      "reason": "Moderate retries with significant incorrect-attempt rate.",
+      "question": "5. display WHERE LIKE"
+    },
+    "6. display WHERE LIKE 2": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate indicate significant difficulty.",
+      "question": "6. display WHERE LIKE 2"
+    },
+    "5. create an INDEX": {
+      "band": "Very Hard",
+      "reason": "Similar to Question 1, with high failure rates and low success.",
+      "question": "5. create an INDEX"
+    },
+    "7. WHERE NOT NULL GROUP BY (AI Copy)": {
+      "band": "Hard",
+      "reason": "Moderate attempts per student with a high incorrect rate suggests difficulty.",
+      "question": "7. WHERE NOT NULL GROUP BY (AI Copy)"
+    },
+    "GROUP BY, ORDER BY  and LEFT JOIN - AI Copy": {
+      "band": "Hard",
+      "reason": "High average attempts and incorrect rate indicate significant challenges.",
+      "question": "GROUP BY, ORDER BY  and LEFT JOIN - AI Copy"
+    },
+    "GROUP BY, HAVING, WHERE  and JOIN - AI Copy": {
+      "band": "Hard",
+      "reason": "Similar to Question 4, with high attempts and incorrectness suggesting difficulty.",
+      "question": "GROUP BY, HAVING, WHERE  and JOIN - AI Copy"
+    },
+    "7. display WHERE LIKE 3": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate indicate significant difficulty.",
+      "question": "7. display WHERE LIKE 3"
+    },
+    "4. subqueries 4 - AI Copy": {
+      "band": "Very Hard",
+      "reason": "Similar high incorrect-attempt and first-attempt failure rates suggest substantial challenge.",
+      "question": "4. subqueries 4 - AI Copy"
+    },
+    "1. extra display WHERE comparison": {
+      "band": "Very Hard",
+      "reason": "High average attempts and incorrect-attempt rate show many struggle with this question.",
+      "question": "1. extra display WHERE comparison"
+    },
+    "11. order by desc": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate indicate significant difficulty.",
+      "question": "11. order by desc"
+    },
+    "1.b display all": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate suggest substantial challenge.",
+      "question": "1.b display all"
+    },
+    "2. self-defined average (AI Copy)": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate indicate significant difficulty.",
+      "question": "2. self-defined average (AI Copy)"
+    },
+    "7. Unique Index": {
+      "band": "Very Hard",
+      "reason": "Similar to Question 1, with high failure rates and low success.",
+      "question": "7. Unique Index"
+    },
+    "8. display WHERE AND": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate suggest extreme difficulty.",
+      "question": "8. display WHERE AND"
+    },
+    "1. CLIENTS table with constraints": {
+      "band": "Hard",
+      "reason": "Moderate incorrect-attempt rate; many retries but some students succeed.",
+      "question": "1. CLIENTS table with constraints"
+    },
+    "2. LEFT JOIN - AI Copy": {
+      "band": "Hard",
+      "reason": "High attempts per student indicate difficulty, but some manage to solve.",
+      "question": "2. LEFT JOIN - AI Copy"
+    },
+    "9. change column headers": {
+      "band": "Very Hard",
+      "reason": "High incorrect rate and first-attempt failure; few students succeed.",
+      "question": "9. change column headers"
+    },
+    "7. WHERE GROUP BY ORDER BY - AI Copy": {
+      "band": "Very Hard",
+      "reason": "Similar to Question 1; high failure rate and many attempts.",
+      "question": "7. WHERE GROUP BY ORDER BY - AI Copy"
+    },
+    "3. Transfer the clerks (AI Copy)": {
+      "band": "Hard",
+      "reason": "Moderate attempts and incorrectness; some students eventually solve.",
+      "question": "3. Transfer the clerks (AI Copy)"
+    },
+    "7. Create a new employee table (AI Copy)": {
+      "band": "Hard",
+      "reason": "High incorrect rate; moderate attempts indicate difficulty.",
+      "question": "7. Create a new employee table (AI Copy)"
+    },
+    "1. display all": {
+      "band": "Medium",
+      "reason": "Lower incorrect rate and attempts suggest moderate difficulty.",
+      "question": "1. display all"
+    },
+    "13. DISTINCT": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate indicates significant difficulty.",
+      "question": "13. DISTINCT"
+    },
+    "5. LEFT JOIN ON - AI Copy": {
+      "band": "Very Hard",
+      "reason": "Similar high incorrect-attempt and first-attempt failure rates suggest substantial challenge.",
+      "question": "5. LEFT JOIN ON - AI Copy"
+    },
+    "3. subqueries 3 - AI Copy": {
+      "band": "Very Hard",
+      "reason": "Consistently high failure rates and attempts indicate this question is very difficult.",
+      "question": "3. subqueries 3 - AI Copy"
+    },
+    "6. Update the job number (AI Copy)": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate show significant struggle.",
+      "question": "6. Update the job number (AI Copy)"
+    },
+    "8. GROUP BY ORDER BY (AI Copy)": {
+      "band": "Hard",
+      "reason": "Lower first-attempt failure rate suggests some students can solve it with retries.",
+      "question": "8. GROUP BY ORDER BY (AI Copy)"
+    },
+    "4.EXTRA  NULL": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and many retries indicate significant difficulty.",
+      "question": "4.EXTRA  NULL"
+    },
+    "5. subqueries 5 - AI Copy": {
+      "band": "Very Hard",
+      "reason": "High first-attempt failure rate suggests students struggle significantly.",
+      "question": "5. subqueries 5 - AI Copy"
+    },
+    "9. Drop a column (AI Copy)": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and retries indicate substantial challenge.",
+      "question": "9. Drop a column (AI Copy)"
+    },
+    "4. Clients table with  FK": {
+      "band": "Very Hard",
+      "reason": "High first-attempt failure rate and incorrect attempts show difficulty.",
+      "question": "4. Clients table with  FK"
+    },
+    "2. Add a manager and two clerks (AI Copy)": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and retries indicate significant challenge.",
+      "question": "2. Add a manager and two clerks (AI Copy)"
+    },
+    "WHERE GROUP BY three fields, - AI Copy": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate.",
+      "question": "WHERE GROUP BY three fields, - AI Copy"
+    },
+    "5. Fill the new table (AI Copy)": {
+      "band": "Very Hard",
+      "reason": "Similar high incorrect-attempt and first-attempt failure rates.",
+      "question": "5. Fill the new table (AI Copy)"
+    },
+    "7. UNION 1 - AI Copy": {
+      "band": "Very Hard",
+      "reason": "Very high incorrect-attempt rate and no first-attempt success.",
+      "question": "7. UNION 1 - AI Copy"
+    },
+    "2. subqueries 2 - AI Copy": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate with significant retries.",
+      "question": "2. subqueries 2 - AI Copy"
+    },
+    "6. subqueries 6 - AI Copy": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate.",
+      "question": "6. subqueries 6 - AI Copy"
+    },
+    "4. Create a new table (AI Copy)": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate indicate significant difficulty.",
+      "question": "4. Create a new table (AI Copy)"
+    },
+    "4. INNER JOIN - AI Copy": {
+      "band": "Very Hard",
+      "reason": "Similar to Question 1, with high incorrect attempts and failure rates.",
+      "question": "4. INNER JOIN - AI Copy"
+    },
+    "3. Extra display WHERE LIKE": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and average attempts suggest significant challenge.",
+      "question": "3. Extra display WHERE LIKE"
+    },
+    "8. Fill the new table with the data from other tables (AI Copy)": {
+      "band": "Hard",
+      "reason": "Lower incorrect rate and attempts indicate moderate difficulty compared to others.",
+      "question": "8. Fill the new table with the data from other tables (AI Copy)"
+    },
+    "1. subqueries - AI Copy": {
+      "band": "Hard",
+      "reason": "High incorrect-attempt rate but lower first-attempt failure suggests some students succeed.",
+      "question": "1. subqueries - AI Copy"
+    },
+    "1. CLIENTS table with primary key": {
+      "band": "Very Hard",
+      "reason": "High incorrect-attempt rate and first-attempt failure rate indicate significant difficulty.",
+      "question": "1. CLIENTS table with primary key"
+    },
+    "6. WHERE GROUP BY - AI Copy": {
+      "band": "Very Hard",
+      "reason": "Extremely high incorrect-attempt rate suggests very few students succeed.",
+      "question": "6. WHERE GROUP BY - AI Copy"
+    }
+  }
+}

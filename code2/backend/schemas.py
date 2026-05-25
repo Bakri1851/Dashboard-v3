@@ -245,6 +245,12 @@ class RuntimeSettings(BaseModel):
     struggle_model: str           # "baseline" | "improved"
     difficulty_model: str         # "baseline" | "irt"
     bkt: BKTParameters
+    # Phase 5: V2 toggles (all "v1" | "v2"; default "v1")
+    struggle_weights_version: str
+    difficulty_weights_version: str
+    improved_struggle_weights_version: str
+    hyperparams_version: str
+    shrinkage_k: int
 
 
 class Settings(BaseModel):

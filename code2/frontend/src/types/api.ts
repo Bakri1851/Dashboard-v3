@@ -168,6 +168,12 @@ export interface RuntimeSettings {
   struggle_model: 'baseline' | 'improved' | string
   difficulty_model: 'baseline' | 'irt' | string
   bkt: BKTParameters
+  // Phase 5: v2 weight + hyperparam toggles. All default 'v1'.
+  struggle_weights_version: 'v1' | 'v2' | string
+  difficulty_weights_version: 'v1' | 'v2' | string
+  improved_struggle_weights_version: 'v1' | 'v2' | string
+  hyperparams_version: 'v1' | 'v2' | string
+  shrinkage_k: number
 }
 
 export interface Settings {

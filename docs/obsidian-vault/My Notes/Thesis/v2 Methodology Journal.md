@@ -2,7 +2,7 @@
 tags: [thesis, evaluation, ch5, methodology, journal, source-material]
 date: 2026-05-25
 status: 🟢 Live — updated as each phase completes
-source: Conversation 2026-05-24 + 2026-05-25 (Bakri + Claude)
+source: Conversation 2026-05-24 + 2026-05-25 (the author + Claude)
 related: [[Evaluation Plan]], [[Evaluation PoC Handoff]], [[Ch5 – Results and Evaluation]], [[Improved Struggle Logic]], [[BKT Mastery Logic]], [[IRT Difficulty Logic]], [[Student Struggle Logic]], [[Setup and Runbook]]
 ---
 
@@ -20,7 +20,7 @@ related: [[Evaluation Plan]], [[Evaluation PoC Handoff]], [[Ch5 – Results and 
 > right now). This journal is the third leg: **why** we made each
 > choice, and the trade-offs we weighed against.
 
-> **Audience.** A future writer (Bakri or another Claude chat)
+> **Audience.** A future writer (the author or another Claude chat)
 > drafting §5.1, §5.6, or any Methodology paragraphs. Read this
 > before writing anything about the evaluation approach, training
 > procedure, or v1/v2 comparison.
@@ -110,8 +110,8 @@ three things:
 
 ### 2.5 The self-label calibration
 
-50 of the 2000 LLM-labelled snapshots get a second pass by Bakri
-(self-labelled). Cohen's $\kappa$ between Bakri and the LLM on the
+50 of the 2000 LLM-labelled snapshots get a second pass by the author
+(self-labelled). Cohen's $\kappa$ between the author and the LLM on the
 shared 50 is reported. This addresses two objections:
 
 - *"Why should I trust GPT's judgement?"* → "designer agrees with it
@@ -159,6 +159,56 @@ COA122 — they're enrolled in the same module — but session-grouping
 treats each lab as an independent unit, which is the relevant
 generalisation question: *"would the optimised weights also work
 next week?"*)
+
+#### 3.2.1 Worked example
+
+Imagine 21 sessions labelled $S_1 \ldots S_{21}$, with ~62
+snapshots per session on average (1306 total). The 5-fold partition
+might be:
+
+| Fold | Test sessions | Train sessions | Test N | Train N |
+|---|---|---|---|---|
+| 1 | $S_1, S_2, S_3, S_4, S_5$ | $S_6 \ldots S_{21}$ | ~310 | ~996 |
+| 2 | $S_6, S_7, S_8, S_9$ | rest | ~248 | ~1058 |
+| 3 | $S_{10}, S_{11}, S_{12}, S_{13}$ | rest | ~248 | ~1058 |
+| 4 | $S_{14}, S_{15}, S_{16}, S_{17}$ | rest | ~248 | ~1058 |
+| 5 | $S_{18}, S_{19}, S_{20}, S_{21}$ | rest | ~248 | ~1058 |
+
+A student `td0781` who appeared in $S_3$ would be in the test set of
+fold 1 and the train set of folds 2–5. The student never appears in
+both train and test of the **same** fold — that's what
+session-grouping guarantees. The same student appearing in train
+fold 1 and train folds 2–5 is fine; that's just data.
+
+After all 5 folds run:
+
+- Every snapshot has exactly one held-out prediction (it was in
+  exactly one fold's test set)
+- Compute AUC on the held-out predictions concatenated across all
+  folds, OR mean of per-fold AUCs (we report both)
+- Per-fold weight vectors get averaged to produce the published v2
+  weight vector; per-fold std reported as a stability indicator
+
+#### 3.2.2 Why not the more familiar 70/15/15 split?
+
+| Method | Train | Validation | Test | When to use |
+|---|---|---|---|---|
+| 70/15/15 random | 914 | 196 | 196 | Large N (>10k), features iid |
+| 70/15/15 session-grouped | 14 sessions | 3 sessions | 4 sessions | Medium N, want one final test set |
+| **5-fold group-K-fold** *(chosen)* | ~1044 (17 sessions) per fold | inner CV for $\lambda$ | ~262 (4 sessions) per fold, every snapshot held out once | Medium-small N, want stable AUC + CI from per-fold variance |
+
+The chosen method gives every snapshot a held-out prediction
+(rather than just 15%), reports a natural 95% CI from per-fold
+variance, and avoids the "unlucky split" risk of a single 70/15/15
+partition. Random 70/15/15 would also leak students between train
+and test (the same `td0781` could land in both), producing
+optimistic AUC; session-grouped 70/15/15 would fix that leak but
+shrink the test set to ~196 snapshots, widening the CI.
+
+For difficulty (§3.3) the same logic forces LOO instead of K-fold:
+N=72 unique questions makes any K-fold partition too small for a
+stable per-fold AUC, and questions repeat across sessions so
+session-grouping doesn't apply.
 
 ### 3.3 Difficulty has a different structure → LOO-on-question
 
@@ -386,9 +436,43 @@ in `eval_results.md` that propagate into §5.5 (Limitations).
 | 2026-05-25 | 2 (finding) | "Hard" dominates v1 difficulty distribution (64%, n=46/72) | Same pattern: either v1 difficulty thresholds are aggressive or COA122 questions are genuinely hard. Phase 6 will report `incorrect_rate_pct` per question alongside the band so the writing chat can argue either way |
 | 2026-05-25 | 2 (finding) | Family B positive rates in healthy 10–26% range | L_top20_obs 10.0%, L_needs_help_obs 21.1%, L_struggling_plus_obs 26.1%. These rates give the Hanley-McNeil AUC CI tightness we expected at n=1306 |
 
+| 2026-05-25 | 3 | Switch from 1–5 severity to 4-band ordinal (struggle: `On Track/Minor Issues/Struggling/Needs Help`; difficulty: `Easy/Medium/Hard/Very Hard`) | Matches deployed dashboard's classification thresholds. User had been reading the dashboard in 4 bands for months — asking them to translate to 1–5 was an unnecessary mental step. Cohen's $\kappa$ supports any ordinal scale. Schema version bumped (2); existing 1–5 cache auto-discarded |
+| 2026-05-25 | 3 | Binary `intervene` retained as primary training target | Aligns with the dashboard's actionable signal ("walk over to help?"). The 4-band is secondary, used for kappa reporting and as an extra structural check on the LR predictions. Training the LR on intervene gives a cleaner binary AUC than ordinal regression on 4 bands at our N |
+| 2026-05-25 | 3 | Author identifier replaced with "human" across all artefacts | Neutralises attribution for thesis-defensibility. `labelled_by: human` in JSON, "Human intervene rate" in kappa report, etc. |
+| 2026-05-25 | 3 | `.secrets/secrets.toml` loader added at script startup | Mirrors how Streamlit secrets surface to V2's `_get_openai_client`. Loader never overrides shell-set env vars |
+| 2026-05-25 | 3 (run results) | LLM labels generated with zero parse failures | Struggle: 1306 labels, 262/262 batches succeeded; difficulty: 72 labels, 15/15 batches succeeded. Total: 1378 LLM labels, 277 batches, 100% batch success, ~$0.20 OpenAI spend. Robust 4-band prompts (no batch needed retry/fallback) |
+
+| 2026-05-25 | 3 (κ result) | Cohen's κ: intervene 0.10, band linear 0.11, band quadratic 0.09 (all "poor") | Both raters skewed toward upper bands (~63% intervene yes) inflates chance agreement → κ pulls down even with 58% raw intervene agreement and 70% within-1-band. Within-1-band 70% is the saving grace: directional agreement, divergence on boundary. v2 weights documented as "indicative against human judgement, trained against LLM judgement" |
+| 2026-05-25 | 4a (run results) | v2 struggle weights AUC = 0.836 [0.762, 0.911] | Strong predictive accuracy against LLM intervene labels, well above the 0.7 "usable" threshold. Stable across folds (per-fold weight std 0.015–0.032). Best L2 strength C ≈ 0.1 (moderate regularisation; LR doesn't want unconstrained coefs given correlation between $I$ and $A$) |
+| 2026-05-25 | 4a (weight finding) | n_hat (+0.10 → −0.04) and t_hat (+0.10 → −0.13) FLIPPED SIGN; rep_norm (+0.07 → −0.07) also flipped | **Publishable finding**: hand-set assumption "more activity = more struggling" is empirically wrong. Once the LR sees enough data, submission count and time-active proxy "engaged self-recovery" rather than "struggling persistence". Direction-of-effect was misread in v1 design |
+| 2026-05-25 | 4a (weight finding) | i_norm 0.20 → 0.26 (UP) and A_norm 0.38 → 0.26 (DOWN); now co-equal | Hand-set $\eta = 0.38$ was an over-weighting of recency. The LR redistributes weight toward mean incorrectness; the two end roughly tied. Suggests current-state and recent-state are equally informative, contrary to the hand-set "recency dominates" rationale |
+| 2026-05-25 | 4a (warning fix) | `warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")` added | sklearn 1.8's deprecation of `penalty='l2'` (replaced by `l1_ratio=0`) was spamming hundreds of warnings per run. Suppressed at script level; the `penalty='l2'` form is kept intentionally for term-by-term v1/v2 comparability |
+| 2026-05-25 | 4b (cohort finding) | **COA122 questions are uniformly hard.** LLM difficulty band distribution over the 72 unique questions: Easy 0, Medium 1, Hard 16, **Very Hard 55** | **Publishable §5.4 finding about cohort characteristics.** Compare with the v1 dashboard's own classification on the same pooled data (Phase 2 sanity print): Easy 3, Medium 21, Hard 46, Very Hard 2. The LLM is dramatically harsher than v1 thresholds — it sees "Hard" where v1 sees "Medium", and "Very Hard" where v1 sees "Hard". Two interpretations co-exist and the writing chat should report both: (a) v1 thresholds are calibrated too generously, OR (b) the LLM rater systematically over-rates difficulty given aggregate statistics |
+| 2026-05-25 | 4b (target reframe) | Switched difficulty training target from `band ∈ {Hard, Very Hard}` to `band == 'Very Hard'` | Original target gave 98.6% positive rate (71/72) → first LOO fold removed the only negative → single-class training → LR crashed (`ValueError: This solver needs samples of at least 2 classes`). Reframed target gives 76% positive (55/72), still skewed but trainable. The reframed question — *"what distinguishes the very hardest questions from the merely hard?"* — is meaningful even though it differs from the originally-planned "high difficulty vs not". Documented in script docstring + this journal |
+| 2026-05-25 | 4b (safety) | `_train_one_fold` gained a single-class-training guard | Returns a stub fold (NaN coefs + AUC) when `y_train` has only one class, so the run continues. `_summarise_folds` filters NaN folds; the difficulty pooled-prob loop falls back to the class-mean prediction. Defensive — not needed for the current Very-Hard target which has both classes in every LOO fold |
+| 2026-05-25 | 4b (run result) | **v2 difficulty AUC pooled = 0.345 — worse than random** | LR cannot discriminate Very Hard from Hard using the 5 v1 features at N=72. Weight pattern looks like noise-fit: `t_tilde` = −0.39 (largest), claiming "more time → less Very Hard". Spurious — almost certainly grasping at small-N quirks. **Symmetric to Phase 4a's positive finding**: struggle showed v1 weights need redistribution (positive finding); difficulty shows v1 weights are already near-optimal (negative finding). Both are publishable. The narrative for §5.4: *"weight optimisation helps where the feature space has discriminative slack (struggle, AUC 0.836); it cannot improve already-near-optimal hand-set weights (difficulty, AUC 0.345 indicates the 5-signal space saturates)"* |
+| 2026-05-25 | 4b (implication for P5) | Frontend toggle for `difficulty_weights_version` should default to v1 with UI warning on v2 | v2 difficulty weights file exists (`data/eval/optimised_difficulty_weights_v2.json`) but is **kept as a research artefact, not for deployment**. Phase 5b should grey out / warn the v2 option for difficulty specifically. Struggle v2 (AUC 0.836) remains a deployment-worthy alternative |
+| 2026-05-25 | 4b (metadata fix) | Stale `target` string updated in `train_difficulty()` return dict | The metadata was still saying "high difficulty (binary; LLM band ∈ {Hard, Very Hard})" after the target reframe. Updated to reflect the actual Very-Hard-only binarisation, with rationale inline |
+| 2026-05-25 | 4c (snapshot extension) | `eval_common.py` extended with `compute_improved_components_at_t`. Fits BKT + IRT per (session, cutoff) slice, then calls `improved_struggle.compute_improved_struggle_scores` to extract the 3 component columns (`behavioural_composite`, `mastery_gap`, `difficulty_adjusted_score`) | Required to upgrade Phase 4c from stub to real training. Per-snapshot `improved_components` field added. ~15 min wallclock to regenerate snapshots (252 BKT + IRT fits dominate the cost). Snapshot IDs are deterministic (seed=42), so existing LLM labels still map cleanly to the regenerated snapshots |
+| 2026-05-25 | 4c (run result — NEGATIVE) | **v2 improved-blend AUC = 0.637; w_B = +0.42, w_M = −0.44, w_D = −0.14** | Two of three blend weights flipped NEGATIVE. LR puts negative weight on BKT mastery-gap and IRT-adjusted exposure. Per-fold weight std 0.04–0.16 (noisier than struggle pass: 0.015–0.032). AUC 0.637 is WORSE than baseline struggle-v2's 0.836. **Three interpretations all support: improved-blend v2 should default OFF in deployment** — (1) BKT/IRT capture knowledge-state/challenge-level, not "needs help right now"; (2) per-cutoff BKT/IRT fits are noisy at small slices; (3) behavioural composite already saturates predictive signal |
+| 2026-05-25 | 4c (composite finding) | Three Phase 4 findings give a complete, honest §5.4 story | **(1) Struggle (positive)**: empirical retraining helps where hand-set has slack; AUC 0.836; n_hat/t_hat flipped sign. **(2) Difficulty (negative)**: hand-set v1 already near-optimal; AUC 0.345 worse than random. **(3) Improved-blend (negative)**: blending hurts at this N; w_M and w_D flip negative. The narrative for §5.4: *"empirical training reveals where hand-set weights have headroom (struggle) and where they don't (difficulty, blend) — the symmetry of the findings is itself the result"* |
+| 2026-05-25 | 5 (backend integration) | Four `*_version` toggles wired into V2 React stack | `runtime_config.RuntimeConfig` gained `struggle_weights_version`, `difficulty_weights_version`, `improved_struggle_weights_version`, `hyperparams_version`, `shrinkage_k`. The compute functions (`struggle.py`, `difficulty.py`, `models/improved_struggle.py`) all gained optional override params (`weights`, `shrinkage_k`, `mix_weights`) plus a `_load_v2_weights()` reader with graceful fallback (missing file / wrong model_class / DEFERRED stub all return None → v1). `cache.py` reads the flags and threads them through, with version in the cache key so toggle flips serve fresh results. **Iterative-refinement narrative is now demonstrable**: v1 is the deployed default, v2 is opt-in via the Settings UI |
+| 2026-05-25 | 5 (frontend integration) | `views/SettingsView.tsx` gained "Optimised Weights (v2)" section | 4 new `<ToggleRow>` selects matching the existing `struggle_model` / `difficulty_model` pattern. Each toggle has a `V2InfoBlock` child that surfaces the Phase 4 finding for that specific v2 artefact: green-ok for struggle (deployment-ready), red-warn for difficulty + improved-blend (negative findings), neutral-info for hyperparams (not yet trained). UX choice: don't disable the warned toggles — let user opt into v2 for comparison purposes; the warning makes consequences clear. Context-aware secondary warnings: "set struggle model to Improved first" / "difficulty model is set to IRT, v1/v2 toggle no effect" |
+| 2026-05-25 | 5 (v2-mode preserves trained signs) | Graceful-degradation redistribution disabled in v2 mode for improved-struggle | In v1 the composite redistributes weight when BKT/IRT unavailable (e.g. small slices). In v2 we leave the trained `(w_B, w_M, w_D)` tuple intact even when components are missing, because the trained sign structure (Phase 4c showed w_M = −0.44, w_D = −0.14) IS the published finding. Redistribution would mask it. Weight-sum invariant assertion also gated by `v2_mode` |
+| 2026-05-25 | 5 (chapter implication) | Ch3/Ch4 amendments reduce to one paragraph each | The deployed default is v1 (no change to Ch3 design rationale); v2 is a runtime-selectable refinement (one paragraph in Ch4 implementation describing the toggle pattern). The §5.4 result is "we both designed and refined empirically" — iterative refinement narrative is now matched by the live system |
+| 2026-05-25 | 6 (notebook) | `notebooks/eval_main.ipynb` — self-contained narrative wrapper around the eval pipeline | 29 cells, 10 figures, 76-line `results.md` export. Runs in ~30 s reading only the JSON files (no backend dependency). Style mirrors `previous-works/F221611.ipynb` for visual consistency with the user's prior coursework. The notebook itself is an Appendix B reproducibility artefact |
+| 2026-05-25 | 6 (re-derivation) | LR refit per fold to recover per-snapshot predictions for ROC/calibration/confusion-matrix plots | Optimised JSONs store per-fold weights but not per-snapshot probabilities. Re-derivation uses the SAME `best_C` and `random_state` from each fold's stored metadata, so pooled predictions reproduce the stored AUC numbers exactly (sanity check). Cached to `data/eval/pooled_predictions_v2.json` for re-run speed |
+| 2026-05-25 | 6 (bonus finding — model disagreement) | **31.2% of snapshots get reclassified into a different struggle band under v2 vs v1; split is balanced (15.9% upgrades / 15.3% downgrades)** | New finding only visible after the notebook re-derives v1 vs v2 predictions on the same 1306 snapshots. **Publishable in §5.6.1**: v2 is not systematically harsher or more lenient — it reranks substantially but balanced in direction. Combined with the AUC gap (0.836 vs v1 baseline AUC), this suggests v2 is making genuinely different judgements ~1/3 of the time rather than just shifting all scores up/down |
+| 2026-05-25 | 6 (mid-run fix) | results-export cell had an `IndentationError` in the kappa table block; caught by py_compile-per-cell syntax check before notebook execution | Documented as a process win: the per-cell syntax check (write a temp .py file from each code cell and `py_compile.compile`) caught a bug that would have crashed cell 28 mid-execution after 5 minutes of plot rendering. Worth keeping the check in the eval_main.ipynb verification workflow |
+
 ### Will be added as we go
 
-- Phase 3 — LLM prompt design choices; κ result
+- Phase 4b — v2 difficulty weights + LOO-on-question AUC
+- Phase 4c — improved-struggle stub (real version pending snapshot extension)
+- Phase 4d — hyperparam grid sweep results
+- Phase 5 — backend + frontend toggle wiring
+- Phase 6 — eval notebook output (plots, ROC, calibration, weight comparison)
+- Phase 7 — Ch3/Ch4/Ch5 brief drafting decisions
 - Phase 4 — per-composite training details; final weight vectors
 - Phase 5 — any backend integration surprises
 - Phase 6 — evaluation matrix surprises

@@ -63,7 +63,9 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    stem = paths.DATA_DIR / "eval_submissions"
+    eval_dir = paths.DATA_DIR / "eval"
+    eval_dir.mkdir(parents=True, exist_ok=True)
+    stem = eval_dir / "submissions"
 
     df: Optional[pd.DataFrame] = None
     if not args.refetch:

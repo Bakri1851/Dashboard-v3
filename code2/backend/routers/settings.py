@@ -42,6 +42,12 @@ def _to_runtime_settings(rc: runtime_config.RuntimeConfig) -> RuntimeSettings:
             p_slip=rc.bkt_p_slip,
             mastery_threshold=rc.bkt_mastery_threshold,
         ),
+        # Phase 5: V2 toggle state surfaced to the Settings UI
+        struggle_weights_version=rc.struggle_weights_version,
+        difficulty_weights_version=rc.difficulty_weights_version,
+        improved_struggle_weights_version=rc.improved_struggle_weights_version,
+        hyperparams_version=rc.hyperparams_version,
+        shrinkage_k=rc.shrinkage_k,
     )
 
 

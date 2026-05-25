@@ -210,9 +210,112 @@ export function SettingsView() {
             </div>
           </AnimatedCard>
 
+          {/* Optimised Weights (v2) — Phase 5 toggles */}
+          <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
+            <SectionLabel n={5}>Optimised Weights (v2)</SectionLabel>
+            <div style={{ fontFamily: T.fMono, fontSize: 11, color: T.ink3, marginBottom: 14, lineHeight: 1.6 }}>
+              The deployed defaults are the hand-set v1 weights (see Read-only config reference below).
+              v2 weights are empirically trained against second-opinion labels and stored at
+              <code style={{ marginLeft: 4 }}>data/eval/optimised_*_weights_v2.json</code>.
+              Flip a toggle to v2 to use the trained weights live — leaderboards re-rank immediately.
+              Toggles default v1 so no behaviour changes unless you opt in.
+            </div>
+
+            <ToggleRow
+              label="Struggle weights"
+              options={[
+                { id: 'v1', label: 'Hand-set (v1)' },
+                { id: 'v2', label: 'Optimised (v2)' },
+              ]}
+              active={data.runtime.struggle_weights_version}
+              onChange={(v) => update({ struggle_weights_version: v })}
+            />
+            {data.runtime.struggle_weights_version === 'v2' && (
+              <V2InfoBlock kind="ok">
+                v2 trained via logistic regression with session-grouped 5-fold CV — held-out AUC = 0.836
+                [0.762, 0.911] against LLM intervene labels. <strong>Deployment-ready.</strong>
+              </V2InfoBlock>
+            )}
+
+            <ToggleRow
+              label="Difficulty weights"
+              options={[
+                { id: 'v1', label: 'Hand-set (v1)' },
+                { id: 'v2', label: 'Optimised (v2)' },
+              ]}
+              active={data.runtime.difficulty_weights_version}
+              onChange={(v) => update({ difficulty_weights_version: v })}
+            />
+            {data.runtime.difficulty_weights_version === 'v2' && (
+              <V2InfoBlock kind="warn">
+                <strong>Warning: v2 underperforms v1.</strong> Held-out AUC = 0.345 (worse than random)
+                against LLM "very hard" labels. Hand-set v1 is recommended for production use.
+                v2 retained as an honest negative finding — at N=72 with COA122's uniformly-hard
+                cohort, the 5-signal feature space saturates and the LR fits noise.
+              </V2InfoBlock>
+            )}
+            {data.runtime.difficulty_model === 'irt' && (
+              <V2InfoBlock kind="info">
+                Difficulty model is set to IRT, which bypasses the composite weights entirely.
+                The v1/v2 toggle above has no effect until you switch the difficulty model back to
+                "Baseline".
+              </V2InfoBlock>
+            )}
+
+            <ToggleRow
+              label="Improved-struggle blend"
+              options={[
+                { id: 'v1', label: 'Hand-set (v1)' },
+                { id: 'v2', label: 'Optimised (v2)' },
+              ]}
+              active={data.runtime.improved_struggle_weights_version}
+              onChange={(v) => update({ improved_struggle_weights_version: v })}
+            />
+            {data.runtime.improved_struggle_weights_version === 'v2' && (
+              <V2InfoBlock kind="warn">
+                <strong>Warning: v2 underperforms v1.</strong> Held-out AUC = 0.637 against LLM
+                intervene labels — worse than baseline struggle v2 alone (0.836). The LR assigned
+                NEGATIVE weights to BKT mastery-gap (w_M = −0.44) and IRT-adjusted exposure
+                (w_D = −0.14). Hand-set v1 blend (0.45 / 0.30 / 0.25) is recommended for production.
+                v2 retained as a research artefact.
+              </V2InfoBlock>
+            )}
+            {data.runtime.struggle_model !== 'improved' && (
+              <V2InfoBlock kind="info">
+                Improved-struggle blend weights only apply when "Struggle model" (above) is set to
+                "Improved". Flip the model first.
+              </V2InfoBlock>
+            )}
+
+            <ToggleRow
+              label="Scalar hyperparams (CF τ, K, BKT priors)"
+              options={[
+                { id: 'v1', label: 'Defaults (v1)' },
+                { id: 'v2', label: 'Optimised (v2)' },
+              ]}
+              active={data.runtime.hyperparams_version}
+              onChange={(v) => update({ hyperparams_version: v })}
+            />
+            {data.runtime.hyperparams_version === 'v1' && (
+              <V2InfoBlock kind="info">
+                Phase 4d (hyperparam grid search) is not yet run, so v2 has no effect — selecting it
+                will log a "missing/malformed/deferred" warning server-side and leave sliders
+                unchanged. Run <code>scripts/optimise_hyperparams.py</code> to populate
+                <code style={{ marginLeft: 4 }}>data/eval/optimised_hyperparams_v2.json</code>.
+              </V2InfoBlock>
+            )}
+            {data.runtime.hyperparams_version === 'v2' && (
+              <V2InfoBlock kind="info">
+                When real v2 hyperparams are available, flipping this to v2 repopulates the CF
+                threshold, BKT priors, and BKT mastery threshold sliders with the grid-searched
+                optimal values. You can still slide manually on top — your overrides win.
+              </V2InfoBlock>
+            )}
+          </AnimatedCard>
+
           {/* Environment */}
           <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
-            <SectionLabel n={5}>Environment</SectionLabel>
+            <SectionLabel n={6}>Environment</SectionLabel>
             <ToggleRow
               label="Sound effects"
               options={[
@@ -304,7 +407,7 @@ export function SettingsView() {
 
           {/* Read-only config reference (unchanged from Phase 3) */}
           <AnimatedCard variants={fadeUp} style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}>
-            <SectionLabel n={6}>Read-only config reference</SectionLabel>
+            <SectionLabel n={8}>Read-only config reference</SectionLabel>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16 }}>
               <InfoBlock title="Struggle weights (sum = 1.00)">
                 {Object.entries(data.struggle_weights).map(([k, v]) => (
@@ -520,7 +623,7 @@ function DemoLabSection() {
       variants={fadeUp}
       style={{ padding: 24, background: T.card, border: `1px solid ${T.line}` }}
     >
-      <SectionLabel n={6}>Demo Lab</SectionLabel>
+      <SectionLabel n={7}>Demo Lab</SectionLabel>
       <div
         style={{
           fontFamily: T.fMono,
@@ -579,6 +682,38 @@ function DemoLabSection() {
         )}
       </div>
     </AnimatedCard>
+  )
+}
+
+function V2InfoBlock({
+  kind,
+  children,
+}: {
+  kind: 'ok' | 'warn' | 'info'
+  children: React.ReactNode
+}) {
+  // Three muted variants so the warning text under each v2 toggle is
+  // unambiguous (warn = red-ish) but doesn't shout (the page already has
+  // a lot going on). 'ok' = deployment-ready v2, 'warn' = published
+  // negative finding, 'info' = neutral note.
+  const color = kind === 'warn' ? T.danger : kind === 'ok' ? T.accent : T.ink3
+  const border = kind === 'warn' ? T.danger : T.line2
+  return (
+    <div
+      style={{
+        marginTop: 6,
+        marginBottom: 4,
+        padding: '8px 12px',
+        borderLeft: `2px solid ${border}`,
+        fontFamily: T.fMono,
+        fontSize: 10.5,
+        color,
+        background: T.bg2,
+        lineHeight: 1.55,
+      }}
+    >
+      {children}
+    </div>
   )
 }
 

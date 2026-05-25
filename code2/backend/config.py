@@ -7,7 +7,7 @@ CACHE_TTL: int = 60            # seconds
 
 # --- Data Cleaning ---
 EXCLUDED_MODULES: list[str] = ["24COB231", "24WSC701"]
-#EXCLUDED_MODULES: list[str] = ["AI_TEST", "24COB231", "24WSC701"]
+EXCLUDED_MODULES: list[str] = ["AI_TEST", "24COB231", "24WSC701"]
 
 # --- OpenAI Configuration ---
 OPENAI_MODEL: str = "gpt-4o-mini"
@@ -166,6 +166,24 @@ BKT_FIT_MAX_ITER: int = 200          # matches IRT_MAX_ITER spirit
 IMPROVED_STRUGGLE_WEIGHT_BEHAVIORAL: float = 0.45
 IMPROVED_STRUGGLE_WEIGHT_MASTERY_GAP: float = 0.30
 IMPROVED_STRUGGLE_WEIGHT_DIFFICULTY_ADJ: float = 0.25
+
+# --- Phase 5: V2 optimised weights and hyperparams (data-driven refinements) ---
+# These point to JSON files written by scripts/optimise_v2_weights.py and
+# scripts/optimise_hyperparams.py. When the corresponding runtime_config
+# *_version flag is "v2" AND the file exists + parses + passes loader checks,
+# the dashboard uses the trained weights/hyperparams instead of the hand-set
+# v1 above. Missing/malformed files fall back to v1 silently with a warning.
+# Defaults always remain v1 so the dashboard behaves identically unless the
+# user explicitly toggles in Settings.
+from . import paths as _paths
+STRUGGLE_WEIGHTS_V2_PATH = _paths.DATA_DIR / "eval" / "optimised_struggle_weights_v2.json"
+DIFFICULTY_WEIGHTS_V2_PATH = _paths.DATA_DIR / "eval" / "optimised_difficulty_weights_v2.json"
+IMPROVED_WEIGHTS_V2_PATH = _paths.DATA_DIR / "eval" / "optimised_improved_weights_v2.json"
+OPTIMISED_HYPERPARAMS_V2_PATH = _paths.DATA_DIR / "eval" / "optimised_hyperparams_v2.json"
+
+# Promote SHRINKAGE_K to a runtime-tunable. The hyperparams v2 toggle can
+# override it without a code change; default stays at the v1 value.
+SHRINKAGE_K_DEFAULT: int = SHRINKAGE_K
 
 # --- Phase 9: RAG Suggested Feedback ---
 RAG_ENABLED_DEFAULT: bool = True

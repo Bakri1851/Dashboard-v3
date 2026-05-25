@@ -25,7 +25,8 @@ sys.path.insert(0, str(REPO_ROOT / "code2"))
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
-from backend import cache, difficulty, paths, struggle  # noqa: E402
+from backend import cache, config, difficulty, paths, struggle  # noqa: E402
+from backend.models import bkt, improved_struggle, irt  # noqa: E402
 
 
 STRUGGLE_FEATURE_COLS = ["n_hat", "t_hat", "i_norm", "r_norm", "A_norm", "d_hat", "rep_norm"]
@@ -39,8 +40,8 @@ DEFAULT_INCORRECT_THRESHOLD = 0.5
 # ---------- shared library functions ----------
 
 def load_cached_df() -> pd.DataFrame:
-    """Read cached DataFrame from data/eval_submissions.{parquet,pkl}."""
-    stem = paths.DATA_DIR / "eval_submissions"
+    """Read cached DataFrame from data/eval/submissions.{parquet,pkl}."""
+    stem = paths.DATA_DIR / "eval" / "submissions"
     for suffix in (".parquet", ".pkl"):
         path = stem.with_suffix(suffix)
         if path.exists():
@@ -231,6 +232,81 @@ def cohort_horizon_labels(
     return per_user
 
 
+def compute_improved_components_at_t(slice_df: pd.DataFrame) -> dict[str, dict]:
+    """Per-student improved-struggle component scores at time t.
+
+    Fits BKT + IRT on the slice, then calls
+    ``improved_struggle.compute_improved_struggle_scores`` to extract the
+    three component columns (behavioural_composite, mastery_gap,
+    difficulty_adjusted_score) for each user.
+
+    Returns dict keyed by user → {behavioural_composite, mastery_gap,
+    difficulty_adjusted_score, improved_struggle_score}. Empty dict on
+    any failure (sparse slice, BKT/IRT non-convergence).
+    """
+    if slice_df.empty:
+        return {}
+
+    # BKT: per-skill MLE fit using config defaults. fit_all_skills is the
+    # heavy operation but we can call compute_all_mastery directly with the
+    # default priors and let it use whatever per-skill fitted params are
+    # cached. For per-cutoff training we use the defaults (priors live in
+    # config), matching how the dashboard runs when hyperparams_version=v1.
+    mastery_summary = None
+    try:
+        mastery_df = bkt.compute_all_mastery(
+            slice_df,
+            p_init=config.BKT_P_INIT,
+            p_learn=config.BKT_P_LEARN,
+            p_guess=config.BKT_P_GUESS,
+            p_slip=config.BKT_P_SLIP,
+            per_skill_params=None,
+        )
+        if not mastery_df.empty:
+            mastery_summary = bkt.compute_student_mastery_summary(mastery_df)
+    except Exception:
+        mastery_summary = None
+
+    # IRT 2PL fit
+    irt_difficulty = None
+    irt_ability = None
+    try:
+        irt_model = irt.compute_irt_model(slice_df)
+        irt_difficulty = irt_model.get("difficulty_df")
+        irt_ability = irt_model.get("ability_df")
+        if irt_difficulty is not None and irt_difficulty.empty:
+            irt_difficulty = None
+        if irt_ability is not None and irt_ability.empty:
+            irt_ability = None
+    except Exception:
+        irt_difficulty = None
+        irt_ability = None
+
+    # Call improved_struggle to extract the three component columns
+    try:
+        improved_df = improved_struggle.compute_improved_struggle_scores(
+            slice_df,
+            mastery_summary=mastery_summary,
+            irt_difficulty=irt_difficulty,
+            irt_ability=irt_ability,
+        )
+    except Exception:
+        return {}
+
+    if improved_df.empty:
+        return {}
+
+    return {
+        str(row["user"]): {
+            "behavioural_composite": round(float(row["behavioural_composite"]), 4),
+            "mastery_gap": round(float(row["mastery_gap"]), 4),
+            "difficulty_adjusted_score": round(float(row["difficulty_adjusted_score"]), 4),
+            "improved_struggle_score": round(float(row["struggle_score"]), 4),
+        }
+        for _, row in improved_df.iterrows()
+    }
+
+
 def recent_submissions_trail(
     window_df: pd.DataFrame, user: str, t: pd.Timestamp, n: int = 10
 ) -> list[dict]:
@@ -263,9 +339,11 @@ def _build_snapshot(
     window_df: pd.DataFrame,
     horizon: dict,
     horizon_minutes: int,
+    improved_components: dict | None = None,
 ) -> dict:
     minutes_in = max(0, int((t - cutoffs[0]).total_seconds() / 60))
     h = horizon.get(user, {})
+    improved = (improved_components or {}).get(user, {})
     return {
         "snapshot_id": f"{session.get('id', '')}__{user}__{t.isoformat()}",
         "session_id": str(session.get("id", "")),
@@ -293,6 +371,7 @@ def _build_snapshot(
                 for k, v in h.items()
             },
         },
+        "improved_components": improved,
     }
 
 
@@ -320,6 +399,11 @@ def sample_struggle_snapshots(
             if scores.empty:
                 continue
             horizon = cohort_horizon_labels(window, slice_df, t, horizon_minutes)
+            # Improved-struggle component scores per user (B_s, M_s, D_s) — needed
+            # by Phase 4c training. Fits BKT + IRT on the slice; ~3–15 s per cutoff
+            # depending on slice size. Empty dict on failure → snapshots still
+            # written but with empty improved_components (train_improved filters).
+            improved = compute_improved_components_at_t(slice_df)
             for band in STRUGGLE_BANDS:
                 band_rows = scores[scores["struggle_level"] == band]
                 if band_rows.empty:
@@ -332,6 +416,7 @@ def sample_struggle_snapshots(
                         _build_snapshot(
                             session, str(row["user"]), t, cutoffs,
                             row, slice_df, window, horizon, horizon_minutes,
+                            improved_components=improved,
                         )
                     )
 
@@ -376,10 +461,11 @@ def main() -> int:
     parser.add_argument("--per-band", type=int, default=3)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--horizon-min", type=int, default=DEFAULT_HORIZON_MINUTES)
-    parser.add_argument("--out", type=Path, default=paths.DATA_DIR / "eval_snapshots.json")
+    parser.add_argument("--out", type=Path, default=paths.DATA_DIR / "eval" / "snapshots.json")
     args = parser.parse_args()
 
-    print(f"Loading cached DataFrame from {paths.DATA_DIR}\\eval_submissions.* ...")
+    (paths.DATA_DIR / "eval").mkdir(parents=True, exist_ok=True)
+    print(f"Loading cached DataFrame from {paths.DATA_DIR}\\eval\\submissions.* ...")
     df = load_cached_df()
     print(f"  {len(df):,} rows x {len(df.columns)} cols")
 
