@@ -518,7 +518,7 @@ The net effect is that V2's cold-start cost is paid once per process restart rat
 \hline
 \texttt{\_improved\_cache}, \texttt{\_irt\_difficulty\_cache} & Per-session advanced model & 10\,min & In-memory & V2 \\
 \hline
-\texttt{incorrectness\_cache.json} & Feedback $\to$ score & --- & On disk & V2 \\
+\texttt{incorrectness\_cache.json} & Feedback $\to$ score & - & On disk & V2 \\
 \hline
 \end{tabular}
 \caption{Caches in the data pipeline across V1 (Streamlit) and V2 (FastAPI).}
@@ -552,7 +552,7 @@ Each ended session is appended to \texttt{data/saved\_sessions.json} through \te
 The \texttt{context} dict carries only the UI filter state; the assistant roster and assignment map are not persisted, since they live in the live-state file \texttt{data/lab\_session.json} which is cleared on \texttt{end\_lab\_session()}.
 This is a deliberate scope split: saved sessions are for retrospective analysis of submissions in a time window and not for replaying assistant allocations.
 CRUD operations live in \texttt{data\_loader.py} in both versions and persist through \texttt{\_write\_saved\_sessions\_payload()}, which uses the same atomic \texttt{.tmp} $\to$ \texttt{path.replace(\dots)} pattern as the live-state writer (Figure \ref{fig:code-lablock}). 
-In V1, \texttt{apply\_saved\_session\_to\_state(record, available\_modules)} restores the saved filter state to \texttt{st.session\_state} through the deferred-actions \texttt{pending\_session\_load\_record} flag covered in Section \ref{sec:structure}, the next rerun reads the flag, applies the filter state and routes back to the In-Class view at that historical window. V2 has no equivalent server-side function; the React Previous Sessions view re-applies the filter state client-side from the \texttt{GET /api/s/\{id\}} response, sidestepping Streamlit's widget-instantiation rule entirely.
+In V1, \texttt{apply\_saved\_session\_to\_state(record, available\_modules)} restores the saved filter state to \texttt{st.session\_state} through the deferred-actions \texttt{pending\_session\_load\_record} flag covered in Section \ref{sec:structure}, the next rerun reads the flag, applies the filter state and routes back to the In-Class view at that time window. V2 has no equivalent server-side function; the React Previous Sessions view re-applies the filter state client-side from the \texttt{GET /api/s/\{id\}} response, sidestepping Streamlit's widget-instantiation rule entirely.
 
 
 
@@ -585,110 +585,695 @@ In V1, \texttt{apply\_saved\_session\_to\_state(record, available\_modules)} res
 
 \subsection{Analytics Implementation} \label{sec:analytics}
 
-% TODO: write per Ch4 Rewrite Brief §4.6
+The analytical core runs five scoring pipelines on each cache refresh: incorrectness, student struggle, question difficulty, collaborative filtering (CF) and mistake clustering.
+Incorrectness is computed first because struggle, difficulty and CF all consume the resulting $x_i \in [0,1]$ score. 
+V1 keeps these five pipelines in a single \texttt{analytics.py} module, whereas V2 splits them across per-signal modules (\texttt{incorrectness.py}, \texttt{struggle.py}, \texttt{difficulty.py}, \texttt{collab.py}, \texttt{clustering.py}) while keeping the public function signatures and the threshold-classification machinery unchanged; the per-signal refinements V2 introduces are flagged inline in the subsections below.
 
 \subsubsection{Incorrectness Scoring}
 
-% TODO: write per Ch4 Rewrite Brief §4.6.1 - REQUIRED maths recap line (Marker-1 check)
+\textbf{Maths recap.}
+Each submission $i$ receives a scalar incorrectness $x_i \in [0, 1]$ where $x_i = 0$ means completely correct and $x_i = 1$ means completely incorrect.
+The mapping from the \texttt{ai\_feedback} text to $x_i$ uses the gpt-4o-mini model in the OpenAI API. 
+Empty feedback returns the neutral score of $x_i = 0.5$ without an API call. 
+
+Incorrectness is computed by \texttt{compute\_incorrectness\_column(df)}, which routes uncached feedback strings through \texttt{\_call\_openai\_batch()} in groups of up to \texttt{OPENAI\_BATCH\_SIZE = 20} feedback texts per request - smaller batches parse more reliably than the API's nominal maximum.
+A cold-start guard \texttt{SCORING\_PER\_RUN\_CAP = 500} caps the new pairs scored per Streamlit rerun in V1 or per FastAPI cache rebuild in V2; any feedbacks beyond the cap fall back to the neutral $0.5$ and are scored on subsequent runs, keeping the UI responsive when the cache is empty.
+On API failure the row falls back to $0.5$ as well and the bad response is not persisted; the next rerun retries the call (Figure \ref{fig:code-openai}).
+
+Both versions keep the in-process dictionary \texttt{\_incorrectness\_cache} keyed by feedback text, introduced in Section \ref{sec:pipeline}.
+V2 takes this a step further with a disk-persisted JSON at \texttt{data/incorrectness\_cache.json} whose payload is model-versioned: the \texttt{OPENAI\_MODEL} name is stored alongside the scores and the cache is discarded on load when the model name changes, protecting scores from being reused when the model is changed.
+V2's \texttt{compute\_incorrectness\_column} also exposes two kwargs used by the lifespan handler: \texttt{max\_new\_scores} overrides the per-run cap (the prewarm sets it to lift the cap entirely on a cold boot), and \texttt{score\_new=False} is a lookup-only mode that skips OpenAI calls and returns $0.5$ for any missing feedback. The warm-ratio short-circuit shown in Figure \ref{fig:code-warmratio} is the lifespan handler exercising \texttt{score\_new=False}.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.92\linewidth}
+\begin{lstlisting}[firstnumber=82]
+numbered = "\n".join(f"{i + 1}. {text}" for i, text in enumerate(feedbacks))
+prompt = (
+    "You are scoring student answers based on AI tutor feedback.\n"
+    "For each numbered feedback text below, return a JSON array of floats "
+    "from 0.0 (fully correct) to 1.0 (fully incorrect).\n"
+    "Return ONLY the JSON array, nothing else.\n\n"
+    f"Feedbacks:\n{numbered}"
+)
+response = client.chat.completions.create(
+    model=config.OPENAI_MODEL,
+    messages=[{"role": "user", "content": prompt}],
+    temperature=0,
+)
+scores = _parse_scores_response(
+    response.choices[0].message.content or "",
+    len(feedbacks),
+)
+\end{lstlisting}
+    \end{minipage}
+    \caption{Prompt construction and batched OpenAI call inside \texttt{\_call\_openai\_batch()}.}
+    \label{fig:code-openai}
+\end{figure}
+
 
 \subsubsection{Baseline Student Struggle Model}
 
-% TODO: write per Ch4 Rewrite Brief §4.6.2 - REQUIRED maths recap line; drop in tab:struggle-7sig
+\textbf{Maths recap.}
+Each student $s$ scores
+\[
+S(s)
+= \alpha\, N_s
++ \beta\, T_s
++ \gamma\, I_s
++ \delta\, R_s
++ \eta\, A_s
++ \zeta\, D_s
++ \theta\, \mathrm{Rep}_s,
+\]
+where each capital symbol is the min-max normalisation of its raw per-student signal across the cohort; the mapping back to the Chapter \ref{sec:design} hat-tilde notation is given in Table \ref{tab:struggle-7sig}.
+A Bayesian shrinkage step then pulls students with few submissions toward the cohort mean (full derivation in Section \ref{sec:design} and Appendix E):
+\[
+S_{\mathrm{final}}(s) = w_n\, S(s) + (1 - w_n)\,\bar{S}, \qquad w_n = \frac{n}{n + K}, \qquad K = 5,
+\]
+where $\bar{S}$ is the cohort mean of $S$.
+The recent-incorrectness signal $A$ uses an exponential time decay $w_i = e^{-\lambda \Delta t}$ with half-life $T_{1/2} = 1800$ s, giving $\lambda = \ln 2 / 1800$.
+
+The seven signals and their default weights are listed in Table \ref{tab:struggle-7sig}; an import-time assertion in \texttt{config.py} enforces the weight sum to $1.0$.
+Each per-student aggregate is computed once over a single \texttt{groupby("user")} pass; the seven signals are then min-max normalised across the cohort and combined under the weighted sum above as vector operations on the DataFrame.
+Bayesian shrinkage is the final step: a student with $n \gg K$ submissions is unaffected, whereas a student with $n \ll K$ is pulled toward the cohort mean, which stops a single noisy submission from putting a low-volume student at the top of the leaderboard (Figure \ref{fig:code-shrinkage}).
+
+V1 takes the unweighted arithmetic mean when computing both the overall incorrectness signal $I$ and the recent-incorrectness signal $A$.
+V2 weights both by the per-row measurement confidence introduced in Section \ref{sec:advanced}, so a submission with low-confidence feedback contributes less to the incorrectness signals and therefore to the struggle score; this is an improvement since the OpenAI scorer can be noisy on short or ambiguous feedback texts.
+Confidence-weighted aggregation is one of several analytical refinements introduced in V2 (see Section \ref{sec:advanced} for the IRT and BKT additions).
+Threshold bands live in \texttt{STRUGGLE\_THRESHOLDS}: On Track ($0.00$--$0.20$), Minor Issues ($0.20$--$0.35$), Struggling ($0.35$--$0.50$) and Needs Help ($0.50$--$1.00$); the colours match the In-Class leaderboard colours shown in Section \ref{sec:views}.
+
+
+\begin{table}[H]
+\centering
+\caption{Components of the baseline student struggle score with default weights.}
+\label{tab:struggle-7sig}
+\small
+\begin{tabular}{|c|c|l|p{0.32\textwidth}|c|}
+\hline
+\textbf{Symbol} & \textbf{Design symbol} & \textbf{config.py key} & \textbf{Meaning} & \textbf{Weight} \\
+\hline\hline
+$N_s$            & $\hat{n}_{s,\sigma}$                       & \texttt{STRUGGLE\_WEIGHT\_N}   & Submission count                                  & $\alpha = 0.10$ \\
+\hline
+$T_s$            & $\hat{t}_{s,\sigma}$                       & \texttt{STRUGGLE\_WEIGHT\_T}   & Time active in the session                        & $\beta = 0.10$  \\
+\hline
+$I_s$            & $\hat{\imath}_{s,\sigma}$                  & \texttt{STRUGGLE\_WEIGHT\_I}   & Mean incorrectness across submissions             & $\gamma = 0.20$ \\
+\hline
+$R_s$            & $\hat{\tilde{r}}_{s,\sigma}$               & \texttt{STRUGGLE\_WEIGHT\_R}   & Retry rate (repeats on the same question)         & $\delta = 0.10$ \\
+\hline
+$A_s$            & $\widehat{A^{\mathrm{raw}}}(s,\sigma)$     & \texttt{STRUGGLE\_WEIGHT\_A}   & Recent incorrectness, 30-min exponential decay    & $\eta = 0.38$   \\
+\hline
+$D_s$            & $\hat{d}_{s,\sigma}$                       & \texttt{STRUGGLE\_WEIGHT\_D}   & Improvement-slope coefficient                     & $\zeta = 0.05$  \\
+\hline
+$\mathrm{Rep}_s$ & $\widehat{\tilde{\mathrm{rep}}}_{s,\sigma}$ & \texttt{STRUGGLE\_WEIGHT\_REP} & Answer-repetition rate (repeats $\div$ total)    & $\theta = 0.07$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.92\linewidth}
+\begin{lstlisting}[firstnumber=346]
+s_class_mean = result["struggle_score"].mean()
+w_n = result["n_raw"] / (result["n_raw"] + config.SHRINKAGE_K)
+result["struggle_score"] = (
+    w_n * result["struggle_score"]
+    + (1 - w_n) * s_class_mean
+).clip(0.0, 1.0)
+\end{lstlisting}
+    \end{minipage}
+    \caption{Bayesian shrinkage pass closing the vectorised struggle pipeline}
+    \label{fig:code-shrinkage}
+\end{figure}
 
 \subsubsection{Baseline Question Difficulty Model}
 
-% TODO: write per Ch4 Rewrite Brief §4.6.3 - REQUIRED maths recap line; drop in tab:difficulty-5sig
+\textbf{Maths recap.}
+Each question $q$ scores
+\[
+D(q) = \alpha\, C_q + \beta\, T_q + \gamma\, A_q + \delta\, F_q + \epsilon\, P_q,
+\]
+where each capital symbol is the min-max normalisation of its raw per-question signal across the question set; the mapping back to the Chapter \ref{sec:design} tilde notation is given in Table \ref{tab:difficulty-5sig} (full derivation in Section \ref{sec:design} and Appendix E). The Greek weights are reused across the struggle and difficulty models in line with Section \ref{sec:design}; the formulas are otherwise independent.
+
+The five signals and their weights are listed in Table \ref{tab:difficulty-5sig}; an import-time assertion in \texttt{config.py} enforces the weight sum to $1.0$.
+V1 normalises each signal globally across the full question set using \texttt{min\_max\_normalise}; V2 instead normalises within each module using \texttt{min\_max\_normalise\_grouped} keyed by \texttt{module}.
+A hard question in one module may not be the same as a hard question in another, and a global normalisation would let one module's difficulty distribution dominate the others - V2's grouped pass restores per-module sensitivity without changing the weights themselves (Figure \ref{fig:code-permodule}).
+The threshold bands in \texttt{DIFFICULTY\_THRESHOLDS} are Easy ($0.00$--$0.35$), Medium ($0.35$--$0.50$), Hard ($0.50$--$0.75$) and Very Hard ($0.75$--$1.00$).
+
+
+\begin{table}[H]
+\centering
+\caption{Components of the baseline question difficulty score with default weights.}
+\label{tab:difficulty-5sig}
+\small
+\begin{tabular}{|c|c|l|p{0.32\textwidth}|c|}
+\hline
+\textbf{Symbol} & \textbf{Design symbol} & \textbf{config.py key} & \textbf{Meaning} & \textbf{Weight} \\
+\hline\hline
+$C_q$ & $\tilde{c}_{q}$ & \texttt{DIFFICULTY\_WEIGHT\_C} & Incorrect-attempt rate (raw ratio)            & $\alpha = 0.28$   \\
+\hline
+$T_q$ & $\tilde{t}_{q}$ & \texttt{DIFFICULTY\_WEIGHT\_T} & Mean time per student                          & $\beta = 0.12$    \\
+\hline
+$A_q$ & $\tilde{a}_{q}$ & \texttt{DIFFICULTY\_WEIGHT\_A} & Mean attempts per student                      & $\gamma = 0.20$   \\
+\hline
+$F_q$ & $\tilde{f}_{q}$ & \texttt{DIFFICULTY\_WEIGHT\_F} & Mean incorrectness score                       & $\delta = 0.20$   \\
+\hline
+$P_q$ & $\tilde{p}_{q}$ & \texttt{DIFFICULTY\_WEIGHT\_P} & First-attempt failure rate                     & $\epsilon = 0.20$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.92\linewidth}
+\begin{lstlisting}[firstnumber=94]
+for col in ("c_raw", "t_raw", "a_raw", "f_raw", "p_raw"):
+    result[col.replace("_raw", "_norm")] = min_max_normalise_grouped(
+        result[col], result["module"]
+    )
+\end{lstlisting}
+    \end{minipage}
+    \caption{V2's per-module normalisation in \texttt{compute\_question\_difficulty\_scores}}
+    \label{fig:code-permodule}
+\end{figure}
 
 \subsubsection{Collaborative Filtering}
 
-% TODO: write per Ch4 Rewrite Brief §4.6.4 - REQUIRED maths recap line
+\textbf{Maths recap.}
+For each pair of students $(s, t)$, similarity is the cosine over the five-element behavioural feature vector $\mathbf{v}_s = (N_s, T_s, I_s, A_s, D_s) \in [0,1]^5$ (using the cleaned-up symbols from Table \ref{tab:struggle-7sig}):
+\[
+\mathrm{sim}(s, t) = \frac{\mathbf{v}_s^{\top} \mathbf{v}_t}{\lVert \mathbf{v}_s \rVert_2 \, \lVert \mathbf{v}_t \rVert_2}.
+\]
+A struggling student $s^\star$ flagged by the parametric model "infects" any peer $t$ with $\mathrm{sim}(s^\star, t) \geq \tau$ and $t$ not already flagged, surfacing students whose behaviour looks like a struggler's even when their parametric score does not yet cross the threshold.
+
+The five-element feature vector \texttt{CF\_FEATURES} carries the four normalised struggle signals $N$, $T$, $I$, $A$ and the improvement-slope $D$ (named \texttt{n\_hat}, \texttt{t\_hat}, \texttt{i\_norm}, \texttt{A\_norm}, \texttt{d\_hat} respectively in code).
+The algorithm considers $k = 3$ nearest neighbours per flagged struggler.
+The similarity threshold $\tau$ defaults differ between versions, with V1 at $\tau = 0.6$ and V2 at $\tau = 0.7$; the higher default trades recall for tighter precision, and a slider in the Settings view (Section \ref{sec:views}) allows the user to toggle $\tau$.
+The output is a list of (similar student, source student, similarity score) tuples rendered in the In-Class view's CF diagnostic panel beneath the leaderboards if the collaborative-filtering flag \texttt{cf\_enabled} is set to \texttt{True}.
+
+
 
 \subsubsection{Mistake Clustering}
 
-% TODO: write per Ch4 Rewrite Brief §4.6.5
+For each question with at least \texttt{CLUSTER\_MIN\_WRONG = 3} incorrect submissions, \texttt{cluster\_question\_mistakes()} TF-IDF vectorises the wrong-answer texts and clusters them with KMeans.
+The number of clusters $k$ is selected by silhouette score, capped at \texttt{CLUSTER\_MAX\_K = 5}, after which each cluster is labelled by a short OpenAI call (\texttt{\_label\_clusters\_with\_openai}) that turns the centroid and a few representative answers into a human-readable tag.
+Up to \texttt{CLUSTER\_MAX\_EXAMPLES = 3} representative answers are shown per cluster, each truncated to \texttt{CLUSTER\_EXAMPLE\_MAX\_CHARS = 300} characters for the UI.
+The cache key uses SHA1 of the input texts rather than Python's built-in \texttt{hash()}; the built-in is salted per process and would invalidate the cache on every restart, defeating the cache's purpose.
+Results surface in the Question Detail view (Section \ref{sec:views}) as labelled clusters next to the question text.
+
 
 \subsection{Advanced Model Implementation} \label{sec:advanced}
 
-% TODO: write per Ch4 Rewrite Brief §4.7
-
+The four models in this section sit behind the Settings view's Improved Models toggle, which switches the In-Class leaderboard between the baseline and improved struggle models, and the Question Detail difficulty between the baseline and IRT versions.
+All four share an implementation pattern: building a response matrix or per-row feature from the live DataFrame, fitting by maximum likelihood where applicable, and falling back to baseline results when the fit declines so the UI remains responsive in edge cases.
+V1 wires the models statically, whilst V2 fits at FastAPI startup with the \texttt{lifespan} handler and caches the fitted parameters per process.
+The improved struggle model is the one place where the upstream signals are combined into a single score.
 \subsubsection{Measurement Confidence}
+\textbf{Maths recap.}
+For an incorrectness score $x \in [0, 1]$ with feedback text of length $\ell$ characters, confidence is
+\[
+\kappa = \mathrm{ramp}_{\ell, 0, L} \cdot \big(0.5 + 0.5\,|2x - 1|\big) \cdot \kappa_{\text{base}},
+\]
+where $\mathrm{ramp}_{\ell, 0, L}$ rises linearly from $0$ to $1$ over $[0, L]$ characters ($L = 20$ from \texttt{MEASUREMENT\_CONFIDENCE\_MIN\_LENGTH}), $|2x - 1|$ is the extremity term (1 at the ends of $[0,1]$, 0 at $x = 0.5$), and $\kappa_{\text{base}} = 0.7$ (\texttt{MEASUREMENT\_CONFIDENCE\_BASE}).
 
-% TODO: write per Ch4 Rewrite Brief §4.7.1 - REQUIRED maths recap line
+Confidence is a meta-signal that quantifies how much the system trusts a given scorer verdict; short or empty feedback texts and verdicts near the middle of the scale are flagged as less trustworthy than long, decisive ones.
+Only two factors feed the formula: feedback length and extremity, combined under the base ceiling shown in Figure \ref{fig:code-confidence}.
+Empty feedback returns $\kappa = 0$ rather than the neutral $0.5$ used for the underlying incorrectness score; an empty score is fallback, not measurement.
+V2 introduces \texttt{\_CONFIDENCE\_FLOOR = 0.2} inside \texttt{\_confidence\_weighted\_mean()} so that low-confidence rows still contribute proportionally to the aggregate; V1 has no equivalent floor.
+
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.92\linewidth}
+\begin{lstlisting}[firstnumber=31]
+# Length factor: ramps linearly from 0 to 1 over MIN_LENGTH characters
+lengths = feedbacks.str.len().fillna(0).astype(float)
+length_factor = np.minimum(1.0, lengths / config.MEASUREMENT_CONFIDENCE_MIN_LENGTH)
+
+# Extremity factor: 0.0 at score=0.5, 1.0 at score=0 or 1.
+safe_scores = scores.fillna(0.5)
+extremity_factor = 2.0 * np.abs(safe_scores - 0.5)
+
+# Combined confidence: base * length * (0.5 + 0.5 * extremity)
+confidence = (
+    config.MEASUREMENT_CONFIDENCE_BASE
+    * length_factor
+    * (0.5 + 0.5 * extremity_factor)
+)
+confidence = np.clip(confidence, 0.0, 1.0)
+\end{lstlisting}
+    \end{minipage}
+    \caption{Measurement-confidence formula in V1}
+    \label{fig:code-confidence}
+\end{figure} 
 
 \subsubsection{Item Response Theory (IRT) Difficulty}
 
-% TODO: write per Ch4 Rewrite Brief §4.7.2 - REQUIRED maths recap line; \cite{byrdLBFGSB1995}
+\textbf{Maths recap.}
+V1 fits a one-parameter logistic (Rasch) model
+\[
+P(X_{s,q} = 1 \mid \theta_s, \beta_q) = \sigma(\theta_s - \beta_q),
+\]
+where $\theta_s$ is the student ability, $\beta_q$ the question difficulty and $\sigma$ the logistic sigmoid.
+V2 evolves this to the two-parameter logistic (2PL) form
+\[
+P(X_{s,q} = 1 \mid \theta_s, \alpha_q, \beta_q) = \sigma\!\big(\alpha_q\,(\theta_s - \beta_q)\big),
+\]
+adding a positive per-question discrimination $\alpha_q$.
+Both fits maximise the Bernoulli log-likelihood across all observed responses via L-BFGS-B \cite{byrdLimitedMemoryAlgorithm1995}.
+The 2PL collapses to Rasch when all $\alpha_q = 1$, so V2 is a strict generalisation of V1. 
+
+V1's \texttt{fit\_rasch\_model} builds a response matrix with one row per student and one column per question; the entry is $1$ if the student's best-attempt incorrectness is below the correctness threshold $\tau = 0.5$, $0$ otherwise, and \texttt{NaN} if no attempt exists.
+Filtering is iterative: \texttt{IRT\_MIN\_ATTEMPTS\_PER\_QUESTION = 2} drops thin questions and \texttt{IRT\_MIN\_ATTEMPTS\_PER\_STUDENT = 2} drops thin students; the filter is repeated until both minima are satisfied.
+The optimiser runs at \texttt{IRT\_MAX\_ITER = 100} iterations and the convergence flag (\texttt{bool(result.success)}) is returned alongside the fit so downstream consumers can detect a failed run.
+The fitted $\hat{\beta}_q$ is on the logit scale; the leaderboard maps it to $[0, 1]$ via $D^{\mathrm{IRT}}(q) = \sigma(\hat{\beta}_q)$ and applies the same threshold bands as the baseline difficulty model (\texttt{IRT\_DIFFICULTY\_THRESHOLDS}).
+
+V2's \texttt{fit\_2pl\_model} carries a parameter vector laid out as $[\theta, b, \log a]$ (Figure \ref{fig:code-2pl-unpack}); the discrimination is fitted in log space and exponentiated back, which keeps $\alpha_q > 0$ without an explicit box constraint, and the only box bound applied is $\log a \in [-5, +5]$ to prevent the optimiser parking on degenerate-discrimination items.
+The identifiability projection $\bar{\theta} = 0$ and $\overline{\log a} = 0$ (geometric mean of $a$ equal to $1$) is reapplied at every gradient evaluation through the \texttt{\_unpack} step, so the absolute level of the latent parameters is fixed without trading the loss against an arbitrary offset.
+The model returns a difficulty DataFrame with \texttt{[question, irt\_difficulty, irt\_discrimination, irt\_difficulty\_level, irt\_difficulty\_color]} and an ability DataFrame with \texttt{[user, theta]}, alongside the convergence flag and the log-likelihood; the whole result is cached at the FastAPI level in \texttt{\_irt\_difficulty\_cache} (\texttt{TTLCache(maxsize=4, ttl=600)}) keyed by the active time window.
+
+The 1PL$\rightarrow$2PL evolution is one of the two algorithmic improvements in V2 over V1, and it carries a free bad-item diagnostic: a fitted $\alpha_q$ near zero flags items that fail to separate the cohort, exposed through the \texttt{irt\_discrimination} column on the Question Detail page.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.92\linewidth}
+\begin{lstlisting}[firstnumber=191]
+def _unpack(params: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    theta = params[sl_theta] - params[sl_theta].mean()
+    b = params[sl_b]
+    log_a = params[sl_log_a] - params[sl_log_a].mean()  # geomean(a) = 1
+    a = np.exp(log_a)
+    return theta, b, a
+\end{lstlisting}
+    \end{minipage}
+    \caption{V2's 2PL parameter projection inside \texttt{fit\_2pl\_model}}
+    \label{fig:code-2pl-unpack}
+\end{figure}
 
 \subsubsection{Bayesian Knowledge Tracing (BKT) Mastery}
 
-% TODO: write per Ch4 Rewrite Brief §4.7.3 - REQUIRED maths recap line; \cite{corbettKnowledgeTracingModeling1995}; drop in tab:bkt-defaults
+\textbf{Maths recap.}
+Bayesian Knowledge Tracing \cite{corbettKnowledgeTracingModeling1995} models each (student, skill) pair as a two-state hidden Markov model.
+The hidden state $L_t \in \{\text{not learned},\, \text{learned}\}$ is updated after each observed correctness $c_t \in \{0, 1\}$ by the forward recursion
+\[
+P(L_t \mid c_t) = \frac{P(L_t)\, P(c_t \mid L_t)}{P(c_t)}, \qquad
+P(L_{t+1}) = P(L_t \mid c_t) + \big(1 - P(L_t \mid c_t)\big)\, P(T),
+\]
+parameterised by the four scalars listed in Table \ref{tab:bkt-defaults}.
+
+V1 leaves the four parameters at their configured defaults whilst V2 fits them once per process at FastAPI startup (the \texttt{lifespan} handler), caching the result in the module-level \texttt{\_BKT\_PARAMS\_CACHE} dictionary so the four-parameter model is fit once per process lifetime and reused across stateless requests.
+The fit refuses when fewer than \texttt{BKT\_FIT\_MIN\_OBSERVATIONS = 50} attempts are available, or when every attempt is graded the same way; the optimiser is L-BFGS-B with bounds $[0, 1] \times [0, 1] \times [0, 0.5] \times [0, 0.5]$ where the $0.5$ ceilings on guess and slip implicitly enforce the identifiability constraint $P(G) + P(S) < 1$.
+
+V2's \texttt{fit\_all\_skills} fits one parameter set per skill (module), not per question.
+This is a deliberate choice: a question-level fit would require more data than most individual questions ever see, whereas a module-level fit pools across the questions in a single subject area and remains stable on session-sized data.
+Predictive AUC via \texttt{sklearn.metrics.roc\_auc\_score} is computed alongside the fit and reported back to the UI.
+The mastery threshold \texttt{BKT\_MASTERY\_THRESHOLD = 0.95} is the bar for the ``mastered'' badge on the Student Detail page.
+
+\begin{table}[H]
+\centering
+\caption{Default Bayesian Knowledge Tracing parameters and their permitted fit ranges.}
+\label{tab:bkt-defaults}
+\small
+\begin{tabular}{|c|p{0.50\textwidth}|c|c|}
+\hline
+\textbf{Symbol} & \textbf{Meaning} & \textbf{Default} & \textbf{Fit bounds} \\
+\hline\hline
+$P(L_0)$ & Prior probability of knowing the skill                    & 0.30 & $[0.0, 1.0]$ \\
+\hline
+$P(T)$   & Probability of learning per opportunity                   & 0.10 & $[0.0, 1.0]$ \\
+\hline
+$P(G)$   & Probability of guessing correctly while not learned       & 0.20 & $[0.0, 0.5]$ \\
+\hline
+$P(S)$   & Probability of slipping (wrong) while learned             & 0.10 & $[0.0, 0.5]$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.92\linewidth}
+\begin{lstlisting}[firstnumber=29]
+def bkt_update(
+    p_mastery: float,
+    correct: bool,
+    p_guess: float = config.BKT_P_GUESS,
+    p_slip: float = config.BKT_P_SLIP,
+    p_learn: float = config.BKT_P_LEARN,
+) -> float:
+    """Single BKT HMM update step.  Returns P(L_{t+1})."""
+    if correct:
+        p_obs = p_mastery * (1.0 - p_slip) + (1.0 - p_mastery) * p_guess
+        if p_obs < 1e-12:
+            p_obs = 1e-12
+        p_posterior = p_mastery * (1.0 - p_slip) / p_obs
+    else:
+        p_obs = p_mastery * p_slip + (1.0 - p_mastery) * (1.0 - p_guess)
+        if p_obs < 1e-12:
+            p_obs = 1e-12
+        p_posterior = p_mastery * p_slip / p_obs
+
+    p_next = p_posterior + (1.0 - p_posterior) * p_learn
+    return float(np.clip(p_next, 0.0, 1.0))
+\end{lstlisting}
+    \end{minipage}
+    \caption{BKT single-observation forward update from V1.}
+    \label{fig:code-bkt-update}
+\end{figure}
+
 
 \subsubsection{Improved Struggle Model}
 
-% TODO: write per Ch4 Rewrite Brief §4.7.4 - REQUIRED maths recap line
+\textbf{Maths recap.}
+The improved struggle score combines three components under a convex sum:
+\[
+S_{\mathrm{improved}}(s) = w_B\, B_s + w_M\, M_s + w_D\, D_s,
+\]
+where $B_s$ is the behavioural composite (the equal-weighted mean of four cohort-normalised baseline signals from Section \ref{sec:analytics}: $\widehat{A^{\mathrm{raw}}}_s$, $\hat{\tilde{r}}_s$, $\hat{d}_s$ and $\widehat{\tilde{\mathrm{rep}}}_s$), $M_s = \max\!\big(\bar{m}_s - (1 - A^{\mathrm{raw}}_s),\, 0\big)$ is the mastery-gap term derived from BKT (Section \ref{sec:advanced}) - the positive-part difference between mean BKT mastery and the student's recent correctness rate, so the signal only fires when a student underperforms their own mastery estimate - and $D_s$ is a difficulty-adjusted exposure term that reweights each submission by the IRT difficulty of its question.
+Default weights are $(w_B, w_M, w_D) = (0.45, 0.30, 0.25)$ from \texttt{IMPROVED\_STRUGGLE\_WEIGHT\_BEHAVIORAL}, \texttt{IMPROVED\_STRUGGLE\_WEIGHT\_MASTERY\_GAP} and \texttt{IMPROVED\_STRUGGLE\_WEIGHT\_DIFFICULTY\_ADJ} respectively (Chapter \ref{sec:design} writes these as $w_{\mathrm{beh}}, w_{\mathrm{mg}}, w_{\mathrm{da}}$).
+
+V1's \texttt{compute\_improved\_struggle\_scores} builds the three component scores and combines them under the weighted sum above.
+The difficulty-adjusted term uses \texttt{incorrectness $\times$ (1 - norm\_diff)} for each submission, so wrong attempts on easy items contribute more than wrong attempts on hard ones - failing an easy question signals struggle more strongly than failing a hard one, since the cohort has already validated the hard item's difficulty.
+The distinctive piece is the graceful weight redistribution: if BKT mastery is unavailable for a student, $w_M$ is absorbed entirely into $w_B$ ($w_D$ unchanged); if IRT difficulty is unavailable, $w_D$ is absorbed entirely into $w_B$.
+The score is therefore always defined and collapses cleanly to a lower-information variant when one of the component models fails to fit.
+Table \ref{tab:improved-redist} lists the four redistribution cases.
+
+V2's \texttt{compute\_improved\_struggle\_scores} takes an additional \texttt{irt\_ability} kwarg.
+When the full 2PL parameters are available, \texttt{\_compute\_irt\_residual} replaces the legacy difficulty-adjustment term with the IRT residual shown in Figure \ref{fig:code-irt-residual}.
+The intuition is that a student whose observed performance falls below the IRT-expected performance is struggling more than a student tracking expectation, regardless of overall difficulty exposure.
+Rows missing $\theta_s$, $\alpha_q$ or $\beta_q$ return \texttt{NaN} and are dropped before aggregation, and the aggregator falls back to V1's legacy term when the full 2PL parameters are absent.
+The toggle is plumbed differently between versions: V1 wires \texttt{improved\_models\_enabled} as a session-state boolean derived from the Settings dropdowns, whereas V2 carries the choice in \texttt{runtime\_config.RuntimeConfig.struggle\_model} (``baseline''/``improved'') and \texttt{difficulty\_model} (``baseline''/``irt'') enums, persisted through \texttt{POST /api/settings}.
+
+\begin{table}[H]
+\centering
+\caption{Weight redistribution in \texttt{compute\_improved\_struggle\_scores} when an upstream model is unavailable; the missing weight is added entirely to $w_B$.}
+\label{tab:improved-redist}
+\small
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Available data} & $\boldsymbol{w_B}$ & $\boldsymbol{w_M}$ & $\boldsymbol{w_D}$ \\
+\hline\hline
+All three                 & 0.45 & 0.30 & 0.25 \\
+\hline
+BKT mastery unavailable   & 0.75 & -  & 0.25 \\
+\hline
+IRT difficulty unavailable & 0.70 & 0.30 & -  \\
+\hline
+Both unavailable          & 1.00 & -  & -  \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.92\linewidth}
+\begin{lstlisting}[firstnumber=336]
+def _residual(row: pd.Series) -> float:
+    theta = theta_map.get(row["user"])
+    if theta is None or pd.isna(row.get("a_j")) or pd.isna(row.get("b_j")):
+        return np.nan
+    expected = float(expit(row["a_j"] * (theta - row["b_j"])))
+    observed = 1.0 - float(row["incorrectness"])
+    return expected - observed
+
+# ... later: rescale residual from [-1, 1] to [0, 1] ...
+raw = result["user"].map(scores).fillna(global_residual)
+return ((raw + 1.0) / 2.0).clip(0.0, 1.0)
+\end{lstlisting}
+    \end{minipage}
+    \caption{V2's IRT-residual computation in \texttt{\_compute\_irt\_residual()}.}
+    \label{fig:code-irt-residual}
+\end{figure}
 
 \subsection{RAG Suggested Feedback} \label{sec:rag}
 
-% TODO: write per Ch4 Rewrite Brief §4.8 - no inline supervisor attribution
+The RAG layer turns a struggling student's submission history into 2-3 tailored feedback points for the lab assistants, which is surfaced as a panel on the assistant's app.
+RAG based feedback beats normal prompting here as it anchors the LLM in the student's actual work rather than producing generic advice, which lets the assistant see coaching points referenced to specific student work rather than generic feedback.
+Another application of the RAG generated feedback is in the Question Detail view (Section \ref{sec:views}) where the instructor is pointed towards common failures for the question rather than one student, which lets the instructor give the class more targeted feedback when going through a question rather than a generic walkthrough of it.
 
 \subsubsection{Hybrid Two-Layer Architecture}
 
-% TODO: write per Ch4 Rewrite Brief §4.8.1 - include \cite{lewisRetrievalAugmentedGenerationKnowledgeIntensive2020}
+\textbf{Maths recap (optional).}
+Layer 2 retrieval is a top-$k$ nearest-neighbour search in the 384-dimensional embedding space of \texttt{all-MiniLM-L6-v2}, using cosine similarity through ChromaDB's HNSW index \cite{lewisRetrievalAugmentedGenerationKnowledgeIntensive2020}. 
+
+The two layers correspond to a structured filter followed by a semantic ranker. 
+\textbf{Layer 1} is a pandas pre-filter: \texttt{student\_df = df[df["user"] == student\_id]} narrows the corpus to the requested student's own submission history before any embedding work happens, so retrieved evidence is always directly relevant to the student in question and the embedding index is never larger than a single student's history, keeping retrieval latency low. 
+\textbf{Layer 2} is a ChromaDB semantic search over the embeddings of those submissions, with a metadata \texttt{where} clause that scopes the search within the active session's collection (\texttt{session\_\{session\_id\}}).
+The two-layer output is a small list of (submission text, feedback, score) triples that is then handed to the generator. 
+V2's \texttt{code2/backend/routers/rag.py} wraps the synchronous build and generate path in \texttt{asyncio.to\_thread} so the first-time ChromaDB build doesn't block the FastAPI event loop; V1 does not need this as with Streamlit the build happens during the cached scoring pass.
+Both the assistant-panel path and the instructor-view path (\texttt{generate\_question\_suggestions}) use the same two-layer retrieval differing only in the Layer 1 pandas filter.
 
 \subsubsection{Embedding Model (all-MiniLM-L6-v2)}
 
-% TODO: write per Ch4 Rewrite Brief §4.8.2
+Embeddings are produced locally by \texttt{sentence-transformers} running \texttt{all-MiniLM-L6-v2} (\texttt{RAG\_EMBEDDING\_MODEL}).
+This was chosen as the model runs locally with no API call and no per-query cost, and is sufficient for the short submission texts that the lab endpoint produces.
+ChromaDB collections are named \texttt{session\_\{session\_id\}} so that embeddings do not leak across sessions and the vector store persists to \texttt{data/rag\_chroma/} with \texttt{chromadb.PersistentClient}.
+A short circuit guard \texttt{RAG\_MIN\_SUBMISSIONS = 2} skips the panel for students with fewer than 2 submissions, as the feedback is unlikely to be useful and the embedding work isn't worth doing.
+The whole RAG path is gated by \texttt{RAG\_ENABLED\_DEFAULT = True}.
 
 \subsubsection{Generation and Prompting}
 
-% TODO: write per Ch4 Rewrite Brief §4.8.3
+The chosen LLM to generate feedback is gpt-4o-mini, which is the same model used for incorrectness scoring, this is due to it being a lightweight, highly optimised model which balances performance and cost. 
+The prompt is a system message and a user message that carries the retrieved evidence which includes the student's struggle score, struggle band label, the top three questions ranked by incorrectness and the retrieved question-answer snippets.
+Output is constrained to JSON format with OpenAI's \texttt{response\_format=\{"type": "json\_object"\}}, and the prompt itself specifically asks for a JSON array of 2--3 short bullet strings of at most 15 words each.
+The parser is permissive in case the model returns a wrapped object instead of a bare array.
+Each bullet is addressed to the lab assistant and frames a specific thing to look at.
+
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.92\linewidth}
+\begin{lstlisting}[firstnumber=263]
+system_msg = (
+    "You are advising a lab assistant on how to help a student. "
+    "Be concise and practical."
+)
+user_msg = (
+    f"Student struggle score: {struggle_score:.2f} ({struggle_label})\n"
+    f"Top questions by incorrectness:\n{top3_lines}\n\n"
+    f"Retrieved Q&A snippets (worst first):\n{snippets}\n\n"
+    "Return a JSON array of 2 or 3 short bullet strings (max 15 words each) "
+    "on what to check or discuss with this student. No prose outside the array."
+)
+\end{lstlisting}
+    \end{minipage}
+    \caption{RAG generation prompt, the system and user messages used to produce assistant focus suggestions.}
+    \label{fig:code-ragprompt}
+\end{figure}
+
 
 \subsubsection{Suggestion Caching}
 
-% TODO: write per Ch4 Rewrite Brief §4.8.4
+Both versions cache the OpenAI response so that a re-render of the assistant panel doesn't re-call the API, but the caches diverge in both key structure and lifetime.
+V1 uses a plain process-local dictionary \texttt{\_suggestion\_cache} keyed by \texttt{student\_id} alone, cleared via \texttt{clear\_suggestion\_cache()} whenever the session changes.
+V2 uses a \texttt{TTLCache(maxsize=256, ttl=600)} keyed by the tuple \texttt{(student\_id, window.from\_, window.to\_, window.module, session\_id)}, ageing entries out after ten minutes.
+Neither cache invalidates on a submission-count threshold.
+This is a deliberate tradeoff as the RAG generation is the most expensive step in the panel and rerunning it on every poll cycle would dominate the OpenAI API cost without a clear improvement in coaching quality.
+
 
 \subsubsection{Graceful Degradation and Privacy}
 
-% TODO: write per Ch4 Rewrite Brief §4.8.5
+The RAG path is wrapped in an optional-dependency guard: a \texttt{\_lazy\_import()} helper attempts to import \texttt{chromadb} and \texttt{sentence\_transformers} and if either is missing the panel doesn't render whilst leaving the rest of the application intact.
+\texttt{RAG\_ENABLED\_DEFAULT = True} is followed, but the dependency check has the final say on whether the feedback is generated.
+If the OpenAI call fails or times out (V2 sets \texttt{timeout=15.0}; V1 relies on the SDK default), the exception is caught and an empty list is returned; cached bullet points remain on screen and no error message is shown.
+Privacy considerations are baked into the design as all retrieval is local; the only data that leaves the process is what appears in the generation prompt (Figure \ref{fig:code-ragprompt}).
+The prompt contains the student's struggle score, struggle band label, the top three questions ranked by incorrectness and the retrieved question-answer snippets.
+Although the prompt sends this evidence to the LLM, no student identifier of any kind is included - not even the anonymised student IDs that appear in the leaderboards.
+The user ID is only used locally for the pandas filter and as a cache key; it never leaves the process.
 
 \subsection{Instructor System Views} \label{sec:views}
 
-% TODO: write per Ch4 Rewrite Brief §4.9.0 - opening paragraph + drop in tab:views-comparison (V1 vs V2 parity)
+The dashboard's instructor functionality is implemented twice, the V1 implementation lives in \texttt{code/learning\_dashboard/ui/views.py} as the seven page Streamlit app, whilst the V2 implementation lives in \texttt{code2/frontend/src/views/} as an eight page React app served by FastAPI. 
+Both have a \texttt{learning\_dashboard.*} analytical core through different transport layers, with V1 importing the modules directly into the Streamlit process and V2 calling them over HTTP via the FastAPI routers described in Section \ref{sec:structure}. 
+Parity is deliberate as V2 reimpliments the same views as V1 so that we can use it as part of our evaluation later on, despite replicating the views, V2 has its own new view that is not in V1, Session Progression. Table \ref{tab:views-comparison} summarises the per-view parity status across both versions.
 
 \begin{table}[H]
-    \centering
-    \fbox{\parbox{0.85\textwidth}{\centering\vspace{3em}\textbf{Table placeholder: V1 vs V2 instructor view parity}\\\textit{Row-per-view comparison of the seven V1 instructor views and the eight V2 instructor views, noting parity, V2-only additions (e.g. SessionProgression) and any V1 features deferred in V2.}\\\footnotesize Replace this box with the populated tabular environment when §4.9 is written.\vspace{3em}}}
-    \caption{Parity comparison of instructor views between V1 (Streamlit) and V2 (React + FastAPI).}
-    \label{tab:views-comparison}
+\centering
+\caption{Instructor views in V1 (Streamlit) and V2 (React + FastAPI), with view-level parity status.}
+\label{tab:views-comparison}
+\small
+\begin{tabularx}{\textwidth}{|l|X|c|c|}
+\hline
+\textbf{View} & \textbf{Function (purpose)} & \textbf{V1} & \textbf{V2} \\
+\hline\hline
+In-Class            & Live struggle + difficulty leaderboards, CF panel, distributions (V2 ships in two presentations: Basic by default, Advanced toggleable) & Yes & Yes \\
+\hline
+Student Detail      & Per-student signal breakdown, timeline, top hardest questions             & Yes & Yes \\
+\hline
+Question Detail     & Mistake clusters, top strugglers, RAG suggestions                          & Yes & Yes \\
+\hline
+Data Analysis       & Cohort-level summaries across academic weeks                              & Yes & Yes \\
+\hline
+Model Comparison    & Baseline vs IRT, baseline vs improved struggle                             & Yes & Yes \\
+\hline
+Settings            & Model toggles, CF threshold, BKT sliders, theme (V2)                       & Yes & Yes \\
+\hline
+Previous Sessions   & List, filter and load saved sessions                                       & Yes & Yes \\
+\hline
+Session Progression & Time-bucket replay of an ended session                                     & No  & Yes \\
+\hline
+\end{tabularx}
 \end{table}
 
 \subsubsection{In-Class View}
 
-% TODO: write per Ch4 Rewrite Brief §4.9.1
+The In-Class view is the dashboard's live session hub, where instructors spend most of their time during a session and will see first on launch. Both versions present the two side-by-side leaderboards where at the top are the top strugglers ordered by descending struggle level and hardest questions ordered by descending difficulty level. 
+Each leaderboard is capped at \texttt{LEADERBOARD\_MAX\_ITEMS = 15}, with bar colours following the threshold bands from Section \ref{sec:design}, where with this theme they were adjusted so that grey is Minor Issues/Medium and light blue is On Track/Easy. 
+Beneath the leaderboards are three small panels with the struggle and diffculty distribution histograms as well as a last-24-hours submission timeline. 
+Clicking a bar drills into the corresponding Student or Question Detail view; Streamlit uses \texttt{st.plotly\_chart(on\_select ="rerun")} with a \texttt{point\_index} lookup whilst V2 routes via React Router to \texttt{/student/:id} or \texttt{/question/:id}. 
+
+V2 carries two forms of the In Class view, the default one is the Basic layout which is the one the instructor sees on the first load due to the \texttt{useUiPrefsStore} preference store initialising the \texttt{inClassViewMode} value to \texttt{'basic'}; the layout is selectable through the Settings page's \emph{In-class layout} toggle. 
+The basic layout abstracts a lot from the advanced view so that it is a single colour coded bar per student or question, stretched to fill the row using the cohort min-max scale with a minmum visible fill so the lowest score is still visible. 
+When switching to the Advanced view the user is able to see more data immediately which includes submissions, their last registered score, the trend in score for the student side of the in class view and for the question side of the in class view they can see the amount of students attempting the question with the average attempts. 
+V1 has no equivalent view toggle and its default view is close to what V2's Basic view offers.
+
+\begin{figure}[H]
+    \centering
+    \IfFileExists{figures/implementation/ui-inclass-basic.png}{%
+        \includegraphics[width=1\linewidth]{figures/implementation/ui-inclass-basic.png}%
+    }{%
+        \fbox{\parbox{0.85\textwidth}{\centering\vspace{3em}\textbf{Figure placeholder: V2 In-Class - Basic layout (default)}\\\textit{Screenshot of the In-Class view in Basic mode, showing the two cohort-stretched leaderboards and the three small panels beneath (struggle distribution, difficulty distribution, last-24-hour submissions).}\vspace{3em}}}%
+    }
+    \caption{V2 In-Class view in the Basic layout}
+    \label{fig:ui-inclass-basic}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \IfFileExists{figures/implementation/ui-inclass.png}{%
+        \includegraphics[width=1\linewidth]{figures/implementation/ui-inclass.png}%
+    }{%
+        \fbox{\parbox{0.85\textwidth}{\centering\vspace{3em}\textbf{Figure placeholder: V2 In-Class - Advanced layout}\\\textit{Screenshot of the In-Class view in Advanced mode, showing the full Plotly leaderboards, the CF diagnostic panel beneath them, and the two score-distribution histograms.}\vspace{3em}}}%
+    }
+    \caption{V2 In-Class view in the Advanced layout}
+    \label{fig:ui-inclass}
+\end{figure}
 
 \subsubsection{Student Detail View}
 
-% TODO: write per Ch4 Rewrite Brief §4.9.2
+The Student Detail view gives a per-signal breakdown of a single student's struggle score, with one bar for each of the seven signals defined in \ref{sec:analytis} ($N$ submission count, $T$ time per attempt, $I$ recent incorrectness, $R$ retry rate, $A$ activity intensity, $D$ improvement slope and $\mathrm{Rep}$ repeat-question rate), alongside a submission timeline ordered by timestamp with incorrectness coded as the bar colour with at most the 10 of the hardest questions for the student, each row drills into the corresponding Question Detail page. Additionally there is RAG suggestions here like that which the lab assistant would get.
+
+
+\begin{figure}[H]
+    \centering
+    \IfFileExists{figures/implementation/ui-studentdetail.png}{%
+        \includegraphics[width=1\linewidth]{figures/implementation/ui-studentdetail.png}%
+    }{%
+        \fbox{\parbox{0.85\textwidth}{\centering\vspace{3em}\textbf{Figure placeholder: V2 Student Detail}\\\textit{Screenshot of the Student Detail view with Improved Models enabled, showing the header card, the per-signal struggle breakdown, the submission timeline, and the BKT mastery panel.}\vspace{3em}}}%
+    }
+    \caption{V2 Student Detail view }
+    \label{fig:ui-studentdetail}
+\end{figure}
 
 \subsubsection{Question Detail View}
 
-% TODO: write per Ch4 Rewrite Brief §4.9.3
+The Question Detail view shows the question text alongside its difficulty score and aggregated incorrectness. 
+The top students who are struggling on this question are presented to the instructors with their attempt amount, average incorrectness score on the question and their struggle level. 
+There are also RAG suggested feedback points for the instructor to consider when going through the question with the class. 
+The instructor can also see the mistake clusters for the question, which are generated by clustering the incorrect submissions to the question and surfacing the most representative submission for each cluster as a card in the UI, this is so they can see the most common errors and give feedback to the class based on their own intuition rather than the RAG feedback if desired.
+
+
+\begin{figure}[H]
+    \centering
+    \IfFileExists{figures/implementation/ui-questiondetail.png}{%
+        \includegraphics[width=1\linewidth]{figures/implementation/ui-questiondetail.png}%
+    }{%
+        \fbox{\parbox{0.85\textwidth}{\centering\vspace{3em}\textbf{Figure placeholder: V2 Question Detail}\\\textit{Screenshot of the Question Detail view, showing the measurement-confidence chip beside the incorrectness value, the mistake-cluster cards and the RAG-generated coaching bullets.}\vspace{3em}}}%
+    }
+    \caption{V2 Question Detail view}
+    \label{fig:ui-questiondetail}
+\end{figure}
 
 \subsubsection{Data Analysis View}
 
-% TODO: write per Ch4 Rewrite Brief §4.9.4
+The Data Analysis view exposes summaries based off all the data pulled from the endpoint and is meant to be used for offline analysis of data rather than in-session use. 
+Data is aggregated by the \texttt{academic\_week} module to map raw dates into the Loughborough 2025/26 week labels so that the instructor questions phrased in academic time can be answered more swiftly by Loughborough academics. 
+A selectbox allows the users to switch between six different chart modes:  module usage, top questions, user activity, activity timeline, activity by academic week and students by module, with the top-questions and user-activity tables capped at \texttt{DATA\_ANALYSIS\_TOP\_QUESTIONS = 10} and \texttt{DATA\_ANALYSIS\_TOP\_USERS = 20} respectively. 
+The activity-by-week chart in V2 is rendered as a week-by-day heatmap rather than V1's bar chart; the underlying \texttt{academic\_calendar} mapping is shared between the two versions so the period semantics are identical.
+
+\begin{figure}[H]
+    \centering
+    \IfFileExists{figures/implementation/ui-dataanalysis.png}{%
+        \includegraphics[width=1\linewidth]{figures/implementation/ui-dataanalysis.png}%
+    }{%
+        \fbox{\parbox{0.85\textwidth}{\centering\vspace{3em}\textbf{Figure placeholder: V2 Data Analysis}\\\textit{Screenshot of the Data Analysis view with one of the six chart modes selected (e.g.\ the Activity by Week heatmap, which is V2's distinctive variant on V1's bar chart).}\vspace{3em}}}%
+    }
+    \caption{V2 Data Analysis view}
+    \label{fig:ui-dataanalysis}
+\end{figure}
 
 \subsubsection{Model Comparison View}
 
-% TODO: write per Ch4 Rewrite Brief §4.9.5
+The Model Comparison view sits behind the Improved Models toggle and feeds into the quantitative evaluation in Chapter \ref{sec:evaluation}, it is not a screen intended for production use but rather a development and evaluation tool to compare the struggle/question signals side by side and sanity check the model outputs. 
+The data is split into two tabs where baseline struggle is plotted against improved struggle on a scatter chart and surfaces headline metrics including Spearman $\rho$, the top 10 students on each model, as well as the biggest disagreements between the models. 
+Similarly for the Question difficulty model comparison, the baseline difficulty is plotted against the IRT (Rasch) Difficulty on a scatter chart and surfaces the headline metrics included Spearman $\rho$, the top 10 questions on each model as well as the biggest disagreement between the models.
+
+
+\begin{figure}[H]
+    \centering
+    \IfFileExists{figures/implementation/ui-comparison.png}{%
+        \includegraphics[width=1\linewidth]{figures/implementation/ui-comparison.png}%
+    }{%
+        \fbox{\parbox{0.85\textwidth}{\centering\vspace{3em}\textbf{Figure placeholder: V2 Model Comparison}\\\textit{Screenshot of the Model Comparison view, Students tab, showing the baseline-vs-improved scatter colour-coded by level-agreement, the headline metrics row and the largest-mover table.}\vspace{3em}}}%
+    }
+    \caption{V2 Model Comparison view}
+    \label{fig:ui-comparison}
+\end{figure}
 
 \subsubsection{Settings View}
 
-% TODO: write per Ch4 Rewrite Brief §4.9.6
+Both versions expose the runtime model configuration through a Settings page, where they both have common toggles such as Sound Effects (\texttt{SOUNDS\_ENABLED\_DEFAULT = True}), Auto-Refresh (\texttt{AUTO\_REFRESH\_DEFAULT = True}) with the refresh interval selectable from \texttt{AUTO\_REFRESH\_OPTIONS = [5, 10, 15, 30, 60, 120, 300]} seconds, Collaborative Filtering (\texttt{cf\_enabled}) with the similarity-threshold slider $\tau$, and the two model-choice selectboxes. 
+When Improved is selected, four sliders appear for the BKT parameters $P(L_0)$, $P(T)$, $P(G)$ and $P(S)$ with defaults from Section \ref{sec:advanced}, a slider change retriggers the per-student mastery computation on the next refresh. 
+The two diverge in a few places where V2 has a theme picker that persist to \texttt{localStorage} and a In Class layout toggle (Basic/Advanced)
+
+
+
+\begin{figure}[H]
+    \centering
+    \IfFileExists{figures/implementation/ui-settings.png}{%
+        \includegraphics[width=0.9\linewidth]{figures/implementation/ui-settings.png}%
+    }{%
+        \fbox{\parbox{0.85\textwidth}{\centering\vspace{3em}\textbf{Figure placeholder: V2 Settings}\\\textit{Screenshot of the Settings view showing the model-choice selectboxes, the CF threshold slider, the BKT parameter sliders (with Struggle Model = Improved so the sliders are active) and the theme picker.}\vspace{3em}}}%
+    }
+    \caption{V2 Settings view}
+    \label{fig:ui-settings}
+\end{figure}
 
 \subsubsection{Previous Sessions View}
 
-% TODO: write per Ch4 Rewrite Brief §4.9.7
+The Previous Sessions view lists every saved session in descending start-time order reading from \texttt{data/saved\_sessions.json} as described in Section \ref{sec:session}. 
+Sessions can be recovered if they were not recorded through the save retroactive session feature. 
+You can load into a session where you can then see it through the different views to get insight or look at the progression to see how the class progressed over time. Sessions can also be removed through the delete button. 
+V1 writes \texttt{pending\_session\_load\_record} into session state so that the next rerun applies the filter state before the sidebar widgets render, whilst V2 changes the client-side filter store directly through the React state hooks, in both cases the page then routes to In-Class so that the instructor can view the session after it had ended.
+\begin{figure}[H]
+    \centering
+    \IfFileExists{figures/implementation/ui-previoussessions.png}{%
+        \includegraphics[width=0.9\linewidth]{figures/implementation/ui-previoussessions.png}%
+    }{%
+        \fbox{\parbox{0.85\textwidth}{\centering\vspace{3em}\textbf{Figure placeholder: V2 Previous Sessions}\\\textit{Screenshot of the Previous Sessions list with the academic-period filter visible and at least one saved-session row, showing the name, module, timestamps, duration and delete control.}\vspace{3em}}}%
+    }
+    \caption{V2 Previous Sessions view}
+    \label{fig:ui-previoussessions}
+\end{figure}
+
+\subsubsection{Session Progression View (V2-only)}
+The Session Progression View is a V2-only view which lives at \texttt{code2/frontend/src/views/SessionProgression.tsx}. 
+It replays an ended section as 12 evenly spaced time buckets by default and then animates the React view as a stacked chart of the four struggle bands through the timeline, with a per bucket snapshots with the cumulative submission count, unique students, mean incorrectmess and students who were flagged as "Needs Help". 
+The view is useful for looking at in session trends such as seeing when progress in the class had started to decline as well as answering other questions the In Class View cannot answer. 
+V1 has no equivalent functionality as this the idea for this had come after the V1 had been developed, it would also be significantly harder to replicate in Streamlit than it is in React as it is handled natively.
+
+
+
+
+\begin{figure}[H]
+    \centering
+    \IfFileExists{figures/implementation/ui-progression.png}{%
+        \includegraphics[width=1\linewidth]{figures/implementation/ui-progression.png}%
+    }{%
+        \fbox{\parbox{0.85\textwidth}{\centering\vspace{3em}\textbf{Figure placeholder: V2 Session Progression}\\\textit{Screenshot of the Session Progression view, showing the stacked-area chart of the four struggle bands over time, the per-bucket snapshot panel, the scrub control and the end-of-session pill.}\vspace{3em}}}%
+    }
+    \caption{V2 Session Progression view}
+    \label{fig:ui-progression}
+\end{figure}
 
 \subsection{Lab Assistant System} \label{sec:assistant}
 

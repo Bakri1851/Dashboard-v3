@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "My Notes/Thesis/Figures and Tables.md",
+                "file": "My Notes/Thesis/Ch4 §4.9 Drafting Plan.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Figures and Tables"
+              "title": "Ch4 §4.9 Drafting Plan"
             }
           }
         ],
@@ -68,7 +68,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "views-comparison",
+                "query": "",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -89,12 +89,12 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "3c0caa2f4bd4d469",
@@ -201,9 +201,14 @@
   },
   "active": "21618e99d70cb1ec",
   "lastOpenFiles": [
+    "My Notes/Thesis/Ch4 §4.7 Brief.md",
+    "My Notes/Thesis/Ch4 §4.9 Drafting Plan.md",
+    "My Notes/Thesis/Ch4 §4.9 Brief.md",
+    "My Notes/Thesis/Ch4 §4.8 Brief.md",
+    "My Notes/Thesis/Ch4 §4.6 Brief.md",
+    "My Notes/Thesis/Figures and Tables.md",
     "My Notes/Thesis/Ch4 Rewrite Brief.md.tmp.4356.487eb4f1a8f4",
     "My Notes/Thesis/Full Roadmap.md",
-    "My Notes/Thesis/Figures and Tables.md",
     "My Notes/Thesis/Evaluation Plan.md",
     "My Notes/Thesis/Ch5 – Results and Evaluation.md",
     "My Notes/Thesis/V2 Architecture Diagram Spec.md",
@@ -217,7 +222,6 @@
     "My Notes/sedsHBl16",
     "My Notes/Literature/sedgYr6WP",
     "My Notes/Literature/sedDPCcHy",
-    "My Notes/Literature/sedWg9ikO",
     "My Notes/Literature/dong_using.md",
     "My Notes/Literature/coverage.md",
     "My Notes/Literature/corbettKnowledgeTracingModeling1995.md",
@@ -233,10 +237,6 @@
     "My Notes/Literature/MacQueen1967SomeMF.md",
     "My Notes/Thesis/Weekly Plan.md",
     "My Notes/Literature/_import_checklist.md",
-    "My Notes/Literature/chiangCanLargeLanguage2023.md",
-    "My Notes/Literature/bakerDevelopingGeneralizableDetector2008.md",
-    "My Notes/Literature/wangGoalDrivenExplainableClustering2023.md",
-    "My Notes/Literature/manningIntroductionInformationRetrieval2006.md",
     "Untitled.canvas",
     "My Notes/Code/Assistant App/Operations/Pasted image 20260414004425.png",
     "My Notes/Code/Assistant App/Operations/Pasted image 20260414004418.png",

@@ -1,4 +1,4 @@
-\section{Design and Modelling}
+\section{Design and Modelling} \label{sec:design}
 This section describes the design and architecture of the lab dashboard, highlighting how various components are implemented. It covers the data endpoint, defining what data enters the system and in what form, the mathematical models used to derive struggle and difficulty and the user interface design which exposes the analytics to educators. 
  
 \subsection{System Architecture}
@@ -472,13 +472,13 @@ The parameter-based struggle model defined in Section \ref{sec: student struggle
 Let $\mathcal{S} = \{s_1,s_2,\ldots, s_n\}$ denotes the set of students present in sessions $\sigma$. For each student $s_i$, we define a five-dimensional feature vector derived from the normalised interaction quantities introduced in Section \ref{sec: student struggle}:
 
 \begin{equation}
-    \mathbf{x}_{s_i} = 
+    \mathbf{x}_{s_i} =
     \begin{pmatrix}
         \hat{n}_{s_i,\sigma},\;
         \hat{t}_{s_i,\sigma},\;
-        \hat{e}_{s_i,\sigma},\;
-        \hat{f}_{s_i,\sigma},\;
-        A^{\text{raw}}(s_i, \sigma)
+        \hat{\imath}_{s_i,\sigma},\;
+        \widehat{A^{\mathrm{raw}}}(s_i, \sigma),\;
+        \hat{d}_{s_i,\sigma}
     \end{pmatrix}^{\top}
     \in [0,1]^5
 \end{equation}

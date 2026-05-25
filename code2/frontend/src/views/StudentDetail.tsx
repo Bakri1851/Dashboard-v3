@@ -36,6 +36,7 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
   const { data: settings } = useSettings()
   const cfEnabled = settings?.runtime.cf_enabled ?? false
   const pickStudent = useViewStore((s) => s.pickStudent)
+  const pickQuestion = useViewStore((s) => s.pickQuestion)
   const inClassViewMode = useUiPrefsStore((s) => s.inClassViewMode)
   const { data, error, loading } = useApiData<StudentDetailData>(
     `/student/${encodeURIComponent(studentId)}`,
@@ -254,6 +255,9 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
                     layout: { type: 'spring', stiffness: 400, damping: 38 },
                     opacity: { duration: 0.2 },
                   }}
+                  onClick={() => pickQuestion(r.question)}
+                  whileHover={{ background: T.bg2 }}
+                  style={{ cursor: 'pointer' }}
                 >
                   <td
                     style={{
