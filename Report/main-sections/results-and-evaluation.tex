@@ -1,43 +1,98 @@
-\section{Evaluation}
+\section{Evaluation} \label{sec:evaluation}
 
-\subsection{Evaluation Design}
+This chapter evaulates the dashboard system of Chapter~\ref{sec:implementation} along two dimensions, the validity of the model outputs (whether the struggle and difficulty rankings agree with observable student behaviour) and the operational behaviour of the deployed software against the responsiveness, interpretability, and robustness targets implied in Chapter~\ref{sec:design}. 
+The unit of evalation is the individual weekly lab sessions as the dashboard is designed to be used within a single session and the cohort consists of approximately. For the evaluation we are going to focus on module where data was collected \textbf{25COA122}, across 23 recorded lab sessions 2 Feb 2026 to 15 May 2026. 
+On majority of the weeks there were two lab sessions running back to back which were an hour each, so there are two sessions per week, except for the first and last week which had one session each.
+
+\subsection{Evaluation Design} \label{sec:eval-design}
 
 \subsubsection{Scope of Evaluation}
+% TODO: 5.1.1 prose block (retrospective replay choice; prospective intervention out of scope; functional verification bounded)
 
 \subsubsection{Evidence Sources}
+% TODO: 5.1.2 prose block
 
 \subsubsection{Retrospective Evaluation Protocol}
+% TODO: 5.1.3 prose block (ground-truth labels L_top20, L_needs_help, L_struggling_plus; cutoff schedule T; metrics)
 
 \subsubsection{Limitations of Evaluation}
+% TODO: 5.1.4 prose block
 
-\subsection{Functional Testing}
+\subsection{Functional Testing} \label{sec:eval-functional}
 
 \subsubsection{Data Ingestion and Session Handling}
+% TODO: 5.2.1 prose block
 
 \subsubsection{Analytics and Model Behaviour}
+% TODO: 5.2.2 prose block
 
 \subsubsection{Instructor Dashboard Features}
+% TODO: 5.2.3 prose block
 
 \subsubsection{Lab Assistant Workflow}
+% TODO: 5.2.4 prose block
 
-\subsection{Non-Functional Testing}
+\subsection{Non-Functional Testing} \label{sec:eval-nonfunctional}
 
 \subsubsection{Performance and Refresh Behaviour}
+% TODO: 5.3.1 prose block
 
 \subsubsection{Usability and Interpretability}
+% TODO: 5.3.2 prose block
 
 \subsubsection{Robustness and Failure Handling}
+% TODO: 5.3.3 prose block
 
-\subsection{Results}
+\subsection{Results} \label{sec:eval-results}
 
-\subsubsection{Baseline System Results}
+\subsubsection{Baseline System Outputs}
+% TODO: 5.4.1 prose block
 
-\subsubsection{Advanced Model Comparison}
+\subsubsection{Model Comparison - Struggle} \label{sec:eval-compare-struggle}
+% TODO: 5.4.2 prose block (Spearman rho, top-10 overlap, level agreement, largest movers; fig:eval-baseline-vs-improved, fig:eval-disagreement-heatmap, fig:eval-cf-vs-parametric, tab:eval-largest-mover)
+
+\subsubsection{Model Comparison - Difficulty} \label{sec:eval-compare-difficulty}
+% TODO: 5.4.3 prose block (baseline vs IRT; 2PL discrimination diagnostic; fig:eval-irt-discrimination, tab:eval-largest-mover)
+
+\subsubsection{BKT Predictive AUC per Skill}
+% TODO: 5.4.4 prose block (fig:eval-roc-bkt; depends on AUC capture instrumentation)
+
+\subsubsection{Per-Module Normalisation Effect}
+% TODO: 5.4.5 prose block (fig:eval-permodule-normalisation, fig:eval-violin-permodule-difficulty)
+
+\subsubsection{Latency and Prewarm Evidence}
+% TODO: 5.4.6 prose block (fig:eval-latency-prewarm; depends on prewarm latency capture)
+
+\subsubsection{Graceful-Degradation Evidence}
+% TODO: 5.4.7 prose block (problems 5 and 7 from tab:problems)
 
 \subsubsection{Observed Strengths and Weaknesses}
+% TODO: 5.4.8 prose block
 
-\subsection{Discussion}
+\subsection{Survey} \label{sec:eval-survey}
+
+\subsubsection{Instrument, Audience and Ethical Approval}
+% TODO: 5.5.1 prose block (11 questions; Microsoft Forms; n=8 at 2026-05-24, target ~10; tab:eval-survey-summary)
+
+\subsubsection{Baseline Perception of Lab Support}
+% TODO: 5.5.2 prose block (Q2 + Q3 + Q4 themes; fig:eval-survey-baseline)
+
+\subsubsection{Dashboard Interpretability and Trust}
+% TODO: 5.5.3 prose block (Q5 + Q6 + Q7; fig:eval-survey-clarity, fig:eval-survey-trust)
+
+\subsubsection{Student Comfort and Ethical Concerns}
+% TODO: 5.5.4 prose block (Q8 + Q9 + Q10; fig:eval-survey-comfort, fig:eval-survey-themes)
+
+\subsubsection{Change Requests and Triangulation with Quantitative Results}
+% TODO: 5.5.5 prose block (Q11; triangulation with 5.4 findings)
+
+\subsection{Discussion} \label{sec:eval-discussion}
 
 \subsubsection{Model Disagreement}
+% TODO: 5.6.1 prose block
+
+\subsubsection{Tradeoffs and Threats to Validity}
+% TODO: 5.6.2 prose block
 
 \subsubsection{Limitations}
+% TODO: 5.6.3 prose block

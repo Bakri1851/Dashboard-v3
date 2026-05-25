@@ -1,4 +1,4 @@
-\section{Implementation}
+\section{Implementation} \label{sec:implementation}
 
 % TODO: write per Ch4 Rewrite Brief §4.1 - chapter intro paragraph(s) (V1/V2 framing)
 
@@ -1084,7 +1084,7 @@ The user ID is only used locally for the pandas filter and as a cache key; it ne
 
 The dashboard's instructor functionality is implemented twice, the V1 implementation lives in \texttt{code/learning\_dashboard/ui/views.py} as the seven page Streamlit app, whilst the V2 implementation lives in \texttt{code2/frontend/src/views/} as an eight page React app served by FastAPI. 
 Both have a \texttt{learning\_dashboard.*} analytical core through different transport layers, with V1 importing the modules directly into the Streamlit process and V2 calling them over HTTP via the FastAPI routers described in Section \ref{sec:structure}. 
-Parity is deliberate as V2 reimpliments the same views as V1 so that we can use it as part of our evaluation later on, despite replicating the views, V2 has its own new view that is not in V1, Session Progression. Table \ref{tab:views-comparison} summarises the per-view parity status across both versions.
+Parity is deliberate as V2 reimplements the same views as V1 so that we can use it as part of our evaluation later on, despite replicating the views, V2 has its own new view that is not in V1, Session Progression. Table \ref{tab:views-comparison} summarises the per-view parity status across both versions.
 
 \begin{table}[H]
 \centering
@@ -1118,11 +1118,11 @@ Session Progression & Time-bucket replay of an ended session                    
 
 The In-Class view is the dashboard's live session hub, where instructors spend most of their time during a session and will see first on launch. Both versions present the two side-by-side leaderboards where at the top are the top strugglers ordered by descending struggle level and hardest questions ordered by descending difficulty level. 
 Each leaderboard is capped at \texttt{LEADERBOARD\_MAX\_ITEMS = 15}, with bar colours following the threshold bands from Section \ref{sec:design}, where with this theme they were adjusted so that grey is Minor Issues/Medium and light blue is On Track/Easy. 
-Beneath the leaderboards are three small panels with the struggle and diffculty distribution histograms as well as a last-24-hours submission timeline. 
+Under the leaderboards all views render the two score-distribution histograms, with a collaborative filtering diagnostic panel appearing alongside them when the CF toggle is enabled in Settings. 
 Clicking a bar drills into the corresponding Student or Question Detail view; Streamlit uses \texttt{st.plotly\_chart(on\_select ="rerun")} with a \texttt{point\_index} lookup whilst V2 routes via React Router to \texttt{/student/:id} or \texttt{/question/:id}. 
 
 V2 carries two forms of the In Class view, the default one is the Basic layout which is the one the instructor sees on the first load due to the \texttt{useUiPrefsStore} preference store initialising the \texttt{inClassViewMode} value to \texttt{'basic'}; the layout is selectable through the Settings page's \emph{In-class layout} toggle. 
-The basic layout abstracts a lot from the advanced view so that it is a single colour coded bar per student or question, stretched to fill the row using the cohort min-max scale with a minmum visible fill so the lowest score is still visible. 
+The basic layout abstracts a lot from the advanced view so that it is a single colour coded bar per student or question, stretched to fill the row using the cohort min-max scale with a minimum visible fill so the lowest score is still visible. 
 When switching to the Advanced view the user is able to see more data immediately which includes submissions, their last registered score, the trend in score for the student side of the in class view and for the question side of the in class view they can see the amount of students attempting the question with the average attempts. 
 V1 has no equivalent view toggle and its default view is close to what V2's Basic view offers.
 
@@ -1150,7 +1150,7 @@ V1 has no equivalent view toggle and its default view is close to what V2's Basi
 
 \subsubsection{Student Detail View}
 
-The Student Detail view gives a per-signal breakdown of a single student's struggle score, with one bar for each of the seven signals defined in \ref{sec:analytis} ($N$ submission count, $T$ time per attempt, $I$ recent incorrectness, $R$ retry rate, $A$ activity intensity, $D$ improvement slope and $\mathrm{Rep}$ repeat-question rate), alongside a submission timeline ordered by timestamp with incorrectness coded as the bar colour with at most the 10 of the hardest questions for the student, each row drills into the corresponding Question Detail page. Additionally there is RAG suggestions here like that which the lab assistant would get.
+When the In-Class layout is set to Advanced, the Student Detail view gives a per-signal breakdown of a single student's struggle score, with one bar for each of the seven signals defined in \ref{sec:analytics} ($N$ submission count, $T$ time active in the session, $I$ mean incorrectness across submissions, $R$ retry rate, $A$ recent incorrectness with a 30-minute exponential decay, $D$ improvement slope and $\mathrm{Rep}$ answer-repetition rate), alongside an hour-of-day distribution of this student's submissions and a list of at most ten of the hardest questions for the student, where each row drills into the corresponding Question Detail page. Additionally there is RAG suggestions here like that which the lab assistant would get. When the Improved Models toggle is enabled in Settings, the view also adds a BKT mastery panel for the modules the student has touched and a decomposition of the Improved Struggle score into its behavioural, mastery-gap and IRT-difficulty-adjusted components from Section \ref{sec:advanced}.
 
 
 \begin{figure}[H]
@@ -1186,7 +1186,7 @@ The instructor can also see the mistake clusters for the question, which are gen
 \subsubsection{Data Analysis View}
 
 The Data Analysis view exposes summaries based off all the data pulled from the endpoint and is meant to be used for offline analysis of data rather than in-session use. 
-Data is aggregated by the \texttt{academic\_week} module to map raw dates into the Loughborough 2025/26 week labels so that the instructor questions phrased in academic time can be answered more swiftly by Loughborough academics. 
+Data is aggregated by the \texttt{academic\_calendar} module to map raw dates into the Loughborough 2025/26 week labels so that the instructor questions phrased in academic time can be answered more swiftly by Loughborough academics. 
 A selectbox allows the users to switch between six different chart modes:  module usage, top questions, user activity, activity timeline, activity by academic week and students by module, with the top-questions and user-activity tables capped at \texttt{DATA\_ANALYSIS\_TOP\_QUESTIONS = 10} and \texttt{DATA\_ANALYSIS\_TOP\_USERS = 20} respectively. 
 The activity-by-week chart in V2 is rendered as a week-by-day heatmap rather than V1's bar chart; the underlying \texttt{academic\_calendar} mapping is shared between the two versions so the period semantics are identical.
 
@@ -1204,8 +1204,8 @@ The activity-by-week chart in V2 is rendered as a week-by-day heatmap rather tha
 \subsubsection{Model Comparison View}
 
 The Model Comparison view sits behind the Improved Models toggle and feeds into the quantitative evaluation in Chapter \ref{sec:evaluation}, it is not a screen intended for production use but rather a development and evaluation tool to compare the struggle/question signals side by side and sanity check the model outputs. 
-The data is split into two tabs where baseline struggle is plotted against improved struggle on a scatter chart and surfaces headline metrics including Spearman $\rho$, the top 10 students on each model, as well as the biggest disagreements between the models. 
-Similarly for the Question difficulty model comparison, the baseline difficulty is plotted against the IRT (Rasch) Difficulty on a scatter chart and surfaces the headline metrics included Spearman $\rho$, the top 10 questions on each model as well as the biggest disagreement between the models.
+The data is split into two tabs where baseline struggle is plotted against improved struggle on a scatter chart and surfaces headline metrics including Spearman $\rho$, the top-10 overlap (the fraction of students appearing in both models' top-10 lists), as well as the biggest disagreements between the models. 
+Similarly for the Question difficulty model comparison, the baseline difficulty is plotted against the IRT (Rasch) Difficulty on a scatter chart and surfaces the headline metrics included Spearman $\rho$, the top-10 overlap (the fraction of questions appearing in both models' top-10 lists) as well as the biggest disagreement between the models.
 
 
 \begin{figure}[H]
@@ -1223,7 +1223,9 @@ Similarly for the Question difficulty model comparison, the baseline difficulty 
 
 Both versions expose the runtime model configuration through a Settings page, where they both have common toggles such as Sound Effects (\texttt{SOUNDS\_ENABLED\_DEFAULT = True}), Auto-Refresh (\texttt{AUTO\_REFRESH\_DEFAULT = True}) with the refresh interval selectable from \texttt{AUTO\_REFRESH\_OPTIONS = [5, 10, 15, 30, 60, 120, 300]} seconds, Collaborative Filtering (\texttt{cf\_enabled}) with the similarity-threshold slider $\tau$, and the two model-choice selectboxes. 
 When Improved is selected, four sliders appear for the BKT parameters $P(L_0)$, $P(T)$, $P(G)$ and $P(S)$ with defaults from Section \ref{sec:advanced}, a slider change retriggers the per-student mastery computation on the next refresh. 
-The two diverge in a few places where V2 has a theme picker that persist to \texttt{localStorage} and a In Class layout toggle (Basic/Advanced)
+The two diverge in a few places where V2 has a theme picker that persists to \texttt{localStorage} and an In-Class layout toggle (Basic/Advanced). V1 also exposes a Temporal Smoothing toggle (\texttt{SMOOTHING\_ENABLED}) where V2 hard-codes the EMA at $\alpha = 0.3$ and surfaces \texttt{smoothing\_alpha} only in a read-only configuration reference at the bottom of the page.
+
+V1 also carries a small UX flourish that V2 does not: six short sci-fi sound cues fired at session start, session end, student selection and other key events, authored as Web Audio API \texttt{OscillatorNode} and \texttt{GainNode} chains in \texttt{code/learning\_dashboard/sound.py} and injected through a zero-height iframe via \texttt{st.components.v1.html()} as Streamlit cannot natively play audio. The cues are gated by the Sound Effects toggle and, whilst not load-bearing analytically, help the instructor track session state without staring at the screen.
 
 
 
@@ -1257,7 +1259,7 @@ V1 writes \texttt{pending\_session\_load\_record} into session state so that the
 
 \subsubsection{Session Progression View (V2-only)}
 The Session Progression View is a V2-only view which lives at \texttt{code2/frontend/src/views/SessionProgression.tsx}. 
-It replays an ended section as 12 evenly spaced time buckets by default and then animates the React view as a stacked chart of the four struggle bands through the timeline, with a per bucket snapshots with the cumulative submission count, unique students, mean incorrectmess and students who were flagged as "Needs Help". 
+It replays an ended session as 12 evenly spaced time buckets by default and then animates the React view as a stacked chart of the four struggle bands through the timeline, with a per bucket snapshots with the cumulative submission count, unique students, mean incorrectness and students who were flagged as "Needs Help". 
 The view is useful for looking at in session trends such as seeing when progress in the class had started to decline as well as answering other questions the In Class View cannot answer. 
 V1 has no equivalent functionality as this the idea for this had come after the V1 had been developed, it would also be significantly harder to replicate in Streamlit than it is in React as it is handled natively.
 
@@ -1277,46 +1279,78 @@ V1 has no equivalent functionality as this the idea for this had come after the 
 
 \subsection{Lab Assistant System} \label{sec:assistant}
 
-% TODO: write per Ch4 Rewrite Brief §4.10
+The lab assistant system is the mobile-optimised component of the dashboard that allows lab assistants to get assigned to students, mark them as helped once they have provided support, as well as receive the RAG-suggested feedback for the student they are helping to make more informed decisions about their guidance to students. 
+The assistants are coordinated through the shared session file introduced in Section \ref{sec:session}. 
+V1's assistant system is shipped as a separate Streamlit app (\texttt{code/lab\_app.py}, delegating into \texttt{code/learning\_dashboard/assistant\_app.py}), V2 ships it as a React mobile route mounted under \texttt{/mobile} on the same FastAPI process that serves the instructor SPA, with the four state views split across \texttt{code2/frontend/src/mobile/views/}. 
+Both versions coordinate through the shared \texttt{data/lab\_session.json} file with reads and writes serialised by filelock, so an instructor running V1 and an assistant running V2, or vice versa, see one another's state changes. 
+V2 splits the same dispatch functionality across two views, the dedicated screen at  \texttt{code2/frontend/src/views/LabAssistantView.tsx}, and the main form of dispatching which are dropdowns in each row of the In Class leaderboard with the \texttt{AssignCell} component. 
+V1 keeps all allocation controls in the instructor sidebar.
 
-\subsubsection{Session Join Flow}
+\subsubsection{Session Join}
 
-% TODO: write per Ch4 Rewrite Brief §4.10.1
+On the first load, both versions present a single screen join form where the assistant enters their name and the six-character session code (\texttt{LAB\_CODE\_LENGTH = 6}) shown on the instructor dashboard and the client POSTs to the shared lab-state file through \texttt{learning\_dashboard.lab\_state.join\_session} (V1) or \texttt{POST /api/lab/join} (V2), receiving an assistant ID. 
+Identity is then persisted so that refreshing the browser does not force a rejoin, with the V1 writing the assistant ID into the URL as the \texttt{?aid=} query parameter (which has the side-benefit that a shared link can auto-rejoin) and V2 writing it to \texttt{localStorage} via the small \texttt{readAid}/\texttt{writeAid} helpers in \texttt{mobile/state/aid.ts} so that the URL stays clean. 
+V2 also wraps the first \texttt{POST /api/lab/join} in a silent retry loop so that if the assistant cannot join due to the session just starting, the failed join refetches \texttt{/api/lab/state} and retries silently on its own rather than surfacing the error.
+
 
 \begin{figure}[H]
     \centering
     \IfFileExists{figures/implementation/asst-join.png}{%
-        \includegraphics[width=0.5\linewidth]{figures/implementation/asst-join.png}%
+        \includegraphics[width=0.4\linewidth]{figures/implementation/asst-join.png}%
     }{%
         \fbox{\parbox{0.6\textwidth}{\centering\vspace{4em}\textbf{Figure placeholder: Lab assistant join screen}\\\textit{Mobile-viewport screenshot of the lab assistant join page (no \texttt{aid} query parameter present), showing the session-code field and the assistant-name field.}\\\footnotesize Drop \texttt{figures/implementation/asst-join.png} into the repo to auto-resolve this figure.\vspace{4em}}}%
     }
-    \caption{Lab assistant join screen, entered when no \texttt{aid} query parameter is bound to the URL.}
+    \caption{Lab assistant join screen}
     \label{fig:asst-join}
 \end{figure}
 
 \subsubsection{Waiting and Assignment States}
 
-% TODO: write per Ch4 Rewrite Brief §4.10.2
+Between assignments the assistant lands on a waiting view that shows their name and active session as well as a button to leave the session. 
+The assistants can also see a ranked list of the students, where only students whose struggle has been flagged as "Struggling" or "Needs Help" are shown in the list ordered by descending struggle score. 
+Students who are already being helped by another assistant are also not shown to the assistant to avoid confusion. 
+The same list is visible to every joined assistant and to the instructor in real time as the lab-state file where lab information is stored, shared and synchronised. 
+When the instructor enables the \texttt{allow\_self\_allocation} flag in their controls, each row carries a help student button where the assistant can choose to help a student, when the flag is off (the default), the list is read only and the assistant has to wait for an allocation. 
+Both behaviours have a reason to exist as some instructors may want to have more control over the allocation process and prefer to allocate students themselves through the instructor dashboard, whilst others may prefer to let the assistants self-allocate to students as they see fit.
 
 \begin{figure}[H]
     \centering
-    \IfFileExists{figures/implementation/asst-unassigned.png}{%
-        \includegraphics[width=0.5\linewidth]{figures/implementation/asst-unassigned.png}%
-    }{%
-        \fbox{\parbox{0.6\textwidth}{\centering\vspace{4em}\textbf{Figure placeholder: Lab assistant standby view}\\\textit{Mobile-viewport screenshot of the lab assistant standby view (\texttt{aid} present but no student assigned), showing the joined-assistant indicator and the list of students available to self-claim.}\\\footnotesize Drop \texttt{figures/implementation/asst-unassigned.png} into the repo to auto-resolve this figure.\vspace{4em}}}%
-    }
-    \caption{Lab assistant standby view shown once the assistant has joined but before any student is assigned.}
+    \begin{subfigure}[t]{0.4\linewidth}
+        \centering
+        \IfFileExists{figures/implementation/asst-unassigned.png}{%
+            \includegraphics[width=\linewidth]{figures/implementation/asst-unassigned.png}%
+        }{%
+            \fbox{\parbox{0.9\linewidth}{\centering\vspace{2em}\textbf{Figure placeholder: self-allocation off}\vspace{2em}}}%
+        }
+        \caption{Self-allocation off}
+        \label{fig:asst-unassigned-readonly}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}[t]{0.4\linewidth}
+        \centering
+        \IfFileExists{figures/implementation/asst-unassigned2.png}{%
+            \includegraphics[width=\linewidth]{figures/implementation/asst-unassigned2.png}%
+        }{%
+            \fbox{\parbox{0.9\linewidth}{\centering\vspace{2em}\textbf{Figure placeholder: self-allocation on}\vspace{2em}}}%
+        }
+        \caption{Self-allocation on }
+        \label{fig:asst-unassigned-selfalloc}
+    \end{subfigure}
+    \caption{Lab assistant standby view in both allocation modes.}
     \label{fig:asst-unassigned}
 \end{figure}
 
 \subsubsection{Live Assistant Allocation and Mark-Helped}
 
-% TODO: write per Ch4 Rewrite Brief §4.10.3
+Once a student is assigned, either by the instructor or self claiming, the assistant view transitions into a single student card that carries information the assistant needs at the desk such as the student name (anonymised ID in this case), current struggle score, current struggle band they are in, suggested feedback for the student from the RAG layer described in Section \ref{sec:rag} and the student top three hardest questions. 
+The RAG panel is does not give any suggestions when a student has fewer than \texttt{RAG\_MIN\_SUGGESTIONS = 2} submissions instead rendering a message informing the user that there is not enough data to generate suggestions, as the feedback is unlikely to be useful. 
+Two actions are available to the assistant with "Mark Helped" setting the assignment status to "helped" and shows a confirmation badge but leaves the assistant assigned to the student, which lets the assistant keep checking in without releasing the slot, whilst "Release Student" actually unassigns the student and returns the assistant to the waiting view so a fresh student can be dispatched. "Release Student" is also useful for the assistant to indicate that they were not able to help the student allowing another assistant to pick them up.
+
 
 \begin{figure}[H]
     \centering
     \IfFileExists{figures/implementation/asst-assigned.png}{%
-        \includegraphics[width=0.5\linewidth]{figures/implementation/asst-assigned.png}%
+        \includegraphics[width=0.4\linewidth]{figures/implementation/asst-assigned.png}%
     }{%
         \fbox{\parbox{0.6\textwidth}{\centering\vspace{4em}\textbf{Figure placeholder: Lab assistant assigned view}\\\textit{Mobile-viewport screenshot of the lab assistant assigned view (\texttt{aid} present and student assigned), showing the assigned student's card with the \emph{mark helped} action.}\\\footnotesize Drop \texttt{figures/implementation/asst-assigned.png} into the repo to auto-resolve this figure.\vspace{4em}}}%
     }
@@ -1324,7 +1358,63 @@ V1 has no equivalent functionality as this the idea for this had come after the 
     \label{fig:asst-assigned}
 \end{figure}
 
+
+\begin{figure}[H]
+    \centering
+    \IfFileExists{figures/implementation/asst-dispatch.png}{%
+        \includegraphics[width=1\linewidth]{figures/implementation/asst-dispatch.png}%
+    }{%
+        \fbox{\parbox{0.85\textwidth}{\centering\vspace{3em}\textbf{Figure placeholder: V2 instructor dispatch console}\\\textit{Desktop screenshot of the V2 \texttt{LabAssistantView}, showing the session banner with the join code, the assistants roster with at least one helping and one waiting assistant, and the Dispatch Queue with at least one ranked struggler available to dispatch.}\vspace{3em}}}%
+    }
+    \caption{V2 instructor dispatch console.}
+    \label{fig:asst-dispatch}
+\end{figure}
+
+
 \subsection{Problems Encountered and Solutions} \label{sec:problems}
+
+
+A number of issues emerged whilst developing the project; Table \ref{tab:problems} highlights the eight main problems encountered.
+
+{\small
+\begin{longtable}{|p{0.18\textwidth}|p{0.37\textwidth}|p{0.37\textwidth}|}
+\caption{Implementation problems encountered and their resolutions.} \label{tab:problems} \\
+\hline
+\textbf{Problem} & \textbf{Description} & \textbf{Resolution} \\
+\hline\hline
+\endfirsthead
+\multicolumn{3}{l}{\textit{Table \ref{tab:problems} continued from previous page}} \\
+\hline
+\textbf{Problem} & \textbf{Description} & \textbf{Resolution} \\
+\hline\hline
+\endhead
+\hline
+\multicolumn{3}{r}{\textit{continued on next page}} \\
+\endfoot
+\hline
+\endlastfoot
+
+Streamlit widget-instantiation rule & Mutating \texttt{st.session\_state} after a widget has been instantiated raises \texttt{StreamlitAPIException}, breaking the obvious callbacks & Deferred-actions pattern from Section \ref{sec:structure}: callbacks write \texttt{pending\_*} flags into session state, and the top of \texttt{main()} applies them on the next rerun before any sidebar widget is built. \\
+\hline
+Cross-process write conflicts on the shared lab-state file & Up to three processes (V1 instructor, V1 assistant, V2 FastAPI) can read and write \texttt{data/lab\_session.json} at the same time; without coordination, conflicting or incomplete writes lose updates or corrupt the file. & Every read and write is wrapped in a \texttt{filelock.FileLock} with a configurable timeout, and writes go to a \texttt{.tmp} file that is then \texttt{os.replace()}'d atomically so a partial write is never observable. \\
+\hline
+OpenAI scoring cold-start cost & On a fresh session the first run would block for tens of seconds whilst every submission was sent to \texttt{gpt-4o-mini} for an incorrectness score. & Two-layer cache: an in-process dictionary satisfies repeat lookups within one process, and a disk-persisted JSON cache at \texttt{data/incorrectness\_cache.json} survives restarts. The prewarm bypasses the OpenAI call entirely when over 95\% of unique feedback strings are already cached. \\
+\hline
+V2 FastAPI cold-start latency & V2 fits BKT, fits the 2PL IRT, and builds the ChromaDB embedding index at process startup so every subsequent request hits warm caches; running this expensive work synchronously inside the FastAPI startup hook would freeze the event loop for several minutes and block all incoming requests during prewarm. & A \texttt{lifespan} startup handler runs the OpenAI prewarm, the per-skill BKT fits, the 2PL IRT fit, and the ChromaDB build in the background before the server reports ready, and the fitted parameters are cached for the process lifetime. \\
+\hline
+BKT identifiability on single-class data & When every observed attempt in the window is graded the same way (all correct or all incorrect), the BKT log-likelihood surface degenerates and L-BFGS-B returns nonsensical parameters. & The fit refuses when fewer than \texttt{BKT\_FIT\_MIN\_OBSERVATIONS = 50} attempts are available, or when every attempt is graded identically; the per-skill fit retains the configured defaults and logs a diagnostic explaining the cause. \\
+\hline
+Per-module difficulty normalisation & V1 min-max normalised the five difficulty signals globally across the entire question set, so one module with a wider raw-signal range could dominate the leaderboard regardless of within-module difficulty. & V2's \texttt{compute\_question\_difficulty\_scores} routes each raw signal through \texttt{min\_max\_normalise\_grouped} keyed by module, restoring per-module sensitivity without changing the weight vector. \\
+\hline
+Improved-struggle dependence on optional model outputs & The improved struggle score combines behavioural + BKT mastery-gap + IRT-adjusted components under a fixed convex weighting; when either upstream model fails to fit, the score becomes undefined or skewed. & Graceful weight redistribution: if BKT mastery is unavailable, $w_M$ is absorbed entirely into $w_B$; if IRT difficulty is unavailable, $w_D$ is absorbed entirely into $w_B$ (see Table \ref{tab:improved-redist}). The score is always defined and degrades cleanly. \\
+\hline
+RAG generation blocking the FastAPI event loop & Each RAG suggestion call in the request handler runs a sentence-transformer embedding of the student's recent submissions plus an OpenAI completion --- both synchronous and slow enough that, if executed inline in the FastAPI event loop, would block every concurrent request until the call returned. & The RAG router \texttt{await}s \texttt{asyncio.to\_thread(\ldots)} around the generator call, offloading the synchronous work to the default thread pool so the event loop stays responsive. The first-time ChromaDB collection build is a separate concern handled by the \texttt{lifespan} startup prewarm, not by the request handler.  \\
+\hline
+\end{longtable}
+}
+
+%give 8th and 4th extra checks
+
 
 % TODO: write per Ch4 Rewrite Brief §4.11 - drop in tab:problems
 % Note: sound-effects discussion now lives inside §4.9.6 Settings View (the toggle is there); old standalone §4.11 Sound Effects subsection removed during 2026-05-20 layout refinement.

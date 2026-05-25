@@ -954,7 +954,7 @@ On first access (Figure~\ref{fig: figma4}), the assistant enters the session cod
 
 Between assignments (Figure~\ref{fig: figma5}), the assistant sees a ranked list of students currently flagged for help, ordered by their struggle score. The assistant may wait for the instructor to allocate them directly, or self-claim a student from the list when the instructor has enabled this. The same list is visible to every joined assistant; once a student is claimed, they are removed from the unassigned pool so two assistants cannot end up at the same desk.
 
-Once a student is assigned (Figure~\ref{fig: figma6}), the view collapses to a single student card carrying the information the assistant needs at the desk: the student's current struggle context, the questions they are most incorrect on, and a short list of coaching prompts retrieved from the RAG layer described in Section~\ref{sec:rag}. A \emph{Mark Helped} action returns the assistant to the unassigned state.
+Once a student is assigned (Figure~\ref{fig: figma6}), the view collapses to a single student card carrying the information the assistant needs at the desk: the student's current struggle context, the questions they are most incorrect on, and a short list of coaching prompts retrieved from the RAG layer described in Section~\ref{sec:rag}. A Mark Helped action lets the user know the student was helped, after which the assistant can either release the student or continue providing assistance.
 
 \subsubsection{Visual Encoding of Metrics}
 
