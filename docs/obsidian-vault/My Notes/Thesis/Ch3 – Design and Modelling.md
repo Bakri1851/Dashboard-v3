@@ -2,10 +2,10 @@
 
 Thesis chapter covering system architecture, data endpoint, mathematical models, and UI design.
 
-Related: [[Thesis Overview]], [[Report Sync]], [[Architecture]], [[Analytics Engine]], [[Student Struggle Logic]], [[Question Difficulty Logic]], [[IRT Difficulty Logic]]
+Related: [[Thesis Overview]], [[Report Sync]], [[Architecture]], [[Analytics Engine]], [[Student Struggle Logic]], [[Question Difficulty Logic]], [[IRT Difficulty Logic]], [[v2 Empirical Refinement Brief]]
 
 **Source file:** `main sections/design and architecture.tex`
-**Status:** **Closed at prose level 2026-05-19** — all sub-sections filled or updated; Figma mockups for §3.6.3 outstanding (user generating); §3.6.2 caveat softening deferred to chapter-wide design-vs-implementation reframe pass.
+**Status:** **Closed at prose level 2026-05-19** — all sub-sections filled or updated; Figma mockups for §3.6.3 outstanding (user generating); §3.6.2 caveat softening deferred to chapter-wide design-vs-implementation reframe pass. **One small amendment ready 2026-05-25**: ~120-word paragraph after `design-and-architecture.tex:259` ("trial and error in the absence of labelled ground-truth data" sentence) framing v2 as empirical refinement and signposting to §5.4; full brief at [[v2 Empirical Refinement Brief]] §1.
 
 > **Sync note (2026-04-18):** "Current contents" below reflects the thesis state *before* the Phase 6 tex-skeleton additions (2026-04-12). For the current tex subsection tree and the active writing backlog, see [[Rewrite Queue#Phase 6 additions (2026-04-12)]] and the toolkit's Status panel §6 Source reconciliation.
 

@@ -200,3 +200,6 @@ Phase 9 RAG pipeline (ChromaDB + sentence-transformers).
 - 🟡 [[cohen_1960_a|Cohen (1960)]] — coefficient of agreement for nominal scales (kappa)
 - 🟡 [[fawcett_2006_an|Fawcett (2006)]] — introduction to ROC analysis
 - 🟡 [[hanley_1982_the|Hanley & McNeil (1982)]] — meaning and use of the area under an ROC curve
+- 🟡 [[landisMeasurementObserverAgreement1977|Landis & Koch (1977)]] — strength-of-agreement thresholds for Cohen's κ (slight / fair / moderate / substantial / almost perfect); canonical interpretation source for the §5.4.2 inter-rater agreement numbers — **pending Zotero import**
+- 🟡 [[bergstraAlgorithmsHyperParameterOptimization2011|Bergstra et al. (2011)]] — Tree-structured Parzen Estimator (TPE); Bayesian-optimisation algorithm used by Optuna in §5.4.10 hyperparameter search — **pending Zotero import**
+- 🟡 [[akibaOptunaNextgenerationHyperparameter2019|Akiba et al. (2019)]] — Optuna framework; the next-generation hyperparameter optimisation library used to tune K and τ in §5.4.10 — **pending Zotero import**

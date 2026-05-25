@@ -211,3 +211,45 @@ When figures get drawn / captured in one sitting, the suggested order is:
 - Brief Part C inventory: [Ch4 Rewrite Brief.md §Part C](Ch4%20Rewrite%20Brief.md)
 - Plan file with the chat-level details: `~/.claude/plans/i-m-continuing-work-on-reactive-goblet.md`
 - Implementation file: `Report/main-sections/implementation.tex`
+
+---
+
+## 2026-05-25 — Ch5 §5.4 v2 empirical-refinement figures (auto-generated)
+
+Eleven PNGs produced by `notebooks/eval_main.ipynb` and saved under `data/eval/figures/` at ≥200 DPI. They support the new §5.4.2 (κ), §5.4.3–§5.4.4 (struggle headline), §5.4.9 (negative findings: difficulty + improved-blend), §5.4.10 (Optuna), and §5.6.1 (v1↔v2 disagreement). Brief at [[v2 Empirical Refinement Brief]] specifies target subsubsections + LaTeX label suggestions.
+
+**Action:** copy each PNG from `data/eval/figures/` into `Report/figures/evaluation/` (folder may need creating) and add `\includegraphics` lines under the matching `\subsubsection` blocks in `results-and-evaluation.tex`.
+
+| Source file (`data/eval/figures/`) | Target § | Suggested LaTeX label | Subject |
+|---|---|---|---|
+| `band_distributions.png` | 5.4.1 | `fig:eval-cohort-bands` | 4-panel cohort characteristics: v1 struggle bands + v1 difficulty bands + LLM struggle band distribution + LLM difficulty band distribution |
+| `kappa_block.png` | 5.4.2 | `fig:eval-kappa` | 3-bar κ values (binary intervene + linear-weighted band + quadratic-weighted band) with Landis–Koch thresholds overlay |
+| `weights_struggle_v1_v2.png` | 5.4.3 | `fig:eval-weights-struggle` | Paired horizontal bar chart, 7 signals, v1 (left) vs v2 (right) with per-fold std error bars; HEADLINE positive finding |
+| `auc_per_fold_struggle.png` | 5.4.4 | `fig:eval-auc-perfold-struggle` | 5-bar per-fold AUC with mean horizontal line + 95% CI band; per-fold AUC table also lifted from `results.md` |
+| `roc_struggle_v1_v2.png` | 5.4.3 | `fig:eval-roc-struggle` | v1 ROC overlaid with v2 ROC; AUC in legend |
+| `calibration_struggle_v2.png` | 5.4.3 | `fig:eval-calibration-struggle` | 10-bin reliability diagram for v2 struggle; diagonal reference for perfect calibration |
+| `weight_stability_heatmap_struggle.png` | 5.4.3 | `fig:eval-stability-struggle` | 7 signals (rows) × 5 folds (cols) signed-weight heatmap, annotated; shows whether folds agree on sign |
+| `confusion_bands_v1_v2.png` | 5.4.3 / 5.6.1 | `fig:eval-confusion-bands` | Side-by-side 4×4 confusion matrices: v1 predicted bands vs LLM, v2 predicted bands vs LLM; `RdGy` cmap |
+| `weights_difficulty_v1_v2.png` | 5.4.9 | `fig:eval-weights-difficulty` | Paired bar chart, 5 signals, difficulty v1 vs v2; NEGATIVE finding (2 sign flips, AUC 0.345 < random) |
+| `weights_improved_v1_v2.png` | 5.4.9 | `fig:eval-weights-improved` | Paired bar chart, 3 weights, improved-blend v1 vs v2; NEGATIVE finding (w_M and w_D flipped negative) |
+| `disagreement_matrix.png` | 5.6.1 | `fig:eval-disagreement-matrix` | 4×4 v1 bands vs v2 bands confusion; HEADLINE: 31.2% of snapshots reclassified |
+
+### Tables to lift directly from `data/eval/results.md`
+
+Seven Markdown tables ready to convert to LaTeX `tabular` / `tabularx`. Source: `data/eval/results.md` (auto-generated; re-run notebook to refresh).
+
+| Table | Target § | Suggested LaTeX label | Lifted from |
+|---|---|---|---|
+| Cohort | 5.4.1 | `tab:eval-cohort` | `results.md` § Cohort |
+| Cohen's κ (n=50) | 5.4.2 | `tab:eval-kappa` | `results.md` § §5.4.2 |
+| Struggle v1 vs v2 weights (7 signals + signs) | 5.4.3 | `tab:eval-weights-struggle` | `results.md` § §5.4.3 |
+| Per-fold AUC (struggle, 5 folds) | 5.4.4 | `tab:eval-auc-perfold-struggle` | `results.md` § §5.4.4 |
+| Difficulty v1 vs v2 weights (5 signals + signs) | 5.4.9 | `tab:eval-weights-difficulty` | `results.md` § §5.4.9 (first table) |
+| Improved-blend v1 vs v2 weights (3 weights + signs) | 5.4.9 | `tab:eval-weights-improved` | `results.md` § §5.4.9 (second table) |
+| Hyperparam optimisation (Optuna TPE: K + τ) | 5.4.10 | `tab:eval-hyperparams-optuna` | `results.md` § §5.4.10 |
+
+### Verdict scorecard table (lift from [[Evaluation PoC Handoff]] §13)
+
+| Target § | Suggested LaTeX label | Subject |
+|---|---|---|
+| 5.6.1 | `tab:eval-verdict-scorecard` | 5-row table: component × winner × numbers × phase; lifted verbatim from [[Evaluation PoC Handoff]] §13 |

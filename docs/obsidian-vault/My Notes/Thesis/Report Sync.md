@@ -172,7 +172,11 @@ See [[Ch4 – Implementation]] for full chapter analysis.
 
 ---
 
-## Ch5 Results and Evaluation — Status: Empty (CRITICAL)
+## Ch5 Results and Evaluation — Status: Brief delivered + numbers ready (2026-05-25)
+
+> **Update 2026-05-25:** The §5.4 v2 empirical-refinement brief is delivered at [[v2 Empirical Refinement Brief]] — single self-contained paste-ready brief for the writing chat covering Ch3 amendment (~120 words, line 259 anchor), Ch4 amendment (~90 words, line 952 anchor + §4.9.6 settings insertion), and the new §5.4.2 (κ), §5.4.3 (struggle headline AUC 0.836), §5.4.9 (negative findings: difficulty AUC 0.345 and improved-blend AUC 0.637), §5.4.10 (Optuna TPE: K Δ+0.007, τ Δ+0.118), §5.6.1 (v1↔v2 disagreement 31.2%). Numbers auto-generated to `data/eval/results.md`; 11 figures inventoried under `data/eval/figures/`. ToC restructured 2026-05-24 (Hybrid 5.1–5.6); §5.1 drafted in [[Ch5 §5.1 Drafting Plan]]. Section-level status now lives in [[Ch5 – Results and Evaluation]]; this entry remains the cross-reference back to Report Sync.
+
+### Original analysis (pre-evaluation pipeline, retained for context)
 
 **What the report says:** 5 subsection headers only: Evaluation Design, Functional Testing, Non-Functional Testing, Results, Discussion. No content.
 

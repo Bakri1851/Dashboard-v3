@@ -1,7 +1,7 @@
 ---
 tags: [thesis, evaluation, ch5, implementation, handoff, live]
 date: 2026-05-25
-status: 🟢 Phase 6 done — notebooks/eval_main.ipynb runs end-to-end; 10 figures + data/eval/results.md generated. Phase 7 (writing-chat briefs) next
+status: 🟢 Implementation + Phase 7 briefs done. See [[v2 Empirical Refinement Brief]] for the Ch3/Ch4/Ch5 writing-chat brief. Phase 8 (literature) optional
 source: Conversation 2026-05-24 + 2026-05-25 (human + Claude)
 related: [[Evaluation Plan]], [[Ch5 – Results and Evaluation]], [[Evidence Bank]], [[Report Sync]], [[Improved Struggle Logic]], [[BKT Mastery Logic]], [[IRT Difficulty Logic]], [[Student Struggle Logic]], [[Setup and Runbook]], [[Full Roadmap]]
 ---
@@ -468,8 +468,50 @@ live continuation surface.
 
 ---
 
+## 13 · Final v1-vs-v2 verdict scorecard (post-Phase 4d)
+
+Five optimisation targets across Phases 4a–d. Two-and-a-half wins each.
+**This is the §5.4 headline narrative for the thesis.**
+
+| Component | Winner | AUC / Evidence | Phase |
+|---|---|---|---|
+| **Struggle composite** (7 LR weights) | ✅ **v2** | 0.836 [0.762, 0.911] vs v1 baseline; `n_hat`, `t_hat`, `rep_norm` sign-flipped → activity proxies engaged self-recovery, not stuck-persistence | 4a |
+| **Difficulty composite** (5 LR weights) | ✅ **v1** | v2 AUC 0.345 (< random) — LR fits noise at N=72 on COA122's uniformly-hard cohort | 4b |
+| **Improved-blend** (3 mixing weights) | ✅ **v1** | v2 AUC 0.637 (worse than struggle-v2 alone); LR flipped $w_M$ and $w_D$ negative → BKT+IRT components add noise not signal | 4c |
+| **Shrinkage K** (scalar) | ⚖️ **tied** | v2 K=1 beats v1 K=5 by Δ+0.007 — within fold-variance noise; either defensible | 4d |
+| **CF threshold τ** (scalar) | ✅ **v2** | +0.118 AUC (0.682 → 0.800); hand-set τ=0.7 was meaningfully too permissive | 4d |
+
+### The "two regimes" §5.4 narrative
+
+The symmetry is the contribution. Where hand-set had headroom (struggle weights, CF τ), v2 delivered measurable gains; where hand-set was already near-optimal (difficulty, blend, K), v2 either underperformed or matched within noise. *We report negative findings honestly, which lends credibility to the positive ones.*
+
+### Subtle methodology caveat for §5.5
+
+The four v2 artefacts were each measured **in isolation** against the v1 baseline:
+
+- Struggle v2 weights were trained with K=5 (the v1 shrinkage default)
+- CF τ optimisation used v1 struggle features (not v2-weighted features)
+- Joint v2 deployment (all toggles on) is not separately validated — combined AUC could be higher or lower than the sum-of-parts due to interactions
+
+One-sentence §5.5 acknowledgement: *"v2 components were each evaluated against the v1 baseline; joint v2 deployment was not separately validated."*
+
+For the defence demo this is fine — flipping individual toggles in Settings shows the leaderboard responding to each component independently.
+
+### Methodology footnote (for writing chat / future you)
+
+A few framing details that live in [[v2 Empirical Refinement Brief]] §4 (the §5.4 methodology preamble) but are easy to miss if you only read this handoff:
+
+- **Models we trained vs evaluated only.** Four v2 weight artefacts were trained from scratch in Phases 4a–d: the 7-signal struggle composite (LR), 5-signal difficulty composite (LR), 3-weight improved-blend (LR), and two scalar hyperparameters K and τ (Optuna TPE). The other dashboard models — IRT 2PL (already MLE-fitted at lifespan startup), BKT per-skill (already MLE-fitted via forward algorithm), mistake clustering (unsupervised), measurement confidence (formula-based), and incorrectness scoring (gpt-4o-mini API call) — were **evaluated** but **not retrained**. §5.4 should call this distinction out explicitly so a reader doesn't conflate "evaluated" with "fitted from scratch in this work".
+- **CV scheme rationale.** Struggle and improved-blend use **GroupKFold with session as the group cluster** (5 folds) so train and test never share students. Difficulty uses **LOO on questions** (effectively 72 folds) because the 72 unique questions repeat across sessions and session-grouping is therefore not applicable. Optuna uses session-grouped 5-fold CV per trial.
+- **Model class default + fallback.** LR + L2 (Ridge) is the default because it shares the linear-combination functional form of the v1 composites — this keeps the v1 ↔ v2 comparison interpretable as "do the trained weights tell a different story than the designed ones". A gradient-boosting fallback was on the table for any composite whose AUC fell below 0.55; it was not triggered.
+- **Two-Ks naming clash.** The letter $K$ appears in two unrelated places: the **number of CV folds** ($K=5$ for session-grouped runs) and the **shrinkage hyperparameter** $K$ of Equation \ref{eq:struggle-shrunk} (default $K=5$, Optuna-optimised to $K=1$). They share both the letter and the integer 5 by coincidence. Worth a one-line footnote in §5.4 so a reader doesn't think the K-fold count was the thing being optimised.
+
+These are not new findings — they're framing decisions that should land in §5.4 prose. See [[v2 Empirical Refinement Brief]] §4 for the paste-ready guidance and optional LaTeX draft.
+
 ## 12 · Changelog
 
+- **2026-05-25 (P7 done — writing-chat briefs)** — [[v2 Empirical Refinement Brief]] created. Single self-contained brief covering: Ch3 amendment (~120 words, post the existing `line 259` "trial and error" sentence — empirical refinement framing), Ch4 amendment (~90 words, near `line 952` improved-blend defaults — toggle plumbing) plus a Settings-view secondary insertion (~§4.9.6), and the full Ch5 §5.4 numbers brief covering §5.4.2 (κ), §5.4.3 (struggle headline), §5.4.9 (new — honest negative findings for difficulty + improved-blend), §5.4.10 (new — Optuna TPE on K and τ), and §5.6.1 (v1↔v2 disagreement + verdict scorecard). All numbers sourced from `data/eval/results.md`; 11 figures inventoried under `data/eval/figures/`; pre-paste + post-paste checklists included. Brief is paste-ready for the writing chat. Phase 8 (literature sync) is the only remaining optional polish.
+- **2026-05-25 (P4d done — Optuna TPE hyperparam optimisation)** — `scripts/optimise_hyperparams.py` written using Optuna TPE sampler (Bayesian optimisation, more efficient than naive grid). Two parallel studies, 50 trials each, session-grouped 5-fold CV against LLM intervene labels. **Findings**: (1) **shrinkage K: best=1, AUC=0.805, Δ=+0.007 vs v1 K=5** — robustness finding, hand-set K is near-optimal. (2) **CF τ: best=0.899, AUC=0.800, Δ=+0.118 vs v1 τ=0.7** — substantial positive finding, hand-set τ was too permissive; strict τ≈0.9 lifts CF AUC by 12pp. **Caveat for §5.5**: best τ landed at the upper boundary of the [0.4, 0.9] search range; finer search may yield further improvement. `data/eval/optimised_hyperparams_v2.json` populated with full per-trial trajectories + the 5 unoptimised BKT hyperparams pinned to defaults (so the runtime_config loader can switch wholesale to v2). Hyperparams v2 toggle in V2 React Settings is now REAL (no longer DEFERRED stub). BKT priors + mastery threshold remain deferred (would each need ~30 min of BKT refits per trial). Phase 4 fully closed.
 - **2026-05-25 (P6 done — eval notebook + figures + results.md)** — `notebooks/eval_main.ipynb` runs end-to-end in ~30 s. 10 figures saved to `data/eval/figures/` (cohort_distributions, kappa, weights_struggle_v1_vs_v2, per_fold_auc_struggle, roc_struggle, calibration_struggle, weight_heatmap_struggle, confusion_bands, negative_findings, model_disagreement). `data/eval/results.md` (76 lines, 6 tables) ready for writing chat to lift verbatim into §5.4 / §5.5 / §5.6 prose. **Bonus finding (only visible after notebook re-derives v1 vs v2 predictions on same snapshots): 31.2% of students reclassified into a different struggle band under v2 (408/1306); split is balanced (15.9% upgrades, 15.3% downgrades) — v2 is not systematically harsher or more lenient than v1.** This is a §5.6.1 model-disagreement headline. Notebook uses F221611-styled plots (paired bars with value annotations, text-box AUC overlays, ConfusionMatrixDisplay with RdGy cmap, grid alpha 0.3). Mid-run bug caught and fixed: results-export cell had a Python indentation error in the kappa-table block which the syntax-check script flagged before execution. Phase 7 (writing-chat briefs) next.
 - **2026-05-25 (P5 done — backend + frontend toggles live)** — V2 React stack now has the four v2 toggles wired end-to-end. **Backend** (8 files): `config.py` (4 V2 path constants + `SHRINKAGE_K_DEFAULT`), `runtime_config.py` (4 `*_version` + `shrinkage_k` fields + `_load_optimised_hyperparams()` helper + `update()` side-effects on hp-version flip), `schemas.py` (`RuntimeSettings` extended), `struggle.py` + `difficulty.py` + `models/improved_struggle.py` (each gained `_load_v2_weights()` + override params with v2-mode redistribution gating), `cache.py` (`load_*_df` pass overrides through + cache key includes version), `routers/settings.py` (`_to_runtime_settings` surfaces 5 new fields). **Frontend** (2 files): `types/api.ts` extended; `views/SettingsView.tsx` added "Optimised Weights (v2)" section (n=5) with 4 `<ToggleRow>` selects + `V2InfoBlock` subcomponent (green-ok / red-warn / neutral-info variants reflecting Phase 4 findings). All defaults stay v1 → no breaking change. Verified live by user: section visible, toggles flip backend, leaderboards re-rank. **Iterative-refinement narrative now demonstrable in defence demo.** Phase 6 (eval notebook + plots) next.
 - **2026-05-25 (P4c real done — NEGATIVE FINDING)** — Upgraded from stub. `scripts/eval_common.py` extended with `compute_improved_components_at_t` (fits BKT + IRT at each (session, cutoff), attaches `improved_components` field per snapshot). Snapshots regenerated (~15 min wallclock for 252 BKT/IRT fits). `optimise_v2_weights.py --kind improved` now trains real 3-weight LR. **Result: AUC = 0.637 [0.572, 0.703]; w_B = +0.42, w_M = −0.44, w_D = −0.14.** Two of three blend weights flipped NEGATIVE — LR doesn't trust the BKT/IRT components. Headline AUC of 0.637 is WORSE than baseline struggle-v2 (0.836), meaning the improved blend actively hurts at this N. Three interpretations all support: improved-blend v2 should default OFF in deployment, v1 (0.45/0.30/0.25) stays as the recommended blend. Symmetric to Phase 4b's negative finding for difficulty: **two negative findings + one positive (struggle) gives a complete, honest §5.4 story**.

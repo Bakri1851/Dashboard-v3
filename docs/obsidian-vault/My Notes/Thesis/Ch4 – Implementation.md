@@ -2,10 +2,10 @@
 
 Thesis chapter describing the system implementation. Currently describes V1 prototype only — needs near-complete rewrite for V2.
 
-Related: [[Thesis Overview]], [[Report Sync]], [[Analytics Engine]], [[Instructor Dashboard]], [[Lab Assistant System]], [[UI System]], [[Data Loading and Session Persistence]]
+Related: [[Thesis Overview]], [[Report Sync]], [[Analytics Engine]], [[Instructor Dashboard]], [[Lab Assistant System]], [[UI System]], [[Data Loading and Session Persistence]], [[Ch4 Rewrite Brief]], [[v2 Empirical Refinement Brief]]
 
 **Source file:** `main sections/implementation.tex`
-**Status:** Outdated (CRITICAL) — describes V1 prototype, not V2 full system
+**Status:** Outdated (CRITICAL) — describes V1 prototype, not V2 full system. **Two small amendments ready 2026-05-25**: ~90-word paragraph after `implementation.tex:952` (improved-blend defaults) documenting the four `*_version` toggles in `runtime_config.py` and the v2 JSON fallback semantics, plus a 3-sentence insertion near §4.9.6 Settings view describing the new "Optimised Weights (v2)" section with its four `<ToggleRow>` selects + warn-variant `V2InfoBlock` subcomponent. Full brief at [[v2 Empirical Refinement Brief]] §2.
 
 > **Sync note (2026-04-18):** "Current contents" below reflects the thesis state *before* the Phase 6 tex-skeleton additions (2026-04-12) that added 26 new subsection placeholders. For the current tex subsection tree and the active writing backlog, see [[Rewrite Queue#Phase 6 additions (2026-04-12)]] and the toolkit's Status panel §6 Source reconciliation.
 

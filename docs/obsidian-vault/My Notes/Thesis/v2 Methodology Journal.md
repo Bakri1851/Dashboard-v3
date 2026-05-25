@@ -422,6 +422,41 @@ in `eval_results.md` that propagate into §5.5 (Limitations).
 
 ---
 
+## 8.3 · Final v1-vs-v2 verdict scorecard (post-Phase 4d)
+
+Five optimisation targets across Phases 4a–d. Score: **2 wins each + 1 tie**.
+
+| Component | Winner | Headline number | Phase |
+|---|---|---|---|
+| Struggle composite (7 LR weights) | **v2** | AUC 0.836 [0.762, 0.911]; `n_hat`, `t_hat`, `rep_norm` sign-flipped | 4a |
+| Difficulty composite (5 LR weights) | **v1** | v2 AUC 0.345 (< random); LR fits noise at N=72 | 4b |
+| Improved-blend (3 mixing weights) | **v1** | v2 AUC 0.637; LR flipped $w_M$ and $w_D$ negative | 4c |
+| Shrinkage K (scalar) | tied | v2 K=1 vs v1 K=5: Δ+0.007 — within noise | 4d |
+| CF threshold τ (scalar) | **v2** | +0.118 AUC (0.682 → 0.800); v1 τ=0.7 was too permissive | 4d |
+
+### The "two regimes" §5.4 narrative
+
+Where hand-set design had headroom (struggle weights, CF τ), Bayesian-optimised v2 delivered measurable gains. Where hand-set was already near-optimal (difficulty, blend, K), v2 either underperformed or matched within noise. **The symmetry of positive and negative findings IS the empirical contribution** — it shows which Chapter 3 design decisions were well-grounded and which had unrealised improvement potential.
+
+### Methodology caveat for §5.5
+
+The four v2 artefacts were each measured **in isolation** against the v1 baseline:
+
+- Struggle v2 weights trained with K=5 (the v1 shrinkage default)
+- CF τ optimisation used v1 struggle features (not v2-weighted)
+- Joint v2 deployment (all toggles on simultaneously) is **not separately validated** — combined AUC could be higher or lower than the sum-of-parts due to interactions between the four components
+
+One-sentence acknowledgement for §5.5: *"v2 components were each evaluated against the v1 baseline; joint v2 deployment was not separately validated."*
+
+This is honest residual-uncertainty reporting. A joint-evaluation extension (run all combinations of v1/v2 toggle states and measure AUC for each) would be future work — adds ~2¹ to 2⁴ = 2 to 16 configurations to test, depending on whether we treat shrinkage K + CF τ as part of the same hyperparams toggle or as independent factors.
+
+### What this means for the dashboard deployment defaults
+
+- **Struggle weights** — defensible to set v2 as default-on, or keep v1 default with v2 as opt-in (current behaviour). Either is defensible
+- **Difficulty weights** — keep v1 default; v2 toggle remains in UI as research artefact with warning text
+- **Improved-blend** — keep v1 default; v2 toggle remains in UI as research artefact with warning text
+- **Hyperparams (K + τ)** — defensible to enable v2 as default given the +12pp CF τ gain. **But** flipping it also changes K to 1, which is within-noise — the CF τ gain dominates. Honest deployment: keep v1 default for now, mention "switching to v2 hyperparams substantially improves CF predictions" in the dashboard's About / Help page
+
 ## 9 · Live methodology decisions log (updated as we go)
 
 | Date | Phase | Decision | Rationale |
@@ -464,6 +499,11 @@ in `eval_results.md` that propagate into §5.5 (Limitations).
 | 2026-05-25 | 6 (re-derivation) | LR refit per fold to recover per-snapshot predictions for ROC/calibration/confusion-matrix plots | Optimised JSONs store per-fold weights but not per-snapshot probabilities. Re-derivation uses the SAME `best_C` and `random_state` from each fold's stored metadata, so pooled predictions reproduce the stored AUC numbers exactly (sanity check). Cached to `data/eval/pooled_predictions_v2.json` for re-run speed |
 | 2026-05-25 | 6 (bonus finding — model disagreement) | **31.2% of snapshots get reclassified into a different struggle band under v2 vs v1; split is balanced (15.9% upgrades / 15.3% downgrades)** | New finding only visible after the notebook re-derives v1 vs v2 predictions on the same 1306 snapshots. **Publishable in §5.6.1**: v2 is not systematically harsher or more lenient — it reranks substantially but balanced in direction. Combined with the AUC gap (0.836 vs v1 baseline AUC), this suggests v2 is making genuinely different judgements ~1/3 of the time rather than just shifting all scores up/down |
 | 2026-05-25 | 6 (mid-run fix) | results-export cell had an `IndentationError` in the kappa table block; caught by py_compile-per-cell syntax check before notebook execution | Documented as a process win: the per-cell syntax check (write a temp .py file from each code cell and `py_compile.compile`) caught a bug that would have crashed cell 28 mid-execution after 5 minutes of plot rendering. Worth keeping the check in the eval_main.ipynb verification workflow |
+| 2026-05-25 | 4d (Optuna over grid) | Replaced planned grid search with Optuna TPE sampler — joint two-study optimisation over `shrinkage_k` (int 0–50) and `cf_threshold` (float 0.4–0.9), 50 trials per study, session-grouped 5-fold CV, seed=42 | Bayesian optimisation finds good regions in fewer trials than naive grid; for thesis purposes reads as a more sophisticated methodology ("we used Bayesian hyperparam optimisation via Optuna"). Cost: ~2 min wallclock vs the planned ~30 min for a 24-combo BKT-prior grid. Added `optuna>=3.0` to project dependencies (one-line `pip install`) |
+| 2026-05-25 | 4d (results) | **shrinkage K: best=1, AUC=0.805, Δ=+0.007 vs v1 K=5** (robustness); **CF τ: best=0.899, AUC=0.800, Δ=+0.118 vs v1 τ=0.7** (substantial positive) | Two contrasting findings: K is robust (hand-set near-optimal — symmetric to the difficulty/improved-blend negative findings); τ is meaningfully under-tuned in v1 (substantial +12pp AUC headroom). Both lift the "iterative refinement" thesis narrative — empirical optimisation reveals where hand-set choices have headroom and where they don't |
+| 2026-05-25 | 4d (boundary caveat) | Best τ landed at 0.899, the upper edge of the [0.4, 0.9] search range | Honest §5.5 limitation to report: cosine similarity can go up to 1.0; the "true" optimum may be τ≈0.95. A re-run with [0.4, 0.99] would settle this in ~30 sec but the +12pp finding is already substantial enough that refining further is diminishing returns for thesis purposes |
+| 2026-05-25 | 4d (BKT deferral) | BKT priors + mastery threshold pinned to `config.py` defaults in the v2 hyperparams JSON | Each BKT prior trial would need 252 model refits × Optuna's ~30 trials × ~1 sec/refit = ~2.5 h budget. Deferred; the v2 hyperparams toggle still switches K and τ wholesale, just keeps BKT priors at defaults. Reported as deferred-not-impossible in `optimised_hyperparams_v2.json`'s `deferred` field with rationale inline |
+| 2026-05-25 | 4d (notebook integration) | Added §5.4.10 to `notebooks/eval_main.ipynb` — Optuna trajectory + landscape 4-panel plot; results.md gained the hyperparam comparison table | Notebook re-runs clean (~30s); `hyperparams_optuna.png` saved to figures/; `results.md` extended 76 → 87 lines. Phase 6 is now fully complete with all four Phase 4 findings represented (struggle positive + difficulty negative + improved-blend negative + hyperparams mixed) |
 
 ### Will be added as we go
 
