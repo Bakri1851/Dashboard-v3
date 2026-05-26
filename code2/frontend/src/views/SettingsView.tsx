@@ -429,8 +429,9 @@ function AdvancedPanel({ data, update }: { data: SettingsData; update: SettingsU
         />
         {data.runtime.struggle_weights_version === 'v2' && (
           <V2InfoBlock kind="ok">
-            v2 trained via logistic regression with session-grouped 5-fold CV — held-out AUC = 0.836
-            [0.762, 0.911] against LLM intervene labels. <strong>Deployment-ready.</strong>
+            v2 trained via ordinary least-squares linear regression with session-grouped 5-fold CV
+            — held-out Spearman ρ = +0.573 [+0.430, +0.715] against the LLM's 4-band rating
+            (v1 baseline ρ = +0.423). <strong>Deployment-ready.</strong>
           </V2InfoBlock>
         )}
 
@@ -444,16 +445,18 @@ function AdvancedPanel({ data, update }: { data: SettingsData; update: SettingsU
           onChange={(v) => update({ difficulty_weights_version: v })}
         />
         {data.runtime.difficulty_weights_version === 'v2' && (
-          <V2InfoBlock kind="warn">
-            <strong>Warning: v2 underperforms v1.</strong> Held-out AUC = 0.345 (worse than random)
-            against LLM "very hard" labels. Hand-set v1 is recommended for production use.
-            v2 retained as an honest negative finding — at N=72 with COA122's uniformly-hard
-            cohort, the 5-signal feature space saturates and the LR fits noise.
+          <V2InfoBlock kind="ok">
+            v2 trained via ordinary least-squares linear regression on LOO CV — pooled
+            Spearman ρ = +0.287 against the LLM's 4-band rating (v1 baseline ρ = +0.027,
+            essentially flat). v2 outranks v1 on this cohort, but the absolute correlation is
+            modest: N=72 with a heavily skewed "Very Hard" cohort gives limited rank-resolution.
+            <strong> Deployment-ready, with the caveat that this model's overall ranking quality
+            is much lower than the struggle model's.</strong>
           </V2InfoBlock>
         )}
         {data.runtime.difficulty_model === 'irt' && (
           <V2InfoBlock kind="info">
-            Difficulty model is set to IRT, which bypasses the composite weights entirely.
+            Difficulty model is set to IRT, which bypasses the weights entirely.
             The v1/v2 toggle above has no effect until you switch the difficulty model back to
             "Baseline".
           </V2InfoBlock>
@@ -469,17 +472,20 @@ function AdvancedPanel({ data, update }: { data: SettingsData; update: SettingsU
           onChange={(v) => update({ improved_struggle_weights_version: v })}
         />
         {data.runtime.improved_struggle_weights_version === 'v2' && (
-          <V2InfoBlock kind="warn">
-            <strong>Warning: v2 underperforms v1.</strong> Held-out AUC = 0.637 against LLM
-            intervene labels — worse than baseline struggle v2 alone (0.836). The LR assigned
-            NEGATIVE weights to BKT mastery-gap (w_M = −0.44) and IRT-adjusted exposure
-            (w_D = −0.14). Hand-set v1 blend (0.45 / 0.30 / 0.25) is recommended for production.
-            v2 retained as a research artefact.
+          <V2InfoBlock kind="ok">
+            v2 trained via ordinary least-squares linear regression with session-grouped 5-fold CV
+            — held-out Spearman ρ = +0.168 against the LLM's 4-band rating (v1 baseline ρ = −0.017,
+            essentially zero correlation). The trained weights assign NEGATIVE values to BKT
+            mastery-gap (w_M ≈ −0.31) and IRT-adjusted exposure (w_D ≈ −0.32) and POSITIVE to the
+            behavioural component (w_B ≈ +0.37). v2 outranks v1, but the improved-struggle model
+            as a whole is still much weaker than the seven-signal struggle model alone
+            (ρ +0.573). <strong>If you want best rank quality, leave the Struggle Model selector
+            on "Baseline" rather than switching to "Improved".</strong>
           </V2InfoBlock>
         )}
         {data.runtime.struggle_model !== 'improved' && (
           <V2InfoBlock kind="info">
-            Improved-struggle blend weights only apply when "Struggle model" (above) is set to
+            Improved-struggle weights only apply when "Struggle model" (above) is set to
             "Improved". Flip the model first.
           </V2InfoBlock>
         )}
@@ -495,17 +501,19 @@ function AdvancedPanel({ data, update }: { data: SettingsData; update: SettingsU
         />
         {data.runtime.hyperparams_version === 'v1' && (
           <V2InfoBlock kind="info">
-            Phase 4d (hyperparam grid search) is not yet run, so v2 has no effect — selecting it
-            will log a "missing/malformed/deferred" warning server-side and leave sliders
-            unchanged. Run <code>scripts/optimise_hyperparams.py</code> to populate
-            <code style={{ marginLeft: 4 }}>data/eval/optimised_hyperparams_v2.json</code>.
+            v1 defaults: shrinkage K = 5, CF threshold τ = 0.7. Flip to v2 to apply the
+            Optuna-tuned values from{' '}
+            <code>data/eval/optimised_hyperparams_v2.json</code>.
           </V2InfoBlock>
         )}
         {data.runtime.hyperparams_version === 'v2' && (
-          <V2InfoBlock kind="info">
-            When real v2 hyperparams are available, flipping this to v2 repopulates the CF
-            threshold, BKT priors, and BKT mastery threshold sliders with the grid-searched
-            optimal values. You can still slide manually on top — your overrides win.
+          <V2InfoBlock kind="ok">
+            v2 hyperparameters tuned via Optuna TPE (50 trials per parameter, session-grouped
+            5-fold CV against the LLM's 4-band rating). <strong>CF threshold τ:</strong> v1=0.7
+            → v2=0.899 (Δ ρ = +0.200, substantial gain — v1's τ was too permissive). <strong>
+            Shrinkage K:</strong> v1=5 → v2=1 (Δ ρ = +0.013, within fold-variance noise —
+            either value is defensible). BKT priors and BKT mastery threshold are not tuned in
+            v2 and stay at their v1 defaults.
           </V2InfoBlock>
         )}
       </AnimatedCard>
@@ -795,10 +803,10 @@ function V2InfoBlock({
   kind: 'ok' | 'warn' | 'info'
   children: React.ReactNode
 }) {
-  // Three muted variants so the warning text under each v2 toggle is
-  // unambiguous (warn = red-ish) but doesn't shout (the page already has
-  // a lot going on). 'ok' = deployment-ready v2, 'warn' = published
-  // negative finding, 'info' = neutral note.
+  // Three muted variants so the per-toggle annotation is unambiguous
+  // (warn = red-ish) but doesn't shout (the page already has a lot going
+  // on). 'ok' = deployment-ready v2, 'warn' = a problem the user should
+  // see before flipping the toggle, 'info' = neutral context.
   const color = kind === 'warn' ? T.danger : kind === 'ok' ? T.accent : T.ink3
   const border = kind === 'warn' ? T.danger : T.line2
   return (

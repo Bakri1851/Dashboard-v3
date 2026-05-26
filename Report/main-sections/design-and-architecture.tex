@@ -262,6 +262,11 @@ Since every component is bounded in $[0,1]$ and all the weights are convex,
     S^{\mathrm{raw}}(s,\sigma) \in [0,1].
 \end{equation*}
 
+The weights set above are the baseline model (v1) and remain the system default.
+As an alternative weighting approach, we obtained second-opinion labels from an LLM rater and re-fitted both the struggle model of Table~\ref{tab: struggle weights} and the difficulty model of Table~\ref{tab: difficulty weights} as a v2 model variant.
+The trained model can be toggled on at runtime in the V2 React dashboard from the Settings view.
+The v2 model vectors are signed and do not satisfy the convex combination constraint of Equation~\ref{eq: scalar in range model} which is a consequence of using ordinary least-squares linear regression for fitting; the v1 model is preserved as the deployed default for the system. The pipeline that produced the v2 vectors is described in Section~\ref{sec:v2-pipeline-design}; the model comparison is reported in Section~\ref{sec:eval-results}.
+
 \begin{table}[H]
     \centering
     \begin{tabular}{|p{0.15\textwidth}|p{0.55\textwidth}|p{0.20\textwidth}|}
@@ -785,6 +790,61 @@ Mean imputation preserves the cohort-level scale and remains neutral on the affe
 
 The combined score $S^{\mathrm{imp}}(s,\sigma)$ is shrunk towards the cohort mean by the same Bayesian estimator used in Section \ref{sec: student struggle}, with the same shrinkage strength $K = 5$. 
 Students with very few submissions are therefore stabilised by the same mechanism in both models; this prevents an unstable mastery gap or difficulty-adjusted estimate on a low-$n$ student from producing a misleading headline score in the dashboard.
+
+\subsection{Model Training Pipeline Design} \label{sec:v2-pipeline-design}
+
+The deployed v1 composite weights of Sections~\ref{sec: student struggle} and~\ref{sec: task difficulty} were tuned by trial and error in the absence of labelled ground-truth data.
+We will also use an alternative method, where the design adopts a self-contained offline pipeline that re-fits the composite weights against second-opinion labels obtained from a large language model rater (GPT-4o-mini); the refined v2 weights are evaluated against the same evaluation methodology v1 is evaluated under.
+The v2 weights are exposed through a toggle whilst the v1 vectors remain the deployed default.
+
+The pipeline is structured in five phases with data hand-off between them as seen in Figure~\ref{fig:v2-pipeline-design}: a one-shot data fetch from the submission API, a stratified snapshot sample, an LLM labelling stage that also collects a fifty-snapshot author review to support an inter-rater agreement check, a fitting stage that produces three composite weight vectors and two scalar hyperparameters, then a notebook is used for gathering our figures and tables used in Section~\ref{sec:eval-results}. The implementation of each phase is detailed in Section~\ref{sec:v2-training}.
+
+
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        node distance=4mm,
+        font=\small,
+        artefact/.style={rectangle, draw, rounded corners, fill=blue!5,
+                         text width=0.62\textwidth, align=center, minimum height=8mm,
+                         inner sep=4pt},
+        phase/.style={rectangle, draw, fill=orange!10,
+                      text width=0.62\textwidth, align=center, minimum height=8mm,
+                      inner sep=4pt},
+        runtime/.style={rectangle, draw, dashed, fill=green!5,
+                        text width=0.62\textwidth, align=center, minimum height=8mm,
+                        inner sep=4pt},
+        every path/.style={->, >=stealth}
+    ]
+        \node[artefact] (api) {Loughborough submission API};
+        \node[phase, below=of api] (p1) {\textbf{Phase 1}: \texttt{scripts/eval\_fetch.py}};
+        \node[artefact, below=of p1] (parquet) {\texttt{data/eval/submissions.parquet} };
+        \node[phase, below=of parquet] (p2) {\textbf{Phase 2}: \texttt{scripts/eval\_common.py} (stratified sampler)};
+        \node[artefact, below=of p2] (snapshots) {\texttt{data/eval/snapshots.json} };
+        \node[phase, below=of snapshots] (p3) {\textbf{Phase 3}: \texttt{scripts/eval\_label.py} (struggle / difficulty / self-label / $\kappa$)};
+        \node[artefact, below=of p3] (labels) {\texttt{llm\_struggle\_labels.json}  \\ \texttt{llm\_difficulty\_labels.json}  \\ \texttt{self\_labels.json}  \\ \texttt{kappa\_report.json}};
+        \node[phase, below=of labels] (p4) {\textbf{Phase 4}: \texttt{scripts/optimise\_v2\_weights.py} + \texttt{scripts/optimise\_hyperparams.py}};
+        \node[artefact, below=of p4] (weights) {\texttt{optimised\_struggle\_weights\_v2.json} \\ \texttt{optimised\_difficulty\_weights\_v2.json} \\ \texttt{optimised\_improved\_weights\_v2.json} \\ \texttt{optimised\_hyperparams\_v2.json}};
+        \node[phase, below=of weights] (p5) {\textbf{Phase 5}: \texttt{notebooks/eval\_main.ipynb}};
+        \node[artefact, below=of p5] (out) {\texttt{data/eval/figures/*.png} };
+        \node[runtime, below=of out] (runtime) {\textbf{V2 runtime}: \texttt{runtime\_config.py} loads the four weight + hyperparams JSONs via five toggle fields (four \texttt{*\_version} flags + one \texttt{shrinkage\_k} direct override)};
+
+        \draw (api)       -- (p1);
+        \draw (p1)        -- (parquet);
+        \draw (parquet)   -- (p2);
+        \draw (p2)        -- (snapshots);
+        \draw (snapshots) -- (p3);
+        \draw (p3)        -- (labels);
+        \draw (labels)    -- (p4);
+        \draw (p4)        -- (weights);
+        \draw (weights)   -- (p5);
+        \draw (p5)        -- (out);
+        \draw[dashed]     (weights.east) -- ++(0.04\textwidth,0) |- (runtime.east);
+    \end{tikzpicture}
+    \caption{V2 model refinement pipeline}
+    \label{fig:v2-pipeline-design}
+\end{figure}
 
 
 \subsection{Retrieval-Augmented Generation Feedback Design}

@@ -1,5 +1,8 @@
 # Writing Roadmap
 
+<!-- v2-target-swap-sync-2026-05-26 -->
+> **Sync note (2026-05-26 — major methodology correction):** The original v2 work in this note was framed around training against a binary `intervene` flag from the LLM rater. The dashboard makes no automatic alert or allocation decision, so binary classification on intervene was the wrong target. **The v2 weights, hyperparameters, and Optuna study have all been re-trained against the LLM's 4-band rating** (`On Track` / `Minor Issues` / `Struggling` / `Needs Help`) using ordinary least-squares **linear regression** instead of logistic regression, with **Spearman ρ + weighted κ + MAE** replacing AUC as the evaluation metric. Under the corrected target the verdict scorecard becomes **4 positive findings + 1 tie** (was "2 positive + 2 negative + 1 tie" — the previous negative findings for difficulty and improved-struggle were artefacts of the wrong target). Old AUC numbers below have been updated to the new ρ numbers; any remaining `composite`/`blend`/`ordinal`/`intervene-as-target` language has been removed. See `data/eval/results.md` for the authoritative current numbers.
+
 > [!info] **Self-contained handoff doc.** This file is designed to let any future chat pick up the thesis-writing work without losing context. Last updated 2026-05-05 after Ch2 restructure + Stage 1c + Stage 1b §2.2.2 + Stage 1b §2.3.2 + Stage 1b §2.4.
 >
 > Companions: [[Rewrite Queue]] (granular edits), [[Report Sync]] (code↔thesis mismatch table), [[Evidence Bank]] (eval evidence checklist), [[Figures and Tables]] (figure inventory), and `docs/obsidian-vault/My Notes/Literature/_import_checklist.md` (live import progress).

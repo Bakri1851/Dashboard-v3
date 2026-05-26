@@ -1,17 +1,31 @@
-"""Phase 4 — Optimise v2 weight vectors via logistic regression.
+"""Phase 4 — Optimise v2 weight vectors via ordinary least-squares linear regression.
 
-Three modes share the same training infrastructure (LR + L2 + inner CV for
-the L2 strength). The outer CV scheme differs by mode:
+Three modes share the same training infrastructure. The outer CV scheme differs
+by mode:
 
   --kind struggle    : 5-fold group K-fold, session as group  (N=1306)
   --kind difficulty  : leave-one-out on questions             (N=72)
   --kind improved    : 5-fold group K-fold (requires snapshot extension)
 
+**Target**: the LLM's 4-band rating (`On Track`=0, `Minor Issues`=1,
+`Struggling`=2, `Needs Help`=3 for struggle; analogous `Easy ... Very Hard` for
+difficulty). This matches what the dashboard surfaces — a ranked leaderboard
+mapped to bands — rather than the binary "intervene now?" decision the
+system does NOT automatically make.
+
+**Model class**: ordinary least squares (`sklearn.linear_model.LinearRegression`).
+No regularisation. Coefficients are interpretable as "expected change in band
+index per unit feature".
+
+**Metrics**: Spearman ρ (rank quality) + linear-weighted Cohen's κ (band
+agreement) + MAE (mean absolute band-distance error). AUC + Brier are not used
+— neither is meaningful for a continuous regression on a band target.
+
 Run from repo root::
 
     python scripts/optimise_v2_weights.py --kind struggle
     python scripts/optimise_v2_weights.py --kind difficulty
-    python scripts/optimise_v2_weights.py --kind improved   # stub for now
+    python scripts/optimise_v2_weights.py --kind improved
 
 Outputs written under ``data/eval/``::
 
@@ -29,9 +43,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
-# Silence sklearn 1.8 deprecation noise about the `penalty` arg in LogisticRegression
-# — the script intentionally pins penalty='l2' for term-by-term v1/v2 comparability,
-# and the suggested `l1_ratio=0` replacement is functionally identical.
 warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -40,9 +51,9 @@ sys.path.insert(0, str(REPO_ROOT / "code2"))
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 from scipy import stats  # noqa: E402
-from sklearn.linear_model import LogisticRegression  # noqa: E402
-from sklearn.metrics import roc_auc_score, brier_score_loss  # noqa: E402
-from sklearn.model_selection import GroupKFold, KFold, LeaveOneOut  # noqa: E402
+from sklearn.linear_model import LinearRegression  # noqa: E402
+from sklearn.metrics import cohen_kappa_score, mean_absolute_error  # noqa: E402
+from sklearn.model_selection import GroupKFold, LeaveOneOut  # noqa: E402
 from sklearn.preprocessing import StandardScaler  # noqa: E402
 
 from backend import paths  # noqa: E402
@@ -51,8 +62,27 @@ from backend import paths  # noqa: E402
 STRUGGLE_FEATURE_COLS = ["n_hat", "t_hat", "i_norm", "r_norm", "A_norm", "d_hat", "rep_norm"]
 DIFFICULTY_FEATURE_COLS = ["c_norm", "t_tilde", "a_tilde", "f_norm", "p_norm"]
 IMPROVED_FEATURE_COLS = ["behavioural_composite", "mastery_gap", "difficulty_adjusted_score"]
-DEFAULT_CS = np.logspace(-3, 3, 7).tolist()  # 7 L2-strength candidates
 DEFAULT_SEED = 42
+
+# 4-band target encoded as integer index 0-3.
+STRUGGLE_BAND_INDEX = {
+    "On Track": 0,
+    "Minor Issues": 1,
+    "Struggling": 2,
+    "Needs Help": 3,
+}
+DIFFICULTY_BAND_INDEX = {
+    "Easy": 0,
+    "Medium": 1,
+    "Hard": 2,
+    "Very Hard": 3,
+}
+N_BANDS = 4
+TARGET_DESCRIPTION = (
+    "4-band rating (LLM second-opinion). "
+    "Struggle: On Track=0, Minor Issues=1, Struggling=2, Needs Help=3. "
+    "Difficulty: Easy=0, Medium=1, Hard=2, Very Hard=3."
+)
 
 
 # -------------------- Data loading --------------------
@@ -77,23 +107,22 @@ def _load_labels(kind: str) -> dict[str, dict]:
 # -------------------- Coefficient post-processing --------------------
 
 def _unscale_coefs(coefs_std: np.ndarray, scaler: StandardScaler) -> np.ndarray:
-    """Convert LR coefficients fit on standardised features back to raw-feature space.
+    """Convert OLS coefficients fit on standardised features back to raw-feature space.
 
-    In standardised space:  logit(p) = b0 + sum(c_i * (x_i - mu_i) / sigma_i)
-    In raw space:           logit(p) = b0' + sum(c_i' * x_i)
-    where c_i' = c_i / sigma_i.
+    Standardised:  y = b0 + sum(c_i * (x_i - mu_i) / sigma_i)
+    Raw:           y = b0' + sum(c_i' * x_i),  where  c_i' = c_i / sigma_i.
     """
     return coefs_std / scaler.scale_
 
 
 def _normalise_to_convex(coefs: np.ndarray) -> np.ndarray:
-    """Normalise the raw-space coefficient vector so |w|_1 = 1, preserving sign.
+    """L1-normalise the raw-space coefficient vector so |w|_1 = 1, preserving sign.
 
     The v1 hand-set weights sum to 1 (convex combination). Reporting v2 weights
-    on the same scale makes the term-by-term comparison interpretable. We use
-    L1 normalisation rather than positive-only renormalisation because LR may
-    legitimately learn a negative weight on a signal that proxies the wrong
-    direction for the target (e.g. low submission count → struggling).
+    on the same scale makes the term-by-term v1 vs v2 comparison interpretable.
+    L1 rather than positive-only renormalisation because OLS may legitimately
+    learn a negative weight on a signal that proxies the wrong direction for
+    severity (e.g. low submission count → struggling).
     """
     l1 = float(np.abs(coefs).sum())
     if l1 <= 0:
@@ -101,48 +130,37 @@ def _normalise_to_convex(coefs: np.ndarray) -> np.ndarray:
     return coefs / l1
 
 
+# -------------------- Metric helpers --------------------
+
+def _pred_to_band(pred: np.ndarray) -> np.ndarray:
+    """Round + clip continuous OLS prediction to a valid band index in {0..3}."""
+    return np.clip(np.rint(pred), 0, N_BANDS - 1).astype(int)
+
+
+def _fold_metrics(y_true: np.ndarray, pred: np.ndarray) -> dict[str, float]:
+    """Spearman ρ on raw predictions + linear-weighted κ + MAE on rounded bands."""
+    if len(y_true) < 2 or len(np.unique(y_true)) < 2:
+        return {
+            "spearman_rho": float("nan"),
+            "weighted_kappa": float("nan"),
+            "mae": float("nan"),
+            "mae_continuous": float("nan"),
+        }
+    rho = float(stats.spearmanr(pred, y_true).correlation)
+    pred_band = _pred_to_band(pred)
+    try:
+        kappa = float(cohen_kappa_score(y_true, pred_band, weights="linear"))
+    except ValueError:
+        kappa = float("nan")
+    return {
+        "spearman_rho": rho if not np.isnan(rho) else float("nan"),
+        "weighted_kappa": kappa,
+        "mae": float(mean_absolute_error(y_true, pred_band)),
+        "mae_continuous": float(np.mean(np.abs(pred - y_true))),
+    }
+
+
 # -------------------- Core training loop --------------------
-
-def _inner_cv_best_C(
-    X: np.ndarray,
-    y: np.ndarray,
-    groups: Optional[np.ndarray],
-    Cs: list[float],
-    n_inner: int = 3,
-    seed: int = DEFAULT_SEED,
-) -> float:
-    """Pick the L2 strength C that maximises mean inner-fold AUC."""
-    if groups is not None and len(np.unique(groups)) >= n_inner:
-        splitter = GroupKFold(n_splits=n_inner)
-        splits = list(splitter.split(X, y, groups))
-    else:
-        # LOO outer means inner has nothing to group on — use plain KFold
-        splitter = KFold(n_splits=min(n_inner, max(2, len(X) // 5)), shuffle=True, random_state=seed)
-        splits = list(splitter.split(X, y))
-
-    best_C = Cs[0]
-    best_auc = -np.inf
-    for C in Cs:
-        fold_aucs = []
-        for tr, va in splits:
-            if len(np.unique(y[tr])) < 2 or len(np.unique(y[va])) < 2:
-                continue  # AUC undefined on single-class folds
-            sc = StandardScaler().fit(X[tr])
-            Xtr, Xva = sc.transform(X[tr]), sc.transform(X[va])
-            lr = LogisticRegression(
-                penalty="l2", C=C, max_iter=2000, solver="lbfgs", random_state=seed
-            )
-            lr.fit(Xtr, y[tr])
-            prob = lr.predict_proba(Xva)[:, 1]
-            fold_aucs.append(roc_auc_score(y[va], prob))
-        if not fold_aucs:
-            continue
-        mean_auc = float(np.mean(fold_aucs))
-        if mean_auc > best_auc:
-            best_auc = mean_auc
-            best_C = C
-    return best_C
-
 
 def _train_one_fold(
     X_train: np.ndarray,
@@ -150,74 +168,73 @@ def _train_one_fold(
     X_test: np.ndarray,
     y_test: np.ndarray,
     feature_cols: list[str],
-    train_groups: Optional[np.ndarray],
-    Cs: list[float],
     seed: int = DEFAULT_SEED,
 ) -> dict:
-    """Fit on the outer training fold with inner-CV-selected L2; predict on test."""
-    # Guard against single-class training folds (can happen with LOO on heavily
-    # skewed targets). Return a stub fold so the run continues — _summarise_folds
-    # filters by valid AUC, so a stub fold just doesn't contribute to the headline.
+    """Fit OLS on the outer training fold; predict on test; return per-fold metrics."""
     if len(np.unique(y_train)) < 2:
         return {
-            "best_C": float("nan"),
-            "auc": float("nan"),
-            "brier": float("nan"),
+            "spearman_rho": float("nan"),
+            "weighted_kappa": float("nan"),
+            "mae": float("nan"),
+            "mae_continuous": float("nan"),
             "n_train": int(len(X_train)),
             "n_test": int(len(X_test)),
-            "n_positive_test": int(y_test.sum()),
-            "positive_rate_test": float(y_test.mean()) if len(y_test) else 0.0,
+            "y_test_mean": float(y_test.mean()) if len(y_test) else 0.0,
+            "y_test_std": float(y_test.std()) if len(y_test) else 0.0,
             "coefs_raw": {k: float("nan") for k in feature_cols},
             "weights_convex": {k: float("nan") for k in feature_cols},
-            "skipped_reason": "single_class_training_fold",
+            "skipped_reason": "single_target_value_training_fold",
         }
-    best_C = _inner_cv_best_C(X_train, y_train, train_groups, Cs, seed=seed)
 
     scaler = StandardScaler().fit(X_train)
     Xtr_s = scaler.transform(X_train)
     Xte_s = scaler.transform(X_test)
-    lr = LogisticRegression(
-        penalty="l2", C=best_C, max_iter=2000, solver="lbfgs", random_state=seed
-    )
-    lr.fit(Xtr_s, y_train)
 
-    prob_test = lr.predict_proba(Xte_s)[:, 1]
-    auc = (
-        float(roc_auc_score(y_test, prob_test))
-        if len(np.unique(y_test)) >= 2
-        else float("nan")
-    )
-    brier = float(brier_score_loss(y_test, prob_test)) if len(y_test) else float("nan")
+    lr = LinearRegression()
+    lr.fit(Xtr_s, y_train.astype(float))
+    pred_test = lr.predict(Xte_s)
 
-    raw_coefs = _unscale_coefs(lr.coef_[0], scaler)
+    metrics = _fold_metrics(y_test, pred_test)
+    raw_coefs = _unscale_coefs(lr.coef_, scaler)
     convex = _normalise_to_convex(raw_coefs)
     return {
-        "best_C": float(best_C),
-        "auc": auc,
-        "brier": brier,
+        **metrics,
         "n_train": int(len(X_train)),
         "n_test": int(len(X_test)),
-        "n_positive_test": int(y_test.sum()),
-        "positive_rate_test": float(y_test.mean()) if len(y_test) else 0.0,
+        "y_test_mean": float(y_test.mean()) if len(y_test) else 0.0,
+        "y_test_std": float(y_test.std()) if len(y_test) else 0.0,
         "coefs_raw": dict(zip(feature_cols, [float(c) for c in raw_coefs])),
         "weights_convex": dict(zip(feature_cols, [float(c) for c in convex])),
     }
 
 
-def _summarise_folds(
-    per_fold: list[dict], feature_cols: list[str], n_folds: int
-) -> dict:
-    valid_aucs = [f["auc"] for f in per_fold if not np.isnan(f["auc"])]
-    mean_auc = float(np.mean(valid_aucs)) if valid_aucs else float("nan")
-    std_auc = float(np.std(valid_aucs, ddof=1)) if len(valid_aucs) > 1 else 0.0
-    if len(valid_aucs) > 1:
-        t_crit = stats.t.ppf(0.975, len(valid_aucs) - 1)
-        half = t_crit * std_auc / np.sqrt(len(valid_aucs))
-        ci = [mean_auc - half, mean_auc + half]
-    else:
-        ci = [mean_auc, mean_auc]
+def _summarise_folds(per_fold: list[dict], feature_cols: list[str], n_folds: int) -> dict:
+    """Mean / std / 95% CI across the per-fold Spearman ρ + weighted κ + MAE."""
+    valid_rhos = [f["spearman_rho"] for f in per_fold if not np.isnan(f["spearman_rho"])]
+    valid_kappas = [f["weighted_kappa"] for f in per_fold if not np.isnan(f["weighted_kappa"])]
+    valid_maes = [f["mae"] for f in per_fold if not np.isnan(f["mae"])]
 
-    valid_folds = [f for f in per_fold if not np.isnan(f["weights_convex"].get(feature_cols[0], float("nan")))]
+    def _agg(values: list[float]) -> tuple[float, float, list[float], int]:
+        if not values:
+            return float("nan"), float("nan"), [float("nan"), float("nan")], 0
+        mean = float(np.mean(values))
+        std = float(np.std(values, ddof=1)) if len(values) > 1 else 0.0
+        if len(values) > 1:
+            t_crit = stats.t.ppf(0.975, len(values) - 1)
+            half = t_crit * std / np.sqrt(len(values))
+            ci = [mean - half, mean + half]
+        else:
+            ci = [mean, mean]
+        return mean, std, ci, len(values)
+
+    rho_mean, rho_std, rho_ci, n_valid = _agg(valid_rhos)
+    kappa_mean, kappa_std, kappa_ci, _ = _agg(valid_kappas)
+    mae_mean, mae_std, mae_ci, _ = _agg(valid_maes)
+
+    valid_folds = [
+        f for f in per_fold
+        if not np.isnan(f["weights_convex"].get(feature_cols[0], float("nan")))
+    ]
     mean_weights = {
         k: float(np.mean([f["weights_convex"][k] for f in valid_folds]))
         if valid_folds
@@ -231,13 +248,18 @@ def _summarise_folds(
         for k in feature_cols
     }
     return {
-        "auc_mean": mean_auc,
-        "auc_std": std_auc,
-        "auc_ci95": ci,
+        "spearman_rho_mean": rho_mean,
+        "spearman_rho_std": rho_std,
+        "spearman_rho_ci95": rho_ci,
+        "weighted_kappa_mean": kappa_mean,
+        "weighted_kappa_std": kappa_std,
+        "weighted_kappa_ci95": kappa_ci,
+        "mae_mean": mae_mean,
+        "mae_std": mae_std,
+        "mae_ci95": mae_ci,
         "weights": mean_weights,
         "weights_per_fold_std": std_weights,
-        "n_folds_with_valid_auc": len(valid_aucs),
-        "best_C_per_fold": [f["best_C"] for f in per_fold],
+        "n_folds_with_valid_rho": n_valid,
     }
 
 
@@ -247,18 +269,17 @@ def train_struggle(
     snapshots: list[dict],
     labels: dict[str, dict],
     n_folds: int = 5,
-    Cs: Optional[list[float]] = None,
     seed: int = DEFAULT_SEED,
 ) -> dict:
-    Cs = Cs or DEFAULT_CS
     matched = [s for s in snapshots if s["snapshot_id"] in labels]
     print(f"struggle: {len(matched)}/{len(snapshots)} snapshots have labels")
 
     X = np.array([[s["v1_features"][k] for k in STRUGGLE_FEATURE_COLS] for s in matched])
-    y = np.array([int(labels[s["snapshot_id"]]["intervene"]) for s in matched])
+    y = np.array([STRUGGLE_BAND_INDEX[labels[s["snapshot_id"]]["band"]] for s in matched])
     groups = np.array([s["session_id"] for s in matched])
 
-    print(f"  X shape: {X.shape}; positive rate: {y.mean():.1%}")
+    band_counts = {b: int(np.sum(y == STRUGGLE_BAND_INDEX[b])) for b in STRUGGLE_BAND_INDEX}
+    print(f"  X shape: {X.shape}; y mean band: {y.mean():.2f}; band counts: {band_counts}")
     print(f"  Unique sessions: {len(np.unique(groups))}")
 
     gkf = GroupKFold(n_splits=n_folds)
@@ -266,29 +287,29 @@ def train_struggle(
     for fold_idx, (tr, te) in enumerate(gkf.split(X, y, groups)):
         result = _train_one_fold(
             X[tr], y[tr], X[te], y[te],
-            STRUGGLE_FEATURE_COLS, groups[tr], Cs, seed,
+            STRUGGLE_FEATURE_COLS, seed,
         )
         result["fold"] = fold_idx
         per_fold.append(result)
         print(
-            f"  fold {fold_idx}: C={result['best_C']:.3g}  AUC={result['auc']:.3f}  "
-            f"n_train={result['n_train']}  n_test={result['n_test']}  "
-            f"pos_rate={result['positive_rate_test']:.1%}"
+            f"  fold {fold_idx}: ρ={result['spearman_rho']:+.3f}  "
+            f"κ={result['weighted_kappa']:+.3f}  MAE={result['mae']:.3f}  "
+            f"n_train={result['n_train']}  n_test={result['n_test']}"
         )
 
     summary = _summarise_folds(per_fold, STRUGGLE_FEATURE_COLS, n_folds)
     return {
         "version": "v2",
         "kind": "struggle",
-        "model_class": "LogisticRegression",
+        "model_class": "LinearRegression",
         "trained_at": datetime.now(timezone.utc).isoformat(),
         "n_samples": int(len(X)),
         "n_folds": n_folds,
-        "target": "intervene (binary; LLM second-opinion)",
+        "target": TARGET_DESCRIPTION,
+        "target_band_index": STRUGGLE_BAND_INDEX,
         "features": STRUGGLE_FEATURE_COLS,
         "cv_scheme": f"GroupKFold(n_splits={n_folds}) with session_id as group",
-        "regularisation": "L2 (Ridge); C selected by inner GroupKFold(3) on AUC",
-        "Cs_grid": Cs,
+        "regularisation": "None (OLS — pure ordinary least squares)",
         "random_seed": seed,
         **summary,
         "per_fold": per_fold,
@@ -298,96 +319,89 @@ def train_struggle(
 def train_difficulty(
     questions: list[dict],
     labels: dict[str, dict],
-    Cs: Optional[list[float]] = None,
     seed: int = DEFAULT_SEED,
 ) -> dict:
-    Cs = Cs or DEFAULT_CS
     matched = [q for q in questions if q["question"] in labels]
     print(f"difficulty: {len(matched)}/{len(questions)} questions have labels")
 
-    # Binary target: "very hard" = LLM band == 'Very Hard'.
-    # The original {Hard, Very Hard} target produced 98.6% positive rate on
-    # this cohort (the LLM judged COA122 questions uniformly hard given the
-    # aggregate stats). At 99% positive LOO produces single-class training
-    # folds and the LR has nothing to discriminate. "Very Hard only" gives a
-    # 76%/24% split — still skewed but trainable. The reframed question is
-    # "what distinguishes the very hardest questions from the merely hard?"
     X = np.array([[q["v1_features"][k] for k in DIFFICULTY_FEATURE_COLS] for q in matched])
-    y = np.array([
-        int(labels[q["question"]]["band"] == "Very Hard") for q in matched
-    ])
-    print(f"  X shape: {X.shape}; positive rate (Very Hard only): {y.mean():.1%}")
+    y = np.array([DIFFICULTY_BAND_INDEX[labels[q["question"]]["band"]] for q in matched])
+    band_counts = {b: int(np.sum(y == DIFFICULTY_BAND_INDEX[b])) for b in DIFFICULTY_BAND_INDEX}
+    print(f"  X shape: {X.shape}; y mean band: {y.mean():.2f}; band counts: {band_counts}")
 
     loo = LeaveOneOut()
     per_fold: list[dict] = []
+    pooled_pred: list[float] = []
+    pooled_y: list[int] = []
     for fold_idx, (tr, te) in enumerate(loo.split(X)):
-        # LOO has 1 test sample — AUC undefined per-fold; we aggregate predictions
         result = _train_one_fold(
             X[tr], y[tr], X[te], y[te],
-            DIFFICULTY_FEATURE_COLS, None, Cs, seed,
+            DIFFICULTY_FEATURE_COLS, seed,
         )
         result["fold"] = fold_idx
         per_fold.append(result)
+        # Per-fold metrics are NaN for single-test-point LOO (need N≥2 for Spearman);
+        # we accumulate predictions and compute pooled metrics below.
+        if result.get("skipped_reason") is None:
+            scaler = StandardScaler().fit(X[tr])
+            lr = LinearRegression()
+            lr.fit(scaler.transform(X[tr]), y[tr].astype(float))
+            pred = float(lr.predict(scaler.transform(X[te]))[0])
+        else:
+            pred = float(y[tr].mean()) if len(tr) else 0.0
+        pooled_pred.append(pred)
+        pooled_y.append(int(y[te][0]))
 
-    # LOO: AUC computed on the pooled out-of-fold predictions
-    pooled_y = np.array([y[i] for i in range(len(X))])
-    pooled_prob: list[float] = []
-    for fold_idx, (tr, te) in enumerate(loo.split(X)):
-        # Skip folds that were stubbed out (single-class training data); use the
-        # class-mean as the prediction so the pooled AUC at least has SOMETHING
-        # to score. Stub folds also have NaN coefs so the recompute below
-        # would fail.
-        if per_fold[fold_idx].get("skipped_reason") is not None:
-            pooled_prob.append(float(y[tr].mean()))
-            continue
-        scaler = StandardScaler().fit(X[tr])
-        lr = LogisticRegression(
-            penalty="l2", C=per_fold[fold_idx]["best_C"],
-            max_iter=2000, solver="lbfgs", random_state=seed,
-        )
-        Xtr_s = scaler.transform(X[tr])
-        Xte_s = scaler.transform(X[te])
-        lr.fit(Xtr_s, y[tr])
-        pooled_prob.append(float(lr.predict_proba(Xte_s)[0, 1]))
+    pooled_pred_arr = np.array(pooled_pred)
+    pooled_y_arr = np.array(pooled_y)
+    pooled_metrics = _fold_metrics(pooled_y_arr, pooled_pred_arr)
+    print(
+        f"  LOO pooled: ρ={pooled_metrics['spearman_rho']:+.3f}  "
+        f"κ={pooled_metrics['weighted_kappa']:+.3f}  "
+        f"MAE={pooled_metrics['mae']:.3f}"
+    )
 
-    if len(np.unique(pooled_y)) >= 2:
-        pooled_auc = float(roc_auc_score(pooled_y, pooled_prob))
-        pooled_brier = float(brier_score_loss(pooled_y, pooled_prob))
-    else:
-        pooled_auc = float("nan")
-        pooled_brier = float("nan")
-    print(f"  LOO pooled AUC: {pooled_auc:.3f}  Brier: {pooled_brier:.3f}")
-
+    valid_folds = [
+        f for f in per_fold
+        if not np.isnan(f["weights_convex"].get(DIFFICULTY_FEATURE_COLS[0], float("nan")))
+    ]
     mean_weights = {
-        k: float(np.mean([f["weights_convex"][k] for f in per_fold]))
+        k: float(np.mean([f["weights_convex"][k] for f in valid_folds]))
         for k in DIFFICULTY_FEATURE_COLS
-    }
+    } if valid_folds else {k: float("nan") for k in DIFFICULTY_FEATURE_COLS}
     std_weights = {
-        k: float(np.std([f["weights_convex"][k] for f in per_fold], ddof=1))
+        k: float(np.std([f["weights_convex"][k] for f in valid_folds], ddof=1))
+        if len(valid_folds) > 1
+        else 0.0
         for k in DIFFICULTY_FEATURE_COLS
     }
 
     return {
         "version": "v2",
         "kind": "difficulty",
-        "model_class": "LogisticRegression",
+        "model_class": "LinearRegression",
         "trained_at": datetime.now(timezone.utc).isoformat(),
         "n_samples": int(len(X)),
         "n_folds": len(per_fold),
-        "target": "very hard (binary; LLM band == 'Very Hard'). Reframed from the original {Hard, Very Hard} target which gave 98.6% positive on this cohort and crashed LOO with single-class training folds.",
+        "target": TARGET_DESCRIPTION,
+        "target_band_index": DIFFICULTY_BAND_INDEX,
         "features": DIFFICULTY_FEATURE_COLS,
-        "cv_scheme": "LeaveOneOut on questions",
-        "regularisation": "L2 (Ridge); C selected by inner KFold(3) on AUC",
-        "Cs_grid": Cs,
+        "cv_scheme": "LeaveOneOut on questions; pooled metrics over OOF predictions",
+        "regularisation": "None (OLS — pure ordinary least squares)",
         "random_seed": seed,
         "weights": mean_weights,
         "weights_per_fold_std": std_weights,
-        "auc_mean": pooled_auc,
-        "auc_std": 0.0,  # single pooled AUC; no per-fold variance
-        "auc_ci95": [pooled_auc, pooled_auc],
-        "brier_pooled": pooled_brier,
-        "best_C_per_fold": [f["best_C"] for f in per_fold],
-        # per_fold omitted for difficulty — would be 72 entries; just keep summary
+        "spearman_rho_mean": pooled_metrics["spearman_rho"],
+        "spearman_rho_std": 0.0,
+        "spearman_rho_ci95": [pooled_metrics["spearman_rho"], pooled_metrics["spearman_rho"]],
+        "weighted_kappa_mean": pooled_metrics["weighted_kappa"],
+        "weighted_kappa_std": 0.0,
+        "weighted_kappa_ci95": [pooled_metrics["weighted_kappa"], pooled_metrics["weighted_kappa"]],
+        "mae_mean": pooled_metrics["mae"],
+        "mae_std": 0.0,
+        "mae_ci95": [pooled_metrics["mae"], pooled_metrics["mae"]],
+        "pooled_predictions": pooled_pred,
+        "pooled_y": pooled_y,
     }
 
 
@@ -395,31 +409,18 @@ def train_improved(
     snapshots: list[dict],
     labels: dict[str, dict],
     n_folds: int = 5,
-    Cs: Optional[list[float]] = None,
     seed: int = DEFAULT_SEED,
 ) -> dict:
-    """Train the 3 blend weights (w_B, w_M, w_D) of the improved-struggle composite.
+    """Train the 3 model weights (w_B, w_M, w_D) of the improved-struggle model.
 
-    Features are the three component scores per snapshot:
-      - behavioural_composite (B_s)
-      - mastery_gap (M_s)
-      - difficulty_adjusted_score (D_s)
-
-    Target is the same binary LLM intervene label as the struggle pass — the
-    improved composite is supposed to predict the same actionable signal, so
-    we train it against the same target for a clean v1 vs v2 comparison of
-    the BLEND weights specifically (not the composite-vs-baseline question,
-    which is in scope for Phase 6 evaluation).
+    Features are the three component scores per snapshot. Target is the same
+    4-band struggle rating as the struggle pass — the improved model
+    is supposed to predict the same band severity, so we train it against
+    the same target for a clean v1 vs v2 comparison of the MODEL weights.
 
     Requires snapshots to carry `improved_components` populated by
     scripts/eval_common.py (the helper compute_improved_components_at_t).
-    Snapshots without the field are filtered out — if zero snapshots have
-    it, returns a DEFERRED stub identical in shape to the original
-    train_improved_stub so the JSON consumer side doesn't break.
     """
-    Cs = Cs or DEFAULT_CS
-
-    # Filter snapshots that have BOTH the LLM label AND populated improved_components
     matched = [
         s for s in snapshots
         if s["snapshot_id"] in labels
@@ -432,11 +433,10 @@ def train_improved(
     )
 
     if not matched:
-        # Snapshots haven't been regenerated yet — fall back to the stub shape
         return {
             "version": "v2",
             "kind": "improved",
-            "model_class": "LogisticRegression",
+            "model_class": "LinearRegression",
             "trained_at": datetime.now(timezone.utc).isoformat(),
             "status": "DEFERRED",
             "reason": (
@@ -446,14 +446,15 @@ def train_improved(
                 "then re-run this script."
             ),
             "weights": {"w_B": 0.45, "w_M": 0.30, "w_D": 0.25},
-            "auc_mean": float("nan"),
+            "spearman_rho_mean": float("nan"),
         }
 
     X = np.array([[s["improved_components"][k] for k in IMPROVED_FEATURE_COLS] for s in matched])
-    y = np.array([int(labels[s["snapshot_id"]]["intervene"]) for s in matched])
+    y = np.array([STRUGGLE_BAND_INDEX[labels[s["snapshot_id"]]["band"]] for s in matched])
     groups = np.array([s["session_id"] for s in matched])
 
-    print(f"  X shape: {X.shape}; positive rate: {y.mean():.1%}")
+    band_counts = {b: int(np.sum(y == STRUGGLE_BAND_INDEX[b])) for b in STRUGGLE_BAND_INDEX}
+    print(f"  X shape: {X.shape}; y mean band: {y.mean():.2f}; band counts: {band_counts}")
     print(f"  Unique sessions: {len(np.unique(groups))}")
 
     gkf = GroupKFold(n_splits=n_folds)
@@ -461,18 +462,17 @@ def train_improved(
     for fold_idx, (tr, te) in enumerate(gkf.split(X, y, groups)):
         result = _train_one_fold(
             X[tr], y[tr], X[te], y[te],
-            IMPROVED_FEATURE_COLS, groups[tr], Cs, seed,
+            IMPROVED_FEATURE_COLS, seed,
         )
         result["fold"] = fold_idx
         per_fold.append(result)
         print(
-            f"  fold {fold_idx}: C={result['best_C']:.3g}  AUC={result['auc']:.3f}  "
-            f"n_train={result['n_train']}  n_test={result['n_test']}  "
-            f"pos_rate={result['positive_rate_test']:.1%}"
+            f"  fold {fold_idx}: ρ={result['spearman_rho']:+.3f}  "
+            f"κ={result['weighted_kappa']:+.3f}  MAE={result['mae']:.3f}  "
+            f"n_train={result['n_train']}  n_test={result['n_test']}"
         )
 
     summary = _summarise_folds(per_fold, IMPROVED_FEATURE_COLS, n_folds)
-    # Rename keys for v1 comparability (w_B, w_M, w_D)
     weights_named = {
         "w_B": summary["weights"]["behavioural_composite"],
         "w_M": summary["weights"]["mastery_gap"],
@@ -487,26 +487,35 @@ def train_improved(
     return {
         "version": "v2",
         "kind": "improved",
-        "model_class": "LogisticRegression",
+        "model_class": "LinearRegression",
         "trained_at": datetime.now(timezone.utc).isoformat(),
         "n_samples": int(len(X)),
         "n_folds": n_folds,
-        "target": "intervene (binary; LLM second-opinion)",
+        "target": TARGET_DESCRIPTION,
+        "target_band_index": STRUGGLE_BAND_INDEX,
         "features": IMPROVED_FEATURE_COLS,
-        "feature_aliases": {"behavioural_composite": "w_B", "mastery_gap": "w_M", "difficulty_adjusted_score": "w_D"},
+        "feature_aliases": {
+            "behavioural_composite": "w_B",
+            "mastery_gap": "w_M",
+            "difficulty_adjusted_score": "w_D",
+        },
         "cv_scheme": f"GroupKFold(n_splits={n_folds}) with session_id as group",
-        "regularisation": "L2 (Ridge); C selected by inner GroupKFold(3) on AUC",
-        "Cs_grid": Cs,
+        "regularisation": "None (OLS — pure ordinary least squares)",
         "random_seed": seed,
-        "auc_mean": summary["auc_mean"],
-        "auc_std": summary["auc_std"],
-        "auc_ci95": summary["auc_ci95"],
+        "spearman_rho_mean": summary["spearman_rho_mean"],
+        "spearman_rho_std": summary["spearman_rho_std"],
+        "spearman_rho_ci95": summary["spearman_rho_ci95"],
+        "weighted_kappa_mean": summary["weighted_kappa_mean"],
+        "weighted_kappa_std": summary["weighted_kappa_std"],
+        "weighted_kappa_ci95": summary["weighted_kappa_ci95"],
+        "mae_mean": summary["mae_mean"],
+        "mae_std": summary["mae_std"],
+        "mae_ci95": summary["mae_ci95"],
         "weights": weights_named,
         "weights_per_fold_std": weights_std_named,
         "weights_by_feature": summary["weights"],
         "weights_per_fold_std_by_feature": summary["weights_per_fold_std"],
-        "n_folds_with_valid_auc": summary["n_folds_with_valid_auc"],
-        "best_C_per_fold": summary["best_C_per_fold"],
+        "n_folds_with_valid_rho": summary["n_folds_with_valid_rho"],
         "per_fold": per_fold,
     }
 
@@ -518,13 +527,6 @@ def main() -> int:
     parser.add_argument("--kind", required=True, choices=["struggle", "difficulty", "improved"])
     parser.add_argument("--n-folds", type=int, default=5)
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
-    parser.add_argument(
-        "--Cs",
-        type=float,
-        nargs="+",
-        default=None,
-        help="Override the default L2-strength grid (7 values from 1e-3 to 1e3).",
-    )
     parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args()
 
@@ -534,17 +536,15 @@ def main() -> int:
 
     if args.kind == "struggle":
         labels = _load_labels("struggle")
-        result = train_struggle(
-            snapshots, labels, n_folds=args.n_folds, Cs=args.Cs, seed=args.seed
-        )
+        result = train_struggle(snapshots, labels, n_folds=args.n_folds, seed=args.seed)
         out = args.out or paths.DATA_DIR / "eval" / "optimised_struggle_weights_v2.json"
     elif args.kind == "difficulty":
         labels = _load_labels("difficulty")
-        result = train_difficulty(questions, labels, Cs=args.Cs, seed=args.seed)
+        result = train_difficulty(questions, labels, seed=args.seed)
         out = args.out or paths.DATA_DIR / "eval" / "optimised_difficulty_weights_v2.json"
     else:  # improved
-        labels = _load_labels("struggle")  # same target as struggle pass
-        result = train_improved(snapshots, labels, n_folds=args.n_folds, Cs=args.Cs, seed=args.seed)
+        labels = _load_labels("struggle")  # same 4-band target as struggle pass
+        result = train_improved(snapshots, labels, n_folds=args.n_folds, seed=args.seed)
         out = args.out or paths.DATA_DIR / "eval" / "optimised_improved_weights_v2.json"
 
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -553,12 +553,16 @@ def main() -> int:
     print(f"Wrote {out}")
     print()
 
-    # Headline summary
     if result.get("status") == "DEFERRED":
         print(f"Status: DEFERRED ({result['kind']})")
         return 0
-    print(f"=== {args.kind.upper()} v2 weights ===")
-    print(f"  AUC (mean): {result['auc_mean']:.3f}  95% CI: [{result['auc_ci95'][0]:.3f}, {result['auc_ci95'][1]:.3f}]")
+    print(f"=== {args.kind.upper()} v2 weights (OLS on 4-band) ===")
+    print(f"  Spearman ρ: {result['spearman_rho_mean']:+.3f}  "
+          f"95% CI: [{result['spearman_rho_ci95'][0]:+.3f}, {result['spearman_rho_ci95'][1]:+.3f}]")
+    print(f"  Weighted κ: {result['weighted_kappa_mean']:+.3f}  "
+          f"95% CI: [{result['weighted_kappa_ci95'][0]:+.3f}, {result['weighted_kappa_ci95'][1]:+.3f}]")
+    print(f"  MAE (band): {result['mae_mean']:.3f}  "
+          f"95% CI: [{result['mae_ci95'][0]:.3f}, {result['mae_ci95'][1]:.3f}]")
     print(f"  N samples:  {result['n_samples']}")
     print(f"  N folds:    {result['n_folds']}")
     print()
@@ -566,8 +570,6 @@ def main() -> int:
     for k, v in result["weights"].items():
         sd = result["weights_per_fold_std"].get(k, 0.0)
         print(f"    {k:<10} {v:+.3f}  (per-fold std: {sd:.3f})")
-    print()
-    print(f"  Best C per fold: {[round(c, 4) for c in result['best_C_per_fold']]}")
     return 0
 
 

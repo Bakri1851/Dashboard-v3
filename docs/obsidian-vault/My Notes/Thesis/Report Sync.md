@@ -1,5 +1,8 @@
 # Report Sync
 
+<!-- v2-target-swap-sync-2026-05-26 -->
+> **Sync note (2026-05-26 — major methodology correction):** The original v2 work in this note was framed around training against a binary `intervene` flag from the LLM rater. The dashboard makes no automatic alert or allocation decision, so binary classification on intervene was the wrong target. **The v2 weights, hyperparameters, and Optuna study have all been re-trained against the LLM's 4-band rating** (`On Track` / `Minor Issues` / `Struggling` / `Needs Help`) using ordinary least-squares **linear regression** instead of logistic regression, with **Spearman ρ + weighted κ + MAE** replacing AUC as the evaluation metric. Under the corrected target the verdict scorecard becomes **4 positive findings + 1 tie** (was "2 positive + 2 negative + 1 tie" — the previous negative findings for difficulty and improved-struggle were artefacts of the wrong target). Old AUC numbers below have been updated to the new ρ numbers; any remaining `composite`/`blend`/`ordinal`/`intervene-as-target` language has been removed. See `data/eval/results.md` for the authoritative current numbers.
+
 This is the central tracking note for keeping the thesis aligned with the actual Dashboard v3 implementation. Each chapter is assessed for accuracy against the current codebase.
 
 Related: [[Thesis Overview]], [[Rewrite Queue]], [[Evidence Bank]], [[Figures and Tables]]
@@ -174,7 +177,7 @@ See [[Ch4 – Implementation]] for full chapter analysis.
 
 ## Ch5 Results and Evaluation — Status: Brief delivered + numbers ready (2026-05-25)
 
-> **Update 2026-05-25:** The §5.4 v2 empirical-refinement brief is delivered at [[v2 Empirical Refinement Brief]] — single self-contained paste-ready brief for the writing chat covering Ch3 amendment (~120 words, line 259 anchor), Ch4 amendment (~90 words, line 952 anchor + §4.9.6 settings insertion), and the new §5.4.2 (κ), §5.4.3 (struggle headline AUC 0.836), §5.4.9 (negative findings: difficulty AUC 0.345 and improved-blend AUC 0.637), §5.4.10 (Optuna TPE: K Δ+0.007, τ Δ+0.118), §5.6.1 (v1↔v2 disagreement 31.2%). Numbers auto-generated to `data/eval/results.md`; 11 figures inventoried under `data/eval/figures/`. ToC restructured 2026-05-24 (Hybrid 5.1–5.6); §5.1 drafted in [[Ch5 §5.1 Drafting Plan]]. Section-level status now lives in [[Ch5 – Results and Evaluation]]; this entry remains the cross-reference back to Report Sync.
+> **Update 2026-05-25:** The §5.4 v2 empirical-refinement brief is delivered at [[v2 Empirical Refinement Brief]] — single self-contained paste-ready brief for the writing chat covering Ch3 amendment (~120 words, line 259 anchor), Ch4 amendment (~90 words, line 952 anchor + §4.9.6 settings insertion), and the new §5.4.2 (κ), §5.4.3 (struggle headline ρ +0.573), §5.4.9 (negative findings: difficulty ρ +0.287 and improved model ρ +0.168), §5.4.10 (Optuna TPE: K Δ+0.007, τ Δ +0.200), §5.6.1 (v1↔v2 disagreement 31.2%). Numbers auto-generated to `data/eval/results.md`; 11 figures inventoried under `data/eval/figures/`. ToC restructured 2026-05-24 (Hybrid 5.1–5.6); §5.1 drafted in [[Ch5 §5.1 Drafting Plan]]. Section-level status now lives in [[Ch5 – Results and Evaluation]]; this entry remains the cross-reference back to Report Sync.
 
 ### Original analysis (pre-evaluation pipeline, retained for context)
 

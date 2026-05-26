@@ -948,8 +948,15 @@ The improved struggle score combines three components under a convex sum:
 \[
 S_{\mathrm{improved}}(s) = w_B\, B_s + w_M\, M_s + w_D\, D_s,
 \]
-where $B_s$ is the behavioural composite (the equal-weighted mean of four cohort-normalised baseline signals from Section \ref{sec:analytics}: $\widehat{A^{\mathrm{raw}}}_s$, $\hat{\tilde{r}}_s$, $\hat{d}_s$ and $\widehat{\tilde{\mathrm{rep}}}_s$), $M_s = \max\!\big(\bar{m}_s - (1 - A^{\mathrm{raw}}_s),\, 0\big)$ is the mastery-gap term derived from BKT (Section \ref{sec:advanced}) - the positive-part difference between mean BKT mastery and the student's recent correctness rate, so the signal only fires when a student underperforms their own mastery estimate - and $D_s$ is a difficulty-adjusted exposure term that reweights each submission by the IRT difficulty of its question.
+where $B_s$ is the behavioural model (the equal-weighted mean of four cohort-normalised baseline signals from Section \ref{sec:analytics}: $\widehat{A^{\mathrm{raw}}}_s$, $\hat{\tilde{r}}_s$, $\hat{d}_s$ and $\widehat{\tilde{\mathrm{rep}}}_s$), $M_s = \max\!\big(\bar{m}_s - (1 - A^{\mathrm{raw}}_s),\, 0\big)$ is the mastery-gap term derived from BKT (Section \ref{sec:advanced}) - the positive-part difference between mean BKT mastery and the student's recent correctness rate, so the signal only fires when a student underperforms their own mastery estimate - and $D_s$ is a difficulty-adjusted exposure term that reweights each submission by the IRT difficulty of its question.
 Default weights are $(w_B, w_M, w_D) = (0.45, 0.30, 0.25)$ from \texttt{IMPROVED\_STRUGGLE\_WEIGHT\_BEHAVIORAL}, \texttt{IMPROVED\_STRUGGLE\_WEIGHT\_MASTERY\_GAP} and \texttt{IMPROVED\_STRUGGLE\_WEIGHT\_DIFFICULTY\_ADJ} respectively (Chapter \ref{sec:design} writes these as $w_{\mathrm{beh}}, w_{\mathrm{mg}}, w_{\mathrm{da}}$).
+
+The three model scores covered in this section (seven-signal baseline struggle, five-signal baseline difficulty, three-weight improved) each carry an optional v2 weight vector loaded at request time from \texttt{data/eval/optimised\_*\_v2.json}, with a fourth JSON (\texttt{optimised\_hyperparams\_v2.json}) carrying the Optuna-tuned values of the two scalar hyperparameters introduced in Chapter~\ref{sec:design}.
+Five fields on \texttt{RuntimeConfig} gate the selection: four \texttt{*\_version} string flags (\texttt{struggle\_weights\_version}, \texttt{difficulty\_weights\_version}, \texttt{improved\_struggle\_weights\_version}, \texttt{hyperparams\_version}) and one direct-override scalar (\texttt{shrinkage\_k}) each defaulting to its v1 value.
+When \texttt{hyperparams\_version} is set to \texttt{"v2"}, both the shrinkage constant $K$ and the CF threshold $\tau$ are read from the JSON; \texttt{shrinkage\_k} can also accept an integer outside of the v1/v2 values.
+A missing or corrupt JSON falls back to v1 with a warning logged.
+The toggles are only implemented on the V2 iteration of the dashboard.
+
 
 V1's \texttt{compute\_improved\_struggle\_scores} builds the three component scores and combines them under the weighted sum above.
 The difficulty-adjusted term uses \texttt{incorrectness $\times$ (1 - norm\_diff)} for each submission, so wrong attempts on easy items contribute more than wrong attempts on hard ones - failing an easy question signals struggle more strongly than failing a hard one, since the cohort has already validated the hard item's difficulty.
@@ -1004,8 +1011,25 @@ return ((raw + 1.0) / 2.0).clip(0.0, 1.0)
     \label{fig:code-irt-residual}
 \end{figure}
 
-\subsubsection{V2 Empirical Refinement Pipeline} \label{sec:v2-training}
-% TODO: §4.7.5 prose block (~480 words, offline training pipeline: five phases scripts/eval_*.py + notebooks/eval_main.ipynb; see Ch5 §5.4 v2 Empirical Refinement drafting plan, Insertion 6)
+\subsubsection{v2 Model Refinement Pipeline} \label{sec:v2-training}
+
+The v1 model weights in Sections~\ref{sec:analytics} and~\ref{sec:advanced} were tuned by trial and error in the absence of labelled ground-truth data; the design of the offline pipeline that fits them is set out in Section~\ref{sec:v2-pipeline-design}, and the evaluation is highlighted in Section~\ref{sec:eval-v2-methodology}.
+This section describes the implementation.
+The four JSON files the pipeline produces under \texttt{data/eval/} are loaded at request time by the toggle in Settings.
+v2 vectors are read from disk on the first request after a settings change.
+
+The pipeline is structured as five sequential phases, each implemented with Python scripts in \texttt{scripts/} or as a Jupyter notebook under \texttt{notebooks/}.
+Phase~1 (\texttt{eval\_fetch.py}) pulls from the Loughborough submission API once and caches all the responses to a Parquet file under \texttt{data/eval/submissions.parquet}, so later phases are completely offline.
+Phase~2 (\texttt{eval\_common.py}) stratifies the cached submissions into snapshots across the lab sessions, twelve cutoff times per session, and the four struggle bands.
+Phase~3 (\texttt{eval\_label.py}) calls GPT-4o-mini for each snapshot to obtain a four-band struggle rating, and a four-band difficulty rating for the question side.
+The bands "On Track", "Minor Issues", "Struggling", "Needs Help" for struggle; "Easy", "Medium", "Hard", "Very Hard" for difficulty are encoded as an integer index in $\{0, 1, 2, 3\}$ for training.
+
+Phase~4 (\texttt{optimise\_v2\_weights.py} and \texttt{optimise\_hyperparams.py}) fits the v2 vectors. The seven-signal struggle model and the three-weight improved model are fitted under ordinary least-squares linear regression against the band index; the outer scheme is \texttt{GroupKFold(n\_splits=5)} with session as the group identifier, so train and test partitions never share students.
+Alternatively, the five-signal difficulty model is fitted under leave-one-out cross-validation due to the smaller sample size.
+The two scalar parameters Bayesian shrinkage $K$ and collaborative-filtering similarity threshold $\tau$ are tuned in the two Optuna~\cite{akibaOptunaNextgenerationHyperparameter2019} studies each using the Tree-structured Parzen Estimator~\cite{NIPS2011_86e8f7ab}, with session-grouped five-fold cross-validation Spearman~$\rho$ against the four-band labels as the maximisation objective.
+
+Ordinary least-squares regression was chosen so that the linear functional form of the v1 side is kept so that v1 and v2 are directly comparable term by term, and so that the v2 score remains a single continuous scalar that the dashboard's deployed band thresholds can map to a band label in the same way as the v1 score.
+The metrics reported alongside the trained weights are Spearman~$\rho$ for rank quality, linear-weighted Cohen's $\kappa$ for band agreement, and mean absolute band-distance error (MAE).
 
 \subsection{RAG Suggested Feedback} \label{sec:rag}
 
@@ -1226,7 +1250,10 @@ Similarly for the Question difficulty model comparison, the baseline difficulty 
 
 Both versions expose the runtime model configuration through a Settings page, where they both have common toggles such as Sound Effects (\texttt{SOUNDS\_ENABLED\_DEFAULT = True}), Auto-Refresh (\texttt{AUTO\_REFRESH\_DEFAULT = True}) with the refresh interval selectable from \texttt{AUTO\_REFRESH\_OPTIONS = [5, 10, 15, 30, 60, 120, 300]} seconds, Collaborative Filtering (\texttt{cf\_enabled}) with the similarity-threshold slider $\tau$, and the two model-choice selectboxes. 
 When Improved is selected, four sliders appear for the BKT parameters $P(L_0)$, $P(T)$, $P(G)$ and $P(S)$ with defaults from Section \ref{sec:advanced}, a slider change retriggers the per-student mastery computation on the next refresh. 
-The two diverge in a few places where V2 has a theme picker that persists to \texttt{localStorage} and an In-Class layout toggle (Basic/Advanced). V1 also exposes a Temporal Smoothing toggle (\texttt{SMOOTHING\_ENABLED}) where V2 hard-codes the EMA at $\alpha = 0.3$ and surfaces \texttt{smoothing\_alpha} only in a read-only configuration reference at the bottom of the page.
+The two diverge in a few places where V2 has a theme picker that persists to \texttt{localStorage} and an In-Class layout toggle (Basic/Advanced). V1 also exposes a Temporal Smoothing toggle (\texttt{SMOOTHING\_ENABLED}) where V2 hard-codes the EMA at $\alpha = 0.3$ and surfaces \texttt{smoothing\_alpha} only in a read-only configuration reference at the bottom of the page. 
+V2 also has an extra Settings section titled "Optimised Weights (v2)", with four select rows: struggle weights, difficulty weights, improved-struggle model, and hyperparams; selecting v2 on any row invalidates the selected cache and reloads the leaderboard on the next refresh.
+The difficulty weights selector is disabled when \texttt{difficulty\_model == "irt"} as the IRT path bypasses the model weights entirely, and the improved model selector is disabled when \texttt{struggle\_model != "improved"}.
+The per-component verdict for each v2 trained weight vector is reported in Section~\ref{sec:eval-findings}, and the trained weights replace the v1 defaults at request time once a v2 selection is made.
 
 V1 also carries a small UX flourish that V2 does not: six short sci-fi sound cues fired at session start, session end, student selection and other key events, authored as Web Audio API \texttt{OscillatorNode} and \texttt{GainNode} chains in \texttt{code/learning\_dashboard/sound.py} and injected through a zero-height iframe via \texttt{st.components.v1.html()} as Streamlit cannot natively play audio. The cues are gated by the Sound Effects toggle and, whilst not load-bearing analytically, help the instructor track session state without staring at the screen.
 

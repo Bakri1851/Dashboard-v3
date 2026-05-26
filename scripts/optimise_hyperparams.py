@@ -3,24 +3,29 @@
 Two TPE studies, one per cheap-to-evaluate scalar hyperparam:
 
 1. **shrinkage_k** — integer in {0..50}. Objective: 5-fold session-grouped CV
-   AUC of v1 struggle composite, with each K applied as Bayesian-shrinkage
-   pull toward cohort class mean, against LLM intervene labels.
+   **Spearman ρ** of v1 struggle model (with K applied as Bayesian-shrinkage
+   pull toward cohort class mean) against the LLM's 4-band rating.
 
 2. **cf_threshold** — float in [0.4, 0.9]. Objective: 5-fold session-grouped
-   CV AUC of CF scores (cosine k-NN over the 5 normalised features) against
-   the same LLM intervene labels.
+   CV **Spearman ρ** of CF scores (cosine k-NN over the 5 normalised features)
+   against the same 4-band rating.
 
 Both studies use TPE (Tree-structured Parzen Estimator); 50 trials each;
 fixed random seed for reproducibility. Cached snapshot features mean no
 model refits per trial — each trial is sub-100 ms (K) or sub-2 s (CF).
+
+**Target**: 4-band rating (`On Track`=0, `Minor Issues`=1,
+`Struggling`=2, `Needs Help`=3) — the same target the v2 weight scripts use.
+The binary `intervene` flag is NOT used as the optimisation target because
+the dashboard makes no automatic alert/allocation decision.
 
 **Deferred (would each need ~30 min of BKT/IRT refits per trial):**
 - BKT priors (p_init, p_learn, p_guess, p_slip)
 - BKT mastery threshold
 
 Output: ``data/eval/optimised_hyperparams_v2.json`` with best values, best
-AUCs, full per-trial trajectories, and a comparison against v1 defaults
-(K=5, τ=0.7).
+Spearman ρs, full per-trial trajectories, and a comparison against v1
+defaults (K=5, τ=0.7).
 
 Run from repo root::
 
@@ -45,7 +50,7 @@ sys.path.insert(0, str(REPO_ROOT / "code2"))
 import numpy as np  # noqa: E402
 import optuna  # noqa: E402
 import pandas as pd  # noqa: E402
-from sklearn.metrics import roc_auc_score  # noqa: E402
+from scipy.stats import spearmanr  # noqa: E402
 from sklearn.model_selection import GroupKFold  # noqa: E402
 
 from backend import collab, config, paths  # noqa: E402
@@ -61,6 +66,14 @@ V1_K = config.SHRINKAGE_K_DEFAULT
 V1_TAU = 0.7
 DEFAULT_N_TRIALS = 50
 DEFAULT_SEED = 42
+
+# 4-band target encoded as integer index 0-3 (matches optimise_v2_weights.py)
+STRUGGLE_BAND_INDEX = {
+    "On Track": 0,
+    "Minor Issues": 1,
+    "Struggling": 2,
+    "Needs Help": 3,
+}
 
 
 # -------------------- Data loaders --------------------
@@ -80,7 +93,7 @@ def _load_jsons() -> tuple[list[dict], dict[str, dict]]:
 def _build_matched(snapshots: list[dict], labels: dict[str, dict]) -> dict[str, Any]:
     """Filter snapshots to those with LLM labels; build the per-fold index arrays."""
     matched = [s for s in snapshots if s["snapshot_id"] in labels]
-    y = np.array([int(labels[s["snapshot_id"]]["intervene"]) for s in matched])
+    y = np.array([STRUGGLE_BAND_INDEX[labels[s["snapshot_id"]]["band"]] for s in matched])
     groups = np.array([s["session_id"] for s in matched])
 
     # Cohort grouping for shrinkage class-mean + CF cohort-relative similarity
@@ -91,10 +104,11 @@ def _build_matched(snapshots: list[dict], labels: dict[str, dict]) -> dict[str, 
     gkf = GroupKFold(n_splits=5)
     fold_splits = list(gkf.split(np.zeros(len(matched)), y, groups))
 
+    band_counts = {b: int(np.sum(y == STRUGGLE_BAND_INDEX[b])) for b in STRUGGLE_BAND_INDEX}
     print(f"  matched: {len(matched)} snapshots")
     print(f"  cohorts: {len(cohorts)}")
     print(f"  sessions: {len(np.unique(groups))}")
-    print(f"  positive rate: {y.mean():.1%}")
+    print(f"  mean band: {y.mean():.2f}; band counts: {band_counts}")
     return {"matched": matched, "y": y, "groups": groups, "cohorts": cohorts, "fold_splits": fold_splits}
 
 
@@ -159,15 +173,22 @@ def score_with_tau(data: dict, tau: float) -> np.ndarray:
 
 # -------------------- CV scoring --------------------
 
-def cv_auc(data: dict, preds: np.ndarray) -> tuple[float, list[float]]:
-    """Mean AUC across 5 session-grouped folds + the per-fold list."""
+def cv_spearman(data: dict, preds: np.ndarray) -> tuple[float, list[float]]:
+    """Mean Spearman ρ across 5 session-grouped folds + the per-fold list.
+
+    ρ measures rank correlation between predicted score and band index
+    — exactly the ranking quality the dashboard's leaderboard surfaces.
+    """
     y = data["y"]
-    fold_aucs = []
+    fold_rhos = []
     for _tr, te in data["fold_splits"]:
-        if len(np.unique(y[te])) < 2:
+        if len(np.unique(y[te])) < 2 or len(te) < 2:
             continue
-        fold_aucs.append(float(roc_auc_score(y[te], preds[te])))
-    return float(np.mean(fold_aucs)) if fold_aucs else float("nan"), fold_aucs
+        rho = spearmanr(preds[te], y[te]).correlation
+        if rho is None or np.isnan(rho):
+            continue
+        fold_rhos.append(float(rho))
+    return float(np.mean(fold_rhos)) if fold_rhos else float("nan"), fold_rhos
 
 
 # -------------------- Optuna objectives --------------------
@@ -176,9 +197,9 @@ def make_k_objective(data: dict):
     def objective(trial: optuna.Trial) -> float:
         K = trial.suggest_int("shrinkage_k", 0, 50)
         preds = score_with_k(data, K)
-        mean_auc, fold_aucs = cv_auc(data, preds)
-        trial.set_user_attr("fold_aucs", fold_aucs)
-        return mean_auc
+        mean_rho, fold_rhos = cv_spearman(data, preds)
+        trial.set_user_attr("fold_rhos", fold_rhos)
+        return mean_rho
     return objective
 
 
@@ -186,9 +207,9 @@ def make_tau_objective(data: dict):
     def objective(trial: optuna.Trial) -> float:
         tau = trial.suggest_float("cf_threshold", 0.4, 0.9)
         preds = score_with_tau(data, tau)
-        mean_auc, fold_aucs = cv_auc(data, preds)
-        trial.set_user_attr("fold_aucs", fold_aucs)
-        return mean_auc
+        mean_rho, fold_rhos = cv_spearman(data, preds)
+        trial.set_user_attr("fold_rhos", fold_rhos)
+        return mean_rho
     return objective
 
 
@@ -213,13 +234,13 @@ def main() -> int:
     print()
 
     # ---- Baseline: v1 defaults ----
-    print(f"Baseline AUC at v1 defaults (K={V1_K}, τ={V1_TAU})...")
+    print(f"Baseline Spearman ρ at v1 defaults (K={V1_K}, τ={V1_TAU})...")
     base_k_preds = score_with_k(data, V1_K)
-    base_k_auc, base_k_folds = cv_auc(data, base_k_preds)
-    print(f"  shrinkage K={V1_K} → CV AUC = {base_k_auc:.4f}  (folds: {[round(a, 3) for a in base_k_folds]})")
+    base_k_rho, base_k_folds = cv_spearman(data, base_k_preds)
+    print(f"  shrinkage K={V1_K} → CV ρ = {base_k_rho:+.4f}  (folds: {[round(r, 3) for r in base_k_folds]})")
     base_t_preds = score_with_tau(data, V1_TAU)
-    base_t_auc, base_t_folds = cv_auc(data, base_t_preds)
-    print(f"  CF τ={V1_TAU}    → CV AUC = {base_t_auc:.4f}  (folds: {[round(a, 3) for a in base_t_folds]})")
+    base_t_rho, base_t_folds = cv_spearman(data, base_t_preds)
+    print(f"  CF τ={V1_TAU}    → CV ρ = {base_t_rho:+.4f}  (folds: {[round(r, 3) for r in base_t_folds]})")
     print()
 
     # ---- Optuna study 1: shrinkage_k ----
@@ -231,8 +252,8 @@ def main() -> int:
     )
     study_k.optimize(make_k_objective(data), n_trials=args.n_trials, show_progress_bar=False)
     best_k = study_k.best_params["shrinkage_k"]
-    best_k_auc = study_k.best_value
-    print(f"  best K = {best_k}  CV AUC = {best_k_auc:.4f}  (Δ vs v1: {best_k_auc - base_k_auc:+.4f})")
+    best_k_rho = study_k.best_value
+    print(f"  best K = {best_k}  CV ρ = {best_k_rho:+.4f}  (Δ vs v1: {best_k_rho - base_k_rho:+.4f})")
     print()
 
     # ---- Optuna study 2: cf_threshold ----
@@ -244,8 +265,8 @@ def main() -> int:
     )
     study_t.optimize(make_tau_objective(data), n_trials=args.n_trials, show_progress_bar=False)
     best_t = study_t.best_params["cf_threshold"]
-    best_t_auc = study_t.best_value
-    print(f"  best τ = {best_t:.3f}  CV AUC = {best_t_auc:.4f}  (Δ vs v1: {best_t_auc - base_t_auc:+.4f})")
+    best_t_rho = study_t.best_value
+    print(f"  best τ = {best_t:.3f}  CV ρ = {best_t_rho:+.4f}  (Δ vs v1: {best_t_rho - base_t_rho:+.4f})")
     print()
 
     # ---- Compile + persist ----
@@ -256,8 +277,13 @@ def main() -> int:
         "trained_at": datetime.now(timezone.utc).isoformat(),
         "n_trials_per_study": args.n_trials,
         "random_seed": args.seed,
-        "cv_scheme": "GroupKFold(n_splits=5) with session_id as group; same fold split as Phase 4a",
-        "target": "intervene (binary; LLM second-opinion) — same as Phase 4a",
+        "cv_scheme": "GroupKFold(n_splits=5) with session_id as group; same fold split as the v2 weight scripts",
+        "target": (
+            "4-band rating (LLM second-opinion). "
+            "On Track=0, Minor Issues=1, Struggling=2, Needs Help=3. "
+            "Objective: maximise mean per-fold Spearman ρ."
+        ),
+        "metric": "Spearman ρ (rank correlation between predicted score and band index)",
         "n_samples": len(data["matched"]),
 
         "best_values": {
@@ -271,19 +297,19 @@ def main() -> int:
             "bkt_p_slip":           config.BKT_P_SLIP,
             "bkt_mastery_threshold": config.BKT_MASTERY_THRESHOLD,
         },
-        "best_aucs": {
-            "shrinkage_k_best":  float(best_k_auc),
-            "cf_threshold_best": float(best_t_auc),
+        "best_rhos": {
+            "shrinkage_k_best":  float(best_k_rho),
+            "cf_threshold_best": float(best_t_rho),
         },
-        "v1_baseline_aucs": {
-            "shrinkage_k_at_default":  float(base_k_auc),
-            "cf_threshold_at_default": float(base_t_auc),
+        "v1_baseline_rhos": {
+            "shrinkage_k_at_default":  float(base_k_rho),
+            "cf_threshold_at_default": float(base_t_rho),
             "default_k":   V1_K,
             "default_tau": V1_TAU,
         },
         "deltas": {
-            "shrinkage_k":  float(best_k_auc - base_k_auc),
-            "cf_threshold": float(best_t_auc - base_t_auc),
+            "shrinkage_k":  float(best_k_rho - base_k_rho),
+            "cf_threshold": float(best_t_rho - base_t_rho),
         },
         "studies": {
             "shrinkage_k": {
@@ -294,7 +320,7 @@ def main() -> int:
                         "number": t.number,
                         "value": t.value,
                         "params": t.params,
-                        "fold_aucs": t.user_attrs.get("fold_aucs", []),
+                        "fold_rhos": t.user_attrs.get("fold_rhos", []),
                         "state": str(t.state),
                     }
                     for t in study_k.trials
@@ -308,7 +334,7 @@ def main() -> int:
                         "number": t.number,
                         "value": t.value,
                         "params": t.params,
-                        "fold_aucs": t.user_attrs.get("fold_aucs", []),
+                        "fold_rhos": t.user_attrs.get("fold_rhos", []),
                         "state": str(t.state),
                     }
                     for t in study_t.trials
@@ -328,9 +354,9 @@ def main() -> int:
     args.out.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
     print(f"Wrote {args.out}")
     print()
-    print("=== HEADLINE ===")
-    print(f"  shrinkage_k:  best={best_k}  AUC={best_k_auc:.4f}  (Δ vs v1 K={V1_K}: {best_k_auc - base_k_auc:+.4f})")
-    print(f"  cf_threshold: best={best_t:.3f}  AUC={best_t_auc:.4f}  (Δ vs v1 τ={V1_TAU}: {best_t_auc - base_t_auc:+.4f})")
+    print("=== HEADLINE (Spearman ρ vs 4-band) ===")
+    print(f"  shrinkage_k:  best={best_k}  ρ={best_k_rho:+.4f}  (Δ vs v1 K={V1_K}: {best_k_rho - base_k_rho:+.4f})")
+    print(f"  cf_threshold: best={best_t:.3f}  ρ={best_t_rho:+.4f}  (Δ vs v1 τ={V1_TAU}: {best_t_rho - base_t_rho:+.4f})")
     return 0
 
 

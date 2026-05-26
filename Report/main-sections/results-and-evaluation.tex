@@ -1,27 +1,65 @@
 \section{Evaluation} \label{sec:evaluation}
 
-This chapter evaulates the dashboard system of Chapter~\ref{sec:implementation} along two dimensions, the validity of the model outputs (whether the struggle and difficulty rankings agree with observable student behaviour) and the operational behaviour of the deployed software against the responsiveness, interpretability, and robustness targets implied in Chapter~\ref{sec:design}. 
-The unit of evalation is the individual weekly lab sessions as the dashboard is designed to be used within a single session and the cohort consists of approximately. For the evaluation we are going to focus on module where data was collected \textbf{25COA122}, across 23 recorded lab sessions 2 Feb 2026 to 15 May 2026. 
-On majority of the weeks there were two lab sessions running back to back which were an hour each, so there are two sessions per week, except for the first and last week which had one session each.
+This chapter evaluates the dashboard system of Chapter~\ref{sec:implementation} along two dimensions, the validity of the model outputs (whether the struggle and difficulty rankings agree with observable student behaviour) and the operational behaviour of the deployed software against the responsiveness, interpretability, and robustness targets implied in Chapter~\ref{sec:requirements}. 
+The unit of evaluation is the individual weekly lab sessions as the dashboard is designed to be used within a single session and the cohort consists of approximately 140 students. The evaluation focuses on the module from which data was collected, \textbf{25COA122}, across 23 recorded lab sessions from 2 February 2026 to 15 May 2026.
+On most weeks there were two lab sessions running back-to-back, each lasting an hour, except for the first and last week which had one session each.
 
 \subsection{Evaluation Design} \label{sec:eval-design}
 
 \subsubsection{Scope of Evaluation}
 % TODO: 5.1.1 prose block (retrospective replay choice; prospective intervention out of scope; functional verification bounded)
+The evaluation is a retrospective replay of the submission logs already collected during the deployment, assessing each model output at varying cutoff points \(T\) against ground-truth labels derived from behaviour in the same logs, which lets us examine the dashboard's prioritisation as if it were running live without conducting a fresh classroom experiment.
+We additionally evaluate the v2 weight vectors that were refitted against second-opinion labels obtained from an LLM rater.
+A prospective intervention study, which would test whether dashboard-informed instructor decisions improve student outcomes, is explicitly out of scope; the deployment window did not permit a controlled comparison, the anonymisation of student identifiers rules out grade linkage, and submission records cannot currently be mapped to individual lab seats, so any causal interpretation is left to future work.
+
+The functional and non-functional testing is also carried out through smoke-testing and end-to-end testing of the deployed V2 stack, where we record evidence of the system's behaviour and performance against the targets set in Chapter~\ref{sec:design}.
+We will present a qualitative summary in the main body with the full row-by-row checklist appearing in Appendix~\ref{app:detailed-test-results}. We do not run a load test, a security audit, or an accessibility audit.
 
 \subsubsection{Evidence Sources}
 % TODO: 5.1.2 prose block
 
-\subsubsection{Retrospective Evaluation Protocol}
-% TODO: 5.1.3 prose block (ground-truth labels L_top20, L_needs_help, L_struggling_plus; cutoff schedule T; metrics)
+The evaluation draws on five sources of evidence. 
+The primary source is the deployment submission log, a newline delimited JSON record exported from the platform's submission API and parsed by the data loader of Section~\ref{sec:analytics} into a normalised DataFrame indexed by student, question, and timestamp. 
+The log spans the academic period of deployment and contains the per-submission fields the model pipeline relies on, namely the question attempted, module label, submitted answers, AI feedback and timestamp; these fields feed the derived signals recomputed at replay time.
+
+The second source is the second-opinion label set obtained from a large language model rater (GPT-4o-mini), which assigns each of the $1{,}306$ stratified snapshots across $140$ distinct users a struggle rating from the four defined bands, and each of the $72$ unique questions a difficulty rating from the four defined bands.
+The label set is important for the training of the v2 model and its agreement against the $50$ human calibration set is reported in Section~\ref{sec:eval-compare-struggle} and also bounds the interpretive strength of the v2 numbers.
+
+The third source is the survey of Section~\ref{sec:eval-survey}, which is an eleven-question Microsoft Forms survey distributed to undergraduate students, PhD student lab assistants and staff who are involved in computer lab sessions.
+The survey provides Likert and free-text evidence on baseline lab support, dashboard interpretability, trust, and ethical concerns. 
+
+The fourth source is the smoke testing and end-to-end testing of the deployed V2 stack, where each of the functional and non-functional tests defined in Section~\ref{sec:design} is exercised manually and the observed behaviour recorded; the resulting checklist appears in Appendix~\ref{app:detailed-test-results}, and the body of this chapter (Section~\ref{sec:eval-functional}) records only the qualitative summary and the small number of items that failed or required workaround.
+
+The fifth source is the V2 prewarm log, which records the wall-clock cost of each startup phase (incorrectness cache warm, IRT fit, BKT fit, struggle leaderboard, difficulty leaderboard) together with per-skill BKT predictive area under the curve (AUC) and which underpins the latency and per-skill BKT evidence reported in Section~\ref{sec:eval-results}.
+
+
+
+\subsubsection{V2 Training Methodology} \label{sec:eval-v2-methodology}
+
+Whilst the dashboard evaluation is primarily focused on the v1 model, a v2 model is also trained and evaluated as part of the evaluation section.
+The v2 model fits the weights against second-opinion labels obtained from a large language model rater, and the resulting v2 weights are evaluated under the same evaluation framework.
+Of the models introduced in Section~\ref{sec:implementation}, three composite weight vectors and two scalar hyperparameters are re-tuned.
+The per-skill BKT parameters and the 2PL IRT parameters are retained from the fitting documented in Chapter~\ref{sec:implementation} and are not re-trained here.
+The mistake-clustering pipeline, the measurement-confidence formula, and the incorrectness scorer carry no learnable weights so they are excluded from the training. 
+For the evaluation we have training data which are 1{,}306 stratified snapshots across twenty-one healthy sessions for the struggle model and the improved model, and seventy-two unique questions for the difficulty model, all labelled by GPT-4o-mini. 
+The agreement between the LLM rater and a fifty-snapshot author calibration is reported in Section~\ref{sec:eval-compare-struggle}.
+
 
 \subsubsection{Limitations of Evaluation}
 % TODO: 5.1.4 prose block
+Several limitations of the evaluation are worth noting, all of which follow from the evaluation context rather than the evaluation design. 
+The first is the small effective cohort, with the v2 model training drawing on 1{,}306 stratified snapshots across twenty-one healthy sessions and 140 unique students, for the struggle model and the improved model, and 72 unique questions for the difficulty model.
+
+The second is the single module, single institution context which limits the generalisability of the findings. 
+Behaviour of the dashboard on a different module or different form of submission is not directly inferable from the results presented here, and we report findings only in the context of the 25COA122 module and the submission format of Loughborough University Computer Science lab modules. 
+
+The third is the retrospective nature of the evaluation, which is necessary for the context of this report but still leaves a gap about whether instructor decisions actually informed by the dashboard improves student outcomes. Results focus on agreement with the LLM rater and not the causal impact on student outcomes, and any causal interpretation is left to a prospective study outside the scope of this report.
+
 
 \subsection{Functional Testing} \label{sec:eval-functional}
 
 \subsubsection{Data Ingestion and Session Handling}
-% TODO: 5.2.1 prose block
+The first functional requirement of Section~ref{sec}
 
 \subsubsection{Analytics and Model Behaviour}
 % TODO: 5.2.2 prose block
@@ -48,26 +86,21 @@ On majority of the weeks there were two lab sessions running back to back which 
 \subsubsection{Baseline System Outputs}
 % TODO: 5.4.1 prose block
 
-\subsubsection{Model Comparison - Struggle} \label{sec:eval-compare-struggle}
-% TODO: 5.4.2 prose block (Spearman rho, top-10 overlap, level agreement, largest movers; fig:eval-baseline-vs-improved, fig:eval-disagreement-heatmap, fig:eval-cf-vs-parametric, tab:eval-largest-mover)
+\subsubsection{Inter-rater Agreement (Cohen's $\kappa$)} \label{sec:eval-compare-struggle}
+% TODO: 5.4.2 prose block (~150 words, 3 κ statistics + Landis-Koch interpretation + within-1-band agreement; rater calibration before findings; see drafting plan Insertion 3c)
 
-\subsubsection{Model Comparison - Difficulty} \label{sec:eval-compare-difficulty}
-% TODO: 5.4.3 prose block (baseline vs IRT; 2PL discrimination diagnostic; fig:eval-irt-discrimination, tab:eval-largest-mover)
-
-\subsubsection{BKT Predictive AUC per Skill}
-% TODO: 5.4.4 prose block (fig:eval-roc-bkt; depends on AUC capture instrumentation)
+\subsubsection{Model Comparison} \label{sec:eval-compare-difficulty}
+% TODO: 5.4.3 prose block (~400 words; baseline vs improved for BOTH composites: Spearman ρ + top-10 overlap + level agreement + largest movers for struggle, then same four for difficulty + 2PL discrimination diagnostic; see drafting plan §5.4.3 merged block — needs new draft)
 
 \subsubsection{Per-Module Normalisation Effect}
-% TODO: 5.4.5 prose block (fig:eval-permodule-normalisation, fig:eval-violin-permodule-difficulty)
+% TODO: 5.4.4 prose block (was 5.4.5 pre-trim; fig:eval-permodule-normalisation, fig:eval-violin-permodule-difficulty)
 
-\subsubsection{Latency and Prewarm Evidence}
-% TODO: 5.4.6 prose block (fig:eval-latency-prewarm; depends on prewarm latency capture)
+\subsubsection{Hyperparameter optimisation} \label{sec:eval-hyperopt}
+% TODO: 5.4.5 prose block (was 5.4.9 pre-trim; ~290 words, Optuna TPE with Spearman ρ objective for K and τ; K tied within noise (Δρ +0.013); τ substantial Δρ +0.200; joint K×τ study confirms independence; figures fig:eval-hyperparams-contour + fig:eval-hyperparams-importances + table tab:eval-hyperparams; see drafting plan §5.4.9 block)
 
-\subsubsection{Graceful-Degradation Evidence}
-% TODO: 5.4.7 prose block (problems 5 and 7 from tab:problems)
+\subsubsection{Findings} \label{sec:eval-findings}
+% TODO: 5.4.6 prose block (was 5.4.10 pre-trim; ~900 words; all three v2 weight-refit findings as one continuous narrative: positive struggle v1↔v2 (ρ +0.573) + weaker-positive difficulty (ρ +0.287) + weaker-positive improved-struggle (ρ +0.168) + 4-positive-1-tie verdict scorecard; figures fig:eval-weights-struggle, fig:eval-rho-perfold-struggle, fig:eval-ols-diagnostic (supplementary), fig:eval-negative-findings + tables tab:eval-weights-struggle, tab:eval-weights-difficulty, tab:eval-weights-improved, tab:eval-verdict-scorecard; see drafting plan §5.4.10 block)
 
-\subsubsection{Observed Strengths and Weaknesses}
-% TODO: 5.4.8 prose block
 
 \subsection{Survey} \label{sec:eval-survey}
 

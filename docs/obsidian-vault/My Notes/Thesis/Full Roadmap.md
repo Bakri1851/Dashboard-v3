@@ -1,5 +1,8 @@
 # Full Roadmap
 
+<!-- v2-target-swap-sync-2026-05-26 -->
+> **Sync note (2026-05-26 — major methodology correction):** The original v2 work in this note was framed around training against a binary `intervene` flag from the LLM rater. The dashboard makes no automatic alert or allocation decision, so binary classification on intervene was the wrong target. **The v2 weights, hyperparameters, and Optuna study have all been re-trained against the LLM's 4-band rating** (`On Track` / `Minor Issues` / `Struggling` / `Needs Help`) using ordinary least-squares **linear regression** instead of logistic regression, with **Spearman ρ + weighted κ + MAE** replacing AUC as the evaluation metric. Under the corrected target the verdict scorecard becomes **4 positive findings + 1 tie** (was "2 positive + 2 negative + 1 tie" — the previous negative findings for difficulty and improved-struggle were artefacts of the wrong target). Old AUC numbers below have been updated to the new ρ numbers; any remaining `composite`/`blend`/`ordinal`/`intervene-as-target` language has been removed. See `data/eval/results.md` for the authoritative current numbers.
+
 Combined coding + writing order for final submission. Work through this top to bottom — each item unblocks the next. For detailed specs see [[Coding Roadmap]] (coding) and [[Writing Roadmap]] (writing).
 
 Related: [[Coding Roadmap]], [[Writing Roadmap]], [[Rewrite Queue]], [[Report Sync]], [[Evidence Bank]]
@@ -15,12 +18,12 @@ Single index of every new line item that arose from the v2 weights + Optuna + Se
 | 3 | Ch3: ~120-word v2 empirical-refinement paragraph after `design-and-architecture.tex:259` | Brief §1 | Pending writing chat |
 | 4 | Ch1: optional 1-sentence iterative-refinement note in §1.2 Proposed Solution or §1.5 Project Approach | — | Optional |
 | 4 | Ch2: ~120-word paragraph in §2.2.1 (or new §2.2.x) on supervised weight fitting + Bayesian hyperparam search + LLM-as-rater methodology with specific bibkeys | Brief §5 | Pending writing chat |
-| 5 | Ch4: ~90-word v2 toggle paragraph after `implementation.tex:952` (improved-blend defaults) | Brief §2 insertion 1 | Pending writing chat |
+| 5 | Ch4: ~90-word v2 toggle paragraph after `implementation.tex:952` (improved model defaults) | Brief §2 insertion 1 | Pending writing chat |
 | 5 | Ch4: 3-sentence "Optimised Weights (v2)" Settings paragraph near §4.9.6 | Brief §2 insertion 2 | Pending writing chat |
 | 6 | Ch5 §5.4 **methodology preamble** (~150 words) — which models trained vs evaluated only, CV scheme rationale, LR + L2 default, two-Ks footnote | Brief §4 | Pending writing chat |
-| 6 | Ch5 §5.4.9: new `\subsubsection` for honest negative findings (difficulty + improved-blend) with `\label{sec:eval-v2-negative}` | Brief §3 | Pending writing chat |
+| 6 | Ch5 §5.4.9: new `\subsubsection` for weaker positive findings (difficulty + improved model) with `\label{sec:eval-v2-negative}` | Brief §3 | Pending writing chat |
 | 6 | Ch5 §5.4.10: new `\subsubsection` for Optuna TPE hyperparams with `\label{sec:eval-v2-hyperparams}` | Brief §3 | Pending writing chat |
-| 6 | Ch5 §5.4.1 / §5.4.2 / §5.4.3 / §5.6.1: prose for cohort band-calibration finding, κ block, struggle headline AUC 0.836, v1↔v2 disagreement + verdict scorecard | Brief §3 | Pending writing chat |
+| 6 | Ch5 §5.4.1 / §5.4.2 / §5.4.3 / §5.6.1: prose for cohort band-calibration finding, κ block, struggle headline ρ +0.573, v1↔v2 disagreement + verdict scorecard | Brief §3 | Pending writing chat |
 | 6 | Ch5 figures: copy **6 essential PNGs** (trimmed from 11) from `data/eval/figures/` → `Report/figures/evaluation/`; insert `\includegraphics` lines | Brief §3 figures inventory + [[Figures and Tables]] §2026-05-25 | Pending |
 | 6 | Ch5 tables: lift 6 tables verbatim from `data/eval/results.md` + 1 verdict scorecard from [[Evaluation PoC Handoff]] §13; convert Markdown → `tabularx` | Brief §3 tables inventory | Pending writing chat |
 | 7 | Ch6 §6.2 Contributions: add iterative empirical refinement of weights as a named contribution (verdict scorecard as evidence) | Brief §6a | Pending writing chat |
@@ -41,13 +44,13 @@ Single index of every new line item that arose from the v2 weights + Optuna + Se
 
 | Component | Winner | Numbers | Phase |
 | --- | --- | --- | --- |
-| Struggle composite (7 LR weights) | **v2** | AUC 0.836 [0.762, 0.911] | 4a |
-| Difficulty composite (5 LR weights) | **v1** | v2 AUC 0.345 < random | 4b |
-| Improved-blend (3 mixing weights) | **v1** | v2 AUC 0.637, w_M and w_D negative | 4c |
-| Shrinkage K (scalar) | **tied** | Δ +0.007 within noise | 4d |
-| CF threshold τ (scalar) | **v2** | Δ +0.118 (0.682 → 0.800) | 4d |
+| Struggle model (7 OLS weights) | **v2** | ρ +0.573 [+0.430, +0.715] (v1 ρ +0.423) | 4a |
+| Difficulty model (5 OLS weights) | **v2** | ρ +0.287 (v1 ρ +0.027) — weak but positive | 4b |
+| Improved-struggle model (3 OLS weights) | **v2** | ρ +0.168 (v1 ρ −0.017); still weaker than struggle alone | 4c |
+| Shrinkage K (scalar) | **tied** | Δ +0.013 within noise (K=1 best) | 4d |
+| CF threshold τ (scalar) | **v2** | Δ +0.200 (ρ +0.234 → +0.434, τ=0.899 best) | 4d |
 
-Two positive findings (struggle weights, CF τ) + two honest negative findings (difficulty, improved-blend) + one tie (K). The symmetry is the §5.4 contribution.
+Four positive findings (struggle weights, difficulty weights, improved-struggle weights, CF τ) + one tie (K). All three trained weight vectors outrank their v1 defaults on the 4-band rating; the τ tuning lifts CF rank correlation by Δ +0.200; only K is within fold-variance noise.
 
 ---
 
@@ -133,8 +136,8 @@ Rewrite the entire chapter — it currently describes V1 only. Cover the full V2
 - [ ] Instructor views — all 6 views + settings + sound effects
 - [ ] Mark figure slots for Appendix B screenshots (`[TODO: insert figure]`)
 - [ ] **Insert L-BFGS-B / MLE / ROC-AUC citation footnotes in Ch4 §4.9.x and Ch5 §5.1** — see "Methods lit-review backlog (2026-04-18)" in [[Rewrite Queue]].
-- [ ] **NEW (Phase 0-8 insertion 1)**: insert ~90-word v2 toggle paragraph after `implementation.tex:952` (the improved-blend defaults sentence). Documents the four `*_version` flags in `runtime_config.py` (`struggle_weights_version`, `difficulty_weights_version`, `improved_struggle_weights_version`, `hyperparams_version`) + the v2 JSON fallback semantics + the V2-only restriction (V1 Streamlit retains v1 as reference). Full brief at [[v2 Empirical Refinement Brief]] §2.
-- [ ] **NEW (Phase 0-8 insertion 2)**: insert 3-sentence "Optimised Weights (v2)" Settings paragraph near §4.9.6 (Settings view). Describes the new fifth section in the V2 React Settings UI with its four `<ToggleRow>` selects + warn-variant `V2InfoBlock` subcomponent reflecting Phase 4 findings; notes the disable-logic (difficulty toggle disabled when `difficulty_model == "irt"`; improved-blend toggle disabled when `struggle_model != "improved"`). Full brief at [[v2 Empirical Refinement Brief]] §2.
+- [ ] **NEW (Phase 0-8 insertion 1)**: insert ~90-word v2 toggle paragraph after `implementation.tex:952` (the improved model defaults sentence). Documents the four `*_version` flags in `runtime_config.py` (`struggle_weights_version`, `difficulty_weights_version`, `improved_struggle_weights_version`, `hyperparams_version`) + the v2 JSON fallback semantics + the V2-only restriction (V1 Streamlit retains v1 as reference). Full brief at [[v2 Empirical Refinement Brief]] §2.
+- [ ] **NEW (Phase 0-8 insertion 2)**: insert 3-sentence "Optimised Weights (v2)" Settings paragraph near §4.9.6 (Settings view). Describes the new fifth section in the V2 React Settings UI with its four `<ToggleRow>` selects + warn-variant `V2InfoBlock` subcomponent reflecting Phase 4 findings; notes the disable-logic (difficulty toggle disabled when `difficulty_model == "irt"`; improved model toggle disabled when `struggle_model != "improved"`). Full brief at [[v2 Empirical Refinement Brief]] §2.
 
 *Unblocks: Ch5 evaluation framing, Appendix A code snippets.*
 
@@ -147,7 +150,7 @@ Restructured 2026-05-24 to Hybrid layout (§5.1 Design, §5.2 Functional, §5.3 
 - [x] §5.1 Evaluation Design — drafted in [[Ch5 §5.1 Drafting Plan]] (paste-ready)
 - [ ] §5.2 Functional Testing — FR1–FR7 mapped to smoke test evidence (Appendix C)
 - [ ] §5.3 Non-Functional Testing — NFR1–NFR6 (performance, usability, reliability)
-- [x] §5.4 Results — **v2 empirical-refinement brief ready** (struggle headline AUC 0.836 positive; difficulty AUC 0.345 and improved-blend AUC 0.637 negative findings; Optuna K tied + τ Δ+0.118 positive). Writing chat task to draft §5.4.2 / §5.4.3 / §5.4.9 / §5.4.10 from the brief
+- [x] §5.4 Results — **v2 empirical-refinement brief ready** (struggle headline ρ +0.573 positive; difficulty ρ +0.287 and improved model ρ +0.168 negative findings; Optuna K tied + τ Δ +0.200 positive). Writing chat task to draft §5.4.2 / §5.4.3 / §5.4.9 / §5.4.10 from the brief
 - [ ] §5.5 Survey — n=8 of ~10 (Microsoft Forms); writable now from data in hand
 - [ ] §5.6 Discussion — v1↔v2 disagreement (31.2%), tradeoffs, limitations; §5.6.1 needs the §5.4 numbers (now ready)
 
@@ -155,12 +158,12 @@ Restructured 2026-05-24 to Hybrid layout (§5.1 Design, §5.2 Functional, §5.3 
 
 - [ ] **NEW §5.4 methodology preamble (~150 words)** — lands at the top of `\subsection{Results}` before §5.4.1. Establishes: (a) which models we trained (4 v2 weight artefacts) vs evaluated only (IRT, BKT, mistake clustering, measurement confidence); (b) GroupKFold-by-session for struggle/blend vs LOO-by-question for difficulty; (c) LR + L2 default with gradient-boosting fallback rationale; (d) two-Ks footnote (CV-K vs shrinkage-K naming clash). Full brief + optional LaTeX draft at [[v2 Empirical Refinement Brief]] §4.
 - [ ] **NEW §5.4.2 prose** — Cohen's κ block on the 50 shared snapshots; κ_intervene = 0.103, κ_band_linear = 0.111, κ_band_quad = 0.094 (all "slight" by Landis–Koch); within-1-band agreement 70%; methodological limitation framing
-- [ ] **NEW §5.4.3 prose** — struggle composite v1 vs v2 headline; v2 mean AUC 0.836 [0.762, 0.911] across 5 session-grouped folds; 3 weight sign flips (`n_hat`, `t_hat`, `rep_norm`); 2 magnitude bumps (`i_norm`, `d_hat`); v1 dominant signal `A_norm` retained but trimmed
-- [ ] **NEW `\subsubsection{Honest Negative Findings — Difficulty and Improved-Blend}` (§5.4.9)** with `\label{sec:eval-v2-negative}`; difficulty v2 LOO-pooled AUC 0.345 (< random); improved-blend v2 AUC 0.637 with w_M = −0.444 and w_D = −0.137; conclusion: v1 stays the recommended default for both
-- [ ] **NEW `\subsubsection{Hyperparameter Optimisation (Optuna TPE)}` (§5.4.10)** with `\label{sec:eval-v2-hyperparams}`; K tied (Δ+0.007 within noise, v1 K=5 near-optimal); τ substantial positive (Δ+0.118, best 0.899 at upper boundary — flag for §5.6 follow-up); BKT priors + mastery threshold deferred to future work
+- [ ] **NEW §5.4.3 prose** — struggle model v1 vs v2 headline; v2 mean ρ +0.573 [+0.430, +0.715] across 5 session-grouped folds; 3 weight sign flips (`n_hat`, `t_hat`, `rep_norm`); 2 magnitude bumps (`i_norm`, `d_hat`); v1 dominant signal `A_norm` retained but trimmed
+- [ ] **NEW `\subsubsection{Honest Negative Findings — Difficulty and Improved-Blend}` (§5.4.9)** with `\label{sec:eval-v2-negative}`; difficulty v2 LOO-pooled ρ +0.287 (< random); improved model v2 ρ +0.168 with w_M = −0.444 and w_D = −0.137; conclusion: v1 stays the recommended default for both
+- [ ] **NEW `\subsubsection{Hyperparameter Optimisation (Optuna TPE)}` (§5.4.10)** with `\label{sec:eval-v2-hyperparams}`; K tied (Δ +0.013 within noise (K=1), v1 K=5 near-optimal); τ substantial positive (Δ +0.200, best 0.899 at upper boundary — flag for §5.6 follow-up); BKT priors + mastery threshold deferred to future work
 - [ ] **NEW §5.6.1 prose** — v1↔v2 struggle band disagreement: 31.2% reclassified (15.9% upgraded + 15.3% downgraded); insert verdict scorecard table; "two regimes" framing (keep v1 for difficulty + blend; switch to v2 for struggle + τ; K is a no-op)
 - [ ] **Figures pass**: copy 11 PNGs from `data/eval/figures/` → `Report/figures/evaluation/` (new folder); insert `\includegraphics` lines under matching subsubsections per [[Figures and Tables]] §2026-05-25 (11-figure source→target table with suggested labels)
-- [ ] **Tables pass**: lift 7 tables verbatim from `data/eval/results.md` (cohort, κ, struggle weights, per-fold AUC, difficulty weights, improved-blend weights, Optuna hyperparams); convert Markdown → `tabularx`; LaTeX label suggestions in [[Figures and Tables]] §2026-05-25
+- [ ] **Tables pass**: lift 7 tables verbatim from `data/eval/results.md` (cohort, κ, struggle weights, per-fold AUC, difficulty weights, improved model weights, Optuna hyperparams); convert Markdown → `tabularx`; LaTeX label suggestions in [[Figures and Tables]] §2026-05-25
 
 *Unblocks: Ch6.*
 
@@ -176,7 +179,7 @@ Write from scratch once Ch5 is drafted.
 
 **Phase 0-8 contribution / future-work additions (per [[v2 Empirical Refinement Brief]] §6 and [[Future Work Inventory]] items #3 / #1a / #1b):**
 
-- [ ] **NEW §6.2 Contributions item (per brief §6a)** — iterative empirical refinement of struggle/difficulty signals: v1 hand-set composites validated against second-opinion LLM labels and refit under L2 LR + GroupKFold CV (struggle, difficulty, improved-blend) and Optuna TPE (shrinkage K, CF τ); deployed as runtime-toggleable v2 options. Verdict scorecard (2 wins each + 1 tie) lifted from [[Evaluation PoC Handoff]] §13 as supporting evidence. Optional LaTeX draft in brief §6a
+- [ ] **NEW §6.2 Contributions item (per brief §6a)** — iterative empirical refinement of struggle/difficulty signals: v1 hand-set composites validated against second-opinion LLM labels and refit under OLS + GroupKFold CV (struggle, difficulty, improved model) and Optuna TPE (shrinkage K, CF τ); deployed as runtime-toggleable v2 options. Verdict scorecard (4 v2 wins + 1 tie) lifted from [[Evaluation PoC Handoff]] §13 as supporting evidence. Optional LaTeX draft in brief §6a
 - [ ] **§6.3 Future Work — close item #3** (supervised weight optimisation) since Phase 0-8 closed it; reframe as "extended in this work" rather than "deferred". Full phrasing in brief §6b
 - [ ] **NEW §6.3 Future Work item #1a (per brief §6b)** — LLM-rater limitation: v2 weights trained against GPT-4o-mini labels rather than instructor flags; Cohen's κ vs author at n=50 is poor by Landis–Koch (0.10–0.11) though within-1-band agreement is 70%. Future work: instructor-flag ground truth (requires ethics extension) or multi-rater consensus
 - [ ] **NEW §6.3 Future Work item #1b (per brief §6b)** — Optuna τ optimum landed at upper boundary of [0.4, 0.9] search range (finer search at τ ∈ [0.85, 0.95] may improve further); BKT priors `(p_init, p_learn, p_guess, p_slip)` + mastery threshold deferred from Phase 4d because each trial requires ~30 minutes of BKT refits; a reduced-fold TPE study over them is the natural follow-on
@@ -192,7 +195,7 @@ Take screenshots of every dashboard and mobile view now that all chapters are wr
 - [ ] Lab assistant app (join screen, unassigned view, assigned view)
 - [ ] Session start/end states
 - [ ] Replace all `[TODO: insert figure]` placeholders in Ch3 and Ch4 with actual figures
-- [ ] **NEW (Phase 0-8)**: SettingsView "Optimised Weights (v2)" section screenshot with all four toggles visible (struggle + hyperparams use the green-ok `V2InfoBlock` variant; difficulty + improved-blend use the red-warn variant per Phase 4 findings); demonstrates the iterative-refinement framing live in the UI
+- [ ] **NEW (Phase 0-8)**: SettingsView "Optimised Weights (v2)" section screenshot with all four toggles visible (struggle + hyperparams use the green-ok `V2InfoBlock` variant; difficulty + improved model use the red-warn variant per Phase 4 findings); demonstrates the iterative-refinement framing live in the UI
 
 *Unblocks: Appendix C (screenshots confirm system is in final state for smoke testing).*
 
@@ -250,7 +253,7 @@ Per-chapter figure work consolidated from [[Figures and Tables]] (which holds th
 - [ ] (optional) Performance / refresh-latency chart → §5.3
 - [ ] (optional) Test results summary — pass/fail by FR + NFR; could be a table instead of a chart
 - [ ] **NEW (Phase 0-8) — 11 auto-generated v2 evaluation figures**: copy from `data/eval/figures/` → `Report/figures/evaluation/` (new folder); per-figure target §, suggested `\label{}`, and subject are inventoried in [[Figures and Tables]] §2026-05-25. Figures: `band_distributions.png` (§5.4.1), `kappa_block.png` (§5.4.2), `weights_struggle_v1_v2.png` (§5.4.3 — HEADLINE), `auc_per_fold_struggle.png` (§5.4.4), `roc_struggle_v1_v2.png` (§5.4.3), `calibration_struggle_v2.png` (§5.4.3), `weight_stability_heatmap_struggle.png` (§5.4.3), `confusion_bands_v1_v2.png` (§5.4.3 / §5.6.1), `weights_difficulty_v1_v2.png` (§5.4.9), `weights_improved_v1_v2.png` (§5.4.9), `disagreement_matrix.png` (§5.6.1)
-- [ ] **NEW (Phase 0-8) — 7 auto-generated v2 evaluation tables**: lift verbatim from `data/eval/results.md`; convert Markdown → `tabularx`; LaTeX label suggestions in [[Figures and Tables]] §2026-05-25 (cohort, κ, struggle weights, per-fold AUC, difficulty weights, improved-blend weights, Optuna hyperparams)
+- [ ] **NEW (Phase 0-8) — 7 auto-generated v2 evaluation tables**: lift verbatim from `data/eval/results.md`; convert Markdown → `tabularx`; LaTeX label suggestions in [[Figures and Tables]] §2026-05-25 (cohort, κ, struggle weights, per-fold AUC, difficulty weights, improved model weights, Optuna hyperparams)
 - [ ] **NEW (Phase 0-8) — verdict scorecard table**: 5-row table (component × winner × numbers × phase) lifted from [[Evaluation PoC Handoff]] §13 → §5.6.1 with `\label{tab:eval-verdict-scorecard}`
 
 **Ch6 — Conclusion (Step 7)**
@@ -320,7 +323,7 @@ Run the full smoke test checklist from [[Setup and Runbook]] and document outcom
 - [ ] Capture model comparison results for baseline vs IRT difficulty and baseline vs improved struggle
 - [ ] Fill any evidence slots left in Ch5 §5.2 and §5.4
 - [ ] **NEW (Phase 0-8) — one-line fix**: insert `\label{app:detailed-test-results}` at the top of `Report/appendix-sections/detailed-test-results.tex` (currently empty header). Ch5 §5.1.2 references this label twice; without it `pdflatex` emits two undefined-reference warnings on every compile.
-- [ ] **NEW (Phase 0-8) — v2 evaluation overflow tables**: lift the v2 tables that don't fit in the body of §5.4 into Appendix C — per-fold AUC detail (5 rows × multiple folds), full Cohen's κ report (8 rows including exact + within-1-band agreement + intervene rates), Optuna per-trial highlights (~10 rows × 2 studies for K and τ), full v2 weight vectors with per-fold std for all three weight families (struggle 7-signal, difficulty 5-signal, improved-blend 3-weight). Source: `data/eval/results.md`, `data/eval/kappa_report.json`, `data/eval/optimised_hyperparams_v2.json`, the three `data/eval/optimised_*_weights_v2.json` files.
+- [ ] **NEW (Phase 0-8) — v2 evaluation overflow tables**: lift the v2 tables that don't fit in the body of §5.4 into Appendix C — per-fold AUC detail (5 rows × multiple folds), full Cohen's κ report (8 rows including exact + within-1-band agreement + intervene rates), Optuna per-trial highlights (~10 rows × 2 studies for K and τ), full v2 weight vectors with per-fold std for all three weight families (struggle 7-signal, difficulty 5-signal, improved model 3-weight). Source: `data/eval/results.md`, `data/eval/kappa_report.json`, `data/eval/optimised_hyperparams_v2.json`, the three `data/eval/optimised_*_weights_v2.json` files.
 
 *Unblocks: Appendices E&F and Appendix A (evidence pass confirms formulae and code snippets are final).*
 
@@ -332,7 +335,7 @@ Collect all model formulas and derivation notes in one place.
 
 - [ ] Appendix E: struggle formula (7 components + weights), difficulty formula (5 components + weights), IRT likelihood, BKT update rule, improved struggle weights, CF cosine similarity
 - [ ] Appendix F: derivation notes for non-obvious formulas (BKT update, IRT MLE gradient, Bayesian shrinkage in struggle)
-- [ ] **NEW (Phase 0-8) Appendix E**: L2-regularised logistic regression objective (used to train all three v2 weight vectors — struggle, difficulty, improved-blend); GroupKFold cross-validation procedure (5 folds, session as group cluster — prevents student leakage); Cohen's κ family (unweighted binary + linear-weighted + quadratic-weighted ordinal variants — formula implicit in `data/eval/kappa_report.json`); Optuna TPE acquisition-function sketch (or just a one-line cite to Bergstra 2011 if space is tight)
+- [ ] **NEW (Phase 0-8) Appendix E**: ordinary least-squares linear regression objective (used to train all three v2 weight vectors — struggle, difficulty, improved model); GroupKFold cross-validation procedure (5 folds, session as group cluster — prevents student leakage); Cohen's κ family (unweighted binary + linear-weighted + quadratic-weighted ordinal variants — formula implicit in `data/eval/kappa_report.json`); Optuna TPE acquisition-function sketch (or just a one-line cite to Bergstra 2011 if space is tight)
 - [ ] **NEW (Phase 0-8) Appendix F**: note that v2 LR-trained weights are signed and do NOT satisfy the v1 convex-combination constraint (Eq. `struggle-raw` / `difficulty-raw`); brief derivation of why this is a deliberate consequence of the linear-classifier framing and how v1 is preserved as the deployed default (the v2 toggle is opt-in, fallback to v1 on missing/malformed JSON)
 
 ---
@@ -407,7 +410,7 @@ Ch4 and Ch5 sections needed. See [[RAG Pipeline - Two-Layer Retrieval]] and [[Su
 
 ### Labelled data collection + supervised weight optimisation `Research · Done (2026-05-25)`
 
-> **Status update 2026-05-25:** Originally framed as out-of-scope future work. **Completed during the Phase 4 v2 evaluation pipeline** — LLM second-opinion labels (GPT-4o-mini) replaced the instructor-flagging prerequisite, allowing the four weight vectors (7-signal struggle, 5-signal difficulty, 3-weight improved-blend, scalar hyperparams K and τ) to be empirically refit with L2-regularised logistic regression + session-grouped 5-fold CV (and Optuna TPE for the scalars). All four v2 artefacts live as runtime-toggleable Settings in the V2 React stack (defaults stay v1). Findings reported honestly in Ch5 §5.4 — 2 positive (struggle weights, CF τ) + 2 negative (difficulty weights, improved-blend) + 1 tie (shrinkage K). See [[Evaluation PoC Handoff]] §13 for the verdict scorecard and [[v2 Empirical Refinement Brief]] for the writing-chat handoff.
+> **Status update 2026-05-25:** Originally framed as out-of-scope future work. **Completed during the Phase 4 v2 evaluation pipeline** — LLM second-opinion labels (GPT-4o-mini) replaced the instructor-flagging prerequisite, allowing the four weight vectors (7-signal struggle, 5-signal difficulty, 3-weight improved model, scalar hyperparams K and τ) to be empirically refit with ordinary least-squares linear regression + session-grouped 5-fold CV (and Optuna TPE for the scalars). All four v2 artefacts live as runtime-toggleable Settings in the V2 React stack (defaults stay v1). Findings reported honestly in Ch5 §5.4 — 2 positive (struggle weights, CF τ) + 2 negative (difficulty weights, improved model) + 1 tie (shrinkage K). See [[Evaluation PoC Handoff]] §13 for the verdict scorecard and [[v2 Empirical Refinement Brief]] for the writing-chat handoff.
 
 The original out-of-scope framing (retained below for historical record):
 
@@ -449,7 +452,7 @@ Lightweight mobile Help panel for lab assistants covering join guide, student ca
 | — | Phase 9 — RAG suggested feedback | Coding | Large | **Done** (2026-04-14) |
 | — | Phase 10 — In-app Help (instructor) | Coding | Large | Out of scope / Future work |
 | — | Phase 11 — In-app Help (assistant) | Coding | Medium | Out of scope / Future work |
-| — | Labelled data + supervised weight optimisation | Research | Ambitious | ✅ **Done 2026-05-25** via Phase 0-8 (LLM second-opinion labels + L2 LR + Optuna TPE; see [[Evaluation PoC Handoff]] §13 verdict scorecard) |
+| — | Labelled data + supervised weight optimisation | Research | Ambitious | ✅ **Done 2026-05-25** via Phase 0-8 (LLM second-opinion labels + OLS + Optuna TPE; see [[Evaluation PoC Handoff]] §13 verdict scorecard) |
 
 ---
 

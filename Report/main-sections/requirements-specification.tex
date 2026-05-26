@@ -1,4 +1,4 @@
-\section{Background and Requirements}
+\section{Background and Requirements} \label{sec:requirements}
 
 \subsection{Learning Analytics and Dashboards}
 
@@ -136,8 +136,12 @@ These works support the view that question difficulty should be modelled separat
 
 Overall, the literature suggests that task difficulty should be deduced from a combination of correctness, time, attempts, and progression-related information rather than from a single descriptive statistic \cite{dannath_evaluating,piech_modeling}.
 
-\subsubsection{Empirical Refinement of Composite Models}
-% TODO: §2.2.4 prose block (~170 words, supervised weight optimisation + LLM-as-rater literature; see Ch5 §5.4 v2 Empirical Refinement drafting plan, Insertion 5)
+\subsubsection{Composite Model Training and Optimisation}
+
+Supervised learning allows us to refine composite weights through methods such as linear regression or gradient boosting against externally-collected labels.
+This method serves as an alternative to hand-set or manually tuned weights.
+The supervised approach does not need to be human annotated as we can now leverage LLMs as raters; recent studies demonstrate substantial agreement with human annotators on classification tasks at a small cost and saving time \cite{gilardiChatGPTOutperformsCrowd2023, chiangCanLargeLanguage2023, zhengJudgingLLMasaJudgeMTBench2023}.
+Rather than tuning hyperparameters manually we can use modern Bayesian optimisation libraries such as Optuna's Tree-structured Parzen Estimator (TPE) to efficiently search the hyperparameter space and find optimal weights for our composite metrics \cite{NIPS2011_86e8f7ab, akibaOptunaNextgenerationHyperparameter2019}, as TPE produces stable optima in fewer iterations than other methods such as grid search and random search.
 
 \subsection{Data-Driven Personalisation}
 

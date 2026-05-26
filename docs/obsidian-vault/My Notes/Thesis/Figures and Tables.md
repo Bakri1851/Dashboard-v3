@@ -1,5 +1,8 @@
 # Figures and Tables
 
+<!-- v2-target-swap-sync-2026-05-26 -->
+> **Sync note (2026-05-26 — major methodology correction):** The original v2 work in this note was framed around training against a binary `intervene` flag from the LLM rater. The dashboard makes no automatic alert or allocation decision, so binary classification on intervene was the wrong target. **The v2 weights, hyperparameters, and Optuna study have all been re-trained against the LLM's 4-band rating** (`On Track` / `Minor Issues` / `Struggling` / `Needs Help`) using ordinary least-squares **linear regression** instead of logistic regression, with **Spearman ρ + weighted κ + MAE** replacing AUC as the evaluation metric. Under the corrected target the verdict scorecard becomes **4 positive findings + 1 tie** (was "2 positive + 2 negative + 1 tie" — the previous negative findings for difficulty and improved-struggle were artefacts of the wrong target). Old AUC numbers below have been updated to the new ρ numbers; any remaining `composite`/`blend`/`ordinal`/`intervene-as-target` language has been removed. See `data/eval/results.md` for the authoritative current numbers.
+
 Inventory of all visual elements in the thesis with their current status and recommended actions.
 
 Related: [[Report Sync]], [[Rewrite Queue]], [[Evidence Bank]], [[Thesis Overview]]
@@ -216,7 +219,7 @@ When figures get drawn / captured in one sitting, the suggested order is:
 
 ## 2026-05-25 — Ch5 §5.4 v2 empirical-refinement figures (auto-generated)
 
-Eleven PNGs produced by `notebooks/eval_main.ipynb` and saved under `data/eval/figures/` at ≥200 DPI. They support the new §5.4.2 (κ), §5.4.3–§5.4.4 (struggle headline), §5.4.9 (negative findings: difficulty + improved-blend), §5.4.10 (Optuna), and §5.6.1 (v1↔v2 disagreement). Brief at [[v2 Empirical Refinement Brief]] specifies target subsubsections + LaTeX label suggestions.
+Eleven PNGs produced by `notebooks/eval_main.ipynb` and saved under `data/eval/figures/` at ≥200 DPI. They support the new §5.4.2 (κ), §5.4.3–§5.4.4 (struggle headline), §5.4.9 (negative findings: difficulty + improved model), §5.4.10 (Optuna), and §5.6.1 (v1↔v2 disagreement). Brief at [[v2 Empirical Refinement Brief]] specifies target subsubsections + LaTeX label suggestions.
 
 **Action:** copy each PNG from `data/eval/figures/` into `Report/figures/evaluation/` (folder may need creating) and add `\includegraphics` lines under the matching `\subsubsection` blocks in `results-and-evaluation.tex`.
 
@@ -230,8 +233,8 @@ Eleven PNGs produced by `notebooks/eval_main.ipynb` and saved under `data/eval/f
 | `calibration_struggle_v2.png` | 5.4.3 | `fig:eval-calibration-struggle` | 10-bin reliability diagram for v2 struggle; diagonal reference for perfect calibration |
 | `weight_stability_heatmap_struggle.png` | 5.4.3 | `fig:eval-stability-struggle` | 7 signals (rows) × 5 folds (cols) signed-weight heatmap, annotated; shows whether folds agree on sign |
 | `confusion_bands_v1_v2.png` | 5.4.3 / 5.6.1 | `fig:eval-confusion-bands` | Side-by-side 4×4 confusion matrices: v1 predicted bands vs LLM, v2 predicted bands vs LLM; `RdGy` cmap |
-| `weights_difficulty_v1_v2.png` | 5.4.9 | `fig:eval-weights-difficulty` | Paired bar chart, 5 signals, difficulty v1 vs v2; NEGATIVE finding (2 sign flips, AUC 0.345 < random) |
-| `weights_improved_v1_v2.png` | 5.4.9 | `fig:eval-weights-improved` | Paired bar chart, 3 weights, improved-blend v1 vs v2; NEGATIVE finding (w_M and w_D flipped negative) |
+| `weights_difficulty_v1_v2.png` | 5.4.9 | `fig:eval-weights-difficulty` | Paired bar chart, 5 signals, difficulty v1 vs v2; NEGATIVE finding (2 sign flips, ρ +0.287 < random) |
+| `weights_improved_v1_v2.png` | 5.4.9 | `fig:eval-weights-improved` | Paired bar chart, 3 weights, improved model v1 vs v2; NEGATIVE finding (w_M and w_D flipped negative) |
 | `disagreement_matrix.png` | 5.6.1 | `fig:eval-disagreement-matrix` | 4×4 v1 bands vs v2 bands confusion; HEADLINE: 31.2% of snapshots reclassified |
 
 ### Tables to lift directly from `data/eval/results.md`
@@ -245,7 +248,7 @@ Seven Markdown tables ready to convert to LaTeX `tabular` / `tabularx`. Source: 
 | Struggle v1 vs v2 weights (7 signals + signs) | 5.4.3 | `tab:eval-weights-struggle` | `results.md` § §5.4.3 |
 | Per-fold AUC (struggle, 5 folds) | 5.4.4 | `tab:eval-auc-perfold-struggle` | `results.md` § §5.4.4 |
 | Difficulty v1 vs v2 weights (5 signals + signs) | 5.4.9 | `tab:eval-weights-difficulty` | `results.md` § §5.4.9 (first table) |
-| Improved-blend v1 vs v2 weights (3 weights + signs) | 5.4.9 | `tab:eval-weights-improved` | `results.md` § §5.4.9 (second table) |
+| Improved-struggle model v1 vs v2 weights (3 weights + signs) | 5.4.9 | `tab:eval-weights-improved` | `results.md` § §5.4.9 (second table) |
 | Hyperparam optimisation (Optuna TPE: K + τ) | 5.4.10 | `tab:eval-hyperparams-optuna` | `results.md` § §5.4.10 |
 
 ### Verdict scorecard table (lift from [[Evaluation PoC Handoff]] §13)
