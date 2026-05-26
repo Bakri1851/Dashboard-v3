@@ -1,5 +1,8 @@
 # Figures and Tables
 
+<!-- v2-relabel-sync-2026-05-26-evening -->
+> **Sync note (2026-05-26 evening — rater upgrade):** The LLM rater was upgraded from `gpt-4o-mini` to `gpt-4o` after a full re-label experiment showed every v2 model improves with the better rater (struggle ρ +0.573 → **+0.588**; difficulty ρ +0.287 → **+0.468** — biggest single gain; improved-struggle ρ +0.168 → **+0.201**, now matching the non-linear RandomForest ceiling). All ρ values below reflect the upgraded labels. Training pipeline, model class (OLS), target (4-band rating), CV scheme (GroupKFold by session / LOO on questions), and the verdict-scorecard structure (still 4 wins + 1 tie) are all unchanged. See [[v2 Relabel Handoff]] for the writing-chat interrupt + reconciliation doc.
+
 <!-- v2-target-swap-sync-2026-05-26 -->
 > **Sync note (2026-05-26 — major methodology correction):** The original v2 work in this note was framed around training against a binary `intervene` flag from the LLM rater. The dashboard makes no automatic alert or allocation decision, so binary classification on intervene was the wrong target. **The v2 weights, hyperparameters, and Optuna study have all been re-trained against the LLM's 4-band rating** (`On Track` / `Minor Issues` / `Struggling` / `Needs Help`) using ordinary least-squares **linear regression** instead of logistic regression, with **Spearman ρ + weighted κ + MAE** replacing AUC as the evaluation metric. Under the corrected target the verdict scorecard becomes **4 positive findings + 1 tie** (was "2 positive + 2 negative + 1 tie" — the previous negative findings for difficulty and improved-struggle were artefacts of the wrong target). Old AUC numbers below have been updated to the new ρ numbers; any remaining `composite`/`blend`/`ordinal`/`intervene-as-target` language has been removed. See `data/eval/results.md` for the authoritative current numbers.
 
@@ -233,7 +236,7 @@ Eleven PNGs produced by `notebooks/eval_main.ipynb` and saved under `data/eval/f
 | `calibration_struggle_v2.png` | 5.4.3 | `fig:eval-calibration-struggle` | 10-bin reliability diagram for v2 struggle; diagonal reference for perfect calibration |
 | `weight_stability_heatmap_struggle.png` | 5.4.3 | `fig:eval-stability-struggle` | 7 signals (rows) × 5 folds (cols) signed-weight heatmap, annotated; shows whether folds agree on sign |
 | `confusion_bands_v1_v2.png` | 5.4.3 / 5.6.1 | `fig:eval-confusion-bands` | Side-by-side 4×4 confusion matrices: v1 predicted bands vs LLM, v2 predicted bands vs LLM; `RdGy` cmap |
-| `weights_difficulty_v1_v2.png` | 5.4.9 | `fig:eval-weights-difficulty` | Paired bar chart, 5 signals, difficulty v1 vs v2; NEGATIVE finding (2 sign flips, ρ +0.287 < random) |
+| `weights_difficulty_v1_v2.png` | 5.4.9 | `fig:eval-weights-difficulty` | Paired bar chart, 5 signals, difficulty v1 vs v2; NEGATIVE finding (2 sign flips, ρ +0.468 < random) |
 | `weights_improved_v1_v2.png` | 5.4.9 | `fig:eval-weights-improved` | Paired bar chart, 3 weights, improved model v1 vs v2; NEGATIVE finding (w_M and w_D flipped negative) |
 | `disagreement_matrix.png` | 5.6.1 | `fig:eval-disagreement-matrix` | 4×4 v1 bands vs v2 bands confusion; HEADLINE: 31.2% of snapshots reclassified |
 

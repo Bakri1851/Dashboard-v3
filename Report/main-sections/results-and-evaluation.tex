@@ -22,13 +22,13 @@ The evaluation draws on five sources of evidence.
 The primary source is the deployment submission log, a newline delimited JSON record exported from the platform's submission API and parsed by the data loader of Section~\ref{sec:analytics} into a normalised DataFrame indexed by student, question, and timestamp. 
 The log spans the academic period of deployment and contains the per-submission fields the model pipeline relies on, namely the question attempted, module label, submitted answers, AI feedback and timestamp; these fields feed the derived signals recomputed at replay time.
 
-The second source is the second-opinion label set obtained from a large language model rater (GPT-4o-mini), which assigns each of the $1{,}306$ stratified snapshots across $140$ distinct users a struggle rating from the four defined bands, and each of the $72$ unique questions a difficulty rating from the four defined bands.
+The second source is the second-opinion label set obtained from a large language model rater (GPT-4o), which assigns each of the $1{,}306$ stratified snapshots across $140$ distinct users a struggle rating from the four defined bands, and each of the $72$ unique questions a difficulty rating from the four defined bands.
 The label set is important for the training of the v2 model and its agreement against the $50$ human calibration set is reported in Section~\ref{sec:eval-compare-struggle} and also bounds the interpretive strength of the v2 numbers.
 
 The third source is the survey of Section~\ref{sec:eval-survey}, which is an eleven-question Microsoft Forms survey distributed to undergraduate students, PhD student lab assistants and staff who are involved in computer lab sessions.
 The survey provides Likert and free-text evidence on baseline lab support, dashboard interpretability, trust, and ethical concerns. 
 
-The fourth source is the smoke testing and end-to-end testing of the deployed V2 stack, where each of the functional and non-functional tests defined in Section~\ref{sec:design} is exercised manually and the observed behaviour recorded; the resulting checklist appears in Appendix~\ref{app:detailed-test-results}, and the body of this chapter (Section~\ref{sec:eval-functional}) records only the qualitative summary and the small number of items that failed or required workaround.
+The fourth source is the smoke testing and end-to-end testing of the deployed V2 stack, where each of the functional and non-functional requirements defined in Chapter~\ref{sec:requirements} is exercised manually and the observed behaviour recorded; the resulting checklist appears in Appendix~\ref{app:detailed-test-results}, and the body of this chapter (Section~\ref{sec:eval-functional}) records only the qualitative summary and the small number of items that failed or required workaround.
 
 The fifth source is the V2 prewarm log, which records the wall-clock cost of each startup phase (incorrectness cache warm, IRT fit, BKT fit, struggle leaderboard, difficulty leaderboard) together with per-skill BKT predictive area under the curve (AUC) and which underpins the latency and per-skill BKT evidence reported in Section~\ref{sec:eval-results}.
 
@@ -38,10 +38,10 @@ The fifth source is the V2 prewarm log, which records the wall-clock cost of eac
 
 Whilst the dashboard evaluation is primarily focused on the v1 model, a v2 model is also trained and evaluated as part of the evaluation section.
 The v2 model fits the weights against second-opinion labels obtained from a large language model rater, and the resulting v2 weights are evaluated under the same evaluation framework.
-Of the models introduced in Section~\ref{sec:implementation}, three composite weight vectors and two scalar hyperparameters are re-tuned.
+Of the models introduced in Chapter~\ref{sec:implementation}, three composite weight vectors and two scalar hyperparameters are re-tuned.
 The per-skill BKT parameters and the 2PL IRT parameters are retained from the fitting documented in Chapter~\ref{sec:implementation} and are not re-trained here.
 The mistake-clustering pipeline, the measurement-confidence formula, and the incorrectness scorer carry no learnable weights so they are excluded from the training. 
-For the evaluation we have training data which are 1{,}306 stratified snapshots across twenty-one healthy sessions for the struggle model and the improved model, and seventy-two unique questions for the difficulty model, all labelled by GPT-4o-mini. 
+For the evaluation we have training data which are 1{,}306 stratified snapshots across twenty-one healthy sessions for the struggle model and the improved model, and seventy-two unique questions for the difficulty model, all labelled by GPT-4o. 
 The agreement between the LLM rater and a fifty-snapshot author calibration is reported in Section~\ref{sec:eval-compare-struggle}.
 
 
@@ -59,24 +59,58 @@ The third is the retrospective nature of the evaluation, which is necessary for 
 \subsection{Functional Testing} \label{sec:eval-functional}
 
 \subsubsection{Data Ingestion and Session Handling}
-The first functional requirement of Section~ref{sec}
+The first functional requirement of Chapter~\ref{sec:requirements} (FR1, live submission-data ingestion) was validated during the V2 deployment against a live session, confirming that the JSON log returned by the Loughborough submission API is parsed correctly end-to-end into the normalised submissions DataFrame, that the XML field embedded in each record is extracted into per-submission attributes, and that the in-memory cache invalidates correctly under the configured TTL described in Section~\ref{sec:pipeline}.
+Session start and end were validated through the lab instructor dashboard and the lab assistant join flow concurrently, confirming that the shared state file at \texttt{data/lab\_session.json} updates correctly under the \texttt{filelock} pattern described in Section~\ref{sec:shared-state}.
+No data loss or corruption was found across the test runs. The full FR1 verification row appears in Appendix~\ref{app:detailed-test-results}.
 
 \subsubsection{Analytics and Model Behaviour}
 % TODO: 5.2.2 prose block
+Functional requirements FR2 (computation of student struggle) and FR3 (computation of question difficulty) of Chapter~\ref{sec:requirements} were validated against the analytical pipeline of Chapter~\ref{sec:implementation}.
+The seven-signal baseline struggle model and the five-signal baseline difficulty model were confirmed to produce scores in $[0, 1]$ across the cohort, with the four band-classification labels classifying correctly under both the v1 and v2 weight regimes.
+The collaborative-filtering layer, the mistake-clustering pipeline, the IRT 2PL fit, the BKT mastery estimates, and the improved-struggle model were tested end-to-end and the outputs were cross-checked against the design equations of Chapter~\ref{sec:design}.
+The graceful weight-redistribution cases described in Section~\ref{sec: improved struggle} (BKT unavailable, IRT unavailable, both unavailable) were each tested with mock data and confirmed to redistribute the weights as expected. No silent failures were observed. The per-model verification rows appear in Appendix~\ref{app:detailed-test-results}.
 
 \subsubsection{Instructor Dashboard Features}
 % TODO: 5.2.3 prose block
+FR4 (real-time prioritisation) and FR5 (present relevant analytics) of Chapter~\ref{sec:requirements} were validated through the V2 FastAPI + React stack.
+Each of the seven instructor views was exercised to confirm the rendered components matched the design specification: the In-Class leaderboards are ordered by score under both the Basic and Advanced modes, the band colour coding tracks the threshold classification map of Section~\ref{sec: student struggle}, and the Student Detail, Question Detail, Data Analysis, Session Progression, Previous Sessions, and Settings views render without errors.
+Navigation between views was tested and confirmed to be smooth and error-free, and the data displayed in each view was cross-checked against the expected output from the analytics pipeline.
+The filtering of the system was also tested to confirm that the per-module and per-session filters correctly update the displayed data and that the system handles edge cases gracefully.
+Screenshots for each view appear in Appendix~\ref{app:ui-screenshots}; the full FR4 and FR5 verification rows are in Appendix~\ref{app:detailed-test-results}.
 
 \subsubsection{Lab Assistant Workflow}
 % TODO: 5.2.4 prose block
+FR7 (lab assistant ranking system) of Chapter~\ref{sec:requirements} was validated through the V2 lab-assistant single-page application.
+The join flow was tested with the six-character session code described in Section~\ref{sec:assistant}, confirming that the assistant's identity persists across reloads through the \texttt{?aid=} URL parameter and that the polling cycle picks up new assignments without manual refresh.
+The mark-helped round-trip was validated, confirming that a button press on the assistant app updates \texttt{data/lab\_session.json} through the same file-locked pattern as the instructor process and that the instructor dashboard sidebar picks up new assistants and their status correctly.
+Assistants were also confirmed to be able to join simultaneously without loss of data.
+FR6 (smart device) was scoped out at design time due to focusing on the modelling; it remains future work and is restated in Section~\ref{sec:eval-discussion}. The full FR7 verification row appears in Appendix~\ref{app:detailed-test-results}.
+
 
 \subsection{Non-Functional Testing} \label{sec:eval-nonfunctional}
 
 \subsubsection{Performance and Refresh Behaviour}
-% TODO: 5.3.1 prose block
+NFR1 (Real Time Performance) of Chapter~\ref{sec:requirements} is met through a lifespan prewarm strategy of Chapter~\ref{sec:implementation}, which pre-computes all derived signals before the FastAPI process accepts requests so taht the first user request sees the steady state latency of the dashboard rather than the startup latency. 
+The prewarm is made up of six stages, captured across a representative session of $42{,}443$ submission records across $3{,}935$ unique feedback strings.
+
+The submission log loads and parses in $8.0$~s. The OpenAI incorrectness scoring pass runs in $464.5$~s on a cold start with an empty cache, batching $197$ calls for the $3{,}935$ unique feedback strings, but reduces to a sub-second lookup on subsequent runs through the disk-persisted cache at \texttt{data/incorrectness\_cache.json}; this $71\%$ cold start cold only occurs once pre corpus and never appears in the steady state afterwards. 
+The BKT parameter fit across the six skills present in the cohort runs in $23.2$~s, fitting three skills and falling back to \texttt{config.py} defaults on three under the gating logic of Section~\ref{sec: bkt}. 
+The IRT 2PL fit completes in $7.3$~s on the final $127 \times 86$ response matrix produced by the iterative min-attempts and separable-response drop-pass of Section~\ref{sec: irt}. 
+The struggle leaderboard becomes ready $6.2$~s after the IRT fit and the difficulty leaderboard $3.6$~s after that. The RAG collection takes $137.2$~s to load the sentence-transformers \texttt{all-MiniLM-L6-v2} model and embed $3{,}069$ sampled rows into the in-memory vector index.
+
+Total prewarm for this session is $649.9$~s on the cold start and approximately $185$~s on a warm start once the incorrectness cache is populated; the RAG embdeding is the largest contributor to the prewarm time. 
+Once the prewarm completes, all subsequent requests respond from in-memory state and the steady-state five-second polling cycle of the lab-assistant app was confirmed to be responsive without observable latency on the observed session.  
+The full NFR1 verification row appears in Appendix~\ref{app:detailed-test-results}.
 
 \subsubsection{Usability and Interpretability}
 % TODO: 5.3.2 prose block
+
+NFR2 (Interpretability) of Chapter~\ref{sec:requirements} is supported through the design of the instructor dashboard and the survey of Section~\ref{sec:eval-survey}, which evaluated the clarity of the underlying struggle and difficulty scores as well as the intuitiveness of the colour-coded band labels surfaced in the leaderboards. 
+On the five-point clarity scale of what each metric means (Q5 of the survey), seven of the ten respondents rated both the struggle and difficulty scores as "Completely Intuitive" and a further two rated them as "Slightly Intuitive"; the same single respondent placed both metrics in the "Slightly Unintuitive" band and no respondent picked either "Neutral" or "Completely Unintuitive" on either metric, yielding a strongly bimodal distribution where disagreement collapses to a single outlier.
+On the five-point intuitiveness scale for the colour-coded bands (Q6), the same bimodal pattern held with six respondents at "Completely Intuitive" and three at "Slightly Intuitive" on both band sub-rows, with the same outlier at "Slightly Unintuitive".
+The trust question (Q7) returned two respondents at "Very Likely" and five at "Somewhat Likely" to trust the dashboard's prioritisation, one respondent at "Neither Likely nor Unlikely", and two participants on the negative end of the scale (one at "Somewhat Unlikely" and one at "Very Unlikely"); this yielded a $70/10/20$ split between positive, neutral, and negative trust.
+The question on what the main issue is when providing real-time support (Q4) had three main themes: not enough staff, quieter students may not be willing to ask for help and identifying who needs the most help is difficult which the dashboard targets. 
+NFR2 is met for the surveyed cohort within the limitations of the sample size; the full NFR2 verification row appears in Appendix~\ref{app:detailed-test-results}.
 
 \subsubsection{Robustness and Failure Handling}
 % TODO: 5.3.3 prose block
@@ -99,7 +133,7 @@ The first functional requirement of Section~ref{sec}
 % TODO: 5.4.5 prose block (was 5.4.9 pre-trim; ~290 words, Optuna TPE with Spearman ρ objective for K and τ; K tied within noise (Δρ +0.013); τ substantial Δρ +0.200; joint K×τ study confirms independence; figures fig:eval-hyperparams-contour + fig:eval-hyperparams-importances + table tab:eval-hyperparams; see drafting plan §5.4.9 block)
 
 \subsubsection{Findings} \label{sec:eval-findings}
-% TODO: 5.4.6 prose block (was 5.4.10 pre-trim; ~900 words; all three v2 weight-refit findings as one continuous narrative: positive struggle v1↔v2 (ρ +0.573) + weaker-positive difficulty (ρ +0.287) + weaker-positive improved-struggle (ρ +0.168) + 4-positive-1-tie verdict scorecard; figures fig:eval-weights-struggle, fig:eval-rho-perfold-struggle, fig:eval-ols-diagnostic (supplementary), fig:eval-negative-findings + tables tab:eval-weights-struggle, tab:eval-weights-difficulty, tab:eval-weights-improved, tab:eval-verdict-scorecard; see drafting plan §5.4.10 block)
+% TODO: 5.4.6 prose block (was 5.4.10 pre-trim; ~900 words; all three v2 weight-refit findings as one continuous narrative: positive struggle v1↔v2 (ρ +0.588) + moderate-positive difficulty (ρ +0.468) + weaker-positive improved-struggle (ρ +0.201 at RF ceiling) + 4-positive-1-tie verdict scorecard; figures fig:eval-weights-struggle, fig:eval-rho-perfold-struggle, fig:eval-ols-diagnostic (supplementary), fig:eval-negative-findings + tables tab:eval-weights-struggle, tab:eval-weights-difficulty, tab:eval-weights-improved, tab:eval-verdict-scorecard; see drafting plan §5.4.10 block)
 
 
 \subsection{Survey} \label{sec:eval-survey}

@@ -1021,7 +1021,7 @@ v2 vectors are read from disk on the first request after a settings change.
 The pipeline is structured as five sequential phases, each implemented with Python scripts in \texttt{scripts/} or as a Jupyter notebook under \texttt{notebooks/}.
 Phase~1 (\texttt{eval\_fetch.py}) pulls from the Loughborough submission API once and caches all the responses to a Parquet file under \texttt{data/eval/submissions.parquet}, so later phases are completely offline.
 Phase~2 (\texttt{eval\_common.py}) stratifies the cached submissions into snapshots across the lab sessions, twelve cutoff times per session, and the four struggle bands.
-Phase~3 (\texttt{eval\_label.py}) calls GPT-4o-mini for each snapshot to obtain a four-band struggle rating, and a four-band difficulty rating for the question side.
+Phase~3 (\texttt{eval\_label.py}) calls GPT-4o for each snapshot to obtain a four-band struggle rating, and a four-band difficulty rating for the question side.
 The bands "On Track", "Minor Issues", "Struggling", "Needs Help" for struggle; "Easy", "Medium", "Hard", "Very Hard" for difficulty are encoded as an integer index in $\{0, 1, 2, 3\}$ for training.
 
 Phase~4 (\texttt{optimise\_v2\_weights.py} and \texttt{optimise\_hyperparams.py}) fits the v2 vectors. The seven-signal struggle model and the three-weight improved model are fitted under ordinary least-squares linear regression against the band index; the outer scheme is \texttt{GroupKFold(n\_splits=5)} with session as the group identifier, so train and test partitions never share students.

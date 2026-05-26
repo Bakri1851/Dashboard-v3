@@ -109,7 +109,8 @@ def main() -> int:
 
     n_per_band = args.n // 4
     print(f"Stratified sample target: {n_per_band} per band, {n_per_band*4} total")
-    picked = _stratified_sample(snaps, labels, n_per_band)
+    print(f"  (all author self-labels force-included for head-to-head κ comparison)")
+    picked = _stratified_sample(snaps, labels, n_per_band, self_label_ids=set(self_labels.keys()))
     print(f"Picked {len(picked)} snapshots total")
 
     # Prioritise overlap with author self-labels for direct κ comparison

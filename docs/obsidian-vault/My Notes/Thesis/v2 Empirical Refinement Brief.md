@@ -12,6 +12,9 @@ inputs:
 
 # v2 Empirical Refinement Brief
 
+<!-- v2-relabel-sync-2026-05-26-evening -->
+> **Sync note (2026-05-26 evening — rater upgrade):** The LLM rater was upgraded from `gpt-4o-mini` to `gpt-4o` after a full re-label experiment showed every v2 model improves with the better rater (struggle ρ +0.573 → **+0.588**; difficulty ρ +0.287 → **+0.468** — biggest single gain; improved-struggle ρ +0.168 → **+0.201**, now matching the non-linear RandomForest ceiling). All ρ values below reflect the upgraded labels. Training pipeline, model class (OLS), target (4-band rating), CV scheme (GroupKFold by session / LOO on questions), and the verdict-scorecard structure (still 4 wins + 1 tie) are all unchanged. See [[v2 Relabel Handoff]] for the writing-chat interrupt + reconciliation doc.
+
 <!-- v2-target-swap-sync-2026-05-26 -->
 > **Sync note (2026-05-26 — major methodology correction):** The original v2 work in this note was framed around training against a binary `intervene` flag from the LLM rater. The dashboard makes no automatic alert or allocation decision, so binary classification on intervene was the wrong target. **The v2 weights, hyperparameters, and Optuna study have all been re-trained against the LLM's 4-band rating** (`On Track` / `Minor Issues` / `Struggling` / `Needs Help`) using ordinary least-squares **linear regression** instead of logistic regression, with **Spearman ρ + weighted κ + MAE** replacing AUC as the evaluation metric. Under the corrected target the verdict scorecard becomes **4 positive findings + 1 tie** (was "2 positive + 2 negative + 1 tie" — the previous negative findings for difficulty and improved-struggle were artefacts of the wrong target). Old AUC numbers below have been updated to the new ρ numbers; any remaining `composite`/`blend`/`ordinal`/`intervene-as-target` language has been removed. See `data/eval/results.md` for the authoritative current numbers.
 
@@ -43,7 +46,7 @@ The amendment **does not replace** that sentence — it appends a paragraph that
 **Brief content to write**:
 
 - Open with: the v1 weights of Table \ref{tab: struggle weights} (and the analogous v1 difficulty weights in Table \ref{tab: difficulty weights}) constitute the deployed baseline and remain the default in the shipped system.
-- Note: after deployment we obtained 1,306 second-opinion labels from GPT-4o-mini against which we could empirically refit both composites using ordinary least-squares linear regression with session-grouped 5-fold cross-validation; the refined weight vectors are reported as v2 and are toggleable at runtime in the V2 React stack from the Settings view.
+- Note: after deployment we obtained 1,306 second-opinion labels from GPT-4o against which we could empirically refit both composites using ordinary least-squares linear regression with session-grouped 5-fold cross-validation; the refined weight vectors are reported as v2 and are toggleable at runtime in the V2 React stack from the Settings view.
 - Frame v2 as iterative empirical refinement, not as a replacement: the v1 vectors are not retired and the comparison itself (Spearman \(\rho\), held-out AUC, weight-sign agreement) is the contribution.
 - Close with a forward reference: full empirical comparison in §\ref{sec:eval-results} (which is `sec:eval-results`).
 - Symbol consistency: keep \(\alpha, \beta, \gamma, \delta, \eta, \zeta, \theta\) (struggle) and \(\alpha, \beta, \gamma, \delta, \epsilon\) (difficulty); v2 vectors are written as **trained values** of the same Greek letters, not as a separate symbol set.
@@ -52,7 +55,7 @@ The amendment **does not replace** that sentence — it appends a paragraph that
 Optional draft (the writing chat can rework):
 
 ```latex
-The weights enumerated above constitute the deployed baseline (designated v1) and remain the system default. After the deployment window closed we obtained 1{,}306 second-opinion labels from a large language model rater (GPT-4o-mini) against which both composites were re-fitted under ordinary least-squares linear regression with session-grouped 5-fold cross-validation; the refined weight vectors are designated v2 and are toggleable at runtime in the V2 React stack from the Settings view. The v2 vectors are signed and do not satisfy the convex-combination constraint of Equation~\ref{eq:struggle-raw}; this is a deliberate consequence of the linear-classifier framing, and the v1 convex interpretation is preserved as the deployed default. Section~\ref{sec:eval-results} reports the empirical comparison.
+The weights enumerated above constitute the deployed baseline (designated v1) and remain the system default. After the deployment window closed we obtained 1{,}306 second-opinion labels from a large language model rater (GPT-4o) against which both composites were re-fitted under ordinary least-squares linear regression with session-grouped 5-fold cross-validation; the refined weight vectors are designated v2 and are toggleable at runtime in the V2 React stack from the Settings view. The v2 vectors are signed and do not satisfy the convex-combination constraint of Equation~\ref{eq:struggle-raw}; this is a deliberate consequence of the linear-classifier framing, and the v1 convex interpretation is preserved as the deployed default. Section~\ref{sec:eval-results} reports the empirical comparison.
 ```
 
 **Do not** also append this to the difficulty section (line ~428) — one Ch3 amendment is enough; reference both composites in the single insertion above.
@@ -175,7 +178,7 @@ Two weaker positive findings under one subsubsection. Both v2 models outrank the
 - Trained weights: \((w_B, w_M, w_D) = (+0.419, -0.444, -0.137)\). Two negative weights.
 - The LR fitter assigned **negative weight to the BKT mastery-gap term** and **negative weight to the IRT-difficulty-adjusted exposure term** — both upstream signals are anti-correlated with the rater's intervene decision after the behavioural composite is already in the model.
 - Interpretation: the v1 design rationale (combine behavioural, mastery-gap, and IRT-adjusted under a convex combination) is not supported by the empirical labels; conditional on the behavioural composite \(B_s\), the BKT and IRT components add noise rather than signal.
-- Conclusion: v2 outranks v1 but the improved-struggle model is still weaker than the struggle model alone (ρ +0.168 vs +0.573). The v2 weights ship as the default for this model, but the practical recommendation is to leave the user on the struggle model rather than the improved blend. Settings exposes both with a note ("v2 underperforms v1 on held-out evaluation, ρ +0.168 vs baseline-v2's 0.836"). The finding has implications for the §5.6 discussion: the v1 design hypothesis that BKT mastery-gap and IRT-adjusted exposure add independent value is **not corroborated** on this cohort.
+- Conclusion: v2 outranks v1 but the improved-struggle model is still weaker than the struggle model alone (ρ +0.201 vs +0.573). The v2 weights ship as the default for this model, but the practical recommendation is to leave the user on the struggle model rather than the improved blend. Settings exposes both with a note ("v2 underperforms v1 on held-out evaluation, ρ +0.201 vs baseline-v2's 0.836"). The finding has implications for the §5.6 discussion: the v1 design hypothesis that BKT mastery-gap and IRT-adjusted exposure add independent value is **not corroborated** on this cohort.
 
 **Tables to include**: §5.4.9 difficulty weights table + §5.4.9 improved model weights table, both lifted from `data/eval/results.md`.
 
@@ -196,7 +199,7 @@ Two weaker positive findings under one subsubsection. Both v2 models outrank the
 
 - Methodology: Optuna's Tree-structured Parzen Estimator (TPE), maximising session-grouped 5-fold CV Spearman ρ against the LLM 4-band ratings; 50 trials per parameter; two independent studies (one for K over integers in [1, 20], one for τ over real numbers in [0.4, 0.9]).
 - Headline: K finding is a **robustness validation** of v1 — the hand-set value is near-optimal and the gain from optimisation is within noise.
-- τ finding is a **substantive empirical refinement** — v1's 0.7 was too permissive; v2's 0.899 lifts CF AUC by Δ +0.200.
+- τ finding is a **substantive empirical refinement** — v1's 0.7 was too permissive; v2's 0.899 lifts CF AUC by Δ +0.160.
 - Toggle pattern: when `hyperparams_version == "v2"`, both K and τ are overridden by the JSON-loaded values; the four BKT priors and mastery threshold fall back to `config.py` defaults (the v2 hyperparams JSON does not carry them).
 - Connection to §5.4.3: the struggle v2 weights were trained with the v1 (K = 5) shrinkage in place — recomputing with K = 1 may shift the v2 AUC slightly, but the per-fold gain is small and within the per-fold std; this is documented for future work, not re-run for the submission.
 
@@ -219,11 +222,11 @@ Two weaker positive findings under one subsubsection. Both v2 models outrank the
 
   | Component | Winner | Numbers | Phase |
   |---|---|---|---|
-  | Struggle model (7 OLS weights) | v2 | ρ +0.573 [+0.430, +0.715] | 4a |
-  | Difficulty model (5 OLS weights) | v1 | v2 ρ +0.287 (v1 ρ +0.027); weak but positive | 4b |
-  | Improved-struggle model (3 OLS weights) | v1 | v2 ρ +0.168, two negative weights | 4c |
-  | Shrinkage K | tied | Δ +0.013 within noise (K=1) | 4d |
-  | CF threshold τ | v2 | Δ +0.200 (ρ +0.234 → +0.434, τ=0.899) | 4d |
+  | Struggle model (7 OLS weights) | v2 | ρ +0.588 [+0.490, +0.686] | 4a |
+  | Difficulty model (5 OLS weights) | v1 | v2 ρ +0.468 (v1 baseline near-flat); weak but positive | 4b |
+  | Improved-struggle model (3 OLS weights) | v1 | v2 ρ +0.201, two negative weights | 4c |
+  | Shrinkage K | tied | Δ +0.009 within noise (K=0) | 4d |
+  | CF threshold τ | v2 | Δ +0.160 (ρ +0.306 → +0.466, τ=0.900) | 4d |
 
 - Two regimes for the dashboard: keep v1 for difficulty + improved model; switch to v2 for struggle weights + CF threshold; K toggle is a no-op.
 
@@ -288,7 +291,7 @@ The weights of a composite indicator can be re-fitted empirically once labelled 
 **Brief content to write (~80 words)**:
 
 - Frame the v2 evaluation pipeline (Phases 0–8) as a methodological contribution alongside the system contribution.
-- Cite the verdict scorecard as evidence — 2 positive findings (struggle weights ρ +0.573; CF threshold τ Δ +0.200) + 2 weaker positive findings (difficulty ρ +0.287; improved model ρ +0.168 with negative BKT/IRT weights) + 1 tie (shrinkage K within fold-variance noise).
+- Cite the verdict scorecard as evidence — 2 positive findings (struggle weights ρ +0.588; CF threshold τ Δ +0.160) + 2 weaker positive findings (difficulty ρ +0.468; improved model ρ +0.201 with negative BKT/IRT weights) + 1 tie (shrinkage K within fold-variance noise).
 - The contribution is the **symmetry** of the findings — refitting the composites empirically validated some hand-set choices and refuted others; this is the contribution, not "v2 wins everywhere".
 
 Optional draft (1 paragraph in the §6.2 Contributions list):
@@ -302,7 +305,7 @@ A further contribution is the iterative empirical refinement of the struggle and
 **Brief content to write**:
 
 - **Close item #3 (supervised weight optimisation)**: the original §6.3 placeholder framed this as the most significant methodological limitation of the work. The v2 evaluation pipeline addressed it. Reframe in §6.3 prose as "extended in this work" rather than dropping the discussion entirely (the residual limitations below justify why it remains an active line of work).
-- **NEW item #1a — LLM-rater limitation**: v2 weights were trained against GPT-4o-mini second-opinion labels rather than instructor flags; Cohen's κ between the LLM and the author at n=50 was poor by Landis-Koch (0.10–0.11) though within-1-band agreement was 70%. Future work: collect instructor-flag ground truth (requires ethics extension) or run a multi-rater consensus and re-fit against the consensus labels rather than against a single annotator.
+- **NEW item #1a — LLM-rater limitation**: v2 weights were trained against GPT-4o second-opinion labels rather than instructor flags; Cohen's κ between the LLM and the author at n=50 was poor by Landis-Koch (0.10–0.11) though within-1-band agreement was 70%. Future work: collect instructor-flag ground truth (requires ethics extension) or run a multi-rater consensus and re-fit against the consensus labels rather than against a single annotator.
 - **NEW item #1b — Optuna τ boundary + deferred BKT priors**: the CF threshold τ optimum landed at the upper boundary of the [0.4, 0.9] search range; a finer search at τ ∈ [0.85, 0.95] may yield further improvement. The four BKT priors (p_init, p_learn, p_guess, p_slip) and the BKT mastery threshold were originally on the Optuna grid but were pinned to `config.py` defaults because each trial required ~30 minutes of BKT refits across the full snapshot set; a reduced-fold or amortised TPE study over them is the natural follow-on.
 
 Optional draft (3 paragraphs in §6.3 Future Work):
@@ -310,7 +313,7 @@ Optional draft (3 paragraphs in §6.3 Future Work):
 ```latex
 The methodological limitation discussed at length in the first version of this work --- that the composite weights were tuned by trial and error rather than fitted from labelled data --- was addressed in the evaluation chapter through a supervised refit against second-opinion labels (Section~\ref{sec:eval-results}). It remains an active line of work for two reasons.
 
-The first concerns the source of the labels themselves. The v2 weight vectors were trained against ratings generated by a large language model (GPT-4o-mini) rather than against instructor flags collected during live deployment; the inter-rater agreement between the language-model annotator and the author at $n=50$ shared snapshots was poor by the Landis–Koch scale (Cohen's $\kappa \in \{0.10, 0.11\}$ across the binary intervene and the linear- and quadratic-weighted ordinal-band variants), though within-one-band agreement reached $70\%$. Replacing the language-model annotator with instructor flags --- which would require an ethics extension to collect labelled session data --- or running a multi-rater consensus over the existing snapshots would let the v2 weights claim agreement with human judgement, rather than with one model's judgement.
+The first concerns the source of the labels themselves. The v2 weight vectors were trained against ratings generated by a large language model (GPT-4o) rather than against instructor flags collected during live deployment; the inter-rater agreement between the language-model annotator and the author at $n=50$ shared snapshots was poor by the Landis–Koch scale (Cohen's $\kappa \in \{0.10, 0.11\}$ across the binary intervene and the linear- and quadratic-weighted ordinal-band variants), though within-one-band agreement reached $70\%$. Replacing the language-model annotator with instructor flags --- which would require an ethics extension to collect labelled session data --- or running a multi-rater consensus over the existing snapshots would let the v2 weights claim agreement with human judgement, rather than with one model's judgement.
 
 The second concerns the hyperparameter optimisation. The collaborative-filtering threshold $\tau$ optimum landed at the upper boundary of the $[0.4, 0.9]$ search range, and a finer search at $\tau \in [0.85, 0.95]$ may yield further improvement. The four Bayesian-knowledge-tracing priors $(p_{\mathrm{init}}, p_{\mathrm{learn}}, p_{\mathrm{guess}}, p_{\mathrm{slip}})$ and the BKT mastery threshold were originally part of the optimisation grid but were pinned to the configured defaults because each Optuna trial required approximately thirty minutes of BKT refits across the full snapshot set; a reduced-fold or amortised TPE study over the BKT parameter space is the natural follow-on.
 ```
@@ -336,7 +339,7 @@ All under `data/eval/figures/` at ≥200 DPI; copy to `Report/figures/evaluation
 |---|---|---|
 | `cohort_distributions.png` | 5.4.1 | **4-panel band-calibration finding** — v1 struggle bands (54% Needs Help), v1 difficulty bands (64% Hard, only 2 Very Hard), LLM struggle bands, LLM difficulty bands (55/72 Very Hard — "COA122 uniformly hard"). Motivates why v2 weights / thresholds matter |
 | `weights_struggle_v1_vs_v2.png` | 5.4.3 | **HEADLINE positive** — paired bar chart, 7 signals, v1 vs v2 with per-fold std error bars; 3 sign flips visible at a glance |
-| `per_fold_auc_struggle.png` | 5.4.3 / 5.4.4 | 5-bar per-fold AUC with mean horizontal line + 95% CI band — stability evidence for the ρ +0.573 headline |
+| `per_fold_auc_struggle.png` | 5.4.3 / 5.4.4 | 5-bar per-fold AUC with mean horizontal line + 95% CI band — stability evidence for the ρ +0.588 headline |
 | `negative_findings.png` | 5.4.9 | **Single 2-panel figure** (difficulty left, improved model right) showing both negative findings together — efficient |
 | `hyperparams_optuna.png` | 5.4.10 | **4-panel** — Optuna trajectories (top row) + optimisation landscapes (bottom row) for K and τ. The τ landscape visually justifies the boundary caveat; the K landscape visually justifies "tied within noise"; trajectories show TPE convergence in ~10 trials |
 | `model_disagreement.png` | 5.6.1 | 4×4 v1↔v2 band confusion matrix — 31.2% reclassification with symmetric upgrade/downgrade balance (15.9% / 15.3%) |

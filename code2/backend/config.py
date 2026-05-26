@@ -10,7 +10,7 @@ EXCLUDED_MODULES: list[str] = ["24COB231", "24WSC701"]
 EXCLUDED_MODULES: list[str] = ["AI_TEST", "24COB231", "24WSC701"]
 
 # --- OpenAI Configuration ---
-OPENAI_MODEL: str = "gpt-4o-mini"
+OPENAI_MODEL: str = "gpt-4o"  # upgraded from gpt-4o-mini 2026-05-26 after re-label experiment showed +0.18 Spearman ρ gain on difficulty v2 training
 OPENAI_BATCH_SIZE: int = 20       # max (question, answer) pairs per API call — smaller batches parse more reliably
 SCORING_PER_RUN_CAP: int = 500    # max new pairs scored per request; rest fall back to 0.5 and get scored on subsequent calls (keeps UI responsive on cold-start)
 # Master switch for OpenAI incorrectness scoring. When False,

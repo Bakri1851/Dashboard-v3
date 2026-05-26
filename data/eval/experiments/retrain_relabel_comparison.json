@@ -1,0 +1,52 @@
+{
+  "ran_at": "2026-05-26T19:14:10.148920+00:00",
+  "purpose": "Test whether re-labelling 148 stratified snapshots with GPT-4o (vs 4o-mini) lifts (a) \u03ba vs human, (b) downstream OLS Spearman \u03c1.",
+  "kappa_head_to_head": {
+    "n_shared": 50,
+    "kappa_human_vs_4o_mini_unweighted": 0.10714285714285698,
+    "kappa_human_vs_4o_mini_linear_weighted": 0.11125740618828173,
+    "kappa_human_vs_4o_mini_quadratic_weighted": 0.09426366990942636,
+    "kappa_human_vs_4o_full_unweighted": 0.14506343077771666,
+    "kappa_human_vs_4o_full_linear_weighted": 0.19768934531450577,
+    "kappa_human_vs_4o_full_quadratic_weighted": 0.26170279610430414,
+    "agreement_exact_human_vs_4o_mini": 0.34,
+    "agreement_exact_human_vs_4o_full": 0.38,
+    "agreement_within_1_human_vs_4o_mini": 0.7,
+    "agreement_within_1_human_vs_4o_full": 0.68
+  },
+  "training_canonical": {
+    "n_samples": 1306,
+    "n_folds_with_rho": 5,
+    "rho_mean": 0.5728619634566313,
+    "rho_std": 0.11470480513666755,
+    "rho_per_fold": [
+      0.3802542342627899,
+      0.5848564577186173,
+      0.6871672364025277,
+      0.6138611886571854,
+      0.5981707002420363
+    ],
+    "kappa_mean": 0.3642113397306601,
+    "mae_mean": 0.6565368999972774
+  },
+  "training_merged": {
+    "n_samples": 1306,
+    "n_folds_with_rho": 5,
+    "rho_mean": 0.5424346291644194,
+    "rho_std": 0.12204757781756204,
+    "rho_per_fold": [
+      0.3355758983158724,
+      0.5772685384757692,
+      0.6583547692354267,
+      0.5873268440517241,
+      0.5536470957433045
+    ],
+    "kappa_mean": 0.3393223638126017,
+    "mae_mean": 0.6638844128617714
+  },
+  "deltas": {
+    "rho": -0.030427334292211894,
+    "kappa": -0.024888975918058387,
+    "mae": 0.007347512864493977
+  }
+}

@@ -2,7 +2,7 @@
   "version": "v2",
   "kind": "improved",
   "model_class": "LinearRegression",
-  "trained_at": "2026-05-26T02:19:16.861628+00:00",
+  "trained_at": "2026-05-26T20:01:04.701907+00:00",
   "n_samples": 1306,
   "n_folds": 5,
   "target": "4-band rating (LLM second-opinion). Struggle: On Track=0, Minor Issues=1, Struggling=2, Needs Help=3. Difficulty: Easy=0, Medium=1, Hard=2, Very Hard=3.",
@@ -25,148 +25,148 @@
   "cv_scheme": "GroupKFold(n_splits=5) with session_id as group",
   "regularisation": "None (OLS \u2014 pure ordinary least squares)",
   "random_seed": 42,
-  "spearman_rho_mean": 0.16829738449880396,
-  "spearman_rho_std": 0.13246248446694261,
+  "spearman_rho_mean": 0.2014784290478655,
+  "spearman_rho_std": 0.12417502587518298,
   "spearman_rho_ci95": [
-    0.0038234864235759947,
-    0.33277128257403193
+    0.04729476994262993,
+    0.3556620881531011
   ],
-  "weighted_kappa_mean": 0.012687014343792801,
-  "weighted_kappa_std": 0.017795993379281318,
+  "weighted_kappa_mean": 0.008567491696489493,
+  "weighted_kappa_std": 0.016477911796143753,
   "weighted_kappa_ci95": [
-    -0.009409629947533355,
-    0.03478365863511896
+    -0.011892538146359327,
+    0.02902752153933831
   ],
-  "mae_mean": 0.8723435868115115,
-  "mae_std": 0.06577314533239113,
+  "mae_mean": 0.812840404040404,
+  "mae_std": 0.023467207885346907,
   "mae_ci95": [
-    0.7906754402036574,
-    0.9540117334193655
+    0.7837020168708053,
+    0.8419787912100027
   ],
   "weights": {
-    "w_B": 0.3728317416274144,
-    "w_M": -0.307850981268068,
-    "w_D": -0.31931727710451757
+    "w_B": 0.2679883598345677,
+    "w_M": -0.6797344344634124,
+    "w_D": -0.052277205702020046
   },
   "weights_per_fold_std": {
-    "w_B": 0.12782654794014012,
-    "w_M": 0.182444085478002,
-    "w_D": 0.05896829429122584
+    "w_B": 0.05620133412557998,
+    "w_M": 0.049342100088677544,
+    "w_D": 0.015691079444849793
   },
   "weights_by_feature": {
-    "behavioural_composite": 0.3728317416274144,
-    "mastery_gap": -0.307850981268068,
-    "difficulty_adjusted_score": -0.31931727710451757
+    "behavioural_composite": 0.2679883598345677,
+    "mastery_gap": -0.6797344344634124,
+    "difficulty_adjusted_score": -0.052277205702020046
   },
   "weights_per_fold_std_by_feature": {
-    "behavioural_composite": 0.12782654794014012,
-    "mastery_gap": 0.182444085478002,
-    "difficulty_adjusted_score": 0.05896829429122584
+    "behavioural_composite": 0.05620133412557998,
+    "mastery_gap": 0.049342100088677544,
+    "difficulty_adjusted_score": 0.015691079444849793
   },
   "n_folds_with_valid_rho": 5,
   "per_fold": [
     {
-      "spearman_rho": -0.026614978948867347,
-      "weighted_kappa": 0.03616045543197488,
-      "mae": 0.7811320754716982,
-      "mae_continuous": 0.8480779076815812,
+      "spearman_rho": 0.07691599018285109,
+      "weighted_kappa": 0.028733446284706643,
+      "mae": 0.8,
+      "mae_continuous": 0.8314725466612191,
       "n_train": 1041,
       "n_test": 265,
-      "y_test_mean": 1.9773584905660377,
-      "y_test_std": 0.9787634689179442,
+      "y_test_mean": 2.237735849056604,
+      "y_test_std": 0.9194392087170123,
       "coefs_raw": {
-        "behavioural_composite": 0.9402517986149244,
-        "mastery_gap": -1.9341380698672686,
-        "difficulty_adjusted_score": -0.873376166984455
+        "behavioural_composite": 1.3529980443285858,
+        "mastery_gap": -4.180885713001073,
+        "difficulty_adjusted_score": -0.38147750723905394
       },
       "weights_convex": {
-        "behavioural_composite": 0.2508832701179678,
-        "mastery_gap": -0.516077591707627,
-        "difficulty_adjusted_score": -0.23303913817440522
+        "behavioural_composite": 0.2287261899679144,
+        "mastery_gap": -0.70678451002534,
+        "difficulty_adjusted_score": -0.06448930000674563
       },
       "fold": 0
     },
     {
-      "spearman_rho": 0.11854492499831755,
-      "weighted_kappa": -0.00036376864314280333,
-      "mae": 0.946969696969697,
-      "mae_continuous": 0.9722670593454367,
+      "spearman_rho": 0.1016207768921269,
+      "weighted_kappa": -0.016379672406551915,
+      "mae": 0.8333333333333334,
+      "mae_continuous": 0.8496917201528164,
       "n_train": 1042,
       "n_test": 264,
-      "y_test_mean": 1.7954545454545454,
-      "y_test_std": 1.129753501966961,
+      "y_test_mean": 2.0303030303030303,
+      "y_test_std": 0.9842655617522251,
       "coefs_raw": {
-        "behavioural_composite": 0.9274292463334787,
-        "mastery_gap": -0.18958692488962897,
-        "difficulty_adjusted_score": -0.6924835833849253
+        "behavioural_composite": 1.3926678391578076,
+        "mastery_gap": -3.363689168287465,
+        "difficulty_adjusted_score": -0.19046576615753813
       },
       "weights_convex": {
-        "behavioural_composite": 0.5125335021304686,
-        "mastery_gap": -0.1047731144515665,
-        "difficulty_adjusted_score": -0.3826933834179648
+        "behavioural_composite": 0.28152774071255365,
+        "mastery_gap": -0.6799696132711185,
+        "difficulty_adjusted_score": -0.03850264601632785
       },
       "fold": 1
     },
     {
-      "spearman_rho": 0.32949642873301654,
-      "weighted_kappa": 0.0,
-      "mae": 0.8888888888888888,
-      "mae_continuous": 0.8990387798076308,
+      "spearman_rho": 0.3823036174650257,
+      "weighted_kappa": 0.015860365027496548,
+      "mae": 0.7777777777777778,
+      "mae_continuous": 0.7512991566091362,
       "n_train": 1054,
       "n_test": 252,
-      "y_test_mean": 1.9206349206349207,
-      "y_test_std": 1.0881991429208007,
+      "y_test_mean": 2.1785714285714284,
+      "y_test_std": 0.914964405835319,
       "coefs_raw": {
-        "behavioural_composite": 0.4401902570587266,
-        "mastery_gap": -0.8056150044338227,
-        "difficulty_adjusted_score": -0.5464427986928855
+        "behavioural_composite": 0.9962788836470652,
+        "mastery_gap": -1.6442557938409663,
+        "difficulty_adjusted_score": -0.12396969658046304
       },
       "weights_convex": {
-        "behavioural_composite": 0.24560788589341945,
-        "mastery_gap": -0.4494997217910058,
-        "difficulty_adjusted_score": -0.3048923923155748
+        "behavioural_composite": 0.3603824587844117,
+        "mastery_gap": -0.5947741697442609,
+        "difficulty_adjusted_score": -0.044843371471327435
       },
       "fold": 2
     },
     {
-      "spearman_rho": 0.22122631206867002,
-      "weighted_kappa": 0.027638384930131932,
-      "mae": 0.8327272727272728,
-      "mae_continuous": 0.8765374610462605,
+      "spearman_rho": 0.18762206006527546,
+      "weighted_kappa": 0.007911392405063444,
+      "mae": 0.8290909090909091,
+      "mae_continuous": 0.8267967909004429,
       "n_train": 1031,
       "n_test": 275,
-      "y_test_mean": 1.8909090909090909,
-      "y_test_std": 1.0492027670002553,
+      "y_test_mean": 2.098181818181818,
+      "y_test_std": 0.9804434820465703,
       "coefs_raw": {
-        "behavioural_composite": 0.7819438137690956,
-        "mastery_gap": -0.22223676193573588,
-        "difficulty_adjusted_score": -0.5791120962048294
+        "behavioural_composite": 1.1930918982272285,
+        "mastery_gap": -3.5131881291371543,
+        "difficulty_adjusted_score": -0.19705856126651908
       },
       "weights_convex": {
-        "behavioural_composite": 0.4938719338768667,
-        "mastery_gap": -0.14036366483506102,
-        "difficulty_adjusted_score": -0.3657644012880723
+        "behavioural_composite": 0.24332235611743894,
+        "mastery_gap": -0.7164889932918336,
+        "difficulty_adjusted_score": -0.040188650590727674
       },
       "fold": 3
     },
     {
-      "spearman_rho": 0.198834235642883,
-      "weighted_kappa": 0.0,
-      "mae": 0.912,
-      "mae_continuous": 0.909519390201238,
+      "spearman_rho": 0.25892970063404824,
+      "weighted_kappa": 0.0067119271717327456,
+      "mae": 0.824,
+      "mae_continuous": 0.8088311407867415,
       "n_train": 1056,
       "n_test": 250,
-      "y_test_mean": 1.728,
-      "y_test_std": 1.0798222075878974,
+      "y_test_mean": 2.116,
+      "y_test_std": 0.9625715557816988,
       "coefs_raw": {
-        "behavioural_composite": 0.747281022221367,
-        "mastery_gap": -0.6795960717742402,
-        "difficulty_adjusted_score": -0.6416515141260316
+        "behavioural_composite": 1.0179882500732327,
+        "mastery_gap": -3.156247470578261,
+        "difficulty_adjusted_score": -0.3304748490083972
       },
       "weights_convex": {
-        "behavioural_composite": 0.36126211611834935,
-        "mastery_gap": -0.32854081355507986,
-        "difficulty_adjusted_score": -0.3101970703265708
+        "behavioural_composite": 0.22598305359051993,
+        "mastery_gap": -0.7006548859845084,
+        "difficulty_adjusted_score": -0.0733620604249716
       },
       "fold": 4
     }

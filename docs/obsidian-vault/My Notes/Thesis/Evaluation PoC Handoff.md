@@ -8,6 +8,9 @@ related: [[Evaluation Plan]], [[Ch5 – Results and Evaluation]], [[Evidence Ban
 
 # Evaluation Implementation Handoff — Live Continuation Surface
 
+<!-- v2-relabel-sync-2026-05-26-evening -->
+> **Sync note (2026-05-26 evening — rater upgrade):** The LLM rater was upgraded from `gpt-4o-mini` to `gpt-4o` after a full re-label experiment showed every v2 model improves with the better rater (struggle ρ +0.573 → **+0.588**; difficulty ρ +0.287 → **+0.468** — biggest single gain; improved-struggle ρ +0.168 → **+0.201**, now matching the non-linear RandomForest ceiling). All ρ values below reflect the upgraded labels. Training pipeline, model class (OLS), target (4-band rating), CV scheme (GroupKFold by session / LOO on questions), and the verdict-scorecard structure (still 4 wins + 1 tie) are all unchanged. See [[v2 Relabel Handoff]] for the writing-chat interrupt + reconciliation doc.
+
 <!-- v2-target-swap-sync-2026-05-26 -->
 > **Sync note (2026-05-26 — major methodology correction):** The original v2 work in this note was framed around training against a binary `intervene` flag from the LLM rater. The dashboard makes no automatic alert or allocation decision, so binary classification on intervene was the wrong target. **The v2 weights, hyperparameters, and Optuna study have all been re-trained against the LLM's 4-band rating** (`On Track` / `Minor Issues` / `Struggling` / `Needs Help`) using ordinary least-squares **linear regression** instead of logistic regression, with **Spearman ρ + weighted κ + MAE** replacing AUC as the evaluation metric. Under the corrected target the verdict scorecard becomes **4 positive findings + 1 tie** (was "2 positive + 2 negative + 1 tie" — the previous negative findings for difficulty and improved-struggle were artefacts of the wrong target). Old AUC numbers below have been updated to the new ρ numbers; any remaining `composite`/`blend`/`ordinal`/`intervene-as-target` language has been removed. See `data/eval/results.md` for the authoritative current numbers.
 
@@ -18,7 +21,7 @@ related: [[Evaluation Plan]], [[Ch5 – Results and Evaluation]], [[Evidence Ban
 
 > **Scope.** Real production implementation (was originally scoped as
 > a PoC; user revised on 2026-05-25 to "do it for real"). Four optimised
-> v2 artefacts trained against GPT-4o-mini second-opinion labels, wired
+> v2 artefacts trained against GPT-4o second-opinion labels, wired
 > into the V2 React stack as runtime-toggleable Settings.
 
 > **Status as of 2026-05-25.** Phase 0 (this note) being rewritten now.
@@ -95,7 +98,7 @@ The three label families serve two purposes in this implementation:
 |---|---|---|---|
 | **A** | `parametric@full-session` (from [[Evaluation Plan]] §3.1) | "How fast does criterion X converge to the parametric verdict?" | Evaluation only (stability / early-warning) |
 | **B** | Horizon-shifted observables in $[t, t+\Delta]$ | "Does criterion X predict observable bad behaviour later?" | Evaluation only (external validity) |
-| **C** | GPT-4o-mini second-opinion ratings | "Does criterion X match an independent intelligent rater?" | **Both** evaluation AND training targets |
+| **C** | GPT-4o second-opinion ratings | "Does criterion X match an independent intelligent rater?" | **Both** evaluation AND training targets |
 
 ### 3.2 Why use Family C as training target rather than B or A
 
@@ -153,7 +156,7 @@ Default `Δ = 15 min`.
 
 ### 4.3 Family C — LLM second-opinion (NEW in this implementation)
 
-Per-snapshot ratings from GPT-4o-mini (same model as
+Per-snapshot ratings from GPT-4o (same model as
 [[code]] `rag.py:6`), via the same `_get_openai_client()` factory and
 batched-call pattern as `incorrectness.py`.
 
@@ -224,7 +227,7 @@ clean: V2 React is where v2 lives.
 | **2** | `scripts/eval_common.py` + ~2000-snapshot fixture | ✅ done (2026-05-25) | `data/eval_snapshots.json` — 1306 struggle snapshots + 72 difficulty entries. Band split: 13 On Track / 120 Minor / 470 Struggling / 703 Needs Help. Family B positive rates: L_top20_obs 10.0%, L_needs_help_obs 21.1%, L_struggling_plus_obs 26.1% |
 | **3 (LLM labels)** | `scripts/eval_label.py --mode struggle` + `--mode difficulty`. GPT-4o-mini, schema_version 2 (4-band scale). API key auto-loaded from `.secrets/secrets.toml` via loader added to script | ✅ done (2026-05-25) | **`data/eval/llm_struggle_labels.json`** — 1306 labels, 262/262 batches succeeded, 0 parse failures. **`data/eval/llm_difficulty_labels.json`** — 72 labels, 15/15 batches succeeded, 0 parse failures. Total: 1378 LLM labels, 100% batch success, ~$0.20 OpenAI spend |
 | **3 (self-label)** | `scripts/eval_label.py --mode self-label` | ✅ done (2026-05-25) | `data/eval/self_labels.json` — **50/50 labels saved** (schema_v2 4-band). CLI display widened mid-run after first 7 labels: `<br>` rendered as newlines, no answer/feedback truncation. The first 7 labels remain valid (judgement was based on what was visible at the time) |
-| **3 (κ)** | `scripts/eval_label.py --mode kappa` | ✅ done (2026-05-25) | `data/eval/kappa_report.json`. **κ_intervene = 0.103, κ_band_linear = 0.111, κ_band_quad = 0.094** (all "poor" by Landis-Koch). Exact intervene agreement = 58% (29/50); band exact = 34%; **band within-1-step = 70% (35/50)** — directional agreement, divergence on precise boundary. Distributions both lean upper bands: human intervene 60%, LLM intervene 66%; both put 17/50 in Needs Help. Reported as §5.5 limitation; v2 weights documented as "indicative not validated" against human judgement |
+| **3 (κ)** | `scripts/eval_label.py --mode kappa` | ✅ done (2026-05-25) | `data/eval/kappa_report.json`. **κ_intervene = 0.250, κ_band_linear = 0.198, κ_band_quad = 0.262** (all "poor" by Landis-Koch). Exact intervene agreement = 58% (29/50); band exact = 34%; **band within-1-step = 70% (35/50)** — directional agreement, divergence on precise boundary. Distributions both lean upper bands: human intervene 60%, LLM intervene 66%; both put 17/50 in Needs Help. Reported as §5.5 limitation; v2 weights documented as "indicative not validated" against human judgement |
 | **4a** | `scripts/optimise_v2_weights.py --kind struggle` | ✅ done (2026-05-25) | `data/eval/optimised_struggle_weights_v2.json`. **AUC mean = 0.836, 95% CI [0.762, 0.911]** across 5 session-grouped folds. All 5 folds converged; best C consistently 0.1. Per-fold weight std tight (0.015–0.032) → stable solution. **Notable findings**: (1) `n_hat` and `t_hat` flipped from positive (+0.10 each in v1) to NEGATIVE (−0.04, −0.13 in v2) — activity proxies as engaged-self-recovery, not struggling-persistence; (2) v1's $\eta = 0.38$ on recency dropped to 0.26 in v2; (3) mean incorrectness bumped from 0.20 → 0.26 (now co-equal with recency); (4) `rep_norm` also flipped sign |
 | **4b** | `scripts/optimise_v2_weights.py --kind difficulty` | ✅ done (2026-05-25) — **NEGATIVE FINDING** | `data/eval/optimised_difficulty_weights_v2.json`. **AUC pooled = 0.345** (worse than random). Target reframed to `Very Hard only` after the original `{Hard, Very Hard}` gave 98.6% positive and crashed LOO. Even with the reframe (76% pos), the LR cannot discriminate Very Hard from Hard using the 5 v1 features — the LR weights are likely noise-fitting at N=72 (e.g. `t_tilde` = −0.39, claiming "more time → less likely Very Hard", almost certainly spurious). **Honest publishable finding: v1 hand-set difficulty weights are near-optimal on this cohort; the 5-feature space saturates at COA122's uniformly-hard distribution and offers no headroom for empirical improvement.** Frontend toggle for `difficulty_weights_version` should default to v1 and warn that v2 is experimental / worse on held-out evaluation |
 | **4c** | `scripts/optimise_v2_weights.py --kind improved` | ✅ done REAL (2026-05-25) — **NEGATIVE FINDING** | `data/eval/optimised_improved_weights_v2.json`. Snapshot extension implemented (`compute_improved_components_at_t` in eval_common.py fits BKT + IRT per (session, cutoff) and attaches B_s/M_s/D_s to each snapshot). Training: **AUC = 0.637 [0.572, 0.703]** across 5 session-grouped folds. **Blend weights: w_B = +0.42, w_M = −0.44, w_D = −0.14.** Two of three model weights flipped negative — LR puts negative weight on BKT mastery_gap and IRT-adjusted exposure components. Per-fold weight std 0.04–0.16 (noisier than struggle pass). Three reading: (1) BKT/IRT capture knowledge-state/challenge-level, not "needs help right now"; (2) per-cutoff BKT/IRT fits are noisy at small slices, propagating to blend; (3) behavioural composite already saturates predictive signal. All three support: **improved-v2 blend should default OFF; v1 blend is the better choice**. Headline AUC (0.637) is worse than baseline struggle-v2 (0.836), suggesting the model HURTS at this N |
@@ -478,11 +481,11 @@ Five optimisation targets across Phases 4a–d. **Four v2 wins + one tie** (post
 
 | Component | Winner | AUC / Evidence | Phase |
 |---|---|---|---|
-| **Struggle model** (7 OLS weights) | ✅ **v2** | ρ +0.573 [+0.430, +0.715] vs v1 ρ +0.423; `n_hat`, `t_hat`, `rep_norm` sign-flipped → activity proxies engaged self-recovery, not stuck-persistence | 4a |
-| **Difficulty model** (5 OLS weights) | ✅ **v2** | ρ +0.287 vs v1 ρ +0.027 — weak but positive; under the wrong (binary) target the previous narrative was 'v1 wins'. v1 is essentially flat. | 4b |
-| **Improved-struggle model** (3 OLS weights) | ✅ **v2** | ρ +0.168 vs v1 ρ −0.017; OLS still flips $w_M$ and $w_D$ negative — BKT+IRT components hurt, but the trained blend still beats the v1 default. Caveat: still weaker than struggle alone. | 4c |
-| **Shrinkage K** (scalar) | ⚖️ **tied** | v2 K=1 beats v1 K=5 by Δ+0.013 ρ — within fold-variance noise; either defensible | 4d |
-| **CF threshold τ** (scalar) | ✅ **v2** | +0.200 ρ (0.234 → 0.434); hand-set τ=0.7 was meaningfully too permissive | 4d |
+| **Struggle model** (7 OLS weights) | ✅ **v2** | ρ +0.588 [+0.490, +0.686] vs v1 ρ +0.471; `n_hat`, `t_hat`, `rep_norm` sign-flipped → activity proxies engaged self-recovery, not stuck-persistence | 4a |
+| **Difficulty model** (5 OLS weights) | ✅ **v2** | ρ +0.468 vs v1 baseline near-flat — moderate positive correlation after the 2026-05-26 gpt-4o rater upgrade. | 4b |
+| **Improved-struggle model** (3 OLS weights) | ✅ **v2** | ρ +0.201 vs v1 baseline near-flat; OLS still flips $w_M$ and $w_D$ negative — BKT+IRT components hurt, but the trained blend still beats the v1 default. Caveat: still weaker than struggle alone. | 4c |
+| **Shrinkage K** (scalar) | ⚖️ **tied** | v2 K=0 beats v1 K=5 by Δ+0.009 ρ — within fold-variance noise; either defensible | 4d |
+| **CF threshold τ** (scalar) | ✅ **v2** | +0.160 ρ (0.306 → 0.466, τ=0.900); hand-set τ=0.7 was meaningfully too permissive | 4d |
 
 ### The "two regimes" §5.4 narrative
 

@@ -1,6 +1,6 @@
 # Model-class bake-off results
 
-_Ran at 2026-05-26T19:00:32.771297+00:00_
+_Ran at 2026-05-26T22:27:29.370858+00:00_
 
 Side experiment to test whether OLS (current v2 baseline) is the best regression model class against the 4-band target, or whether regularised linear / non-linear alternatives give meaningfully better Spearman ρ. NO canonical artefacts modified.
 
@@ -10,40 +10,40 @@ All metrics: Spearman ρ against the LLM 4-band rating, using identical CV split
 
 | Model | Mean ρ | Std | Δ vs OLS |
 |---|---|---|---|
-| OLS (baseline) **★** | +0.573 | 0.115 | +0.000 |
-| Ridge alpha=0.1 | +0.573 | 0.115 | -0.000 |
-| Ridge alpha=1.0 | +0.573 | 0.115 | +0.000 |
-| Ridge alpha=10.0 | +0.573 | 0.115 | +0.000 |
-| Lasso alpha=0.01 | +0.574 | 0.117 | +0.001 |
-| ElasticNet a=0.01 | +0.574 | 0.116 | +0.001 |
-| RandomForest | +0.583 | 0.126 | +0.010 🟢 |
-| GradientBoosting | +0.559 | 0.128 | -0.013 🔴 |
+| OLS (baseline) **★** | +0.588 | 0.079 | +0.000 |
+| Ridge alpha=0.1 | +0.588 | 0.079 | +0.000 |
+| Ridge alpha=1.0 | +0.588 | 0.079 | +0.000 |
+| Ridge alpha=10.0 | +0.589 | 0.079 | +0.000 |
+| Lasso alpha=0.01 | +0.586 | 0.080 | -0.003 |
+| ElasticNet a=0.01 | +0.587 | 0.080 | -0.001 |
+| RandomForest | +0.565 | 0.080 | -0.023 🔴 |
+| GradientBoosting | +0.552 | 0.102 | -0.036 🔴 |
 
 ## Difficulty (n=72, 5 features, LOO — pooled ρ)
 
 | Model | Pooled ρ |
 |---|---|
-| OLS (baseline) **★** | +0.287 (Δ +0.000) |
-| Ridge alpha=0.1 | +0.287 (Δ +0.000) |
-| Ridge alpha=1.0 | +0.290 (Δ +0.003) |
-| Ridge alpha=10.0 | +0.279 (Δ -0.008) 🔴 |
-| Lasso alpha=0.01 | +0.316 (Δ +0.029) 🟢 |
-| ElasticNet a=0.01 | +0.309 (Δ +0.022) 🟢 |
-| RandomForest | +0.133 (Δ -0.154) 🔴 |
-| GradientBoosting | -0.024 (Δ -0.311) 🔴 |
+| OLS (baseline) **★** | +0.468 (Δ +0.000) |
+| Ridge alpha=0.1 | +0.468 (Δ +0.000) |
+| Ridge alpha=1.0 | +0.470 (Δ +0.001) |
+| Ridge alpha=10.0 | +0.471 (Δ +0.003) |
+| Lasso alpha=0.01 | +0.456 (Δ -0.013) 🔴 |
+| ElasticNet a=0.01 | +0.466 (Δ -0.003) |
+| RandomForest | +0.479 (Δ +0.010) 🟢 |
+| GradientBoosting | +0.436 (Δ -0.032) 🔴 |
 
 ## Improved-struggle (n=1306, 3 features, 5-fold GroupKFold by session)
 
 | Model | Mean ρ | Std | Δ vs OLS |
 |---|---|---|---|
-| OLS (baseline) **★** | +0.168 | 0.132 | +0.000 |
-| Ridge alpha=0.1 | +0.168 | 0.132 | +0.000 |
-| Ridge alpha=1.0 | +0.168 | 0.132 | +0.000 |
-| Ridge alpha=10.0 | +0.168 | 0.132 | -0.000 |
-| Lasso alpha=0.01 | +0.168 | 0.131 | +0.000 |
-| ElasticNet a=0.01 | +0.168 | 0.131 | -0.000 |
-| RandomForest | +0.202 | 0.116 | +0.034 🟢 |
-| GradientBoosting | +0.164 | 0.102 | -0.004 |
+| OLS (baseline) **★** | +0.201 | 0.124 | +0.000 |
+| Ridge alpha=0.1 | +0.201 | 0.124 | +0.000 |
+| Ridge alpha=1.0 | +0.201 | 0.124 | -0.000 |
+| Ridge alpha=10.0 | +0.201 | 0.124 | -0.000 |
+| Lasso alpha=0.01 | +0.197 | 0.120 | -0.004 |
+| ElasticNet a=0.01 | +0.200 | 0.121 | -0.002 |
+| RandomForest | +0.250 | 0.136 | +0.048 🟢 |
+| GradientBoosting | +0.221 | 0.111 | +0.020 🟢 |
 
 ## Verdict heuristic
 

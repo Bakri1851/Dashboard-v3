@@ -64,3 +64,17 @@ data/eval/experiments/DECISION.md              ← this file
 ```
 
 Delete-safe: `rm -rf scripts/experiments/ data/eval/experiments/` removes the entire experiment without touching any canonical artefact.
+
+---
+
+## Update — re-bake-off under upgraded gpt-4o labels
+
+After the rater upgrade (2026-05-26 evening), the bake-off was re-run against the new labels. The verdict shifted in OLS's favour for struggle, stayed essentially tied for difficulty, and persisted only for improved-struggle.
+
+| Target | OLS old labels | OLS new labels | Best alternative new labels | Notes |
+|---|---|---|---|---|
+| Struggle | +0.573 | **+0.588** | RandomForest +0.565 ← went DOWN | OLS now decisively beats RF; earlier "RF marginally wins" was overfitting to label noise |
+| Difficulty | +0.287 | **+0.469** | RandomForest +0.479 (Δ +0.010, noise) | All linear variants tied with OLS within ±0.003 |
+| Improved-struggle | +0.168 | +0.201 | RandomForest +0.250 (Δ +0.049, real) | RF still wins but interpretability cost unchanged |
+
+**Updated decision (2026-05-27): still no swap.** OLS confirmed as the right choice on struggle (now decisively); ties or marginal RF gains elsewhere don't justify swapping. The cleaner-labels result is the publishable methodological argument that the OLS choice is correct on merit, not just on interpretability constraint. Paste-ready §5.6 prose lives in [[v2 Relabel Handoff]] §5.6 prose addition section.

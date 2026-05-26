@@ -794,7 +794,7 @@ Students with very few submissions are therefore stabilised by the same mechanis
 \subsection{Model Training Pipeline Design} \label{sec:v2-pipeline-design}
 
 The deployed v1 composite weights of Sections~\ref{sec: student struggle} and~\ref{sec: task difficulty} were tuned by trial and error in the absence of labelled ground-truth data.
-We will also use an alternative method, where the design adopts a self-contained offline pipeline that re-fits the composite weights against second-opinion labels obtained from a large language model rater (GPT-4o-mini); the refined v2 weights are evaluated against the same evaluation methodology v1 is evaluated under.
+We will also use an alternative method, where the design adopts a self-contained offline pipeline that re-fits the composite weights against second-opinion labels obtained from a large language model rater (GPT-4o); the refined v2 weights are evaluated against the same evaluation methodology v1 is evaluated under.
 The v2 weights are exposed through a toggle whilst the v1 vectors remain the deployed default.
 
 The pipeline is structured in five phases with data hand-off between them as seen in Figure~\ref{fig:v2-pipeline-design}: a one-shot data fetch from the submission API, a stratified snapshot sample, an LLM labelling stage that also collects a fifty-snapshot author review to support an inter-rater agreement check, a fitting stage that produces three composite weight vectors and two scalar hyperparameters, then a notebook is used for gathering our figures and tables used in Section~\ref{sec:eval-results}. The implementation of each phase is detailed in Section~\ref{sec:v2-training}.

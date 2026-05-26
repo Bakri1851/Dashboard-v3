@@ -1,0 +1,147 @@
+{
+  "n_respondents": 10,
+  "likert": {
+    "Q1_demographics": {
+      "Undergraduate Student": 6,
+      "Postgraduate Taught Student": 1,
+      "Postgraduate Research Student": 2,
+      "Staff": 1,
+      "Other": 0
+    },
+    "Q2_timely_help": {
+      "Always": 1,
+      "Often": 4,
+      "Sometimes": 4,
+      "Rarely": 1,
+      "Never": 0
+    },
+    "Q3_identify_strugglers": {
+      "Extremely easy": 0,
+      "Somewhat easy": 2,
+      "Neutral": 2,
+      "Somewhat not easy": 4,
+      "Extremely not easy": 2
+    },
+    "Q7_trust": {
+      "Very likely": 2,
+      "Somewhat likely": 5,
+      "Neither likely nor unlikely": 1,
+      "Somewhat unlikely": 1,
+      "Very unlikely": 1
+    },
+    "Q9_comfort": {
+      "Very comfortable": 3,
+      "Somewhat comfortable": 3,
+      "Neither comfortable nor uncomfortable": 1,
+      "Somewhat uncomfortable": 3,
+      "Very uncomfortable": 0
+    }
+  },
+  "matrix": {
+    "Q5_clarity": {
+      "Student Struggle": {
+        "Completely Unintuitive": 0,
+        "Slightly Unintuitive": 1,
+        "Neutral": 0,
+        "Slightly Intuitive": 2,
+        "Completely Intuitive": 7
+      },
+      "Question Difficulty": {
+        "Completely Unintuitive": 0,
+        "Slightly Unintuitive": 1,
+        "Neutral": 0,
+        "Slightly Intuitive": 2,
+        "Completely Intuitive": 7
+      }
+    },
+    "Q6_band_intuitiveness": {
+      "Student Struggle Bands": {
+        "Completely Unintuitive": 0,
+        "Slightly Unintuitive": 1,
+        "Neutral": 0,
+        "Slightly Intuitive": 3,
+        "Completely Intuitive": 6
+      },
+      "Question Difficulty Bands": {
+        "Completely Unintuitive": 0,
+        "Slightly Unintuitive": 1,
+        "Neutral": 0,
+        "Slightly Intuitive": 3,
+        "Completely Intuitive": 6
+      }
+    }
+  },
+  "matrix_persistent_dissenters": 1,
+  "freetext": {
+    "Q4": {
+      "n_responses": 9,
+      "responses": [
+        "Identifying who needs help the most",
+        "The teaching assistants don't engage enough with the students ",
+        "The personality of the student",
+        "Not enough time to help everyone ",
+        "Students actually asking for help rather than sitting there struggling as they may not be confident enough to ask",
+        "Lack of staff ",
+        "Not enough staff, and it is hard to see some students, that are quieter and still need help.",
+        "Being able to recognise a student is in need of support before the student notifies a staff member",
+        "Shy students may not be willing to ask for help"
+      ],
+      "theme_counts": {
+        "Identifying student need": 3,
+        "Staff shortage": 4,
+        "Help-seeking reluctance": 3
+      },
+      "untagged": []
+    },
+    "Q8": {
+      "n_responses": 5,
+      "responses": [
+        "Students might feel the pressure while solving when they have this feeling that each question is being monitored",
+        "Unquantifiable human factors that play a major role in these statistics",
+        "Students not wanting to be tracked in labs, may only want to ask for help after asking friends etc",
+        "students may not like to be surveyed or have their issues public.",
+        "It is hard to quantify how much a student is struggling due to the complex dynamics "
+      ],
+      "theme_counts": {
+        "Surveillance discomfort": 3,
+        "Quantifiability limits": 2
+      },
+      "untagged": []
+    },
+    "Q10": {
+      "n_responses": 5,
+      "responses": [
+        "Some students may not be comfortable with question 9",
+        "Make students aware and get their participation before adoption",
+        "If a lecturer constantly saw a student struggling in exams, could it impact their coursework grade? Since both only show the lecturer the student ID so they would be able to make the connection.",
+        "As long as my name is not shown that is ok.",
+        "Will my university data be used with this"
+      ],
+      "theme_counts": {
+        "Consent and transparency": 1,
+        "Name visibility / re-identification": 2,
+        "Lecturer bias on grading": 1,
+        "Data-use scope": 1
+      },
+      "untagged": [
+        "Some students may not be comfortable with question 9"
+      ]
+    },
+    "Q11": {
+      "n_responses": 2,
+      "responses": [
+        "a feature where you could tell how frequently a student is struggling across labs maybe even on easy questions",
+        "Definitive criteria on which the dashboard is based on in terms of learning, response, participation etc."
+      ],
+      "theme_counts": {
+        "Cross-session aggregation": 1,
+        "Criteria transparency": 1
+      },
+      "untagged": []
+    }
+  },
+  "figures": [
+    "Report/figures/evaluation/eval-survey-likert.png",
+    "Report/figures/evaluation/eval-survey-clarity-intuitiveness.png"
+  ]
+}

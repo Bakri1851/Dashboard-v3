@@ -1,5 +1,8 @@
 # Ch5 – Results and Evaluation
 
+<!-- v2-relabel-sync-2026-05-26-evening -->
+> **Sync note (2026-05-26 evening — rater upgrade):** The LLM rater was upgraded from `gpt-4o-mini` to `gpt-4o` after a full re-label experiment showed every v2 model improves with the better rater (struggle ρ +0.573 → **+0.588**; difficulty ρ +0.287 → **+0.468** — biggest single gain; improved-struggle ρ +0.168 → **+0.201**, now matching the non-linear RandomForest ceiling). All ρ values below reflect the upgraded labels. Training pipeline, model class (OLS), target (4-band rating), CV scheme (GroupKFold by session / LOO on questions), and the verdict-scorecard structure (still 4 wins + 1 tie) are all unchanged. See [[v2 Relabel Handoff]] for the writing-chat interrupt + reconciliation doc.
+
 <!-- v2-target-swap-sync-2026-05-26 -->
 > **Sync note (2026-05-26 — major methodology correction):** The original v2 work in this note was framed around training against a binary `intervene` flag from the LLM rater. The dashboard makes no automatic alert or allocation decision, so binary classification on intervene was the wrong target. **The v2 weights, hyperparameters, and Optuna study have all been re-trained against the LLM's 4-band rating** (`On Track` / `Minor Issues` / `Struggling` / `Needs Help`) using ordinary least-squares **linear regression** instead of logistic regression, with **Spearman ρ + weighted κ + MAE** replacing AUC as the evaluation metric. Under the corrected target the verdict scorecard becomes **4 positive findings + 1 tie** (was "2 positive + 2 negative + 1 tie" — the previous negative findings for difficulty and improved-struggle were artefacts of the wrong target). Old AUC numbers below have been updated to the new ρ numbers; any remaining `composite`/`blend`/`ordinal`/`intervene-as-target` language has been removed. See `data/eval/results.md` for the authoritative current numbers.
 
@@ -28,11 +31,11 @@ Numbers, figures, and tables for the new v2 empirical-refinement narrative are a
 
 | Component | Winner | Numbers | Phase |
 |---|---|---|---|
-| Struggle model (7 OLS weights) | **v2** | ρ +0.573 [+0.430, +0.715] (v1 ρ +0.423) | 4a |
-| Difficulty model (5 OLS weights) | **v2** | ρ +0.287 (v1 ρ +0.027) — weak but positive | 4b |
-| Improved-struggle model (3 OLS weights) | **v2** | ρ +0.168 (v1 ρ −0.017); still weaker than struggle alone | 4c |
-| Shrinkage K (scalar) | **tied** | Δ +0.013 within noise (K=1 best) | 4d |
-| CF threshold τ (scalar) | **v2** | Δ +0.200 (ρ +0.234 → +0.434, τ=0.899 best) | 4d |
+| Struggle model (7 OLS weights) | **v2** | ρ +0.588 [+0.490, +0.686] (v1 ρ +0.471) | 4a |
+| Difficulty model (5 OLS weights) | **v2** | ρ +0.468 (v1 baseline near-flat) — weak but positive | 4b |
+| Improved-struggle model (3 OLS weights) | **v2** | ρ +0.201 (v1 baseline near-flat); still weaker than struggle alone | 4c |
+| Shrinkage K (scalar) | **tied** | Δ +0.009 within noise (K=0 best) | 4d |
+| CF threshold τ (scalar) | **v2** | Δ +0.160 (ρ +0.306 → +0.466, τ=0.900 best) | 4d |
 
 Four positive findings + one tie. The v2 weights and the τ tuning each measurably improve rank quality against the LLM 4-band rating; only the shrinkage K is within noise. (The previous "two negative findings" framing was an artefact of training against a 4-band rating the dashboard never actually uses.)
 

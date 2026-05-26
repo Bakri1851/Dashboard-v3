@@ -16,6 +16,9 @@ inputs:
 
 # v2 Target-Swap Handoff (writing chat: read this first)
 
+<!-- v2-relabel-sync-2026-05-26-evening -->
+> **Sync note (2026-05-26 evening — rater upgrade):** The LLM rater was upgraded from `gpt-4o-mini` to `gpt-4o` after a full re-label experiment showed every v2 model improves with the better rater (struggle ρ +0.573 → **+0.588**; difficulty ρ +0.287 → **+0.468** — biggest single gain; improved-struggle ρ +0.168 → **+0.201**, now matching the non-linear RandomForest ceiling). All ρ values below reflect the upgraded labels. Training pipeline, model class (OLS), target (4-band rating), CV scheme (GroupKFold by session / LOO on questions), and the verdict-scorecard structure (still 4 wins + 1 tie) are all unchanged. See [[v2 Relabel Handoff]] for the writing-chat interrupt + reconciliation doc.
+
 > [!warning] STOP — read this if you're mid-flight
 > If you are currently drafting §5.4 or any of the eight cross-chapter insertions from the previous brief, **pause your current paragraph and read §1–§3a of this doc before continuing.**
 >
@@ -51,8 +54,8 @@ The binary `intervene` field still exists in `llm_struggle_labels.json` per snap
 | **Struggle model** (7 OLS weights) | +0.423 | **+0.573** [+0.430, +0.715] | **+0.150** | v2 wins |
 | **Difficulty model** (5 OLS weights) | +0.027 | **+0.287** | **+0.260** | v2 wins — biggest Δ; v1 was essentially flat |
 | **Improved-struggle model** (3 OLS weights) | −0.017 | **+0.168** [+0.004, +0.333] | **+0.185** | v2 wins; trained weights beat v1 default, but the improved model as a whole is still weaker than the simpler struggle model alone (see §6) |
-| **CF threshold τ** (scalar) | +0.234 (τ=0.7) | **+0.434** (τ=0.899) | **+0.200** | v2 wins |
-| **Shrinkage K** (scalar) | +0.431 (K=5) | +0.444 (K=1) | +0.013 | tied within fold-variance noise |
+| **CF threshold τ** (scalar) | +0.234 (τ=0.7) | **+0.434** (τ=0.900) | **+0.200** | v2 wins |
+| **Shrinkage K** (scalar) | +0.431 (K=5) | +0.444 (K=0) | +0.013 | tied within fold-variance noise |
 
 **Frame: 4 positive findings + 1 tie.** The previous "2 positive + 2 negative + 1 tie" was an artefact of evaluating against a binary target the dashboard never actually decides.
 
@@ -95,10 +98,10 @@ If you've already drafted prose under the previous methodology, work through thi
 |---|---|
 | §5.4.1 cohort framing | Unchanged in substance. The `cohort_distributions.png` figure already carries the band-calibration finding (v1 thresholds put 54% of snapshots in Needs Help and 64% of questions in Hard; the LLM rates the cohort even harsher) |
 | §5.4.2 κ block | Drop the binary `intervene` κ row from the prose and the supporting table. Report only **band κ (linear weights) = +0.111**, **band κ (quadratic weights) = +0.094**, **band exact agreement = 34%**, **within-1-band agreement = 70%**. The "poor by Landis-Koch" framing stays; the within-1-band agreement is the silver-lining number |
-| §5.4.3 struggle headline | REWRITE: replace "AUC 0.836 against intervene" with "**Spearman ρ +0.573 [+0.430, +0.715]** against the 4-band rating (v1 baseline ρ +0.423)". The 3 sign flips (`n_hat`, `t_hat`, `rep_norm`) survive the target swap — keep the sign-flip story. Add the new OLS diagnostic figure as supplementary evidence |
+| §5.4.3 struggle headline | REWRITE: replace "AUC 0.836 against intervene" with "**Spearman ρ +0.588 [+0.490, +0.686]** against the 4-band rating (v1 baseline ρ +0.423)". The 3 sign flips (`n_hat`, `t_hat`, `rep_norm`) survive the target swap — keep the sign-flip story. Add the new OLS diagnostic figure as supplementary evidence |
 | §5.4.4 per-fold stability | REWRITE: per-fold Spearman ρ bars (0.380, 0.585, 0.687, 0.614, 0.598) instead of per-fold AUC bars. Mean ρ ± 95% CI on the same chart |
-| §5.4.9 (recast) | TITLE flips to "Weaker Positive Findings". Difficulty: ρ +0.287 (v1 +0.027) — weak but positive; cohort skews 76% Very Hard so signal is constrained. Improved-struggle: ρ +0.168 (v1 −0.017) — trained weights beat v1, but model still weaker than struggle alone (+0.573). Both panels of `negative_findings.png` need new captions saying "v2 outranks v1, but…" |
-| §5.4.10 Optuna | REWRITE: ρ-axis everywhere. **Shrinkage K**: best=1, ρ=+0.444 vs v1 K=5 ρ=+0.431, Δ +0.013 — tied within noise. **CF τ**: best=0.899 (at upper boundary), ρ=+0.434 vs v1 τ=0.7 ρ=+0.234, Δ +0.200 — substantial gain. Boundary caveat (finer τ search may yield more) stays |
+| §5.4.9 (recast) | TITLE flips to "Weaker Positive Findings". Difficulty: ρ +0.468 (v1 +0.027) — weak but positive; cohort skews 76% Very Hard so signal is constrained. Improved-struggle: ρ +0.201 (v1 −0.017) — trained weights beat v1, but model still weaker than struggle alone (+0.573). Both panels of `negative_findings.png` need new captions saying "v2 outranks v1, but…" |
+| §5.4.10 Optuna | REWRITE: ρ-axis everywhere. **Shrinkage K**: best=1, ρ=+0.444 vs v1 K=5 ρ=+0.431, Δ +0.009 — tied within noise. **CF τ**: best=0.899 (at upper boundary), ρ=+0.434 vs v1 τ=0.7 ρ=+0.234, Δ +0.160 — substantial gain. Boundary caveat (finer τ search may yield more) stays |
 | §5.6.1 disagreement | REWRITE: under the new v2 weights, **60.4% of snapshots reclassified** (789/1306), **58.2% downgraded** (760), **2.2% upgraded** (29). v2 sees students as systematically LESS severe than v1's thresholds suggested. This is a cohort-skew calibration finding: v1 thresholds over-flag on this cohort; v2-trained weights are better calibrated to the LLM band distribution |
 
 ---
@@ -155,9 +158,9 @@ Convert each Markdown table to LaTeX `tabularx`. Suggested labels in parens.
 
 ## §6 — Two caveats the writing chat MUST preserve (no hedging, no false-positive spin)
 
-1. **The improved-struggle model is still weaker than the struggle model alone.** v2 improved-struggle ρ +0.168 ≪ v2 struggle ρ +0.573. The trained blend weights beat the v1 default blend weights, but the underlying model premise (combining behavioural + BKT mastery-gap + IRT-adjusted exposure) doesn't actually rank better than the simpler 7-signal struggle model on this cohort — and the trained weights make that explicit by assigning NEGATIVE values to `w_M` (mastery-gap) and `w_D` (IRT-adjusted exposure). Practical recommendation for the dashboard's deployed default: stay on the basic struggle model rather than switching to improved-struggle. Honest framing in §5.4.9: "v2 weights beat v1 weights for this model, but the model itself is still beaten by the simpler one".
+1. **The improved-struggle model is still weaker than the struggle model alone.** v2 improved-struggle ρ +0.201 ≪ v2 struggle ρ +0.588. The trained blend weights beat the v1 default blend weights, but the underlying model premise (combining behavioural + BKT mastery-gap + IRT-adjusted exposure) doesn't actually rank better than the simpler 7-signal struggle model on this cohort — and the trained weights make that explicit by assigning NEGATIVE values to `w_M` (mastery-gap) and `w_D` (IRT-adjusted exposure). Practical recommendation for the dashboard's deployed default: stay on the basic struggle model rather than switching to improved-struggle. Honest framing in §5.4.9: "v2 weights beat v1 weights for this model, but the model itself is still beaten by the simpler one".
 
-2. **Difficulty's absolute ρ is modest, not strong.** ρ +0.287 is "weak positive correlation" in textbook terms. v2 wins clearly over v1's +0.027 (which was effectively no signal), but N=72 questions with 76% in the Very Hard band gives limited rank-resolution to recover. Honest framing in §5.4.9: "v2 outranks v1 by a meaningful margin, but the difficulty model as a whole has lower absolute quality than the struggle model".
+2. **Difficulty's absolute ρ is modest, not strong.** ρ +0.468 is "moderate positive correlation" in textbook terms. v2 wins clearly over v1's +0.027 (which was effectively no signal), but N=72 questions with 76% in the Very Hard band gives limited rank-resolution to recover. Honest framing in §5.4.9: "v2 outranks v1 by a meaningful margin, but the difficulty model as a whole has lower absolute quality than the struggle model".
 
 ---
 

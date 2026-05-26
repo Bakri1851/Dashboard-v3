@@ -430,8 +430,9 @@ function AdvancedPanel({ data, update }: { data: SettingsData; update: SettingsU
         {data.runtime.struggle_weights_version === 'v2' && (
           <V2InfoBlock kind="ok">
             v2 trained via ordinary least-squares linear regression with session-grouped 5-fold CV
-            — held-out Spearman ρ = +0.573 [+0.430, +0.715] against the LLM's 4-band rating
-            (v1 baseline ρ = +0.423). <strong>Deployment-ready.</strong>
+            — held-out Spearman ρ = +0.588 [+0.490, +0.686] against the LLM's 4-band rating
+            (v1 baseline ρ = +0.471, rater upgraded to gpt-4o on 2026-05-26).
+            <strong>Deployment-ready.</strong>
           </V2InfoBlock>
         )}
 
@@ -447,11 +448,12 @@ function AdvancedPanel({ data, update }: { data: SettingsData; update: SettingsU
         {data.runtime.difficulty_weights_version === 'v2' && (
           <V2InfoBlock kind="ok">
             v2 trained via ordinary least-squares linear regression on LOO CV — pooled
-            Spearman ρ = +0.287 against the LLM's 4-band rating (v1 baseline ρ = +0.027,
-            essentially flat). v2 outranks v1 on this cohort, but the absolute correlation is
-            modest: N=72 with a heavily skewed "Very Hard" cohort gives limited rank-resolution.
-            <strong> Deployment-ready, with the caveat that this model's overall ranking quality
-            is much lower than the struggle model's.</strong>
+            Spearman ρ = +0.468 against the LLM's 4-band rating (v1 baseline near-flat).
+            Substantial moderate-positive correlation under the upgraded gpt-4o rater
+            (2026-05-26); previously +0.287 under gpt-4o-mini — a +0.18 ρ gain from rater
+            upgrade alone. N=72 with heavily skewed "Very Hard" cohort still constrains
+            absolute ρ but no longer dominates the ceiling.
+            <strong> Deployment-ready.</strong>
           </V2InfoBlock>
         )}
         {data.runtime.difficulty_model === 'irt' && (
@@ -474,13 +476,14 @@ function AdvancedPanel({ data, update }: { data: SettingsData; update: SettingsU
         {data.runtime.improved_struggle_weights_version === 'v2' && (
           <V2InfoBlock kind="ok">
             v2 trained via ordinary least-squares linear regression with session-grouped 5-fold CV
-            — held-out Spearman ρ = +0.168 against the LLM's 4-band rating (v1 baseline ρ = −0.017,
-            essentially zero correlation). The trained weights assign NEGATIVE values to BKT
-            mastery-gap (w_M ≈ −0.31) and IRT-adjusted exposure (w_D ≈ −0.32) and POSITIVE to the
-            behavioural component (w_B ≈ +0.37). v2 outranks v1, but the improved-struggle model
-            as a whole is still much weaker than the seven-signal struggle model alone
-            (ρ +0.573). <strong>If you want best rank quality, leave the Struggle Model selector
-            on "Baseline" rather than switching to "Improved".</strong>
+            — held-out Spearman ρ = +0.201 [+0.047, +0.356] against the LLM's 4-band rating.
+            Under the upgraded gpt-4o rater (2026-05-26) the v2 weights now match the
+            non-linear RandomForest ceiling (+0.202) found in a model-class bake-off, suggesting
+            OLS reaches the achievable ceiling on these features. Trained weights still assign
+            NEGATIVE values to w_M (mastery-gap) and w_D (IRT-adjusted exposure). v2 outranks v1,
+            but the improved-struggle model overall is still much weaker than the seven-signal
+            struggle model alone (ρ +0.588). <strong>If you want best rank quality, leave the
+            Struggle Model selector on "Baseline" rather than switching to "Improved".</strong>
           </V2InfoBlock>
         )}
         {data.runtime.struggle_model !== 'improved' && (
@@ -509,10 +512,11 @@ function AdvancedPanel({ data, update }: { data: SettingsData; update: SettingsU
         {data.runtime.hyperparams_version === 'v2' && (
           <V2InfoBlock kind="ok">
             v2 hyperparameters tuned via Optuna TPE (50 trials per parameter, session-grouped
-            5-fold CV against the LLM's 4-band rating). <strong>CF threshold τ:</strong> v1=0.7
-            → v2=0.899 (Δ ρ = +0.200, substantial gain — v1's τ was too permissive). <strong>
-            Shrinkage K:</strong> v1=5 → v2=1 (Δ ρ = +0.013, within fold-variance noise —
-            either value is defensible). BKT priors and BKT mastery threshold are not tuned in
+            5-fold CV against the LLM's 4-band rating; gpt-4o labels). <strong>CF threshold τ:</strong>
+            v1=0.7 → v2=0.900 (Δ ρ = +0.160, substantial gain — v1's τ was too permissive,
+            optimum still at the upper boundary of the [0.4, 0.9] search range).
+            <strong>Shrinkage K:</strong> v1=5 → v2=0 (Δ ρ = +0.009, within fold-variance noise
+            — either value is defensible). BKT priors and BKT mastery threshold are not tuned in
             v2 and stay at their v1 defaults.
           </V2InfoBlock>
         )}

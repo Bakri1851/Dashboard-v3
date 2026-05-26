@@ -1,0 +1,898 @@
+{
+  "ran_at": "2026-05-26T19:13:06.824529+00:00",
+  "model": "gpt-4o",
+  "schema_version": 2,
+  "n_relabeled": 148,
+  "stratification": "stratified random across 4 bands; includes author self-label overlap",
+  "purpose": "Re-label a 150-snapshot subset with full GPT-4o (not 4o-mini) to test whether label quality is the \u03c1 ceiling. Compare \u03ba vs author self-labels (head-to-head 4o-mini vs 4o); then re-train OLS with merged labels and compare Spearman \u03c1 vs the canonical run.",
+  "labels": {
+    "86b6b119-a324-4fca-bddb-138516d73a15__iu0381__2026-02-19T15:30:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Student is making progress with decreasing incorrectness.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc416__fk0882__2026-02-12T16:05:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Repeated incorrect submissions with no progress.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15215__st0251__2026-02-26T15:35:00+00:00": {
+      "intervene": false,
+      "band": "On Track",
+      "reason": "Student has low recent incorrectness and is progressing.",
+      "model": "gpt-4o"
+    },
+    "86b6b119-a324-4fca-bddb-138516d73a15__uu0141__2026-02-19T15:45:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "High incorrectness and repeated errors on similar questions.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc415__wo0851__2026-02-12T15:20:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Student is active and receiving feedback to correct errors.",
+      "model": "gpt-4o"
+    },
+    "feff012a-a7c9-4bab-95db-f944e2723716__jo0841__2026-03-05T16:35:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Repeated syntax errors in SQL joins, unable to progress without guidance.",
+      "model": "gpt-4o"
+    },
+    "1b29fb64-c60c-4fc4-ad03-ab027109ac08__sa0431__2026-02-06T13:10:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Consistent incorrect submissions, no signs of improvement or understanding.",
+      "model": "gpt-4o"
+    },
+    "a4160000-0000-4000-8000-9eae93d80015__pj0371__2026-04-16T15:45:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Multiple incorrect attempts on subqueries, needs clarification on subquery logic.",
+      "model": "gpt-4o"
+    },
+    "a5070000-0000-4000-8000-9eae93db0015__so0511__2026-05-07T15:30:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Repeated errors in creating views, struggling with SQL syntax and logic.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc415__qy0661__2026-02-12T15:35:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Some incorrect submissions but recent success indicates self-correction.",
+      "model": "gpt-4o"
+    },
+    "1b29fb64-c60c-4fc4-ad03-ab027109ac08__eu0931__2026-02-06T13:10:00+00:00": {
+      "intervene": false,
+      "band": "On Track",
+      "reason": "Consistent progress with low incorrectness, likely to recover independently.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0015__do0021__2026-04-30T15:45:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Repeated identical incorrect submissions indicate being stuck.",
+      "model": "gpt-4o"
+    },
+    "feff012a-a7c9-4bab-95db-f944e2723715__uq0283__2026-03-05T15:40:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Some errors but shows signs of self-correction and progress.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0015__ew0271__2026-04-30T15:50:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Errors present but feedback is being applied, showing improvement.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15216__xx0531__2026-02-26T16:40:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Frequent errors and incorrect joins suggest difficulty understanding concepts.",
+      "model": "gpt-4o"
+    },
+    "3c64a95b-6f25-4073-8e2e-8cab1e1b5515__jo0031__2026-03-12T16:00:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness and repeated errors in recent submissions.",
+      "model": "gpt-4o"
+    },
+    "a5070000-0000-4000-8000-9eae93db0015__so0511__2026-05-07T15:35:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Consistent errors and lack of progress on recent tasks.",
+      "model": "gpt-4o"
+    },
+    "1b29fb64-c60c-4fc4-ad03-ab027109ac08__qz0582__2026-02-06T13:45:00+00:00": {
+      "intervene": false,
+      "band": "On Track",
+      "reason": "Correct submissions and low recent incorrectness.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90015__kp0701__2026-04-23T15:55:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Repeated errors and feedback not leading to improvement.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc416__pd0671__2026-02-12T16:35:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Some errors but showing signs of self-correction.",
+      "model": "gpt-4o"
+    },
+    "1b29fb64-c60c-4fc4-ad03-ab027109ac08__ew0271__2026-02-06T13:05:00+00:00": {
+      "intervene": false,
+      "band": "On Track",
+      "reason": "Few submissions, low incorrectness, progressing well.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90016__ey0671__2026-04-23T16:20:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness, repetitive errors, no progress.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc415__of0161__2026-02-12T15:55:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Sustained errors, slow progress, needs guidance.",
+      "model": "gpt-4o"
+    },
+    "a4160000-0000-4000-8000-9eae93d80016__zz0603__2026-04-16T16:25:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Some errors but receiving feedback and adjusting.",
+      "model": "gpt-4o"
+    },
+    "a4160000-0000-4000-8000-9eae93d80015__tx0522__2026-04-16T15:50:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Frequent submissions, adjusting based on feedback.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0015__uq0283__2026-04-30T15:05:00+00:00": {
+      "intervene": false,
+      "band": "On Track",
+      "reason": "Low incorrectness and recent feedback shows progress.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36016__mu0343__2026-03-19T16:30:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness and repeated errors on the same question.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15215__st0251__2026-02-26T15:25:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Recent feedback indicates correct logic despite some errors.",
+      "model": "gpt-4o"
+    },
+    "feff012a-a7c9-4bab-95db-f944e2723715__dw0161__2026-03-05T15:45:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Correct logic with minor alias capitalization issue.",
+      "model": "gpt-4o"
+    },
+    "3c64a95b-6f25-4073-8e2e-8cab1e1b5515__xj0851__2026-03-12T15:35:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness and multiple unique questions attempted.",
+      "model": "gpt-4o"
+    },
+    "3c64a95b-6f25-4073-8e2e-8cab1e1b5516__mu0343__2026-03-12T16:50:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Recent incorrectness is low and feedback shows progress.",
+      "model": "gpt-4o"
+    },
+    "a4160000-0000-4000-8000-9eae93d80016__zz0603__2026-04-16T16:30:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "High incorrectness and repeated errors on similar tasks.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15216__zj0101__2026-02-26T16:50:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Consistent errors and misunderstanding of LEFT JOIN usage.",
+      "model": "gpt-4o"
+    },
+    "86b6b119-a324-4fca-bddb-138516d73a15__em0501__2026-02-19T15:05:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness and syntax errors across multiple questions.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15216__sa0431__2026-02-26T16:10:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness and repeated errors without improvement.",
+      "model": "gpt-4o"
+    },
+    "3c64a95b-6f25-4073-8e2e-8cab1e1b5515__pj0371__2026-03-12T15:45:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Repeated incorrect submissions with no progress, inactive for 40 minutes.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15216__td0063__2026-02-26T16:55:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Active and making progress, recent correct submission.",
+      "model": "gpt-4o"
+    },
+    "1b29fb64-c60c-4fc4-ad03-ab027109ac08__de0291__2026-02-06T13:25:00+00:00": {
+      "intervene": false,
+      "band": "On Track",
+      "reason": "Recent correct submissions, low incorrectness rate.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36016__tt0012__2026-03-19T16:35:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "High incorrectness, repeated similar errors, slow progress.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0015__xj0121__2026-04-30T15:15:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness, no correct submissions, needs guidance.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0015__wo0851__2026-04-30T15:10:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Student is making progress with minor errors and receiving feedback.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15216__mm0521__2026-02-26T16:20:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Student has consistent errors and no progress in recent submissions.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90015__uu0571__2026-04-23T15:25:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Student is repeatedly making the same errors without improvement.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0015__kj0571__2026-04-30T15:55:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Student is active and receiving feedback, showing some progress.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0016__pj0371__2026-04-30T16:40:00+00:00": {
+      "intervene": false,
+      "band": "On Track",
+      "reason": "Student is making progress with low recent incorrectness.",
+      "model": "gpt-4o"
+    },
+    "86b6b119-a324-4fca-bddb-138516d73a15__tx0522__2026-02-19T15:15:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Student is making progress with syntax errors, likely to recover.",
+      "model": "gpt-4o"
+    },
+    "3c64a95b-6f25-4073-8e2e-8cab1e1b5515__sa0591__2026-03-12T15:40:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Repeated incorrect submissions and misunderstanding of JOIN concepts.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0015__sa0431__2026-04-30T15:05:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Student is making progress with minor syntax errors.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36016__mi0621__2026-03-19T16:50:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Consistent incorrect submissions with no signs of progress.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90016__do0021__2026-04-23T16:05:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Repeated incorrect submissions with misunderstanding of subqueries.",
+      "model": "gpt-4o"
+    },
+    "a4160000-0000-4000-8000-9eae93d80015__tx0522__2026-04-16T15:15:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Repeated errors on same question, not improving.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36015__td0591__2026-03-19T15:20:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Consistent errors with subqueries, not resolving issues.",
+      "model": "gpt-4o"
+    },
+    "feff012a-a7c9-4bab-95db-f944e2723715__ax0201__2026-03-05T15:35:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness, repeated errors, no progress.",
+      "model": "gpt-4o"
+    },
+    "a4160000-0000-4000-8000-9eae93d80015__tt0012__2026-04-16T15:50:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Frequent errors, struggling with multiple questions.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc415__wz0352__2026-02-12T15:50:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Consistent high incorrectness, no signs of improvement.",
+      "model": "gpt-4o"
+    },
+    "86b6b119-a324-4fca-bddb-138516d73a15__pj0201__2026-02-19T15:45:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Frequent errors and repeated attempts without improvement indicate sustained difficulty.",
+      "model": "gpt-4o"
+    },
+    "a4160000-0000-4000-8000-9eae93d80015__tt0012__2026-04-16T15:40:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness and repeated syntax errors suggest the student is stuck.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc415__dw0161__2026-02-12T15:25:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Some errors but feedback is being used to make progress.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0015__do0021__2026-04-30T15:20:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Errors are present but feedback is being applied to correct them.",
+      "model": "gpt-4o"
+    },
+    "feff012a-a7c9-4bab-95db-f944e2723716__jo0841__2026-03-05T17:00:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "High submission count with persistent errors indicates difficulty in understanding.",
+      "model": "gpt-4o"
+    },
+    "3c64a95b-6f25-4073-8e2e-8cab1e1b5515__td0781__2026-03-12T15:40:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Recent incorrectness is low and errors are being addressed.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90015__dw0161__2026-04-23T15:45:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Consistent errors with no signs of improvement in recent submissions.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36015__ld0801__2026-03-19T16:00:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness and repeated syntax errors without progress.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15215__zz0603__2026-02-26T15:50:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Recent incorrectness is improving and feedback is being applied.",
+      "model": "gpt-4o"
+    },
+    "86b6b119-a324-4fca-bddb-138516d73a15__wo0851__2026-02-19T15:10:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "High incorrectness and repeated errors in a short session.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc415__jp0412__2026-02-12T15:55:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Recent incorrectness improving, feedback suggests progress on SQL queries.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90015__tx0522__2026-04-23T15:25:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Student is making progress with feedback, recent incorrectness is stable.",
+      "model": "gpt-4o"
+    },
+    "a4160000-0000-4000-8000-9eae93d80016__lq0562__2026-04-16T16:40:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "High incorrectness, repeated errors, and lack of progress on recent tasks.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0016__pj0371__2026-04-30T16:45:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Feedback indicates close to correct solutions, recent incorrectness is stable.",
+      "model": "gpt-4o"
+    },
+    "1b29fb64-c60c-4fc4-ad03-ab027109ac09__uq0283__2026-02-05T14:00:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness, low activity time, and no progress on multiple questions.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36016__ak0272__2026-03-19T16:50:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Consistent incorrect submissions, no signs of improvement or recovery.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15216__xm0461__2026-02-26T16:50:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Repeated incorrect attempts, not progressing on current questions.",
+      "model": "gpt-4o"
+    },
+    "a4160000-0000-4000-8000-9eae93d80015__jz0382__2026-04-16T15:50:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness, no successful submissions, likely stuck.",
+      "model": "gpt-4o"
+    },
+    "feff012a-a7c9-4bab-95db-f944e2723715__uo0752__2026-03-05T15:25:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High volume of incorrect submissions, no progress on questions.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90015__sa0431__2026-04-23T15:10:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness, no successful submissions, early in session.",
+      "model": "gpt-4o"
+    },
+    "86b6b119-a324-4fca-bddb-138516d73a15__jo0841__2026-02-19T15:30:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Consistent incorrectness and repeated attempts without progress.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0015__ep0511__2026-04-30T15:10:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness and no active time, indicating potential abandonment.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15215__gc0041__2026-02-26T15:35:00+00:00": {
+      "intervene": false,
+      "band": "Struggling",
+      "reason": "High submission count but consistent incorrectness, indicating struggle.",
+      "model": "gpt-4o"
+    },
+    "a4160000-0000-4000-8000-9eae93d80016__fa0501__2026-04-16T16:45:00+00:00": {
+      "intervene": false,
+      "band": "Struggling",
+      "reason": "Consistent incorrectness but active engagement with multiple questions.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc415__po0411__2026-02-12T15:50:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Some incorrectness but progressing with feedback and multiple questions.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15215__zz0603__2026-02-26T15:55:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Repeated errors on same question, misunderstanding table and column usage.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0016__ga0662__2026-04-30T16:45:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness, repeated errors on single question, syntax issues.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90016__ex0221__2026-04-23T16:50:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Consistent high incorrectness, multiple questions, no progress.",
+      "model": "gpt-4o"
+    },
+    "1b29fb64-c60c-4fc4-ad03-ab027109ac09__tq0371__2026-02-05T13:55:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness, multiple questions, no signs of improvement.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36015__af0631__2026-03-19T15:35:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Some errors but showing signs of recovery with feedback.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36016__tu0911__2026-03-19T16:10:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness and repeated attempts on the same question.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15215__ed0311__2026-02-26T15:55:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Consistent incorrectness but low submission count suggests manageable issues.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36015__tx0522__2026-03-19T15:20:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Frequent submissions with some progress and feedback utilization.",
+      "model": "gpt-4o"
+    },
+    "86b6b119-a324-4fca-bddb-138516d73a16__jg0992__2026-02-19T16:25:00+00:00": {
+      "intervene": false,
+      "band": "Struggling",
+      "reason": "Repeated errors on similar queries indicate difficulty but not complete stagnation.",
+      "model": "gpt-4o"
+    },
+    "a4160000-0000-4000-8000-9eae93d80016__dp0801__2026-04-16T16:25:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Some syntax errors but feedback is being used to improve.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36016__kp0701__2026-03-19T16:45:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness, rapid submissions, likely using AI without understanding.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0016__ga0662__2026-04-30T16:35:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Consistent attempts with feedback, showing some progress.",
+      "model": "gpt-4o"
+    },
+    "a5070000-0000-4000-8000-9eae93db0015__so0511__2026-05-07T15:45:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Repeated errors, not improving despite feedback, needs guidance.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc415__ou0022__2026-02-12T15:10:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Consistently incorrect submissions, no progress, likely stuck.",
+      "model": "gpt-4o"
+    },
+    "feff012a-a7c9-4bab-95db-f944e2723715__uq0283__2026-03-05T15:45:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Some errors but showing improvement and understanding.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90016__ld0231__2026-04-23T16:25:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High submission count with consistent errors indicates being stuck.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc416__sa0431__2026-02-12T16:05:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Repeated errors on similar queries suggest difficulty understanding concepts.",
+      "model": "gpt-4o"
+    },
+    "a4160000-0000-4000-8000-9eae93d80016__pj0371__2026-04-16T16:25:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Some errors but shows signs of self-correction.",
+      "model": "gpt-4o"
+    },
+    "a4160000-0000-4000-8000-9eae93d80015__ep0511__2026-04-16T15:35:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "High error rate and repeated attempts on similar queries.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36016__uq0283__2026-03-19T16:10:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness and repeated errors indicate being stuck.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0016__ga0662__2026-04-30T17:00:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Repeated syntax errors and high incorrectness indicate sustained difficulty.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90015__tl0291__2026-04-23T15:50:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Frequent errors and incorrect syntax suggest the student is not progressing.",
+      "model": "gpt-4o"
+    },
+    "3c64a95b-6f25-4073-8e2e-8cab1e1b5516__dp0801__2026-03-12T16:50:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Student is making progress with some errors but shows signs of recovery.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90015__sa0431__2026-04-23T15:30:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Consistent syntax errors and no progress indicate the student is stuck.",
+      "model": "gpt-4o"
+    },
+    "3c64a95b-6f25-4073-8e2e-8cab1e1b5516__af0631__2026-03-12T16:20:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness and lack of progress suggest the student is stuck.",
+      "model": "gpt-4o"
+    },
+    "a4160000-0000-4000-8000-9eae93d80016__fa0501__2026-04-16T16:55:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Consistent incorrectness and repeated attempts without progress.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc416__ff0022__2026-02-12T16:10:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "High incorrectness and repeated attempts on the same question.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc415__qf0122__2026-02-12T15:20:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Multiple incorrect submissions across different questions.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15215__zo0262__2026-02-26T15:40:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness and repeated attempts without improvement.",
+      "model": "gpt-4o"
+    },
+    "a4160000-0000-4000-8000-9eae93d80015__ep0511__2026-04-16T15:10:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness and repeated attempts with no progress.",
+      "model": "gpt-4o"
+    },
+    "3c64a95b-6f25-4073-8e2e-8cab1e1b5515__jo0031__2026-03-12T15:25:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Recent incorrectness is low, showing signs of recovery.",
+      "model": "gpt-4o"
+    },
+    "feff012a-a7c9-4bab-95db-f944e2723716__qf0132__2026-03-05T16:40:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Consistently high incorrectness, no signs of improvement.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36016__kp0701__2026-03-19T16:30:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness and very low activity time.",
+      "model": "gpt-4o"
+    },
+    "3c64a95b-6f25-4073-8e2e-8cab1e1b5515__ak0272__2026-03-12T15:55:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Consistently incorrect with no progress over time.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc416__mm0521__2026-02-12T16:25:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness with repeated similar errors.",
+      "model": "gpt-4o"
+    },
+    "86b6b119-a324-4fca-bddb-138516d73a16__dl0241__2026-02-19T16:40:00+00:00": {
+      "intervene": false,
+      "band": "On Track",
+      "reason": "Consistent progress with low incorrectness, likely to recover.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36016__fj0482__2026-03-19T16:50:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness and inactivity, stuck on one question.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36016__fj0472__2026-03-19T16:45:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Multiple questions attempted, moderate incorrectness, active.",
+      "model": "gpt-4o"
+    },
+    "1b29fb64-c60c-4fc4-ad03-ab027109ac08__dp0801__2026-02-06T13:45:00+00:00": {
+      "intervene": false,
+      "band": "On Track",
+      "reason": "High activity, diverse questions, low incorrectness.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15216__mm0521__2026-02-26T16:55:00+00:00": {
+      "intervene": false,
+      "band": "On Track",
+      "reason": "Consistent submissions, moderate incorrectness, active engagement.",
+      "model": "gpt-4o"
+    },
+    "3c64a95b-6f25-4073-8e2e-8cab1e1b5516__fj0472__2026-03-12T16:55:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Consistent incorrect submissions, no progress on multiple questions.",
+      "model": "gpt-4o"
+    },
+    "3c64a95b-6f25-4073-8e2e-8cab1e1b5516__ly0861__2026-03-12T16:10:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Repeated incorrect attempts on the same question, no progress.",
+      "model": "gpt-4o"
+    },
+    "86b6b119-a324-4fca-bddb-138516d73a15__uu0141__2026-02-19T15:05:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness, rapid submissions, no progress.",
+      "model": "gpt-4o"
+    },
+    "86b6b119-a324-4fca-bddb-138516d73a16__ak0272__2026-02-19T16:50:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Repeated incorrect submissions on the same question, no progress.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36016__uq0283__2026-03-19T16:50:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness, repeated errors, feedback not improving submissions.",
+      "model": "gpt-4o"
+    },
+    "feff012a-a7c9-4bab-95db-f944e2723716__xm0461__2026-03-05T16:40:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "No progress, inactive for 35 minutes, incorrect submission.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90015__uu0571__2026-04-23T15:50:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "High incorrectness, repeated errors, active but not improving.",
+      "model": "gpt-4o"
+    },
+    "3c64a95b-6f25-4073-8e2e-8cab1e1b5516__ak0272__2026-03-12T16:40:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Consistent incorrectness, minimal progress, needs guidance.",
+      "model": "gpt-4o"
+    },
+    "86b6b119-a324-4fca-bddb-138516d73a16__ak0272__2026-02-19T16:05:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Repeated incorrect submissions, no progress, needs intervention.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90015__ax0651__2026-04-23T15:05:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Inactive, incorrect submission, no progress made.",
+      "model": "gpt-4o"
+    },
+    "1b29fb64-c60c-4fc4-ad03-ab027109ac08__lk0091__2026-02-06T13:25:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Consistent incorrectness, multiple attempts without progress.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0016__fj0472__2026-04-30T16:05:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Initial submission incomplete, no progress, needs guidance.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90015__kp0102__2026-04-23T15:15:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "High submission count, repeated errors, slow progress.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15216__qf0132__2026-02-26T16:15:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Rapid submissions with errors, no signs of correction.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36016__yt0141__2026-03-19T16:20:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Frequent errors, rapid submissions, no improvement.",
+      "model": "gpt-4o"
+    },
+    "1b29fb64-c60c-4fc4-ad03-ab027109ac09__tq0371__2026-02-05T13:45:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Consistent incorrectness, no progress in 40 minutes, needs intervention.",
+      "model": "gpt-4o"
+    },
+    "3c64a95b-6f25-4073-8e2e-8cab1e1b5516__lk0091__2026-03-12T16:10:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High submission rate with errors, likely stuck on subqueries.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc415__qf0222__2026-02-12T15:10:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Only one submission with errors, no activity, likely stuck.",
+      "model": "gpt-4o"
+    },
+    "86b6b119-a324-4fca-bddb-138516d73a16__al0521__2026-02-19T16:45:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High submission rate with errors, no progress, likely stuck.",
+      "model": "gpt-4o"
+    },
+    "b257d48e-faa7-4f60-9287-9eae93d36016__ld0231__2026-03-19T16:40:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Repeated incorrect submissions on same question, no progress.",
+      "model": "gpt-4o"
+    },
+    "86b6b119-a324-4fca-bddb-138516d73a16__ak0272__2026-02-19T16:55:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Repeated incorrect submissions with no progress, inactive for a while.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90015__ep0511__2026-04-23T15:10:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "High incorrectness, repeated errors, and no progress in short time.",
+      "model": "gpt-4o"
+    },
+    "a4230000-0000-4000-8000-9eae93d90015__ax0201__2026-04-23T15:15:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Some errors but active and trying different approaches.",
+      "model": "gpt-4o"
+    },
+    "a4300000-0000-4000-8000-9eae93da0015__ec0811__2026-04-30T15:55:00+00:00": {
+      "intervene": false,
+      "band": "On Track",
+      "reason": "Consistent progress with manageable errors, active engagement.",
+      "model": "gpt-4o"
+    },
+    "87202fbf-300a-44ed-b85b-9f584fb15215__jz0382__2026-02-26T15:25:00+00:00": {
+      "intervene": false,
+      "band": "Minor Issues",
+      "reason": "Some errors but exploring different queries, active engagement.",
+      "model": "gpt-4o"
+    },
+    "a5070000-0000-4000-8000-9eae93db0015__pz0611__2026-05-07T15:45:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Repeated errors on same question, not progressing.",
+      "model": "gpt-4o"
+    },
+    "36e5e474-daba-46bd-8059-630383bcc415__up0301__2026-02-12T15:45:00+00:00": {
+      "intervene": true,
+      "band": "Struggling",
+      "reason": "Multiple errors, not improving despite feedback.",
+      "model": "gpt-4o"
+    },
+    "3c64a95b-6f25-4073-8e2e-8cab1e1b5516__ly0861__2026-03-12T16:20:00+00:00": {
+      "intervene": true,
+      "band": "Needs Help",
+      "reason": "Consistent errors, no progress on multiple questions.",
+      "model": "gpt-4o"
+    }
+  }
+}

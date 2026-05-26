@@ -8,7 +8,7 @@ Survey themes that recur across Q2–Q11 (instructor situational awareness, dash
 
 ## What stays in §5.5 vs what moves to Ch2
 
-Survey **findings** (n=8 numbers, quoted free-text, themes) stay in §5.5 — they are primary data, not citable third-party claims. What moves to Ch2 are the **concepts** the findings echo, with citable literature behind them. §5.5 subsubsections then reference back to Ch2.
+Survey **findings** (n=10 numbers, quoted free-text, themes) stay in §5.5 — they are primary data, not citable third-party claims. What moves to Ch2 are the **concepts** the findings echo, with citable literature behind them. §5.5 subsubsections then reference back to Ch2.
 
 ## Voice / convention
 

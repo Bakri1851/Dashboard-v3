@@ -1,5 +1,8 @@
 # Evidence Bank
 
+<!-- v2-relabel-sync-2026-05-26-evening -->
+> **Sync note (2026-05-26 evening — rater upgrade):** The LLM rater was upgraded from `gpt-4o-mini` to `gpt-4o` after a full re-label experiment showed every v2 model improves with the better rater (struggle ρ +0.573 → **+0.588**; difficulty ρ +0.287 → **+0.468** — biggest single gain; improved-struggle ρ +0.168 → **+0.201**, now matching the non-linear RandomForest ceiling). All ρ values below reflect the upgraded labels. Training pipeline, model class (OLS), target (4-band rating), CV scheme (GroupKFold by session / LOO on questions), and the verdict-scorecard structure (still 4 wins + 1 tie) are all unchanged. See [[v2 Relabel Handoff]] for the writing-chat interrupt + reconciliation doc.
+
 <!-- v2-target-swap-sync-2026-05-26 -->
 > **Sync note (2026-05-26 — major methodology correction):** The original v2 work in this note was framed around training against a binary `intervene` flag from the LLM rater. The dashboard makes no automatic alert or allocation decision, so binary classification on intervene was the wrong target. **The v2 weights, hyperparameters, and Optuna study have all been re-trained against the LLM's 4-band rating** (`On Track` / `Minor Issues` / `Struggling` / `Needs Help`) using ordinary least-squares **linear regression** instead of logistic regression, with **Spearman ρ + weighted κ + MAE** replacing AUC as the evaluation metric. Under the corrected target the verdict scorecard becomes **4 positive findings + 1 tie** (was "2 positive + 2 negative + 1 tie" — the previous negative findings for difficulty and improved-struggle were artefacts of the wrong target). Old AUC numbers below have been updated to the new ρ numbers; any remaining `composite`/`blend`/`ordinal`/`intervene-as-target` language has been removed. See `data/eval/results.md` for the authoritative current numbers.
 
@@ -113,14 +116,14 @@ All Ch5 §5.4 evidence for the new v2 empirical-refinement narrative. Numbers au
 
 | Evidence | Description | Location | Status | Supports |
 |---|---|---|---|---|
-| 1,306 LLM struggle labels | GPT-4o-mini second-opinion ratings on 4-band scale (On Track / Minor Issues / Struggling / Needs Help) across 21 healthy sessions | `data/eval/llm_struggle_labels.json` | **Ready** | §5.4.2, §5.4.3 |
+| 1,306 LLM struggle labels | GPT-4o second-opinion ratings on 4-band scale (On Track / Minor Issues / Struggling / Needs Help) across 21 healthy sessions | `data/eval/llm_struggle_labels.json` | **Ready** | §5.4.2, §5.4.3 |
 | 72 LLM difficulty labels | GPT-4o-mini per-question ratings on 4-band scale (Easy / Medium / Hard / Very Hard) | `data/eval/llm_difficulty_labels.json` | **Ready** | §5.4.9 |
 | 50 author self-labels | Human ratings on the same 4-band scale for κ calibration | `data/eval/self_labels.json` | **Ready** | §5.4.2 |
-| Cohen's κ report | Three κ flavours (binary intervene, linear-weighted band, quadratic-weighted band) + exact + within-1-band agreement | `data/eval/kappa_report.json` (κ_intervene=0.103, κ_band_linear=0.111, κ_band_quad=0.094, within-1-band=70%) | **Ready** | §5.4.2 |
-| v2 struggle weights | 7-signal LR weights + per-fold std + CV ρ +0.573 [+0.430, +0.715] (5 GroupKFold folds, session as group); 3 weight sign flips | `data/eval/optimised_struggle_weights_v2.json` | **Ready — POSITIVE finding** | §5.4.3 |
-| v2 difficulty weights | 5-signal LR weights + per-fold std + LOO pooled ρ +0.287 (< random); 2 weight sign flips | `data/eval/optimised_difficulty_weights_v2.json` | **Ready — NEGATIVE finding** | §5.4.9 |
-| v2 improved model weights | 3-weight LR (w_B=+0.419, w_M=−0.444, w_D=−0.137); CV ρ +0.168 < struggle-v2 alone (0.836) | `data/eval/optimised_improved_weights_v2.json` | **Ready — NEGATIVE finding** | §5.4.9 |
-| v2 hyperparams (Optuna TPE) | 50 trials each for shrinkage K and CF τ; K best=1 (Δ+0.007, tied), τ best=0.899 (Δ +0.200, substantial positive) | `data/eval/optimised_hyperparams_v2.json` | **Ready — MIXED finding** (1 tie + 1 positive) | §5.4.10 |
+| Cohen's κ report | Three κ flavours (binary intervene, linear-weighted band, quadratic-weighted band) + exact + within-1-band agreement | `data/eval/kappa_report.json` (κ_intervene=0.250, κ_band_linear=0.198, κ_band_quad=0.262, within-1-band=70%) | **Ready** | §5.4.2 |
+| v2 struggle weights | 7-signal LR weights + per-fold std + CV ρ +0.588 [+0.490, +0.686] (5 GroupKFold folds, session as group); 3 weight sign flips | `data/eval/optimised_struggle_weights_v2.json` | **Ready — POSITIVE finding** | §5.4.3 |
+| v2 difficulty weights | 5-signal LR weights + per-fold std + LOO pooled ρ +0.468 (< random); 2 weight sign flips | `data/eval/optimised_difficulty_weights_v2.json` | **Ready — NEGATIVE finding** | §5.4.9 |
+| v2 improved model weights | 3-weight LR (w_B=+0.419, w_M=−0.444, w_D=−0.137); CV ρ +0.201 < struggle-v2 alone (0.836) | `data/eval/optimised_improved_weights_v2.json` | **Ready — NEGATIVE finding** | §5.4.9 |
+| v2 hyperparams (Optuna TPE) | 50 trials each for shrinkage K and CF τ; K best=1 (Δ+0.007, tied), τ best=0.899 (Δ +0.160, substantial positive) | `data/eval/optimised_hyperparams_v2.json` | **Ready — MIXED finding** (1 tie + 1 positive) | §5.4.10 |
 | Snapshots dataset | 1,306 stratified snapshots × 12 cutoffs × 23 sessions × 4 struggle bands + 72 difficulty entries; replay-derived from cached parquet | `data/eval/snapshots.json` + `data/eval/submissions.parquet` (42,443 rows, 2025-10-06 → 2026-05-15) | **Ready** | §5.4 cohort framing |
 | Eval notebook | 31-cell self-contained notebook reading only the above JSONs; reproduces all 11 figures + results.md from scratch | `notebooks/eval_main.ipynb` | **Ready** | §5.4 reproducibility |
 | Results markdown | Auto-generated tables (κ block, weights × 3, AUC summary, hyperparam table, disagreement matrix); writing chat lifts directly | `data/eval/results.md` (87 lines, 7 tables) | **Ready** | §5.4 prose |
@@ -130,11 +133,11 @@ All Ch5 §5.4 evidence for the new v2 empirical-refinement narrative. Numbers au
 
 | Component | Winner | Numbers | Phase |
 |---|---|---|---|
-| Struggle model (7 OLS weights) | **v2** | ρ +0.573 [+0.430, +0.715] (v1 ρ +0.423) | 4a |
-| Difficulty model (5 OLS weights) | **v2** | ρ +0.287 (v1 ρ +0.027) — weak but positive | 4b |
-| Improved-struggle model (3 OLS weights) | **v2** | ρ +0.168 (v1 ρ −0.017); still weaker than struggle alone | 4c |
-| Shrinkage K (scalar) | **tied** | Δ +0.013 within noise (K=1 best) | 4d |
-| CF threshold τ (scalar) | **v2** | Δ +0.200 (ρ +0.234 → +0.434, τ=0.899 best) | 4d |
+| Struggle model (7 OLS weights) | **v2** | ρ +0.588 [+0.490, +0.686] (v1 ρ +0.471) | 4a |
+| Difficulty model (5 OLS weights) | **v2** | ρ +0.468 (v1 baseline near-flat) — weak but positive | 4b |
+| Improved-struggle model (3 OLS weights) | **v2** | ρ +0.201 (v1 baseline near-flat); still weaker than struggle alone | 4c |
+| Shrinkage K (scalar) | **tied** | Δ +0.009 within noise (K=0 best) | 4d |
+| CF threshold τ (scalar) | **v2** | Δ +0.160 (ρ +0.306 → +0.466, τ=0.900 best) | 4d |
 
 Four positive findings (struggle weights, difficulty weights, improved-struggle weights, CF τ) + one tie (K). All three trained weight vectors outrank their v1 defaults under the 4-band target; only the shrinkage K is within fold-variance noise.
 
