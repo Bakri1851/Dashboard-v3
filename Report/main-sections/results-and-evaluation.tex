@@ -23,7 +23,7 @@ The primary source is the deployment submission log, a newline delimited JSON re
 The log spans the academic period of deployment and contains the per-submission fields the model pipeline relies on, namely the question attempted, module label, submitted answers, AI feedback and timestamp; these fields feed the derived signals recomputed at replay time.
 
 The second source is the second-opinion label set obtained from a large language model rater (GPT-4o), which assigns each of the $1{,}306$ stratified snapshots across $140$ distinct users a struggle rating from the four defined bands, and each of the $72$ unique questions a difficulty rating from the four defined bands.
-The label set is important for the training of the v2 model and its agreement against the $50$ human calibration set is reported in Section~\ref{sec:eval-compare-struggle} and also bounds the interpretive strength of the v2 numbers.
+The label set is important for the training of the v2 model and its agreement against the $50$ human calibration set is reported in Section~\ref{sec:eval-tradeoffs} and also bounds the interpretive strength of the v2 numbers.
 
 The third source is the survey of Section~\ref{sec:eval-survey}, which is an eleven-question Microsoft Forms survey distributed to undergraduate students, PhD student lab assistants and staff who are involved in computer lab sessions.
 The survey provides Likert and free-text evidence on baseline lab support, dashboard interpretability, trust, and ethical concerns. 
@@ -36,13 +36,13 @@ The fifth source is the V2 prewarm log, which records the wall-clock cost of eac
 
 \subsubsection{V2 Training Methodology} \label{sec:eval-v2-methodology}
 
-Whilst the dashboard evaluation is primarily focused on the v1 model, a v2 model is also trained and evaluated as part of the evaluation section.
+The deployed system is the trained v2 model, and this section evaluates it. The hand-set v1 weights are the starting point it evolved from rather than a competing model evaluated in its own right.
 The v2 model fits the weights against second-opinion labels obtained from a large language model rater, and the resulting v2 weights are evaluated under the same evaluation framework.
 Of the models introduced in Chapter~\ref{sec:implementation}, three composite weight vectors and two scalar hyperparameters are re-tuned.
 The per-skill BKT parameters and the 2PL IRT parameters are retained from the fitting documented in Chapter~\ref{sec:implementation} and are not re-trained here.
 The mistake-clustering pipeline, the measurement-confidence formula, and the incorrectness scorer carry no learnable weights so they are excluded from the training. 
 For the evaluation we have training data which are 1{,}306 stratified snapshots across twenty-one healthy sessions for the struggle model and the improved model, and seventy-two unique questions for the difficulty model, all labelled by GPT-4o. 
-The agreement between the LLM rater and a fifty-snapshot author calibration is reported in Section~\ref{sec:eval-compare-struggle}.
+The agreement between the LLM rater and a fifty-snapshot author calibration is reported in Section~\ref{sec:eval-tradeoffs}.
 
 
 \subsubsection{Limitations of Evaluation}
@@ -90,16 +90,16 @@ FR6 (smart device) was scoped out at design time due to focusing on the modellin
 \subsection{Non-Functional Testing} \label{sec:eval-nonfunctional}
 
 \subsubsection{Performance and Refresh Behaviour}
-NFR1 (Real Time Performance) of Chapter~\ref{sec:requirements} is met through a lifespan prewarm strategy of Chapter~\ref{sec:implementation}, which pre-computes all derived signals before the FastAPI process accepts requests so taht the first user request sees the steady state latency of the dashboard rather than the startup latency. 
-The prewarm is made up of six stages, captured across a representative session of $42{,}443$ submission records across $3{,}935$ unique feedback strings.
+NFR1 (Real Time Performance) of Chapter~\ref{sec:requirements} is met through a lifespan-prewarm strategy of Chapter~\ref{sec:implementation}, which pre-computes all derived signals before the FastAPI process accepts requests so that the first user request sees the steady-state latency of the dashboard rather than the startup latency.
+The prewarm is made up of seven stages, captured across a representative session of $42{,}443$ submission records across $3{,}935$ unique feedback strings.
 
-The submission log loads and parses in $8.0$~s. The OpenAI incorrectness scoring pass runs in $464.5$~s on a cold start with an empty cache, batching $197$ calls for the $3{,}935$ unique feedback strings, but reduces to a sub-second lookup on subsequent runs through the disk-persisted cache at \texttt{data/incorrectness\_cache.json}; this $71\%$ cold start cold only occurs once pre corpus and never appears in the steady state afterwards. 
+The submission log loads and parses in $8.0$~s. The OpenAI incorrectness scoring pass runs in $464.5$~s on a cold start with an empty cache, batching $197$ calls for the $3{,}935$ unique feedback strings, but reduces to a sub-second lookup on subsequent runs through the disk-persisted cache at \texttt{data/incorrectness\_cache.json}; this $71\%$ cold-start cost only occurs once per corpus and never appears in the steady state afterwards.
 The BKT parameter fit across the six skills present in the cohort runs in $23.2$~s, fitting three skills and falling back to \texttt{config.py} defaults on three under the gating logic of Section~\ref{sec: bkt}. 
 The IRT 2PL fit completes in $7.3$~s on the final $127 \times 86$ response matrix produced by the iterative min-attempts and separable-response drop-pass of Section~\ref{sec: irt}. 
-The struggle leaderboard becomes ready $6.2$~s after the IRT fit and the difficulty leaderboard $3.6$~s after that. The RAG collection takes $137.2$~s to load the sentence-transformers \texttt{all-MiniLM-L6-v2} model and embed $3{,}069$ sampled rows into the in-memory vector index.
+The struggle leaderboard step completes in $6.2$~s and the difficulty leaderboard step in $3.6$~s. The RAG collection takes $137.2$~s to load the sentence-transformers \texttt{all-MiniLM-L6-v2} model and embed $3{,}069$ sampled rows into the in-memory vector index.
 
-Total prewarm for this session is $649.9$~s on the cold start and approximately $185$~s on a warm start once the incorrectness cache is populated; the RAG embdeding is the largest contributor to the prewarm time. 
-Once the prewarm completes, all subsequent requests respond from in-memory state and the steady-state five-second polling cycle of the lab-assistant app was confirmed to be responsive without observable latency on the observed session.  
+Total prewarm for this session is $649.9$~s on the cold start and approximately $185$~s on a warm start once the incorrectness cache is populated; the RAG embedding is the largest contributor to the prewarm time.
+Once the prewarm completes, all subsequent requests respond from in-memory state and the steady-state five-second polling cycle of the lab-assistant app was confirmed to be responsive without observable latency under steady-state operation.
 The full NFR1 verification row appears in Appendix~\ref{app:detailed-test-results}.
 
 \subsubsection{Usability and Interpretability}
@@ -109,57 +109,264 @@ NFR2 (Interpretability) of Chapter~\ref{sec:requirements} is supported through t
 On the five-point clarity scale of what each metric means (Q5 of the survey), seven of the ten respondents rated both the struggle and difficulty scores as "Completely Intuitive" and a further two rated them as "Slightly Intuitive"; the same single respondent placed both metrics in the "Slightly Unintuitive" band and no respondent picked either "Neutral" or "Completely Unintuitive" on either metric, yielding a strongly bimodal distribution where disagreement collapses to a single outlier.
 On the five-point intuitiveness scale for the colour-coded bands (Q6), the same bimodal pattern held with six respondents at "Completely Intuitive" and three at "Slightly Intuitive" on both band sub-rows, with the same outlier at "Slightly Unintuitive".
 The trust question (Q7) returned two respondents at "Very Likely" and five at "Somewhat Likely" to trust the dashboard's prioritisation, one respondent at "Neither Likely nor Unlikely", and two participants on the negative end of the scale (one at "Somewhat Unlikely" and one at "Very Unlikely"); this yielded a $70/10/20$ split between positive, neutral, and negative trust.
-The question on what the main issue is when providing real-time support (Q4) had three main themes: not enough staff, quieter students may not be willing to ask for help and identifying who needs the most help is difficult which the dashboard targets. 
+The question on what the main issue is when providing real-time support (Q4) had three main themes: not enough staff, quieter students may not be willing to ask for help, and identifying who needs the most help is difficult, all three of which the dashboard's prioritisation features directly target.
 NFR2 is met for the surveyed cohort within the limitations of the sample size; the full NFR2 verification row appears in Appendix~\ref{app:detailed-test-results}.
 
 \subsubsection{Robustness and Failure Handling}
 % TODO: 5.3.3 prose block
+NFR3 (Robustness to noisy data) of Chapter~\ref{sec:requirements} is validated through several edge cases being exercised against the deployed V2 stack.
+The cold start case where there are no submissions at the session start was tested by joining the dashboard before the prewarm had finished, confirming that the leaderboards render with skeleton loaders and the scoring pipeline returns gracefully without raising exceptions or errors; the IRT fit refuses to fit when fewer than two attempts per question are available and returns empty difficulty, discrimination and ability dictionaries; later stages detect the empty fit through a non-empty check and redistribute the IRT weights to the behavioural part of the improved model under the graceful degradation logic of Section~\ref{sec: improved struggle}.
+The single student case (one student active) was tested by replaying a session at the first cutoff; the collaborative filtering layer requires at least $k+1$ active students to compute a similarity ranking and gracefully returns the parametric ranking unchanged when the cohort is too small.
+The BKT identifiability case (a session where all attempts on a skill share the same outcome leading to MLE degeneracy) is handled by the gating logic of Section~\ref{sec: bkt} where, if fewer than fifty attempts are recorded or when all attempts are identical, the fitter refuses to fit and the configured defaults are retained; this fallback path was observed in production during the deployment, with the 25COA122 BKT fit returning a scipy \texttt{ABNORMAL\_TERMINATION\_IN\_LNSRCH} status and the gating logic correctly retaining the \texttt{config.py} defaults.
+The improved model's weight redistribution behaviour, when BKT mastery or IRT difficulty is unavailable, is implemented as explicit branches in the model code covering the four cases of Section~\ref{sec: improved struggle}; the BKT-unavailable case (case 2) was observed in production via the 25COA122 fallback above, with the missing mastery weight $w_M$ redistributed to the behavioural composite weight $w_B$ as the documented redistribution rule prescribes.
+The lab-state file at \texttt{data/lab\_session.json} is protected against concurrent writes through the \texttt{filelock} library, which serialises access under an exclusive lock so that the instructor app, the lab-assistant app, and the FastAPI backend cannot corrupt the shared state when they update it within a polling cycle.
+The RAG layer offloads its blocking calls through \texttt{asyncio.to\_thread}, which dispatches the embedding and retrieval work onto a worker thread so the FastAPI event loop remains free to service other requests during a RAG call.
+NFR4 (Scalability), NFR5 (Privacy and Ethical), and NFR6 (Extensibility and Maintainability) hold by construction rather than by edge-case testing, and are documented in the NFR table of Appendix~\ref{app:detailed-test-results}.
 
 \subsection{Results} \label{sec:eval-results}
 
-\subsubsection{Baseline System Outputs}
-% TODO: 5.4.1 prose block
+\subsubsection{Cohort Characterisation}
 
-\subsubsection{Inter-rater Agreement (Cohen's $\kappa$)} \label{sec:eval-compare-struggle}
-% TODO: 5.4.2 prose block (~150 words, 3 κ statistics + Landis-Koch interpretation + within-1-band agreement; rater calibration before findings; see drafting plan Insertion 3c)
+It is useful to characterise what the deployed v2 model produces on the evaluation cohort before the model comparisons.
+Figure~\ref{fig:eval-cohort-distributions} shows the v2 struggle bands across the 1{,}306 snapshots, the v2 difficulty bands across the 72 unique questions, and the band assignments the LLM rater produced on the same data.
+
+The cohort skews towards the severe end on both axes.
+The deployed model places 40\% of snapshots in "Needs Help" and 31\% in "On Track", which tracks the LLM rater reasonably as it rates 47\% "Needs Help" and only 6\% "On Track".
+Difficulty is more skewed , with the model rating 67\% of questions "Very Hard" against the rater's 72\%, and neither placing a meaningful share in the lowest band.
+The model is therefore strict for this module rather than the dashboard over-flagging.
+
+Despite being trained on a large language model rater rather than on human marks, the model matches what it was trained on, which is encouraging: the same supervised approach trained on human-rated data would likely bring the model closer to human judgement and yield a more accurate model that matches a human marker's ratings.
+Collecting enough human-rated snapshots is infeasible within the constraints of this project; the LLM rater stands in as a scalable second opinion, and its agreement with a fifty-snapshot human calibration is reported in Section~\ref{sec:eval-tradeoffs}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/evaluation/cohort_distributions.png}
+    \caption{Cohort characterisation}
+    \label{fig:eval-cohort-distributions}
+\end{figure}
 
 \subsubsection{Model Comparison} \label{sec:eval-compare-difficulty}
-% TODO: 5.4.3 prose block (~400 words; baseline vs improved for BOTH composites: Spearman ρ + top-10 overlap + level agreement + largest movers for struggle, then same four for difficulty + 2PL discrimination diagnostic; see drafting plan §5.4.3 merged block — needs new draft)
+% TODO: 5.4.2 prose block (~400 words; baseline-vs-improved struggle + baseline-vs-IRT difficulty using the four §4.9.5 metrics: Spearman ρ + top-10 overlap + level agreement + largest movers; numbers come from notebooks/model_comparison.ipynb; figures fig:eval-comparison-struggle-scatter + fig:eval-comparison-difficulty-scatter + tables tab:eval-comparison-struggle-top10 + tab:eval-comparison-difficulty-top10; see drafting plan §5.4.2 block)
 
-\subsubsection{Per-Module Normalisation Effect}
-% TODO: 5.4.4 prose block (was 5.4.5 pre-trim; fig:eval-permodule-normalisation, fig:eval-violin-permodule-difficulty)
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/evaluation/comparison_struggle_scatter.png}
+    \caption{Per-snapshot baseline composite struggle score (x-axis) against the improved BKT$+$IRT struggle score (y-axis), $n = 1{,}306$, coloured by the four-band LLM rating. Spearman $\rho = +0.496$ and top-10 overlap $= 4/10$: the two models concur on the broad rank order but the improved score compresses the upper tail (no improved score exceeds $\approx 0.63$) so the dashboard's top-K leaderboard differs materially between the two model classes.}
+    \label{fig:eval-comparison-struggle-scatter}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Top-10 most-struggling snapshots under the baseline composite (left) versus the improved BKT$+$IRT model (right); session names abbreviated to week and time. The LLM-band column reports the rater's four-band severity for the same snapshot.}
+\label{tab:eval-comparison-struggle-top10}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|r|l|l|r|l||r|l|l|r|l|}
+\hline
+\multicolumn{5}{|c||}{\textbf{Baseline composite top-10}} & \multicolumn{5}{c|}{\textbf{Improved (BKT$+$IRT) top-10}} \\
+\hline
+\textbf{\#} & \textbf{user} & \textbf{session} & \textbf{score} & \textbf{LLM band} & \textbf{\#} & \textbf{user} & \textbf{session} & \textbf{score} & \textbf{LLM band} \\
+\hline
+1  & uo0752 & W4 15:40  & $0.913$ & Needs Help   & 1  & ak0272 & W3 16:10  & $0.630$ & Struggling \\
+\hline
+2  & fj0472 & W10 16:35 & $0.908$ & Needs Help   & 2  & ep0511 & W8 15:15  & $0.601$ & Struggling \\
+\hline
+3  & lk0311 & W5 15:50  & $0.907$ & Needs Help   & 3  & kp0701 & W3 16:25  & $0.601$ & Needs Help \\
+\hline
+4  & id0821 & W3 16:35  & $0.897$ & Needs Help   & 4  & lk0311 & W9 15:05  & $0.598$ & Needs Help \\
+\hline
+5  & fj0472 & W10 16:45 & $0.893$ & Needs Help   & 5  & zz0603 & W8 16:40  & $0.573$ & Needs Help \\
+\hline
+6  & ep0511 & W9 15:45  & $0.887$ & Struggling   & 6  & fj0472 & W10 16:35 & $0.566$ & Needs Help \\
+\hline
+7  & ed0311 & W6 15:20  & $0.877$ & Needs Help   & 7  & mu0343 & W6 16:30  & $0.560$ & Struggling \\
+\hline
+8  & id0821 & W2 17:00  & $0.868$ & Needs Help   & 8  & sa0431 & W6 17:00  & $0.559$ & Struggling \\
+\hline
+9  & po0821 & W10 16:50 & $0.867$ & Needs Help   & 9  & po0821 & W10 16:50 & $0.541$ & Needs Help \\
+\hline
+10 & qf0122 & W3 15:40  & $0.866$ & Needs Help   & 10 & qf0132 & W10 16:45 & $0.541$ & Needs Help \\
+\hline
+\end{tabular}%
+}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/evaluation/comparison_difficulty_scatter.png}
+    \caption{Per-question baseline composite difficulty (x-axis) against the IRT 2PL difficulty $b_q$ scaled to $[0, 1]$ (y-axis), $n = 72$, coloured by the LLM rater's four-band difficulty rating. Spearman $\rho = +0.345$ and top-10 hardest overlap $= 1/10$: the two model classes disagree substantially on which questions are hardest, and the IRT model identifies items the baseline composite places only mid-range.}
+    \label{fig:eval-comparison-difficulty-scatter}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Top-10 hardest questions under the baseline composite (left) versus the 2PL IRT model (right). Question identifiers are abbreviated from the deployed labels; the LLM-band column reports the rater's four-band difficulty rating for the same question.}
+\label{tab:eval-comparison-difficulty-top10}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|r|l|r|l||r|l|r|l|}
+\hline
+\multicolumn{4}{|c||}{\textbf{Baseline composite top-10}} & \multicolumn{4}{c|}{\textbf{IRT 2PL top-10}} \\
+\hline
+\textbf{\#} & \textbf{question} & \textbf{score} & \textbf{LLM band} & \textbf{\#} & \textbf{question} & \textbf{score} & \textbf{LLM band} \\
+\hline
+1  & 11. multiple tables                & $0.799$ & Very Hard & 1  & 1. display all                     & $1.000$ & Hard      \\
+\hline
+2  & 12. multiple tables except         & $0.777$ & Very Hard & 2  & 10. UNION 4 + ORDER                & $0.893$ & Hard      \\
+\hline
+3  & 8. Alter the view                  & $0.722$ & Very Hard & 3  & 1.b display all                    & $0.892$ & Hard      \\
+\hline
+4  & 1. JOIN                            & $0.712$ & Hard      & 4  & 5. Create a view called SALES1     & $0.851$ & Very Hard \\
+\hline
+5  & 10. UNION 4 + ORDER                & $0.684$ & Hard      & 5  & 2. display columns                 & $0.841$ & Very Hard \\
+\hline
+6  & 6. Create a view called SALES2     & $0.684$ & Very Hard & 6  & 4. display WHERE comparison        & $0.761$ & Very Hard \\
+\hline
+7  & 3. Create a view called BOSS       & $0.669$ & Very Hard & 7  & 11. order by desc                  & $0.758$ & Hard      \\
+\hline
+8  & 1. Add a new record                & $0.666$ & Very Hard & 8  & 7. Create a new employee table     & $0.751$ & Very Hard \\
+\hline
+9  & 1. max, min and mean               & $0.661$ & Very Hard & 9  & 4. Create a new table              & $0.741$ & Very Hard \\
+\hline
+10 & 9. UNION 3                         & $0.655$ & Very Hard & 10 & 7. Unique Index                    & $0.655$ & Very Hard \\
+\hline
+\end{tabular}%
+}
+\end{table}
 
 \subsubsection{Hyperparameter optimisation} \label{sec:eval-hyperopt}
-% TODO: 5.4.5 prose block (was 5.4.9 pre-trim; ~290 words, Optuna TPE with Spearman ρ objective for K and τ; K tied within noise (Δρ +0.013); τ substantial Δρ +0.200; joint K×τ study confirms independence; figures fig:eval-hyperparams-contour + fig:eval-hyperparams-importances + table tab:eval-hyperparams; see drafting plan §5.4.9 block)
+% TODO: 5.4.3 prose block (~290 words; Optuna TPE with Spearman ρ objective for K and τ; K tied within noise (Δρ +0.009); τ substantial Δρ +0.160; joint K×τ study confirms independence; figures fig:eval-hyperparams-contour + fig:eval-hyperparams-importances + table tab:eval-hyperparams; see drafting plan §5.4.3 block)
+
+Two scalar hyperparameters were tuned using Optuna's Tree-structured Parzen Estimator (TPE) \cite{NIPS2011_86e8f7ab, akibaOptunaNextgenerationHyperparameter2019}, maximising session-grouped five-fold cross-validation Spearman~$\rho$ against the LLM's four-band rating. 
+The Bayesian shrinkage constant $K$ was tuned in a 50-trial study over integers $[1,20]$ and the collaborative-filtering threshold $\tau$ in a separate 50-trial study over reals in $[0.4, 0.9]$. 
+TPE was used over grid and random search due to being significantly better for a small sample size. The shrinkage constant $K$ moves from v1 default $5$ to v2 best $1$, with CV $\rho$ changing from $+0.471$ to $+0.481$;  $\Delta\rho \approx +0.013$ within the per-fold standard deviation, so the result is a robustness validation of the hand-set value rather than an empirical refinement. 
+The threshold $\tau$ moves from v1 default $0.7$ to v2 best $0.900$, with CV $\rho$ moving from $+0.306$ to $+0.466$; $\Delta\rho \approx +0.200$, which is a substantial improvement indicating that the v1 default was too permissive. 
+The best $\tau$ sits at the upper boundary of the $[0.4, 0.9]$ search range so a finer search may yield further improvement. 
+
+
+To validate the independence assumption that the two hyperparameters can be tuned separately a single joint $K \times \tau$ study was run over 100 trials with the joint objective $0.5\,(\rho_K + \rho_\tau)$.  
+The joint optimum lands at $K = 1$ and $\tau = 0.898$, coinciding with the independent optima to within the third decimal place, suggesting that the two hyper parameters are decoupled under the objective. 
+Figure~\ref{fig:eval-hyperparams-contour} shows the joint optimisation surface, where the ridge of high $\rho$ tracks $\tau$ near the upper boundary of the search range and the surface is essentially flat along $K$, visually confirming the independence. 
+Figure~\ref{fig:eval-hyperparams-importances} quantifies this directly as a parameter importance bar chart $\tau$ accounts for the bulk of the joint-objective variance whereas $K$ contributes negligibly. Table~\ref{tab:eval-hyperparams} reports the headline numbers.
+
+
+\begin{table}[H]
+\centering
+\caption{Optuna TPE results for the two scalar hyperparameters: 50 trials per study, session-grouped five-fold CV Spearman $\rho$ against LLM 4-band ratings.}
+\label{tab:eval-hyperparams}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|r|r|r|r|r|l|}
+\hline
+\textbf{Hyperparameter} & \textbf{v1 default} & \textbf{v1 CV $\rho$} & \textbf{v2 best} & \textbf{v2 CV $\rho$} & \textbf{$\Delta\rho$} & \textbf{Verdict} \\
+\hline
+\texttt{shrinkage\_k} & 5  & $+0.471$ & 0     & $+0.481$ & $+0.009$ & Tied within noise (hand-set near-optimal) \\
+\hline
+\texttt{cf\_threshold} & 0.7 & $+0.306$ & 0.900 & $+0.466$ & $+0.160$ & Substantial positive (hand-set too permissive) \\
+\hline
+\end{tabular}%
+}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/evaluation/optuna_joint_contour.png}
+    \caption{Joint $K \times \tau$ Optuna optimisation surface (100 trials, TPE). The high-$\rho$ ridge tracks $\tau$ near the upper boundary of the search range; the surface is essentially flat along $K$.}
+    \label{fig:eval-hyperparams-contour}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/evaluation/optuna_joint_importances.png}
+    \caption{Parameter-importance bar chart for the joint $K \times \tau$ study: $\tau$ accounts for the bulk of the joint-objective variance whereas $K$ contributes negligibly.}
+    \label{fig:eval-hyperparams-importances}
+\end{figure}
 
 \subsubsection{Findings} \label{sec:eval-findings}
-% TODO: 5.4.6 prose block (was 5.4.10 pre-trim; ~900 words; all three v2 weight-refit findings as one continuous narrative: positive struggle v1↔v2 (ρ +0.588) + moderate-positive difficulty (ρ +0.468) + weaker-positive improved-struggle (ρ +0.201 at RF ceiling) + 4-positive-1-tie verdict scorecard; figures fig:eval-weights-struggle, fig:eval-rho-perfold-struggle, fig:eval-ols-diagnostic (supplementary), fig:eval-negative-findings + tables tab:eval-weights-struggle, tab:eval-weights-difficulty, tab:eval-weights-improved, tab:eval-verdict-scorecard; see drafting plan §5.4.10 block)
+% TODO: 5.4.4 prose block (~900 words; all three v2 weight-refit findings as one continuous narrative: positive struggle v1↔v2 (ρ +0.588) + moderate-positive difficulty (ρ +0.468) + weaker-positive improved-struggle (ρ +0.201 at RF ceiling) + 4-positive-1-tie verdict scorecard; figures fig:eval-weights-struggle, fig:eval-weights-heatmap, fig:eval-ols-diagnostic, fig:eval-pred-vs-obs-struggle, fig:eval-rho-perfold-struggle, fig:eval-negative-findings + tables tab:eval-weights-struggle, tab:eval-weights-difficulty, tab:eval-weights-improved, tab:eval-verdict-scorecard; see drafting plan §5.4.4 block)
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/evaluation/weights_struggle_v1_vs_v2.png}
+    \caption{Paired comparison of v1 hand-set and v2 OLS-trained weights for the seven-signal struggle model under the upgraded GPT-4o rater. Two signals flip sign in v2 (active time $\hat{t}$ and answer-repetition $\widehat{\mathrm{rep}}$); the v1-vs-v2 weight pairs are visible at a glance.}
+    \label{fig:eval-weights-struggle}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/evaluation/weight_heatmap_struggle.png}
+    \caption{Signed-weight heatmap for the v2 struggle model across the seven signals and five session-grouped folds. Row-by-row sign agreement and small per-fold magnitude variance show that the trained weight vector is stable across the cross-validation splits and the two sign flips of Figure~\ref{fig:eval-weights-struggle} are reproducible rather than an artefact of a single fold.}
+    \label{fig:eval-weights-heatmap}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/evaluation/ols_diagnostic_struggle.png}
+    \caption{Predicted band severity (OLS output) versus observed LLM band, with identity reference and binned-mean calibration curve. Mean Spearman $\rho = +0.588$ $[+0.490, +0.686]$ across the five session-grouped folds; MAE $= 0.564$ bands.}
+    \label{fig:eval-ols-diagnostic}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/evaluation/pred_vs_obs_v1_v2_struggle.png}
+    \caption{Side-by-side scatter of predicted versus observed band severity for v1 hand-set weights (left) and v2 OLS-trained weights (right). The v2 predictions hug the identity reference noticeably more tightly than v1, visualising the Spearman $\rho$ lift from $+0.471$ to $+0.588$ that the weight refit buys.}
+    \label{fig:eval-pred-vs-obs-struggle}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/evaluation/per_fold_rho_struggle.png}
+    \caption{Per-fold held-out Spearman $\rho$ of the v2 struggle model under session-grouped five-fold cross-validation; mean $+0.588$, $95\%$ interval $[+0.490, +0.686]$; per-fold values $\{0.498, 0.508, 0.666, 0.636, 0.633\}$.}
+    \label{fig:eval-rho-perfold-struggle}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/evaluation/negative_findings.png}
+    \caption{Paired v1 versus v2 weight comparisons for the two weaker positive findings: five-signal difficulty model (left panel) and three-weight improved-struggle model (right panel). Difficulty lifts from a near-flat v1 baseline to a moderate positive correlation ($\rho = +0.468$); improved-struggle reaches $\rho = +0.201$, matching the achievable non-linear ceiling under the upgraded rater.}
+    \label{fig:eval-negative-findings}
+\end{figure}
 
 
 \subsection{Survey} \label{sec:eval-survey}
 
 \subsubsection{Instrument, Audience and Ethical Approval}
-% TODO: 5.5.1 prose block (11 questions; Microsoft Forms; n=8 at 2026-05-24, target ~10; tab:eval-survey-summary)
+% TODO: 5.5.1 prose block (11 questions; Microsoft Forms; n=10 at 2026-05-27; tab:eval-survey-summary)
 
 \subsubsection{Baseline Perception of Lab Support}
-% TODO: 5.5.2 prose block (Q2 + Q3 + Q4 themes; fig:eval-survey-baseline)
+% TODO: 5.5.2 prose block (Q2 + Q3 + Q4 themes; fig:eval-survey-likert covers Q3 + Q7 + Q9)
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/evaluation/eval-survey-likert.png}
+    \caption{Single-item Likert distributions ($n=10$) for Q3 (ease of identifying struggling students), Q7 (trust in dashboard prioritisation), and Q9 (comfort being scored). Q3 shows that $60\%$ of respondents find it ``Somewhat not easy'' or ``Extremely not easy'' to identify struggling students; Q7 yields a $70/10/20$ favourable/neutral/sceptic trust split; Q9 yields a $60/10/30$ comfortable/neutral/uncomfortable split.}
+    \label{fig:eval-survey-likert}
+\end{figure}
 
 \subsubsection{Dashboard Interpretability and Trust}
-% TODO: 5.5.3 prose block (Q5 + Q6 + Q7; fig:eval-survey-clarity, fig:eval-survey-trust)
+% TODO: 5.5.3 prose block (Q5 + Q6 + Q7; fig:eval-survey-clarity-intuitiveness covers Q5+Q6; Q7 is in fig:eval-survey-likert above)
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/evaluation/eval-survey-clarity-intuitiveness.png}
+    \caption{Matrix Likert distributions ($n=10$) for Q5 (score clarity, two sub-rows: student struggle, question difficulty) and Q6 (band intuitiveness, two sub-rows: student struggle bands, question difficulty bands). Nine respondents place every sub-row in ``Slightly Intuitive'' or ``Completely Intuitive''; a single persistent dissenter places all four sub-rows in ``Slightly Unintuitive''; no respondent selects either ``Neutral'' or ``Completely Unintuitive'' on any sub-row.}
+    \label{fig:eval-survey-clarity-intuitiveness}
+\end{figure}
 
 \subsubsection{Student Comfort and Ethical Concerns}
-% TODO: 5.5.4 prose block (Q8 + Q9 + Q10; fig:eval-survey-comfort, fig:eval-survey-themes)
+% TODO: 5.5.4 prose block (Q8 + Q9 + Q10; Q9 is in fig:eval-survey-likert above; Q8/Q10 themes go in tab:eval-survey-themes)
 
 \subsubsection{Change Requests and Triangulation with Quantitative Results}
 % TODO: 5.5.5 prose block (Q11; triangulation with 5.4 findings)
 
 \subsection{Discussion} \label{sec:eval-discussion}
 
-\subsubsection{Model Disagreement}
-% TODO: 5.6.1 prose block
-
-\subsubsection{Tradeoffs and Threats to Validity}
-% TODO: 5.6.2 prose block
+\subsubsection{Tradeoffs and Threats to Validity} \label{sec:eval-tradeoffs}
+% TODO: 5.6.2 prose block — \paragraph{Rater fidelity.} carries the κ_band_lin = +0.198 / κ_band_quad = +0.262 / exact-band 38% / within-1-band 68% numbers relocated from the former §5.4.2 Inter-rater Agreement; see §5.6 drafting plan
 
 \subsubsection{Limitations}
 % TODO: 5.6.3 prose block
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/evaluation/eval-incorrectness-distribution.png}
+    \caption{Distribution of submission-level incorrectness scores across the $42{,}443$ submissions in the deployment log. The prominent spike at the $0.5$ fallback midpoint shows that the production OpenAI scorer returns the fallback value on the majority of rows; this affects how the deployed v1 struggle composite and the downstream BKT mastery estimates should be interpreted, and is discussed in this section as a validity caveat on the deployed signal pipeline.}
+    \label{fig:eval-incorrectness-distribution}
+\end{figure}

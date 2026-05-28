@@ -39,7 +39,7 @@ if not os.environ.get("OPENAI_API_KEY"):
             pass
 
 from backend.cache import load_dataframe, load_difficulty_df, load_struggle_df
-from backend.routers import analysis, cf, lab, live, meta, models_cmp, question, rag, sessions, settings, student
+from backend.routers import analysis, cf, lab, live, meta, question, rag, sessions, settings, student
 from backend import analytics, incorrectness, lab_state
 from backend import rag as rag_module
 from backend.models import bkt as _bkt
@@ -205,7 +205,6 @@ app.include_router(question.router, prefix="/api")
 app.include_router(analysis.router, prefix="/api")
 app.include_router(sessions.router, prefix="/api")
 app.include_router(settings.router, prefix="/api")
-app.include_router(models_cmp.router, prefix="/api")
 app.include_router(lab.router, prefix="/api")
 app.include_router(rag.router, prefix="/api")
 app.include_router(meta.router, prefix="/api")

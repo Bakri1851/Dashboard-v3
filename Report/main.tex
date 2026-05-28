@@ -23,6 +23,12 @@
 
 \usetikzlibrary{positioning, fit, backgrounds, arrows.meta, shapes.geometric}
 
+% Section-prefixed numbering: 5.1, 5.2, ... resets per section / appendix
+\numberwithin{figure}{section}
+\numberwithin{table}{section}
+\numberwithin{equation}{section}
+\AtBeginDocument{\numberwithin{lstlisting}{section}}
+
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.6em}     % Space between paragraphs
 

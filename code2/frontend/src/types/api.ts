@@ -168,11 +168,9 @@ export interface RuntimeSettings {
   struggle_model: 'baseline' | 'improved' | string
   difficulty_model: 'baseline' | 'irt' | string
   bkt: BKTParameters
-  // Phase 5: v2 weight + hyperparam toggles. All default 'v1'.
-  struggle_weights_version: 'v1' | 'v2' | string
-  difficulty_weights_version: 'v1' | 'v2' | string
-  improved_struggle_weights_version: 'v1' | 'v2' | string
-  hyperparams_version: 'v1' | 'v2' | string
+  // Seeded from the Optuna-tuned v2 value at boot; remains user-adjustable.
+  // The trained v2 composite weights are loaded server-side and are no longer
+  // a runtime-selectable version.
   shrinkage_k: number
 }
 
@@ -231,48 +229,6 @@ export interface AnalysisStats {
   top_questions: TopQuestionRow[]
   user_activity: UserActivityRow[]
   activity_by_week: WeekActivityCell[]
-}
-
-export interface ModelRow {
-  id: string
-  level: string
-  score: number
-}
-
-export interface ModelPairRow {
-  id: string
-  baseline_level: string
-  baseline_score: number
-  improved_level: string
-  improved_score: number
-  delta: number
-}
-
-export interface AgreementSummary {
-  agreement_pct: number
-  upgraded: number
-  downgraded: number
-  unchanged: number
-  total: number
-}
-
-export interface ModelComparisonSection {
-  baseline: ModelRow[]
-  improved: ModelRow[]
-  pairs: ModelPairRow[]
-  agreement: AgreementSummary | null
-  spearman_rho: number | null
-  top10_overlap: number | null
-}
-
-export interface ModelCompareResponse {
-  baseline: ModelRow[]
-  improved: ModelRow[]
-  spearman_rho: number | null
-  top10_overlap: number | null
-  pairs: ModelPairRow[]
-  agreement: AgreementSummary | null
-  difficulty: ModelComparisonSection | null
 }
 
 export interface LabAssistant {

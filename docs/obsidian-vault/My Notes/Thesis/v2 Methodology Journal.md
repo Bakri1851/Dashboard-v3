@@ -14,6 +14,9 @@ related: [[Evaluation Plan]], [[Evaluation PoC Handoff]], [[Ch5 – Results and 
 <!-- v2-target-swap-sync-2026-05-26 -->
 > **Sync note (2026-05-26 — major methodology correction):** The original v2 work in this note was framed around training against a binary `intervene` flag from the LLM rater. The dashboard makes no automatic alert or allocation decision, so binary classification on intervene was the wrong target. **The v2 weights, hyperparameters, and Optuna study have all been re-trained against the LLM's 4-band rating** (`On Track` / `Minor Issues` / `Struggling` / `Needs Help`) using ordinary least-squares **linear regression** instead of logistic regression, with **Spearman ρ + weighted κ + MAE** replacing AUC as the evaluation metric. Under the corrected target the verdict scorecard becomes **4 positive findings + 1 tie** (was "2 positive + 2 negative + 1 tie" — the previous negative findings for difficulty and improved-struggle were artefacts of the wrong target). Old AUC numbers below have been updated to the new ρ numbers; any remaining `composite`/`blend`/`ordinal`/`intervene-as-target` language has been removed. See `data/eval/results.md` for the authoritative current numbers.
 
+<!-- v2-threshold-promotion-2026-05-27-evening -->
+> **Sync note (2026-05-27 evening — threshold promotion):** Band-cutpoint thresholds promoted from hand-set to constrained CV-trained values. Struggle (0.000, 0.315, 0.505, 0.605, 1.000), κ +0.303 → **+0.390** (Δ +0.087, GroupKFold(5), n=1306); difficulty (0.000, 0.363, 0.463, 0.587, 1.000), κ +0.065 → **+0.239** (Δ +0.175, LeaveOneOut, n=72). v2 OLS [0,3] band-index cuts (struggle 1.22/1.78/2.09, difficulty 1.88/2.19/2.69) are used only in `notebooks/eval_main.ipynb` for the confusion-matrix cell; backend `.clip(0,1)`s OLS output, so [0,1] thresholds serve both v1 and v2 in production. No Settings UI toggle — rollback via `git revert`. Source: `data/eval/experiments/threshold_search_cv.json`; see [[v2 Threshold Promotion Handoff]] and [[v2 Threshold Training Handoff]].
+
 > **Purpose.** Capture the *reasoning* behind every methodological
 > choice in the v2 weights and hyperparams implementation. This note
 > is **source material** for Chapter 5 prose — Methods (§5.1),
@@ -458,10 +461,12 @@ This is honest residual-uncertainty reporting. A joint-evaluation extension (run
 
 ### What this means for the dashboard deployment defaults
 
-- **Struggle weights** — defensible to set v2 as default-on, or keep v1 default with v2 as opt-in (current behaviour). Either is defensible
-- **Difficulty weights** — keep v1 default; v2 toggle remains in UI as research artefact with warning text
-- **Improved-struggle model** — keep v1 default; v2 toggle remains in UI as research artefact with warning text
-- **Hyperparams (K + τ)** — defensible to enable v2 as default given the +12pp CF τ gain. **But** flipping it also changes K to 1, which is within-noise — the CF τ gain dominates. Honest deployment: keep v1 default for now, mention "switching to v2 hyperparams substantially improves CF predictions" in the dashboard's About / Help page
+> **Superseded 2026-05-27 evening.** The deliberation below is the historical record. The decision taken: **v2 is now the unconditional deployed default for all four** (struggle weights, difficulty weights, improved-struggle weights, hyperparams) — the v1/v2 runtime toggles were removed entirely. v1 hand-set weights survive only as `config.py` constants for the offline evaluation baseline. See [[v2 Threshold Training Handoff]] §14.
+
+- **Struggle weights** — defensible to set v2 as default-on, or keep v1 default with v2 as opt-in. *(Resolved: v2 default-on, toggle removed.)*
+- **Difficulty weights** — keep v1 default; v2 toggle remains in UI as research artefact with warning text. *(Resolved: v2 default-on, toggle removed.)*
+- **Improved-struggle model** — keep v1 default; v2 toggle remains in UI as research artefact with warning text. *(Resolved: v2 default-on, toggle removed.)*
+- **Hyperparams (K + τ)** — defensible to enable v2 as default given the +12pp CF τ gain. **But** flipping it also changes K, which is within-noise — the CF τ gain dominates. *(Resolved: v2 Optuna values seeded at boot, toggle removed.)*
 
 ## 9 · Live methodology decisions log (updated as we go)
 

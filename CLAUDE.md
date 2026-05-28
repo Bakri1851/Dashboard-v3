@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A learning analytics dashboard for monitoring student struggle and question difficulty during university lab sessions. Shipped as two separate stacks that coexist in this repo:
 
 - **`code/`** — **V1**, the original Streamlit dashboard (instructor on 8501, mobile lab assistant on 8502). Canonical reference implementation and the fallback for the defence demo. The analytical core lives at `code/learning_dashboard/` alongside `code/learning_dashboard/ui/` (Streamlit views). Do not work on it but look into it if needed.
-- **`code2/`** — **V2**, the evolved React + FastAPI implementation (single FastAPI process on 8000 serves both the API and the built React SPA; Vite dev server on 5173 during frontend development). Feature-parity with V1 was reached in Phase 9 (archived log: `docs/recap_toolkit/archive/code2-CHECKLIST.md`). Layout is now `code2/{backend/, frontend/, requirements.txt}` only — the analytical core has been **flattened directly into `backend/`** (analytics.py, data_loader.py, lab_state.py, config.py, paths.py, academic_calendar.py, rag.py, lab_classes.py, models/) since the FastAPI process is itself the analytical backend; there is no separate `learning_dashboard/` package in V2.
+- **`code2/`** — **V2**, the evolved React + FastAPI implementation (single FastAPI process on 8000 serves both the API and the built React SPA; Vite dev server on 5173 during frontend development). Feature-parity with V1 was reached in Phase 9 (archived log: `docs/recap_toolkit/archive/code2-CHECKLIST.md`). Layout is now `code2/{backend/, frontend/, requirements.txt}` only — the analytical core has been **flattened directly into `backend/`** (analytics.py, data_loader.py, lab_state.py, config.py, paths.py, academic_calendar.py, rag.py, lab_classes.py, models/) since the FastAPI process is itself the analytical backend; there is no separate `learning_dashboard/` package in V2. The same FastAPI process also serves the lab assistant at `/mobile` (route in `code2/backend/main.py`), so V2 does not need a second process for assistants.
 
 Both stacks share live state through `data/lab_session.json` — a file-locked JSON file coordinated through `lab_state.py` and `filelock`, so a Streamlit app in `code/` and the FastAPI backend in `code2/` can run side by side.
 
@@ -24,6 +24,7 @@ streamlit run code/lab_app.py --server.port 8502             # mobile lab assist
 # --- React + FastAPI stack (code2/) ---
 pip install -r code2/requirements.txt
 uvicorn backend.main:app --app-dir code2 --port 8000         # API + built SPA on http://localhost:8000
+                                                             # lab assistant on V2 is served by the same process at http://localhost:8000/mobile
 cd code2/frontend && npm install && npm run dev              # Vite dev server on http://localhost:5173 (proxies /api → :8000)
 cd code2/frontend && npm run build                           # build SPA into dist/ for FastAPI to serve
 
@@ -38,7 +39,7 @@ There are no automated tests. Validation is manual smoke testing (see README.md 
 
 ### Two stacks, shared state
 - **Streamlit (`code/`)** — `code/app.py` and `code/lab_app.py` are thin wrappers delegating to `code/learning_dashboard/instructor_app.py` and `code/learning_dashboard/assistant_app.py`.
-- **React + FastAPI (`code2/`)** — `code2/backend/main.py` is the FastAPI entry; 10 routers under `code2/backend/routers/` adapt the `learning_dashboard` analytical core to HTTP. `code2/frontend/` is a Vite + React + TypeScript SPA with 8 views mirroring the Streamlit ones.
+- **React + FastAPI (`code2/`)** — `code2/backend/main.py` is the FastAPI entry; routers under `code2/backend/routers/` adapt the analytical core to HTTP (see the `main.py` router-include block for the current set). `code2/frontend/` is a Vite + React + TypeScript SPA with views under `code2/frontend/src/views/` mirroring the Streamlit ones.
 - All three apps (two Streamlit + one FastAPI) share state via `data/lab_session.json`, managed through `learning_dashboard/lab_state.py` with `filelock` — so a session started in Streamlit is visible in React within ~5 s and vice versa.
 
 ### Package layout (`code/learning_dashboard/`)
@@ -62,6 +63,8 @@ There are no automated tests. Validation is manual smoke testing (see README.md 
 
 The lab assistant app has its own independent `@st.cache_data(ttl=10)` cache on `_load_student_data()` — it does not share the instructor app's cache. Both caches are process-local, so running both apps means two separate fetch cycles.
 
+V2 runs an asynchronous lifespan pre-warm on startup that primes the main dataframe, BKT/IRT model caches, struggle/difficulty frames, and the RAG collection. Expect a 5–60 s warm-up after `uvicorn` starts; the first `/api/*` request returns immediately once it finishes. The incorrectness cache is disk-persisted at `data/incorrectness_cache.json`, so subsequent boots are fast.
+
 ### Deferred actions pattern
 Streamlit cannot mutate `st.session_state` after widget instantiation in the same run. This repo uses `pending_*` flags (e.g., `pending_session_load_record`, `pending_return_to_live_data`) applied at the top of `main()` before sidebar widgets render.
 
@@ -76,7 +79,7 @@ Streamlit cannot mutate `st.session_state` after widget instantiation in the sam
 - `_incorrectness_cache` in analytics.py avoids repeat OpenAI calls within a process
 - Session code is 6-char alphanumeric excluding O/0/I/1 to avoid confusion
 - Lab assistant identity persisted via URL `?aid=` query param
-- OpenAI API key stored in `.streamlit/secrets.toml`
+- OpenAI API key lives in `.secrets/secrets.toml` at the repo root (V2 bootstrap in `code2/backend/main.py` lifts it into `os.environ`). V1 also reads `.streamlit/secrets.toml`; both files should hold the same key.
 - Runtime data lives in `data/` (auto-migrated from repo root on first run)
 
 ## Context Navigation
@@ -104,6 +107,8 @@ The Zotero Integration plugin's import template lives at `docs/obsidian-vault/My
 
 When looking at literature, give it all a deep look and verify that everything you said exists so there is no hallucination
 
+Other scripts in `scripts/`: `eval_fetch.py` + `eval_label.py` + `eval_common.py` drive the V2 evaluation pipeline (outputs land in `data/eval/`); `optimise_hyperparams.py` and `optimise_v2_weights.py` run the Optuna studies referenced in Ch5.
+
 ## graphify
 
 This project has a graphify knowledge graph at graphify-out/.
@@ -111,37 +116,6 @@ This project has a graphify knowledge graph at graphify-out/.
 Rules:
 - Before answering architecture or codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes and community structure
 - After modifying code files in this session, run `python3 -c "from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code(Path('.'))"` to keep the graph current
-
-## HTML Recap Toolkit
-
-`docs/recap_toolkit/dashboard_v3_toolkit.html` is the canonical unified reference. It mirrors the code, the thesis, AND the vault — it is the primary intuitive navigation surface, more flexible than the Obsidian vault for exploring how methods work.
-
-Panels (11 tabs):
-
-- **Overview** — what the system does, who uses it, architecture
-- **Code reference** — searchable function list
-- **Glossary** — project + math terms, tagged
-- **Literature** — bibtex keys + grouping, mirrors `Literature/index.md`; ⚠ flags citations still needed
-- **Operations** — install / run / smoke test / troubleshooting (mirrors `Setup and Runbook.md`)
-- **Status** — implementation status + evidence gaps + report-alignment + figure audit (mirrors `Evidence Bank.md`, `Report Sync.md`, `Figures and Tables.md`)
-- **Deep dive** — per-method walkthroughs with citation footers
-- **Roadmap** — CODE-LEARNING stages 1–6 ending with Stage 6 defence-prep Q&A. Distinct from Plan.
-- **Plan** — SUBMISSION roadmap (14 steps, mirrors `Full Roadmap.md`) + 6-week schedule (mirrors `Weekly Plan.md`). Distinct from Roadmap.
-- **Section Plan** — per-section punch list with subtabs for each chapter and appendix; what's there now, what should be there, gaps, action items, citations and figures needed. Mirrors `Report Sync.md` + `Rewrite Queue.md` at the section level.
-- **Report guide** — per-chapter writing guide
-
-Keep it in sync after any of the following:
-
-- **Code change** — method names, default parameter values in `config.py`, new signals/models, removed features.
-- **Thesis change** — new Ch2 citations, Ch3 design decisions, Ch4 implementation details, Appendix E/F formulae, Ch5 evaluation framing.
-- **Literature change** — new bibtex entry, new grouping in `docs/obsidian-vault/My Notes/Literature/index.md`.
-- **Vault change** — updates to `Setup and Runbook.md`, `Evidence Bank.md`, `Report Sync.md`, `Figures and Tables.md`, `Full Roadmap.md`, or `Weekly Plan.md` — the toolkit mirrors these; update the corresponding panel.
-
-Every deep-dive carries a citation footer: `Cite: [bibkeys] · Thesis: [section, appendix] · Code: [file:lines]`. Every glossary formula has a 1:1 mapping to an Appendix E entry. When a method lacks a citation, the toolkit is the first place to flag it (Literature panel shows "citation needed").
-
-The Obsidian vault remains the long-form writing workspace; the toolkit is the reference surface. Update both, but prioritise toolkit freshness.
-
-
 
 # CLAUDE.md
 

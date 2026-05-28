@@ -14,5 +14,8 @@
     "**/*.nav": true,
     "**/*.snm": true,
     "**/*.vrb": true
-  }
+  },
+  "cSpell.words": [
+    "indentifiability"
+  ]
 }

@@ -175,17 +175,15 @@ def load_struggle_df(
 ) -> pd.DataFrame:
     """Compute + cache the struggle leaderboard for the given window + module.
 
-    Phase 5: respects the `struggle_weights_version` and `hyperparams_version`
-    toggles from runtime_config. When either is "v2", we load the trained
-    JSON and pass overrides through to ``struggle.compute_student_struggle_scores``.
-    Both toggles are included in the cache key so a flip serves fresh results.
+    Uses the trained v2 weights + the runtime shrinkage_k (seeded from the
+    Optuna-tuned v2 value) unconditionally — the trained model is the deployed
+    system. The hand-set v1 weights survive only as `config.py` constants for
+    the offline evaluation comparison.
     """
     from backend import runtime_config as _rc_mod
 
     rc = _rc_mod.get()
-    w_ver = rc.struggle_weights_version
-    h_ver = rc.hyperparams_version
-    key = (*_window_key(from_, to_, module), w_ver, h_ver)
+    key = _window_key(from_, to_, module)
     if key in _struggle_cache:
         return _struggle_cache[key]
     with _struggle_lock:
@@ -193,13 +191,9 @@ def load_struggle_df(
             return _struggle_cache[key]
         df, _ = load_dataframe()
         sliced = _slice_df(df, from_, to_, module)
-        weights = struggle._load_v2_weights() if w_ver == "v2" else None
-        # shrinkage_k is already loaded into runtime_config by the
-        # _load_optimised_hyperparams() side-effect in runtime_config.update();
-        # we just pass the currently-active value when the toggle is "v2".
-        shrinkage_k = rc.shrinkage_k if h_ver == "v2" else None
+        weights = struggle._load_v2_weights()
         result = struggle.compute_student_struggle_scores(
-            sliced, weights=weights, shrinkage_k=shrinkage_k
+            sliced, weights=weights, shrinkage_k=rc.shrinkage_k
         )
         _struggle_cache[key] = result
         return result
@@ -212,14 +206,11 @@ def load_difficulty_df(
 ) -> pd.DataFrame:
     """Compute + cache the difficulty leaderboard for the given window + module.
 
-    Phase 5: respects `difficulty_weights_version`. Toggle "v2" loads the
-    trained JSON and passes it through; "v1" uses the hand-set defaults.
+    Uses the trained v2 weights unconditionally — the trained model is the
+    deployed system. The hand-set v1 weights survive only as `config.py`
+    constants for the offline evaluation comparison.
     """
-    from backend import runtime_config as _rc_mod
-
-    rc = _rc_mod.get()
-    w_ver = rc.difficulty_weights_version
-    key = (*_window_key(from_, to_, module), w_ver)
+    key = _window_key(from_, to_, module)
     if key in _difficulty_cache:
         return _difficulty_cache[key]
     with _difficulty_lock:
@@ -227,7 +218,7 @@ def load_difficulty_df(
             return _difficulty_cache[key]
         df, _ = load_dataframe()
         sliced = _slice_df(df, from_, to_, module)
-        weights = difficulty._load_v2_weights() if w_ver == "v2" else None
+        weights = difficulty._load_v2_weights()
         result = difficulty.compute_question_difficulty_scores(sliced, weights=weights)
         _difficulty_cache[key] = result
         return result
@@ -247,17 +238,7 @@ def load_improved_struggle_df(
     # Local import keeps the cache module import-safe during router boot.
     from backend import runtime_config as _rc_mod
 
-    # Phase 5: include improved-struggle + struggle weight versions + hyperparams
-    # version in the cache key. Improved-struggle delegates to struggle internally
-    # (B_s component); a flip of struggle_weights_version changes B_s so it must
-    # invalidate improved-struggle cache too.
-    rc_preview = _rc_mod.get()
-    key = (
-        *_window_key(from_, to_, module),
-        rc_preview.improved_struggle_weights_version,
-        rc_preview.struggle_weights_version,
-        rc_preview.hyperparams_version,
-    )
+    key = _window_key(from_, to_, module)
     if key in _improved_cache:
         return _improved_cache[key]
     with _improved_lock:
@@ -278,12 +259,9 @@ def load_improved_struggle_df(
             and rc.bkt_p_slip == config.BKT_P_SLIP
         )
         per_skill = bkt.get_fitted_params() if at_defaults else None
-        # Phase 5: load v2 mix_weights if toggle is on
-        mix_weights = (
-            improved_struggle._load_v2_weights()
-            if rc.improved_struggle_weights_version == "v2"
-            else None
-        )
+        # Trained v2 mix-weights, loaded unconditionally (the trained model is
+        # the deployed system).
+        mix_weights = improved_struggle._load_v2_weights()
         try:
             mastery_df = bkt.compute_all_mastery(
                 sliced,
@@ -298,11 +276,10 @@ def load_improved_struggle_df(
                 if not mastery_df.empty
                 else None
             )
-            # Reuse the IRT model cache so a back-to-back visit to the
-            # Model Comparison view doesn't re-fit. We need the full model
-            # dict here (not just the difficulty projection) because the
-            # IRT-residual difficulty-adjusted signal needs b_raw + a_j +
-            # per-student θ.
+            # Reuse the IRT model cache so a back-to-back request doesn't
+            # re-fit. We need the full model dict here (not just the difficulty
+            # projection) because the IRT-residual difficulty-adjusted signal
+            # needs b_raw + a_j + per-student θ.
             irt_model = load_irt_model(from_, to_, module)
             irt_diff_full = irt_model.get("difficulty_df", pd.DataFrame())
             irt_ability = irt_model.get("ability_df", pd.DataFrame())

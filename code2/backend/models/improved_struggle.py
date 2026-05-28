@@ -9,7 +9,8 @@ Combines three signal groups:
 Graceful degradation: unavailable signal groups redistribute their weight
 to the behavioural composite.
 
-Phase 5: accepts optional `mix_weights` override for the v2 toggle.
+Phase 5: accepts optional `mix_weights` override; cache.py passes the trained
+v2 weights on every request (the deployed default — there is no runtime toggle).
 `_load_v2_weights` reads the trained JSON; the 3-element tuple replaces
 the config defaults when supplied. Trained v2 weights may be NEGATIVE
 (LR coefficients L1-normalised, may flip sign vs. v1's positive convex
@@ -93,13 +94,13 @@ def compute_improved_struggle_scores(
     Parameters
     ----------
     mix_weights : optional 3-tuple ``(w_B, w_M, w_D)`` overriding the
-        v1 config defaults. Typically the result of ``_load_v2_weights()``
-        passed by ``cache.load_improved_struggle_df`` when the runtime
-        ``improved_struggle_weights_version`` toggle is "v2". Trained v2
-        weights may be NEGATIVE (LR coefficients L1-normalised). In v2
-        mode the graceful-degradation redistribution is **disabled** so
-        the trained sign structure is preserved; the loader-side guard
-        on missing BKT/IRT availability is left to the caller.
+        v1 config defaults. The trained v2 weights from ``_load_v2_weights()``
+        are passed by ``cache.load_improved_struggle_df`` on every request
+        (the deployed default). Trained v2 weights may be NEGATIVE (LR
+        coefficients L1-normalised). When trained weights are supplied the
+        graceful-degradation redistribution is **disabled** so the trained
+        sign structure is preserved; the loader-side guard on missing
+        BKT/IRT availability is left to the caller.
 
     Note: the weight-sum invariant (``w_beh + w_mg + w_da == 1``) is asserted
     only on the non-empty code path AND only in v1 mode — v2 weights are

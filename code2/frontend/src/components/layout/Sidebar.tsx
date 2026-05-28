@@ -18,7 +18,6 @@ interface NavItem {
 const NAV: NavItem[] = [
   { id: 'inclass',  label: 'In Class' },
   { id: 'analysis', label: 'Data Analysis' },
-  { id: 'compare',  label: 'Model Comparison' },
   { id: 'previous', label: 'Previous Sessions' },
   { id: 'lab',      label: 'Lab Assistants' },
   { id: 'settings', label: 'Settings' },

@@ -4,7 +4,6 @@ import { playNavigation, playSelection } from '../sound'
 export type ViewId =
   | 'inclass'
   | 'analysis'
-  | 'compare'
   | 'previous'
   | 'settings'
   | 'lab'

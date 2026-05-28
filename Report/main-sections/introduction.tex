@@ -61,7 +61,7 @@ The aims will be addressed through the following objectives:
     \item \textbf{Formalise system requirements} by defining functional and non-functional requirements for the real-time computer lab support system
     \item \textbf{Design Data Model} that extracts relevant data provided into meaningful metrics suitable for real-time analysis
     \item \textbf{Design system architecture} to support live data ingestion, prioritisation and presentation while remaining extensible to smart devices
-    \item \textbf{Develop a struggle and difficulty model} so that we can take the relevant values to produce metrics which will be used in showing the relevant information, whilst additionally training the composite weights against second-opinion labels obtained from a large language model rater reported in Section \ref{sec:eval-results}
+    \item \textbf{Develop a struggle and difficulty model} so that we can take the relevant values to produce metrics which will be used in showing the relevant information, whilst additionally training the composite weights, scalar hyperparameters and score-to-band thresholds against second-opinion labels obtained from a large language model rater reported in Section \ref{sec:eval-results}
     \item \textbf{Implement live data analytics dashboard} for real-time data visualisation, prioritisation and intuitive interactivity
     \item \textbf{Evaluate approach} through functional and non-functional aspects to determine the feasibility and usefulness in a computer lab session
 \end{enumerate}
@@ -105,7 +105,7 @@ The process also also considered how the system could be extended to smart devic
 
 Implementation then progressed from core functionality to increasing the complexity of our analytics.
 The priority was to establish reliable data retrieval, parsing and processing. 
-Once this was in place, we extended the dashboard to include live monitoring, drill down analysis, model comparison, historical sessions and assistant coordination.
+Once this was in place, we extended the dashboard to include live monitoring, drill down analysis, historical sessions and assistant coordination.
 More advanced analytical components were implemented such as collaborative filtering, mistake clustering and alternative modelling approaches which use Item Response Theory and Bayesian Knowledge Tracing.
 
 The incremental approach was appropriate for this project as it reduced risk and made it possible to validate each layer of the system before moving on to the next step.

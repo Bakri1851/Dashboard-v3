@@ -290,7 +290,9 @@ def main() -> int:
             "shrinkage_k": int(best_k),
             "cf_threshold": float(best_t),
             # Defaults preserved for hyperparams we did NOT optimise — the
-            # runtime_config loader needs the full set to switch wholesale to v2.
+            # runtime_config boot overlay (RuntimeConfig.defaults) seeds the
+            # scalar sliders from the full set; the trained v2 values are the
+            # unconditional deployed default.
             "bkt_p_init":           config.BKT_P_INIT,
             "bkt_p_learn":          config.BKT_P_LEARN,
             "bkt_p_guess":          config.BKT_P_GUESS,

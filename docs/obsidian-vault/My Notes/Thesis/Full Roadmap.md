@@ -6,6 +6,12 @@
 <!-- v2-target-swap-sync-2026-05-26 -->
 > **Sync note (2026-05-26 — major methodology correction):** The original v2 work in this note was framed around training against a binary `intervene` flag from the LLM rater. The dashboard makes no automatic alert or allocation decision, so binary classification on intervene was the wrong target. **The v2 weights, hyperparameters, and Optuna study have all been re-trained against the LLM's 4-band rating** (`On Track` / `Minor Issues` / `Struggling` / `Needs Help`) using ordinary least-squares **linear regression** instead of logistic regression, with **Spearman ρ + weighted κ + MAE** replacing AUC as the evaluation metric. Under the corrected target the verdict scorecard becomes **4 positive findings + 1 tie** (was "2 positive + 2 negative + 1 tie" — the previous negative findings for difficulty and improved-struggle were artefacts of the wrong target). Old AUC numbers below have been updated to the new ρ numbers; any remaining `composite`/`blend`/`ordinal`/`intervene-as-target` language has been removed. See `data/eval/results.md` for the authoritative current numbers.
 
+<!-- v2-threshold-promotion-2026-05-27-evening -->
+> **Sync note (2026-05-27 evening — threshold promotion):** Band-cutpoint thresholds promoted from hand-set to constrained CV-trained values in `code2/backend/config.py`. Struggle κ +0.303 → **+0.390** (Δ +0.087, GroupKFold(5), n=1306); difficulty κ +0.065 → **+0.239** (Δ +0.175, LeaveOneOut, n=72). Verdict scorecard below now extends to **5 positive findings + 1 tie** if you count band-thresholds as a 6th model component; the writing chat may either fold it into the existing scorecard or report it separately in §5.4.11 per [[v2 Threshold Training Handoff]]. **Tbl 6 TODO at line ~234 cites the hand-set values verbatim — writing chat will update both the TODO and the report's Tbl 6/Tbl 7 to the trained values (struggle 0.000/0.315/0.505/0.605/1.000; difficulty 0.000/0.363/0.463/0.587/1.000).** Source: `data/eval/experiments/threshold_search_cv.json`; see [[v2 Threshold Promotion Handoff]] (status: completed).
+
+<!-- v2-toggle-removal-2026-05-27-evening -->
+> **Sync note (2026-05-27 evening — weight/hyperparam toggles removed):** The four v1/v2 runtime version toggles (`struggle_weights_version`, `difficulty_weights_version`, `improved_struggle_weights_version`, `hyperparams_version`) and the Settings → Advanced "Optimised Weights (v2)" card were **removed from the V2 dashboard**. The trained v2 weights + Optuna hyperparameters are now the **unconditional deployed default**; v1 hand-set weights survive only as `config.py` constants for the offline evaluation baseline. **Any text below describing the four toggles, the "Optimised Weights (v2)" select rows, or v1 as the deployed default is historical** — superseded by this change. The model-class selectors (`struggle_model` baseline/improved, `difficulty_model` baseline/irt) are NOT affected; they remain live. See [[v2 Threshold Training Handoff]] §14.
+
 Combined coding + writing order for final submission. Work through this top to bottom — each item unblocks the next. For detailed specs see [[Coding Roadmap]] (coding) and [[Writing Roadmap]] (writing).
 
 Related: [[Coding Roadmap]], [[Writing Roadmap]], [[Rewrite Queue]], [[Report Sync]], [[Evidence Bank]]
@@ -40,7 +46,7 @@ Single index of every new line item that arose from the v2 weights + Optuna + Se
 | 11 | Appendix A: 4 new Phase 0-8 code-snippet candidates (LR fit, Optuna study, runtime_config v2 loader, SettingsView toggle pattern) | — | Pending |
 | 12 | Polish: Zotero imports for 3 pending bibkeys (Landis & Koch 1977, Bergstra 2011 TPE, Akiba 2019 Optuna) | — | User does via Better BibTeX |
 | 12 | Polish: run `python scripts/sync_literature.py` after the new `\cite{}` calls land in `.tex` to flip 🟡 → ✅ | — | One command |
-| 12 | Polish: refresh `docs/recap_toolkit/dashboard_v3_toolkit.html` panels (Status, Section Plan, Roadmap, Literature) | — | Pending |
+| 12 | ~~Polish: refresh recap toolkit panels~~ — **dropped 2026-05-27: the HTML recap toolkit was deleted (not useful)** | — | N/A |
 | 12 | Polish: rebuild `graphify-out/` after `code2/backend/` changes | — | One command |
 
 **Verdict scorecard headline** (referenced everywhere above):
@@ -339,7 +345,7 @@ Collect all model formulas and derivation notes in one place.
 - [ ] Appendix E: struggle formula (7 components + weights), difficulty formula (5 components + weights), IRT likelihood, BKT update rule, improved struggle weights, CF cosine similarity
 - [ ] Appendix F: derivation notes for non-obvious formulas (BKT update, IRT MLE gradient, Bayesian shrinkage in struggle)
 - [ ] **NEW (Phase 0-8) Appendix E**: ordinary least-squares linear regression objective (used to train all three v2 weight vectors — struggle, difficulty, improved model); GroupKFold cross-validation procedure (5 folds, session as group cluster — prevents student leakage); Cohen's κ family (unweighted binary + linear-weighted + quadratic-weighted ordinal variants — formula implicit in `data/eval/kappa_report.json`); Optuna TPE acquisition-function sketch (or just a one-line cite to Bergstra 2011 if space is tight)
-- [ ] **NEW (Phase 0-8) Appendix F**: note that v2 LR-trained weights are signed and do NOT satisfy the v1 convex-combination constraint (Eq. `struggle-raw` / `difficulty-raw`); brief derivation of why this is a deliberate consequence of the linear-classifier framing and how v1 is preserved as the deployed default (the v2 toggle is opt-in, fallback to v1 on missing/malformed JSON)
+- [ ] **NEW (Phase 0-8) Appendix F**: note that v2 LR-trained weights are signed and do NOT satisfy the v1 convex-combination constraint (Eq. `struggle-raw` / `difficulty-raw`); brief derivation of why this is a deliberate consequence of the linear-classifier framing. (Updated 2026-05-27: the v2 trained weights are now the **unconditional deployed default** — the v1/v2 weight toggles were removed; v1 hand-set weights survive only as `config.py` constants for the offline evaluation baseline. See [[v2 Threshold Training Handoff]] §14.)
 
 ---
 
@@ -368,7 +374,7 @@ Final consistency check before submission.
 - [ ] LaTeX compile check — `main.tex` with no errors or warnings
 - [ ] **NEW (Phase 0-8) — Zotero imports for 3 pending bibkeys** (user-side via Better BibTeX): `landisMeasurementObserverAgreement1977` (DOI 10.2307/2529310), `bergstraAlgorithmsHyperParameterOptimization2011` (NeurIPS 24 paper, hash `86e8f7ab32cfd12577bc2619bc635690`), `akibaOptunaNextgenerationHyperparameter2019` (DOI 10.1145/3292500.3330701, arXiv 1907.10902). After import: re-export `references.bib` and run Obsidian Zotero Integration "Import & Replace" to generate the 3 `.md` notes
 - [ ] **NEW (Phase 0-8)** — run `python scripts/sync_literature.py` once the new `\cite{}` calls land in §2.2 / §5.4.2 / §5.4.10 to flip 🟡 → ✅ on the 3 new entries in [[Literature/index.md]] §5 Evaluation Metrics
-- [ ] **NEW (Phase 0-8)** — refresh `docs/recap_toolkit/dashboard_v3_toolkit.html` panels per CLAUDE.md after the v2-toggle work and the §5.4 brief delivery: Status panel (Phase 4 findings + verdict scorecard), Section Plan panel (Ch3/Ch4/Ch5 amendments), Roadmap panel (this section's new line items), Literature panel (3 pending entries marked ⚠ citation-needed until Zotero imports complete)
+- [x] ~~**NEW (Phase 0-8)** — refresh recap toolkit panels per CLAUDE.md~~ — **dropped 2026-05-27: the HTML recap toolkit was deleted (not useful); CLAUDE.md's toolkit section was removed. No toolkit to refresh.**
 - [ ] **NEW (Phase 0-8)** — rebuild `graphify-out/` after the `code2/backend/` changes (per CLAUDE.md): `python3 -c "from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code(Path('.'))"`
 
 ---
@@ -472,7 +478,7 @@ Additive track kicked off after the core Streamlit app was feature-complete. **`
 | 4 | Lab state parity — 11 `/api/lab/*` endpoints, LabAssistantView with dispatch queue. Verified curl cycle: join → assign → mark helped → remove, state mutates through the same `FileLock`-protected `lab_session.json` that the Streamlit apps use. | **Done** (2026-04-19) |
 | 5 | Sessions + settings + RAG — `/api/sessions` (read-only), `/api/settings` (read-only config snapshot), `/api/rag/{student,question}/{id}` (`async` + `to_thread` so the first-time Chroma build doesn't block the event loop). RagPanel integrated into detail views. | **Done** (2026-04-19) |
 | 6 | Build + polish — ErrorBoundary, loading skeletons, `npm run build` → `dist/` (≈260 KB / 74 KB gzipped), `StaticFiles` mount at `/`, `/docs` Swagger UI, custom editorial favicon | **Done** (2026-04-19) |
-| 7 | Documentation sync — this block, Evidence Bank, Report Sync, Figures and Tables, Weekly Plan, Setup and Runbook, recap toolkit panels | **In progress** |
+| 7 | Documentation sync — this block, Evidence Bank, Report Sync, Figures and Tables, Weekly Plan, Setup and Runbook | **In progress** |
 | 8 | Defence rehearsal — 5-process smoke test, thesis screenshots, demo script | Not started |
 
 Plan file (full context, resumable across context loss): `C:\Users\Bakri\.claude\plans\c-users-bakri-downloads-alternative-das-majestic-garden.md`.

@@ -1,0 +1,80 @@
+{
+  "struggle": {
+    "OLS (baseline)": {
+      "rho_expected": 0.5851783111943545,
+      "rho_argmax": 0.5211377660509234,
+      "weighted_kappa": 0.3798111818635752,
+      "mae": 0.5650842266462481
+    },
+    "LogisticRegression (multinomial)": {
+      "rho_expected": 0.5815167715782976,
+      "rho_argmax": 0.528366090829841,
+      "weighted_kappa": 0.45307112456133936,
+      "mae": 0.5444104134762634
+    },
+    "RandomForestClassifier (n=200, d=5)": {
+      "rho_expected": 0.5802909587945794,
+      "rho_argmax": 0.5614884366004887,
+      "weighted_kappa": 0.4751776481404332,
+      "mae": 0.5214395099540582
+    },
+    "GradientBoostingClassifier (n=200, d=3, lr=0.05)": {
+      "rho_expected": 0.5633217190903906,
+      "rho_argmax": 0.5399483003862227,
+      "weighted_kappa": 0.44421177836419123,
+      "mae": 0.5490045941807045
+    }
+  },
+  "improved": {
+    "OLS (baseline)": {
+      "rho_expected": 0.17472854959654466,
+      "rho_argmax": 0.059193304261101996,
+      "weighted_kappa": 0.007360140160428741,
+      "mae": 0.8131699846860643
+    },
+    "LogisticRegression (multinomial)": {
+      "rho_expected": 0.17945884598302048,
+      "rho_argmax": 0.05235359182809777,
+      "weighted_kappa": 0.029454558729198443,
+      "mae": 0.8728943338437979
+    },
+    "RandomForestClassifier (n=200, d=5)": {
+      "rho_expected": 0.2211473092357263,
+      "rho_argmax": 0.1686700612853101,
+      "weighted_kappa": 0.09662051707993213,
+      "mae": 0.8009188361408882
+    },
+    "GradientBoostingClassifier (n=200, d=3, lr=0.05)": {
+      "rho_expected": 0.22146340984390944,
+      "rho_argmax": 0.1507298765184491,
+      "weighted_kappa": 0.12869604286576564,
+      "mae": 0.8277182235834609
+    }
+  },
+  "difficulty": {
+    "OLS (baseline)": {
+      "rho_expected": 0.4684530363753745,
+      "rho_argmax": 0.248190795578477,
+      "weighted_kappa": 0.22544434050514495,
+      "mae": 0.3194444444444444
+    },
+    "LogisticRegression (multinomial)": {
+      "rho_expected": 0.45709111027672317,
+      "rho_argmax": 0.3560900388135994,
+      "weighted_kappa": 0.33762649494020247,
+      "mae": 0.2777777777777778
+    },
+    "RandomForestClassifier (n=200, d=5)": {
+      "rho_expected": 0.5511974981807705,
+      "rho_argmax": 0.38108091187643395,
+      "weighted_kappa": 0.3294117647058823,
+      "mae": 0.2638888888888889
+    },
+    "GradientBoostingClassifier (n=200, d=3, lr=0.05)": {
+      "rho_expected": 0.3775255661968722,
+      "rho_argmax": 0.4326870095353057,
+      "weighted_kappa": 0.44425385934819894,
+      "mae": 0.25
+    }
+  }
+}

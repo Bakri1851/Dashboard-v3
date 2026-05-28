@@ -481,7 +481,7 @@ Surfaced during this push, not yet resolved:
 5. **Smart device integration (FR6)** — explicitly scoped out, but discuss honestly as future work in Ch6.
 6. **Measurement Confidence formula and graceful-degradation weight redistribution** — both are dashboard-original design contributions, not citation gaps. Frame as such in Ch3 §3.4.1 and §3.4.4.
 7. **Streamlit-only V1 vs React+FastAPI V2 framing.** The thesis Ch4 currently describes V1; V2 has feature-parity (per `code2/CHECKLIST.md` Phase 9). Decide whether to write Ch4 about V2 (recommended) or both stacks.
-8. **Recap toolkit (`docs/recap_toolkit/dashboard_v3_toolkit.html`)** — keep in sync after major thesis edits, especially the Roadmap, Section Plan, Status, and Literature panels.
+8. ~~**Recap toolkit** — keep in sync after major thesis edits.~~ **Dropped 2026-05-27: the HTML recap toolkit was deleted (not useful). No toolkit to maintain.**
 
 ---
 

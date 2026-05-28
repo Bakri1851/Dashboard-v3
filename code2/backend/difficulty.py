@@ -68,8 +68,8 @@ def compute_question_difficulty_scores(
     df : DataFrame of submissions to score.
     weights : optional dict with keys ``{c_norm, t_tilde, a_tilde, f_norm,
         p_norm}`` — when provided, overrides v1 ``config.DIFFICULTY_WEIGHT_*``.
-        Typically the result of ``_load_v2_weights()`` passed through by
-        ``cache.load_difficulty_df`` when ``difficulty_weights_version=="v2"``.
+        The trained v2 weights from ``_load_v2_weights()`` are passed through
+        by ``cache.load_difficulty_df`` on every request (the deployed default).
         v2 weights may be negative; the .clip(0, 1) handles out-of-range.
     """
     if df.empty:

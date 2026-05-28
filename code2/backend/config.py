@@ -42,11 +42,19 @@ DECAY_HALFLIFE_SECONDS: int = 1800  # 30-min half-life; submission 30 min ago ge
 SHRINKAGE_K: int = 5  # students with n >> K are unaffected; n << K pulled toward class mean
 
 # --- Student Struggle Thresholds: (low, high, label, color) ---
+# Constrained CV-trained 2026-05-27 via scripts/experiments/threshold_search_v2composite.py
+# on the DEPLOYED v2-OLS composite score (clip(sum(v2_weights * signals), 0, 1)).
+# κ +0.038 → +0.384 (GroupKFold(5), n=1306; every band >= 10% of [0,1]).
+# Recalibration: the earlier (0.315, 0.505, 0.605) were fit on the v1 baseline
+# composite, but the deployed system feeds the compressed v2-OLS composite
+# (~[0, 0.62], mean 0.24) through these thresholds — the old cuts put ~99% below
+# "Needs Help". New band split on this cohort: 31/14/15/40%.
+# Source: data/eval/experiments/threshold_search_v2composite.json.
 STRUGGLE_THRESHOLDS: list[tuple[float, float, str, str]] = [
-    (0.00, 0.20, "On Track",     "#10a15d"),
-    (0.20, 0.35, "Minor Issues", "#ffcc00"),
-    (0.35, 0.50, "Struggling",   "#ff6600"),
-    (0.50, 1.00, "Needs Help",   "#ff2d55"),
+    (0.000, 0.102, "On Track",     "#10a15d"),
+    (0.102, 0.203, "Minor Issues", "#ffcc00"),
+    (0.203, 0.326, "Struggling",   "#ff6600"),
+    (0.326, 1.000, "Needs Help",   "#ff2d55"),
 ]
 
 # --- Question Difficulty Score Weights ---
@@ -57,11 +65,17 @@ DIFFICULTY_WEIGHT_F: float = 0.20   # avg incorrectness score
 DIFFICULTY_WEIGHT_P: float = 0.20   # first-attempt failure rate
 
 # --- Question Difficulty Thresholds: (low, high, label, color) ---
+# Constrained CV-trained 2026-05-27 via scripts/experiments/threshold_search_v2composite.py
+# on the DEPLOYED v2-OLS difficulty composite (clip(sum(v2_weights * signals), 0, 1)).
+# κ +0.225 → +0.387 (LeaveOneOut, n=72; every band >= 10% of [0,1]).
+# Recalibration over the earlier (0.363, 0.463, 0.587), which were fit on the v1
+# baseline composite. Cohort skews hard (67% "Very Hard"); bands kept for
+# future-cohort generality. Source: data/eval/experiments/threshold_search_v2composite.json.
 DIFFICULTY_THRESHOLDS: list[tuple[float, float, str, str]] = [
-    (0.00, 0.35, "Easy",      "#00ff88"),
-    (0.35, 0.50, "Medium",    "#ffcc00"),
-    (0.50, 0.75, "Hard",      "#ff6600"),
-    (0.75, 1.00, "Very Hard", "#ff2d55"),
+    (0.000, 0.288, "Easy",      "#00ff88"),
+    (0.288, 0.388, "Medium",    "#ffcc00"),
+    (0.388, 0.531, "Hard",      "#ff6600"),
+    (0.531, 1.000, "Very Hard", "#ff2d55"),
 ]
 
 # --- Darker bar fills for leaderboards (white text readability) ---
@@ -169,12 +183,12 @@ IMPROVED_STRUGGLE_WEIGHT_DIFFICULTY_ADJ: float = 0.25
 
 # --- Phase 5: V2 optimised weights and hyperparams (data-driven refinements) ---
 # These point to JSON files written by scripts/optimise_v2_weights.py and
-# scripts/optimise_hyperparams.py. When the corresponding runtime_config
-# *_version flag is "v2" AND the file exists + parses + passes loader checks,
-# the dashboard uses the trained weights/hyperparams instead of the hand-set
-# v1 above. Missing/malformed files fall back to v1 silently with a warning.
-# Defaults always remain v1 so the dashboard behaves identically unless the
-# user explicitly toggles in Settings.
+# scripts/optimise_hyperparams.py. The trained v2 weights + Optuna-tuned
+# hyperparams are loaded unconditionally as the deployed default (composite
+# weights via cache.py, the scalar hyperparams via runtime_config). There is
+# no runtime v1/v2 selector. The hand-set v1 weights above are retained as
+# constants for the offline evaluation comparison only; a missing or malformed
+# v2 JSON logs a warning and falls back to those v1 constants.
 from . import paths as _paths
 STRUGGLE_WEIGHTS_V2_PATH = _paths.DATA_DIR / "eval" / "optimised_struggle_weights_v2.json"
 DIFFICULTY_WEIGHTS_V2_PATH = _paths.DATA_DIR / "eval" / "optimised_difficulty_weights_v2.json"

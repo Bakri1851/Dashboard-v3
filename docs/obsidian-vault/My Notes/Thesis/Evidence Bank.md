@@ -6,6 +6,9 @@
 <!-- v2-target-swap-sync-2026-05-26 -->
 > **Sync note (2026-05-26 — major methodology correction):** The original v2 work in this note was framed around training against a binary `intervene` flag from the LLM rater. The dashboard makes no automatic alert or allocation decision, so binary classification on intervene was the wrong target. **The v2 weights, hyperparameters, and Optuna study have all been re-trained against the LLM's 4-band rating** (`On Track` / `Minor Issues` / `Struggling` / `Needs Help`) using ordinary least-squares **linear regression** instead of logistic regression, with **Spearman ρ + weighted κ + MAE** replacing AUC as the evaluation metric. Under the corrected target the verdict scorecard becomes **4 positive findings + 1 tie** (was "2 positive + 2 negative + 1 tie" — the previous negative findings for difficulty and improved-struggle were artefacts of the wrong target). Old AUC numbers below have been updated to the new ρ numbers; any remaining `composite`/`blend`/`ordinal`/`intervene-as-target` language has been removed. See `data/eval/results.md` for the authoritative current numbers.
 
+<!-- v2-threshold-promotion-2026-05-27-evening -->
+> **Sync note (2026-05-27 evening — threshold promotion):** Band-cutpoint thresholds promoted from hand-set to constrained CV-trained values. Struggle (0.000, 0.315, 0.505, 0.605, 1.000), κ +0.303 → **+0.390** (Δ +0.087, GroupKFold(5), n=1306); difficulty (0.000, 0.363, 0.463, 0.587, 1.000), κ +0.065 → **+0.239** (Δ +0.175, LeaveOneOut, n=72). v2 OLS [0,3] band-index cuts (struggle 1.22/1.78/2.09, difficulty 1.88/2.19/2.69) used only in `notebooks/eval_main.ipynb`; backend `.clip(0,1)`s OLS output, so [0,1] thresholds serve both v1 and v2 in production. No Settings UI toggle — rollback via `git revert`. Source: `data/eval/experiments/threshold_search_cv.json`; see [[v2 Threshold Promotion Handoff]] and [[v2 Threshold Training Handoff]].
+
 Tracks what evidence exists for thesis claims and what still needs to be created. Each entry notes where it would be used in the report.
 
 Related: [[Report Sync]], [[Rewrite Queue]], [[Figures and Tables]], [[Setup and Runbook]]
@@ -127,7 +130,7 @@ All Ch5 §5.4 evidence for the new v2 empirical-refinement narrative. Numbers au
 | Snapshots dataset | 1,306 stratified snapshots × 12 cutoffs × 23 sessions × 4 struggle bands + 72 difficulty entries; replay-derived from cached parquet | `data/eval/snapshots.json` + `data/eval/submissions.parquet` (42,443 rows, 2025-10-06 → 2026-05-15) | **Ready** | §5.4 cohort framing |
 | Eval notebook | 31-cell self-contained notebook reading only the above JSONs; reproduces all 11 figures + results.md from scratch | `notebooks/eval_main.ipynb` | **Ready** | §5.4 reproducibility |
 | Results markdown | Auto-generated tables (κ block, weights × 3, AUC summary, hyperparam table, disagreement matrix); writing chat lifts directly | `data/eval/results.md` (87 lines, 7 tables) | **Ready** | §5.4 prose |
-| 11 figures (200 DPI PNG) | Cohort bands, κ block, struggle v1-vs-v2 paired bars, per-fold AUC, ROC overlay, calibration, weight stability heatmap, confusion matrix, difficulty + improved model weaker-finding plots, v1↔v2 disagreement matrix | `data/eval/figures/*.png` | **Ready** (need to be copied to `Report/figures/evaluation/` for LaTeX) | §5.4.1–5.4.10, §5.6.1 |
+| Report figure set (200 DPI PNG) | **v2-only** (v1 cut 2026-05-27): cohort bands (v2 deployed model), κ block, v2-only struggle weight chart, per-fold ρ, OLS diagnostic + residuals, weight-stability heatmap, v2-only confusion, **model-class bake-off**, **regression-vs-classification framing**, difficulty + improved weaker-finding plots (v2-only), IRT discrimination, incorrectness distribution, Optuna contour + importances | `data/eval/figures/*.png` | **Ready** (copy to `Report/figures/evaluation/`) | §5.4, §5.6 (IRT anti-result) |
 
 ### Verdict scorecard (lifted from [[Evaluation PoC Handoff]] §13)
 
@@ -141,16 +144,18 @@ All Ch5 §5.4 evidence for the new v2 empirical-refinement narrative. Numbers au
 
 Four positive findings (struggle weights, difficulty weights, improved-struggle weights, CF τ) + one tie (K). All three trained weight vectors outrank their v1 defaults under the 4-band target; only the shrinkage K is within fold-variance noise.
 
-### v2 toggles in V2 React Settings — Ready for defence demo
+### v2 weights — deployed default (toggles since removed)
 
-All four v2 artefacts wired through the V2 React stack as runtime-toggleable Settings options (defaults stay v1; missing JSON falls back silently). Backend changes across `runtime_config.py` + `config.py` + `schemas.py` + `struggle.py` + `difficulty.py` + `models/improved_struggle.py` + `cache.py` + `routers/settings.py`; frontend changes in `types/api.ts` + `views/SettingsView.tsx` ("Optimised Weights (v2)" section with 4 `<ToggleRow>` selects + `V2InfoBlock` ok/warn/info variants reflecting Phase 4 findings).
+> **Superseded 2026-05-27 evening.** The four v1/v2 runtime toggles below were **removed**; the trained v2 weights + Optuna hyperparameters are now the **unconditional deployed default**. v1 hand-set weights survive only as `config.py` constants for the offline evaluation baseline. The table below is retained as the historical record of the (now-removed) toggle UI. See [[v2 Threshold Training Handoff]] §14.
 
-| Toggle | Default | UI status |
+Originally all four v2 artefacts were wired through the V2 React stack as runtime-toggleable Settings options. The "Optimised Weights (v2)" Settings card and the `*_version` fields across `runtime_config.py` / `schemas.py` / `cache.py` / `routers/settings.py` / `types/api.ts` / `views/SettingsView.tsx` have since been deleted (the `_load_v2_weights()` loaders + the v1 weight constants remain).
+
+| Toggle (removed) | Was-default | Historical UI status |
 |---|---|---|
-| `struggle_weights_version` | v1 | Normal — v2 is deployment-ready (positive finding) |
-| `difficulty_weights_version` | v1 | Warn — v2 underperforms; disabled when `difficulty_model == "irt"` |
-| `improved_struggle_weights_version` | v1 | Warn — v2 underperforms; disabled when `struggle_model != "improved"` |
-| `hyperparams_version` | v1 | Normal — overrides K + τ from the Optuna JSON
+| `struggle_weights_version` | (now always v2) | was v1-default; v2 deployment-ready (positive finding) |
+| `difficulty_weights_version` | (now always v2) | was v1-default; disabled when `difficulty_model == "irt"` |
+| `improved_struggle_weights_version` | (now always v2) | was v1-default; disabled when `struggle_model != "improved"` |
+| `hyperparams_version` | (now always v2) | was v1-default; overrode K + τ from the Optuna JSON |
 
 ---
 

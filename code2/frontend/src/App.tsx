@@ -14,7 +14,6 @@ import { QuestionDetailView } from './views/QuestionDetail'
 import { PreviousSessionsView } from './views/PreviousSessions'
 import { SettingsView } from './views/SettingsView'
 import { DataAnalysisView } from './views/DataAnalysisView'
-import { ComparisonView } from './views/ComparisonView'
 import { LabAssistantView } from './views/LabAssistantView'
 import { SessionProgressionView } from './views/SessionProgression'
 import { useEffect } from 'react'
@@ -97,10 +96,6 @@ export default function App() {
       case 'analysis':
         title = 'Data Analysis'
         screen = <DataAnalysisView />
-        break
-      case 'compare':
-        title = 'Model Comparison'
-        screen = <ComparisonView />
         break
       case 'previous':
         title = 'Previous Sessions'

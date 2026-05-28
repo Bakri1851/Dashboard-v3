@@ -2,7 +2,7 @@
 
 ## Conclusion: **stay with OLS for all three v2 model classes.**
 
-No methodology change. The bake-off is a defensive artefact for §5.6 "we considered alternatives" prose if a reviewer asks why we used OLS rather than something fancier.
+No methodology change to the model class. **Promoted 2026-05-27 from a defensive §5.6 footnote to the headline §5.4 model-class-selection comparison** (see `[[v2 Threshold Training Handoff]]` §14): the bake-off is now first-class evidence that the OLS choice was correct on merit, not just interpretability. A second axis (regression-vs-classification framing, `classifier_bakeoff.json`) was added — classifiers win raw κ but OLS+trained-thresholds matches them while keeping interpretable signed weights and stronger ranking. The promoted artefacts live at `data/eval/{model_class,classifier}_bakeoff.json` + `data/eval/figures/{model_class_bakeoff,framing_regression_vs_classification}.png`.
 
 ## What the bake-off tried
 

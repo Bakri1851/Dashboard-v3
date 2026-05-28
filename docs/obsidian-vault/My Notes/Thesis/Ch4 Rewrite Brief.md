@@ -322,7 +322,7 @@ where each signal is min-max normalised across the cohort, and a Bayesian shrink
   - Weights sum to 1.00; an import-time assertion in `config.py` enforces this.
 - Bayesian shrinkage with prior strength `SHRINKAGE_K = 5`: a student with $n \gg K$ submissions is unaffected; a student with $n \ll K$ is pulled toward the cohort mean. This stops a single noisy submission from putting a low-volume student at the top of the leaderboard.
 - The whole pipeline runs as one vectorised pass over the data frame — no per-student loops.
-- Thresholds for level labels live in `STRUGGLE_THRESHOLDS`: `On Track` (0.00–0.20), `Minor Issues` (0.20–0.35), `Struggling` (0.35–0.50), `Needs Help` (0.50–1.00).
+- Thresholds for level labels live in `STRUGGLE_THRESHOLDS`: `On Track` (0.00–0.102), `Minor Issues` (0.102–0.203), `Struggling` (0.203–0.326), `Needs Help` (0.326–1.00) — CV-trained on the deployed v2-OLS composite (κ +0.038→+0.384; provenance in the §5.4 band-threshold subsection).
 
 **Drop-in LaTeX table (paste under `\subsubsection{Baseline Student Struggle Model}`):**
 
@@ -363,7 +363,7 @@ with all components min-max normalised across the question set. Derivation in Ch
   - $F$ — average incorrectness score (`DIFFICULTY_WEIGHT_F = 0.20`)
   - $P$ — first-attempt failure rate (`DIFFICULTY_WEIGHT_P = 0.20`)
 - Weights sum to 1.00 (asserted at import time).
-- Thresholds: `Easy` (0.00–0.35), `Medium` (0.35–0.50), `Hard` (0.50–0.75), `Very Hard` (0.75–1.00).
+- Thresholds: `Easy` (0.00–0.288), `Medium` (0.288–0.388), `Hard` (0.388–0.531), `Very Hard` (0.531–1.00) — CV-trained on the deployed v2-OLS difficulty composite (κ +0.225→+0.387; provenance in the §5.4 band-threshold subsection).
 
 **Drop-in LaTeX table:**
 

@@ -250,8 +250,8 @@ def compute_improved_components_at_t(slice_df: pd.DataFrame) -> dict[str, dict]:
     # BKT: per-skill MLE fit using config defaults. fit_all_skills is the
     # heavy operation but we can call compute_all_mastery directly with the
     # default priors and let it use whatever per-skill fitted params are
-    # cached. For per-cutoff training we use the defaults (priors live in
-    # config), matching how the dashboard runs when hyperparams_version=v1.
+    # cached. For per-cutoff training we use the config-default BKT priors
+    # (BKT priors are not part of the Optuna-tuned hyperparameters).
     mastery_summary = None
     try:
         mastery_df = bkt.compute_all_mastery(

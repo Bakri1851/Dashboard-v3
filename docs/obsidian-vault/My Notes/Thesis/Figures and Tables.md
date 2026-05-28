@@ -6,6 +6,9 @@
 <!-- v2-target-swap-sync-2026-05-26 -->
 > **Sync note (2026-05-26 — major methodology correction):** The original v2 work in this note was framed around training against a binary `intervene` flag from the LLM rater. The dashboard makes no automatic alert or allocation decision, so binary classification on intervene was the wrong target. **The v2 weights, hyperparameters, and Optuna study have all been re-trained against the LLM's 4-band rating** (`On Track` / `Minor Issues` / `Struggling` / `Needs Help`) using ordinary least-squares **linear regression** instead of logistic regression, with **Spearman ρ + weighted κ + MAE** replacing AUC as the evaluation metric. Under the corrected target the verdict scorecard becomes **4 positive findings + 1 tie** (was "2 positive + 2 negative + 1 tie" — the previous negative findings for difficulty and improved-struggle were artefacts of the wrong target). Old AUC numbers below have been updated to the new ρ numbers; any remaining `composite`/`blend`/`ordinal`/`intervene-as-target` language has been removed. See `data/eval/results.md` for the authoritative current numbers.
 
+<!-- v2-threshold-promotion-2026-05-27-evening -->
+> **Sync note (2026-05-27 evening — threshold promotion + recalibration):** Band-cutpoint thresholds are now CV-trained on the **deployed v2-OLS composite** — struggle (0.000, 0.102, 0.203, 0.326, 1.000), κ +0.038→+0.384; difficulty (0.000, 0.288, 0.388, 0.531, 1.000), κ +0.225→+0.387. (An earlier promotion fit the cutpoints on the v1 *baseline* composite — (0.315, 0.505, 0.605)/(0.363, 0.463, 0.587) — but the deployed system feeds the compressed v2 composite through them, classifying ~99% below "Needs Help"; recalibrated 2026-05-27 via `scripts/experiments/threshold_search_v2composite.py`.) **Tbl 6 / Tbl 7 refreshed to the recalibrated values.** Regenerated figures: `data/eval/figures/cohort_distributions.png` (deployed v2 model, 31/14/15/40% struggle split), `confusion_bands.png` (v2-only). Source: `data/eval/experiments/threshold_search_v2composite.json`; see [[v2 Threshold Training Handoff]] and [[v2 Report Change List]].
+
 Inventory of all visual elements in the thesis with their current status and recommended actions.
 
 Related: [[Report Sync]], [[Rewrite Queue]], [[Evidence Bank]], [[Thesis Overview]]
@@ -40,7 +43,11 @@ New figures needed for the rewritten Ch4 and Ch5:
 | V2 Data analysis | Example analysis chart | Screenshot |
 | V2 Settings | Model toggles and CF configuration | Screenshot |
 | V2 Lab assistant views | Join, waiting, assigned screens | Screenshot |
+| Model-class bake-off | OLS vs regression alternatives (Ridge/Lasso/ElasticNet/RF/GB) × 3 targets — the headline §5.4 comparison | `data/eval/figures/model_class_bakeoff.png` |
+| Regression-vs-classification framing | OLS (regression) vs 3 classifiers — Spearman ρ + weighted κ panels | `data/eval/figures/framing_regression_vs_classification.png` |
 | V2 Architecture diagram | Three-layer pipeline: ingest + caches → baseline + advanced + RAG → instructor + lab-assistant surfaces with file-locked shared state | **Done 2026-05-20** — TikZ inline in `design-and-architecture.tex` keeps the `\label{fig: system architecture}` Figure 6 slot. |
+
+> **v1-cut note (2026-05-27):** v1 is removed from the Ch5 evaluation (v2 is the deployed/premiere model; the model-class bake-off is the §5.4 comparison). The paired v1-vs-v2 eval figures (`weights_struggle_v1_vs_v2`, `pred_vs_obs_v1_v2_struggle`, `negative_findings`, `confusion_bands`, `model_disagreement`, `score_delta_v1_vs_v2_struggle`, `rank_shift_v1_vs_v2_*`) are **no longer cited**; the report uses v2-only equivalents (`weights_struggle_v2`, `pred_vs_obs_v2_struggle`, `negative_findings_v2`, v2-only `confusion_bands`) + the two bake-off figures above.
 
 ---
 
@@ -129,8 +136,8 @@ New figures and tables prompted by post-Phase-11 code surface (commits `54d45b7`
 
 | Target | What to change |
 |---|---|
-| Ch3 Tbl 6 (Struggle visual encoding) | Use current thresholds: On Track [0.00, 0.20] · Minor Issues [0.20, 0.35] · Struggling [0.35, 0.50] · Needs Help [0.50, 1.00] — matches `config.py` after maths-fix. |
-| Ch3 Tbl 7 (Difficulty visual encoding) | Use current thresholds: Easy [0.00, 0.35] · Medium [0.35, 0.50] · Hard [0.50, 0.75] · Very Hard [0.75, 1.00]. |
+| Ch3 Tbl 6 (Struggle visual encoding) | Deployed v2-composite cutpoints (`config.py`): On Track [0.00, 0.102] · Minor Issues [0.102, 0.203] · Struggling [0.203, 0.326] · Needs Help [0.326, 1.00]. NOTE per the threshold handoff: Ch3 keeps these **symbolic** ($t_{s1..3}$, interpretability-first); the numeric trained values are cited in Ch4 + the §5.4 band-threshold subsection. |
+| Ch3 Tbl 7 (Difficulty visual encoding) | Deployed v2-composite cutpoints (`config.py`): Easy [0.00, 0.288] · Medium [0.288, 0.388] · Hard [0.388, 0.531] · Very Hard [0.531, 1.00]. Ch3 stays symbolic (see Tbl 6 row). |
 | Ch3 Tbl 4 (Tech stack) | Add to "Key libraries": openai, filelock, scikit-learn, scipy, streamlit-autorefresh, chromadb, sentence-transformers, fastapi, uvicorn, react, vite, typescript. Drop any V1-only rows. |
 | Ch1 Tbl 1 (Risks and mitigations) | Replace generic mitigations with actual ones: Bayesian shrinkage for small-n; modular `models/` package for extensibility; graceful-degradation for missing inputs; FR6 scoped out honestly. |
 

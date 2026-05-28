@@ -4,7 +4,7 @@ Master's thesis for the Dashboard v3 project. This note tracks the overall state
 
 Related: [[Report Sync]], [[Rewrite Queue]], [[Evidence Bank]], [[Home]]
 
-> **Source reconciliation:** when code, thesis, vault, toolkit, CLAUDE.md, and MEMORY.md disagree, the canonical rule and live disagreement inventory live in the toolkit's Status panel **§6 Source reconciliation** (`docs/recap_toolkit/dashboard_v3_toolkit.html`).
+> **Source reconciliation:** when code, thesis, vault, CLAUDE.md, and MEMORY.md disagree, the **code + `data/eval/results.md` are canonical for numbers**, the **report (`Report/`) is canonical for prose**, and these vault notes are working drafts. (The HTML recap toolkit that previously held the disagreement inventory was deleted 2026-05-27.)
 
 ## Metadata
 

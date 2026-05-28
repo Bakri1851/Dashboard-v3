@@ -11,9 +11,10 @@
 # and `classify_score` helpers.
 #
 # Phase 5: `compute_student_struggle_scores` accepts optional `weights` and
-# `shrinkage_k` overrides so cache.py can pass v2-trained values through
-# when the runtime toggle is on. `_load_v2_weights` reads the trained JSON
-# with graceful fallback to v1.
+# `shrinkage_k` overrides; cache.py passes the v2-trained values on every
+# request (the deployed default — there is no runtime v1/v2 toggle).
+# `_load_v2_weights` reads the trained JSON, falling back to the v1 constants
+# only if the file is missing.
 import json
 import logging
 import math
@@ -38,10 +39,10 @@ def _load_v2_weights() -> Optional[dict[str, float]]:
     """Read data/eval/optimised_struggle_weights_v2.json. Returns the 7-element
     weight dict on success, None if missing/malformed/wrong-model-class.
 
-    Cached lookup at call time (cheap — file is small + JSON parse is fast),
-    so a Settings toggle flip is reflected on the next request without an
-    app restart. The cache.py callers pass the result through to
-    `compute_student_struggle_scores` only when `runtime_config.struggle_weights_version == "v2"`.
+    Cached lookup at call time (cheap — file is small + JSON parse is fast).
+    `cache.load_struggle_df` passes the result through to
+    `compute_student_struggle_scores` on every request — the trained v2 weights
+    are the deployed default.
     """
     path = config.STRUGGLE_WEIGHTS_V2_PATH
     if not path.exists():
@@ -184,15 +185,15 @@ def compute_student_struggle_scores(
     df : DataFrame of submissions to score.
     weights : optional dict with keys ``{n_hat, t_hat, i_norm, r_norm,
         A_norm, d_hat, rep_norm}`` — when provided, overrides the v1
-        hand-set weights in ``config.STRUGGLE_WEIGHT_*``. Typically the
-        result of ``_load_v2_weights()`` passed through by
-        ``cache.load_struggle_df`` when the runtime
-        ``struggle_weights_version`` toggle is "v2". Note: v2 weights may
-        be NEGATIVE (LR coefficients normalised to L1=1), so the resulting
-        struggle_score is clipped to [0, 1] AFTER the weighted sum.
+        hand-set weights in ``config.STRUGGLE_WEIGHT_*``. The trained v2
+        weights from ``_load_v2_weights()`` are passed through by
+        ``cache.load_struggle_df`` on every request (the deployed default).
+        Note: v2 weights may be NEGATIVE (LR coefficients normalised to
+        L1=1), so the resulting struggle_score is clipped to [0, 1] AFTER
+        the weighted sum.
     shrinkage_k : optional override for ``config.SHRINKAGE_K`` — passed
-        through by cache.py when the runtime ``hyperparams_version`` toggle
-        is "v2". Defaults to ``config.SHRINKAGE_K``.
+        through by cache.py from the runtime config (seeded from the
+        Optuna-tuned v2 value). Defaults to ``config.SHRINKAGE_K``.
     """
     if df.empty:
         return pd.DataFrame(columns=[

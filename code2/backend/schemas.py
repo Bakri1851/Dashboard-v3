@@ -245,11 +245,9 @@ class RuntimeSettings(BaseModel):
     struggle_model: str           # "baseline" | "improved"
     difficulty_model: str         # "baseline" | "irt"
     bkt: BKTParameters
-    # Phase 5: V2 toggles (all "v1" | "v2"; default "v1")
-    struggle_weights_version: str
-    difficulty_weights_version: str
-    improved_struggle_weights_version: str
-    hyperparams_version: str
+    # shrinkage_k is seeded from the Optuna-tuned v2 value at boot and remains
+    # user-adjustable. The trained v2 composite weights are loaded directly by
+    # cache.py and are no longer a runtime-selectable version.
     shrinkage_k: int
 
 
@@ -315,53 +313,6 @@ class AnalysisStats(BaseModel):
     top_questions: list[TopQuestionRow] = Field(default_factory=list)
     user_activity: list[UserActivityRow] = Field(default_factory=list)
     activity_by_week: list[WeekActivityCell] = Field(default_factory=list)
-
-
-# ----------------------------------------------------------------
-# /api/models/compare
-# ----------------------------------------------------------------
-
-
-class ModelRow(BaseModel):
-    id: str
-    level: str
-    score: float
-
-
-class ModelPairRow(BaseModel):
-    id: str
-    baseline_level: str
-    baseline_score: float
-    improved_level: str
-    improved_score: float
-    delta: float
-
-
-class AgreementSummary(BaseModel):
-    agreement_pct: float
-    upgraded: int
-    downgraded: int
-    unchanged: int
-    total: int
-
-
-class ModelComparisonSection(BaseModel):
-    baseline: list[ModelRow]
-    improved: list[ModelRow]
-    pairs: list[ModelPairRow] = Field(default_factory=list)
-    agreement: AgreementSummary | None = None
-    spearman_rho: float | None = None
-    top10_overlap: float | None = None
-
-
-class ModelCompareResponse(BaseModel):
-    baseline: list[ModelRow]
-    improved: list[ModelRow]
-    spearman_rho: float | None = Field(default=None, description="Rank correlation baseline vs improved")
-    top10_overlap: float | None = Field(default=None, description="Fraction overlap in top-10 needs-help sets")
-    pairs: list[ModelPairRow] = Field(default_factory=list, description="All students keyed on id with both baseline + improved scores")
-    agreement: AgreementSummary | None = Field(default=None, description="Level-classification agreement counts")
-    difficulty: ModelComparisonSection | None = Field(default=None, description="Baseline vs IRT question difficulty")
 
 
 # ----------------------------------------------------------------
