@@ -1,60 +1,24 @@
-\section{Conclusion} \label{sec:conclusion}
+---
+phase: writing-brief
+status: draft-prose
+created: 2026-05-28
+covers: Chapter 6 (Conclusion) prose drafts for Report/main-sections/conclusion.tex
+companion-of: "[[v2 Report Change List]]"
+---
 
-% =====================================================================
-% TODO (Bakri): READ-THROUGH PASS before final submission.
-%
-% (1) Voice sweep.  Read the whole Conclusion chapter end-to-end and
-%     rewrite any prose that doesn't sound like your voice.  Claude
-%     drafted all three subsections (§6.1 Summary of the Project,
-%     §6.2 Key Findings and Contributions, §6.3 Future Work) from the
-%     Ch6 brief in v2 Report Change List.md lines 24 and 70-71.
-%     Sweep for:
-%       - "we propose / we adopt" phrasings that don't match your tone
-%       - hedging words ("arguably", "perhaps", "somewhat")
-%       - US spelling ("optimize", "behavior", "analyze")
-%       - double hyphens "--" where you prefer a single "-"
-%       - any leftover "v1 default" / "v2 best" labels
-%       - stale "% TODO:" comments sitting above completed prose
-%
-% (2) Resolve inline % FLAG comments in §6.3:
-%       - L59-60 (Joint optimisation paragraph): neither `mord` nor
-%         `statsmodels.OrderedModel` is in references.bib.  Decide:
-%         (a) import as Phase-2 candidates and add \cite{} calls, or
-%         (b) drop the package names and keep the methodology phrasing.
-%       - L64-66 (Cohort-balanced re-evaluation): the 5.8% On Track
-%         figure was lifted from the v2 Report Change List brief and is
-%         NOT in the shipped results-and-evaluation.tex §5.4.1 (which
-%         reports deployed-model bands 31/14/15/40% struggle).  The
-%         5.8% likely refers to the LLM-rater label distribution rather
-%         than the deployed model's output - verify against
-%         data/eval/results.md or the rater summary, or restate
-%         qualitatively as "very few On Track snapshots".
-%
-% (3) Heading cleanup from paste:
-%       - L21+22: duplicate \subsection{} headings.  Keep the corrected
-%         "Key Findings and Contributions"; delete the original
-%         "Key Findings Contributions" skeleton line.
-%       - L47+49: duplicate \subsection{Future Work} headings.  Keep
-%         one, delete the other.
-%
-% (4) Sync the Writing Roadmap with Ch6 once the read-through is done:
-%       docs/obsidian-vault/My Notes/Thesis/Writing Roadmap.md
-%     Items to bring across:
-%       - Order-of-operations row 13 (Ch6 Conclusion) flips from ⏳ to ✅
-%       - "2026-05-28 - Ch6 conclusion chapter complete" log entry under
-%         the existing "2026-05-28 - Ch5 evaluation chapter complete"
-%         entry, covering §6.1 / §6.2 / §6.3 scope
-%       - v2 Report Change List.md - mark the Ch6 section as DONE and
-%         optionally add a "2026-05-28 - Ch6 session-complete sync" log
-%         entry at the bottom matching the Ch5 entry's structure
-%       - Appendix B Settings-view re-shoot and Appendix E formulae
-%         (optional) remain the only outstanding Ch5/Ch6-adjacent items
-%
-% (5) Verify pdflatex builds clean: the \ref{sec:conclusion} call from
-%     §5.5.5 (Q11 cross-session aggregation) now has a target; no other
-%     forward-references into Ch6 exist in the chapters before it.
-% =====================================================================
+# Ch6 Conclusion - Draft Prose
 
+Author-from drafts for `Report/main-sections/conclusion.tex`. Three subsections matching the existing skeleton. Restyle into voice; paste each tex block in place of the corresponding empty `\subsection{...}` line.
+
+`[FLAG: ...]` notes are surfaced as LaTeX `% FLAG: ...` comments inside the tex blocks so they travel with the prose; resolve and delete the comment before final paste. All other numbers are quoted verbatim from `Report/main-sections/results-and-evaluation.tex` or `data/eval/results.md`.
+
+Heading fix on paste for §6.2: the existing skeleton reads `\subsection{Key Findings Contributions}` (missing "and"); the tex block below has the corrected `\subsection{Key Findings and Contributions}`.
+
+---
+
+## §6.1 Summary of the Project
+
+```tex
 \subsection{Summary of the Project}
 
 This project addressed a recurring practical problem in university computer labs: instructors and lab assistants cannot reliably see, in real time, which students are struggling and which questions are causing the most difficulty across a session of several dozen to over a hundred concurrent learners.
@@ -71,7 +35,13 @@ Functional and non-functional evaluation followed in Chapter~\ref{sec:evaluation
 Against the rater's four-band rating, the deployed composite achieved Spearman $\rho = +0.588$ on the struggle target and $\rho = +0.469$ on difficulty (Section~\ref{sec:eval-results}); after a constrained cross-validated brute-force search the deployed cutpoints lifted linear-weighted Cohen's $\kappa$ to $+0.384$ for struggle and $+0.387$ for difficulty (Section~\ref{sec:eval-thresholds}).
 The 2PL Item Response Theory difficulty model was retained as a complementary toggle but not promoted to be the deployed scorer: its band agreement against the rater was marginally negative ($\kappa = -0.024$ at trained thresholds) and the top-ten hardest set overlapped with the composite's by one question in ten (Section~\ref{sec:eval-irt}).
 The system is deployed and in use; the sections that follow set out what the validation contributed and what remains for future work.
+```
 
+---
+
+## §6.2 Key Findings and Contributions
+
+```tex
 \subsection{Key Findings and Contributions}
 
 The first contribution is a systematic empirical validation of every tunable component of the deployed scoring pipeline against second-opinion labels from a large language model rater, with positive and negative findings reported in equal weight.
@@ -88,15 +58,22 @@ The contribution is the systematic coverage and the willingness to land negative
 
 The second contribution is the training methodology itself, reusable beyond this dashboard.
 The methodology has three components.
-The supervision target is a four-band ordinal rating (On Track / Minor Issues / Struggling / Needs Help on struggle; Easy / Medium / Hard / Very Hard on difficulty) produced by a large language model rater shown per-snapshot and per-question signals, which replaces the earlier binary intervene-or-not framing.
+The supervision target is a four-band ordinal rating (\emph{On Track} / \emph{Minor Issues} / \emph{Struggling} / \emph{Needs Help} on struggle; \emph{Easy} / \emph{Medium} / \emph{Hard} / \emph{Very Hard} on difficulty) produced by a large language model rater shown per-snapshot and per-question signals, which replaces the earlier binary intervene-or-not framing.
 The estimator is ordinary least-squares over the composite features rather than gradient boosting or random forest.
 The evaluation metric stack is Spearman $\rho$ for ranking, linear-weighted Cohen's $\kappa$ for band agreement, and mean absolute error for calibration, replacing the binary-only AUC of the original framing.
 
 The model-class-selection rigour is the bake-off in Section~\ref{sec:eval-results}: ordinary least-squares regression was benchmarked against random forest, gradient boosting, and histogram gradient boosting across all three targets under matched cross-validation.
 Ordinary least-squares won the struggle target decisively at $\rho = +0.588$ against the next-best random forest at $\rho = +0.565$, tied the difficulty target within per-fold noise at $\rho = +0.469$ against random forest's $\rho = +0.479$, and was the only competitive class with interpretable signed weights.
 Tree-ensemble alternatives offered no consistent gain large enough to outweigh that interpretability and were dropped from the deployed path; this is the bake-off rigour that the chapter argues a learning analytics deployment should be judged on, and the basis on which the deployed model class was chosen.
+```
 
+---
 
+## §6.3 Future Work
+
+Seven items, modelling and evaluation first; smart-device integration closes the section as the secondary-aim follow-up. Each item is a `\paragraph{...}` lead matching the §5.6.2 voice.
+
+```tex
 \subsection{Future Work}
 
 \paragraph{Cross-session aggregation.}
@@ -138,3 +115,4 @@ The original scope in Section~\ref{sec: intro} named smartwatch and smart-glasse
 The V2 deployment scoped this down to a mobile lab-assistant web route served by the same FastAPI process, which delivers the same coordination affordance through a web interface rather than a native device.
 Future work would restore the original ambition with native notifications to a wearable, layered over the same file-locked shared-state coordination V2 already uses for cross-stack session synchronisation.
 This closes the loop on the secondary aim from Chapter~\ref{sec: intro} rather than the modelling-side findings that drive the earlier items.
+```

@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "My Notes/Thesis/v2 Report Change List.md",
+                "file": "My Notes/Thesis/Abstract Draft.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "v2 Report Change List"
+              "title": "Abstract Draft"
             }
           }
         ],
@@ -93,8 +93,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "3c0caa2f4bd4d469",
@@ -201,6 +200,10 @@
   },
   "active": "21618e99d70cb1ec",
   "lastOpenFiles": [
+    "My Notes/Thesis/Ch6 Conclusion Draft.md",
+    "My Notes/Thesis/Abstract Draft.md",
+    "My Notes/Thesis/Ch6 – Conclusion.md",
+    "My Notes/Thesis/v2 Report Change List.md",
     "My Notes/Thesis/v2 Report Change List.md.tmp.3468.3a5874dd38ea",
     "My Notes/Thesis/v2 Report Change List.md.tmp.3468.097be86632e8",
     "My Notes/Thesis/v2 Report Change List.md.tmp.3468.9f0ecd1b8b8b",
@@ -212,8 +215,6 @@
     "My Notes/Thesis/Ch4 Rewrite Brief.md.tmp.3468.23bba8a42c32",
     "My Notes/Thesis/Ch4 §4.6 Brief.md.tmp.3468.73fdd9808e6e",
     "My Notes/Thesis/Ch5 §5.4 + cross-chapter training-methodology Drafting Plan.md",
-    "My Notes/Thesis/v2 Report Change List.md",
-    "My Notes/Thesis/v2 Report Change List.md.tmp.3468.61e73a9ae634",
     "My Notes/Thesis/Model Training/Classifier Training.md",
     "My Notes/Thesis/Model Training/Difficulty Model Training.md",
     "My Notes/Thesis/Model Training/Struggle Model Training.md",
@@ -235,8 +236,6 @@
     "My Notes/Thesis/Report Sync.md",
     "My Notes/Thesis/Future Work Inventory.md",
     "My Notes/Thesis/Evaluation PoC Handoff.md",
-    "My Notes/Thesis/Evidence Bank.md",
-    "My Notes/Thesis/V2 Architecture Diagram Spec.md",
     "Untitled.canvas",
     "My Notes/Code/Assistant App/Operations/Pasted image 20260414004425.png",
     "My Notes/Code/Assistant App/Operations/Pasted image 20260414004418.png",

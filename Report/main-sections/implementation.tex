@@ -661,7 +661,7 @@ Bayesian shrinkage is the final step: a student with $n \gg K$ submissions is un
 V1 takes the unweighted arithmetic mean when computing both the overall incorrectness signal $I$ and the recent-incorrectness signal $A$.
 V2 weights both by the per-row measurement confidence introduced in Section \ref{sec:advanced}, so a submission with low-confidence feedback contributes less to the incorrectness signals and therefore to the struggle score; this is an improvement since the OpenAI scorer can be noisy on short or ambiguous feedback texts.
 Confidence-weighted aggregation is one of several analytical refinements introduced in V2 (see Section \ref{sec:advanced} for the IRT and BKT additions).
-Threshold bands live in \texttt{STRUGGLE\_THRESHOLDS}: On Track ($0.00$-$0.102$), Minor Issues ($0.102$-$0.203$), Struggling ($0.203$-$0.326$) and Needs Help ($0.326$-$1.00$); the colours match the In-Class leaderboard colours shown in Section \ref{sec:views}.
+Threshold bands live in \texttt{STRUGGLE\_THRESHOLDS}: On Track ($0.00$-$0.102$), Minor Issues ($0.102$-$0.203$), Struggling ($0.203$-$0.326$) and Needs Help ($0.326$-$1.00$); the colours match the In-Class leaderboard colours shown in Section \ref{sec:views}.\label{sec:thresholds-struggle}
 
 
 \begin{table}[H]
@@ -718,7 +718,7 @@ where each capital symbol is the min-max normalisation of its raw per-question s
 The five signals and their weights are listed in Table \ref{tab:difficulty-5sig}; an import-time assertion in \texttt{config.py} enforces the weight sum to $1.0$.
 V1 normalises each signal globally across the full question set using \texttt{min\_max\_normalise}; V2 instead normalises within each module using \texttt{min\_max\_normalise\_grouped} keyed by \texttt{module}.
 A hard question in one module may not be the same as a hard question in another, and a global normalisation would let one module's difficulty distribution dominate the others - V2's grouped pass restores per-module sensitivity without changing the weights themselves (Figure \ref{fig:code-permodule}).
-The threshold bands in \texttt{DIFFICULTY\_THRESHOLDS} are Easy ($0.00$-$0.288$), Medium ($0.288$-$0.388$), Hard ($0.388$-$0.531$) and Very Hard ($0.531$-$1.00$).
+The threshold bands in \texttt{DIFFICULTY\_THRESHOLDS} are Easy ($0.00$-$0.288$), Medium ($0.288$-$0.388$), Hard ($0.388$-$0.531$) and Very Hard ($0.531$-$1.00$).\label{sec:thresholds-difficulty}
 
 
 \begin{table}[H]
@@ -1231,7 +1231,7 @@ Both versions expose the runtime model configuration through a Settings page, wh
 When Improved is selected, four sliders appear for the BKT parameters $P(L_0)$, $P(T)$, $P(G)$ and $P(S)$ with defaults from Section \ref{sec:advanced}, a slider change retriggers the per-student mastery computation on the next refresh. 
 The two diverge in a few places where V2 has a theme picker that persists to \texttt{localStorage} and an In-Class layout toggle (Basic/Advanced). V1 also exposes a Temporal Smoothing toggle (\texttt{SMOOTHING\_ENABLED}) where V2 hard-codes the EMA at $\alpha = 0.3$ and surfaces \texttt{smoothing\_alpha} only in a read-only configuration reference at the bottom of the page. 
 V2 also surfaces the trained weights, hyperparameters and band thresholds in that read-only configuration reference; they are not user-selectable.
-The per-component verdict for each v2 trained weight vector is reported in Section~\ref{sec:eval-findings}; the trained weights are applied unconditionally at request time.
+The per-component verdict for each v2 trained weight vector is reported in Section~\ref{sec:eval-results}; the trained weights are applied unconditionally at request time.
 
 V1 also carries a small UX flourish that V2 does not: six short sci-fi sound cues fired at session start, session end, student selection and other key events, authored as Web Audio API \texttt{OscillatorNode} and \texttt{GainNode} chains in \texttt{code/learning\_dashboard/sound.py} and injected through a zero-height iframe via \texttt{st.components.v1.html()} as Streamlit cannot natively play audio. The cues are gated by the Sound Effects toggle and, whilst not load-bearing analytically, help the instructor track session state without staring at the screen.
 

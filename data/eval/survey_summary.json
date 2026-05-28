@@ -141,7 +141,8 @@
     }
   },
   "figures": [
-    "Report/figures/evaluation/eval-survey-likert.png",
-    "Report/figures/evaluation/eval-survey-clarity-intuitiveness.png"
+    "Report/figures/evaluation/eval-survey-baseline.png",
+    "Report/figures/evaluation/eval-survey-interpretability-trust.png",
+    "Report/figures/evaluation/eval-survey-comfort.png"
   ]
 }

@@ -1,5 +1,35 @@
+% =====================================================================
+% TODO (Bakri): READ-THROUGH PASS before final submission.
+%
+% (1) Abstract paste.  \begin{abstract}...\end{abstract} below is
+%     empty.  Draft prose ready at
+%       docs/obsidian-vault/My Notes/Thesis/Abstract Draft.md
+%     Paste the tex block, then voice-sweep (see chapter-level blocks
+%     for the standard checklist: hedging, US spelling, double hyphens,
+%     leftover v1/v2 labels, stale comments).
+%
+
+%
+% (3) Build verification.  After all chapter and appendix paste passes:
+%       pdflatex main && bibtex main && pdflatex main && pdflatex main
+%     and confirm zero undefined-reference warnings.  In particular:
+%       - \ref{sec:conclusion} from §5.5.5 (Q11 cross-session
+%         aggregation) now resolves
+%       - \ref{app:ui-screenshots} resolves wherever cited
+%       - \ref{app:detailed-test-results} resolves from §5.1
+%       - \ref{sec:thresholds-struggle} / \ref{sec:thresholds-difficulty}
+%         resolve from §5.4.5
+%       - bibliography style is ieeetr (L131); no missing-citation
+%         warnings after the second pdflatex pass
+%
+% (4) Per-chapter / per-appendix read-through TODO blocks live at the
+%     top of each main-sections/*.tex and appendix-sections/*.tex file.
+%     Sweep them all before submission and delete each block once its
+%     items are resolved.
+% =====================================================================
+
 \documentclass{article}
-\usepackage{graphicx} 
+\usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{titling}
@@ -89,7 +119,16 @@
 
 
 \begin{abstract}
-    
+
+University computer labs are fast-paced environments in which instructors and lab assistants cannot reliably see, in real time, which students are struggling and which questions are causing the most difficulty across a session of several dozen to over a hundred concurrent learners.
+This thesis presents a real-time learning analytics dashboard, deployed as a React and FastAPI application, that ingests live submission data and surfaces interpretable struggle and difficulty rankings alongside a mistake-cluster view, a collaborative-filtering recommender, advanced models based on Item Response Theory and Bayesian Knowledge Tracing, and a Retrieval-Augmented Generation feedback panel.
+A second route on the same process hosts a mobile lab-assistant interface, with cross-component coordination through a file-locked shared session state.
+
+The composite scoring pipeline was validated end-to-end against second-opinion labels from a large language model rater, covering composite weights, two scalar hyperparameters, and the score-to-band thresholds.
+The composite weights were refit by ordinary least-squares regression chosen on the basis of a model-class bake-off against random forest, gradient boosting, and histogram gradient boosting; the Bayesian shrinkage constant and the collaborative-filtering threshold were tuned by Tree-structured Parzen Estimator across fifty-trial Optuna studies; and the band thresholds were trained by brute-force linear-weighted Cohen's $\kappa$ maximisation under constrained cross-validation.
+Against the rater's four-band rating, the deployed composite achieved Spearman $\rho = +0.588$ on the struggle target and $\rho = +0.469$ on difficulty, with linear-weighted Cohen's $\kappa = +0.384$ for struggle and $\kappa = +0.387$ for difficulty at the recalibrated cutpoints.
+A 2PL Item Response Theory difficulty model was evaluated alongside the composite and retained as a complementary view but not promoted to the deployed scorer; its negative finding, with $\kappa = -0.024$ at trained thresholds and a top-ten hardest overlap of one question in ten against the composite, is reported as a positive contribution of the systematic methodology rather than as a failure.
+
 \end{abstract}
 
 \newpage
