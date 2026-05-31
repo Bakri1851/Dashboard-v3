@@ -43,3 +43,7 @@ Related: [[Writing Roadmap]] · [[Full Roadmap]] · [[v2 Report Change List]] ·
 - **RAG count:** confirm how many existing approaches were surveyed ("three or four"). → [[03 Design Rationale & Missing Views]]
 - **τ deployment:** Optuna suggests raising `cf_threshold` 0.7→0.90 — change the deployed `config.py` default, or only report it as a finding? → [[01]] / [[09 Possible New Design-Implementation Work (rationale-only)]]
 - **New BibTeX:** validate the 6 candidate refs in Zotero before Better BibTeX export (I do **not** edit `references.bib`). → [[07 Citations — wire orphans + Candidate References]]
+
+## If time permits (stretch)
+
+- **Recent-work scouting (optional, end of pass):** run a deep-research web sweep on *"What's the 2024–2026 state-of-the-art in real-time struggle detection — am I missing recent work?"* as a scouting step for [[06 Background Lit-Review Expansion]] / [[10 Related Work & Research-Gap Expansion]]. Output is a leads list to chase in Zotero/Scholar — **scouting, not citable content**; validate any ref in Zotero before it enters `references.bib`. → run via `/deep-research`.

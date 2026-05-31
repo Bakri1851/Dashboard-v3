@@ -14,7 +14,7 @@ FR1 & Live ingestion of lab data & E2E & Pass & Section~\ref{sec:eval-data-inges
 \hline
 FR2 & Computation of student struggle & E2E & Pass & Section~\ref{sec:eval-analytics-behaviour}: seven-signal scores in $[0,1]$ with four bands classifying correctly under v1 and v2; CF, clustering, IRT 2PL, BKT and improved model cross-checked against the design equations; weight redistribution verified. \\
 \hline
-FR3 & Computation of question difficulty & E2E & Pass & Section~\ref{sec:eval-analytics-behaviour}: five-signal scores in $[0,1]$ with four bands correct; IRT 2PL and BKT fits and graceful weight redistribution tested; no silent failures. \\
+FR3 & Computation of question difficulty & E2E & Pass & Section~\ref{sec:eval-analytics-behaviour}: five-signal baseline difficulty scores in $[0,1]$ with four bands classifying correctly under v1 and v2; the 2PL IRT difficulty model was evaluated as an alternative but did not beat the hand-set baseline and was not deployed; no silent failures. \\
 \hline
 FR4 & Real-time prioritisation & E2E & Pass & Section~\ref{sec:eval-instructor-features}: In-Class leaderboards ordered by score under Basic and Advanced modes; band colours track the threshold map; per-module and per-session filters update correctly. \\
 \hline
@@ -22,7 +22,7 @@ FR5 & Present relevant analytics & E2E & Pass & Section~\ref{sec:eval-instructor
 \hline
 FR6 & Smart-device integration & & Scoped out & Section~\ref{sec:eval-assistant-workflow}: descoped at design time in favour of the modelling focus; restated as future work in Section~\ref{sec:eval-discussion}. \\
 \hline
-FR7 & Lab-assistant ranking system & E2E & Partial Pass & Section~\ref{sec:eval-assistant-workflow}: join with the six-character code; \texttt{?aid=} identity persistence; polling picks up assignments; mark-helped round-trip through the filelock; simultaneous joins safe, although the ranking system had yet to be implemented. \\
+FR7 & Lab-assistant ranking system & E2E & Partial Pass & Section~\ref{sec:eval-assistant-workflow}: join with the six-character code; \texttt{?aid=} identity persistence; polling picks up assignments; mark-helped round-trip through the filelock; simultaneous joins safe, although the ranking system was not implemented and will be a future work. \\
 \hline
 \end{tabularx}
 \caption{Functional-requirement verification (FR1-FR7).}
@@ -33,7 +33,7 @@ FR7 & Lab-assistant ranking system & E2E & Partial Pass & Section~\ref{sec:eval-
 \centering
 \small
 \renewcommand{\arraystretch}{1.3}
-\begin{tabularx}{\textwidth}{|c|p{0.165\textwidth}|p{0.09\textwidth}|p{0.085\textwidth}|X|}
+\begin{tabularx}{\textwidth}{|c|p{0.155\textwidth}|p{0.10\textwidth}|p{0.085\textwidth}|X|}
 \hline
 \textbf{ID} & \textbf{Requirement} & \textbf{Method} & \textbf{Result} & \textbf{Evidence} \\
 \hline\hline
@@ -45,9 +45,9 @@ NFR3 & Robustness to noisy data & Smoke & Pass & Section~\ref{sec:eval-robustnes
 \hline
 NFR4 & Scalability & By construction & Met & Section~\ref{sec:eval-robustness}: holds by construction rather than by edge-case test. \\
 \hline
-NFR5 & Privacy and ethical & By construction & Met & Section~\ref{sec:eval-robustness}: holds by construction; data handled solely for in-lab analytics. \\
+NFR5 & Privacy and ethical & By construction & Met & Section~\ref{sec:eval-robustness}: ethical approval was granted through the University's ethics approval system (LEON); all student data is anonymised and handled solely for in-lab analytics. \\
 \hline
-NFR6 & Extensibility and maintainability & By construction & Met & Section~\ref{sec:eval-robustness}: holds by construction; new signals add without redesign. \\
+NFR6 & Extensibility and maintainability & By construction & Met & Section~\ref{sec:eval-robustness}: holds by construction; modular signal-and-weight structure, with graceful weight redistribution when a signal is unavailable. \\
 \hline
 \end{tabularx}
 \caption{Non-functional-requirement verification (NFR1-NFR6).}
