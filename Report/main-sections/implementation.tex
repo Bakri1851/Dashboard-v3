@@ -764,7 +764,7 @@ A struggling student $s^\star$ flagged by the parametric model "infects" any pee
 
 The five-element feature vector \texttt{CF\_FEATURES} carries the four normalised struggle signals $N$, $T$, $I$, $A$ and the improvement-slope $D$ (named \texttt{n\_hat}, \texttt{t\_hat}, \texttt{i\_norm}, \texttt{A\_norm}, \texttt{d\_hat} respectively in code).
 The algorithm considers $k = 3$ nearest neighbours per flagged struggler.
-The similarity threshold $\tau$ defaults differ between versions, with V1 at $\tau = 0.6$ and V2 at $\tau = 0.7$; the higher default trades recall for tighter precision, and a slider in the Settings view (Section \ref{sec:views}) allows the user to toggle $\tau$.
+The similarity threshold $\tau$ defaults differ between versions, with V1 at $\tau = 0.6$ and V2 at $\tau \approx 0.90$ (the Optuna-tuned value of Section~\ref{sec:eval-hyperopt}); the higher default trades recall for tighter precision, and a slider in the Settings view (Section \ref{sec:views}) allows the user to toggle $\tau$.
 The output is a list of (similar student, source student, similarity score) tuples rendered in the In-Class view's CF diagnostic panel beneath the leaderboards if the collaborative-filtering flag \texttt{cf\_enabled} is set to \texttt{True}.
 
 
@@ -949,7 +949,7 @@ Default weights are $(w_B, w_M, w_D) = (0.45, 0.30, 0.25)$ from \texttt{IMPROVED
 
 The three model scores covered in this section (seven-signal baseline struggle, five-signal baseline difficulty, three-weight improved) each load a trained v2 weight vector at request time from \texttt{data/eval/optimised\_*\_v2.json}, with a fourth JSON (\texttt{optimised\_hyperparams\_v2.json}) carrying the Optuna-tuned values of the two scalar hyperparameters introduced in Chapter~\ref{sec:design}.
 The trained weights and hyperparameters are the deployed default and are applied unconditionally; there is no runtime v1/v2 selector.
-The shrinkage constant $K$ and the CF threshold $\tau$ are seeded on \texttt{RuntimeConfig} from the Optuna-tuned values and remain adjustable, with \texttt{shrinkage\_k} accepting any integer.
+The CF threshold $\tau$ is seeded on \texttt{RuntimeConfig} from its Optuna-tuned value ($\approx 0.90$), while the shrinkage constant $K$ is retained at its hand-set $5$ (its tuning was within noise); both remain adjustable, with \texttt{shrinkage\_k} accepting any integer.
 The hand-set v1 weights remain in \texttt{config.py} as the fallback if the trained JSON is missing or invalid, and as the baseline for the offline evaluation comparison.
 
 

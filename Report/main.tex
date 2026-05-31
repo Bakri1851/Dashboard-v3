@@ -113,6 +113,75 @@ A two-parameter logistic (2PL) Item Response Theory difficulty model was evaluat
 \listoftables
 \newpage
 
+\section*{Nomenclature}
+\addcontentsline{toc}{section}{Nomenclature}
+
+\textbf{Acronyms}\\
+\begin{tabular}{@{}p{0.16\textwidth}p{0.78\textwidth}@{}}
+1PL      & One-Parameter Logistic (Rasch IRT model) \\
+2PL      & Two-Parameter Logistic (IRT model) \\
+ANN      & Approximate Nearest Neighbour \\
+API      & Application Programming Interface \\
+AUC      & Area Under the ROC Curve \\
+BKT      & Bayesian Knowledge Tracing \\
+CF       & Collaborative Filtering \\
+CV       & Cross-Validation \\
+EdTech   & Educational Technology \\
+EWMA     & Exponentially Weighted Moving Average \\
+FR / NFR & Functional / Non-Functional Requirement \\
+GPT      & Generative Pre-trained Transformer \\
+HNSW     & Hierarchical Navigable Small World (ANN index) \\
+HTTP     & HyperText Transfer Protocol \\
+IRT      & Item Response Theory \\
+JSON     & JavaScript Object Notation \\
+KDD      & Knowledge Discovery in Databases \\
+LLM      & Large Language Model \\
+MAE      & Mean Absolute Error \\
+MLE      & Maximum Likelihood Estimation \\
+OLS      & Ordinary Least Squares \\
+RAG      & Retrieval-Augmented Generation \\
+ROC      & Receiver Operating Characteristic \\
+SBERT    & Sentence-BERT (sentence-embedding model) \\
+SPA      & Single-Page Application \\
+TF-IDF   & Term Frequency-Inverse Document Frequency \\
+TPE      & Tree-structured Parzen Estimator \\
+UI       & User Interface \\
+XML      & Extensible Markup Language \\
+\end{tabular}
+
+\newpage
+\textbf{Symbols}\\
+\begin{tabular}{@{}p{0.16\textwidth}p{0.78\textwidth}@{}}
+$S_t(s,\sigma)$       & Struggle score for student $s$ in session $\sigma$ at time $t$ \\
+$D_t(q)$              & Difficulty score for question $q$ \\
+$\alpha\ldots\theta$  & The seven struggle-signal weights (Table~\ref{tab: struggle weights}) \\
+$\alpha\ldots\epsilon$ & The five difficulty-signal weights (Table~\ref{tab: difficulty weights}) \\
+$w_{\mathrm{beh}}$    & Improved-struggle behavioural-composite weight \\
+$w_{\mathrm{mg}}$     & Improved-struggle mastery-gap weight \\
+$w_{\mathrm{da}}$     & Improved-struggle difficulty-adjusted weight \\
+$K$                   & Bayesian shrinkage strength (prior pseudo-count) \\
+$\tau$                & Correctness threshold (incorrectness below this counts as correct) \\
+$\tau$                & Collaborative-filtering elevation threshold (struggle above this flags help-seeking) \\
+$\lambda$             & EWMA smoothing rate \\
+$H$                   & Recent-incorrectness half-life \\
+$k$                   & Collaborative-filtering nearest neighbours \\
+$t_{s1\text{--}3},\, t_{d1\text{--}3}$ & Struggle / difficulty band cutpoints \\
+$p(L_0)$   & BKT prior mastery probability (before any attempt) \\
+$p(T)$     & BKT transition probability (unlearned $\to$ learned) \\
+$p(G)$     & BKT guess probability (correct without mastery) \\
+$p(S)$     & BKT slip probability (incorrect despite mastery) \\
+$\theta_s$ & IRT student ability (logit scale) \\
+$\beta_q$  & IRT question difficulty (logit scale) \\
+$\alpha_q$ & IRT question discrimination (2PL slope) \\
+$\kappa_0$ & Base measurement-confidence multiplier \\
+$L$        & Confidence length-ramp threshold (characters) \\
+$N_{\min}$ & Minimum incorrect submissions to attempt clustering \\
+$K_{\max}$ & Maximum clusters evaluated by silhouette \\
+$p_{\mathrm{mastery}}$ & BKT mastery cutoff ($P(L)$ above this is ``mastered'') \\
+\end{tabular}
+
+\newpage
+
 \include{main-sections/introduction}
 
 \include{main-sections/requirements-specification}
@@ -129,7 +198,7 @@ A two-parameter logistic (2PL) Item Response Theory difficulty model was evaluat
 
 \appendix
 
-\include{appendix-sections/code-snippets}
+% \include{appendix-sections/code-snippets}
 
 \include{appendix-sections/ui-screenshots}
 

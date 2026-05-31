@@ -7,8 +7,9 @@ caches are flushed so the next data request picks up the new values.
 
 The scoring path uses the empirically-trained v2 weights and Optuna-tuned
 hyperparameters unconditionally — these are the deployed system. The scalar
-sliders (cf_threshold, BKT priors, mastery threshold, shrinkage_k) are seeded
-at boot from `data/eval/optimised_hyperparams_v2.json` and remain
+sliders are seeded at boot from `data/eval/optimised_hyperparams_v2.json`
+(cf_threshold is adopted from the Optuna-tuned value; shrinkage_k is held at its
+`config.py` default, the Optuna tuning of K being within noise) and remain
 user-adjustable; the trained composite weights are loaded directly by
 `cache.py` from `data/eval/optimised_*_weights_v2.json`. The hand-set v1
 weights survive only as `config.py` constants for the offline evaluation
@@ -32,10 +33,10 @@ def _load_optimised_hyperparams() -> dict[str, Any] | None:
     scalar overrides (cf_threshold, bkt_p_init, ..., shrinkage_k, etc.) or
     None if the file is missing/malformed.
 
-    Called by `defaults()` at process boot so a fresh config seeds its scalar
-    sliders (cf_threshold, BKT priors, shrinkage_k) from the Optuna-tuned v2
-    values rather than the `config.py` defaults. The sliders remain
-    user-adjustable after boot.
+    Called by `defaults()` at process boot. `defaults()` adopts `cf_threshold`
+    (and the BKT priors, held at their config defaults) from these v2 values but
+    retains `shrinkage_k` at the `config.py` default — the Optuna tuning of K was
+    within noise. The sliders remain user-adjustable after boot.
     """
     path = config.OPTIMISED_HYPERPARAMS_V2_PATH
     if not path.exists():
@@ -92,6 +93,10 @@ class RuntimeConfig:
         }
         v2_overrides = _load_optimised_hyperparams()
         if v2_overrides:
+            # K is retained at its hand-set default: the Optuna tuning of K was
+            # within per-fold noise (see Ch5) and the design relies on shrinkage,
+            # so only cf_threshold (and the BKT priors) seed from the v2 study.
+            v2_overrides.pop("shrinkage_k", None)
             scalars.update(v2_overrides)
         return cls(
             sounds_enabled=config.SOUNDS_ENABLED_DEFAULT,

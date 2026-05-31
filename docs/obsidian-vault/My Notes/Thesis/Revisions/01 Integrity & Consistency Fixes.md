@@ -50,5 +50,15 @@ These are correctness/credibility issues an examiner notices immediately. All ve
 ### I11. Abstract acronyms unexpanded
 - `main.tex` l127–130 uses **OLS, TPE, 2PL** without expansion (RAG/IRT/BKT are expanded). Expand on first use; also see the document-level acronym list in [[04 Symbol, Data & Acronym Definitions]].
 
+### I12. Min-max normalisation: degenerate-cohort value (0 vs 0.5)
+- **Where:** `design-and-architecture.tex` l448 — "When $x_{\min} = x_{\max}$, the normalised value is conventionally set to $0$."
+- **Truth (code-verified):** the deployed V2 normaliser `code2/backend/analytics.py:50` returns **0.5** (the neutral midpoint), not 0, with a documented rationale — it preserves the signal's weight contribution when a signal is uniform across the cohort, and the ranking is unchanged either way. The "0" is the V1 convention (`code/learning_dashboard/`), stale for the evaluated V2 system.
+- **Fix:** change "$0$" to "$0.5$ (the neutral midpoint)" plus a short rationale clause. One-line gated before→after, delivered with the Ch3 brief in [[05 Intros, Conclusions & Summaries]].
+
+### I13. §2.2.4 Optuna "finds weights" vs tunes scalar hyperparameters
+- **Where:** `requirements-specification.tex` l151 (§2.2.4) — "use … Optuna's TPE to efficiently search the hyperparameter space and find optimal weights for our composite metrics".
+- **Truth (code-verified):** the composite **weights** are learned by OLS regression (`scripts/optimise_v2_weights.py`, `sklearn LinearRegression`), not by Optuna. Optuna's TPE tuned only the **scalar hyperparameters** K and τ (`scripts/optimise_hyperparams.py` — two TPE studies: `shrinkage_k` ∈ {0..50}, `cf_threshold` ∈ [0.4, 0.9], objective 5-fold CV Spearman ρ). Optuna does not "find the weights".
+- **Fix:** "find optimal weights for our composite metrics" → "tune the scalar hyperparameters that govern these composite models". Gated before→after, delivered with the Ch2 brief in [[05 Intros, Conclusions & Summaries]]. The preceding sentence (l142) already credits supervised learning with refining the weights.
+
 ## Verify-on-apply
 After approved edits: `pdflatex main && bibtex main && pdflatex main && pdflatex main` from `Report/`; confirm zero undefined-reference/citation warnings.

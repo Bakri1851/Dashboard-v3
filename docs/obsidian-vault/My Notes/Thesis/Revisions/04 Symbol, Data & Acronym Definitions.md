@@ -1,33 +1,58 @@
-# 04 — Symbol, Data & Acronym Definitions (author writes)
+# 04 — Symbol, Data & Acronym Definitions
 
-Supervisor pt 5: terms and symbols are used before they are defined. Three clusters below + a document-level acronym list. ← [[00 Index]]
+Supervisor pt 5: terms and symbols are used before they are defined. ← [[00 Index]]
 
-## D1. Data Definitions block (module / question / timestamp / session / user)
-- **Where:** `design-and-architecture.tex` Data Endpoint subsection, after l123–124, before `fig:data entry` (l128).
-- **Write:** define each field once, plainly — **module** (the university course/unit identifier, e.g. 25COA122); **question** (an individual lab task); **timestamp** (submission datetime); **user** (anonymised student identifier); **session** (a contiguous period of student engagement, bounded by submission timestamps). A small definitions table is cleanest. The supervisor explicitly flagged these as undefined.
+> **Status — closed 2026-05-31.** Every D-item anchor was re-verified against the live `.tex`; all items (D1–D7) are now applied and the report compiles clean.
+>
+> **Appendix lettering (compiled PDF, verified via `main.toc`):** `code-snippets` is commented out, so the appendices render as **A** ui-screenshots · **B** detailed-test-results · **C** Notation and Formulae · **D** formulae-derivation · **E** themes-and-references. The Formulae appendix is **Appendix C**.
+>
+> - **Applied this pass:** **D7a** (front-matter Nomenclature); **D7b** (Appendix-C notation table — fixes the previously-blank Appendix C); **comprehensive Appendix-C formulae** (every model/method, each tagged with the section it is used in); **D6** (Evaluation Metrics subsection added to the body of Ch5); **D5-IRT** (logit-scale clause).
+> - **Already present (verified, no edit):** **D2** K/τ/λ (defined at first use), **D3** (signed-weights note), **D4** (forward-ref at `implementation.tex:645`).
+> - **Applied this pass (cont.):** **D1** (six data fields), **D2** (configured-scalar paragraph), **D5-BKT** (prior vs running mastery), the **τ split**, and the **cf_threshold=0.90 deployment reconciliation** + K=5 seeding fix (see below).
 
-## D2. Parameters paragraph after the struggle composite
-- **Where:** after Equation (3) / `tab: struggle weights` (l228–291).
-- **Write:** explain the seven weights (α,β,γ,δ,η,ζ,θ) — non-negative convex weights summing to 1.0 in v1 (hand-set; note η=0.38 dominance because recent incorrectness is the strongest within-session signal, and ζ=0.05 is a small tie-breaker), refit by OLS in v2. Then define the scalars: **K** (Bayesian shrinkage strength / prior pseudo-count, K=5 default), **τ** (correctness threshold, state range τ∈[0,1], 0.5 a neutral midpoint), **λ** (EWMA smoothing rate, 0.3). For each, say whether it is *learned* or *configured* and how it is *normalised*.
+## ✅ Applied this pass (review-gated, in `Report/`)
 
-## D3. Promote the "v2 weights are signed / break convexity" note
-- **Where:** `design-and-architecture.tex` l266 (currently buried mid-paragraph).
-- **Write:** a clear sentence right after the v1 defaults (~l256): the v2 OLS-trained vectors are **signed** and do **not** satisfy the convex-combination constraint, and are rescaled by min-max normalisation before band classification.
+### D7a — front-matter Nomenclature (`main.tex`, after `\listoftables`)
+`\section*{Nomenclature}` page (acronyms + symbols, one symbol per row, lowercase `p(·)`), with `\addcontentsline`. Symbols verified against the live `.tex`.
 
-## D4. Notation bridge (Design hat/tilde ↔ Implementation capitals)
-- **Where:** one sentence in `design-and-architecture.tex` ~l204, and one in `implementation.tex` before l638.
-- **Write:** state up front that the Implementation chapter's capital-letter shorthand (N, T, I, R, A, D, Rep) denotes the same quantities as Ch3's hat/tilde symbols, pointing to `tab:struggle-7sig` — currently the mapping only appears *after* the formulas.
+### D7b — Appendix-C notation table (`appendix-sections/formulae.tex`)
+Bare `\section{Formulae}` → `\section{Notation and Formulae}` (`\label{app:formulae}`) + `tab:notation` parameter dictionary (K=5, τ=0.5, λ=0.3, weights `[0,1]` sum=1 v1 → signed/OLS v2, BKT/IRT learned-MLE; one symbol per row). Defaults verified against `config.py`. **Clears the blank-Appendix-C integrity gap.**
 
-## D5. IRT / BKT symbol clarifications
-- **IRT** (`design-and-architecture.tex` l623–631): add a sentence that θ_s (ability) and β_q (difficulty) are **unbounded on the logit scale**, interpretation is relative, identifiability resolved by anchoring (already at l642).
-- **BKT** (`requirements-specification.tex` l107–112): distinguish P(L₀) (initial mastery) from P(L_t) (mastery after t opportunities); rewrite the prediction equation with P(L_t); add a line on the Bayesian posterior update (cross-ref the Appendix F derivation if populated).
+### Comprehensive Appendix-C formulae (`appendix-sections/formulae.tex`)
+After `tab:notation`, one `\subsection` per area, each opened with an *"Used in Section~\ref{…}"* tag: Data & derived signals · Baseline struggle · Baseline difficulty · Collaborative filtering · Mistake clustering (TF-IDF/k-means/silhouette/auto-k) · Measurement confidence · IRT (1PL/log-lik/sigmoid-map/2PL) · BKT · Improved struggle · Evaluation metrics. Equations transcribed verbatim from the body, **unlabelled** (no clash). Added `\label{sec: collaborative filtering}` to the CF subsection so it could be cross-referenced.
 
-## D6. New "Evaluation Metrics" subsection (single fix for a big cluster)
-- **Where:** `results-and-evaluation.tex`, new subsection after Scope of Evaluation (~l17), before first metric use at l149.
-- **Write:** brief definitions of every metric the chapter uses — **Spearman ρ** (rank correlation, range [−1,+1], higher = better rank agreement); **MAE** (mean absolute band-distance error, units = bands, range [0,4] on the 4-band scale); **linear-weighted Cohen's κ** (band agreement; *linear* weighting penalises off-by-one less than off-by-two, reflecting the ordinal scale — vs *quadratic*); **AUC** (BKT predictive diagnostic). Define **GroupKFold(5)** (keeps same-session rows together across train/validation) vs **leave-one-out**; and first-use of **2PL**, **L1-normalised**, **b_q**, **w_M/w_B**.
-- This single subsection clears findings D5-04/12/13, E-09/12/13/14, C1-17.
-- **Cite here:** Spearman → `spearmanProofMeasurementAssociation1904`; weighted κ + interpretation bands → `CoefficientAgreementNominal` (Cohen 1960) + `landisMeasurementObserverAgreement1977`; AUC → `fawcettIntroductionROCAnalysis2006` / `hanleyMeaningUseArea1982` (all orphans, see [[07 Citations — wire orphans + Candidate References]]). Weighted-κ definition proper → new ref **Cohen 1968** ([[07 Citations — wire orphans + Candidate References]]).
+### D6 — Evaluation Metrics subsection (body, `results-and-evaluation.tex`, `\label{sec:eval-metrics}`)
+New `\subsubsection{Evaluation Metrics}` between "Scope of Evaluation" and "Evidence Sources" (before first use, AUC l32). Defines Spearman ρ, MAE (bands, range [0,3]), linear-weighted Cohen's κ, AUC with formulae + glosses + GroupKFold(5)/LOO; cites `spearmanProofMeasurementAssociation1904`, `CoefficientAgreementNominal`, `landisMeasurementObserverAgreement1977`, `fawcettIntroductionROCAnalysis2006`, `hanleyMeaningUseArea1982` (also wires these orphans). Fixes the "metrics appear out of nowhere" concern; the appendix restates the same formulae.
 
-## D7. Document-level nomenclature / acronym list (examiner gap)
-- **Where:** after the ToC / lists of figures in `main.tex`.
-- **Write:** a one-page nomenclature table — acronyms (IRT, BKT, RAG, OLS, TPE, EWMA, ANN, HNSW, MLE, AUC, MAE, TF-IDF, CF, FR/NFR, SPA, EdTech) and the core symbols (the struggle/difficulty signal subscripts; α–θ weights; K, τ, λ; P(L₀)/P(T)/P(G)/P(S); θ_s/β_q/α_q). Resolves the abstract-acronym issue (I11 in [[01 Integrity & Consistency Fixes]]) at the document level.
+### D5-IRT — logit-scale clause (`design-and-architecture.tex:858`)
+"…both are unbounded on the logit (log-odds) scale, so each value is interpretable only relative to the other…". Confirmed against `irt.py:200` (`logit = a·(θ−b)`) and `:302` (`expit(b_raw)→[0,1]`).
+
+## ✅ Already satisfied before this pass (verified live — no edit)
+- **D2 — K/τ/λ defined at first use:** `K` `design-and-architecture.tex:531–536` (default 5); `λ` l542 + l564–571 (=0.3, `SMOOTHING_ALPHA`); `τ` l607–608 (=0.5). Weights/η-dominance/ζ-tie-breaker/OLS-refit explained 474–499.
+- **D3 — signed v2 weights:** `design-and-architecture.tex:499`.
+- **D4 — notation bridge:** `implementation.tex:645` points the capital-letter equation to `tab:struggle-7sig`.
+
+## ✅ Applied (2026-05-31, cont.) — Note 04 closed
+
+### D1 — Data-field definitions (`design-and-architecture.tex`, after l359)
+Itemize defining the six record fields from Figure~\ref{fig: data entry}: **module** (the university module), **question** (the lab task), **timestamp** (most recent submission), **user** (anonymised student id), **session** (first-submission time), **XML** payload (a sequence of `<submission>` → `<srep>` student answer + `<feedback>` AI responses).
+
+### D2 — Configured scalar hyper-parameters (`design-and-architecture.tex`, before the CF subsection)
+New `\paragraph` gathering K=5, λ=0.3, τ=0.5 (correctness), all hand-set; points to `tab:notation`; cross-refs the Optuna study (K retained at 5; CF elevation τ tuned to ≈0.90).
+
+### D5-BKT (`requirements-specification.tex`, after l112)
+Sentence distinguishing the prior `p(L₀)` from the running `p(L)` (updated by Bayes' rule + transition `p(T)`), cross-ref `sec: bkt`. (No "recurrence" wording, per request.)
+
+### τ split (notation table + nomenclature)
+The overloaded `τ` is now two rows in both `tab:notation` and the front Nomenclature: **correctness threshold** (incorrectness < τ, 0.5, configured) and **CF elevation threshold** (struggle ≥ τ, deployed 0.90, tuned by Optuna).
+
+### cf_threshold = 0.90 deployment reconciliation (code + whole report)
+The deployed dashboard already seeds `cf_threshold ≈ 0.90` from `data/eval/optimised_hyperparams_v2.json` (`runtime_config.defaults()` → `cf.py` → `collab.py`). The report previously said 0.7 in places; now states **0.90 deployed/adopted** throughout (impl §4 l767/l952, eval l320/l341/l361, conclusion l27, design CF l810, `tab:notation`). **Code fix:** the same JSON also seeded `shrinkage_k=0`, which the baseline scorer consumed (`cache.py:196`→`struggle.py:341`); `runtime_config.defaults()` now drops `shrinkage_k` so deployed **K stays 5** — matching the eval recommendation, the design's shrinkage rationale, and the improved model (`improved_struggle.py:297`). Comments in `runtime_config.py`/`schemas.py` updated to match.
+
+## Corrections folded in (2026-05-31)
+- **Appendix lettering:** in the compiled PDF the Formulae appendix is **C**, the derivation appendix is **D**, themes is **E** (code-snippets commented out; verified via `main.toc`). The old note's B/C/D/E/F scheme was wrong.
+- **MAE is used** (eval l171; abbrev defined `implementation.tex:1027`; also `conclusion.tex:38`) — kept in D6. **Range is [0,3]** on a four-band scale (max band distance = 3), not [0,4].
+- **Eval metrics were never written as equations** anywhere — D6 now defines them in the body **and** the appendix lists their formulae, so they no longer appear "out of nowhere".
+- **BKT notation is lowercase** `p(·)` in the report — D7a/D7b/appendix lowercased accordingly.
+- **Cohen 1968** weighted-κ *proper definition* is **MISSING** from `references.bib` → candidate ref in [[07 Citations — wire orphans + Candidate References]] (#1). D6 cites Cohen 1960 + Landis 1977 for now.
+- **Appendix D (formulae-derivation) still empty & `\include`d** → renders blank; populate-or-remove deferred to end of pass per [[00 Index]] open decision.

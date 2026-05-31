@@ -15,6 +15,29 @@ A prospective intervention study, which would test whether dashboard-informed in
 The functional and non-functional testing is also carried out through smoke-testing and end-to-end testing of the deployed V2 stack, where we record evidence of the system's behaviour and performance against the targets set in Chapter~\ref{sec:requirements}.
 We will present a qualitative summary in the main body with the full row-by-row checklist appearing in Appendix~\ref{app:detailed-test-results}. We do not run a load test, a security audit, or an accessibility audit.
 
+\subsubsection{Evaluation Metrics} \label{sec:eval-metrics}
+The evaluation reports four metrics throughout; each is defined here before its first use.
+
+\textbf{Spearman's rank correlation $\rho$} measures rank agreement between a model's ordering of students or questions and the rater's. For $n$ items with rank differences $d_i$,
+\begin{equation*}
+    \rho = 1 - \frac{6\sum_{i=1}^{n} d_i^2}{n(n^2-1)} \in [-1,+1],
+\end{equation*}
+where $+1$ is perfect rank agreement and $0$ is no rank agreement \cite{spearmanProofMeasurementAssociation1904}. It is the primary quality metric, since the dashboard's value lies in the ranking it produces rather than in the absolute scores.
+
+\textbf{Mean absolute error (MAE)} is the mean absolute band-distance between the predicted band $\hat{b}_i$ and the rated band $b_i$ on the four-band scale, $\mathrm{MAE} = \tfrac{1}{n}\sum_{i=1}^{n} |\hat{b}_i - b_i|$, in units of bands (range $[0,3]$); it reports calibration in interpretable band terms rather than rank order.
+
+\textbf{Linear-weighted Cohen's $\kappa$} measures agreement on the ordinal band labels above chance. With $k$ ordered bands, observed and expected agreement matrices $O$ and $E$, and linear weights $w_{ij} = |i-j|/(k-1)$,
+\begin{equation*}
+    \kappa = 1 - \frac{\sum_{i,j} w_{ij}\,O_{ij}}{\sum_{i,j} w_{ij}\,E_{ij}},
+\end{equation*}
+so an off-by-one disagreement is penalised less than an off-by-two; linear weighting suits the band scale where a quadratic penalty would over-weight the extremes \cite{CoefficientAgreementNominal}. Values are read against the conventional agreement bands of Landis and Koch \cite{landisMeasurementObserverAgreement1977}. The quadratic-weighted variant, with weights $w_{ij} = (i-j)^2/(k-1)^2$, is also reported for rater fidelity, where a sharper penalty on distant disagreements is informative. Band agreement is additionally summarised by two interpretable rates: exact-band agreement, the fraction of items the model and rater place in the same band, and within-one-band agreement, the fraction placed within one band of each other; the latter is the more lenient and, on an ordinal scale, the more honest measure, since adjacent-band disagreements often reflect threshold placement rather than genuine disagreement about severity.
+
+\textbf{Area under the ROC curve (AUC)} is the BKT predictive diagnostic: the probability that a randomly chosen correct attempt is scored higher than a randomly chosen incorrect one, equivalently the area under the true-positive-rate against false-positive-rate curve \cite{fawcettIntroductionROCAnalysis2006,hanleyMeaningUseArea1982}; $0.5$ is chance and $1.0$ perfect separation.
+
+\textbf{Top-$N$ overlap} counts how many items two rankings share in their top $N$ (for example the top-ten most-at-risk students or the ten hardest questions); it captures agreement at the actionable head of the leaderboard, which a whole-list rank correlation can mask.
+
+Unless stated otherwise, struggle metrics are pooled out-of-fold under GroupKFold($5$) keyed by session, which keeps all rows from the same session in the same fold, and the $72$-question difficulty model uses leave-one-out. Cross-validated figures are summarised by their per-fold mean and a bootstrap $95\%$ confidence interval; the leave-one-out difficulty folds do not support a comparable interval.
+
 \subsubsection{Evidence Sources}
 
 The evaluation draws on five sources of evidence. 
@@ -294,7 +317,7 @@ The cutpoints may additionally be biased toward the more severe bands because no
 Two scalar hyperparameters were tuned using Optuna's Tree-structured Parzen Estimator (TPE) \cite{NIPS2011_86e8f7ab, akibaOptunaNextgenerationHyperparameter2019}, maximising session-grouped five-fold cross-validation Spearman~$\rho$ against the LLM's four-band rating. 
 The Bayesian shrinkage constant $K$ was tuned in a 50-trial study over integers $[0,50]$ and the collaborative-filtering threshold $\tau$ in a separate 50-trial study over reals in $[0.4, 0.9]$. 
 TPE was used over grid and random search due to being significantly better for a small sample size. The shrinkage constant $K$ moves from the initial hand-set default $5$ to the tuned best $0$, with CV $\rho$ changing from $+0.471$ to $+0.481$; $\Delta\rho \approx +0.009$ within the per-fold standard deviation, so the result is a robustness validation of the hand-set value rather than an empirical refinement.
-The threshold $\tau$ moves from the initial hand-set default $0.7$ to the tuned best $0.900$, with CV $\rho$ moving from $+0.306$ to $+0.466$; $\Delta\rho \approx +0.160$, which is a substantial improvement indicating that the initial hand-set default was too permissive.
+The threshold $\tau$ was raised from the hand-set $0.7$ to the tuned $0.900$, lifting CV $\rho$ from $+0.306$ to $+0.466$ ($\Delta\rho \approx +0.160$); this tuned value is the deployed default, the hand-set $0.7$ having proved too permissive.
 The best $\tau$ sits at the upper boundary of the $[0.4, 0.9]$ search range so a finer search may yield further improvement. 
 
 
@@ -313,9 +336,9 @@ Figure~\ref{fig:eval-hyperparams-importances} quantifies this directly as a para
 \hline
 \textbf{Hyperparameter} & \textbf{Initial default} & \textbf{Initial CV $\rho$} & \textbf{Tuned best} & \textbf{Tuned CV $\rho$} & \textbf{$\Delta\rho$} & \textbf{Verdict} \\
 \hline
-\texttt{shrinkage\_k} & 5  & $+0.471$ & 0     & $+0.481$ & $+0.009$ & Tied within noise (hand-set near-optimal) \\
+\texttt{shrinkage\_k} & 5  & $+0.471$ & 0     & $+0.481$ & $+0.009$ & Within noise; retained at 5 \\
 \hline
-\texttt{cf\_threshold} & 0.7 & $+0.306$ & 0.900 & $+0.466$ & $+0.160$ & Substantial positive (hand-set too permissive) \\
+\texttt{cf\_threshold} & 0.7 & $+0.306$ & 0.900 & $+0.466$ & $+0.160$ & Substantial; adopted at 0.90 \\
 \hline
 \end{tabular}%
 }
@@ -335,7 +358,7 @@ Figure~\ref{fig:eval-hyperparams-importances} quantifies this directly as a para
     \label{fig:eval-hyperparams-importances}
 \end{figure}
 
-In summary, the Bayesian shrinkage constant $K$ is non-consequential on this cohort: it can be left at its hand-set default without measurable loss, and the collaborative-filtering threshold $\tau$ is the only one of the two scalar hyperparameters whose tuning materially improves rank agreement.
+In summary, the Bayesian shrinkage constant $K$ is non-consequential on this cohort and is retained at its hand-set $5$ without measurable loss; the collaborative-filtering threshold $\tau$ is the only one of the two scalar hyperparameters whose tuning materially improves rank agreement, and its tuned value $0.90$ is adopted as the deployed default.
 
 \subsection{Survey} \label{sec:eval-survey}
 

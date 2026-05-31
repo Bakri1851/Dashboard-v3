@@ -2,6 +2,37 @@
 
 Supervisor pts 11–14, 16: don't end sections/chapters abruptly on a figure; open each top-level section with a short framing paragraph (but check the existing ones first); summarise big tables; finish the abandoned sentences. ← [[00 Index]]
 
+> **Re-anchored + reconciled 2026-05-31** against the live `Report/main-sections/*.tex`. Roughly nine items already done (writing landed during the Notes 01–04 passes); about thirteen remain. Delivery is chapter-by-chapter (Ch1 → Ch5; Ch6 needs no change); Ch2 gets the full treatment (intros + composite framing + glossary + §2.6 gaps). Status legend: ✅ done · ⬜ to write.
+
+## Status reconciliation (verified anchors, 2026-05-31)
+**✅ Already done (verified, no action):**
+- Ch1 garbled first sentence (Note 01 I10) — `introduction.tex` reads clean now (l4 "at their own pace"; l18 "The central problem addressed … is therefore").
+- §5.4 Results intro — exists, `results-and-evaluation.tex` l147–156.
+- Eval abandoned "bayesian shrinkage" sentence — completed at l319 (full sentence, inline comment gone).
+- Eval threshold-bias fragment — completed (no trailing fragment found).
+- Eval Optuna summary after `tab:eval-hyperparams` — exists at l361.
+- Eval prewarm interpretation — exists at l115–121 (**keep the "five-second polling" claim scoped to the lab-assistant app**: code-verified that only the mobile portal polls at 5 s; the instructor console uses 3 s / 10 s and the config default is 60 s).
+- Fig 3.6 `fig:context-stakeholders` discussion — exists (fuller lead-in, names C1–C3).
+- §4.9 instructor-views closer — exists at l1201–1210 (Session Progression view).
+- Ch6 conclusion opener — fine, no change.
+- Composite-metric formal definition — exists in the Design chapter (l471–587) + Appendix C / Nomenclature.
+
+**⬜ Remaining (current anchors):**
+- **Ch1** opener — `introduction.tex` l1–2.
+- **Ch2** intros §2.2/§2.3/§2.4/§2.5 ✅ applied by author; composite framing + glossary dropped after review (see the supervisor-pt-16 section below). **Remaining:** §2.6 Research Gaps cleanup (heading l313; TODOs at l317/320/323/331; P3/P5 source paras l327–329) + the l151 Optuna accuracy fix (I13).
+- **Ch3** §3.1 walkthrough five DRAFT-only figures (l111/124/139/154/168), lead-in l5, bridge; §3.5 closer after `fig:v2-pipeline-design` (l1094–1095); chapter-end summary after visual-encoding tables (l1341–1346).
+- **Ch4** chapter intro (TODO near top); chapter summary (chapter ends on the problems table, l1254–1303); problems-table intro (l1257) + post-table summary; impl→design back-refs in the UI/view subsections (FC-02).
+- **Ch5** chapter closer after `fig:eval-incorrectness-distribution` (l541–547); §5.2 intro (l80), §5.5 intro (l363), §5.6 intro (l462).
+
+## Accuracy audit (code-verified, 2026-05-31)
+Deep read of the live `code2/backend/` source agtainst the report's quantitative claims (the facts these briefs lean on). **All verified accurate** except one:
+- **DISCREPANCY → logged as [[01 Integrity & Consistency Fixes]] I12:** `design-and-architecture.tex` l448 says min-max normalisation is "conventionally set to **0**" when `x_min = x_max`, but the deployed code (`code2/backend/analytics.py:50`) returns **0.5** (neutral midpoint, with a documented rationale: it preserves the signal's weight contribution on a degenerate cohort; rankings are unchanged). The "0" is a stale V1-era convention. Fix gated for Ch3.
+- **τ symbol reuse (not an error):** τ = 0.5 is the correctness threshold (l618); τ ≈ 0.90 is the CF elevation threshold. The report already flags the reuse at l712; confirm Appendix C `tab:notation` lists both.
+- **IRT is 2PL — confirmed in the report:** the design chapter presents Rasch 1PL for V1 (l870–879) then an explicit 2PL extension for V2 (l902–913: discrimination $\alpha_q$, $\sigma(\alpha_q(\theta_s-\beta_q))$, log-reparam, identifiability anchoring), matching `models/irt.py`. No fix needed.
+- **§2.6 references audit (2026-05-31):** all 9 citekeys in the rewritten Research-Gaps section verified relevant + correct (koutcheme/pitts → LLM feedback; estey → course-level; dong → 4-consecutive-fail threshold; li_2020/schafer → CF recommendation; herlocker → CF sparsity; corbett/yudelson → BKT; salton/macqueen → text mining; kasneci/lewis → hallucination/RAG). Each accurately represents the prior work and the gap is framed as what that work did not do. No reference changes. (Minor prose typos flagged to author: l317 agreement/comma-splice, l320 "suport", l328 "retrieval-augemented", l333 "a future work", l335 stray comma.)
+- **Ch3 references audit (2026-05-31):** all 14 design-chapter `\cite` keys exist in `references.bib` and are the correct canonical sources, with three actioned: (1) `lord1968statistical` at design l853 **removed** (the κ confidence heuristic is not classical test theory); (2) `little2014statistical` at l1031 **reframed** (correct missing-data authority but it does not endorse mean imputation); (3) `efron…1977` at l546 **left** (acceptable popular James-Stein ref; `morris…1983` anchors it). `lord1968statistical` stays valid for IRT (Ch2 l133, design l868).
+- **Confirmed accurate against code:** 7 struggle signals + weights 0.10/0.10/0.20/0.10/0.38/0.05/0.07 (`config.py`, `struggle.py:327`); 5 difficulty signals + weights 0.28/0.12/0.20/0.20/0.20 (`difficulty.py:170`); EWMA λ=0.3 (`SMOOTHING_ALPHA`); shrinkage K=5 + formula (`struggle.py:337`); CF τ=0.8998≈0.90 seeded from `optimised_hyperparams_v2.json` via `runtime_config`, used in `cf.py`; **K-retention fix** `runtime_config.py:99` `.pop("shrinkage_k")` so the JSON's 0 is *not* applied; Optuna deltas (K Δρ≈+0.009 on +0.471→+0.481; τ Δρ≈+0.160 on +0.306→+0.466); BKT 4 params 0.3/0.1/0.2/0.1 with P(G)+P(S)<1 bounded ≤0.5; prewarm 7 stages + disk-persisted incorrectness cache; single FastAPI process + `/mobile`; filelock atomic state; SessionProgression 12 buckets / 4 bands / four per-bucket metrics / V2-only.
+
 ## Chapter-intro audit (keep / tweak / add) — supervisor pt 12
 Check each chapter opener before adding — some already have one:
 - **Ch1 Introduction** — opens straight into "Problem"; add a 2–3 sentence chapter framing, and fix the garbled first sentence (see [[01 Integrity & Consistency Fixes]] I10).
@@ -34,9 +65,11 @@ The Walkthrough storyboard and the stakeholder context diagram open Ch3 and need
 - `results-and-evaluation.tex` **l87–98**: after the prewarm timing list, add interpretation — ~650 s cold-start is once-per-deployment, steady-state 5 s polling meets NFR1 (sub-millisecond in-memory lookups thereafter).
 - **Research Gaps §2.6** (`requirements-specification.tex` l288–307): resolve the four embedded TODOs, fix the trailing fragment, split into coherent paragraphs (AI/struggle/CF gaps; BKT instructor-facing + mistake clustering; smart-device assistant channel), and add an optional synthesis paragraph tying the gaps to the thesis motivation.
 
-## Background composite-metric definition + glossary — supervisor pt 16
-- `requirements-specification.tex` §2.2.2/2.2.3: add a paragraph framing struggle/difficulty as weighted composites of sub-metrics (time-on-task, attempts, correctness), weights set by manual tuning or supervised learning, normalised to [0,1]/[−1,+1], with EWMA temporal decay.
-- §2.2.4 l141–144: add a short glossary line — *weight* = coefficient in the weighted sum; *hyperparameter* = tuning parameter of the learning algorithm or a threshold boundary; *parameter* = learnable coefficient.
+## Background composite-metric & glossary — supervisor pt 16 (RESOLVED 2026-05-31: both dropped, replaced by an l145 accuracy fix)
+**Decision after review (author, 2026-05-31): both dropped.**
+- The composite *concept* is already established and properly hedged in the lit review (l97, l136, l138: "combination of … signals rather than a single measure"). A new Background "weighted composite" paragraph would sit in the wrong register (it describes the Ch3 system, not prior work) and would misattribute the specific weighted/normalised formulation to `estey_2017_automatically` / `dannath_evaluating` / `piech_modeling`, who proposed a trajectory metric, a multi-indicator difficulty scheme, and a graphical solution-path model respectively. The formal composite definition stays in Ch3.
+- The glossary line was also dropped; the symbols live in the front-matter Nomenclature page (Note 04).
+- **Replaced by an accuracy fix → [[01 Integrity & Consistency Fixes]] I13 (gated before→after):** §2.2.4 l151 says Optuna's TPE is used "to … find optimal weights for our composite metrics", but the deployed pipeline learns the weights by OLS regression (`scripts/optimise_v2_weights.py`, `LinearRegression`) and uses Optuna only to tune the scalar hyperparameters K and τ (`scripts/optimise_hyperparams.py`, two TPE studies). Fix: "find optimal weights for our composite metrics" → "tune the scalar hyperparameters that govern these composite models".
 
 ## Impl → Design back-references — FC-02
 - Where Ch4 describes each deployed view, add "as designed in §3.7, Figure [figma-N]" so the conceptual design and deployed implementation are traceable (currently zero such back-references).

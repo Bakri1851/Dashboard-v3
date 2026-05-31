@@ -2,7 +2,11 @@
 This section describes the design and architecture of the lab dashboard, highlighting how various components are implemented. It covers the data endpoint, defining what data enters the system and in what form, the mathematical models used to derive struggle and difficulty and the user interface design which exposes the analytics to educators.
 
 \subsection{System Walkthrough}
-Before detailing the architecture, the storyboard in Figures~\ref{fig:storyboard}-\ref{fig:sb-helped} walks through a typical interaction which our system will enable: the system monitors student submissions, flags a struggling student, and the instructor dispatches a lab assistant who crosses the room to help.
+Before detailing the architecture, the storyboard in Figures~\ref{fig:storyboard}-\ref{fig:sb-helped} walks through a typical interaction which our system will enable: the system monitors student submissions, flags a struggling student, and the instructor dispatches a lab assistant who crosses the room to help. 
+A concrete scenario makes the system's purpose tangible before the architecture is introduced. 
+The storyboard below follows one struggling student through the monitor-and-dispatch loop, from the moment their struggle becomes visible to the moment help arrives in person.
+
+
 
 % ---- Storyboard setup: colours, reusable pics, and the reusable room backdrop ----
 \definecolor{wallcol}{HTML}{2B2B2B}
@@ -108,7 +112,9 @@ Before detailing the architecture, the storyboard in Figures~\ref{fig:storyboard
   \node[font=\large\bfseries, text=#1] at (4.2,-0.05) {#2};%
 }
 
-\paragraph{Monitor.} Throughout the session the dashboard tracks every student's submissions, maintaining a live view of who is coping and who is falling behind. % DRAFT scenario sentence --- refine/replace (Revisions Note 05).
+\paragraph{Monitor} Throughout the session the dashboard tracks every student's submissions, maintaining a live view of who is coping and who is falling behind. 
+This opening step establishes the dashboard as a passive system uses for observing the current state of the class: it watches every submission without waiting for a request for help, so the quiet student who would never raise a hand is monitored on equal terms with everyone else.
+
 \begin{figure}[H]
     \centering
     \resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[line join=round]
@@ -121,7 +127,9 @@ Before detailing the architecture, the storyboard in Figures~\ref{fig:storyboard
 \end{figure}
 
 \newpage
-\paragraph{Detect.} When a student's recent attempts show they are stuck, the dashboard flags them at the top of the instructor's struggle leaderboard. % DRAFT scenario sentence --- refine/replace (Revisions Note 05).
+\paragraph{Detect} When a student's recent attempts show they are stuck, the dashboard flags them at the top of the instructor's struggle leaderboard.
+Detection is where monitoring becomes actionable: the struggle signal ranks students so the instructor's attention is drawn to the student struggling the most, rather than scanning the room or waiting for a hand to go up.
+
 \begin{figure}[H]
     \centering
     \resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[line join=round]
@@ -136,7 +144,9 @@ Before detailing the architecture, the storyboard in Figures~\ref{fig:storyboard
 \end{figure}
 
 \newpage
-\paragraph{Dispatch.} Seeing the flag, the instructor assigns the nearest available lab assistant to that student. % DRAFT scenario sentence --- refine/replace (Revisions Note 05).
+\paragraph{Dispatch} Seeing the flag, the instructor assigns the nearest available lab assistant to that student.
+Dispatch keeps a human in the loop: the system recommends who needs help, but the instructor makes the allocation, preserving professional judgement over an automated decision.
+
 \begin{figure}[H]
     \centering
     \resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[line join=round]
@@ -151,7 +161,9 @@ Before detailing the architecture, the storyboard in Figures~\ref{fig:storyboard
 \end{figure}
 
 \newpage
-\paragraph{Cross the room.} The assistant receives the assignment on their phone and crosses the room to the flagged student. % DRAFT scenario sentence --- refine/replace (Revisions Note 05).
+\paragraph{Cross the room} The assistant receives the assignment on their phone and crosses the room to the flagged student. 
+This step is where the assistant is allocated their next student to help: the allocation arrives on the assistant's own device, so help reaches the student in person and within the session, not after it.
+
 \begin{figure}[H]
     \centering
     \resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[line join=round]
@@ -165,7 +177,8 @@ Before detailing the architecture, the storyboard in Figures~\ref{fig:storyboard
 \end{figure}
 
 \newpage
-\paragraph{Helped.} Once helped, the student returns to work and the dashboard clears the flag, freeing the assistant for the next request. % DRAFT scenario sentence --- refine/replace (Revisions Note 05).
+\paragraph{Helped} Once helped, the student returns to work and the dashboard clears the flag, freeing the assistant for the next request.
+The final step closes the loop: once help is delivered the flag clears and the assistant is freed for the next request, returning the system to its monitoring state.
 \begin{figure}[H]
     \centering
     \resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[line join=round]
@@ -183,6 +196,8 @@ The proposed system adopts a layered architecture designed to support real-time 
 The architecture separates data generation, data ingestion and processing, as well as decision-making and action, into three distinct layers, ensuring each component can evolve independently.
 
 Figure~\ref{fig:context-stakeholders} gives a bird's-eye view of the three stakeholders and their touchpoints, with the three system components labelled C1--C3 for reference in the discussion that follows.
+
+Where the storyboard shows how the system is used, the context diagram that follows names the components that make it possible.
 
 \begin{figure}[H]
     \centering
@@ -358,6 +373,16 @@ The endpoint returns an array in JSON format, where each record corresponds to a
 
 Interaction data are organised around sessions, where a session represents a continuous period of student engagement from the first submission attempt. Within a session, students may have multiple submissions, getting multiple AI responses. This is beneficial in reflecting how their answers may improve question by question. The structure allows the capture of temporal patterns, repeated attempts, and help-seeking behaviour, which will be vital for identifying short-term struggle and difficult questions in lab sessions.
 
+As illustrated in Figure~\ref{fig: data entry}, each record comprises six fields:
+\begin{itemize}
+    \item \textbf{module} - the university module the question belongs to.
+    \item \textbf{question} - the individual lab task that a submission answers.
+    \item \textbf{timestamp} - the time of the most recent submission.
+    \item \textbf{user} - the anonymised identifier of the submitting student.
+    \item \textbf{session} - the session identifier, given by the time of the first submission.
+    \item \textbf{XML} - the session payload: a sequence of \texttt{<submission>} elements, each holding the student's answer (\texttt{<srep>}) and one or more AI responses (\texttt{<feedback>}).
+\end{itemize}
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{figures/design-and-architecture/data-entry.png}
@@ -435,7 +460,8 @@ Applied to the seven signals introduced earlier, we have:
     \;\in\; [0,1].
 \end{equation*}
 Min-max normalisation is applied even to signals already bounded to $[0,1]$, because the configured weights only match the effective contribution of each signal when every signal occupies the full $[0,1]$ range, otherwise a signal that clusters in a sub-interval would contribute less than the weight implied. 
-When $x_{\min} = x_{\max}$, the normalised value is conventionally set to $0$.
+When $x_{\min} = x_{\max}$, the normalised value is set to $0.5$, this preserves the signal's weighted contribution when a signal is uniform across the cohort, and leaves the ranking unaffected.
+
 
 
 \paragraph{Recent submissions weighted by time decay}
@@ -698,10 +724,16 @@ To provide a responsive stable indicator, we will update question difficulty wit
 \paragraph{Interpretation of Model}
 Higher values of $D_t(q)$ indicate that a question is difficult for the class as a whole during the current session. The metric will prove to be valuable in real-time prioritisation of help in lab sessions.
 
-\subsubsection{Alternative Modelling Approach: Collaborative Filtering}
+\paragraph{Configured scalar hyper-parameters}
+Three scalar hyper-parameters complete the baseline models, each with a hand-set default: the Bayesian shrinkage strength $K = 5$ (Equation~\ref{eq:struggle-shrunk}); the EWMA smoothing rate $\lambda = 0.3$, with $\lambda \in (0,1]$ (Equations~\ref{eq: temporal struggle} and~\ref{eq: temporal difficulty}); and the correctness threshold $\tau = 0.5$, with $\tau \in [0,1]$ (introduced above). Their domains and defaults are collected in Appendix~\ref{app:formulae}, Table~\ref{tab:notation}; the Optuna study of Section~\ref{sec:eval-hyperopt} examines $K$ (retained at $5$) and the collaborative-filtering elevation threshold (Section~\ref{sec: collaborative filtering}; the symbol $\tau$ is reused), whose tuned value $\approx 0.90$ is the deployed default.
+
+\subsubsection{Alternative Modelling Approach: Collaborative Filtering} \label{sec: collaborative filtering}
 
 \paragraph{Motivation}
+Collaborative filtering infers a student's likely need for help not from their own behaviour in isolation but from the behaviour of peers with a similar interaction profile. 
+A student who is beginning to struggle often resembles peers who have already crossed the help threshold, by borrowing the signal from those neighbours, the model can flag the student earlier than a purely self-referential score would. Similarity is measured over the same normalised interaction features used by the parametric model, so the two approaches operate on a common representation of student behaviour.
 The parameter-based struggle model defined in Section \ref{sec: student struggle} assigns a score to each student independently base on a weighted combination of normalised interaction features. Whilst this approach is computationally lightweight and interpretable, it depends on the weightings  $\alpha, \beta, \gamma, \delta, \eta$. We can use an alternative modelling approach based on Collaborative Filtering, where rather than scoring each student in isolation, we explore similarity between students.
+
 
 \paragraph{Student Interaction Matrix}
 
@@ -728,7 +760,7 @@ Collecting these vectors row-wise, we define the student interaction matrix:
 Each row of $\mathbf{X}$ encodes one student's current behavioural profile during the session. The matrix is updated at each refresh interval as new data arrives from the endpoint.
 
 \paragraph{Student Similarity Measure}
-To quantify how similar two students are, we apply cosine similarity over their feature vectors. Cosine similarity is preferred over Euclidean distance because it measures the angle between two vectors rather than their absolute magnitudes, making it robust to differences in overall activity levels between students.
+To quantify how similar two students are, we apply cosine similarity over their feature vectors. Cosine similarity is preferred over Euclidean distance because it measures the angle between two vectors rather than their absolute magnitudes, making it robust to differences in overall activity levels between students~\cite{manningIntroductionInformationRetrieval2006}.
 
 \begin{equation}
     \text{sim}(s_i, s_j) =
@@ -804,7 +836,7 @@ primary approach.
 \paragraph{Justification for Current Approach}
 The parameter-based model is adopted as the primary approach for several reasons. This approach does not require a minimum class size to be considered viable, making it robust to sessions with few students where the similarity matrix $\mathbf{W}$ would be unreliable. Additionally, it produces more reliable results immediately, whereas a collaborative filtering approach produces results that are not reliable at the start of a session. 
 
-The collaborative filtering approach is implemented alongside the parameter-based model as a secondary indicator, exposed through the Settings panel as a user-toggle option like Bloomberg's terminal; it is enabled by default with $k=3$ nearest neighbours and a configurable elevation threshold, and can be turned off if the instructor prefers the parametric model.
+The collaborative filtering approach is implemented alongside the parameter-based model as a secondary indicator, exposed through the Settings panel as a user-toggle option like Bloomberg's terminal; it is enabled by default with $k=3$ nearest neighbours and a configurable elevation threshold (deployed default $\tau \approx 0.90$, tuned in Section~\ref{sec:eval-hyperopt}), and can be turned off if the instructor prefers the parametric model.
 
 \subsubsection{Mistake Clustering} \label{sec: mistake clustering}
 
@@ -852,7 +884,7 @@ In the dashboard, $\kappa$ is surfaced as a coloured indicator next to the incor
 The baseline difficulty score $D_t(q)$ defined in Section \ref{sec: task difficulty} is a heuristic combination of observable metrics; however, it does not separate the difficulty of the question from the ability of the students who attempted it. A question registering as hard may have attracted a weaker subset of the cohort. To make this distinction, the dashboard offers an alternative difficulty score based on Item Response Theory (IRT) \cite{lord1968statistical}, where question difficulty and student ability are estimated jointly as latent variables.
 
 \paragraph{Rasch 1-parameter logistic model}
-The simplest IRT model is the Rasch model \cite{rasch1960probabilistic}, which assigns each student $s$ a latent ability $\theta_s \in \mathbb{R}$ and each question $q$ a latent difficulty $\beta_q \in \mathbb{R}$. The probability of student $s$ answering question $q$ correctly is the sigmoid of the ability-difficulty gap:
+The simplest IRT model is the Rasch model \cite{rasch1960probabilistic}, which assigns each student $s$ a latent ability $\theta_s \in \mathbb{R}$ and each question $q$ a latent difficulty $\beta_q \in \mathbb{R}$; both are unbounded on the logit (log-odds) scale, so each value is interpretable only relative to the other rather than on an absolute scale. The probability of student $s$ answering question $q$ correctly is the sigmoid of the ability-difficulty gap:
 \begin{equation}
     P(X_{s,q} = 1 \mid \theta_s, \beta_q)
     = \sigma(\theta_s - \beta_q)
@@ -1077,6 +1109,9 @@ The same labelled set also calibrates the band-classification thresholds of Tabl
     \caption{V2 model refinement pipeline}
     \label{fig:v2-pipeline-design}
 \end{figure}
+The metrics this pipeline produces, the trained composite weights, the calibrated band thresholds, and the tuned scalar hyperparameters, are serialised to disk and loaded by the V2 backend at start-up, so the deployed system applies the offline-trained model without retraining mid-session. With the analytical models established, now we look at how the system explains its judgements to instructors, which the next section addresses through retrieval-augmented feedback.
+
+
 
 
 \subsection{Retrieval-Augmented Generation Feedback Design}
@@ -1084,6 +1119,9 @@ The same labelled set also calibrates the band-classification thresholds of Tabl
 This section describes the retrieval-augmented generation (RAG) layer that produces coaching suggestions for the lab assistants and instructors.
 The architecture adopts a hybrid two-layer retrieval architecture, in which a structured pre-filter narrows the candidate set before a semantic search ranks it (Figure~\ref{fig: rag architecture}).
 The design grounds LLM output in the session's own submission history; this mitigates the hallucination risk that has been flagged as a major concern when deploying generative models in educational settings \cite{lewisRetrievalAugmentedGenerationKnowledgeIntensive2020,kasneciChatGPTGoodOpportunities2023}.
+
+The RAG layer serves as a proof of concept for how generative models can be integrated into the dashboard, it is evaluated qualitatively rather than quantitatively, and the design is intentionally simple to keep the scope manageable for a first iteration. 
+The RAG system will have potential for enhancing the personalised feedback provided to students, but its primary purpose at this stage is to demonstrate the feasibility of integrating generative models into the educational workflow.
 
 \begin{figure}[H]
     \centering
@@ -1195,6 +1233,21 @@ The dashboard provides a real-time overview of student struggles and question di
 \end{figure}
 As shown in Figure \ref{fig: figma1}, our dashboard has two key views: the first shows a list of students whose struggles are at certain thresholds, hence the colour; the second shows a list of questions based on difficulty at a threshold, thus the colour. The values used for comparison against the thresholds are derived from our student struggle and question difficulty equations. The view also allows instructors to go over additional information.
 
+The instructor view is built around a priority list of students and questions rather than a chart-led layout because, in a live session, there is a need for quick interpretation and actionability rather than detailed analytics.
+A sorted leaderboard solves this problem by surfacing the students struggling the most and the hardest questions in the classroom at a glance ordered by priority. 
+The tabular form also keeps the two key signals as parallel ranked lists so that the instructor can quickly see the two without switching screens. 
+Individual buttons can be clicked so that the per-student and per-question detail views for the student or question can be given a closer look.
+
+
+\paragraph{Student Detail} The Student Detail view is opened by clicking a student in the leaderboard. 
+It breaks the student's struggle score down into its individual signals so that the instructor can see which behaviours are driving it, such as recent incorrectness or repeated retries. 
+It also shows a timeline of the score across the session, the questions the student is finding hardest, and coaching prompts drawn from the student's own submissions by the RAG layer described in Section~\ref{sec:rag}. 
+This gives the instructor or assistant the context they need before helping the student.
+
+\paragraph{Question Detail} The Question Detail view is opened in the same way by clicking a question. 
+It pairs the difficulty score with the incorrectness aggregated across all attempts at that question, the students who are struggling with it the most, and the mistake clusters that group similar wrong answers together (Section~\ref{sec: mistake clustering}). 
+It also shows suggestions generated by the RAG layer so that the instructor can address common errors with the whole class.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{figures/design-and-architecture/figma2.png}
@@ -1215,6 +1268,12 @@ In Figure \ref{fig: figma3}, we can see that lab assistants are displayed based 
 \subsubsection{Lab Assistant View}
 
 The lab assistant view is the mobile interface designed for assistants moving between students during a live session. Unlike the lab instructor dashboard, which assumes a stationary screen and wide canvas, the assistant view is built for short interactions on a handheld device. The interface presents one of three states at any moment, each scoped to the assistant's current responsibility: joining a session, waiting for an assignment, or helping the student they have been assigned. Figure~\ref{fig: assistant views} shows the three states in sequence.
+
+The assistant interface is delivered as a responsive web application rather than a native mobile app. 
+A web app allows assistants to access the interface on any device with a browser, without the friction of installing an app or managing updates. 
+This is an important consideration for the tool as it is intended to make use as easy as possible for assistants who may be volunteers or have varying different hardware. 
+This design choice also allows us to deploy updates to the assistant interface without requiring users to download a new version, ensuring that all assistants have access to the latest features and improvements seamlessly. 
+
 
 \begin{figure}[H]
     \centering
@@ -1248,6 +1307,25 @@ Between assignments (Figure~\ref{fig: figma5}), the assistant sees a ranked list
 
 Once a student is assigned (Figure~\ref{fig: figma6}), the view collapses to a single student card carrying the information the assistant needs at the desk: the student's current struggle context, the questions they are most incorrect on, and a short list of coaching prompts retrieved from the RAG layer described in Section~\ref{sec:rag}. A Mark Helped action lets the user know the student was helped, after which the assistant can either release the student or continue providing assistance.
 
+\subsubsection{Settings View}
+The Settings view gathers the configuration choices that govern the dashboard into a single place, so that the instructor decides which signals drive the board rather than the system imposing a fixed configuration. The controls are grouped into four tabs, with defaults chosen to be safe for an instructor who never opens the panel. For the actual implementation we will split the settings view into the tab:
+
+\begin{itemize}
+    \item \textbf{Appearance} - the visual theme and accent colour, and whether the in-class board uses the basic one-row-per-entry layout or the advanced layout with distributions and timelines.
+    \item \textbf{Models} - the choice of struggle model (the baseline parametric model or the improved, BKT- and IRT-informed model), the difficulty model (baseline or IRT), and whether the collaborative-filtering indicator is active, together with its similarity threshold $\tau$.
+    \item \textbf{System} - sound effects and the auto-refresh interval that sets the live polling rate, alongside session utilities.
+    \item \textbf{Advanced} - the Bayesian Knowledge Tracing parameters (prior mastery, transition, guess and slip) and a read-only reference showing the active model weights and band thresholds.
+\end{itemize}
+
+The deployed Settings view is shown in Figure~\ref{fig: settings view}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/design-and-architecture/settings-view.png}
+    \caption{The instructor Settings view.}
+    \label{fig: settings view}
+\end{figure}
+
 \subsubsection{Visual Encoding of Metrics}
 
 By deciding on thresholds, we can highlight a student by degree of struggle or highlight a question by degree of difficulty
@@ -1280,3 +1358,12 @@ By deciding on thresholds, we can highlight a student by degree of struggle or h
 \end{table}
 
 The band boundaries ($t_{s1}$, $t_{s2}$, $t_{s3}$ for struggle and $t_{d1}$, $t_{d2}$, $t_{d3}$ for difficulty) are set by hand at interpretable values so that an instructor can reason about what each band means. They are later calibrated against the LLM rater alongside the model weights, and Section~\ref{sec:eval-results} reports how much this improves the band labels.
+
+The scales are divided into four ordered bands (On Track, Minor Issues, Struggling, Needs Help for struggle; Easy, Medium, Hard, Very Hard for difficulty) with a distinct colour for each so that the board conveys more than a binary help/no-help signal. 
+The multiple bands allow instructors to prioritise their attention and make more informed decisions.
+The green, amber, orange, red colour scheme follows the traffic light convention so that it can be intuitive to users without needing a legend. 
+Colour is also not the sole channel as each band carries a text label, a fixed position and their score so that information can still be interpreted without colour.
+
+Taken together, these choices form a layered information architecture: raw submission data is reduced to interpretable composite signals, which is optionally refined by the IRT, BKT and collaborative-filtering layers, and finally encoded into a small set of ordered, colour-coded bands. 
+Each layer adds analytical depth while preserving the at-a-glance readability an instructor needs during a live session. The next chapter describes how this design is realised in the deployed V1 and V2 systems.
+

@@ -1,2 +1,285 @@
-\section{Formulae}
+\section{Notation and Formulae} \label{app:formulae}
+
+Table~\ref{tab:notation} lists the parameters used by the models in this appendix and in
+Chapters~\ref{sec:design} and~\ref{sec:evaluation}, with their ranges, deployed defaults, and
+whether each is configured by hand or learned from data.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|p{0.30\textwidth}|l|l|}
+    \hline
+    \textbf{Symbol} & \textbf{Meaning} & \textbf{Range / default} & \textbf{Source} \\
+    \hline
+    $\alpha,\ldots,\theta$ & Seven struggle-model weights, one per signal (Table~\ref{tab:struggle-7sig}) & $[0,1]$, sum $1$ (v1) & learned (OLS, v2) \\
+    \hline
+    $\alpha,\ldots,\epsilon$ & Five difficulty-model weights, one per signal (Table~\ref{tab: difficulty weights}); & $[0,1]$, sum $1$ (v1) & learned (OLS, v2) \\
+    \hline
+    $w_{\mathrm{beh}}$ & Improved-struggle behavioural-composite weight & default $0.45$ & configured \\
+    \hline
+    $w_{\mathrm{mg}}$ & Improved-struggle mastery-gap weight & default $0.30$ & configured \\
+    \hline
+    $w_{\mathrm{da}}$ & Improved-struggle difficulty-adjusted weight & default $0.25$ & configured \\
+    \hline
+    $K$     & Shrinkage prior pseudo-count        & default $5$            & configured \\
+    \hline
+    $\tau$  & Correctness threshold (incorrectness $<\tau$) & $[0,1]$, default $0.5$ & configured \\
+    \hline
+    $\tau$  & CF elevation threshold (struggle $\ge\tau$ flags help) & $[0,1]$, deployed $0.90$ & tuned (Optuna) \\
+    \hline
+    $\lambda$ & EWMA smoothing rate               & $(0,1]$, default $0.3$ & configured \\
+    \hline
+    $H$     & Recent-incorrectness half-life      & $1800$\,s              & configured \\
+    \hline
+    $k$     & Collaborative-filtering neighbours  & default $3$            & configured \\
+    \hline
+    $t_{s1\text{-}3},\, t_{d1\text{-}3}$ & Struggle / difficulty band cutpoints & $[0,1]$ & calibrated \\
+    \hline
+    $p(L_0)$ & BKT prior mastery (before any attempt) & $[0,1]$ & learned (MLE) \\
+    \hline
+    $p(T)$   & BKT transition (unlearned $\to$ learned) & $[0,1]$ & learned (MLE) \\
+    \hline
+    $p(G)$   & BKT guess (correct without mastery) & $[0,1]$ & learned (MLE) \\
+    \hline
+    $p(S)$   & BKT slip (incorrect despite mastery) & $[0,1]$ & learned (MLE) \\
+    \hline
+    $\theta_s$ & IRT student ability & $\mathbb{R}$ (logit) & learned (MLE) \\
+    \hline
+    $\beta_q$  & IRT question difficulty & $\mathbb{R}$ (logit) & learned (MLE) \\
+    \hline
+    $\alpha_q$ & IRT question discrimination (2PL slope) & $>0$, geom.\ mean $1$ & learned (MLE) \\
+    \hline
+    $\kappa_0$ & Base measurement-confidence multiplier & default $0.7$ & configured \\
+    \hline
+    $L$ & Confidence length-ramp threshold (characters) & $20$ & configured \\
+    \hline
+    $N_{\min}$ & Min.\ incorrect submissions to attempt clustering & $3$ & configured \\
+    \hline
+    $K_{\max}$ & Max.\ clusters evaluated by silhouette & $5$ & configured \\
+    \hline
+    $p_{\mathrm{mastery}}$ & BKT mastery cutoff ($P(L)$ above this is ``mastered'') & $0.95$ & configured \\
+    \hline
+    \end{tabular}
+    \caption{Model notation, ranges, defaults, and whether each parameter is configured or learned.}
+    \label{tab:notation}
+\end{table}
+
+The remainder of this appendix collects, every model and method used in the report.
+Each appendix subsection names the section in which it is used; equations are stated in the notation of
+Table~\ref{tab:notation} and in the canonical form of Chapter~\ref{sec:design} (the capital-letter
+shorthand of Chapter~\ref{sec:implementation} maps to it through Table~\ref{tab:struggle-7sig}).
+
+\subsection{Data and Derived Signals}
+\emph{Used in Sections~\ref{sec: student struggle} and~\ref{sec: task difficulty}.}
+
+Per-submission correctness and incorrectness from the LLM rater, and the general cohort min-max
+normalisation applied to each unbounded signal:
+\[
+    c_{s,\sigma,k} = C(A_{s,\sigma,k},A_{\sigma},Q_{\sigma}) \in [0,1],
+    \qquad
+    i_{s,\sigma,k} = 1 - c_{s,\sigma,k} \in [0,1],
+\]
+Here $C(\cdot)$ is the LLM correctness scorer applied to the student's answer $A_{s,\sigma,k}$ given the reference answer $A_\sigma$ and the question text $Q_\sigma$.
+\[
+    \tilde{r}_{s,\sigma} = \frac{r_{s,\sigma}}{n_{s,\sigma}}, \quad
+    \tilde{\mathrm{rep}}_{s,\sigma} = \frac{\mathrm{rep}_{s,\sigma}}{n_{s,\sigma}},
+    \qquad
+    \hat{x}_{s,\sigma} = \frac{x_{s,\sigma} - x_{\min}}{x_{\max} - x_{\min}}, \quad
+    x_{\min} = \min_{s'} x_{s',\sigma},\; x_{\max} = \max_{s'} x_{s',\sigma}.
+\]
+The seven normalised struggle signals are $\hat{n},\hat{t},\hat{\imath},\hat{\tilde{r}},\widehat{A^{\mathrm{raw}}},\hat{d},\widehat{\tilde{\mathrm{rep}}} \in [0,1]$; the five difficulty signals are
+\[
+    \tilde{c}_{q} = 1 - \frac{c_{q}}{n_{q}}, \quad
+    \tilde{p}_{q} = \frac{p_{q}}{|\mathcal{S}_{q}|}, \quad
+    \tilde{t}_{q} = \frac{t_{q}-t_{\min}}{t_{\max}-t_{\min}}, \quad
+    \tilde{a}_{q} = \frac{a_{q}-a_{\min}}{a_{\max}-a_{\min}}, \quad
+    \tilde{f}_{q} = f_{q}.
+\]
+where $\mathcal{S}_q$ is the set of student-session pairs that attempted question $q$, and $n_q,c_q,p_q,t_q,a_q,f_q$ are its attempt count, correct count, first-attempt failures, mean time, mean attempts and mean LLM incorrectness respectively.
+
+\subsection{Baseline Student Struggle Model}
+\emph{Used in Section~\ref{sec: student struggle} (design) and Chapter~\ref{sec:implementation} (implementation).}
+
+Per-submission time-decay weight (half-life $H = 1800$\,s) and the time-decayed recent-incorrectness signal:
+\[
+    w_{s,\sigma,k} = \exp\!\left(-\frac{\ln 2}{H}\,\Delta_{s,\sigma,k}\right),
+    \qquad
+    A^{\mathrm{raw}}(s,\sigma)
+    = \frac{\sum_{k} w_{s,\sigma,k}\, i_{s,\sigma,k}}{\sum_{k} w_{s,\sigma,k}} \in [0,1].
+\]
+Raw struggle as a convex combination of the seven normalised signals ($\alpha,\ldots,\theta \geq 0$, summing to $1$):
+\[
+    S^{\mathrm{raw}}(s,\sigma)
+    = \alpha \hat{n}_{s,\sigma} + \beta  \hat{t}_{s,\sigma} + \gamma \hat{\imath}_{s,\sigma}
+    + \delta \hat{\tilde{r}}_{s,\sigma} + \eta \widehat{A^{\mathrm{raw}}}(s,\sigma)
+    + \zeta \hat{d}_{s,\sigma} + \theta \widehat{\tilde{\mathrm{rep}}}_{s,\sigma}.
+\]
+Bayesian shrinkage toward the cohort mean, then EWMA temporal smoothing across refresh cycles:
+\[
+    S^{\mathrm{shrunk}}(s,\sigma)
+    = \frac{n_{s,\sigma}}{n_{s,\sigma} + K}\,S^{\mathrm{raw}}(s,\sigma)
+    + \frac{K}{n_{s,\sigma} + K}\,\bar{S}^{\mathrm{raw}}_{\sigma},
+    \qquad
+    S_t = (1-\lambda)S_{t-1} + \lambda S^{\mathrm{shrunk}}.
+\]
+Here $\Delta_{s,\sigma,k}$ is the time elapsed since submission $k$, $n_{s,\sigma}$ the student's submission count, and $\bar{S}^{\mathrm{raw}}_\sigma$ the cohort mean raw struggle in session $\sigma$.
+Hand-set v1 weights, one per signal: $\alpha=0.10$ (submission count $\hat{n}$), $\beta=0.10$ (active time $\hat{t}$), $\gamma=0.20$ (mean incorrectness $\hat{\imath}$), $\delta=0.10$ (retry rate $\hat{\tilde{r}}$), $\eta=0.38$ (time-decayed recent incorrectness $\widehat{A^{\mathrm{raw}}}$), $\zeta=0.05$ (improvement-trajectory slope $\hat{d}$) and $\theta=0.07$ (answer-repetition rate $\widehat{\tilde{\mathrm{rep}}}$); refit by OLS in v2. The score is assigned to one of four ordered bands by its calibrated cutpoints $t_{s1}<t_{s2}<t_{s3}$ (difficulty is analogous with $t_{d1}<t_{d2}<t_{d3}$):
+\[
+    \mathrm{band}(S_t) =
+    \begin{cases}
+        \text{On Track}     & S_t \le t_{s1},\\
+        \text{Minor Issues} & t_{s1} < S_t \le t_{s2},\\
+        \text{Struggling}   & t_{s2} < S_t \le t_{s3},\\
+        \text{Needs Help}   & S_t > t_{s3}.
+    \end{cases}
+\]
+
+\subsection{Baseline Question Difficulty Model}
+\emph{Used in Section~\ref{sec: task difficulty}.}
+
+Raw difficulty as a convex combination of the five normalised signals (here $\alpha,\ldots,\epsilon$ are the difficulty weights, distinct from the struggle weights above), then EWMA smoothing:
+\[
+    D^{\mathrm{raw}}(q)
+    = \alpha\,\tilde{c}_{q} + \beta\,\tilde{t}_{q} + \gamma\,\tilde{a}_{q}
+    + \delta\,\tilde{f}_{q} + \epsilon\,\tilde{p}_{q},
+    \qquad
+    D_t(q) = (1-\lambda)\,D_{t-1}(q) + \lambda\,D^{\mathrm{raw}}(q).
+\]
+Hand-set v1 weights, one per signal: $\alpha=0.28$ (incorrect rate $\tilde{c}_q$), $\beta=0.12$ (mean time per student $\tilde{t}_q$), $\gamma=0.20$ (mean attempts per student $\tilde{a}_q$), $\delta=0.20$ (mean LLM incorrectness $\tilde{f}_q$) and $\epsilon=0.20$ (first-attempt failure rate $\tilde{p}_q$); refit by OLS in v2. Classified into Easy / Medium / Hard / Very Hard at cutpoints $t_{d1} < t_{d2} < t_{d3}$.
+
+\subsection{Collaborative Filtering}
+\emph{Used in Section~\ref{sec: collaborative filtering}.}
+
+Each student is a five-dimensional behavioural vector; pairwise similarity is cosine:
+\[
+    \mathbf{x}_{s_i} =
+    \big(\hat{n}_{s_i,\sigma},\, \hat{t}_{s_i,\sigma},\, \hat{\imath}_{s_i,\sigma},\,
+    \widehat{A^{\mathrm{raw}}}(s_i,\sigma),\, \hat{d}_{s_i,\sigma}\big)^{\top} \in [0,1]^5,
+    \quad
+    \mathrm{sim}(s_i,s_j) =
+    \frac{\mathbf{x}_{s_i}^{\top}\mathbf{x}_{s_j}}{\|\mathbf{x}_{s_i}\|_2\,\|\mathbf{x}_{s_j}\|_2} \in [0,1].
+\]
+A binary help-seeking proxy thresholds the parametric score; the predicted help-need is the similarity-weighted mean over the $k$ nearest neighbours $\mathcal{N}_k(s)$:
+\[
+    h_{s,\sigma} =
+    \begin{cases}
+        1 & \text{if } S_t(s,\sigma) \geq \tau \\
+        0 & \text{otherwise,}
+    \end{cases}
+    \qquad
+    \hat{h}_{s,\sigma} =
+    \frac{\sum_{s' \in \mathcal{N}_k(s)} \mathrm{sim}(s,s')\, h_{s',\sigma}}
+         {\sum_{s' \in \mathcal{N}_k(s)} \mathrm{sim}(s,s')} \in [0,1].
+\]
+
+\subsection{Mistake Clustering}
+\emph{Standard methods defined in Section~\ref{sec: text mining}; applied in Section~\ref{sec: mistake clustering}.}
+
+Incorrect answers are vectorised by TF-IDF, partitioned by $k$-means (objective $\phi$), and the cluster quality measured by the silhouette coefficient:
+\[
+    \mathrm{tf\text{-}idf}_{t,d} = \mathrm{tf}_{t,d}\cdot\log\frac{N}{\mathrm{df}_t},
+    \qquad
+    \phi = \sum_{x\in X}\min_{c\in C}\|x-c\|^2,
+    \qquad
+    s(i) = \frac{b(i)-a(i)}{\max\{a(i),b(i)\}}.
+\]
+For point $i$, $a(i)$ is its mean distance to the other points in its cluster and $b(i)$ its mean distance to the nearest other cluster; $\mathrm{tf}_{t,d}$ is the term frequency, $\mathrm{df}_t$ the document frequency and $N$ the number of documents.
+The deployed pipeline selects the cluster count automatically by maximising the mean silhouette over $k\in\{2,\ldots,K_{\max}\}$ with $K_{\max}=5$:
+\[
+    k^\star = \arg\max_{k\in\{2,\ldots,K_{\max}\}} \frac{1}{|X_q|}\sum_{x\in X_q} s(x;k).
+\]
+Clustering is attempted only when a question has at least $N_{\min}=3$ incorrect submissions.
+
+\subsection{Measurement Confidence}
+\emph{Used in Section~\ref{sec: measurement confidence}.}
+
+Each incorrectness score carries a confidence weight combining a base value, a length factor and an extremity factor (deployment: $\kappa_0 = 0.7$, length ramp over $L = 20$ characters):
+\[
+    \kappa_{s,\sigma,k}
+    = \kappa_0 \cdot \mathrm{length}(A_{s,\sigma,k}) \cdot
+      \Big(\tfrac{1}{2} + \tfrac{1}{2}\,\mathrm{extremity}(i_{s,\sigma,k})\Big) \in [0,1].
+\]
+
+\subsection{Item Response Theory}
+\emph{Used in Section~\ref{sec: irt}.}
+
+Rasch (1PL) response probability and its Bernoulli log-likelihood over the observed entries $\mathcal{O}$:
+\[
+    P(X_{s,q}=1 \mid \theta_s,\beta_q) = \sigma(\theta_s-\beta_q) = \frac{1}{1+e^{-(\theta_s-\beta_q)}},
+\]
+\[
+    \ell(\theta,\beta)
+    = \sum_{(s,q)\in\mathcal{O}}
+      \big[\, X_{s,q}\log\sigma(\theta_s-\beta_q) + (1-X_{s,q})\log\big(1-\sigma(\theta_s-\beta_q)\big) \big].
+\]
+The fitted logit-scale difficulty is mapped to $[0,1]$ by the sigmoid; V2 uses the 2PL extension with discrimination $\alpha_q$ and anchoring $\sum_s\theta_s = 0$, $\sum_q\log\alpha_q = 0$:
+\[
+    D^{\mathrm{IRT}}(q) = \sigma(\hat{\beta}_q) \in [0,1],
+    \qquad
+    P(X_{s,q}=1 \mid \theta_s,\alpha_q,\beta_q) = \sigma\!\big(\alpha_q(\theta_s-\beta_q)\big).
+\]
+In V2 the per-attempt IRT residual (expected minus observed correctness, rescaled to $[0,1]$) feeds the improved struggle model:
+\[
+    r_{s,q} = \sigma\!\big(\alpha_q(\theta_s-\beta_q)\big) - (1 - i_{s,\sigma,k}),
+    \qquad
+    \tilde{r}^{\,\mathrm{IRT}}_{s,q} = \tfrac{1}{2}\big(r_{s,q} + 1\big) \in [0,1].
+\]
+
+\subsection{Bayesian Knowledge Tracing}
+\emph{Used in Section~\ref{sec: bkt}; background in Chapter~\ref{sec:requirements}.}
+
+With four parameters $p(L_0),p(T),p(G),p(S)$, the per-attempt posterior mastery is updated by Bayes' rule and advanced by the learning transition; the one-step-ahead predictive probability of a correct response is:
+\[
+    P(L_{k+1}) = P(L_k \mid X_{s,q,k}) + \big(1 - P(L_k \mid X_{s,q,k})\big)\,p(T),
+\]
+\[
+    P(\text{correct}_{k+1}) = P(L_k)\,(1-p(S)) + (1-P(L_k))\,p(G).
+\]
+A skill is treated as mastered when $P(L) > p_{\mathrm{mastery}} = 0.95$; for identifiability the guess and slip probabilities are bounded $p(G),p(S) \le 0.5$ (so that $p(G)+p(S)<1$).
+
+\subsection{Improved Struggle Model}
+\emph{Used in Section~\ref{sec: improved struggle}.}
+
+Mastery- and difficulty-aware convex combination (defaults $w_{\mathrm{beh}}=0.45$, $w_{\mathrm{mg}}=0.30$, $w_{\mathrm{da}}=0.25$), with the mastery gap $M_s$ and the difficulty-adjusted incorrectness $D_s$:
+\[
+    S^{\mathrm{imp}}(s,\sigma)
+    = w_{\mathrm{beh}} B_s + w_{\mathrm{mg}} M_s + w_{\mathrm{da}} D_s,
+    \qquad
+    w_{\mathrm{beh}} + w_{\mathrm{mg}} + w_{\mathrm{da}} = 1,
+\]
+\[
+    M_s = \max\!\big(\bar{m}_s - (1 - A^{\mathrm{raw}}_s),\, 0\big) \in [0,1],
+    \qquad
+    D_s = \frac{1}{|\mathcal{R}_s|} \sum_{k \in \mathcal{R}_s} i_{s,\sigma,k}\,(1 - \tilde{\beta}_q) \in [0,1].
+\]
+The behavioural composite $B_s$ is the equal-weighted mean of four normalised baseline signals:
+\[
+    B_s = \tfrac{1}{4}\big(\widehat{A^{\mathrm{raw}}}_s + \hat{\tilde{r}}_s + \hat{d}_s + \widehat{\tilde{\mathrm{rep}}}_s\big).
+\]
+Here $\bar{m}_s$ is the student's mean BKT mastery over attempted questions, $A^{\mathrm{raw}}_s$ their per-student time-decayed recent incorrectness, $\tilde{\beta}_q = D^{\mathrm{IRT}}(q)$ the normalised IRT difficulty of the attempted question, and $\mathcal{R}_s$ the student's recent submission set. When BKT or IRT is unavailable the missing weight is redistributed to $w_{\mathrm{beh}}$, and the combined score is shrunk toward the cohort mean with the same estimator and $K=5$ as the baseline model.
+
+\subsection{Evaluation Metrics}
+\emph{Used in Section~\ref{sec:evaluation} (defined in its Evaluation Metrics subsection).}
+
+Spearman's rank correlation between two rankings of $n$ items with rank differences $d_i$, and the mean absolute band-distance error over $n$ items on the four-band scale:
+\[
+    \rho = 1 - \frac{6\sum_{i=1}^{n} d_i^2}{n(n^2-1)} \in [-1,1],
+    \qquad
+    \mathrm{MAE} = \frac{1}{n}\sum_{i=1}^{n} \big|\hat{b}_i - b_i\big|.
+\]
+Linear-weighted Cohen's $\kappa$ over $k$ ordered bands, with observed and expected agreement matrices $O,E$ and weights $w_{ij} = |i-j|/(k-1)$; and the AUC as the probability that a random positive is ranked above a random negative:
+\[
+    \kappa = 1 - \frac{\sum_{i,j} w_{ij}\,O_{ij}}{\sum_{i,j} w_{ij}\,E_{ij}},
+    \qquad
+    \mathrm{AUC} = P\big(\hat{s}(x^{+}) > \hat{s}(x^{-})\big)
+    = \int_0^1 \mathrm{TPR}\,\mathrm{d}(\mathrm{FPR}).
+\]
+The quadratic-weighted $\kappa$ uses $w_{ij} = (i-j)^2/(k-1)^2$. Two unweighted agreement rates are also reported - exact-band and within-one-band agreement - together with the top-$N$ overlap of two rankings:
+\[
+    \mathrm{exact} = \frac{1}{n}\sum_{i=1}^{n} \mathbf{1}\!\left[\hat{b}_i = b_i\right],
+    \quad
+    \mathrm{within\text{-}1} = \frac{1}{n}\sum_{i=1}^{n} \mathbf{1}\!\left[|\hat{b}_i - b_i| \le 1\right],
+    \quad
+    \mathrm{overlap}_N = \big|\mathcal{T}^{\mathrm{model}}_N \cap \mathcal{T}^{\mathrm{rater}}_N\big|.
+\]
+Cross-validated figures are reported as a per-fold mean with a bootstrap $95\%$ confidence interval (struggle, GroupKFold($5$) by session; the $72$-question difficulty model uses leave-one-out, which does not support a comparable interval).
 

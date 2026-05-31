@@ -245,9 +245,10 @@ class RuntimeSettings(BaseModel):
     struggle_model: str           # "baseline" | "improved"
     difficulty_model: str         # "baseline" | "irt"
     bkt: BKTParameters
-    # shrinkage_k is seeded from the Optuna-tuned v2 value at boot and remains
-    # user-adjustable. The trained v2 composite weights are loaded directly by
-    # cache.py and are no longer a runtime-selectable version.
+    # shrinkage_k is held at its config.py default (5) — the Optuna tuning of K
+    # was within noise — while cf_threshold is seeded from the Optuna-tuned v2
+    # value at boot; both remain user-adjustable. The trained v2 composite
+    # weights are loaded directly by cache.py and are not a runtime-selectable version.
     shrinkage_k: int
 
 

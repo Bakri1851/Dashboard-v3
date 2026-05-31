@@ -24,7 +24,7 @@ The validation covered three tiers of parameter.
 The composite weights were refit by ordinary least-squares regression against the four-band rater target (Section~\ref{sec:eval-results}); the two scalar hyperparameters, the Bayesian shrinkage constant $K$ and the collaborative-filtering threshold $\tau$, were tuned by Tree-structured Parzen Estimator across fifty-trial Optuna studies (Section~\ref{sec:eval-hyperopt}); and the score-to-band thresholds were trained by brute-force linear-weighted $\kappa$ maximisation across six model variants under constrained group five-fold and leave-one-out cross-validation (Section~\ref{sec:eval-thresholds}).
 
 The positive findings are concrete.
-Tuning $\tau$ from the hand-set $0.7$ to the tuned $0.900$ raised Spearman $\rho$ by $+0.160$, a substantial gain indicating the initial setting was too permissive.
+Tuning $\tau$ from the hand-set $0.7$ to the tuned $0.900$ raised Spearman $\rho$ by $+0.160$, a substantial gain indicating the initial setting was too permissive; the tuned $0.90$ is the deployed collaborative-filtering threshold.
 Four of the six threshold variants cleared the pre-registered promotion bar of $\Delta\kappa \geq +0.05$ under constrained cross-validation, and a follow-up search on the deployed min-max composite produced the cutpoints now in \texttt{config.py} with band-agreement $\kappa = +0.384$ for struggle and $\kappa = +0.387$ for difficulty.
 The negative findings are reported with the same emphasis.
 The shrinkage constant $K$ moved from the hand-set $5$ to the tuned $0$ but the gain $\Delta\rho = +0.009$ sat within per-fold standard deviation, validating the hand-set value rather than refining it.
