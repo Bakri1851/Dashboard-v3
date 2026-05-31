@@ -1,22 +1,103 @@
 \section{User Interface Screenshots} \label{app:ui-screenshots}
 
-% =====================================================================
-% TODO (Bakri): READ-THROUGH PASS before final submission.
-%
-% Appendix B is currently a heading only.  Outstanding from Ch5
-% (v2 Report Change List - Ch5 + Ch6 sections):
-%   - SETTINGS VIEW RE-SHOOT (highest priority): the deployed Settings
-%     card no longer shows the removed weight-version selector; any
-%     screenshot still showing it is stale and must be replaced before
-%     submission.
-%   - Add screenshots covering every shipped V2 view: instructor
-%     in-class leaderboards, student detail, question detail, mistake
-%     clusters, RAG suggested feedback, saved sessions, data analysis,
-%     lab-assistant mobile route, settings.
-%
-% The \label{app:ui-screenshots} above is already in place so any
-% \ref{app:ui-screenshots} from Ch4 / Ch5 resolves on first paste.
-% Caption every figure with the view name and the cohort / session
-% it was captured from so the reader can correlate to §5.4 / §5.5
-% claims about UI behaviour.
-% =====================================================================
+This appendix collects deployed-system screenshots of the V2 (React~+~FastAPI) interface referenced in the implementation and evaluation chapters. Each figure is captured from the 25COA122 deployment cohort.
+
+\subsection{Instructor Dashboard (V2)}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/implementation/ui-inclass-basic.png}
+    \caption{V2 In-Class view - Basic layout (default).}
+    \label{fig:ui-inclass-basic}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/implementation/ui-inclass.png}
+    \caption{V2 In-Class view - Advanced layout.}
+    \label{fig:ui-inclass}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/implementation/ui-studentdetail.png}
+    \caption{V2 Student Detail view (Improved Models enabled).}
+    \label{fig:ui-studentdetail}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/implementation/ui-questiondetail.png}
+    \caption{V2 Question Detail view.}
+    \label{fig:ui-questiondetail}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/implementation/ui-dataanalysis.png}
+    \caption{V2 Data Analysis view.}
+    \label{fig:ui-dataanalysis}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/implementation/ui-settings.png}
+    \caption{V2 Settings view.}
+    \label{fig:ui-settings}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/implementation/ui-previoussessions.png}
+    \caption{V2 Previous Sessions view.}
+    \label{fig:ui-previoussessions}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/implementation/ui-progression.png}
+    \caption{V2 Session Progression view.}
+    \label{fig:ui-progression}
+\end{figure}
+
+\subsection{Lab Assistant (mobile)}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\linewidth]{figures/implementation/asst-join.png}
+    \caption{Lab assistant join screen.}
+    \label{fig:asst-join}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[t]{0.4\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/implementation/asst-unassigned.png}
+        \caption{Self-allocation off}
+        \label{fig:asst-unassigned-readonly}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}[t]{0.4\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/implementation/asst-unassigned2.png}
+        \caption{Self-allocation on}
+        \label{fig:asst-unassigned-selfalloc}
+    \end{subfigure}
+    \caption{Lab assistant standby view in both allocation modes.}
+    \label{fig:asst-unassigned}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\linewidth]{figures/implementation/asst-assigned.png}
+    \caption{Lab assistant assigned view; the \emph{mark helped} action closes the assignment.}
+    \label{fig:asst-assigned}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/implementation/asst-dispatch.png}
+    \caption{V2 instructor dispatch console.}
+    \label{fig:asst-dispatch}
+\end{figure}

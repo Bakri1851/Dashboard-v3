@@ -6,12 +6,14 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
+  - Report/appendix-sections/themes-and-references.tex:23
+  - Report/main-sections/design-and-architecture.tex:855
   - Report/main-sections/requirements-specification.tex:132
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Ch3 – Design and Modelling
   - IRT Difficulty Logic
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Probabilistic models for some intelligence and attainment tests
 

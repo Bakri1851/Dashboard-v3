@@ -6,10 +6,13 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
+  - Report/appendix-sections/themes-and-references.tex:21
+  - Report/main-sections/design-and-architecture.tex:906
+  - Report/main-sections/implementation.tex:872
   - Report/main-sections/requirements-specification.tex:106
   - Report/main-sections/requirements-specification.tex:112
 cited_in_planned: []
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Knowledge tracing: Modeling the acquisition of procedural knowledge
 

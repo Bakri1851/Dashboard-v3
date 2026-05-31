@@ -6,18 +6,14 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:18
-  - Report/appendix-sections/themes-and-references.tex:20
-  - Report/main-sections/requirements-specification-old.tex:107
-  - Report/main-sections/requirements-specification-old.tex:111
-  - Report/main-sections/requirements-specification-old.tex:119
+  - Report/appendix-sections/themes-and-references.tex:23
   - Report/main-sections/requirements-specification.tex:125
   - Report/main-sections/requirements-specification.tex:129
   - Report/main-sections/requirements-specification.tex:137
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Question Difficulty Logic
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Evaluating task-level struggle detection methods in intelligent tutoring systems for programming
 

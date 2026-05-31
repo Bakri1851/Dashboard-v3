@@ -6,15 +6,13 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:15
-  - Report/main-sections/requirements-specification-old.tex:64
-  - Report/main-sections/requirements-specification-old.tex:73
+  - Report/appendix-sections/themes-and-references.tex:17
   - Report/main-sections/requirements-specification.tex:64
   - Report/main-sections/requirements-specification.tex:73
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Data Loading and Session Persistence
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Real-time data analytics in retail: A review of USA and global practices
 

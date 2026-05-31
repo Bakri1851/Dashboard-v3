@@ -6,9 +6,11 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
+  - Report/appendix-sections/themes-and-references.tex:21
+  - Report/main-sections/design-and-architecture.tex:944
   - Report/main-sections/requirements-specification.tex:115
 cited_in_planned: []
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Individualized Bayesian Knowledge Tracing Models
 

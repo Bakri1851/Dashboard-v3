@@ -6,10 +6,11 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:22
+  - Report/appendix-sections/themes-and-references.tex:25
+  - Report/main-sections/requirements-specification.tex:152
 cited_in_planned:
   - Ch2 – Background and Requirements
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Course recommendations in online education based on collaborative filtering recommendation algorithm
 

@@ -6,13 +6,12 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:18
-  - Report/main-sections/requirements-specification-old.tex:82
+  - Report/appendix-sections/themes-and-references.tex:19
   - Report/main-sections/requirements-specification.tex:84
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Student Struggle Logic
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Exploring novice programmers' testing behavior: a first step to define coding struggle citation in BibTeX format exploring novice programmer testing behavior: a first step to define coding struggle
 

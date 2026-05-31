@@ -6,11 +6,12 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/main-sections/requirements-specification.tex:144
+  - Report/appendix-sections/themes-and-references.tex:25
+  - Report/main-sections/requirements-specification.tex:151
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Analytics Engine
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # GroupLens: an open architecture for collaborative filtering of netnews
 

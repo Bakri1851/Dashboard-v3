@@ -7,11 +7,13 @@ status: active
 last_imported: 2026-05-05
 tags: [Computer Vision and Pattern Recognition (cs.CV), Data Structures and Algorithms (cs.DS), FOS: Computer and information sciences, Information Retrieval (cs.IR), Social and Information Networks (cs.SI)]
 cited_in_tex:
-  - Report/main-sections/requirements-specification.tex:204
-  - Report/main-sections/requirements-specification.tex:205
-  - Report/main-sections/requirements-specification.tex:206
+  - Report/appendix-sections/themes-and-references.tex:29
+  - Report/main-sections/design-and-architecture.tex:1160
+  - Report/main-sections/requirements-specification.tex:211
+  - Report/main-sections/requirements-specification.tex:212
+  - Report/main-sections/requirements-specification.tex:213
 cited_in_planned: []
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs
 

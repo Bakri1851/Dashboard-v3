@@ -6,10 +6,12 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/main-sections/requirements-specification.tex:194
-  - Report/main-sections/requirements-specification.tex:195
+  - Report/appendix-sections/themes-and-references.tex:29
+  - Report/main-sections/design-and-architecture.tex:1086
+  - Report/main-sections/requirements-specification.tex:201
+  - Report/main-sections/requirements-specification.tex:202
 cited_in_planned: []
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # ChatGPT for good? On opportunities and challenges of large language models for education
 

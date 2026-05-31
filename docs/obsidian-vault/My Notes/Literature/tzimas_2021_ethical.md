@@ -6,14 +6,12 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:11
-  - Report/main-sections/requirements-specification-old.tex:25
-  - Report/main-sections/requirements-specification-old.tex:31
+  - Report/appendix-sections/themes-and-references.tex:13
   - Report/main-sections/requirements-specification.tex:25
   - Report/main-sections/requirements-specification.tex:31
 cited_in_planned:
   - Ch2 – Background and Requirements
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Ethical issues in learning analytics: a review of the field
 

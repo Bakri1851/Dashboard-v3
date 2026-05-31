@@ -7,12 +7,15 @@ status: active
 last_imported: 2026-05-05
 tags: [Computation and Language (cs.CL), FOS: Computer and information sciences, Machine Learning (cs.LG)]
 cited_in_tex:
-  - Report/main-sections/requirements-specification.tex:188
-  - Report/main-sections/requirements-specification.tex:189
-  - Report/main-sections/requirements-specification.tex:190
+  - Report/appendix-sections/themes-and-references.tex:29
+  - Report/main-sections/design-and-architecture.tex:1086
+  - Report/main-sections/implementation.tex:1038
   - Report/main-sections/requirements-specification.tex:195
+  - Report/main-sections/requirements-specification.tex:196
+  - Report/main-sections/requirements-specification.tex:197
+  - Report/main-sections/requirements-specification.tex:202
 cited_in_planned: []
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks
 

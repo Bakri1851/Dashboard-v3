@@ -6,16 +6,14 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:18
-  - Report/main-sections/requirements-specification-old.tex:78
-  - Report/main-sections/requirements-specification-old.tex:79
+  - Report/appendix-sections/themes-and-references.tex:19
   - Report/main-sections/requirements-specification.tex:80
   - Report/main-sections/requirements-specification.tex:81
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Student Struggle Logic
   - Improved Struggle Logic
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Using student trace logs to determine meaningful progress and struggle during programming problem solving
 

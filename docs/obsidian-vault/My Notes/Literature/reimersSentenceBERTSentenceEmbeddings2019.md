@@ -7,10 +7,12 @@ status: active
 last_imported: 2026-05-05
 tags: [Computation and Language (cs.CL), FOS: Computer and information sciences]
 cited_in_tex:
-  - Report/main-sections/requirements-specification.tex:200
-  - Report/main-sections/requirements-specification.tex:201
+  - Report/appendix-sections/themes-and-references.tex:29
+  - Report/main-sections/design-and-architecture.tex:1160
+  - Report/main-sections/requirements-specification.tex:207
+  - Report/main-sections/requirements-specification.tex:208
 cited_in_planned: []
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks
 

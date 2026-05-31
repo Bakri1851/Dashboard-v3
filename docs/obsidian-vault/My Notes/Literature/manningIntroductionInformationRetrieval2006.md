@@ -6,9 +6,11 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/main-sections/requirements-specification.tex:162
+  - Report/appendix-sections/themes-and-references.tex:27
+  - Report/main-sections/design-and-architecture.tex:813
+  - Report/main-sections/requirements-specification.tex:169
 cited_in_planned: []
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Introduction to Information Retrieval
 

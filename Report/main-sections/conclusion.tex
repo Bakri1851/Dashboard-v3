@@ -1,60 +1,5 @@
 \section{Conclusion} \label{sec:conclusion}
 
-% =====================================================================
-% TODO (Bakri): READ-THROUGH PASS before final submission.
-%
-% (1) Voice sweep.  Read the whole Conclusion chapter end-to-end and
-%     rewrite any prose that doesn't sound like your voice.  Claude
-%     drafted all three subsections (§6.1 Summary of the Project,
-%     §6.2 Key Findings and Contributions, §6.3 Future Work) from the
-%     Ch6 brief in v2 Report Change List.md lines 24 and 70-71.
-%     Sweep for:
-%       - "we propose / we adopt" phrasings that don't match your tone
-%       - hedging words ("arguably", "perhaps", "somewhat")
-%       - US spelling ("optimize", "behavior", "analyze")
-%       - double hyphens "--" where you prefer a single "-"
-%       - any leftover "v1 default" / "v2 best" labels
-%       - stale "% TODO:" comments sitting above completed prose
-%
-% (2) Resolve inline % FLAG comments in §6.3:
-%       - L59-60 (Joint optimisation paragraph): neither `mord` nor
-%         `statsmodels.OrderedModel` is in references.bib.  Decide:
-%         (a) import as Phase-2 candidates and add \cite{} calls, or
-%         (b) drop the package names and keep the methodology phrasing.
-%       - L64-66 (Cohort-balanced re-evaluation): the 5.8% On Track
-%         figure was lifted from the v2 Report Change List brief and is
-%         NOT in the shipped results-and-evaluation.tex §5.4.1 (which
-%         reports deployed-model bands 31/14/15/40% struggle).  The
-%         5.8% likely refers to the LLM-rater label distribution rather
-%         than the deployed model's output - verify against
-%         data/eval/results.md or the rater summary, or restate
-%         qualitatively as "very few On Track snapshots".
-%
-% (3) Heading cleanup from paste:
-%       - L21+22: duplicate \subsection{} headings.  Keep the corrected
-%         "Key Findings and Contributions"; delete the original
-%         "Key Findings Contributions" skeleton line.
-%       - L47+49: duplicate \subsection{Future Work} headings.  Keep
-%         one, delete the other.
-%
-% (4) Sync the Writing Roadmap with Ch6 once the read-through is done:
-%       docs/obsidian-vault/My Notes/Thesis/Writing Roadmap.md
-%     Items to bring across:
-%       - Order-of-operations row 13 (Ch6 Conclusion) flips from ⏳ to ✅
-%       - "2026-05-28 - Ch6 conclusion chapter complete" log entry under
-%         the existing "2026-05-28 - Ch5 evaluation chapter complete"
-%         entry, covering §6.1 / §6.2 / §6.3 scope
-%       - v2 Report Change List.md - mark the Ch6 section as DONE and
-%         optionally add a "2026-05-28 - Ch6 session-complete sync" log
-%         entry at the bottom matching the Ch5 entry's structure
-%       - Appendix B Settings-view re-shoot and Appendix E formulae
-%         (optional) remain the only outstanding Ch5/Ch6-adjacent items
-%
-% (5) Verify pdflatex builds clean: the \ref{sec:conclusion} call from
-%     §5.5.5 (Q11 cross-session aggregation) now has a target; no other
-%     forward-references into Ch6 exist in the chapters before it.
-% =====================================================================
-
 \subsection{Summary of the Project}
 
 This project addressed a recurring practical problem in university computer labs: instructors and lab assistants cannot reliably see, in real time, which students are struggling and which questions are causing the most difficulty across a session of several dozen to over a hundred concurrent learners.
@@ -68,7 +13,7 @@ The struggle and difficulty composites were specified in Chapter~\ref{sec:design
 The dashboard itself was built incrementally from the V1 Streamlit reference to the V2 React and FastAPI implementation documented in Chapter~\ref{sec:implementation}.
 Functional and non-functional evaluation followed in Chapter~\ref{sec:evaluation}, combining a retrospective replay of the deployment cohort with an eleven-question instructor and student survey.
 
-Against the rater's four-band rating, the deployed composite achieved Spearman $\rho = +0.588$ on the struggle target and $\rho = +0.469$ on difficulty (Section~\ref{sec:eval-results}); after a constrained cross-validated brute-force search the deployed cutpoints lifted linear-weighted Cohen's $\kappa$ to $+0.384$ for struggle and $+0.387$ for difficulty (Section~\ref{sec:eval-thresholds}).
+Against the rater's four-band rating, the deployed composite achieved Spearman $\rho = +0.588$ on the struggle target and $\rho = +0.468$ on difficulty (Section~\ref{sec:eval-results}); after a constrained cross-validated brute-force search the deployed cutpoints lifted linear-weighted Cohen's $\kappa$ to $+0.384$ for struggle and $+0.387$ for difficulty (Section~\ref{sec:eval-thresholds}).
 The 2PL Item Response Theory difficulty model was retained as a complementary toggle but not promoted to be the deployed scorer: its band agreement against the rater was marginally negative ($\kappa = -0.024$ at trained thresholds) and the top-ten hardest set overlapped with the composite's by one question in ten (Section~\ref{sec:eval-irt}).
 The system is deployed and in use; the sections that follow set out what the validation contributed and what remains for future work.
 
@@ -84,57 +29,52 @@ Four of the six threshold variants cleared the pre-registered promotion bar of $
 The negative findings are reported with the same emphasis.
 The shrinkage constant $K$ moved from the hand-set $5$ to the tuned $0$ but the gain $\Delta\rho = +0.009$ sat within per-fold standard deviation, validating the hand-set value rather than refining it.
 The 2PL IRT difficulty model failed to clear the band-agreement bar at any threshold pass, with $\kappa = -0.016$ at hand-set cutpoints and $\kappa = -0.024$ at trained cutpoints, and was retained as a complementary view rather than promoted to the deployed scorer (Section~\ref{sec:eval-irt}).
-The contribution is the systematic coverage and the willingness to land negative findings as findings.
+The contribution is the systematic coverage and the documented negative findings.
 
 The second contribution is the training methodology itself, reusable beyond this dashboard.
 The methodology has three components.
-The supervision target is a four-band ordinal rating (On Track / Minor Issues / Struggling / Needs Help on struggle; Easy / Medium / Hard / Very Hard on difficulty) produced by a large language model rater shown per-snapshot and per-question signals, which replaces the earlier binary intervene-or-not framing.
+The supervision target is a four-band ordinal rating (On Track / Minor Issues / Struggling / Needs Help on struggle; Easy / Medium / Hard / Very Hard on difficulty) produced by a large language model rater shown per-snapshot and per-question signals.
 The estimator is ordinary least-squares over the composite features rather than gradient boosting or random forest.
 The evaluation metric stack is Spearman $\rho$ for ranking, linear-weighted Cohen's $\kappa$ for band agreement, and mean absolute error for calibration, replacing the binary-only AUC of the original framing.
 
-The model-class-selection rigour is the bake-off in Section~\ref{sec:eval-results}: ordinary least-squares regression was benchmarked against random forest, gradient boosting, and histogram gradient boosting across all three targets under matched cross-validation.
-Ordinary least-squares won the struggle target decisively at $\rho = +0.588$ against the next-best random forest at $\rho = +0.565$, tied the difficulty target within per-fold noise at $\rho = +0.469$ against random forest's $\rho = +0.479$, and was the only competitive class with interpretable signed weights.
-Tree-ensemble alternatives offered no consistent gain large enough to outweigh that interpretability and were dropped from the deployed path; this is the bake-off rigour that the chapter argues a learning analytics deployment should be judged on, and the basis on which the deployed model class was chosen.
+The model-class-selection rigour is the bake-off in Section~\ref{sec:eval-results}: ordinary least-squares regression was benchmarked against random forest and gradient boosting across all three targets under matched cross-validation.
+Ordinary least-squares won the struggle target decisively at $\rho = +0.588$ against the next-best random forest at $\rho = +0.565$, tied the difficulty target within per-fold noise at $\rho = +0.468$ against random forest's $\rho = +0.479$, and was the only competitive class with interpretable signed weights.
+Tree based alternatives offered no consistent gain large enough to outweigh that interpretability and were dropped from the deployed path.
 
 
 \subsection{Future Work}
 
-\paragraph{Cross-session aggregation.}
+\paragraph{Cross-session aggregation}
 The deployed dashboard reports struggle and difficulty within a single live session.
 A respondent to the closing survey question (Section~\ref{sec:eval-survey}, Q11) asked for a view of how frequently a given student is flagged as struggling across multiple lab sessions, not just within one.
 Implementing this requires persisting per-snapshot scoring beyond the live session window and aggregating per-student across sessions in a way that respects the session-grouped cross-validation structure used in evaluation.
 This is the most direct survey-driven feature request in the chapter.
 
-\paragraph{Joint weight and cutpoint optimisation via ordinal logistic regression.}
+\paragraph{Joint weight and threshold optimisation via ordinal logistic regression}
 The pipeline currently trains composite weights (Section~\ref{sec:eval-results}) and band thresholds (Section~\ref{sec:eval-thresholds}) in two separate passes; the recalibration pass on the deployed min-max composite was needed because the originally-promoted cutpoints were fit against a different score scale than the one the deployed system serves.
-% FLAG: neither `mord` nor `statsmodels.OrderedModel` is in references.bib;
-% decide whether to import (Phase-2 candidate) or drop the package names from the sentence below.
 A proportional-odds ordinal logistic regression, fit either through \texttt{mord} or \texttt{statsmodels.OrderedModel}, would optimise the weights and the cutpoints jointly against the four-band ordinal target in a single fit, removing the scale-mismatch failure mode at its root rather than recalibrating around it.
 
-\paragraph{Cohort-balanced re-evaluation.}
-% FLAG: the 5.8% On Track figure is from the v2 Report Change List brief and is not
-% in the shipped results-and-evaluation.tex; verify against data/eval/results.md or
-% the rater summary, or restate qualitatively as "very few On Track snapshots".
-The validation cohort produced no questions in the rater's \emph{Easy} band and only $5.8\%$ of snapshots in the \emph{On Track} band; the cohort distributions reported in Section~\ref{sec:eval-results} reflect a cohort skewed toward higher difficulty and lower performance.
+\paragraph{Cohort-balanced re-evaluation}
+The validation cohort produced no questions in the rater's "Easy" band and only $5.8\%$ of snapshots in the "On Track" band; the cohort distributions reported in Section~\ref{sec:eval-results} reflect a cohort skewed toward higher difficulty and lower performance which may be due to no intervention.
 The lowest band of each scorer is therefore effectively empty on this cohort, so band-agreement findings against the rater are conditioned on a distribution the next cohort may not replicate.
 Re-running the evaluation on a more balanced cohort, or on stratified sub-cohorts of the same module, would test whether the recalibrated cutpoints generalise and whether the IRT difficulty anti-result holds on a less-skewed response matrix.
 
-\paragraph{Per-semester threshold re-tuning as a maintenance concern.}
-Following directly from the cohort caveat in Section~\ref{sec:eval-thresholds}, the threshold-training pass should be re-run per cohort rather than the existing tuples reused indefinitely.
-This is a deployment-side machine-learning maintenance concern rather than a model-design change: the underlying composite score is rank-portable across cohorts, but the cutpoints that turn it into a four-band label are not, and the maintenance loop should recognise that.
+\paragraph{Per-semester threshold re-tuning as a maintenance concern}
+Following directly from the cohort caveat in Section~\ref{sec:eval-thresholds}, the threshold-training pass should be re-run per module rather than the existing tuples reused indefinitely.
+This is a deployment-side machine-learning maintenance concern rather than a model-design change: the underlying composite score and threshold is not portable across cohorts, and the maintenance loop should recognise that.
 
-\paragraph{Restoring the OpenAI incorrectness scorer to a non-fallback rate.}
+\paragraph{Restoring the OpenAI incorrectness scorer to a non-fallback rate}
 Section~\ref{sec:eval-tradeoffs} flags this as the highest-leverage future change in the evaluation chapter, ranking above retraining any of the weights or thresholds.
-The OpenAI incorrectness scorer fell back to a midpoint score on the majority of the production submissions, which propagates into the composite as noise on the strongest single signal in the weight vector.
-A more robust scorer path - retry logic with backoff, structured-output validation, or a local fallback model rather than a midpoint imputation - would raise the ceiling on every downstream model in the pipeline.
+The OpenAI incorrectness scorer fell back to a midpoint score on $92.5\%$ of the production submissions, which propagates into the composite as noise on the strongest single signal in the weight vector.
+A more robust scorer path: retry logic with backoff, structured-output validation, or a local fallback model rather than a midpoint imputation would raise the ceiling on every downstream model in the pipeline.
 
-\paragraph{Prospective intervention study.}
+\paragraph{Prospective intervention study}
 The retrospective replay design used in Chapter~\ref{sec:evaluation} explicitly scopes out a prospective intervention study, in which dashboard-informed instructor decisions are compared with a control group on student outcomes.
 A future evaluation pass would need a controlled comparison, a lift of the student-identifier anonymisation that currently rules out grade linkage, and a submission-to-lab-seat mapping that does not exist in the current data path.
 This is named here as the next-generation evaluation step rather than as an immediate follow-up; it is the only way to attribute outcome changes to the dashboard rather than to correlations with it.
 
-\paragraph{Smart device integration.}
+\paragraph{Smart device integration}
 The original scope in Section~\ref{sec: intro} named smartwatch and smart-glasses notifications to lab assistants as a secondary aim.
 The V2 deployment scoped this down to a mobile lab-assistant web route served by the same FastAPI process, which delivers the same coordination affordance through a web interface rather than a native device.
-Future work would restore the original ambition with native notifications to a wearable, layered over the same file-locked shared-state coordination V2 already uses for cross-stack session synchronisation.
+Future work would restore the original goal with native notifications to a wearable, layered over the same file-locked shared-state coordination V2 already uses for cross-stack session synchronisation.
 This closes the loop on the secondary aim from Chapter~\ref{sec: intro} rather than the modelling-side findings that drive the earlier items.

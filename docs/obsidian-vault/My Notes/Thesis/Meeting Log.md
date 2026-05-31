@@ -6,6 +6,30 @@ Location: University office
 
 ---
 
+## Meeting 5 — Fri 29 May 2026 (draft review)
+
+**Status:** 🔄 Actioned into [[Revisions/00 Index|Revisions Roadmap]]
+
+### Discussed (supervisor reviewed the finished draft on screen)
+- **Stickman context diagram** — add a simple bird's-eye stakeholder diagram (student / lab assistant / coordinator → assessment env / phone / dashboard) near System Architecture; keep the existing technical diagram too; number the components.
+- **Component-level cross-references** — cite "Component A on Figure 3.1", not just the whole figure; refer back to the big diagram when discussing details.
+- **Reads like a user manual** — add engineering *rationale* (why each design choice; what iterations led to it), backed by literature not preference. Examples named: tabular layout, visual encoding/colour.
+- **Screenshots → appendix** — live software screenshots move to Appendix B and are cross-referenced; conceptual design drawings (Figma) stay in Ch3. Implementation keeps code segments, colour/framework decisions, problems.
+- **Design completeness** — Settings view was left out of Ch3; state student-detail and question-detail interface designs in Ch3.
+- **Define symbols** — module/question/timestamp/session never defined; parameters/weights need explaining.
+- **RAG** — state why it's in the thesis (proof-of-concept) and how many systems were surveyed (~three or four).
+- **Figure 3.2** (data-entry) — credit the module technician, **Charlotte Barnes**, by role+name.
+- **Captions** — figure number + short title only; move explanations to body.
+- **Section intros / conclusions** — small intro para per section; don't end sections/chapters abruptly on a figure; summary para after big tables; summary para at end of Implementation.
+- **More lit review** — newer model-training content (OLS/bake-off, shrinkage, thresholds, missing data) needs background + references.
+- **High-leverage follow-up (29 May):** check who else is doing this (prior art) and whether Research Gaps (§2.7) needs expanding → [[Revisions/10 Related Work & Research-Gap Expansion]].
+
+### Audit + actions
+- Two read-only audits run over the whole report (verified against `.tex`/`data/eval/`): 86 + 96 findings. Highest-impact net-new: a phantom "histogram gradient boosting" benchmark claim in the abstract/conclusion (not in `model_class_bakeoff.json`); difficulty ρ printed +0.469 but data is +0.468; §5.5.1 heading promises "Ethical Approval" with none given; Introduction claims smart-device integration as delivered (contradicts FR6 future-work).
+- All actions captured in the **Revisions/** folder; nothing applied to `Report/` yet — every edit is previewed for sign-off. No new features built this pass.
+
+---
+
 ## Meeting 4 — Wed 16 Apr 2026
 
 **Status:** ✅ Complete

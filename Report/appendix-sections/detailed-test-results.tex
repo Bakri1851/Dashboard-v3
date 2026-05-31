@@ -1,23 +1,55 @@
 \section{Detailed Test Results} \label{app:detailed-test-results}
 
-% =====================================================================
-% TODO (Bakri): READ-THROUGH PASS before final submission.
-%
-% Appendix C is currently a heading only.  Populate with the row-by-row
-% functional + non-functional test checklist promised in §5.1:
-%   "We will present a qualitative summary in the main body with the
-%    full row-by-row checklist appearing in
-%    Appendix~\ref{app:detailed-test-results}."
-% The \label is in place so the §5.1 \ref resolves on paste.
-%
-% Suggested structure:
-%   - FR1..FRn table: requirement ID, description, test method
-%     (smoke / e2e / unit), pass/fail, evidence reference
-%     (screenshot / log / git commit).
-%   - NFR1..NFRn table: same shape, plus measured value vs target
-%     (e.g. p95 latency, page load time, dashboard refresh interval,
-%     prewarm cold-start duration).
-%   - Source notes: any reproducible smoke-test artefacts in data/ or
-%     notebooks/; no load test, security audit, or accessibility audit
-%     per the §5.1 scope.
-% =====================================================================
+This appendix records the verification of the functional and non-functional requirements of Chapter~\ref{sec:requirements}, summarised qualitatively in Section~\ref{sec:eval-functional} and Section~\ref{sec:eval-nonfunctional}. Each requirement was exercised against the deployed V2 stack through smoke and end-to-end (E2E) testing; the tables below give the test method, the outcome, and the section in which the supporting evidence is reported.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|c|p{0.165\textwidth}|c|p{0.085\textwidth}|X|}
+\hline
+\textbf{ID} & \textbf{Requirement} & \textbf{Method} & \textbf{Result} & \textbf{Evidence} \\
+\hline\hline
+FR1 & Live ingestion of lab data & E2E & Pass & Section~\ref{sec:eval-data-ingestion}: JSON and embedded-XML parsed end-to-end into the normalised DataFrame; TTL cache invalidation and \texttt{lab\_session.json} filelock state confirmed; no data loss across runs. \\
+\hline
+FR2 & Computation of student struggle & E2E & Pass & Section~\ref{sec:eval-analytics-behaviour}: seven-signal scores in $[0,1]$ with four bands classifying correctly under v1 and v2; CF, clustering, IRT 2PL, BKT and improved model cross-checked against the design equations; weight redistribution verified. \\
+\hline
+FR3 & Computation of question difficulty & E2E & Pass & Section~\ref{sec:eval-analytics-behaviour}: five-signal scores in $[0,1]$ with four bands correct; IRT 2PL and BKT fits and graceful weight redistribution tested; no silent failures. \\
+\hline
+FR4 & Real-time prioritisation & E2E & Pass & Section~\ref{sec:eval-instructor-features}: In-Class leaderboards ordered by score under Basic and Advanced modes; band colours track the threshold map; per-module and per-session filters update correctly. \\
+\hline
+FR5 & Present relevant analytics & E2E & Pass & Section~\ref{sec:eval-instructor-features}: all seven instructor views render to the design specification; displayed data cross-checked against the analytics pipeline; navigation error-free. \\
+\hline
+FR6 & Smart-device integration & & Scoped out & Section~\ref{sec:eval-assistant-workflow}: descoped at design time in favour of the modelling focus; restated as future work in Section~\ref{sec:eval-discussion}. \\
+\hline
+FR7 & Lab-assistant ranking system & E2E & Partial Pass & Section~\ref{sec:eval-assistant-workflow}: join with the six-character code; \texttt{?aid=} identity persistence; polling picks up assignments; mark-helped round-trip through the filelock; simultaneous joins safe, although the ranking system had yet to be implemented. \\
+\hline
+\end{tabularx}
+\caption{Functional-requirement verification (FR1-FR7).}
+\label{tab:fr-verification}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|c|p{0.165\textwidth}|p{0.09\textwidth}|p{0.085\textwidth}|X|}
+\hline
+\textbf{ID} & \textbf{Requirement} & \textbf{Method} & \textbf{Result} & \textbf{Evidence} \\
+\hline\hline
+NFR1 & Real-time performance & Smoke & Pass (within limits) & Section~\ref{sec:eval-performance}: lifespan prewarm computes all derived signals before serving; $649.9$~s cold and ${\approx}\,185$~s warm on a $42{,}443$-submission session; steady-state five-second polling responsive. \\
+\hline
+NFR2 & Interpretability & Smoke & Pass (within sample) & Section~\ref{sec:eval-usability}: survey ($n{=}10$): Q5 clarity 7/2/1, Q6 bands 6/3/1, Q7 trust 7/1/2; the Q4 support issues are directly targeted by the prioritisation. \\
+\hline
+NFR3 & Robustness to noisy data & Smoke & Pass & Section~\ref{sec:eval-robustness}: cold-start skeleton loaders; IRT, CF and BKT degrade gracefully; the 25COA122 \texttt{ABNORMAL\_TERMINATION\_IN\_LNSRCH} fallback observed in production; filelock and \texttt{asyncio.to\_thread} guard concurrency. \\
+\hline
+NFR4 & Scalability & By construction & Met & Section~\ref{sec:eval-robustness}: holds by construction rather than by edge-case test. \\
+\hline
+NFR5 & Privacy and ethical & By construction & Met & Section~\ref{sec:eval-robustness}: holds by construction; data handled solely for in-lab analytics. \\
+\hline
+NFR6 & Extensibility and maintainability & By construction & Met & Section~\ref{sec:eval-robustness}: holds by construction; new signals add without redesign. \\
+\hline
+\end{tabularx}
+\caption{Non-functional-requirement verification (NFR1-NFR6).}
+\label{tab:nfr-verification}
+\end{table}

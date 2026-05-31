@@ -7,11 +7,10 @@ status: active
 last_imported: 2026-05-05
 tags: [course completion]
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:28
-  - Report/main-sections/requirements-specification-old.tex:217
-  - Report/main-sections/requirements-specification.tex:276
+  - Report/appendix-sections/themes-and-references.tex:43
+  - Report/main-sections/requirements-specification.tex:283
 cited_in_planned: []
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Early Alert of Academically At-Risk Students: An Open Source Analytics Initiative
 

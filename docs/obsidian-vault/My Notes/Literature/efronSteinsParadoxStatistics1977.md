@@ -3,14 +3,18 @@ category: literaturenote
 citekey: efronSteinsParadoxStatistics1977
 year: 1977
 in_zotero: true
-status: stale
+status: active
 last_imported: 2026-05-05
-cited_in_tex: []
+cited_in_tex:
+  - Report/appendix-sections/themes-and-references.tex:31
+  - Report/main-sections/design-and-architecture.tex:536
 cited_in_planned: []
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
-
 # Stein's Paradox in Statistics
+
+%% Begin annotations %%
+## Summary
 
 > [!Cite]
 > [1]
@@ -59,3 +63,4 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 %% Import Date: 2026-05-05T18:39:57.923+01:00 %%
+%% End annotations %%

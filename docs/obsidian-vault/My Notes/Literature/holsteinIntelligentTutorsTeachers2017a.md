@@ -6,12 +6,13 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/main-sections/requirements-specification.tex:221
+  - Report/appendix-sections/themes-and-references.tex:41
+  - Report/main-sections/requirements-specification.tex:228
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Instructor Dashboard
   - Lab Assistant System
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Intelligent tutors as teachers' aides: exploring teacher needs for real-time analytics in blended classrooms
 

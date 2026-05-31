@@ -7,9 +7,11 @@ status: active
 last_imported: 2026-05-05
 tags: [Computation and Language (cs.CL), FOS: Computer and information sciences]
 cited_in_tex:
-  - Report/main-sections/requirements-specification.tex:182
+  - Report/appendix-sections/themes-and-references.tex:27
+  - Report/main-sections/design-and-architecture.tex:822
+  - Report/main-sections/requirements-specification.tex:189
 cited_in_planned: []
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # Goal-Driven Explainable Clustering via Language Descriptions
 

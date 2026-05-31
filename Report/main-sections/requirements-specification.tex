@@ -1,4 +1,4 @@
-\section{Background and Requirements} \label{sec:requirements}
+\section{Background} \label{sec:requirements}
 
 \subsection{Learning Analytics and Dashboards}
 
@@ -51,7 +51,7 @@ The report is the main dashboard in Edsight, where teachers can select filters s
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{figures/requirements-specification/Edsight-Dashboard-2.png}
-    \caption{(L) A single-event report displayed in Edsight, with filters on the right side. (R) Multi-Day view, with the ability to compare patterns across classes and sections.}
+    \caption{Edsight: (L) a single-event report with filters; (R) the multi-day comparison view.}
     \label{fig: Edsight Dashboard 2}
 \end{figure}
 
@@ -147,9 +147,9 @@ Rather than tuning hyperparameters manually we can use modern Bayesian optimisat
 
 \subsubsection{Collaborative Filtering}
 
-Beyond parametric approaches discussed in the previous subsection, more sophisticated data-driven methods have been explored in the educational recommender systems literature.
+Beyond parametric approaches discussed in the previous subsection, more sophisticated data-driven methods have been explored in the educational recommender systems literature \cite{dasilva_2022_a, deschnes_2020_recommender}.
 Collaborative filtering is an alternative method used for personalising user experiences \cite{resnickGroupLensOpenArchitecture1994}.
-Unlike methods that rely on parameters, Collaborative filtering leverages the collective behaviour of users with similar histories to create preferences, on the principle that users with similar histories share similar needs. This method has been applied primarily in educational contexts to provide more efficient and accurate course suggestions than traditional methods. This can be done with different types of models, such as linear regression and factor decomposers. It is evident that integrating intelligent recommendation technology significantly enhances resource utilisation and the overall student learning experience
+Unlike methods that rely on parameters, Collaborative filtering leverages the collective behaviour of users with similar histories to create preferences, on the principle that users with similar histories share similar needs \cite{schafer_2007_collaborative}. This method has been applied primarily in educational contexts to provide more efficient and accurate course suggestions than traditional methods \cite{li_2020_course}. This can be done with different types of models, such as linear regression and factor decomposers. It is evident that integrating intelligent recommendation technology significantly enhances resource utilisation and the overall student learning experience
 
 A user-based collaborative filtering method identifies a set of $k$ nearest neighbours for a given student based on a similarity measure over their profiles \cite{herlockerAlgorithmicFrameworkPerforming1999}. The behaviour of the neighbours are aggregated to produce a prediction. The approach is shown to be effective in sparse datasets, where explicit ratings are unavailable and implicit signals such as time-on-task and submission frequency must serve as proxies for preference. A known limitation is that when a student has little interaction history, similarity cannot be computed reliably, leading to unstable early-session predictions.
 
@@ -275,7 +275,7 @@ We can look at the edInsight Early Warning System as an example. This system loo
         F & 10\\
         \hline
     \end{tabular}
-    \caption{Scoring system based on grades, where lower grades add to the score, showing that a student is struggling more}
+    \caption{Grade-based scoring: lower grades raise the struggle score.}
     \label{tab: grade scoring}
 \end{table}
 With the scores calculated, educators have a clear idea of which students are most at risk, making this information useful for directing attention to those who need the most help \cite{a2020_atrisk}.

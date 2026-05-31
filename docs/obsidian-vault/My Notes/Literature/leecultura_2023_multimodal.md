@@ -6,16 +6,13 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:26
-  - Report/main-sections/requirements-specification-old.tex:171
-  - Report/main-sections/requirements-specification-old.tex:178
-  - Report/main-sections/requirements-specification-old.tex:180
-  - Report/main-sections/requirements-specification.tex:230
+  - Report/appendix-sections/themes-and-references.tex:41
   - Report/main-sections/requirements-specification.tex:237
-  - Report/main-sections/requirements-specification.tex:239
+  - Report/main-sections/requirements-specification.tex:244
+  - Report/main-sections/requirements-specification.tex:246
 cited_in_planned:
   - Ch2 – Background and Requirements
-last_synced: 2026-05-05
+last_synced: 2026-05-31
 ---
 # MultiModal teacher dashboards: Challenges and opportunities of enhancing teacher insights through a case study
 

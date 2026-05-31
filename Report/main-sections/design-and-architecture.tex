@@ -1,10 +1,243 @@
-\section{Design and Modelling} \label{sec:design}
-This section describes the design and architecture of the lab dashboard, highlighting how various components are implemented. It covers the data endpoint, defining what data enters the system and in what form, the mathematical models used to derive struggle and difficulty and the user interface design which exposes the analytics to educators. 
- 
+\section{Design} \label{sec:design}
+This section describes the design and architecture of the lab dashboard, highlighting how various components are implemented. It covers the data endpoint, defining what data enters the system and in what form, the mathematical models used to derive struggle and difficulty and the user interface design which exposes the analytics to educators.
+
+\subsection{System Walkthrough}
+Before detailing the architecture, the storyboard in Figures~\ref{fig:storyboard}-\ref{fig:sb-helped} walks through a typical interaction which our system will enable: the system monitors student submissions, flags a struggling student, and the instructor dispatches a lab assistant who crosses the room to help.
+
+% ---- Storyboard setup: colours, reusable pics, and the reusable room backdrop ----
+\definecolor{wallcol}{HTML}{2B2B2B}
+\definecolor{deskfill}{HTML}{F4F4F2}
+\definecolor{desklinecol}{HTML}{A9A9A9}
+\definecolor{monitorcol}{HTML}{38465A}
+\definecolor{chaircol}{HTML}{DCDCDC}
+\definecolor{studentfill}{HTML}{6E8CA8}
+\definecolor{studentline}{HTML}{41566D}
+\definecolor{tutorfill}{HTML}{E08A3C}
+\definecolor{tutorline}{HTML}{A0571E}
+\definecolor{boardcol}{HTML}{CBD5DA}
+\definecolor{lacol}{HTML}{3FA45C}
+\definecolor{lacline}{HTML}{27713B}
+
+\tikzset{
+  student/.pic={
+    \filldraw[fill=chaircol, draw=chaircol!65!black, line width=0.2pt]
+      (-0.2,-0.42) rectangle (0.2,-0.16);
+    \filldraw[fill=studentfill, draw=studentline, line width=0.45pt]
+      (0,-0.06) ellipse (0.22 and 0.13);
+    \filldraw[fill=studentfill, draw=studentline, line width=0.45pt]
+      (0,0.09) circle (0.12);
+  },
+  tutor/.pic={
+    \filldraw[fill=chaircol, draw=chaircol!65!black, line width=0.2pt]
+      (-0.2,-0.42) rectangle (0.2,-0.16);
+    \filldraw[fill=tutorfill, draw=tutorline, line width=0.45pt]
+      (0,-0.06) ellipse (0.22 and 0.13);
+    \filldraw[fill=tutorfill, draw=tutorline, line width=0.45pt]
+      (0,0.09) circle (0.12);
+  },
+  monitor/.pic={
+    \fill[monitorcol] (-0.045,-0.05) rectangle (0.045,0);
+    \filldraw[fill=monitorcol, draw=monitorcol!55!black, line width=0.3pt]
+      (-0.2,0) rectangle (0.2,0.17);
+  },
+  assistant/.pic={
+    \filldraw[fill=lacol, draw=lacline, line width=0.45pt]
+      (0,-0.07) ellipse (0.24 and 0.15);
+    \filldraw[fill=lacol, draw=lacline, line width=0.45pt]
+      (0,0.10) circle (0.13);
+  }
+}
+
+% Static lab backdrop (the roaming assistant that travels is drawn per panel)
+\newcommand{\labbase}{%
+  \draw[wallcol, line width=2pt] (0,0) rectangle (16,12);
+  \filldraw[fill=boardcol, draw=wallcol, line width=0.5pt]
+    (15.74,4.2) rectangle (15.96,7.8);
+  % Pod A (top): 3 + 3
+  \filldraw[fill=deskfill, draw=desklinecol, line width=0.8pt, rounded corners=2pt]
+    (2,9.0) rectangle (10.4,10.2);
+  \foreach \x in {3.4,6.2,9.0}{
+    \pic[rotate=180] at (\x,10.70) {student};
+    \pic             at (\x, 9.95) {monitor};
+    \pic             at (\x, 8.50) {student};
+    \pic[rotate=180] at (\x, 9.25) {monitor};
+  }
+  % Pod B (middle): 3 + 3
+  \filldraw[fill=deskfill, draw=desklinecol, line width=0.8pt, rounded corners=2pt]
+    (2,5.4) rectangle (10.4,6.6);
+  \foreach \x in {3.4,6.2,9.0}{
+    \pic[rotate=180] at (\x,7.10) {student};
+    \pic             at (\x,6.35) {monitor};
+    \pic             at (\x,4.90) {student};
+    \pic[rotate=180] at (\x,5.65) {monitor};
+  }
+  % Pod C (bottom): 3 + 2
+  \filldraw[fill=deskfill, draw=desklinecol, line width=0.8pt, rounded corners=2pt]
+    (2,1.8) rectangle (8.4,3.0);
+  \foreach \x in {3.2,5.2,7.2}{
+    \pic[rotate=180] at (\x,3.50) {student};
+    \pic             at (\x,2.75) {monitor};
+  }
+  \foreach \x in {4.2,6.2}{
+    \pic             at (\x,1.30) {student};
+    \pic[rotate=180] at (\x,2.05) {monitor};
+  }
+  % Instructor station
+  \filldraw[fill=deskfill, draw=desklinecol, line width=0.8pt, rounded corners=2pt]
+    (12.4,5.3) rectangle (14.2,6.5);
+  \pic[rotate=-90] at (13.00,5.90) {monitor};
+  \pic[rotate=90]  at (14.05,5.90) {tutor};
+  % Two stationary assistants
+  \pic at (4.80,7.80)  {assistant};
+  \pic at (11.30,8.50) {assistant};
+}
+
+% ---- Storyboard overlay helpers (used by every panel) ----
+\tikzset{
+  sbarrow/.style={-{Stealth[length=4.5mm]}, line width=2.4pt}
+}
+% dimmed static backdrop + a fixed bounding box so every panel scales identically
+\newcommand{\sbdim}{%
+  \useasboundingbox (-0.3,-0.7) rectangle (16.3,12.3);
+  \begin{scope}[opacity=0.4]\labbase\end{scope}%
+}
+% the flagged student: coloured halo + ring + status word (#1 colour, #2 word)
+\newcommand{\sbflag}[2]{%
+  \fill[#1, opacity=0.16] (4.2,1.30) circle (1.05);
+  \draw[#1, line width=2.4pt] (4.2,1.30) circle (0.64);
+  \node[font=\large\bfseries, text=#1] at (4.2,-0.05) {#2};%
+}
+
+\paragraph{Monitor.} Throughout the session the dashboard tracks every student's submissions, maintaining a live view of who is coping and who is falling behind. % DRAFT scenario sentence --- refine/replace (Revisions Note 05).
+\begin{figure}[H]
+    \centering
+    \resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[line join=round]
+        \useasboundingbox (-0.3,-0.7) rectangle (16.3,12.3);
+        \labbase
+        \pic at (7.0,4.2) {assistant};
+    \end{tikzpicture}}
+    \caption{Monitor - the dashboard monitors the whole class.}
+    \label{fig:storyboard}
+\end{figure}
+
+\newpage
+\paragraph{Detect.} When a student's recent attempts show they are stuck, the dashboard flags them at the top of the instructor's struggle leaderboard. % DRAFT scenario sentence --- refine/replace (Revisions Note 05).
+\begin{figure}[H]
+    \centering
+    \resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[line join=round]
+        \sbdim
+        \begin{scope}[opacity=0.4]\pic at (7.0,4.2) {assistant};\end{scope}
+        \sbflag{red!75!black}{needs help}
+        \node[circle, fill=red!80!black, text=white, font=\Large\bfseries, inner sep=2.5pt]
+            at (13.0,7.05) {!};
+    \end{tikzpicture}}
+    \caption{Detect - a struggling student is flagged.}
+    \label{fig:sb-detect}
+\end{figure}
+
+\newpage
+\paragraph{Dispatch.} Seeing the flag, the instructor assigns the nearest available lab assistant to that student. % DRAFT scenario sentence --- refine/replace (Revisions Note 05).
+\begin{figure}[H]
+    \centering
+    \resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[line join=round]
+        \sbdim
+        \sbflag{red!75!black}{needs help}
+        \pic[scale=1.35] at (7.0,4.2) {assistant};
+        \draw[sbarrow, tutorline, dashed] (12.3,5.6) to[bend right=12]
+            node[font=\large\itshape, fill=white, inner sep=2pt]{dispatch} (7.6,4.6);
+    \end{tikzpicture}}
+    \caption{Dispatch - the instructor dispatches an assistant.}
+    \label{fig:sb-dispatch}
+\end{figure}
+
+\newpage
+\paragraph{Cross the room.} The assistant receives the assignment on their phone and crosses the room to the flagged student. % DRAFT scenario sentence --- refine/replace (Revisions Note 05).
+\begin{figure}[H]
+    \centering
+    \resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[line join=round]
+        \sbdim
+        \sbflag{orange!85!black}{on the way}
+        \draw[sbarrow, lacline] (6.9,3.95) to[bend right=12] (4.9,1.85);
+        \pic[scale=1.35] at (5.6,2.9) {assistant};
+    \end{tikzpicture}}
+    \caption{Cross the room - the assistant crosses to the student.}
+    \label{fig:sb-cross}
+\end{figure}
+
+\newpage
+\paragraph{Helped.} Once helped, the student returns to work and the dashboard clears the flag, freeing the assistant for the next request. % DRAFT scenario sentence --- refine/replace (Revisions Note 05).
+\begin{figure}[H]
+    \centering
+    \resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[line join=round]
+        \sbdim
+        \sbflag{lacline}{unblocked}
+        \pic[scale=1.35] at (4.95,1.30) {assistant};
+    \end{tikzpicture}}
+    \caption{Helped - the student is unblocked.}
+    \label{fig:sb-helped}
+\end{figure}
+
 \subsection{System Architecture}
 
 The proposed system adopts a layered architecture designed to support real-time learning analytics in computer lab environments. 
-The architecture separates data generation, data ingestion and processing, as well as decision-making and action, into three distinct layers, ensuring each component can evolve independently. 
+The architecture separates data generation, data ingestion and processing, as well as decision-making and action, into three distinct layers, ensuring each component can evolve independently.
+
+Figure~\ref{fig:context-stakeholders} gives a bird's-eye view of the three stakeholders and their touchpoints, with the three system components labelled C1--C3 for reference in the discussion that follows.
+
+\begin{figure}[H]
+    \centering
+    \resizebox{\linewidth}{!}{%
+    \begin{tikzpicture}[
+        comp/.style = {rectangle, draw, rounded corners=2pt, minimum width=2.7cm,
+                       minimum height=1.2cm, align=center, font=\small, fill=blue!4},
+        actorlbl/.style = {align=center, font=\small},
+        flow/.style = {-{Stealth[length=2.4mm]}, thick},
+        biflow/.style = {{Stealth[length=2.4mm]}-{Stealth[length=2.4mm]}, thick},
+        edgelabel/.style = {font=\scriptsize\itshape, fill=white, inner sep=1.5pt},
+        ctag/.style = {font=\scriptsize\bfseries, text=black!70},
+        stickman/.pic = {
+            \draw[thick] (0,0.60) circle (0.14);
+            \draw[thick] (0,0.46) -- (0,0.10);
+            \draw[thick] (-0.22,0.32) -- (0.22,0.32);
+            \draw[thick] (0,0.10) -- (-0.16,-0.18);
+            \draw[thick] (0,0.10) -- (0.16,-0.18);
+        }
+    ]
+        % ---- Student + quiz platform (left) ----
+        \pic at (0,0.15) {stickman};
+        \node[actorlbl] (student) at (0,-0.6) {Student};
+
+        \node[comp] (platform) at (4.0,0) {Quiz with AI\\feedback platform};
+        \node[ctag] at ([yshift=3pt]platform.north) {C1};
+
+        % ---- Instructor surface + actor (upper right) ----
+        \node[comp] (computer) at (9.6,2.3) {Instructor dashboard\\\footnotesize\itshape (on a computer)};
+        \node[ctag] at ([yshift=3pt]computer.north) {C2};
+        \pic at (13.1,2.45) {stickman};
+        \node[actorlbl] (instr) at (13.1,1.7) {Instructor};
+
+        % ---- Assistant surface + actor (lower right) ----
+        \node[comp] (phone) at (9.6,-2.3) {Assistant view\\\footnotesize\itshape (on a phone)};
+        \node[ctag] at ([yshift=3pt]phone.north) {C3};
+        \pic at (13.1,-2.15) {stickman};
+        \node[actorlbl] (asst) at (13.1,-2.9) {Lab assistant};
+
+        % ---- Flows ----
+        \draw[flow] (student) -- node[edgelabel,above]{submissions} (platform);
+        \draw[flow] (platform.north) to[out=70,in=180]
+                    node[edgelabel,above,pos=0.62]{submission data} (computer.west);
+        \draw[flow] (platform.south) to[out=-70,in=180] (phone.west);
+        \draw[biflow] (computer) -- (instr);
+        \draw[biflow] (phone) -- (asst);
+        \draw[flow,dashed] ([xshift=0.8cm]computer.south) --
+                    node[edgelabel,right]{dispatch} ([xshift=0.8cm]phone.north);
+        % assistant goes to help the student in person (closes the loop)
+        \draw[flow] (asst.south) -- ++(0,-0.7) -| (student.south);
+        \node[edgelabel] at (6.5,-3.6) {helps in person};
+    \end{tikzpicture}}
+    \caption{Stakeholder context view of the lab analytics dashboard.}
+    \label{fig:context-stakeholders}
+\end{figure}
 
 \begin{figure}[H]
     \centering
@@ -103,23 +336,23 @@ The architecture separates data generation, data ingestion and processing, as we
         \node[layerlabel] at ([xshift=-0.6cm]ingest.west) {Layer 2};
         \node[layerlabel] at ([xshift=-0.6cm]instructor.west) {Layer 3};
     \end{tikzpicture}}
-    \caption{V2 system architecture: a three-layer pipeline from data ingestion through baseline and advanced analytics and the RAG pipeline to the instructor and lab-assistant surfaces, coordinated via the file-locked shared session state.}
+    \caption{V2 system architecture (three-layer pipeline).}
     \label{fig: system architecture}
 \end{figure}
 
 \paragraph{Data Generation Layer}
-As seen in Figure \ref{fig: system architecture}, student interactions form the primary source of data. When students submit an attempt or request feedback, the interaction data is recorded at the endpoint and not modified.
+As shown in Layer~1 of Figure~\ref{fig: system architecture}, student interactions form the primary source of data. When students submit an attempt or request feedback, the interaction data is recorded at the endpoint and not modified.
 
 \paragraph{Data Ingestion and Processing Layer}
-Data ingestion is performed periodically according to the user-defined refresh rate. Retrieved data will be stored in the raw data store, then parsed and normalised before being used for calculations. The data will be used to determine student struggle, question difficulty, and other required metrics.
+Layer~2 of Figure~\ref{fig: system architecture} performs data ingestion periodically according to the user-defined refresh rate. Retrieved data will be stored in the Raw \& incorrectness caches store, then parsed and normalised before being used for calculations. The data will be used to determine student struggle, question difficulty, and other required metrics.
 
 \paragraph{Decision and Action Layer}
-Data Analytics will now be sent to the learning dashboard for presentation to the instructor, thereby aiding decision-making. The instructor will identify students who are struggling. More complex questions will also be identified so that the instructor can go through the questions with the whole class. Instructors will use the dashboard to assign tasks to assistants to assist students who need help.
+In Layer~3 of Figure~\ref{fig: system architecture}, data analytics are sent to the Instructor Dashboard for presentation to the instructor, thereby aiding decision-making. The instructor will identify students who are struggling. More complex questions will also be identified so that the instructor can go through the questions with the whole class. Instructors will use the dashboard to assign tasks to assistants through the Lab Assistant Interface to assist students who need help.
 
 This layered design supports the project's aim of providing timely, targeted support during lab sessions while using the system as a decision-making tool for student support. Later sections build on this architecture.
 
 \subsection{Data Endpoint} \label{sec: data endpoint}
-A data endpoint is a specific URL or address in a web service or API that defines where and how clients can access the service. The proposed system integrates with the existing AI feedback platform through a single external data endpoint. The data endpoint is crucial in our system as it provides access to detailed records of student submissions and feedback interactions generated as students engage with lab questions. As outlined in Figure \ref{fig: system architecture}, the endpoint serves as the entry point to the analytics pipeline, supplying the raw data that will be processed, normalised, and aggregated for data visualisation. The integration is designed to be read-only, ensuring the data and metrics are not tampered with.
+A data endpoint is a specific URL or address in a web service or API that defines where and how clients can access the service. The proposed system integrates with the existing AI feedback platform through a single external data endpoint. The data endpoint is crucial in our system as it provides access to detailed records of student submissions and feedback interactions generated as students engage with lab questions. As outlined in Figure~\ref{fig: system architecture}, the endpoint serves as the entry point to the analytics pipeline (Layer~2), supplying the raw data that will be processed, normalised, and aggregated for data visualisation. The integration is designed to be read-only, ensuring the data and metrics are not tampered with.
 
 The endpoint returns an array in JSON format, where each record corresponds to a specific session based on the session's first submission time. Alongside standard fields such as module, question, timestamp and user, each record has an XML payload. The payload captures the interaction history for a given session, including submissions and AI responses. The design reflects the constraints of the existing system while providing vital information for our analytics.
 
@@ -128,7 +361,7 @@ Interaction data are organised around sessions, where a session represents a con
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{figures/design-and-architecture/data-entry.png}
-    \caption{Structure of session-based interaction data returned by feedback system}
+    \caption{Structure of session-based interaction data returned by the feedback system; figure courtesy of the Computer Science technician, Charlotte Barnes.}
     \label{fig: data entry}
 \end{figure}
 
@@ -254,7 +487,7 @@ The default values used in the deployed system are:
     \zeta = 0.05, \quad
     \theta = 0.07,
 \end{equation*}
-summarised by signal in Table \ref{tab: struggle weights}. The recent-incorrectness signal carries the largest weight ($\eta = 0.38$) because the model prioritises within-session struggle over cumulative behaviour. 
+summarised by signal in Table \ref{tab: struggle weights}. The recent-incorrectness signal carries the largest weight ($\eta = 0.38$) because the model prioritises within-session struggle over cumulative behaviour. On the deployment cohort, however, the underlying per-submission incorrectness scorer returns its $0.5$ fallback for $92.5\%$ of submissions (Section~\ref{sec:eval-tradeoffs}), so although this signal carries the largest weight it is in practice the most weakly informed of the seven.
 The longer tail signals (trajectory and repetition) carry small but non-zero weights so they can break ties between students who look similar on the headline metrics. 
 The weights were tuned by trial and error in the absence of labelled ground-truth data. 
 Since every component is bounded in $[0,1]$ and all the weights are convex,
@@ -286,7 +519,7 @@ The v2 model vectors are signed and do not satisfy the convex combination constr
     $\widehat{\tilde{\mathrm{rep}}}_{s,\sigma}$ & Answer-repetition rate (min-max normalised) & $\theta = 0.07$ \\
     \hline
     \end{tabular}
-    \caption{Seven signals contributing to the baseline student struggle score $S^{\mathrm{raw}}(s,\sigma)$, with default weights; weights sum to $1.00$}
+    \caption{Seven baseline struggle signals and their default weights.}
     \label{tab: struggle weights}
 \end{table}
 
@@ -356,7 +589,7 @@ The chosen value of $\lambda = 0.3$ was tuned by trial and error to give a good 
     Source of the problem & Irregular submission intervals within one session & Single-submission fluctuations between refreshes \\
     \hline
     \end{tabular}
-    \caption{The two temporal-smoothing mechanisms in the baseline struggle model and the role each plays.}
+    \caption{The two temporal-smoothing mechanisms in the baseline struggle model.}
     \label{tab: temporal smoothing}
 \end{table}
 
@@ -450,7 +683,7 @@ summarised by signal in Table \ref{tab: difficulty weights}.  Since every compon
     $\tilde{p}_{q}$ & First-attempt failure rate, $p_q/|\mathcal{S}_q|$ & $\epsilon = 0.20$ \\
     \hline
     \end{tabular}
-    \caption{Five signals contributing to the baseline question difficulty score $D^{\mathrm{raw}}(q)$, with default weights; weights sum to $1.00$.}
+    \caption{Five baseline difficulty signals and their default weights.}
     \label{tab: difficulty weights}
 \end{table}
 
@@ -564,8 +797,7 @@ primary approach.
     Computational complexity & $O(n)$ per update & $O(n^2)$ per update \\
     \hline
     \end{tabular}
-    \caption{Structural comparison of the parametric struggle model and the 
-    collaborative filtering alternative}
+    \caption{Parametric struggle model vs collaborative-filtering alternative.}
     \label{tab: model comparison}
 \end{table}
 
@@ -774,7 +1006,7 @@ Table~\ref{tab: improved struggle degradation} summarises the four cases:
     Neither signal available & $1.00$ & $0.00$ & $0.00$ \\
     \hline
     \end{tabular}
-    \caption{Effective weights of the improved struggle model under each combination of available latent-trait signals; redistribution preserves the weight-sum invariant so that configured weights match effective contributions even when the system degrades.}
+    \caption{Effective improved-struggle weights by latent-trait combination.}
     \label{tab: improved struggle degradation}
 \end{table}
 
@@ -795,7 +1027,7 @@ The v1 composite weights of Sections~\ref{sec: student struggle} and~\ref{sec: t
 The design then adopts a self-contained offline pipeline that re-fits the composite weights against second-opinion labels obtained from a large language model rater (GPT-4o); these trained v2 weights become the deployed model and are evaluated in Section~\ref{sec:eval-results}.
 The hand-set v1 weights are retained only as the starting point the trained model improves on.
 
-The pipeline is structured in five phases with data hand-off between them as seen in Figure~\ref{fig:v2-pipeline-design}: a one-shot data fetch from the submission API, a stratified snapshot sample, an LLM labelling stage that also collects a fifty-snapshot author review to support an inter-rater agreement check, a fitting stage that produces three composite weight vectors, two scalar hyperparameters and the band-classification thresholds, then a notebook is used for gathering our figures and tables used in Section~\ref{sec:eval-results}. The implementation of each phase is detailed in Section~\ref{sec:v2-training}.
+The pipeline is structured in five phases with data hand-off between them as seen in Figure~\ref{fig:v2-pipeline-design}: a one-shot data fetch from the submission API (Phase~1), a stratified snapshot sample (Phase~2), an LLM labelling stage that also collects a fifty-snapshot author review to support an inter-rater agreement check (Phase~3), a fitting stage (Phase~4) that produces the trained weights, two scalar hyperparameters and the calibrated band thresholds, then a notebook (Phase~5) is used for gathering our figures and tables used in Section~\ref{sec:eval-results}. The implementation of each phase is detailed in Section~\ref{sec:v2-training}.
 
 The same labelled set also calibrates the band-classification thresholds of Tables~\ref{tab: struggle table} and~\ref{tab: difficulty table}. The hand-set boundaries are interpretable but need not match how the rater bands students and questions, so the design re-fits the cutpoints to maximise agreement with the rated bands, cross-validated in the same way as the weights.
 
@@ -916,7 +1148,7 @@ The design grounds LLM output in the session's own submission history; this miti
         \draw[flow] (lm.south)  -- ++(0,-0.4) -| (assistant.north);
         \draw[flow] (lm.south)  -- ++(0,-0.4) -| (instructor.north);
     \end{tikzpicture}
-    \caption{Two-layer retrieval-augmented generation pipeline describing the whole process from session data to final output for both assistants and instructors.}
+    \caption{Two-layer retrieval-augmented generation pipeline.}
     \label{fig: rag architecture}
 \end{figure}
 
@@ -1006,7 +1238,7 @@ The lab assistant view is the mobile interface designed for assistants moving be
         \caption{Assigned student}
         \label{fig: figma6}
     \end{subfigure}
-    \caption{The three states of the lab assistant view: \subref{fig: figma4} the session-join screen where the assistant enters the session code and their name; \subref{fig: figma5} the waiting state with a priority list of unassigned struggling students; \subref{fig: figma6} the assigned-student card showing struggle context, prioritised questions, and coaching prompts from the RAG layer.}
+    \caption{The three states of the lab assistant view: \subref{fig: figma4} session-join; \subref{fig: figma5} waiting (priority list); \subref{fig: figma6} assigned-student card.}
     \label{fig: assistant views}
 \end{figure}
 
@@ -1030,7 +1262,7 @@ By deciding on thresholds, we can highlight a student by degree of struggle or h
         Threshold & $0 \leqslant S_t(s,\sigma) \leqslant t_{s1}$ & $t_{s1} < S_t(s,\sigma) \leqslant t_{s2}$&  $t_{s2} < S_t(s,\sigma) \leqslant t_{s3}$ &  $t_{s3} < S_t(s,\sigma) \leqslant 1 $\\
     \hline
     \end{tabular}
-    \caption{Table Highlighting how thresholds can be indicated for struggle}
+    \caption{Struggle band thresholds and colour mapping}
     \label{tab: struggle table}
 \end{table}
 
@@ -1043,7 +1275,7 @@ By deciding on thresholds, we can highlight a student by degree of struggle or h
         Threshold & $0 \leqslant D_t(q) \leqslant t_{d1}$ & $t_{d1} < D_t(q) \leqslant t_{d2}$&  $t_{d2} < D_t(q) \leqslant t_{d3}$ &  $t_{d3} < D_t(q) \leqslant 1 $\\
     \hline
     \end{tabular}
-    \caption{Table Highlighting how thresholds can be indicated for difficulty}
+    \caption{Difficulty band thresholds and colour mapping}
     \label{tab: difficulty table}
 \end{table}
 
