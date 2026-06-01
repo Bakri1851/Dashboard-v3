@@ -1,6 +1,10 @@
 \section{Background} \label{sec:requirements}
 
+This chapter reviews the research and systems the project builds on. It begins with learning analytics and the dashboards that present it, then examines how student behaviour is modelled, how data-driven methods personalise support, and how retrieval-augmented generation grounds language-model feedback; it closes by surveying existing systems, identifying the gaps this thesis addresses, and specifying the requirements that follow from them.
+
 \subsection{Learning Analytics and Dashboards}
+
+This section introduces learning analytics and the dashboards through which it reaches educators: its use in higher education, the role of dashboards as the primary means of presenting it, and the move towards real-time analysis that makes in-session support possible.
 
 \subsubsection{Learning Analytics in Higher Education}
 
@@ -80,7 +84,7 @@ Student struggle and question difficulty are treated as complementary targets th
 
 
 \subsubsection{Modelling Student Struggle}
-A key challenge in supporting students during lab sessions is identifying which students are struggling and may require timely intervention.
+A key challenge in supporting students during lab sessions is identifying which students are struggling and may require timely intervention. 
 Studies in education have approached struggle detection at different temporal scales, ranging from within-assignment detection to course-level.
 Dong et al.\ highlighted an approach that detects moments of struggle during a session based on time spent and progress relative to peers, achieving over 77\% accuracy when validated against expert judgement on whether intervention was needed \cite{dong_using}.
 Struggle has been operationalised as failing the same unit test consecutively for more than four submission events. providing a clear threshold-based criterion \cite{dong_using}.
@@ -145,10 +149,10 @@ Overall, the literature suggests that task difficulty should be deduced from a c
 
 \subsubsection{Composite Model Training and Optimisation}
 
-Supervised learning allows us to refine composite weights through methods such as linear regression or gradient boosting against externally-collected labels.
+Supervised learning allows us to refine composite weights through methods such as ordinary least squares (OLS) regression \cite{hastieElementsStatisticalLearning2009} or gradient boosting against externally-collected labels.
 This method serves as an alternative to hand-set or manually tuned weights.
 The supervised approach does not need to be human annotated as we can now leverage LLMs as raters; recent studies demonstrate substantial agreement with human annotators on classification tasks at a small cost and saving time \cite{gilardiChatGPTOutperformsCrowd2023, chiangCanLargeLanguage2023, zhengJudgingLLMasaJudgeMTBench2023}.
-Rather than tuning hyperparameters manually we can use modern Bayesian optimisation libraries such as Optuna's Tree-structured Parzen Estimator (TPE) to efficiently search the hyperparameter space and find optimal weights for our composite metrics \cite{NIPS2011_86e8f7ab, akibaOptunaNextgenerationHyperparameter2019}, as TPE produces stable optima in fewer iterations than other methods such as grid search and random search.
+Rather than tuning hyperparameters manually we can use modern Bayesian optimisation libraries such as Optuna's Tree-structured Parzen Estimator (TPE) to efficiently search the hyperparameter space and tune the scalar hyperparameters that govern these composite models \cite{NIPS2011_86e8f7ab, akibaOptunaNextgenerationHyperparameter2019}, as TPE produces stable optima in fewer iterations than other methods such as grid search and random search.
 
 \subsection{Data-Driven Personalisation}
 
@@ -335,6 +339,8 @@ Further smart device integration such as smartwatches or glasses is left to a fu
 Taken together these gaps point to a clear opportunity for a real-time, session-level dashboard that combines multi-signal measures of struggle and difficulty, an AI-derived correctness signal, a cohort view of common mistakes, grounded LLM suggestions for how to help, and a lightweight channel for dispatching that generated feedback to roaming assistants. No existing system brings these together for the live computer lab. Providing this system and evaluating how well its signals agree with expert judgement, is the contribution of this thesis.
 
 \subsection{Requirements Specification}
+
+This section specifies what the system must do, drawing on the gaps identified above. It sets out the functional requirements, the non-functional requirements that constrain how they are met, and a MoSCoW prioritisation that orders them for a single-developer project.
 
 \subsubsection{Functional Requirements}
 In this section, we define the core functionality required of the proposed system to address the problem in Chapter \ref{sec: intro} and the gaps highlighted earlier. These requirements specify what the system must do regardless of implementation.

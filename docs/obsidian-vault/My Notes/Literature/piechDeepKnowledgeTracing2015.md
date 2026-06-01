@@ -7,10 +7,10 @@ status: active
 last_imported: 2026-05-05
 tags: [Artificial Intelligence (cs.AI), Computers and Society (cs.CY), FOS: Computer and information sciences, K.3.1, Machine Learning (cs.LG)]
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:21
-  - Report/main-sections/requirements-specification.tex:117
+  - Report/appendix-sections/themes-and-references.tex:22
+  - Report/main-sections/requirements-specification.tex:127
 cited_in_planned: []
-last_synced: 2026-05-31
+last_synced: 2026-06-01
 ---
 # Deep Knowledge Tracing
 

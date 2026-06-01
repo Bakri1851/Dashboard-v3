@@ -1,6 +1,9 @@
 \section{Implementation} \label{sec:implementation}
 
-% TODO: write per Ch4 Rewrite Brief §4.1 - chapter intro paragraph(s) (V1/V2 framing)
+This chapter describes how the design of Chapter~\ref{sec:design} was implemented and deployed. 
+The system was built in two stages: an initial Streamlit application (V1) that established the analytical core and the lab-assistant workflow, and an evolved React and FastAPI application (V2) that re-houses that same core behind a single web service for responsiveness and scale. 
+The sections that follow cover the technology stack, the shared analytical core, the data pipeline, each deployed view, and the problems encountered along the way.
+
 
 \subsection{Implementation Overview} \label{sec:overview}
 
@@ -64,7 +67,7 @@ The presentation and service layers are where the systems diverge, with V1 using
     \hline
     scikit-learn & TF-IDF + KMeans for mistake clustering; \texttt{roc\_auc\_score} for BKT predictive AUC & Both \\
     \hline
-    OpenAI Python SDK & Batched incorrectness scoring (gpt-4o-mini) and RAG generation & Both \\
+    OpenAI Python SDK & Batched incorrectness scoring (gpt-4o) and RAG generation & Both \\
     \hline
     sentence-transformers, ChromaDB & Local MiniLM-L6-v2 embeddings + persistent vector store for RAG & Both \\
     \hline
@@ -114,7 +117,7 @@ All three apps share one runtime-state file (\texttt{data/lab\_session.json}) fo
     ]
         % ===== Top row - external systems =====
         \node[external] (endpoint) {Lab endpoint API\\\footnotesize\itshape retrievalEndpoint.php};
-        \node[external, right=2.0cm of endpoint] (openai) {OpenAI\\\footnotesize\itshape gpt-4o-mini};
+        \node[external, right=2.0cm of endpoint] (openai) {OpenAI\\\footnotesize\itshape gpt-4o};
         \node[external, right=2.0cm of openai] (chroma) {ChromaDB\\\footnotesize\itshape local, persistent};
 
         % ===== Middle row - the three runtime processes =====
@@ -183,7 +186,7 @@ The same process exposes the analytical core at \texttt{/api/*} and serves two H
 The two entry points share the same React bundle but have different route components and separate routing trees.
 View-level descriptions for both flows live in Section \ref{sec:views} and Section \ref{sec:assistant}, with the V1 versus V2 comparison captured in Table \ref{tab:views-comparison}.
 
-Eleven routers under \texttt{code2/backend/routers/} adapt the analytical core to HTTP: \texttt{live}, \texttt{student}, \texttt{question}, \texttt{analysis}, \texttt{sessions}, \texttt{settings}, \texttt{models\_cmp}, \texttt{lab}, \texttt{rag}, \texttt{meta} and \texttt{cf}. 
+Ten routers under \texttt{code2/backend/routers/} adapt the analytical core to HTTP: \texttt{live}, \texttt{student}, \texttt{question}, \texttt{analysis}, \texttt{sessions}, \texttt{settings}, \texttt{lab}, \texttt{rag}, \texttt{meta} and \texttt{cf}.
 The \texttt{mobile.html} bundle calls \texttt{/api/lab/*}; the \texttt{index.html} bundle calls the others. 
 The frontend is Vite, React and TypeScript with nine top-level views, eight of them are on the instructor side and one for the lab assistant; the eight instructor views include all the ones V1 carries with the addition of a \texttt{SessionProgression} view that replays struggle evolution across the session, an interaction pattern V1's rerun model cannot express.
 V2 also adds a seven-theme runtime palette (paper, newsprint, solar, scifi, blueprint, matrix, cyberpunk) swappable from the settings view through React Context and CSS custom properties; the accent colour is picked separately and persisted to \texttt{localStorage}.
@@ -231,7 +234,7 @@ The threshold classification is unchanged, allowing the V1 and V2 visual encodin
     \hline
     UI / presentation & \texttt{ui/} (\texttt{views}, \texttt{components}, \texttt{theme}) - Streamlit & \texttt{frontend/} - separate React + Vite tree \\
     \hline
-    HTTP layer & & \texttt{routers/} (11: \texttt{live}, \texttt{student}, \texttt{question}, \texttt{analysis}, \texttt{sessions}, \texttt{settings}, \texttt{models\_cmp}, \texttt{lab}, \texttt{rag}, \texttt{meta}, \texttt{cf}) \\
+    HTTP layer & & \texttt{routers/} (10: \texttt{live}, \texttt{student}, \texttt{question}, \texttt{analysis}, \texttt{sessions}, \texttt{settings}, \texttt{lab}, \texttt{rag}, \texttt{meta}, \texttt{cf}) \\
     \hline
     Request schemas &  & \texttt{schemas.py} \\
     \hline
@@ -589,7 +592,7 @@ V1 keeps these five pipelines in a single \texttt{analytics.py} module, whereas 
 
 \textbf{Maths recap.}
 Each submission $i$ receives a scalar incorrectness $x_i \in [0, 1]$ where $x_i = 0$ means completely correct and $x_i = 1$ means completely incorrect.
-The mapping from the \texttt{ai\_feedback} text to $x_i$ uses the gpt-4o-mini model in the OpenAI API. 
+The mapping from the \texttt{ai\_feedback} text to $x_i$ uses the gpt-4o model in the OpenAI API.
 Empty feedback returns the neutral score of $x_i = 0.5$ without an API call. 
 
 Incorrectness is computed by \texttt{compute\_incorrectness\_column(df)}, which routes uncached feedback strings through \texttt{\_call\_openai\_batch()} in groups of up to \texttt{OPENAI\_BATCH\_SIZE = 20} feedback texts per request - smaller batches parse more reliably than the API's nominal maximum.
@@ -1054,7 +1057,7 @@ The whole RAG path is gated by \texttt{RAG\_ENABLED\_DEFAULT = True}.
 
 \subsubsection{Generation and Prompting}
 
-The chosen LLM to generate feedback is gpt-4o-mini, which is the same model used for incorrectness scoring, this is due to it being a lightweight, highly optimised model which balances performance and cost. 
+The chosen LLM to generate feedback is gpt-4o, the same model used for incorrectness scoring; it was adopted after a re-labelling experiment showed materially higher agreement with human difficulty judgements than the lighter gpt-4o-mini.
 The prompt is a system message and a user message that carries the retrieved evidence which includes the student's struggle score, struggle band label, the top three questions ranked by incorrectness and the retrieved question-answer snippets.
 Output is constrained to JSON format with OpenAI's \texttt{response\_format=\{"type": "json\_object"\}}, and the prompt itself specifically asks for a JSON array of 2--3 short bullet strings of at most 15 words each.
 The parser is permissive in case the model returns a wrapped object instead of a bare array.
@@ -1144,7 +1147,7 @@ Clicking a bar drills into the corresponding Student or Question Detail view; St
 V2 carries two forms of the In Class view, the default one is the Basic layout which is the one the instructor sees on the first load due to the \texttt{useUiPrefsStore} preference store initialising the \texttt{inClassViewMode} value to \texttt{'basic'}; the layout is selectable through the Settings page's \emph{In-class layout} toggle. 
 The basic layout abstracts a lot from the advanced view so that it is a single colour coded bar per student or question, stretched to fill the row using the cohort min-max scale with a minimum visible fill so the lowest score is still visible. 
 When switching to the Advanced view the user is able to see more data immediately which includes submissions, their last registered score, the trend in score for the student side of the in class view and for the question side of the in class view they can see the amount of students attempting the question with the average attempts. 
-V1 has no equivalent view toggle and its default view is close to what V2's Basic view offers. The Basic and Advanced layouts are shown in Figures~\ref{fig:ui-inclass-basic} and~\ref{fig:ui-inclass}.
+V1 has no equivalent view toggle and its default view is close to what V2's Basic view offers. The Basic and Advanced layouts are shown in Figures~\ref{fig:ui-inclass-basic} and~\ref{fig:ui-inclass}; both implement the leaderboard design of Section~\ref{sec:design} (Figure~\ref{fig: figma1}).
 
 % screenshot moved to Appendix B (appendix-sections/ui-screenshots.tex): fig:ui-inclass-basic
 
@@ -1184,7 +1187,7 @@ The two diverge in a few places where V2 has a theme picker that persists to \te
 V2 also surfaces the trained weights, hyperparameters and band thresholds in that read-only configuration reference; they are not user-selectable.
 The per-component verdict for each v2 trained weight vector is reported in Section~\ref{sec:eval-results}; the trained weights are applied unconditionally at request time.
 
-V1 also carries a small UX flourish that V2 does not: six short sci-fi sound cues fired at session start, session end, student selection and other key events, authored as Web Audio API \texttt{OscillatorNode} and \texttt{GainNode} chains in \texttt{code/learning\_dashboard/sound.py} and injected through a zero-height iframe via \texttt{st.components.v1.html()} as Streamlit cannot natively play audio. The cues are gated by the Sound Effects toggle and, whilst not load-bearing analytically, help the instructor track session state without staring at the screen. The Settings view is shown in Figure~\ref{fig:ui-settings}.
+V1 also carries a small UX flourish that V2 does not: six short sci-fi sound cues fired at session start, session end, student selection and other key events, authored as Web Audio API \texttt{OscillatorNode} and \texttt{GainNode} chains in \texttt{code/learning\_dashboard/sound.py} and injected through a zero-height iframe via \texttt{st.components.v1.html()} as Streamlit cannot natively play audio. The cues are gated by the Sound Effects toggle and, whilst not load-bearing analytically, help the instructor track session state without staring at the screen. The Settings view is shown in Figure~\ref{fig:ui-settings}; it implements the design of Section~\ref{sec:design} (Figure~\ref{fig: settings view}).
 
 
 
@@ -1222,7 +1225,7 @@ V1 keeps all allocation controls in the instructor sidebar. Screenshots of the a
 
 On the first load, both versions present a single screen join form where the assistant enters their name and the six-character session code (\texttt{LAB\_CODE\_LENGTH = 6}) shown on the instructor dashboard and the client POSTs to the shared lab-state file through \texttt{learning\_dashboard.lab\_state.join\_session} (V1) or \texttt{POST /api/lab/join} (V2), receiving an assistant ID. 
 Identity is then persisted so that refreshing the browser does not force a rejoin, with the V1 writing the assistant ID into the URL as the \texttt{?aid=} query parameter (which has the side-benefit that a shared link can auto-rejoin) and V2 writing it to \texttt{localStorage} via the small \texttt{readAid}/\texttt{writeAid} helpers in \texttt{mobile/state/aid.ts} so that the URL stays clean. 
-V2 also wraps the first \texttt{POST /api/lab/join} in a silent retry loop so that if the assistant cannot join due to the session just starting, the failed join refetches \texttt{/api/lab/state} and retries silently on its own rather than surfacing the error. The join screen is shown in Figure~\ref{fig:asst-join}.
+V2 also wraps the first \texttt{POST /api/lab/join} in a silent retry loop so that if the assistant cannot join due to the session just starting, the failed join refetches \texttt{/api/lab/state} and retries silently on its own rather than surfacing the error. The join screen is shown in Figure~\ref{fig:asst-join}; it implements the design of Section~\ref{sec:design} (Figure~\ref{fig: figma4}).
 
 
 % screenshot moved to Appendix B (appendix-sections/ui-screenshots.tex): fig:asst-join
@@ -1234,15 +1237,15 @@ The assistants can also see a ranked list of the students, where only students w
 Students who are already being helped by another assistant are also not shown to the assistant to avoid confusion. 
 The same list is visible to every joined assistant and to the instructor in real time as the lab-state file where lab information is stored, shared and synchronised. 
 When the instructor enables the \texttt{allow\_self\_allocation} flag in their controls, each row carries a help student button where the assistant can choose to help a student, when the flag is off (the default), the list is read only and the assistant has to wait for an allocation. 
-Both behaviours have a reason to exist as some instructors may want to have more control over the allocation process and prefer to allocate students themselves through the instructor dashboard, whilst others may prefer to let the assistants self-allocate to students as they see fit. The standby view in both allocation modes is shown in Figure~\ref{fig:asst-unassigned}.
+Both behaviours have a reason to exist as some instructors may want to have more control over the allocation process and prefer to allocate students themselves through the instructor dashboard, whilst others may prefer to let the assistants self-allocate to students as they see fit. The standby view in both allocation modes is shown in Figure~\ref{fig:asst-unassigned}; it implements the design of Section~\ref{sec:design} (Figure~\ref{fig: figma5}).
 
 % screenshot moved to Appendix B (appendix-sections/ui-screenshots.tex): fig:asst-unassigned
 
 \subsubsection{Live Assistant Allocation and Mark-Helped}
 
 Once a student is assigned, either by the instructor or self claiming, the assistant view transitions into a single student card that carries information the assistant needs at the desk such as the student name (anonymised ID in this case), current struggle score, current struggle band they are in, suggested feedback for the student from the RAG layer described in Section \ref{sec:rag} and the student top three hardest questions. 
-The RAG panel is does not give any suggestions when a student has fewer than \texttt{RAG\_MIN\_SUGGESTIONS = 2} submissions instead rendering a message informing the user that there is not enough data to generate suggestions, as the feedback is unlikely to be useful. 
-Two actions are available to the assistant with "Mark Helped" setting the assignment status to "helped" and shows a confirmation badge but leaves the assistant assigned to the student, which lets the assistant keep checking in without releasing the slot, whilst "Release Student" actually unassigns the student and returns the assistant to the waiting view so a fresh student can be dispatched. "Release Student" is also useful for the assistant to indicate that they were not able to help the student allowing another assistant to pick them up. The assigned-student card is shown in Figure~\ref{fig:asst-assigned}, and the V2 instructor dispatch console in Figure~\ref{fig:asst-dispatch}.
+The RAG panel does not give any suggestions when a student has fewer than \texttt{RAG\_MIN\_SUBMISSIONS = 2} submissions instead rendering a message informing the user that there is not enough data to generate suggestions, as the feedback is unlikely to be useful. 
+Two actions are available to the assistant with "Mark Helped" setting the assignment status to "helped" and shows a confirmation badge but leaves the assistant assigned to the student, which lets the assistant keep checking in without releasing the slot, whilst "Release Student" actually unassigns the student and returns the assistant to the waiting view so a fresh student can be dispatched. "Release Student" is also useful for the assistant to indicate that they were not able to help the student allowing another assistant to pick them up. The assigned-student card is shown in Figure~\ref{fig:asst-assigned}, and the V2 instructor dispatch console in Figure~\ref{fig:asst-dispatch}; these implement the designs of Section~\ref{sec:design} (Figures~\ref{fig: figma6} and~\ref{fig: figma2}).
 
 
 % screenshot moved to Appendix B (appendix-sections/ui-screenshots.tex): fig:asst-assigned
@@ -1254,7 +1257,8 @@ Two actions are available to the assistant with "Mark Helped" setting the assign
 \subsection{Problems Encountered and Solutions} \label{sec:problems}
 
 
-A number of issues emerged whilst developing the project; Table \ref{tab:problems} highlights the eight main problems encountered.
+Building and deploying the system across two stacks surfaced a number of engineering problems; Table~\ref{tab:problems} summarises the eight most significant, each of which shaped a design or implementation decision.
+
 
 {\small
 \begin{longtable}{|p{0.18\textwidth}|p{0.37\textwidth}|p{0.37\textwidth}|}
@@ -1278,7 +1282,7 @@ Streamlit widget-instantiation rule & Mutating \texttt{st.session\_state} after 
 \hline
 Cross-process write conflicts on the shared lab-state file & Up to three processes (V1 instructor, V1 assistant, V2 FastAPI) can read and write \texttt{data/lab\_session.json} at the same time; without coordination, conflicting or incomplete writes lose updates or corrupt the file. & Every read and write is wrapped in a \texttt{filelock.FileLock} with a configurable timeout, and writes go to a \texttt{.tmp} file that is then \texttt{os.replace()}'d atomically so a partial write is never observable. \\
 \hline
-OpenAI scoring cold-start cost & On a fresh session the first run would block for tens of seconds whilst every submission was sent to \texttt{gpt-4o-mini} for an incorrectness score. & Two-layer cache: an in-process dictionary satisfies repeat lookups within one process, and a disk-persisted JSON cache at \texttt{data/incorrectness\_cache.json} survives restarts. The prewarm bypasses the OpenAI call entirely when over 95\% of unique feedback strings are already cached. \\
+OpenAI scoring cold-start cost & On a fresh session the first run would block for tens of seconds whilst every submission was sent to \texttt{gpt-4o} for an incorrectness score. & Two-layer cache: an in-process dictionary satisfies repeat lookups within one process, and a disk-persisted JSON cache at \texttt{data/incorrectness\_cache.json} survives restarts. The prewarm bypasses the OpenAI call entirely when over 95\% of unique feedback strings are already cached. \\
 \hline
 V2 FastAPI cold-start latency & V2 fits BKT, fits the 2PL IRT, and builds the ChromaDB embedding index at process startup so every subsequent request hits warm caches; running this expensive work synchronously inside the FastAPI startup hook would freeze the event loop for several minutes and block all incoming requests during prewarm. & A \texttt{lifespan} startup handler runs the OpenAI prewarm, the per-skill BKT fits, the 2PL IRT fit, and the ChromaDB build in the background before the server reports ready, and the fitted parameters are cached for the process lifetime. \\
 \hline
@@ -1293,10 +1297,14 @@ RAG generation blocking the FastAPI event loop & Each RAG suggestion call in the
 \end{longtable}
 }
 
-%give 8th and 4th extra checks
+Three themes recur across these problems. The first is concurrency: coordinating state across processes and keeping blocking work off the request path both demanded explicit synchronisation. 
+The second is cold-start latency: the expense of LLM scoring and model fitting motivated the disk-persisted cache and the startup prewarm. 
+The third is graceful degradation: the advanced models fall back cleanly when a session is too sparse to fit them, so a small class never breaks the dashboard. Together these shaped a system that prioritises responsiveness and resilience under the irregular conditions of a live lab.
 
 
-% TODO: write per Ch4 Rewrite Brief §4.11 - drop in tab:problems
-% Note: sound-effects discussion now lives inside §4.9.6 Settings View (the toggle is there); old standalone §4.11 Sound Effects subsection removed during 2026-05-20 layout refinement.
 
-% Old V1-prototype draft prose has been moved to implementation-old.tex (sidecar, not \include'd in main.tex). Decision 2026-05-20: nothing in there is being reused.
+This chapter has traced the system from its design to two working deployments. The analytical core, the struggle and difficulty models, the IRT, BKT and collaborative-filtering layers, and the retrieval-augmented feedback pipeline, is shared across both stacks: V1 runs it inside Streamlit, while V2 flattens it directly into a FastAPI backend that serves the API, the built React single-page application, and the lab-assistant view from a single process. Live state is coordinated between the two stacks through one file-locked JSON document, so a session started in either is visible in the other. The move to V2 delivered the principal engineering gains: a startup prewarm primes the dataframe, the BKT, IRT, struggle and difficulty models, and the retrieval collection so that steady-state requests answer from memory, with the costly incorrectness scores persisted to disk so subsequent boots stay fast. With the trained models in place and the deployed signals matching those evaluated offline, the system is ready for the evaluation reported in the next chapter.
+
+
+
+

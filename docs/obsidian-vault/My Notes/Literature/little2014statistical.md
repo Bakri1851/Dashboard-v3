@@ -6,10 +6,10 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:37
-  - Report/main-sections/design-and-architecture.tex:1015
+  - Report/appendix-sections/themes-and-references.tex:38
+  - Report/main-sections/design-and-architecture.tex:1049
 cited_in_planned: []
-last_synced: 2026-05-31
+last_synced: 2026-06-01
 ---
 # Statistical analysis with missing data
 

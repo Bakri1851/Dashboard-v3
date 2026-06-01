@@ -6,12 +6,12 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:27
-  - Report/main-sections/design-and-architecture.tex:813
-  - Report/main-sections/requirements-specification.tex:179
-  - Report/main-sections/requirements-specification.tex:180
+  - Report/appendix-sections/themes-and-references.tex:28
+  - Report/main-sections/design-and-architecture.tex:845
+  - Report/main-sections/requirements-specification.tex:196
+  - Report/main-sections/requirements-specification.tex:197
 cited_in_planned: []
-last_synced: 2026-05-31
+last_synced: 2026-06-01
 ---
 # k-means++: The Advantages of Careful Seeding
 

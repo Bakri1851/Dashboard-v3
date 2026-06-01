@@ -53,11 +53,11 @@ def _load_v2_weights() -> Optional[dict[str, float]]:
     except (OSError, json.JSONDecodeError) as exc:
         logger.warning("v2 struggle weights load failed (%s): %s", type(exc).__name__, exc)
         return None
-    if payload.get("model_class") != "LogisticRegression":
-        # Defensive: the loader assumes linear LR coefficients; refuse if file
+    if payload.get("model_class") != "LinearRegression":
+        # Defensive: the loader assumes linear OLS coefficients; refuse if file
         # was produced by a different model class (e.g. gradient boosting).
         logger.warning(
-            "v2 struggle weights model_class=%r != LogisticRegression; refusing to use",
+            "v2 struggle weights model_class=%r != LinearRegression; refusing to use",
             payload.get("model_class"),
         )
         return None

@@ -48,9 +48,9 @@ def _load_v2_weights() -> Optional[tuple[float, float, float]]:
     if payload.get("status") == "DEFERRED":
         logger.info("v2 improved weights file is a DEFERRED stub; falling back to v1")
         return None
-    if payload.get("model_class") != "LogisticRegression":
+    if payload.get("model_class") != "LinearRegression":
         logger.warning(
-            "v2 improved weights model_class=%r != LogisticRegression; refusing",
+            "v2 improved weights model_class=%r != LinearRegression; refusing",
             payload.get("model_class"),
         )
         return None

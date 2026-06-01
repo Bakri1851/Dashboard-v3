@@ -6,13 +6,14 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:19
-  - Report/main-sections/requirements-specification.tex:94
+  - Report/appendix-sections/themes-and-references.tex:20
+  - Report/main-sections/requirements-specification.tex:103
+  - Report/main-sections/requirements-specification.tex:327
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Student Struggle Logic
   - Improved Struggle Logic
-last_synced: 2026-05-31
+last_synced: 2026-06-01
 ---
 # Using program repair as a proxy for language models' feedback ability in programming education
 

@@ -5,7 +5,7 @@ This section describes the design and architecture of the lab dashboard, highlig
 Before detailing the architecture, the storyboard in Figures~\ref{fig:storyboard}-\ref{fig:sb-helped} walks through a typical interaction which our system will enable: the system monitors student submissions, flags a struggling student, and the instructor dispatches a lab assistant who crosses the room to help. 
 A concrete scenario makes the system's purpose tangible before the architecture is introduced. 
 The storyboard below follows one struggling student through the monitor-and-dispatch loop, from the moment their struggle becomes visible to the moment help arrives in person.
-
+Orange denotes the lab instructor, green the lab assistant, and blue the student.
 
 
 % ---- Storyboard setup: colours, reusable pics, and the reusable room backdrop ----
@@ -113,7 +113,7 @@ The storyboard below follows one struggling student through the monitor-and-disp
 }
 
 \paragraph{Monitor} Throughout the session the dashboard tracks every student's submissions, maintaining a live view of who is coping and who is falling behind. 
-This opening step establishes the dashboard as a passive system uses for observing the current state of the class: it watches every submission without waiting for a request for help, so the quiet student who would never raise a hand is monitored on equal terms with everyone else.
+This opening step establishes the dashboard as a passive system used for observing the current state of the class: it watches every submission without waiting for a request for help, so the quiet student who would never raise a hand is monitored on equal terms with everyone else.
 
 \begin{figure}[H]
     \centering
@@ -195,7 +195,7 @@ The final step closes the loop: once help is delivered the flag clears and the a
 The proposed system adopts a layered architecture designed to support real-time learning analytics in computer lab environments. 
 The architecture separates data generation, data ingestion and processing, as well as decision-making and action, into three distinct layers, ensuring each component can evolve independently.
 
-Figure~\ref{fig:context-stakeholders} gives a bird's-eye view of the three stakeholders and their touchpoints, with the three system components labelled C1--C3 for reference in the discussion that follows.
+Figure~\ref{fig:context-stakeholders} gives a bird's-eye view of the three stakeholders and their touchpoints, with the three system components labelled C1--C3: the quiz and AI-feedback platform (C1), the instructor dashboard (C2), and the assistant view (C3).
 
 Where the storyboard shows how the system is used, the context diagram that follows names the components that make it possible.
 
@@ -460,7 +460,7 @@ Applied to the seven signals introduced earlier, we have:
     \;\in\; [0,1].
 \end{equation*}
 Min-max normalisation is applied even to signals already bounded to $[0,1]$, because the configured weights only match the effective contribution of each signal when every signal occupies the full $[0,1]$ range, otherwise a signal that clusters in a sub-interval would contribute less than the weight implied. 
-When $x_{\min} = x_{\max}$, the normalised value is set to $0.5$, this preserves the signal's weighted contribution when a signal is uniform across the cohort, and leaves the ranking unaffected.
+When $x_{\min} = x_{\max}$, the normalised value is set to $0.5$; this preserves the signal's weighted contribution when a signal is uniform across the cohort, and leaves the ranking unaffected.
 
 
 
@@ -864,6 +864,8 @@ This complements the parametric difficulty signal: a question may register as "M
 
 \subsection{Advanced Model Design}
 
+This section describes the layers that extend the baseline models of the previous section. Each adds a dimension the weighted composites cannot capture alone: a measurement-confidence weighting that down-weights unreliable incorrectness scores, an Item Response Theory model that separates question difficulty from student ability, a Bayesian Knowledge Tracing layer that tracks mastery over time, and an improved struggle model that combines them.
+
 \subsubsection{Measurement Confidence} \label{sec: measurement confidence}
 
 Every incorrectness score $i_{s,\sigma,k}$ in this design is derived from an LLM judgement that is uncertain. To prevent the instructor from over-interpreting unreliable scores, each submission also carries a confidence measurement value $\kappa_{s,\sigma,k} \in [0,1]$ that quantifies how trustworthy the corresponding incorrectness estimate is, in the spirit of classical test theory \cite{lord1968statistical}.
@@ -1109,7 +1111,7 @@ The same labelled set also calibrates the band-classification thresholds of Tabl
     \caption{V2 model refinement pipeline}
     \label{fig:v2-pipeline-design}
 \end{figure}
-The metrics this pipeline produces, the trained composite weights, the calibrated band thresholds, and the tuned scalar hyperparameters, are serialised to disk and loaded by the V2 backend at start-up, so the deployed system applies the offline-trained model without retraining mid-session. With the analytical models established, now we look at how the system explains its judgements to instructors, which the next section addresses through retrieval-augmented feedback.
+The outputs this pipeline produces, the trained composite weights, the calibrated band thresholds, and the tuned scalar hyperparameters, are serialised to disk and loaded by the V2 backend at start-up, so the deployed system applies the offline-trained model without retraining mid-session. With the analytical models established, now we look at how the system explains its judgements to instructors, which the next section addresses through retrieval-augmented feedback.
 
 
 
@@ -1364,6 +1366,6 @@ The multiple bands allow instructors to prioritise their attention and make more
 The green, amber, orange, red colour scheme follows the traffic light convention so that it can be intuitive to users without needing a legend. 
 Colour is also not the sole channel as each band carries a text label, a fixed position and their score so that information can still be interpreted without colour.
 
-Taken together, these choices form a layered information architecture: raw submission data is reduced to interpretable composite signals, which is optionally refined by the IRT, BKT and collaborative-filtering layers, and finally encoded into a small set of ordered, colour-coded bands. 
+Taken together, these choices form a layered information architecture: raw submission data is reduced to interpretable composite signals, which are optionally refined by the IRT, BKT and collaborative-filtering layers, and finally encoded into a small set of ordered, colour-coded bands. 
 Each layer adds analytical depth while preserving the at-a-glance readability an instructor needs during a live session. The next chapter describes how this design is realised in the deployed V1 and V2 systems.
 

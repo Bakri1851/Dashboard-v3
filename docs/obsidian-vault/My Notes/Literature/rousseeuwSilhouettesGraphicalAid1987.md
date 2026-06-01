@@ -6,11 +6,11 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:27
-  - Report/main-sections/design-and-architecture.tex:813
-  - Report/main-sections/requirements-specification.tex:187
+  - Report/appendix-sections/themes-and-references.tex:28
+  - Report/main-sections/design-and-architecture.tex:845
+  - Report/main-sections/requirements-specification.tex:204
 cited_in_planned: []
-last_synced: 2026-05-31
+last_synced: 2026-06-01
 ---
 # Silhouettes: A graphical aid to the interpretation and validation of cluster analysis
 

@@ -7,10 +7,10 @@ status: active
 last_imported: 2026-05-05
 tags: [Artificial Intelligence (cs.AI), Computation and Language (cs.CL), FOS: Computer and information sciences]
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:33
-  - Report/main-sections/requirements-specification.tex:143
+  - Report/appendix-sections/themes-and-references.tex:34
+  - Report/main-sections/requirements-specification.tex:154
 cited_in_planned: []
-last_synced: 2026-05-31
+last_synced: 2026-06-01
 ---
 # Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena
 

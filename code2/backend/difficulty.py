@@ -36,9 +36,9 @@ def _load_v2_weights() -> Optional[dict[str, float]]:
     except (OSError, json.JSONDecodeError) as exc:
         logger.warning("v2 difficulty weights load failed (%s): %s", type(exc).__name__, exc)
         return None
-    if payload.get("model_class") != "LogisticRegression":
+    if payload.get("model_class") != "LinearRegression":
         logger.warning(
-            "v2 difficulty weights model_class=%r != LogisticRegression; refusing",
+            "v2 difficulty weights model_class=%r != LinearRegression; refusing",
             payload.get("model_class"),
         )
         return None

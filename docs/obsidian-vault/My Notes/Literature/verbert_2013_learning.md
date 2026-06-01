@@ -6,14 +6,14 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:15
-  - Report/main-sections/requirements-specification.tex:35
-  - Report/main-sections/requirements-specification.tex:37
-  - Report/main-sections/requirements-specification.tex:58
+  - Report/appendix-sections/themes-and-references.tex:16
+  - Report/main-sections/requirements-specification.tex:39
+  - Report/main-sections/requirements-specification.tex:41
+  - Report/main-sections/requirements-specification.tex:62
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Instructor Dashboard
-last_synced: 2026-05-31
+last_synced: 2026-06-01
 ---
 # Learning analytics dashboards
 

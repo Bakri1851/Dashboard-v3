@@ -2,27 +2,38 @@
 
 Supervisor pts 11–14, 16: don't end sections/chapters abruptly on a figure; open each top-level section with a short framing paragraph (but check the existing ones first); summarise big tables; finish the abandoned sentences. ← [[00 Index]]
 
-> **Re-anchored + reconciled 2026-05-31** against the live `Report/main-sections/*.tex`. Roughly nine items already done (writing landed during the Notes 01–04 passes); about thirteen remain. Delivery is chapter-by-chapter (Ch1 → Ch5; Ch6 needs no change); Ch2 gets the full treatment (intros + composite framing + glossary + §2.6 gaps). Status legend: ✅ done · ⬜ to write.
+> **CLOSED 2026-05-31.** All Note 05 scope applied to `Report/`: chapter and section intros (including the five the original pass missed — Ch2 §Background opener, §2.1, §2.7, Ch3 §3.4, Ch6 opener), section closers, chapter summaries, the problems-table summary, and the abandoned sentences. A final read-only sweep across all six chapters returned PASS — every top-level section now opens with framing (§5.1 exempt, the chapter opener precedes it). Accuracy fixes surfaced during this pass are logged in [[01 Integrity & Consistency Fixes]] (I13–I19, including the I14 deployment-bug fix). Remaining definitive check: a clean `latexmk` recompile. Deferred as optional nice-to-haves: `\paragraph`-level orienters (§5.6.2, §6.3, a few Ch3 model subsubsections) and the Fig 3.6 C1–C3 wire-in. *(The detail below is retained as the working record.)*
 
 ## Status reconciliation (verified anchors, 2026-05-31)
 **✅ Already done (verified, no action):**
 - Ch1 garbled first sentence (Note 01 I10) — `introduction.tex` reads clean now (l4 "at their own pace"; l18 "The central problem addressed … is therefore").
-- §5.4 Results intro — exists, `results-and-evaluation.tex` l147–156.
+- ~~§5.4 Results intro — exists~~ **CORRECTED 2026-05-31: this was wrong.** The "It is useful to characterise…" text is the body of §5.4.1 Cohort Characterisation, not a §5.4-level framing paragraph. §5.4 jumps straight into its first subsubsection like every other §5.x section — moved to the Ch5 remaining list below.
 - Eval abandoned "bayesian shrinkage" sentence — completed at l319 (full sentence, inline comment gone).
 - Eval threshold-bias fragment — completed (no trailing fragment found).
 - Eval Optuna summary after `tab:eval-hyperparams` — exists at l361.
 - Eval prewarm interpretation — exists at l115–121 (**keep the "five-second polling" claim scoped to the lab-assistant app**: code-verified that only the mobile portal polls at 5 s; the instructor console uses 3 s / 10 s and the config default is 60 s).
-- Fig 3.6 `fig:context-stakeholders` discussion — exists (fuller lead-in, names C1–C3).
+- Fig 3.6 `fig:context-stakeholders` discussion — exists, BUT **the C1–C3 promise is unfulfilled (re-audit 2026-05-31):** the lead-in says the components are "labelled C1--C3 for reference in the discussion that follows", yet no later prose references C1/C2/C3 (they appear only as the promise + 3 TikZ node labels); the components are discussed by name in the Layer paragraphs instead. Either wire C1/C2/C3 into the architecture discussion (ties to [[02 Proposed Report Edits — structural]] component cross-refs / FC-02) or drop the "for reference in the discussion that follows" clause.
 - §4.9 instructor-views closer — exists at l1201–1210 (Session Progression view).
-- Ch6 conclusion opener — fine, no change.
+- ~~Ch6 conclusion opener — fine, no change~~ **CORRECTED 2026-05-31 (re-audit): the §Conclusion `\section` opener is MISSING** — it jumps straight to `\subsection{Summary of the Project}` with no chapter-level intro (unlike Ch4/Ch5, which open with prose). Needs a 1–2 sentence opener. Moved to the re-audit gaps below.
 - Composite-metric formal definition — exists in the Design chapter (l471–587) + Appendix C / Nomenclature.
 
 **⬜ Remaining (current anchors):**
 - **Ch1** opener — `introduction.tex` l1–2.
 - **Ch2** intros §2.2/§2.3/§2.4/§2.5 ✅ applied by author; composite framing + glossary dropped after review (see the supervisor-pt-16 section below). **Remaining:** §2.6 Research Gaps cleanup (heading l313; TODOs at l317/320/323/331; P3/P5 source paras l327–329) + the l151 Optuna accuracy fix (I13).
 - **Ch3** §3.1 walkthrough five DRAFT-only figures (l111/124/139/154/168), lead-in l5, bridge; §3.5 closer after `fig:v2-pipeline-design` (l1094–1095); chapter-end summary after visual-encoding tables (l1341–1346).
-- **Ch4** chapter intro (TODO near top); chapter summary (chapter ends on the problems table, l1254–1303); problems-table intro (l1257) + post-table summary; impl→design back-refs in the UI/view subsections (FC-02).
-- **Ch5** chapter closer after `fig:eval-incorrectness-distribution` (l541–547); §5.2 intro (l80), §5.5 intro (l363), §5.6 intro (l462).
+- **Ch4** ✅ DONE 2026-05-31. Chapter intro, chapter summary, and problems-table intro + post-table summary written by author. **FC-02 back-refs applied by me** to the 5 views with a Ch3 Figma mockup (In-Class→`fig: figma1`, Settings→`fig: settings view`, Session Join→`fig: figma4`, Waiting→`fig: figma5`, Live Allocation/dispatch→`fig: figma6`+`fig: figma2`); the 5 views with no mockup (Student/Question Detail, Data Analysis, Previous Sessions, Session Progression V2-only) intentionally carry no figure back-ref. **Major code bug fixed** during this chapter: trained v2 weights now actually deploy — see [[01 Integrity & Consistency Fixes]] I14.
+- **Ch5** — consistency audit (2026-05-31): **all six §5.x sections jump straight into their first subsubsection.** Add a framing intro to §5.2 Functional, **§5.3 Non-Functional (was missed)**, **§5.4 Results (was wrongly marked done)**, §5.5 Survey, §5.6 Discussion (all five drafts delivered in chat). **§5.1 Evaluation Design is exempt** — the chapter opener (l4–6) immediately precedes it, so a separate intro would duplicate it. Plus the chapter closer after `fig:eval-incorrectness-distribution`; give it a `\paragraph{Summary of the evaluation}` run-in so it does not read as a fourth Limitation.
+
+## Re-audit section-intro gaps (2026-05-31 — report-wide sweep; missed by the original pass)
+The first pass followed the supervisor's flagged points, so it missed these. **All five APPLIED 2026-05-31** (Ch2 §Background opener, §2.1, §2.7, §3.4 Advanced Model Design, Ch6 §Conclusion opener):
+- **Ch2 §Background `\section` opener** (l1) — the whole literature-review chapter has NO opener; jumps straight to §2.1. Highest priority.
+- **§2.1 Learning Analytics and Dashboards** (l3) — jumps to §2.1.1; the only sibling subsection still without an intro (§2.2–§2.6 have them).
+- **§2.7 Requirements Specification** (l337) — jumps to §2.7.1 Functional Requirements; no FR/NFR/MoSCoW framing.
+- **Ch3 §3.4 Advanced Model Design** (l865) — jumps to Measurement Confidence; no preview of what "Advanced" adds over the baseline (contrast §3.3 Baseline Analytics Design, which has a one-liner).
+- **Ch6 §Conclusion `\section` opener** (l1) — see corrected note above.
+- **Minor (`\paragraph`-level, low priority):** §6.3 Future Work, §5.6.2 Tradeoffs, and the §3.x Student-Struggle / Question-Difficulty / CF subsubsections open directly into a `\paragraph` (which serves a framing role); optional one-line orienters.
+
+Ch1 and Ch4 are fully consistent (every section has framing). Ch5 §5.2–§5.6 intros confirmed applied; §5.1 exempt.
 
 ## Accuracy audit (code-verified, 2026-05-31)
 Deep read of the live `code2/backend/` source agtainst the report's quantitative claims (the facts these briefs lean on). **All verified accurate** except one:

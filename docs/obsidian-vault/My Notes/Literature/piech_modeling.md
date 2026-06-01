@@ -6,16 +6,16 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:19
-  - Report/appendix-sections/themes-and-references.tex:23
-  - Report/main-sections/requirements-specification.tex:89
-  - Report/main-sections/requirements-specification.tex:129
-  - Report/main-sections/requirements-specification.tex:137
+  - Report/appendix-sections/themes-and-references.tex:20
+  - Report/appendix-sections/themes-and-references.tex:24
+  - Report/main-sections/requirements-specification.tex:98
+  - Report/main-sections/requirements-specification.tex:139
+  - Report/main-sections/requirements-specification.tex:147
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Student Struggle Logic
   - Improved Struggle Logic
-last_synced: 2026-05-31
+last_synced: 2026-06-01
 ---
 # Modeling how students learn to program
 

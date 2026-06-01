@@ -7,7 +7,7 @@ status: stale
 last_imported: 2026-05-05
 cited_in_tex: []
 cited_in_planned: []
-last_synced: 2026-05-31
+last_synced: 2026-06-01
 ---
 
 # A Limited Memory Algorithm for Bound Constrained Optimization

@@ -3,14 +3,17 @@ category: literaturenote
 citekey: CoefficientAgreementNominal
 year: 1960
 in_zotero: true
-status: stale
+status: active
 last_imported: 2026-05-05
-cited_in_tex: []
+cited_in_tex:
+  - Report/main-sections/results-and-evaluation.tex:33
 cited_in_planned: []
-last_synced: 2026-05-31
+last_synced: 2026-06-01
 ---
-
 # A Coefficient of Agreement for Nominal Scales
+
+%% Begin annotations %%
+## Summary
 
 > [!Cite]
 > [1]
@@ -54,3 +57,4 @@ _Hand-written summary lives here. Survives re-imports. PDF annotations append be
 
 
 %% Import Date: 2026-05-05T18:39:57.772+01:00 %%
+%% End annotations %%

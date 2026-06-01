@@ -7,10 +7,10 @@ status: active
 last_imported: 2026-05-05
 tags: [Artificial Intelligence (cs.AI), FOS: Computer and information sciences, Neural and Evolutionary Computing (cs.NE)]
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:21
-  - Report/main-sections/requirements-specification.tex:118
+  - Report/appendix-sections/themes-and-references.tex:22
+  - Report/main-sections/requirements-specification.tex:128
 cited_in_planned: []
-last_synced: 2026-05-31
+last_synced: 2026-06-01
 ---
 # How deep is knowledge tracing?
 

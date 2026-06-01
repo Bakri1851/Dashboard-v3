@@ -6,13 +6,13 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:23
-  - Report/main-sections/requirements-specification.tex:134
+  - Report/appendix-sections/themes-and-references.tex:24
+  - Report/main-sections/requirements-specification.tex:144
 cited_in_planned:
   - Ch2 – Background and Requirements
   - IRT Difficulty Logic
   - Question Difficulty Logic
-last_synced: 2026-05-31
+last_synced: 2026-06-01
 ---
 # Measuring task difficulty for online learning environments where multiple attempts are allowed -the Elo rating algorithm approach
 

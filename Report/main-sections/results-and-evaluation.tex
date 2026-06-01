@@ -79,6 +79,11 @@ The third is the retrospective nature of the evaluation, which is necessary for 
 
 \subsection{Functional Testing} \label{sec:eval-functional}
 
+This section verifies that the system meets the functional requirements set out in Chapter~\ref{sec:requirements}. 
+Each requirement is exercised against the deployed V2 stack and cross-checked against the design of Chapters~\ref{sec:design} and~\ref{sec:implementation}, covering live data ingestion (FR1), the struggle and difficulty models (FR2, FR3), the instructor dashboard (FR4, FR5), and the lab-assistant workflow (FR7); the full per-requirement verification rows are collected in Appendix~\ref{app:detailed-test-results}.
+
+
+
 \subsubsection{Data Ingestion and Session Handling} \label{sec:eval-data-ingestion}
 The first functional requirement of Chapter~\ref{sec:requirements} (FR1, live submission-data ingestion) was validated during the V2 deployment against a live session, confirming that the JSON log returned by the Loughborough submission API is parsed correctly end-to-end into the normalised submissions DataFrame, that the XML field embedded in each record is extracted into per-submission attributes, and that the in-memory cache invalidates correctly under the configured TTL described in Section~\ref{sec:pipeline}.
 Session start and end were validated through the lab instructor dashboard and the lab assistant join flow concurrently, confirming that the shared state file at \texttt{data/lab\_session.json} updates correctly under the \texttt{filelock} pattern described in Section~\ref{sec:shared-state}.
@@ -108,6 +113,11 @@ FR6 (smart device) was scoped out at design time due to focusing on the modellin
 
 \subsection{Non-Functional Testing} \label{sec:eval-nonfunctional}
 
+This section evaluates the system against the non-functional requirements set out in Chapter~\ref{sec:requirements}, covering real-time performance (NFR1), usability and interpretability (NFR2), and robustness and failure handling (NFR3); the remaining requirements, scalability (NFR4), privacy and ethics (NFR5), and extensibility and maintainability (NFR6), hold by construction and are recorded in the non-functional table of Appendix~\ref{app:detailed-test-results}.
+
+
+
+
 \subsubsection{Performance and Refresh Behaviour} \label{sec:eval-performance}
 NFR1 (Real Time Performance) of Chapter~\ref{sec:requirements} is met through a lifespan-prewarm strategy of Chapter~\ref{sec:implementation}, which pre-computes all derived signals before the FastAPI process accepts requests so that the first user request sees the steady-state latency of the dashboard rather than the startup latency.
 The prewarm is made up of seven stages, captured across a representative session of $42{,}443$ submission records across $3{,}935$ unique feedback strings.
@@ -135,12 +145,15 @@ NFR3 (Robustness to noisy data) of Chapter~\ref{sec:requirements} is validated t
 The cold start case where there are no submissions at the session start was tested by joining the dashboard before the prewarm had finished, confirming that the leaderboards render with skeleton loaders and the scoring pipeline returns gracefully without raising exceptions or errors; the IRT fit refuses to fit when fewer than two attempts per question are available and returns empty difficulty, discrimination and ability dictionaries; later stages detect the empty fit through a non-empty check and redistribute the IRT weights to the behavioural part of the improved model under the graceful degradation logic of Section~\ref{sec: improved struggle}.
 The single student case (one student active) was tested by replaying a session at the first cutoff; the collaborative filtering layer requires at least $k+1$ active students to compute a similarity ranking and gracefully returns the parametric ranking unchanged when the cohort is too small.
 The BKT identifiability case (a session where all attempts on a skill share the same outcome leading to MLE degeneracy) is handled by the gating logic of Section~\ref{sec: bkt} where, if fewer than fifty attempts are recorded or when all attempts are identical, the fitter refuses to fit and the configured defaults are retained; this fallback path was observed in production during the deployment, with the 25COA122 BKT fit returning a scipy \texttt{ABNORMAL\_TERMINATION\_IN\_LNSRCH} status and the gating logic correctly retaining the \texttt{config.py} defaults.
-The improved model's weight redistribution behaviour, when BKT mastery or IRT difficulty is unavailable, is implemented as explicit branches in the model code covering the four cases of Section~\ref{sec: improved struggle}; the BKT-unavailable case (case 2) was observed in production via the 25COA122 fallback above, with the missing mastery weight $w_M$ redistributed to the behavioural composite weight $w_B$ as the documented redistribution rule prescribes.
+The improved model's weight redistribution behaviour, when BKT mastery or IRT difficulty is unavailable, is implemented as explicit branches in the model code covering the four cases of Section~\ref{sec: improved struggle}. This redistribution applies in V1, whose hand-set weights form a convex combination: the BKT-unavailable case (case 2) folds the missing mastery weight $w_M$ into the behavioural composite weight $w_B$. The deployed V2 model instead applies its trained weights directly, so an unavailable signal contributes zero rather than being redistributed, which preserves the trained, and possibly signed, weight structure. The BKT-unavailable fallback itself was observed in production via the 25COA122 fallback above.
 The lab-state file at \texttt{data/lab\_session.json} is protected against concurrent writes through the \texttt{filelock} library, which serialises access under an exclusive lock so that the instructor app, the lab-assistant app, and the FastAPI backend cannot corrupt the shared state when they update it within a polling cycle.
 The RAG layer offloads its blocking calls through \texttt{asyncio.to\_thread}, which dispatches the embedding and retrieval work onto a worker thread so the FastAPI event loop remains free to service other requests during a RAG call.
 NFR4 (Scalability), NFR5 (Privacy and Ethical), and NFR6 (Extensibility and Maintainability) hold by construction rather than by edge-case testing, and are documented in the NFR table of Appendix~\ref{app:detailed-test-results}.
 
 \subsection{Results} \label{sec:eval-results}
+
+This section reports the quantitative results. It first characterises how the deployed model classifies the evaluation cohort, comparing the struggle and difficulty band distributions it produces against the LLM rater's, then assesses the struggle model's agreement with that rater, compares the v1 and v2 weightings across both models, and reports the band-threshold and hyperparameter optimisation passes. Every agreement figure is measured against the LLM rater, whose own fidelity against a human reader is examined in Section~\ref{sec:eval-tradeoffs}.
+
 
 \subsubsection{Cohort Characterisation}
 
@@ -362,6 +375,11 @@ In summary, the Bayesian shrinkage constant $K$ is non-consequential on this coh
 
 \subsection{Survey} \label{sec:eval-survey}
 
+This section complements the quantitative results with a small qualitative survey of the people the dashboard is built for. 
+It reports how lab support is currently perceived, how interpretable and trustworthy participants found the dashboard, what ethical concerns they raised, and which changes they requested, before using those views for discussion against the measured results of Section~\ref{sec:eval-results}. Given the sample size the survey is read as corroboration rather than as an independent statistical claim.
+
+
+
 \subsubsection{Instrument and Audience}
 
 The survey had been presented as an eleven question Microsoft Forms questionnaire, targeted at undergraduate students, postgraduate lab assistants, and staff involved in the 25COA122 computer-lab sessions. Ten responses were returned: six undergraduate students, one postgraduate-taught student, two postgraduate-research lab assistants, and one staff member. Questions focused on validating our requirements,  free text questions to get opinions on areas related to the dashboard, ethical concerns and feature requests. 
@@ -461,6 +479,10 @@ Criteria transparency & 1 \\
 
 \subsection{Discussion} \label{sec:eval-discussion}
 
+This section interprets what the results mean for the deployed system. It examines the one model that did not beat its baseline, the 2PL IRT difficulty scorer, then sets out the  threats to the validity of the trained-model numbers, in particular the fidelity ceiling imposed by the LLM rater, and closes with the limitations that bound how far the findings generalise.
+
+
+
 \subsubsection{Difficulty Model and the IRT Anti-Result} \label{sec:eval-irt}
 
 The 2PL IRT difficulty model is the only model evaluated in this chapter that does not improve on its hand-set baseline. Under the LLM rater's four-band difficulty rating, the IRT difficulty $b_q$ scaled to $[0, 1]$ achieves Spearman $\rho = +0.345$ against the rater, compared with $\rho = +0.468$ for the baseline composite (Figure~\ref{fig:eval-negative-findings}, left panel); the top-10 hardest set overlaps with the composite's by only one question out of ten (Figure~\ref{fig:eval-comparison-difficulty-scatter} and Table~\ref{tab:eval-comparison-difficulty-top10}). Linear-weighted band agreement is similarly weak: $\kappa = -0.016$ at the hand-set cutpoints and $\kappa = -0.024$ at the constrained-CV-trained cutpoints (Table~\ref{tab:eval-thresholds}), so the band threshold training pass made the agreement marginally worse rather than better and the IRT row was retained at its hand-set thresholds.
@@ -544,3 +566,7 @@ The third limitation concerns the underlying incorrectness signal. The deployed 
     \caption{Distribution of submission-level incorrectness scores.}
     \label{fig:eval-incorrectness-distribution}
 \end{figure}
+
+
+Taken together, the evaluation shows a system whose strongest signal is correct and whose weaker ones are honestly bounded. The deployed struggle model agrees with the LLM rater at Spearman $\rho = +0.588$, the main result of the chapter, while the difficulty model is weaker and best read as directional given the seventy-two-question sample. Both sit beneath a rater-fidelity ceiling and, on most rows, a degraded incorrectness signal that falls back to its midpoint for $92.5\%$ of submissions. These findings support the thesis's central claim: the dashboard is an advisory instrument that sharpens an instructor's attention rather than an autonomous decision-maker, most valuable when its rankings are read alongside the human judgement it is designed to support.
+

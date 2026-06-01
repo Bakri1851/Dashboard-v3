@@ -1,30 +1,35 @@
 # 06 — Background Lit-Review Expansion (author writes)
 
-Supervisor pt 15: a lot of model-training content was added to Ch3–5 that Ch2 barely covers. Expand/​add the subsections below. Most sources already exist in `references.bib` (see [[07 Citations — wire orphans + Candidate References]]); only a few are genuinely new. ← [[00 Index]]
+Supervisor pt 15: model-training content was added to Ch3–5 that Ch2 barely covers. **Scoped 2026-06-01:** *evaluation methodology is not lit-reviewed* — the model-class bake-off baselines, weighted Cohen's κ, cutpoint/threshold search, composite-indicator sensitivity, and Optuna/TPE tuning are cited *where they are used in Ch5*, not surveyed here (relocated to [[07 Citations — wire orphans + Candidate References]]). After that filter the one Ch2 addition is **A1** the deployed estimator (OLS). **A2** (help-seeking grounding) was **dropped 2026-06-01** — the claim is empirically validated by the survey (§5.5), so an external citation is optional. ← [[00 Index]]
 
-## B1. Expand §2.2.4 "Composite Model Training and Optimisation"
-Currently ~5 sentences (`requirements-specification.tex` l139–144). Expand to cover, with citations:
-- **Supervised refinement of composite weights** — that hand-set weights can be refit against labels; introduce **linear regression / ordinary least squares (OLS)** as the chosen estimator (the user specifically wants OLS named here, since it trained the deployed model). Cite **Hastie, Tibshirani & Friedman, ESL (2009)** (new — [[07 Citations — wire orphans + Candidate References]]) for OLS / linear regression.
-- **Model-class alternatives** — random forest and gradient boosting as non-linear baselines benchmarked against OLS. Cite **Breiman (2001)** and **Friedman (2001)** (new). (This also retro-grounds the §5.4.3 bake-off — see [[07 Citations — wire orphans + Candidate References]].)
-- **LLM-as-judge / second-opinion labelling** — already cited (`gilardiChatGPTOutperformsCrowd2023`, `chiangCanLargeLanguage2023`, `zhengJudgingLLMasaJudgeMTBench2023`); add `liuGEvalNLGEvaluation2023` (orphan) as the on-point "LLM as graded-rubric evaluator" reference.
-- **Bayesian hyperparameter optimisation (TPE)** — already cited (`NIPS2011_86e8f7ab`, `akibaOptunaNextgenerationHyperparameter2019`); add 1–2 sentences on *why* TPE over grid/random search (models the hyperparameter→objective relationship, samples promising candidates, efficient at small N).
+> **Background voice (not implementation/eval).** Both additions are declarative grounding — no "we", no fitted coefficients, no result numbers. Each carries a *keep-out* line marking what belongs in Ch3/Ch5 instead.
 
-## B2. New subsection: "Shrinkage, Measurement Confidence & Missing Data"
-After §2.2.4. Three short parts, mostly orphan-wiring:
-- **Empirical-Bayes / James–Stein shrinkage** — open with a plain-language sentence (shrinkage pulls noisy, sparse estimates toward a prior / class mean to stabilise them), then the fixed n/(n+K) pseudo-count form. Cite `efronSteinsParadoxStatistics1977`, `morrisParametricEmpiricalBayes1983` (both already cited in Ch3) + `gelmanBayesianDataAnalysis2013` (orphan) for the conjugate-prior framing.
-- **Classical test theory / measurement confidence** — explain CTT as a framework for quantifying score uncertainty, and that the dashboard's κ-confidence derives from it. Cite `lord1968statistical` (already cited).
-- **Missing-data handling** — why missing data arises in lab sessions (BKT mastery uncovered for some students), mean imputation as the chosen baseline (vs zero imputation, which biases the mastery gap upward), under a missing-at-random assumption, with alternatives (forward-fill, kNN, multiple imputation). Cite `little2014statistical` (currently cited once at design l783) by name and connect to the MAR assumption.
+## A1 — Name OLS in §2.2.4 "Composite Model Training and Optimisation"
+`requirements-specification.tex` l150–156 (edit at l152). **✅ Applied 2026-06-01** — `ordinary least squares (OLS) regression \cite{hastieElementsStatisticalLearning2009}`. The subsection already framed supervised refinement of composite weights against labels in background voice; it just lacked the named estimator.
+- **Add:** name **ordinary least squares (OLS)** as the standard linear estimator for refitting composite weights against labels — one clause, e.g. "…through supervised estimators such as ordinary least squares \cite{hastieElementsStatisticalLearning2009}". Cite `hastieElementsStatisticalLearning2009` (new → [[07 Citations — wire orphans + Candidate References]] candidate 5; validate in Zotero first).
+- **Leave as-is:** the existing LLM-rater sentence (`gilardiChatGPTOutperformsCrowd2023, chiangCanLargeLanguage2023, zhengJudgingLLMasaJudgeMTBench2023`) and the Optuna/TPE sentence (`NIPS2011_86e8f7ab, akibaOptunaNextgenerationHyperparameter2019`) — do **not** expand them (TPE justification is eval tuning).
+- **Keep out → elsewhere:** fitted coefficients / deployed weight vector → Ch3–4; the RF/GB bake-off comparison and κ deltas → Ch5 `sec:eval-comparison`; "why TPE beats grid/random" → Ch5 `sec:eval-hyperopt`.
 
-## B3. New subsection: "Threshold Optimisation & Agreement Metrics"
-After B2 (or fold into B1). Cover:
-- **Cohen's κ — standard vs linear-weighted** — ordinal distance-aware penalties; why linear weighting suits the 4-band scale. Cite **Cohen (1968)** (new — weighted variant; the `.bib` currently has only Cohen 1960 `CoefficientAgreementNominal`) + `landisMeasurementObserverAgreement1977` (orphan) for the interpretation bands ("fair/moderate").
-- **Threshold / cutpoint search methodology** — grid search maximising weighted κ under monotonicity + min-band-width constraints, cross-validated; ties to §5.4.5.
-- **Composite-indicator sensitivity** — that cutpoints are cohort-dependent and should be re-tuned. Cite `oecdHandbookConstructingComposite2008` + `saisanaUncertaintySensitivityAnalysis2005` (both orphans).
+## A2 — Help-seeking grounding in §2.2.1 — ❌ dropped 2026-06-01
+**Dropped (author's call):** the "students hesitate to ask for help" claim recurs in the Introduction and is empirically validated as a survey theme (§5.5), so it is grounded by first-party evidence; an external citation (`ryanAvoidingSeekingHelp2001`) is optional and was not added. Re-open if a literature anchor is wanted later (citekey ready in [[07 Citations — wire orphans + Candidate References]]).
+- **Add:** one grounding sentence/citation, e.g. "…students are often reluctant to seek help even when they would benefit from it \cite{ryanAvoidingSeekingHelp2001}". Cite `ryanAvoidingSeekingHelp2001` (new → [[07 Citations — wire orphans + Candidate References]] candidate 4; validate in Zotero first). Primary home §2.2.1; optional one-line echo at the Intro motivating claim (l10) — author's call.
+- **Keep out:** nothing implementation here — purely a grounding citation.
 
-## B4. Help-seeking grounding (load-bearing in Intro + Survey)
-- The "students hesitate to ask for help" claim recurs in the Introduction and as a validated survey theme (§5.5). Ground it once in Ch2 (or Intro) with **Ryan, Pintrich & Midgley (2001)** (new — [[07 Citations — wire orphans + Candidate References]]).
+## Relocated to Ch5 — wired under [[07 Citations — wire orphans + Candidate References]], not here
+- **`breimanRandomForests2001` + `friedmanGreedyFunctionApproximation2001`** (new) → bake-off baselines at `sec:eval-comparison`.
+- **`cohenWeightedKappaNominal1968`** (new, weighted κ) → first weighted-κ use at `sec:eval-metrics`.
+- **`oecdHandbookConstructingComposite2008` + `saisanaUncertaintySensitivityAnalysis2005`** (orphans) → cutpoint cohort-dependence at `sec:eval-thresholds` / limitations.
+- **`liuGEvalNLGEvaluation2023`** (orphan) → LLM-as-rater first mention in §5.4.
 
-## B5. Software-architecture grounding (optional)
-- The layered/three-tier architecture claim (Ch3 l6–7) is currently uncited. Optionally cite **Bass, Clements & Kazman (2012)** (new) for layered-style benefits. Low priority.
+## Parked / dropped
+- **B2** (empirical-Bayes shrinkage / measurement confidence / missing-data imputation) — *parked*. These are deployed methods, not eval, and already grounded in Ch3 (shrinkage at design l552–563 `\cite{efronSteinsParadoxStatistics1977, morrisParametricEmpiricalBayes1983}`; mean-vs-zero imputation at design l1049 `\cite{little2014statistical}`). Re-open if a fuller §2.2 deployed-method background is wanted; that would wire `gelmanBayesianDataAnalysis2013` (orphan, conjugate-prior framing) + `lord1968statistical` (CTT / measurement confidence).
+- **B3** (κ / threshold / agreement-metrics subsection) — *dropped*: pure eval methodology.
+- **B5** (Bass layered-architecture grounding, `bassSoftwareArchitecturePractice2012`) — *dropped*: optional, low priority.
 
-> Themes appendix (Table D) must gain rows for all of the above — handled in [[02 Proposed Report Edits — structural]] S6.
+## Corrections to earlier drafts of this note
+- §2.2.4 is at **l150–156** (not l139–144); A1 is an *edit*, not a new subsection.
+- Ch5 cross-refs resolve to labels **`sec:eval-comparison`** (bake-off) and **`sec:eval-thresholds`** (threshold) — not literal "§5.4.3 / §5.4.5".
+- `landisMeasurementObserverAgreement1977` and `CoefficientAgreementNominal` (Cohen 1960) are each *already cited once* in `results-and-evaluation.tex` — not pure orphans (a [[07 Citations — wire orphans + Candidate References]] Step-1 detail, no longer a Ch2 concern).
+
+## Themes appendix (Table D) follow-up
+With A2 dropped, the only Table D change is: add `hastieElementsStatisticalLearning2009` to the "Model Training and Numerical Optimisation" row, then re-run `python scripts/sync_literature.py`. (Supersedes the earlier "handled in [[02 Proposed Report Edits — structural]] S6" line — S6 predates this ref.)

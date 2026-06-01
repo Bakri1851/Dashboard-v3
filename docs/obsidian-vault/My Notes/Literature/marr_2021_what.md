@@ -6,12 +6,12 @@ in_zotero: true
 status: active
 last_imported: 2026-05-05
 cited_in_tex:
-  - Report/appendix-sections/themes-and-references.tex:17
-  - Report/main-sections/requirements-specification.tex:62
+  - Report/appendix-sections/themes-and-references.tex:18
+  - Report/main-sections/requirements-specification.tex:66
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Data Loading and Session Persistence
-last_synced: 2026-05-31
+last_synced: 2026-06-01
 ---
 # What is real-time data analytics (and why it’s so important)?
 
