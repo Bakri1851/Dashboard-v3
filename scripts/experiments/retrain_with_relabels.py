@@ -117,7 +117,6 @@ def main() -> int:
           f"{len(relabel)} new 4o-full labels.")
     print()
 
-    # Build the merged label set: 4o-full overrides 4o-mini where available
     merged = dict(canonical)
     n_overridden = 0
     for sid, lbl in relabel.items():
@@ -127,7 +126,6 @@ def main() -> int:
     print(f"Merged labels: {len(merged)} total ({n_overridden} overridden from 4o-mini → 4o)")
     print()
 
-    # ---- κ head-to-head (on the self-labelled subset) ----
     print("=" * 70)
     print("Cohen's κ: human ↔ 4o-mini   vs   human ↔ 4o-full")
     print(f"(on the {len(self_labels)} author-self-labelled snapshots)")
@@ -149,7 +147,6 @@ def main() -> int:
             print(f"  {metric}:".ljust(28) + f" {a:>10.1%} {b:>10.1%}  {b-a:>+8.1%}")
     print()
 
-    # ---- Retraining: canonical vs merged ----
     print("=" * 70)
     print("OLS struggle re-training: canonical vs merged labels")
     print("(same GroupKFold(5) splits, same feature set, same model)")

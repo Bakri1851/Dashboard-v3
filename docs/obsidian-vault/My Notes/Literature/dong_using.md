@@ -9,12 +9,12 @@ cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:20
   - Report/main-sections/requirements-specification.tex:89
   - Report/main-sections/requirements-specification.tex:90
-  - Report/main-sections/requirements-specification.tex:328
+  - Report/main-sections/requirements-specification.tex:363
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Student Struggle Logic
   - Improved Struggle Logic
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # Using student trace logs to determine meaningful progress and struggle during programming problem solving
 

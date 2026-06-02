@@ -1,5 +1,4 @@
 # lab_app.py — Mobile lab assistant app (runs on separate port)
-# Usage: streamlit run lab_app.py --server.port 8502
 import html
 from typing import Optional
 
@@ -11,8 +10,6 @@ from learning_dashboard import analytics, config, data_loader, lab_state, rag, s
 from learning_dashboard.ui import theme
 
 
-# Helpers
-
 _JOIN_NOTICE_KEY = "lab_join_notice"
 
 @st.cache_data(ttl=10)
@@ -21,14 +18,12 @@ def _load_student_data() -> tuple[pd.DataFrame, Optional[pd.DataFrame]]:
     df, _err = data_loader.load_data()
     if df.empty:
         return df, None
-    # Filter to only include submissions within the instructor's active session window
     state = lab_state.read_lab_state()
     session_start = state.get("session_start")
     if session_start and "timestamp" in df.columns:
         df = df[df["timestamp"] >= session_start].copy()
         if df.empty:
             return df, None
-    # Attach incorrectness so downstream consumers (RAG, top-questions) don't KeyError
     if "ai_feedback" in df.columns and "incorrectness" not in df.columns:
         df = df.copy()
         df["incorrectness"] = analytics.compute_incorrectness_column(df)
@@ -165,8 +160,6 @@ def _render_session_status_strip(lab_data: dict, assistant_name: str) -> None:
     )
 
 
-# View: No active session
-
 def render_session_ended() -> None:
     st.markdown(
         f"""
@@ -190,8 +183,6 @@ def render_session_ended() -> None:
         unsafe_allow_html=True,
     )
 
-
-# View: Join screen
 
 def render_join_screen(lab_data: dict) -> None:
     _heading("Lab Assistant", sub="JOIN SESSION")
@@ -224,8 +215,6 @@ def render_join_screen(lab_data: dict) -> None:
             st.rerun()
 
 
-# View: Joined but no assignment yet
-
 def render_unassigned_view(
     assistant_id: str,
     lab_data: dict,
@@ -237,7 +226,6 @@ def render_unassigned_view(
     if st.button("Leave Session", key="leave_session_unassigned"):
         _leave_session(assistant_id)
 
-    # Poll: check if instructor has now assigned this assistant
     current = lab_state.get_assignment_for_assistant(assistant_id)
     if current:
         st.rerun()
@@ -309,8 +297,6 @@ def render_unassigned_view(
         st.caption(f"{hidden_count} student(s) not shown (Minor Issues or On Track).")
 
 
-# View: Assigned to a student
-
 def render_assigned_view(
     assistant_id: str,
     student_id: str,
@@ -324,7 +310,6 @@ def render_assigned_view(
     if st.button("Leave Session", key="leave_session_assigned"):
         _leave_session(assistant_id)
 
-    # Look up student struggle data
     student_row = None
     if struggle_df is not None and not struggle_df.empty:
         matches = struggle_df[struggle_df["user"] == student_id]
@@ -339,7 +324,6 @@ def render_assigned_view(
     score = float(student_row["struggle_score"])
     level = student_row["struggle_level"]
 
-    # Student card
     st.markdown(
         f"""
         <div class="student-card"
@@ -355,7 +339,6 @@ def render_assigned_view(
         unsafe_allow_html=True,
     )
 
-    # --- Suggested Focus Areas (Phase 9 RAG) ---
     current_session_id = str(lab_data.get("session_code") or "")
     if st.session_state.get("_rag_session_id") != current_session_id:
         rag.clear_suggestion_cache()
@@ -382,7 +365,6 @@ def render_assigned_view(
     else:
         st.caption("No suggestions available right now.")
 
-    # Top 3 struggling questions
     st.markdown("---")
     _section_label("Top Struggling Questions")
 
@@ -424,7 +406,6 @@ def render_assigned_view(
     else:
         st.caption("No data available.")
 
-    # Assignment status
     assignment = lab_data.get("assignments", {}).get(student_id, {})
     status = assignment.get("status", "helping")
 
@@ -443,8 +424,6 @@ def render_assigned_view(
             lab_state.unassign_student(student_id)
             st.rerun()
 
-# Main
-
 def main() -> None:
     st.set_page_config(
         page_title="Lab Assistant",
@@ -456,17 +435,13 @@ def main() -> None:
     st.markdown(theme.get_google_fonts_import(), unsafe_allow_html=True)
     st.markdown(f"<style>{theme.get_mobile_css()}</style>", unsafe_allow_html=True)
 
-    # Auto-refresh every 5 seconds to pick up state changes
     st_autorefresh(interval=5000, limit=None, key="lab_autorefresh")
 
-    # Restore identity from URL params (survives phone browser refresh)
     params = st.query_params
     assistant_id: Optional[str] = _coerce_query_value(params.get("aid", None))
 
-    # Fresh state read on every rerun
     lab_data = lab_state.read_lab_state()
 
-    # Route
     if not lab_data.get("session_active"):
         render_session_ended()
         return
@@ -483,7 +458,6 @@ def main() -> None:
 
     assigned_student = lab_state.get_assignment_for_assistant(assistant_id)
 
-    # Sound: assignment received (None → assigned transition)
     if "sounds_enabled" not in st.session_state:
         st.session_state["sounds_enabled"] = True
     _prev_assigned = st.session_state.get("_prev_assigned_student")

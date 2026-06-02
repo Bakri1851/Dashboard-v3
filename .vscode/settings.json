@@ -1,4 +1,5 @@
 {
+  "latex-workshop.latex.autoBuild.run": "never",
   "files.exclude": {
     "**/*.aux": true,
     "**/*.log": true,

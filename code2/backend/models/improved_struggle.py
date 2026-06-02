@@ -68,10 +68,6 @@ def _load_v2_weights() -> Optional[tuple[float, float, float]]:
         return None
 
 
-# ------------------------------------------------------------------
-# Public API
-# ------------------------------------------------------------------
-
 def compute_improved_struggle_scores(
     df: pd.DataFrame,
     mastery_summary: pd.DataFrame | None = None,
@@ -122,20 +118,12 @@ def compute_improved_struggle_scores(
     work = df.copy()
     if "incorrectness" not in work.columns:
         work["incorrectness"] = incorrectness.compute_incorrectness_column(work)
-    # Attach per-row measurement confidence so the behavioural signals
-    # (A_raw via compute_recent_incorrectness, and the difficulty-adjusted
-    # branch) downweight low-confidence rows.
     if "incorrectness_confidence" not in work.columns:
         work["incorrectness_confidence"] = incorrectness.compute_feedback_confidence(
             work["ai_feedback"] if "ai_feedback" in work.columns else pd.Series("", index=work.index),
             work["incorrectness"],
         )
 
-    # --- Determine effective weights ---
-    # v2 mode: use trained mix_weights as-is. Skip graceful redistribution
-    # (preserves the trained sign structure, which may include negative
-    # weights on M_s and D_s per the Phase 4c findings).
-    # v1 mode: use config defaults and redistribute when BKT/IRT unavailable.
     v2_mode = mix_weights is not None
     if v2_mode:
         w_beh, w_mg, w_da = mix_weights
@@ -145,10 +133,6 @@ def compute_improved_struggle_scores(
         w_da = config.IMPROVED_STRUGGLE_WEIGHT_DIFFICULTY_ADJ
 
     has_mastery = mastery_summary is not None and not mastery_summary.empty
-    # Require >1 distinct IRT difficulty value — with a single value, the
-    # normalised difficulty is a constant 0.5 for every question, so the
-    # (1 - norm_diff) weighting degenerates to a uniform halving and adds
-    # no discriminative information. Redistribute its weight instead.
     has_irt = (
         irt_difficulty is not None
         and not irt_difficulty.empty
@@ -157,9 +141,6 @@ def compute_improved_struggle_scores(
     )
 
     if not v2_mode:
-        # v1-only redistribution. In v2 mode we leave w_mg/w_da intact —
-        # if the underlying signal is unavailable, the corresponding score
-        # contribution drops to 0 naturally via the later code paths.
         if not has_mastery:
             w_beh += w_mg
             w_mg = 0.0
@@ -167,7 +148,6 @@ def compute_improved_struggle_scores(
             w_beh += w_da
             w_da = 0.0
 
-    # --- Per-student behavioural signals ---
     rows: list[dict] = []
     grouped = work.groupby("user")
 
@@ -207,13 +187,6 @@ def compute_improved_struggle_scores(
     if result.empty:
         return pd.DataFrame(columns=_columns)
 
-    # Min-max normalise every sub-signal onto the same cohort-relative
-    # [0, 1] scale so the equal-weight average is actually equal-weighted.
-    # Student-level within-module grouping was tried and reverted: with a
-    # dominant-module label, minority-module students collapse to single-
-    # member groups where every signal snaps to 0.5, producing a struggle
-    # score of exactly 0.5 → "Needs Help" for every such student. See
-    # struggle.compute_student_struggle_scores for the full rationale.
     result["d_hat"] = analytics.min_max_normalise(result["d_raw"])
     result["A_norm"] = analytics.min_max_normalise(result["A_raw"])
     result["r_norm"] = analytics.min_max_normalise(result["r_hat"])
@@ -224,7 +197,6 @@ def compute_improved_struggle_scores(
         (result["A_norm"] + result["r_norm"] + result["d_hat"] + result["rep_norm"]) / 4.0
     ).clip(0.0, 1.0)
 
-    # --- Mastery gap ---
     result["mastery_gap"] = 0.0
     if has_mastery:
         result = result.merge(
@@ -232,31 +204,20 @@ def compute_improved_struggle_scores(
             on="user",
             how="left",
         )
-        # Coverage guard: if more than half of users have no mastery record,
-        # the signal is untrustworthy — redistribute its weight to behavioural.
         coverage = result["mean_mastery"].notna().mean()
         if coverage < 0.5:
             has_mastery = False
             if not v2_mode:
-                # v1-only redistribution; v2 keeps the trained sign structure
                 w_beh += w_mg
                 w_mg = 0.0
             result["mastery_gap"] = 0.0
         else:
-            # Impute uncovered users with the class mean rather than 0.0 —
-            # "unknown" should not systematically read as "zero mastery",
-            # which would silently zero their mastery_gap contribution.
             class_mean = result["mean_mastery"].mean()
             result["mean_mastery"] = result["mean_mastery"].fillna(class_mean)
-            # recent_performance ≈ how correct the student is recently
             recent_perf = 1.0 - result["A_raw"]
             result["mastery_gap"] = (result["mean_mastery"] - recent_perf).clip(lower=0.0)
         result.drop(columns=["mean_mastery"], inplace=True, errors="ignore")
 
-    # --- Difficulty-adjusted score ---
-    # Prefer the IRT residual (expected − observed) when 2PL params and
-    # abilities are available. Falls back to the legacy (1 − norm_diff)
-    # weighting when only difficulty is known.
     result["difficulty_adjusted_score"] = 0.0
     if has_irt:
         has_full_2pl = (
@@ -275,11 +236,6 @@ def compute_improved_struggle_scores(
                 work, result, irt_difficulty
             )
 
-    # --- Weighted combination ---
-    # Invariant (v1 only): redistribution above must preserve sum-to-one so
-    # configured weights match effective weights. v2 weights are
-    # L1-normalised LR coefficients which may have mixed signs and sum != 1
-    # — the .clip(0, 1) on struggle_score handles out-of-range output.
     if not v2_mode:
         assert abs((w_beh + w_mg + w_da) - 1.0) < 1e-9, (
             f"improved_struggle v1 weights do not sum to 1.0: "
@@ -291,15 +247,12 @@ def compute_improved_struggle_scores(
         + w_da * result["difficulty_adjusted_score"]
     ).clip(0.0, 1.0)
 
-    # Bayesian shrinkage toward class mean (final transform — must not be
-    # followed by another normalisation, which would erase the pull-toward-mean).
     s_mean = result["struggle_score"].mean()
     w_n = result["n"] / (result["n"] + config.SHRINKAGE_K)
     result["struggle_score"] = (
         w_n * result["struggle_score"] + (1.0 - w_n) * s_mean
     ).clip(0.0, 1.0)
 
-    # Classify
     levels_colors = result["struggle_score"].apply(
         lambda s: analytics.classify_score(s, config.STRUGGLE_THRESHOLDS)
     )
@@ -310,10 +263,6 @@ def compute_improved_struggle_scores(
 
     return result[_columns]
 
-
-# ------------------------------------------------------------------
-# Internal helpers
-# ------------------------------------------------------------------
 
 def _compute_difficulty_adjusted(
     work: pd.DataFrame,
@@ -335,12 +284,9 @@ def _compute_difficulty_adjusted(
     if not required.issubset(work.columns):
         return pd.Series(0.0, index=result.index)
 
-    # Normalize IRT difficulty to [0, 1] across available questions
     irt_norm = irt_difficulty[["question", "irt_difficulty"]].copy()
     irt_norm["norm_diff"] = analytics.min_max_normalise(irt_norm["irt_difficulty"])
 
-    # Cohort-wide mean over all covered submissions — used as the shrinkage
-    # target for low-coverage users.
     global_merged = work.merge(
         irt_norm[["question", "norm_diff"]], on="question", how="inner"
     )
@@ -418,7 +364,6 @@ def _compute_irt_residual(
         observed = 1.0 - float(row["incorrectness"])
         return expected - observed
 
-    # Cohort-wide mean residual — shrinkage target for low-coverage users.
     global_merged = work.merge(item, on="question", how="inner")
     if global_merged.empty:
         global_residual = 0.0
@@ -450,8 +395,5 @@ def _compute_irt_residual(
         coverage = len(covered) / len(recent)
         scores[user] = coverage * user_mean + (1.0 - coverage) * global_residual
 
-    # Rescale residual from [−1, 1] to [0, 1] so it matches the rest of the
-    # composite signals. Clip defensively; most residuals will sit in a
-    # narrow band around 0 so this rescaling rarely saturates.
     raw = result["user"].map(scores).fillna(global_residual)
     return ((raw + 1.0) / 2.0).clip(0.0, 1.0)

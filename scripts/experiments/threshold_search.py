@@ -63,7 +63,6 @@ def brute_force_search(score, y_true, lo: float, hi: float, step: float,
         k = kappa_for_cutpoints(score, y_true, (c1, c2, c3))
         if k > best[0]:
             best = (k, (c1, c2, c3))
-    # Refine around the coarse best with a finer grid
     coarse_best = best[1]
     fine_step = step / 5
     fine_grid_extent = step * 1.5
@@ -109,12 +108,9 @@ def main() -> int:
     baseline_kappa(v1_score, y_s, (0.2, 0.35, 0.5), "hand-set")
     best_v1_struggle = brute_force_search(v1_score, y_s, 0.0, 1.0, 0.025, "grid")
 
-    # Also test v2: OLS output is in [0, 3] band-index space.
     print()
     print("STRUGGLE — v2 OLS output [0,3] → 4-band rounding")
     pred_v2 = _load("pooled_predictions_v2.json")["v2_struggle"]["pred"]
-    # pooled_predictions ordering matches matched_s only IF the notebook's
-    # rederive_struggle_v2 iterated snapshots in the same order. Sanity-check:
     pooled_y = np.array(_load("pooled_predictions_v2.json")["v2_struggle"]["y"])
     if np.array_equal(pooled_y, y_s):
         v2_score = np.array(pred_v2)
@@ -141,7 +137,6 @@ def main() -> int:
     baseline_kappa(v1_diff, y_d, (0.35, 0.5, 0.75), "hand-set")
     best_v1_difficulty = brute_force_search(v1_diff, y_d, 0.0, 1.0, 0.025, "grid")
 
-    # v2 difficulty: pull pooled predictions directly
     print()
     print("DIFFICULTY — v2 OLS output [0,3] → 4-band rounding")
     opt_d = _load("optimised_difficulty_weights_v2.json")

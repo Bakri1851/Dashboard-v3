@@ -109,9 +109,10 @@ Orange denotes the lab instructor, green the lab assistant, and blue the student
 \newcommand{\sbflag}[2]{%
   \fill[#1, opacity=0.16] (4.2,1.30) circle (1.05);
   \draw[#1, line width=2.4pt] (4.2,1.30) circle (0.64);
-  \node[font=\large\bfseries, text=#1] at (4.2,-0.05) {#2};%
+  \node[font=\large\bfseries, text=#1] at (4.2,0.40) {#2};%
 }
 
+\newpage
 \paragraph{Monitor} Throughout the session the dashboard tracks every student's submissions, maintaining a live view of who is coping and who is falling behind. 
 This opening step establishes the dashboard as a passive system used for observing the current state of the class: it watches every submission without waiting for a request for help, so the quiet student who would never raise a hand is monitored on equal terms with everyone else.
 
@@ -440,7 +441,7 @@ The retry rate, repetition rate and trajectory slope are derived from the counts
 
 The trajectory slope $d_{s,\sigma}$ is signed (negative values indicate improvement, positive values indicate deterioration) and therefore unbounded by definition. The mean incorrectness $i_{s,\sigma}$ and the time decayed recent-incorrectness $A^{raw}(s,\sigma)$ are already bounded to $[0,1]$ by construction as each is an average of values already in $[0,1]$.
 
-To ensure each component contributes the weighting intended, every signal is min-max normalised across the cohort for the session with:
+To ensure each component contributes the weighting intended, every signal is min-max normalised across the cohort for the session~\cite{oecdHandbookConstructingComposite2008} with:
 \begin{equation*}
     \hat{x}_{s,\sigma}
     = \frac{x_{s,\sigma} - x_{\min}}{x_{\max} - x_{\min}},
@@ -559,7 +560,7 @@ To stabilise scores when the per-student observation count is small, $S^{\mathrm
     \label{eq:struggle-shrunk}
 \end{equation}
 where $\bar{S}^{\mathrm{raw}}_{\sigma}$ is the cohort mean of the raw struggle in session $\sigma$ and $K$ is a hyper-parameter controlling the strength of the shrinkage. The default value is $K=5$, so a student with $n_{s,\sigma} \gg 5$ submissions is essentially unaffected while a student with $n_{s,\sigma} \ll 5$ submissions is shrunk close to the class mean. 
-The technique is the classical empirical Bayes shrinkage estimator in the tradition of James-Stein and Efron \& Morris \cite{efronSteinsParadoxStatistics1977}, here in the conjugate-prior form in which $K$ acts as a prior count \cite{morrisParametricEmpiricalBayes1983}. It is applied here at the level of the aggregate struggle score rather than at the level of the individual signals. 
+The technique is the classical empirical Bayes shrinkage estimator in the tradition of James-Stein and Efron \& Morris \cite{efronSteinsParadoxStatistics1977}, here in the conjugate-prior form in which $K$ acts as a prior count \cite{morrisParametricEmpiricalBayes1983,gelmanBayesianDataAnalysis2013}. It is applied here at the level of the aggregate struggle score rather than at the level of the individual signals. 
 Shrinkage and temporal smoothing serve complementary roles, where shrinkage handles cold-start uncertainty and temporal smoothing handles noise when refreshing scores within a session.
 
 \paragraph{Temporal updating for real-time operation}
@@ -590,9 +591,9 @@ Because students submit at irregular intervals, time-based decay gives a more ac
 \paragraph{Exponentially Weighted Moving Average (EWMA) across refresh cycles applied to $S^{\mathrm{shrunk}}$}
 
 The second mechanism stabilises the score in between refresh cycles. 
-After the raw struggle score is computed and shrunk toward the cohort mean (Equation~\ref{eq:struggle-shrunk}), the resulting $S^{\mathrm{shrunk}}$ is smoothed across refresh cycles using a standard exponentially weighted moving average (EWMA), as given by Equation~\ref{eq: temporal struggle}.
+After the raw struggle score is computed and shrunk toward the cohort mean (Equation~\ref{eq:struggle-shrunk}), the resulting $S^{\mathrm{shrunk}}$ is smoothed across refresh cycles using a standard exponentially weighted moving average (EWMA)~\cite{hunterExponentiallyWeightedMoving1986}, as given by Equation~\ref{eq: temporal struggle}.
 
-The smoothing rate $\lambda = 0.3$ is fixed by the configuration constant \texttt{SMOOTHING\_ALPHA}, gated on by \texttt{SMOOTHING\_ENABLED} (which will be left active by default but can be toggled off). 
+The smoothing rate $\lambda = 0.3$ is fixed by the configuration constant \texttt{SMOOTHING\_ALPHA}, gated by \texttt{SMOOTHING\_ENABLED}; it is active by default in V1, while the deployed V2 backend recomputes each score per request and so does not apply it on the live path (Section~\ref{sec:analytics}). 
 A small $\lambda$ trusts past observations more, giving a smoother trajectory, while a larger $\lambda$ trusts the current shrunk score more, giving a more responsive trajectory. 
 The chosen value of $\lambda = 0.3$ was tuned by trial and error to give a good balance between responsiveness and stability, in the absence of labelled ground-truth data. 
 
@@ -622,11 +623,11 @@ The chosen value of $\lambda = 0.3$ was tuned by trial and error to give a good 
 \subsubsection{Question Difficulty Model} \label{sec: task difficulty}
 
 \paragraph{Modelling Objective}
-To model question difficulty, let $q$ denote a question during the lab session, and let $\mathcal{S}_q$ denote the set of student-session pairs associates with task q. We will denote questions that are difficult with a scalar function:
+To model question difficulty, let $q$ denote a question during the lab session, and let $\mathcal{S}_q$ denote the set of student-session pairs associated with task q. We will denote questions that are difficult with a scalar function:
 \begin{equation}
     D(q) \in [0,1]
 \end{equation}
-The question difficulty function will allow us to quantify the degree of difficulty of a question $q$, that the students in the $\mathcal{S}_q$ set are finding the hardest, based on the observable data from the endpoint in Section \ref{sec: data endpoint}. The model will support real-time prioritisation in computer labs
+The question difficulty function will allow us to quantify the degree of difficulty of a question $q$, that the students in the $\mathcal{S}_q$ set are finding the hardest, based on the observable data from the endpoint in Section \ref{sec: data endpoint}. The model will support real-time prioritisation in computer labs.
 
 \paragraph{Identified Variables}
 From the session based interaction data described in Section \ref{sec: data endpoint}, the following quantities are derived. 
@@ -770,10 +771,10 @@ To quantify how similar two students are, we apply cosine similarity over their 
 \end{equation}
 
 Since all components of $\mathbf{x}_{s_i}$ are normalised to $[0,1]$, the dot product is non-negative, and cosine similarity is bounded to $[0,1]$. This yields a symmetric similarity matrix
-$\mathbf{W} \in [0,1]^{n \times x}$ where $W_{ij} = \text{sim}(s_i,s_j)$ and $W_{ii} = 1$ by definition. A value close to 1 indicates near identical behavioural profiles, whilst a value close to 0 indicates students with very different profiles.
+$\mathbf{W} \in [0,1]^{n \times n}$ where $W_{ij} = \text{sim}(s_i,s_j)$ and $W_{ii} = 1$ by definition. A value close to 1 indicates near identical behavioural profiles, whilst a value close to 0 indicates students with very different profiles.
 
 \paragraph{Help-Seeking as a Proxy for Struggle}
-In traditional systems, user ratings serve as the signal across similar users. In the lab setting, no explicit ratings are available, so we define a binary help seeking indicator derived from the parametrix model as a proxy:
+In traditional systems, user ratings serve as the signal across similar users. In the lab setting, no explicit ratings are available, so we define a binary help seeking indicator derived from the parametric model as a proxy:
 
 \begin{equation}
     h_{s,\sigma} =
@@ -783,10 +784,10 @@ In traditional systems, user ratings serve as the signal across similar users. I
     \end{cases}
 \end{equation}
 
-where $\tau \in {0,1}$ is a threshold above which a student is considered to be observably struggling based on their score. This allows collaborative filtering to leverage signals from students who are struggling with similar peers who may not have crossed the threshold, enabling earlier intervention.
+where $\tau \in [0,1]$ is a threshold above which a student is considered to be observably struggling based on their score. This allows collaborative filtering to leverage signals from students who are struggling with similar peers who may not have crossed the threshold, enabling earlier intervention.
 
 \paragraph{Predicted Help Need with $k$-Nearest Neighbours}
-For a student $s$ for whom $h_{s,\sigma}$, we estimate their latent help need by aggregating the help-seeking behaviour of their $k$ most similar peers.
+For a student $s$ for whom $h_{s,\sigma} = 0$, we estimate their latent help need by aggregating the help-seeking behaviour of their $k$ most similar peers.
 Let $\mathcal{N}_k(s)$ denotes the set of $k$ students with the highest similarity to $s$, excluding $s$:
 
 \begin{equation}
@@ -810,7 +811,7 @@ A high value of $\hat{h}_{s,\sigma}$ indicates that student $s$ is similar to pe
 \paragraph{Comparison with Parameter-Based Model}
 Table~\ref{tab: model comparison} summarises the key structural differences 
 between the adopted parametric model and the collaborative filtering 
-alternatively, highlighting the properties that informed the choice of 
+alternative, highlighting the properties that informed the choice of 
 primary approach.
 
 \begin{table}[H]
@@ -937,10 +938,10 @@ When the response matrix is too sparse - few questions with enough responses, or
 \subsubsection{Bayesian Knowledge Tracing} \label{sec: bkt}
 The struggle and difficulty models defined so far summarise behaviour within a single snapshot of a session. 
 They do not, however, model how a student's understanding evolves across successive attempts. 
-Bayesian Knowledge Tracing (BKT) \cite{corbettKnowledgeTracingModeling1995} fills this gap by treating each (student, question) sequence as a learning trajectory under a two-state hidden Markov model: at any point the student either has or has not mastered the skill, and each attempt is an observation that updates the posterior belief over those two states.
+Bayesian Knowledge Tracing (BKT) \cite{corbettKnowledgeTracingModeling1995} fills this gap by treating each (student, skill) sequence as a learning trajectory under a two-state hidden Markov model: at any point the student either has or has not mastered the skill, and each attempt is an observation that updates the posterior belief over those two states.
 
 \paragraph{Model Parameters}
-Each skill (here taken as a single question) carries four parameters:
+Each skill - taken here as a module, a coherent subject area whose questions share a common mastery process - carries four parameters:
 \begin{itemize}
     \item $P(L_0)$: the prior probability that a student has mastered the skill before any attempts
     \item $P(T)$: the probability of transitioning from not-mastered to mastered between attempts
@@ -971,11 +972,11 @@ which combines the chance of demonstrating mastery (right because they know) wit
 This quantity is used for diagnostics (ROC-AUC against the actual outcomes) and as a per-attempt feature for downstream models.
 
 \paragraph{Parameter fitting and graceful degradation}
-Rather than fit per-skill parameters, the system estimates a single global $P(L_0), P(T), P(G), P(S)$ across all questions. The forward-algorithm log-likelihood is maximised by L-BFGS-B with the identifiability bounds described above. 
+Parameters are fitted per module rather than per question: a per-question fit rarely sees enough attempts to identify four parameters, whereas a single set pooled across every module would erase genuine between-subject differences. The per-module pool balances identifiability against granularity, sharing one $P(L_0), P(T), P(G), P(S)$ across the questions of a module. The forward-algorithm log-likelihood is maximised by L-BFGS-B with the identifiability bounds described above. 
 Fitting is skipped when fewer than a minimum number of observations are available, or when every attempt in the current view is graded the same way: with a single outcome class the learning dynamics become unidentifiable, and the system retains the previously fitted parameters rather than producing spurious estimates. 
-Per-question and per-student mastery values feed the improved struggle model in Section \ref{sec: improved struggle}, and an aggregate (mean mastery, minimum mastery, number of questions above a mastery threshold) is shown alongside the student's struggle score in the Student Detail view.
+Per-module and per-student mastery values feed the improved struggle model in Section \ref{sec: improved struggle}, and an aggregate (mean mastery, minimum mastery, number of skills above a mastery threshold) is shown alongside the student's struggle score in the Student Detail view.
 
-Yudelson et al.~\cite{yudelsonIndividualizedBayesianKnowledge2013} extend BKT with per-student parameters; the system implements only the global-parameter version for the reasons of identifiability and data sufficiency just described.
+Yudelson et al.~\cite{yudelsonIndividualizedBayesianKnowledge2013} extend BKT with per-student parameters; the system implements a per-module (not per-student) parameterisation, for the reasons of identifiability and data sufficiency just described.
 
 \subsubsection{Improved Struggle Model} \label{sec: improved struggle}
 The baseline struggle score $S_t(s,\sigma)$ in Section \ref{sec: student struggle} draws only on observable behaviour such as how often a student submits, how recently they have been wrong, how often they retry the same question. 
@@ -1002,7 +1003,7 @@ Each is defined in Section~\ref{sec: student struggle}. $B_s$ captures the behav
 
 \paragraph{Mastery gap}
 The mastery gap $M_s$ quantifies how much a student is underperforming relative to the mastery BKT attributes to them. 
-Let $\bar{m}_s$ denote the student's mean mastery across attempted questions, and let $1 - A^{\mathrm{raw}}_s$ be their recent correctness rate. 
+Let $\bar{m}_s$ denote the student's mean mastery across attempted skills, and let $1 - A^{\mathrm{raw}}_s$ be their recent correctness rate. 
 The gap takes the positive part of the difference between the two:
 \begin{equation*}
     M_s = \max\!\Big(\bar{m}_s - \big(1 - A^{\mathrm{raw}}_s\big),\, 0\Big) \in [0, 1].

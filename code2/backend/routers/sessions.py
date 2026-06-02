@@ -42,10 +42,6 @@ router = APIRouter(tags=["sessions"])
 STRUGGLE_ORDER = ["On Track", "Minor Issues", "Struggling", "Needs Help"]
 DIFFICULTY_ORDER = ["Easy", "Medium", "Hard", "Very Hard"]
 
-# Saved-session progression is expensive (~20 buckets × full struggle +
-# difficulty pass on a 30 k-row session). Saved sessions are immutable, so
-# the result is valid forever — cache in memory + on disk so a re-visit is
-# instant and a uvicorn restart keeps the warm cache.
 _PROGRESSION_LOCK = threading.Lock()
 _PROGRESSION_MEM: dict[tuple[str, int], SessionProgression] = {}
 
@@ -196,8 +192,6 @@ def save_session(req: SaveSessionRequest) -> SavedSession:
 @router.delete("/sessions/{session_id}", response_model=list[SavedSession])
 def delete_session(session_id: str) -> list[SavedSession]:
     if demo_data.has_session(session_id):
-        # Demo sessions are synthesized in-memory; refuse delete with a 400 so
-        # the user knows to end the demo lab instead.
         raise HTTPException(
             status_code=400,
             detail="Demo sessions can't be deleted — end the demo lab in Settings instead.",
@@ -272,17 +266,12 @@ def get_session_progression(
     window_df = filter_df(df, start.isoformat(), end.isoformat())
     if window_df.empty or "timestamp" not in window_df.columns:
         empty = SessionProgression(session=session_meta, bucket_minutes=0.0, points=[])
-        # Don't persist empty results — a re-fetch after data loads should
-        # rebuild fresh.
         return empty
 
     duration_s = (end - start).total_seconds()
-    bucket_s = max(duration_s / buckets, 60.0)  # never finer than 1 minute
+    bucket_s = max(duration_s / buckets, 60.0)
     bucket_minutes = round(bucket_s / 60.0, 2)
 
-    # Sort once, then use DatetimeIndex.searchsorted to find each bucket's
-    # end-index — avoids re-running a boolean mask + .copy() per bucket,
-    # which on a 30 k-row frame meant 12 × full-frame copies.
     ts = pd.to_datetime(window_df["timestamp"], errors="coerce", utc=True)
     working = (
         window_df.assign(_ts=ts)
@@ -290,14 +279,12 @@ def get_session_progression(
         .sort_values("_ts", kind="stable")
         .reset_index(drop=True)
     )
-    ts_index = pd.DatetimeIndex(working["_ts"])  # tz-aware; handles searchsorted correctly
+    ts_index = pd.DatetimeIndex(working["_ts"])
     start_utc = pd.Timestamp(start).tz_convert("UTC") if pd.Timestamp(start).tzinfo else pd.Timestamp(start, tz="UTC")
 
     points: list[ProgressionPoint] = []
     for i in range(1, buckets + 1):
         t_end = start_utc + pd.Timedelta(seconds=bucket_s * i)
-        # `searchsorted(side="right")` puts equal timestamps inside the bucket
-        # (matching the original `<= t_end` semantics).
         end_idx = int(ts_index.searchsorted(t_end, side="right"))
         if end_idx == 0:
             points.append(

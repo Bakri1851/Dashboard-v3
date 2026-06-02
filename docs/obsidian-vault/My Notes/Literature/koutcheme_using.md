@@ -8,12 +8,12 @@ last_imported: 2026-05-05
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:20
   - Report/main-sections/requirements-specification.tex:103
-  - Report/main-sections/requirements-specification.tex:327
+  - Report/main-sections/requirements-specification.tex:361
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Student Struggle Logic
   - Improved Struggle Logic
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # Using program repair as a proxy for language models' feedback ability in programming education
 

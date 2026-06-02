@@ -47,7 +47,6 @@ IMPROVED_SIGNALS = ["behavioural_composite", "mastery_gap", "difficulty_adjusted
 STRUGGLE_BAND_IDX = {"On Track": 0, "Minor Issues": 1, "Struggling": 2, "Needs Help": 3}
 DIFFICULTY_BAND_IDX = {"Easy": 0, "Medium": 1, "Hard": 2, "Very Hard": 3}
 
-# Factories so each fold gets a fresh estimator
 MODELS = [
     ("OLS (baseline)",       lambda: LinearRegression()),
     ("Ridge alpha=0.1",      lambda: Ridge(alpha=0.1)),
@@ -120,7 +119,6 @@ def run_all():
         "results": {},
     }
 
-    # ----- STRUGGLE -----
     matched_s = [s for s in snapshots if s["snapshot_id"] in llm_struggle]
     X_s = np.array([[s["v1_features"][k] for k in STRUGGLE_SIGNALS] for s in matched_s])
     y_s = np.array([STRUGGLE_BAND_IDX[llm_struggle[s["snapshot_id"]]["band"]] for s in matched_s])
@@ -143,7 +141,6 @@ def run_all():
         "models": struggle_results,
     }
 
-    # ----- DIFFICULTY -----
     matched_d = [q for q in questions if q["question"] in llm_difficulty]
     X_d = np.array([[q["v1_features"][k] for k in DIFFICULTY_SIGNALS] for q in matched_d])
     y_d = np.array([DIFFICULTY_BAND_IDX[llm_difficulty[q["question"]]["band"]] for q in matched_d])
@@ -164,7 +161,6 @@ def run_all():
         "models": difficulty_results,
     }
 
-    # ----- IMPROVED-STRUGGLE -----
     matched_i = [
         s for s in snapshots
         if s["snapshot_id"] in llm_struggle

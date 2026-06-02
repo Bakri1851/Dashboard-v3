@@ -23,8 +23,6 @@ from ..analytics import classify_score
 
 logger = logging.getLogger("backend.models.irt")
 
-# Column schema for the output DataFrame (used for empty-data fallback).
-# irt_discrimination is the 2PL ``a_j`` (positive; 1.0 = Rasch-equivalent).
 _OUTPUT_COLUMNS = [
     "question",
     "irt_difficulty",
@@ -56,7 +54,6 @@ def build_response_matrix(
         )
         return pd.DataFrame()
 
-    # Best attempt per student-question pair.
     best = (
         df.groupby(["user", "question"])["incorrectness"]
         .min()
@@ -73,24 +70,18 @@ def build_response_matrix(
         correct_threshold,
     )
 
-    # Iteratively filter until minimums are met AND no single-class
-    # (all-correct / all-wrong) rows or columns remain. Single-class patterns
-    # make Rasch MLE unbounded (θ or b → ±∞), so L-BFGS-B drifts to a bounds
-    # corner and the gradient vanishes. Dropping them is the standard fix.
     changed = True
     passes = 0
     while changed:
         changed = False
         passes += 1
         shape_before = matrix.shape
-        # Drop questions with too few responding students.
         col_counts = matrix.notna().sum(axis=0)
         keep_cols = col_counts[col_counts >= config.IRT_MIN_ATTEMPTS_PER_QUESTION].index
         dropped_min_q = len(matrix.columns) - len(keep_cols)
         if dropped_min_q:
             matrix = matrix[keep_cols]
             changed = True
-        # Drop students with too few attempted questions.
         row_counts = matrix.notna().sum(axis=1)
         keep_rows = row_counts[row_counts >= config.IRT_MIN_ATTEMPTS_PER_STUDENT].index
         dropped_min_s = len(matrix.index) - len(keep_rows)
@@ -105,14 +96,12 @@ def build_response_matrix(
                 dropped_min_s, config.IRT_MIN_ATTEMPTS_PER_STUDENT,
             )
             break
-        # Drop single-class questions (all students answered the same way).
         col_nunique = matrix.apply(lambda s: s.dropna().nunique(), axis=0)
         keep_cols = col_nunique[col_nunique >= 2].index
         dropped_sep_q = len(matrix.columns) - len(keep_cols)
         if dropped_sep_q:
             matrix = matrix[keep_cols]
             changed = True
-        # Drop single-class students (answered all their questions the same way).
         row_nunique = matrix.apply(lambda s: s.dropna().nunique(), axis=1)
         keep_rows = row_nunique[row_nunique >= 2].index
         dropped_sep_s = len(matrix.index) - len(keep_rows)
@@ -177,9 +166,6 @@ def fit_2pl_model(
     obs_cols = np.array(obs_cols, dtype=int)
     obs_vals = np.array(obs_vals, dtype=float)
 
-    # Defense in depth: build_response_matrix already drops single-class rows
-    # and columns, but if callers pass a hand-constructed matrix we still
-    # refuse to fit a single-class dataset — the MLE is unbounded.
     if obs_vals.size == 0 or np.unique(obs_vals).size < 2:
         return empty_result
 
@@ -191,7 +177,7 @@ def fit_2pl_model(
     def _unpack(params: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         theta = params[sl_theta] - params[sl_theta].mean()
         b = params[sl_b]
-        log_a = params[sl_log_a] - params[sl_log_a].mean()  # geomean(a) = 1
+        log_a = params[sl_log_a] - params[sl_log_a].mean()
         a = np.exp(log_a)
         return theta, b, a
 
@@ -209,34 +195,22 @@ def fit_2pl_model(
         diff = theta[obs_rows] - b[obs_cols]
         logit = a_obs * diff
         p = expit(logit)
-        residual = obs_vals - p  # y − p
+        residual = obs_vals - p
 
         grad_theta = np.zeros(n_students)
         grad_b = np.zeros(n_questions)
         grad_log_a = np.zeros(n_questions)
 
-        # ∂ log L / ∂ θ_i   = Σ_j  a_j · (y − p)
         np.add.at(grad_theta, obs_rows, a_obs * residual)
-        # ∂ log L / ∂ b_j   = −a_j · Σ_i (y − p)
         np.add.at(grad_b, obs_cols, -a_obs * residual)
-        # ∂ log L / ∂ log_a = a_j · (θ − b) · (y − p)
         np.add.at(grad_log_a, obs_cols, a_obs * diff * residual)
 
-        # Project through the mean-centering used in _unpack.
         grad_theta = grad_theta - grad_theta.mean()
         grad_log_a = grad_log_a - grad_log_a.mean()
 
         return np.concatenate([-grad_theta, -grad_b, -grad_log_a])
 
-    # Warm start at Rasch: θ=0, b=0, log_a=0 (a=1 uniform).
     x0 = np.zeros(n_students + 2 * n_questions)
-    # Box-bound log_a to keep a in [~0.007, ~148] — stops the optimiser from
-    # blowing up on degenerate items where discrimination is near-zero and
-    # the Hessian is flat. The bound is on the raw parameter; the effective
-    # log_a seen by the likelihood is the mean-centred version (for
-    # geomean(a)=1), which can exceed these bounds after centering. A wider
-    # raw-parameter bound reduces the chance that the optimiser parks a
-    # parameter on the boundary and loses gradient information.
     bounds = (
         [(None, None)] * n_students
         + [(None, None)] * n_questions
@@ -262,7 +236,6 @@ def fit_2pl_model(
     }
 
 
-# Backwards-compat alias — callers that asked for "Rasch" get the 2PL fit.
 fit_rasch_model = fit_2pl_model
 
 
@@ -299,7 +272,7 @@ def compute_irt_model(df: pd.DataFrame) -> dict:
 
     q_rows = []
     for qid, b_raw in fit["difficulty"].items():
-        score = float(expit(b_raw))  # map logit → [0, 1]
+        score = float(expit(b_raw))
         level, color = classify_score(score, config.IRT_DIFFICULTY_THRESHOLDS)
         q_rows.append({
             "question": qid,
@@ -341,7 +314,6 @@ def compute_irt_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
     df_out = model["difficulty_df"]
     if df_out.empty:
         return pd.DataFrame(columns=_OUTPUT_COLUMNS)
-    # Drop the internal b_raw column — only consumed by compute_irt_model.
     return df_out[_OUTPUT_COLUMNS].copy()
 
 

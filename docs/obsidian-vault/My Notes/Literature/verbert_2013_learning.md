@@ -13,7 +13,7 @@ cited_in_tex:
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Instructor Dashboard
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # Learning analytics dashboards
 

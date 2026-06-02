@@ -4,11 +4,6 @@ from __future__ import annotations
 from pydantic import BaseModel, Field
 
 
-# ----------------------------------------------------------------
-# Shared primitives
-# ----------------------------------------------------------------
-
-
 class LevelBucket(BaseModel):
     label: str
     count: int
@@ -62,11 +57,6 @@ class QuestionStudentRow(BaseModel):
     struggle_score: float
 
 
-# ----------------------------------------------------------------
-# /api/live
-# ----------------------------------------------------------------
-
-
 class LiveDataResponse(BaseModel):
     """Status heartbeat + hero stats for the InClassView header."""
     records: int
@@ -82,11 +72,6 @@ class LiveDataResponse(BaseModel):
     error: str | None = None
 
 
-# ----------------------------------------------------------------
-# /api/struggle
-# ----------------------------------------------------------------
-
-
 class StudentStruggle(BaseModel):
     id: str
     level: str
@@ -96,11 +81,6 @@ class StudentStruggle(BaseModel):
     trend: float
 
 
-# ----------------------------------------------------------------
-# /api/difficulty
-# ----------------------------------------------------------------
-
-
 class QuestionDifficulty(BaseModel):
     id: str
     level: str
@@ -108,11 +88,6 @@ class QuestionDifficulty(BaseModel):
     students: int
     avgAttempts: float
     module: str
-
-
-# ----------------------------------------------------------------
-# /api/student/{id}
-# ----------------------------------------------------------------
 
 
 class StudentDetail(BaseModel):
@@ -135,11 +110,6 @@ class StudentDetail(BaseModel):
     )
 
 
-# ----------------------------------------------------------------
-# /api/question/{id}
-# ----------------------------------------------------------------
-
-
 class QuestionDetail(BaseModel):
     id: str
     level: str
@@ -159,11 +129,6 @@ class QuestionDetail(BaseModel):
         default_factory=lambda: [0] * 24,
         description="Hour-of-day attempt distribution for this question over the active window.",
     )
-
-
-# ----------------------------------------------------------------
-# /api/sessions
-# ----------------------------------------------------------------
 
 
 class SavedSession(BaseModel):
@@ -197,11 +162,6 @@ class SessionProgression(BaseModel):
     session: SavedSession
     bucket_minutes: float
     points: list[ProgressionPoint]
-
-
-# ----------------------------------------------------------------
-# /api/settings
-# ----------------------------------------------------------------
 
 
 class Thresholds(BaseModel):
@@ -245,10 +205,6 @@ class RuntimeSettings(BaseModel):
     struggle_model: str           # "baseline" | "improved"
     difficulty_model: str         # "baseline" | "irt"
     bkt: BKTParameters
-    # shrinkage_k is held at its config.py default (5) — the Optuna tuning of K
-    # was within noise — while cf_threshold is seeded from the Optuna-tuned v2
-    # value at boot; both remain user-adjustable. The trained v2 composite
-    # weights are loaded directly by cache.py and are not a runtime-selectable version.
     shrinkage_k: int
 
 
@@ -264,11 +220,6 @@ class Settings(BaseModel):
     leaderboard_max_items: int
     # Mutable / runtime_config-derived
     runtime: RuntimeSettings
-
-
-# ----------------------------------------------------------------
-# /api/analysis
-# ----------------------------------------------------------------
 
 
 class ModuleBreakdown(BaseModel):
@@ -314,11 +265,6 @@ class AnalysisStats(BaseModel):
     top_questions: list[TopQuestionRow] = Field(default_factory=list)
     user_activity: list[UserActivityRow] = Field(default_factory=list)
     activity_by_week: list[WeekActivityCell] = Field(default_factory=list)
-
-
-# ----------------------------------------------------------------
-# /api/lab/*
-# ----------------------------------------------------------------
 
 
 class LabAssistant(BaseModel):
@@ -403,21 +349,11 @@ class StrugglingQuestionRow(BaseModel):
     avg_incorrectness: float
 
 
-# ----------------------------------------------------------------
-# /api/rag/*
-# ----------------------------------------------------------------
-
-
 class RagSuggestions(BaseModel):
     audience: str  # "student" | "question"
     subject_id: str
     bullets: list[str]
     session_id: str | None = None
-
-
-# ----------------------------------------------------------------
-# /api/meta/*
-# ----------------------------------------------------------------
 
 
 class AcademicPeriod(BaseModel):
@@ -430,11 +366,6 @@ class FilterPreset(BaseModel):
     id: str
     label: str
     needs_custom: bool = False
-
-
-# ----------------------------------------------------------------
-# /api/cf + /api/student/{id}/similar
-# ----------------------------------------------------------------
 
 
 class CFElevatedStudent(BaseModel):

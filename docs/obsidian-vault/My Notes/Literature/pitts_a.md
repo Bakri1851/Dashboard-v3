@@ -8,11 +8,12 @@ last_imported: 2026-05-05
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:20
   - Report/main-sections/requirements-specification.tex:104
-  - Report/main-sections/requirements-specification.tex:327
+  - Report/main-sections/requirements-specification.tex:361
+  - Report/main-sections/requirements-specification.tex:372
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Student Struggle Logic
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # A survey of LLM-based applications in programming education: Balancing automation and human oversight
 

@@ -72,8 +72,6 @@ def parse_json_response(raw: str) -> list[dict]:
                         record["student_answer"] = (
                             srep.text if srep is not None and srep.text else ""
                         )
-                        # Live schema: <feedback model="..." friend="..." time="...">TEXT</feedback>
-                        # (no nested <response>). Text is HTML-escaped — GPT handles that fine.
                         feedback_el = sub.find("feedback")
                         record["ai_feedback"] = (
                             feedback_el.text
@@ -124,8 +122,6 @@ def parse_xml_response(raw: str) -> list[dict]:
                 record = base.copy()
                 record["timestamp"] = _xml_text(sub, "timestamp")
                 record["student_answer"] = _xml_text(sub, "srep")
-                # Live schema: <feedback model="..." friend="..." time="...">TEXT</feedback>
-                # (no nested <response>).
                 feedback_el = sub.find("feedback")
                 record["ai_feedback"] = (
                     feedback_el.text
@@ -171,17 +167,13 @@ def normalise_and_clean(records: list[dict]) -> pd.DataFrame:
         if col not in df.columns:
             df[col] = ""
 
-    # Exclude modules
     df = df[~df["module"].isin(config.EXCLUDED_MODULES)].copy()
 
-    # Parse timestamps
     df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
     df = df.dropna(subset=["timestamp"]).copy()
 
-    # Sort by timestamp
     df = df.sort_values("timestamp").reset_index(drop=True)
 
-    # Add academic period label
     from .academic_calendar import add_academic_period_column
     df = add_academic_period_column(df)
 

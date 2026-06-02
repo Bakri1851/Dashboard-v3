@@ -183,9 +183,6 @@ def struggling_questions(
     if df.empty or "user" not in df.columns:
         return []
 
-    # Default to the active lab session's start when no explicit window is
-    # passed — matches the `code/` original which reads
-    # `state["session_start"]` in `_load_student_data()`.
     effective_from = window.from_
     effective_to = window.to_
     if not window.active:

@@ -1,14 +1,4 @@
 # rag.py — RAG pipeline for lab assistant coaching suggestions
-#
-# Architecture: Dr. Batmaz's hybrid two-layer retrieval (FYP Meeting 3, 2026-04-08).
-#   Layer 1 — pandas pre-filter by student_id (SQL concept, pandas implementation)
-#   Layer 2 — ChromaDB semantic search with student_id metadata filter
-#   Generation — GPT-4o-mini (via shared _get_openai_client()) → 2–3 bullet points
-#
-# chromadb and sentence-transformers are optional; if either is missing the entire
-# module degrades gracefully — generate_assistant_suggestions returns [] silently.
-#
-# Cache pattern mirrors _incorrectness_cache in analytics.py.
 
 from __future__ import annotations
 
@@ -28,34 +18,17 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Module-level state (mirrors _incorrectness_cache in analytics.py:26)
-# ---------------------------------------------------------------------------
-# 10-minute TTL bounds staleness for long lab sessions; maxsize=256 covers a
-# full cohort of students and questions without unbounded growth.
 _suggestion_cache: TTLCache = TTLCache(maxsize=256, ttl=600)
 _cluster_suggestion_cache: TTLCache = TTLCache(maxsize=256, ttl=600)
 _cached_session_id: str | None = None
 _cached_row_count: int = 0
 _cached_latest_ts: str = ""
 _collection: Any = None  # chromadb.Collection once built
-_sentence_model: Any = None  # SentenceTransformer singleton — load once per process
+_sentence_model: Any = None  # SentenceTransformer singleton
 
-# Single-flight guard around build_rag_collection(). The first build on cold
-# start takes 60-120s (sentence-transformers download + embedding); without
-# this lock, concurrent requests each kick off their own rebuild and
-# saturate the FastAPI threadpool.
 _build_lock = threading.Lock()
-# Count-drift tolerance for skipping the re-embed. The persistent ChromaDB
-# store may be a few rows behind the live dataframe (new submissions since
-# last rebuild); a 10% tolerance avoids a 60-120s re-embed for routine drift
-# while still triggering a rebuild on a genuine dataset change.
 _FAST_PATH_DRIFT_TOLERANCE = 0.10
 
-
-# ---------------------------------------------------------------------------
-# Internal helpers
-# ---------------------------------------------------------------------------
 
 _lazy_import_warned: bool = False
 
@@ -78,10 +51,6 @@ def _lazy_import() -> tuple[Any, Any]:
             _lazy_import_warned = True
         return None, None
 
-
-# ---------------------------------------------------------------------------
-# Public API
-# ---------------------------------------------------------------------------
 
 _COLLECTION_NAME = "submissions"
 
@@ -128,9 +97,6 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
     """
     global _collection, _cached_session_id, _cached_row_count, _cached_latest_ts
 
-    # In-memory cache hit: always reuse the collection once built. Minor drift
-    # from new submissions is acceptable — the embeddings are still semantically
-    # valid, and a 60-120s re-embed on a user request is not.
     if _collection is not None:
         _cached_session_id = session_id
         return _collection
@@ -144,10 +110,6 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
     if chromadb_mod is None:
         return None
 
-    # Non-blocking lock: if another thread (usually the startup prewarm) is
-    # already doing the 60-120s first-time embed, don't pile up behind it.
-    # User requests return None fast and get real results next click once
-    # prewarm finishes and populates `_collection`.
     if not _build_lock.acquire(blocking=False):
         logger.info("RAG: build already in progress; returning None so the request doesn't hang")
         return None
@@ -160,14 +122,8 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
             client = chromadb_mod.PersistentClient(path=str(paths.rag_chroma_dir()))
             collection = client.get_or_create_collection(name=_COLLECTION_NAME)
 
-            # Stratify the embedding corpus so the first-time build fits in
-            # tens of seconds on CPU. The rest of the app still uses the full
-            # df — this only affects which rows land in ChromaDB.
             sampled_df = _sample_for_rag(df)
 
-            # Fast path on process restart: compare the persistent count
-            # against the SAMPLED size (that's what we embedded last time),
-            # not the full df. 10% drift tolerance absorbs minor variation.
             try:
                 existing = collection.count()
             except Exception:
@@ -224,8 +180,6 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
             )
             embeddings = _sentence_model.encode(documents, show_progress_bar=True, batch_size=32).tolist()
 
-            # ChromaDB imposes a per-call upsert limit (~5461 items). Chunk so
-            # larger sampled corpora still write successfully.
             UPSERT_CHUNK = 5000
             total = len(ids)
             for start in range(0, total, UPSERT_CHUNK):
@@ -263,19 +217,16 @@ def _extract_bullets(parsed: Any) -> list[str]:
         return [str(b).strip() for b in parsed if isinstance(b, (str, int, float)) and str(b).strip()]
 
     if isinstance(parsed, dict):
-        # First: any value that is a list of short-ish things
         for value in parsed.values():
             if isinstance(value, list) and value:
                 items = [str(v).strip() for v in value if isinstance(v, (str, int, float)) and str(v).strip()]
                 if items:
                     return items
-        # Next: any value that is itself a dict containing a list (one level of nesting)
         for value in parsed.values():
             if isinstance(value, dict):
                 nested = _extract_bullets(value)
                 if nested:
                     return nested
-        # Last resort: treat all string values as bullets
         return [str(v).strip() for v in parsed.values() if isinstance(v, str) and v.strip()]
 
     return []
@@ -292,7 +243,6 @@ def generate_assistant_suggestions(
     Returns [] silently on any error — never breaks the UI.
     Cached per student_id within a session; cleared on session change via clear_suggestion_cache().
     """
-    # Cache hit
     if student_id in _suggestion_cache:
         return _suggestion_cache[student_id]
 
@@ -302,7 +252,6 @@ def generate_assistant_suggestions(
         if len(student_df) < config.RAG_MIN_SUBMISSIONS:
             return []
 
-        # Build (or reuse) collection
         collection = build_rag_collection(df, session_id)
         if collection is None:
             return []
@@ -336,7 +285,6 @@ def generate_assistant_suggestions(
         retrieved_docs: list[str] = results.get("documents", [[]])[0] or []
         retrieved_metas: list[dict] = results.get("metadatas", [[]])[0] or []
 
-        # Sort by incorrectness descending so worst errors appear first in the prompt
         paired = sorted(
             zip(retrieved_docs, retrieved_metas),
             key=lambda x: x[1].get("incorrectness", 0.0),
@@ -344,7 +292,6 @@ def generate_assistant_suggestions(
         )
         sorted_docs = [d for d, _ in paired]
 
-        # Build struggle context
         struggle_score: float = 0.0
         struggle_label: str = "Unknown"
         try:
@@ -353,7 +300,6 @@ def generate_assistant_suggestions(
         except Exception:
             pass
 
-        # Top-3 questions by incorrectness for the prompt
         top3 = (
             student_df.groupby("question")["incorrectness"]
             .mean()
@@ -394,7 +340,7 @@ def generate_assistant_suggestions(
         parsed = json.loads(raw)
 
         bullets = _extract_bullets(parsed)
-        bullets = bullets[:3]  # never more than 3
+        bullets = bullets[:3]
 
         _suggestion_cache[student_id] = bullets
         return bullets

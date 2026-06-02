@@ -10,27 +10,16 @@ This section introduces learning analytics and the dashboards through which it r
 
 
 
-In 2012, the use of data analytics was shown to improve student success by providing real-time feedback, demonstrating the impact of data informed intervention in higher education \cite{nguyen_2020_data}.
+In 2012, the use of data analytics was shown to improve student success by providing real-time feedback, demonstrating the impact of data informed intervention in higher education \cite{nguyen_2020_data,hattiePowerFeedback2007,blackAssessmentClassroomLearning1998}.
 Learning analytics is the measurement, collection, analysis, and reporting of data about learners and their contexts in order to understand and optimise learning and the environment in which it occurs \cite{wikipediacontributors_2019_learning_analytics,nguyen_2020_data,siemensLearningAnalyticsEmergence2013,clowOverviewLearningAnalytics2013}. 
 The growth of online education since the 1990s has contributed significantly to the advancement of learning analytics, as student data can now be captured and analysed enabling educators to make more data-driven decisions \cite{nguyen_2020_data,vieira_2018_visual,romeroEducationalDataMining2020}. 
-Learning analytics allows educators to make data-driven decisions. 
 
-Learning analytics leverages data sources; many types of data sources have been explored and used to help educators. 
-Relevant data sources include Massive Open Online Courses (MOOCs), clickstream data (records of user interactions, such as clicks and time spent), and course content \cite{vieira_2018_visual}.
- There are also data sources that, in the context of our project, we can get away without using, such as demographic data and gaze patterns. 
- Whilst  35\% of the studies used more than one data source, the majority of studies still used only one data source. 
- It is argued that the use of multiple data types will contribute more effectively to learning outcomes \cite{vieira_2018_visual}.
+Learning analytics draws on a range of data sources: Vieira et al. survey Massive Open Online Courses (MOOCs), clickstream records of interactions such as clicks and time spent, and course content \cite{vieira_2018_visual}. They find that, although combining data types is argued to serve learning outcomes more effectively, the majority of studies still rely on a single source \cite{vieira_2018_visual}. This work does not address live computer-lab sessions; the source that matters for this case is neither retrospective clickstream nor demographic or gaze data, but the stream of code submissions a student produces while working, which this project takes as its primary signal.
 
-The outputs of learning analytics have proven to be valuable for pedagogical decision-making. 
-Use includes personalisation and feedback, which can tailor recommendations to students' behavioural profiles to promote diverse learning \cite{vieira_2018_visual}. 
-Another use case is the VITAL project, which confirmed that flipped classroom models were effective, as students accessed materials before attending face-to-face sessions \cite{gelan_2018_affordances}. 
-However, several studies note challenges and limitations in learning analytics. 
-These include how analytics leverage observable behaviours such as clicks and time online rather than cognitive processes \cite{wilson_2017_learning}. 
-Learning analytics also raises ethical concerns, such as privacy, when moving solutions out of labs \cite{wilson_2017_learning,tzimas_2021_ethical}. 
-Many restrictions must be determined, as protecting students' identities and data is a priority, which we shouldn't lose sight of when trying to improve learning outcomes.
+The outputs of learning analytics have proven valuable for pedagogical decision-making, from tailoring recommendations to students' behavioural profiles \cite{vieira_2018_visual} to confirming, in the VITAL project, that flipped-classroom delivery worked because students engaged with materials before face-to-face sessions \cite{gelan_2018_affordances}. Wilson et al. caution, however, that such systems read observable behaviours such as clicks and time online rather than the cognitive processes beneath them \cite{wilson_2017_learning}, and that moving analytics beyond the controlled setting raises privacy concerns \cite{wilson_2017_learning,tzimas_2021_ethical}. 
+This project addresses the first limitation directly by inferring struggle from submissions as the session goes on, when an instructor can intervene, and respects the second by operating only on session submission data without demographic or biometric profiling so that students cannot be identified.
 
-
-With the current utilisation of learning analytics, there is yet to be an approach that leverages smart devices in computer labs, in particular, smart watches and smart glasses.
+With the current utilisation of learning analytics, there is a lack of approaches that leverages smart devices in computer labs, in particular, smart watches and smart glasses.
 By leveraging smart devices, we can significantly increase the efficiency of lab assistance. 
 From a centralised point, we can allow the lab teacher to send instructions to lab assistants based on these analytics, such as which questions are hardest and which students need the most help, thereby improving learning outcomes \cite{vieira_2018_visual,wilson_2017_learning,tzimas_2021_ethical}.
 
@@ -87,10 +76,10 @@ Student struggle and question difficulty are treated as complementary targets th
 A key challenge in supporting students during lab sessions is identifying which students are struggling and may require timely intervention. 
 Studies in education have approached struggle detection at different temporal scales, ranging from within-assignment detection to course-level.
 Dong et al.\ highlighted an approach that detects moments of struggle during a session based on time spent and progress relative to peers, achieving over 77\% accuracy when validated against expert judgement on whether intervention was needed \cite{dong_using}.
-Struggle has been operationalised as failing the same unit test consecutively for more than four submission events. providing a clear threshold-based criterion \cite{dong_using}.
+Struggle has been operationalised as failing the same unit test consecutively for more than four submission events, providing a clear threshold-based criterion \cite{dong_using}.
 
 Beyond threshold-based approaches, more sophisticated methods have been explored. 
-Or examined novice programmers' testing behaviour as an early step toward defining coding struggle, identifying patterns such as repeatedly submitting the incorrect answer for more than four submission events, signalling that students have stopped making meaningful progress \cite{or_2024_exploring}.
+In related work, Or examined novice programmers' testing behaviour as an early step toward defining coding struggle, identifying patterns such as repeatedly submitting the incorrect answer for more than four submission events, signalling that students have stopped making meaningful progress \cite{or_2024_exploring,beckWheelSpinningStudentsWho2013}.
 To move this even further, Estey et al.\ proposed a trajectory metric that measures changes in programming behaviour over time across a four-semester study of 514 students \cite{estey_2017_automatically}. 
 Their early predictor identified 81\% of students who struggled throughout the course, but also flagged 43\% who went on to succeed, highlighting the difficulty of distinguishing slight from serious struggle.
 Their trajectory metric reduced this false-positive rate to 11\%, demonstrating the importance of tracking how performance changes rather than measuring the students' current level \cite{estey_2017_automatically}.
@@ -151,7 +140,7 @@ Overall, the literature suggests that task difficulty should be deduced from a c
 
 Supervised learning allows us to refine composite weights through methods such as ordinary least squares (OLS) regression \cite{hastieElementsStatisticalLearning2009} or gradient boosting against externally-collected labels.
 This method serves as an alternative to hand-set or manually tuned weights.
-The supervised approach does not need to be human annotated as we can now leverage LLMs as raters; recent studies demonstrate substantial agreement with human annotators on classification tasks at a small cost and saving time \cite{gilardiChatGPTOutperformsCrowd2023, chiangCanLargeLanguage2023, zhengJudgingLLMasaJudgeMTBench2023}.
+The supervised approach does not need to be human annotated as we can now leverage LLMs as raters; recent studies demonstrate substantial agreement with human annotators on classification tasks at a small cost and saving time \cite{gilardiChatGPTOutperformsCrowd2023, chiangCanLargeLanguage2023, zhengJudgingLLMasaJudgeMTBench2023, liuGEvalNLGEvaluation2023}.
 Rather than tuning hyperparameters manually we can use modern Bayesian optimisation libraries such as Optuna's Tree-structured Parzen Estimator (TPE) to efficiently search the hyperparameter space and tune the scalar hyperparameters that govern these composite models \cite{NIPS2011_86e8f7ab, akibaOptunaNextgenerationHyperparameter2019}, as TPE produces stable optima in fewer iterations than other methods such as grid search and random search.
 
 \subsection{Data-Driven Personalisation}
@@ -220,7 +209,7 @@ Lewis et al.\ introduced Retrieval-Augmented Generation (RAG) as a way to combin
 Lewis et al.\ showed that RAG outperformed parametric models on knowledge intensive tasks, including open-domain QA tasks  \cite{lewisRetrievalAugmentedGenerationKnowledgeIntensive2020}.
 
 In educational contexts, the case for retrieval is even stronger. 
-Kasneci et al.\ survey the opportunities and challenges of large language models in education, noting that there is a difficulty in distinguishing between real knowledge and convincingly written but unverified model output due to the ability of LLMs to generate human-like text which can make it difficultt for students to distinguish between real knowledge and unverified model output leading students to accept false or misleading information as true. 
+Kasneci et al.\ survey the opportunities and challenges of large language models in education, noting that there is a difficulty in distinguishing between real knowledge and convincingly written but unverified model output due to the ability of LLMs to generate human-like text which can make it difficult for students to distinguish between real knowledge and unverified model output leading students to accept false or misleading information as true. 
 To mitigate this risk, it is recommended we provide education on how information can be evaluated critically and teach students exploration, investigation, verification and corroboration strategies \cite{kasneciChatGPTGoodOpportunities2023}.
 Retrieval-augmented generation can help mitigate this risk by grounding the model's output in verifiable sources, allowing students to trace the information back to its origin and evaluate its credibility \cite{lewisRetrievalAugmentedGenerationKnowledgeIntensive2020,kasneciChatGPTGoodOpportunities2023}.
 
@@ -240,21 +229,16 @@ Together retrieval-augmented generation, dense sentence embeddings, and approxim
 \subsection{Existing Systems}
 
 This section surveys systems already deployed in education to locate where the present work sits. 
-It reviews learning management systems, instructor-facing dashboards, and early-warning systems for at-risk students. 
-A consistent limitation runs through them: they operate at the level of the course and review data after the fact, rather than within a live lab session where support must be timely.
-
-
+It reviews learning management systems, instructor-facing dashboards, early-warning systems for at-risk students, and the recent class of real-time classroom support systems that sits closest to this work. 
+The first three operate largely at the level of the course and review data after the fact; the last bring analytics into the live session, and it is against these that the present contribution must be positioned.
 
 \subsubsection{Learning Management System }
-A learning management system is a software application used for the administration, documentation, tracking, reporting, automation, and delivery of educational courses, training programs, materials or learning and development programs \cite{wikipediacontributors_2019_learning_management_systems}. Learning management systems also constitute the largest share of the learning systems market; almost all higher education institutions have adopted them \cite{wikipediacontributors_2019_learning_management_systems}. They were designed to identify training and learning gaps using analytical data and reporting. A notable learning management systems is Moodle which is the world's most popular learning management system \cite{wikipediacontributors_2019_learning_management_systems}.
-
-A limitation of these systems are that the analytics are typically reviewed after activities, meaning some data may not be as useful after and students that were struggling in computer labs may have not be provided timely assistance. Another limitation of such systems is that they are primarily designed for course level and while this is useful for curriculum design and long-time planning, they are generally not optimised for in lab computer sessions where timely support is critical. 
+A learning management system administers, tracks and delivers educational courses and materials \cite{wikipediacontributors_2019_learning_management_systems}; such systems hold the largest share of the learning-systems market, almost every higher-education institution has adopted one, and Moodle is the most widely used \cite{wikipediacontributors_2019_learning_management_systems}. They were designed to surface learning gaps through analytics but that reporting has two properties to address: it is reviewed after an activity has finished, so a student who struggled in a lab may already have left without timely help, and it is utilised at the level of the course. Course-level reporting is well suited to curriculum design and long-term planning but it is not suited to the live lab, where support is only useful before the student moves on. It is precisely this gap that the present work targets.
 
 \subsubsection{Instructor Facing Dashboards}
 
- Learning management systems often incorporate dashboards to track student or user progress, helping teachers better understand knowledge gaps \cite{kiatxin_development}. Dashboards provide insight into student progress through visualisation and scores derived from data generated during teaching and learning activities. As a result, dashboards are at the centre of learning analytics, integrated with learning management systems \cite{kiatxin_development}.
+Learning management systems often incorporate dashboards that visualise student progress so that teachers can locate knowledge gaps \cite{kiatxin_development}; the dashboard has become the central output of learning analytics. Existing examples such as Blocks: Progress Bar report active time, assignment progress, marks and submission counts \cite{kiatxin_development,holsteinIntelligentTutorsTeachers2017a,holsteinStudentLearningBenefits2018}. What they report, however, is how far a student has progressed, not whether a student is struggling, and they do so at the course level rather than the live session. This project keeps the dashboard format but pivots it from progress tracking towards real-time struggle and difficulty within the session itself.
 
-Existing learning dashboards, such as Blocks: Progress Bar, report on student progress rather than student struggle at the live lab level \cite{kiatxin_development}. Dashboards like these show user active time, assignment progress, learning progress, marks, and assignment submissions \cite{kiatxin_development,holsteinIntelligentTutorsTeachers2017a,holsteinStudentLearningBenefits2018}. Visual components such as the progress bar aid in the understanding of student progress, removing all the complexity that is going on behind the scenes. Although these are useful, they don't directly present the user with more complex questions compared to others, and students struggle.
 
 \begin{figure}[H]
     \centering
@@ -265,7 +249,7 @@ Existing learning dashboards, such as Blocks: Progress Bar, report on student pr
 
 Another implementation of a learning dashboard is the Multi-Modal (MM) teacher dashboard, the MM dashboard: 1) receives data from eye trackers, wristbands, web cameras, and the learning activity; 2) computes the student’s relevant cognitive, affective, and physiological measurements; 3) synchronises and visualises the resulting measurements in a clean, customisable interface; and 4) notifies instructors during potential moments of interest \cite{leecultura_2023_multimodal}.
 \begin{figure}[H]
-    \centering
+    \centering/u
     \includegraphics[width=1\linewidth]{figures/requirements-specification/MM-Dashboard.png}
     \caption{Different views of MM dashboard: SSV (left), ASV (centre), and RSV (right).}
     \label{fig: MM dashboard}
@@ -314,17 +298,54 @@ Jayaprakash et al.\ generalises this further with an open-source initiative, the
 
 Although the system is beneficial for identifying students who are struggling at the course level, it does not necessarily help identify students at the lab level, as its design assumptions do not align with the demands of lab sessions. Educators working in real-time sessions require live data. Hence, they have immediate awareness of which students are currently struggling, rather than future failure. However, we can apply the same concepts used in at-risk systems to identify students who are struggling the most and questions that have the most difficulty. As a result, as a result while traditional at risk systems are not designed for lab sessions, the underlying principles can be adapted to meet the needs of real-time lab analytics.
 
+
+\subsubsection{Real-Time Classroom Support Systems}
+
+The closest prior work brings analytics into the live programming session itself. Diana et al.\ present an instructor dashboard that predicts, from live program-state logs, which students need help during an interactive programming assignment \cite{dianaInstructorDashboardRealtime2017}; the same group separately matches low-performing students to higher-performing peer tutors. 
+ClassAid moves into orchestration: it places a configurable tutoring agent alongside each student and gives the instructor a live dashboard to monitor the student-AI interaction and switch each agent between technical, heuristic, automatic and silent feedback modes \cite{zhangClassAidRealtimeInstructorAIStudent2026}. Both keep an instructor in the loop, yet neither derives a per-submission correctness signal, ranks question difficulty separately, or clusters the cohort's mistakes.
+
+A related line of work delivers awareness through specialised hardware. 
+Lumilo, a set of mixed-reality glasses, presents per-student detector states and Bayesian mastery estimates to a teacher, directing attention to the students who need it most without interrupting the class \cite{holsteinIntelligentTutorsTeachers2017a, holsteinStudentLearningBenefits2018}. The multi-modal teacher dashboard described pursues the same goal through eye-trackers, wristbands and cameras \cite{leecultura_2023_multimodal}. These systems show that real-time awareness is valuable, but they are dependent on the use of certain hardware which may be inaccessible and some stop at awareness rather than routing a person to the student.
+
+A meta-analysis of classroom orchestration systems finds that teacher awareness is the function most strongly associated with improved outcomes, yet awareness on its own does not direct help to where it is needed \cite{fengEffectivenessFunctionsClassroom2023}. Each system above provides one or two of the capabilities this project brings together, but none unites an automatically-derived per-submission correctness signal, separate rankings of student struggle and question difficulty, live clustering of cohort mistakes, and the dispatch of a human assistant over a mobile channel. Table~\ref{tab:rt-systems} summarises how these systems compare with the current project.
+
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{|l|c|l|c|c|l|l|}
+\hline
+System (year) & Live & Signal source & Strug. & Diff. & Dispatch & Device \\
+\hline\hline
+\textbf{This work} & Y & logs + LLM correctness & Y & Y & human assistant & mobile \\
+\hline
+Diana (2017) & Y & program-state logs & Y & N & peer (separate) & desktop \\
+\hline
+ClassAid (2026) & Y & LLM + interaction & part. & N & AI agent & desktop \\
+\hline
+Lumilo (2018) & Y & ITS detectors + BKT & part. & N & awareness & MR glasses \\
+\hline
+MM dashboard (2023) & Y & physiological sensors & part. & N & awareness & desktop \\
+\hline
+\end{tabular}
+\caption{Real-time classroom support systems compared with the developed system in this report}
+\label{tab:rt-systems}
+\end{table}
+
+
 \subsection{Research Gaps}
 
 This subsection reviewed a range of relevant literature. Learning analytics has proved incredibly useful in higher education by providing data on MOOC completion rates, click counts, and time spent, which have significantly aided pedagogical decision-making. Learning dashboards have also emerged as the primary output of learning analytics, enabling educators to gain insight into how different students are performing through an intuitive user interface. Real-time analytics has enabled processing data as it arrives, benefiting multiple sectors. 
 The review also examined the methods that can turn this data into actionable signals: struggle detection, knowledge tracing and Bayesian student models, item-response and composite approaches to question difficulty, collaborative filtering, text mining for mistake-pattern recovery, and retrieval-augmented generation for grounded feedback. 
-Each of these have been well established on their own, the gap this thesis addresses lie at their intersection, in the setting of a live computer lab session.
+Each of these have been well established on their own, the gap this thesis addresses lie at their intersection, in the setting of a live computer lab session. 
+While the systems reviewed above show that real-time dashboards and classroom orchestration tools exist, a systematic review finds that learning analytics dashboards have not reliably improved student achievement \cite{kaliisaHaveLearningAnalytics2024}; the contribution therefore lies not in another visualisation, but in integrating these signals and acting on them within the session.
 
 In particular, computer labs face a distinct challenge that existing approaches don't address well. In these settings, teachers and assistants have no way to swiftly identify those who need help and must rely on those who put their hands up. The problem with this is that it does not account for shy students who may not want to put their hands up, causing them to spend too much time on a question. Also, current dashboards focus on data collected towards the end of the lab; this data may not be as valid afterwards. 
-A dashboard built on real-time analytics addresses this issue directly by leveraging the data as it is generated to suport students during the session itself, rather than after it, when intervention is no longer possible.
+A dashboard built on real-time analytics addresses this issue directly by leveraging the data as it is generated to support students during the session itself, rather than after it, when intervention is no longer possible.
 
 Three gaps emerge from the work on signals and detection. 
-First the LLMs have been studied as a source of explanatory feedback \cite{koutcheme_using, pitts_a}, but not as a live correctness signal: a per submission measure of how close an answer is to correct, computed automatically so that instructors do not need to read every submission and combined with attempts and time into a struggle score. 
+First, LLMs have been studied as a source of explanatory feedback \cite{koutcheme_using, pitts_a} and, in orchestration systems, as tutoring agents dispatched to the student \cite{zhangClassAidRealtimeInstructorAIStudent2026}, but not as a live correctness signal which combines metrics such as correctness, attempt amount and time into a struggle score. 
+Where LLMs have instead been asked to judge difficulty directly they align poorly with human-perceived difficulty \cite{liCanLLMsEstimate2025, tabibTrustworthyDifficultyAssessments2025}, which motivates combining the model's signal with item-response and Bayesian estimates rather than relying on it alone.
 Second, struggle detection operates largely at the course level \cite{estey_2017_automatically}, and where it is applied within a session it rests on simple threshold rules, such as four consecutive failed submissions \cite{dong_using}, which capture only one of the several factors, time, attempts, trajectory and answer quality, that signal difficulty. 
 Third, collaborative filtering is well established for course recommendation \cite{li_2020_course, schafer_2007_collaborative}, yet its use for real-time lab struggle detection is unaddressed, in part because the sparsity of data at the start of a session makes similarity hard to compute reliably \cite{herlockerAlgorithmicFrameworkPerforming1999}.
 
@@ -334,7 +355,9 @@ A related gap concerns trust in any feedback the system offers: LLM output in ed
 Finally the delivery of this information to those who act on it is a critical gap. 
 Existing dashboards present analytics on a screen but offer no channel that sends information on how to aid students to lab assistants as they circulate the room. 
 This motivates a mobile assistant view that delivers allocations and suggested help on an assistant's own device. 
-Further smart device integration such as smartwatches or glasses is left to a future work.
+Mixed-reality displays for teacher awareness already exist \cite{holsteinStudentLearningBenefits2018}, so the contribution here is not the hardware but a more accessible system that needs no per-student sensors or instrumented tutoring system, together with the development of an accurate model for assessing student struggle and question difficulty; the system keeps the human in the loop that the evidence favours over fully automated support \cite{pitts_a}, and heavier wearable integration such as smartwatches or glasses is left to future work.
+
+
 
 Taken together these gaps point to a clear opportunity for a real-time, session-level dashboard that combines multi-signal measures of struggle and difficulty, an AI-derived correctness signal, a cohort view of common mistakes, grounded LLM suggestions for how to help, and a lightweight channel for dispatching that generated feedback to roaming assistants. No existing system brings these together for the live computer lab. Providing this system and evaluating how well its signals agree with expert judgement, is the contribution of this thesis.
 
@@ -389,7 +412,7 @@ The system must be designed to accommodate additional data sources or metrics wi
 
 
 \subsubsection{Requirements Prioritisation (MoSCoW)}
-For this section, we will use a MosCoW table to highlight the project's requirements prioritisation, reflecting on time constraints and the project scope.
+For this section, we will use a MoSCoW table to highlight the project's requirements prioritisation, reflecting on time constraints and the project scope.
 
 
 

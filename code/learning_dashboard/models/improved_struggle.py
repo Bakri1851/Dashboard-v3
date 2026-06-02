@@ -17,10 +17,6 @@ import pandas as pd
 from learning_dashboard import analytics, config
 
 
-# ------------------------------------------------------------------
-# Public API
-# ------------------------------------------------------------------
-
 def compute_improved_struggle_scores(
     df: pd.DataFrame,
     mastery_summary: pd.DataFrame | None = None,
@@ -51,16 +47,11 @@ def compute_improved_struggle_scores(
     if "incorrectness" not in work.columns:
         work["incorrectness"] = analytics.compute_incorrectness_column(work)
 
-    # --- Determine effective weights with graceful degradation ---
     w_beh = config.IMPROVED_STRUGGLE_WEIGHT_BEHAVIORAL
     w_mg = config.IMPROVED_STRUGGLE_WEIGHT_MASTERY_GAP
     w_da = config.IMPROVED_STRUGGLE_WEIGHT_DIFFICULTY_ADJ
 
     has_mastery = mastery_summary is not None and not mastery_summary.empty
-    # Require >1 distinct IRT difficulty value — with a single value, the
-    # normalised difficulty is a constant 0.5 for every question, so the
-    # (1 - norm_diff) weighting degenerates to a uniform halving and adds
-    # no discriminative information. Redistribute its weight instead.
     has_irt = (
         irt_difficulty is not None
         and not irt_difficulty.empty
@@ -75,7 +66,6 @@ def compute_improved_struggle_scores(
         w_beh += w_da
         w_da = 0.0
 
-    # --- Per-student behavioural signals ---
     rows: list[dict] = []
     grouped = work.groupby("user")
 
@@ -115,20 +105,15 @@ def compute_improved_struggle_scores(
     if result.empty:
         return pd.DataFrame(columns=_columns)
 
-    # Min-max normalise every sub-signal onto the same cohort-relative
-    # [0, 1] scale so the equal-weight average is actually equal-weighted.
-    # Raw rates (A_raw, r_hat, rep_hat) are kept on result for reference.
     result["d_hat"] = analytics.min_max_normalise(result["d_raw"])
     result["A_norm"] = analytics.min_max_normalise(result["A_raw"])
     result["r_norm"] = analytics.min_max_normalise(result["r_hat"])
     result["rep_norm"] = analytics.min_max_normalise(result["rep_hat"])
 
-    # Behavioral composite: equal weight across the 4 sub-signals
     result["behavioural_composite"] = (
         (result["A_norm"] + result["r_norm"] + result["d_hat"] + result["rep_norm"]) / 4.0
     ).clip(0.0, 1.0)
 
-    # --- Mastery gap ---
     result["mastery_gap"] = 0.0
     if has_mastery:
         result = result.merge(
@@ -136,8 +121,6 @@ def compute_improved_struggle_scores(
             on="user",
             how="left",
         )
-        # Coverage guard: if more than half of users have no mastery record,
-        # the signal is untrustworthy — redistribute its weight to behavioural.
         coverage = result["mean_mastery"].notna().mean()
         if coverage < 0.5:
             has_mastery = False
@@ -145,9 +128,6 @@ def compute_improved_struggle_scores(
             w_mg = 0.0
             result["mastery_gap"] = 0.0
         else:
-            # Impute uncovered users with the class mean rather than 0.0 —
-            # "unknown" should not systematically read as "zero mastery",
-            # which would silently zero their mastery_gap contribution.
             class_mean = result["mean_mastery"].mean()
             result["mean_mastery"] = result["mean_mastery"].fillna(class_mean)
             # recent_performance ≈ how correct the student is recently
@@ -155,16 +135,12 @@ def compute_improved_struggle_scores(
             result["mastery_gap"] = (result["mean_mastery"] - recent_perf).clip(lower=0.0)
         result.drop(columns=["mean_mastery"], inplace=True, errors="ignore")
 
-    # --- Difficulty-adjusted score ---
     result["difficulty_adjusted_score"] = 0.0
     if has_irt:
         result["difficulty_adjusted_score"] = _compute_difficulty_adjusted(
             work, result, irt_difficulty
         )
 
-    # --- Weighted combination ---
-    # Invariant: redistribution above must preserve sum-to-one so configured
-    # weights match effective weights.
     assert abs((w_beh + w_mg + w_da) - 1.0) < 1e-9, (
         f"improved_struggle weights do not sum to 1.0: "
         f"w_beh={w_beh}, w_mg={w_mg}, w_da={w_da}"
@@ -175,15 +151,12 @@ def compute_improved_struggle_scores(
         + w_da * result["difficulty_adjusted_score"]
     ).clip(0.0, 1.0)
 
-    # Bayesian shrinkage toward class mean (final transform — must not be
-    # followed by another normalisation, which would erase the pull-toward-mean).
     s_mean = result["struggle_score"].mean()
     w_n = result["n"] / (result["n"] + config.SHRINKAGE_K)
     result["struggle_score"] = (
         w_n * result["struggle_score"] + (1.0 - w_n) * s_mean
     ).clip(0.0, 1.0)
 
-    # Classify
     levels_colors = result["struggle_score"].apply(
         lambda s: analytics.classify_score(s, config.STRUGGLE_THRESHOLDS)
     )
@@ -194,10 +167,6 @@ def compute_improved_struggle_scores(
 
     return result[_columns]
 
-
-# ------------------------------------------------------------------
-# Internal helpers
-# ------------------------------------------------------------------
 
 def _compute_difficulty_adjusted(
     work: pd.DataFrame,
@@ -219,12 +188,9 @@ def _compute_difficulty_adjusted(
     if not required.issubset(work.columns):
         return pd.Series(0.0, index=result.index)
 
-    # Normalize IRT difficulty to [0, 1] across available questions
     irt_norm = irt_difficulty[["question", "irt_difficulty"]].copy()
     irt_norm["norm_diff"] = analytics.min_max_normalise(irt_norm["irt_difficulty"])
 
-    # Cohort-wide mean over all covered submissions — used as the shrinkage
-    # target for low-coverage users.
     global_merged = work.merge(
         irt_norm[["question", "norm_diff"]], on="question", how="inner"
     )

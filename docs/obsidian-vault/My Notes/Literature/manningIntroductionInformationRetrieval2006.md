@@ -7,11 +7,11 @@ status: active
 last_imported: 2026-05-05
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:28
-  - Report/main-sections/design-and-architecture.tex:763
-  - Report/main-sections/design-and-architecture.tex:845
+  - Report/main-sections/design-and-architecture.tex:764
+  - Report/main-sections/design-and-architecture.tex:846
   - Report/main-sections/requirements-specification.tex:186
 cited_in_planned: []
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # Introduction to Information Retrieval
 

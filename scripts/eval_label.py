@@ -67,7 +67,7 @@ logger = logging.getLogger("eval_label")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(message)s")
 
 
-SCHEMA_VERSION = 2  # v2: 4-band ordinal scale matching the dashboard (was 1-5 integer)
+SCHEMA_VERSION = 2
 SAVE_DEBOUNCE_S = 30.0
 BATCH_SIZE_STRUGGLE = 5
 BATCH_SIZE_DIFFICULTY = 5
@@ -85,8 +85,6 @@ BAND_BY_SHORTCUT = {
 DIFFICULTY_BANDS = ["Easy", "Medium", "Hard", "Very Hard"]
 DIFF_INDEX = {b: i for i, b in enumerate(DIFFICULTY_BANDS)}
 
-
-# -------------------- Cache layer (mirrors incorrectness.py) --------------------
 
 def _cache_path(kind: str) -> Path:
     eval_dir = paths.DATA_DIR / "eval"
@@ -150,8 +148,6 @@ def _save_cache(kind: str, cache: dict[str, dict], *, force: bool = False) -> No
     except OSError as exc:
         logger.warning("cache save failed for %s: %s", kind, exc)
 
-
-# -------------------- Prompt construction --------------------
 
 def _struggle_prompt(snapshots: list[dict]) -> str:
     """Build a batch-prompt asking the LLM to label N struggle snapshots."""
@@ -245,8 +241,6 @@ def _difficulty_prompt(questions: list[dict]) -> str:
     return "\n".join(parts)
 
 
-# -------------------- JSON parsing (mirrors incorrectness.py) --------------------
-
 _JSON_ARRAY_RE = re.compile(r"\[.*\]", re.DOTALL)
 
 
@@ -300,8 +294,6 @@ def _parse_label_array(text: str, expected_len: int, kind: str) -> Optional[list
     return None
 
 
-# -------------------- OpenAI batch call (mirrors incorrectness.py) --------------------
-
 def _call_openai(prompt: str, expected_len: int, kind: str) -> Optional[list[dict]]:
     try:
         client = _get_openai_client()
@@ -323,8 +315,6 @@ def _call_openai(prompt: str, expected_len: int, kind: str) -> Optional[list[dic
         )
     return parsed
 
-
-# -------------------- Labelling drivers --------------------
 
 def label_struggle_snapshots(
     snapshots: list[dict], batch_size: int = BATCH_SIZE_STRUGGLE
@@ -405,8 +395,6 @@ def label_difficulty_questions(
     )
     return cache
 
-
-# -------------------- Self-label CLI --------------------
 
 def self_label_cli(snapshots: list[dict], n: int = 50, seed: int = 42) -> dict[str, dict]:
     import numpy as np
@@ -498,7 +486,6 @@ def self_label_cli(snapshots: list[dict], n: int = 50, seed: int = 42) -> dict[s
                 "band": band,
                 "labelled_by": "user",
             }
-            # save after every label so a Ctrl+C doesn't lose progress
             self_path.write_text(
                 json.dumps({"schema_version": SCHEMA_VERSION, "labels": existing}, indent=2),
                 encoding="utf-8",
@@ -546,7 +533,6 @@ def cohen_kappa_report() -> None:
     print(f"  band (linear weights):        kappa = {kappa_band:.3f}")
     print(f"  band (quadratic weights):     kappa = {kappa_band_quad:.3f}")
 
-    # Agreement breakdown
     agree_intervene = sum(1 for b, l in zip(human_intervene, llm_intervene) if b == l)
     agree_band_exact = sum(1 for b, l in zip(human_band, llm_band) if b == l)
     agree_band_within1 = sum(
@@ -557,14 +543,12 @@ def cohen_kappa_report() -> None:
     print(f"  band exact agreement:         {agree_band_exact}/{len(shared)} ({agree_band_exact/len(shared):.1%})")
     print(f"  band within 1 step agreement: {agree_band_within1}/{len(shared)} ({agree_band_within1/len(shared):.1%})")
 
-    # Distribution check
     print()
     print(f"  Human intervene rate: {sum(human_intervene)}/{len(shared)} ({sum(human_intervene)/len(shared):.1%})")
     print(f"  LLM intervene rate:   {sum(llm_intervene)}/{len(shared)} ({sum(llm_intervene)/len(shared):.1%})")
     print(f"  Human band distribution: {dict(Counter(human_band))}")
     print(f"  LLM   band distribution: {dict(Counter(llm_band))}")
 
-    # Persist the numbers so they survive across runs and feed §5.4 prose
     report_path = paths.DATA_DIR / "eval" / "kappa_report.json"
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_payload = {
@@ -598,8 +582,6 @@ def cohen_kappa_report() -> None:
     print()
     print(f"Saved to {report_path}")
 
-
-# -------------------- Main --------------------
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)

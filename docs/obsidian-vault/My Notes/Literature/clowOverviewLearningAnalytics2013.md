@@ -11,7 +11,7 @@ cited_in_tex:
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Ch1 – Introduction
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # An overview of learning analytics
 

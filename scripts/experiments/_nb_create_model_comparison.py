@@ -106,8 +106,6 @@ from backend import config as _bk_config
 STRUGGLE_THRESHOLDS    = _bk_config.STRUGGLE_THRESHOLDS
 DIFFICULTY_THRESHOLDS  = _bk_config.DIFFICULTY_THRESHOLDS
 
-# Level ORDER (severity) maps a level label to an integer index used by the
-# agreement summary (upgraded = improved sees higher index than baseline).
 STRUGGLE_LEVEL_ORDER   = {lbl: i for i, (_, _, lbl, _) in enumerate(STRUGGLE_THRESHOLDS)}
 DIFFICULTY_LEVEL_ORDER = {lbl: i for i, (_, _, lbl, _) in enumerate(DIFFICULTY_THRESHOLDS)}
 
@@ -397,6 +395,14 @@ plt.show()
 # Agreement summary + stats.
 agree_d = agreement_summary(df_d['baseline_level'], df_d['irt_level'], DIFFICULTY_LEVEL_ORDER)
 rho_d = float(spearmanr(df_d['baseline_score'], df_d['irt_score']).correlation)
+# True vs-rater agreement: rank each model's difficulty against the 4-band LLM
+# label. This is the number Ch5 5.6.1 needs; rho_d above is cross-model (baseline
+# vs IRT), NOT vs the rater, and must not be quoted as such.
+_bidx = {'Easy': 0, 'Medium': 1, 'Hard': 2, 'Very Hard': 3}
+_m = df_d['llm_band'].notna()
+_band = df_d.loc[_m, 'llm_band'].map(_bidx)
+rho_irt_rater = float(spearmanr(df_d.loc[_m, 'irt_score'], _band).correlation)
+rho_base_rater = float(spearmanr(df_d.loc[_m, 'baseline_score'], _band).correlation)
 ovl_d = top10_overlap(
     df_d.sort_values('baseline_score', ascending=False)['question'].tolist(),
     df_d.sort_values('irt_score',      ascending=False)['question'].tolist(),
@@ -408,7 +414,9 @@ print(f'  total compared:  {agree_d[\"total\"]}')
 print(f'  unchanged:       {agree_d[\"unchanged\"]}  ({agree_d[\"agreement_pct\"]}%)')
 print(f'  upgraded   (IRT harder): {agree_d[\"upgraded\"]}')
 print(f'  downgraded (IRT easier): {agree_d[\"downgraded\"]}')
-print(f'Spearman ρ: {rho_d:+.3f}')
+print(f'Spearman ρ (baseline vs IRT, cross-model): {rho_d:+.3f}')
+print(f'Spearman ρ (IRT vs rater):                 {rho_irt_rater:+.3f}')
+print(f'Spearman ρ (baseline vs rater):            {rho_base_rater:+.3f}')
 print(f'Top-10 overlap: {int((ovl_d or 0) * 10)}/10  ({ovl_d})')
 """),
 
@@ -435,7 +443,7 @@ ax.set_xlabel('Baseline composite difficulty', fontsize=11)
 ax.set_ylabel('IRT difficulty (b_raw, scaled to [0,1])', fontsize=11)
 ax.set_xlim(0, 1); ax.set_ylim(0, 1)
 ax.set_title(f'§2 — Baseline vs IRT difficulty, per question\\n'
-             f'n = {len(df_d)}  ·  Spearman ρ = {rho_d:+.3f}  ·  '
+             f'n = {len(df_d)}  ·  Spearman ρ(baseline, IRT) = {rho_d:+.3f}  ·  '
              f'top-10 overlap = {int((ovl_d or 0) * 10)}/10',
              fontsize=12)
 ax.legend(loc='lower right', fontsize=9, framealpha=0.95)

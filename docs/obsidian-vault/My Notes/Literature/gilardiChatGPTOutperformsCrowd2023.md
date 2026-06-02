@@ -9,7 +9,7 @@ cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:34
   - Report/main-sections/requirements-specification.tex:154
 cited_in_planned: []
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # ChatGPT outperforms crowd workers for text-annotation tasks
 

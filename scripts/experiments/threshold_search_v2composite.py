@@ -98,19 +98,16 @@ def main() -> int:
     w_s = json.loads((EVAL / "optimised_struggle_weights_v2.json").read_text(encoding="utf-8"))["weights"]
     w_d = json.loads((EVAL / "optimised_difficulty_weights_v2.json").read_text(encoding="utf-8"))["weights"]
 
-    # --- struggle: v2 composite, GroupKFold(5) by session ---
     matched_s = [s for s in snaps if s["snapshot_id"] in llm_s]
     score_s = np.array([composite(s["v1_features"], w_s, STRUGGLE_SIGNALS) for s in matched_s])
     y_s = np.array([STRUGGLE_BAND_INDEX[llm_s[s["snapshot_id"]]["band"]] for s in matched_s])
     groups_s = np.array([s["session_id"] for s in matched_s])
 
-    # --- difficulty: v2 composite, LOO (no shrinkage in the difficulty model) ---
     matched_d = [q for q in qs if q["question"] in llm_d]
     score_d = np.array([composite(q["v1_features"], w_d, DIFFICULTY_SIGNALS) for q in matched_d])
     y_d = np.array([DIFFICULTY_BAND_INDEX[llm_d[q["question"]]["band"]] for q in matched_d])
 
     results = {}
-    # baseline_cuts = the currently-shipped (mismatched) config thresholds
     results["struggle_v2composite"] = cv_eval_floored(
         score_s, y_s, groups_s, 0.0, 1.0, 0.02,
         "struggle v2 [0,1] composite (deployed)", (0.315, 0.505, 0.605), min_width=0.10)

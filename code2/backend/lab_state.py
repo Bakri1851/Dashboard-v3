@@ -199,7 +199,6 @@ def end_lab_session() -> None:
         state["assignments"] = {}
         for info in state["lab_assistants"].values():
             info["assigned_student"] = None
-        # class_id / class_label retained on the inactive record.
         _write_state_unlocked(state)
 
 

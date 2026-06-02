@@ -12,7 +12,7 @@ cited_in_planned:
   - Ch2 – Background and Requirements
   - BKT Mastery Logic
   - Improved Struggle Logic
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # Supercharging BKT with multidimensional generalizable IRT and skill discovery
 

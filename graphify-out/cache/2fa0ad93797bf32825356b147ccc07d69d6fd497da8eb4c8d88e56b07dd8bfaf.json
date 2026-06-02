@@ -1,0 +1,1 @@
+{"nodes": [{"id": "config", "label": "config.py", "file_type": "code", "source_file": "code2\\backend\\config.py", "source_location": "L1"}], "edges": [{"source": "config", "target": "", "relation": "imports_from", "confidence": "EXTRACTED", "source_file": "code2\\backend\\config.py", "source_location": "L138", "weight": 1.0}]}

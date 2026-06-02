@@ -1,15 +1,5 @@
 # difficulty.py — 5-signal baseline question difficulty score with within-module normalisation.
-#
-# Carved out of the old analytics.py during the 2026-05-20 split.
-# Holds `compute_question_difficulty_scores` — the only public symbol.
-#
-# Depends on `incorrectness.compute_incorrectness_column` for the per-row
-# scoring and on `analytics.{min_max_normalise_grouped, classify_score}`
-# for the shared normalisation and band-labelling helpers.
-#
-# Phase 5: `compute_question_difficulty_scores` accepts an optional `weights`
-# override (mirrors the pattern in struggle.py); `_load_v2_weights` reads the
-# trained JSON with graceful fallback to v1.
+
 import json
 import logging
 from typing import Optional
@@ -95,7 +85,7 @@ def compute_question_difficulty_scores(
         correct_count = (group["incorrectness"] < config.CORRECT_THRESHOLD).sum()
         c_tilde = 1.0 - (correct_count / total_attempts) if total_attempts > 0 else 0.0
 
-        # t_raw: avg time per student (all students; 1-attempt students contribute 0)
+        # t_raw: avg time per student
         time_values = []
         for _user, user_group in group.groupby("user"):
             if len(user_group) >= 2:
@@ -118,9 +108,6 @@ def compute_question_difficulty_scores(
         failed_first = (first_attempts["incorrectness"] >= config.CORRECT_THRESHOLD).sum()
         p_tilde = failed_first / unique_students if unique_students > 0 else 0.0
 
-        # Module attribution: questions belong to exactly one module, so
-        # group["module"].iloc[0] is canonical. Used for within-module
-        # normalisation — see compute_student_struggle_scores.
         if "module" in group.columns:
             question_module = str(group["module"].iloc[0]) if len(group) else ""
         else:
@@ -141,11 +128,6 @@ def compute_question_difficulty_scores(
 
     result = pd.DataFrame(rows)
 
-    # Min-max normalise every composite input so configured weights match
-    # effective weights. Raw rates (c_tilde, f_tilde, p_tilde) are retained
-    # for display (incorrect_rate_pct); _norm columns feed the weighted sum.
-    # Grouped by module — a "hard" CS question is not commensurable with a
-    # "hard" maths question when both appear on the global leaderboard.
     modules = result["module"] if "module" in result.columns else None
     result["t_tilde"] = min_max_normalise_grouped(result["t_raw"], modules)
     result["a_tilde"] = min_max_normalise_grouped(result["a_raw"], modules)
@@ -153,7 +135,6 @@ def compute_question_difficulty_scores(
     result["f_norm"] = min_max_normalise_grouped(result["f_tilde"], modules)
     result["p_norm"] = min_max_normalise_grouped(result["p_tilde"], modules)
 
-    # Compute D_raw. Use v2 weights if provided, else fall back to v1 hand-set.
     if weights is None:
         w_c = config.DIFFICULTY_WEIGHT_C
         w_t = config.DIFFICULTY_WEIGHT_T
@@ -175,17 +156,14 @@ def compute_question_difficulty_scores(
         + w_p * result["p_norm"]
     ).clip(0.0, 1.0)
 
-    # Classify
     levels_colors = result["difficulty_score"].apply(
         lambda s: classify_score(s, config.DIFFICULTY_THRESHOLDS)
     )
     result["difficulty_level"] = levels_colors.apply(lambda x: x[0])
     result["difficulty_color"] = levels_colors.apply(lambda x: x[1])
 
-    # Convenience columns
     result["incorrect_rate_pct"] = (result["c_tilde"] * 100).round(1)
 
-    # Sort descending by score
     result = result.sort_values("difficulty_score", ascending=False).reset_index(drop=True)
 
     return result

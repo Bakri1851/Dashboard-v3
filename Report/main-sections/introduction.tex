@@ -1,7 +1,7 @@
 \section{Introduction} \label{sec: intro}
 
-This chapter introduces the problem that motivates the project and the solution developed to address it. I
-t begins by characterising the difficulty of providing timely, targeted support in busy computer labs, then outlines the proposed real-time learning analytics dashboard and the aims and objectives it is designed to meet.
+This chapter introduces the problem that motivates the project and the solution developed to address it. 
+It begins by characterising the difficulty of providing timely, targeted support in busy computer labs, then outlines the proposed real-time learning analytics dashboard and the aims and objectives it is designed to meet.
 
 
 \subsection{Problem}
@@ -31,7 +31,7 @@ The system supports lab teachers and assistants by transforming live student dat
 
 
 The dashboard integrates data from an existing endpoint and processes it into a set of practical metrics.
-The include measures derived from attempt number, time spent and average numbers of attempts to complete a question.
+These include measures derived from attempt number, time spent and average numbers of attempts to complete a question.
 From these signals we compute indicators of student struggle and question difficulty, allowing staff to identify which students are struggling and which questions are causing the most difficulty.
 
 The system aims to assist rather than replace human judgement.
@@ -43,7 +43,7 @@ The system sends prioritised students to lab assistants through a mobile web int
 \subsection{Aims and Objectives}
 
 
-The primary aim of this project was to design and implement a system that enables lab teachers and lab assistants to make more well-informed decisions during computer lab sessions.
+The primary aim of this project was to design, implement and validate a system that enables lab teachers and lab assistants to make more well-informed decisions during computer lab sessions, by detecting in real-time which students are struggling and which questions are causing the most difficulty.
 
 
 The secondary aim is to extend our system to smart devices. Whilst the core system is a desktop-based dashboard, we can improve usability by sending notifications or messages to smart devices to enable easier communication with assistants.
@@ -59,7 +59,7 @@ The aims will be addressed through the following objectives:
     \item \textbf{Evaluate approach} through functional and non-functional aspects to determine the feasibility and usefulness in a computer lab session
 \end{enumerate}
 
-Together, these objectives guided the project toward becoming a full-fledged EdTech application that aimed to improve learning outcomes by enabling more efficient and targeted support.
+Together these objectives produced not only an EdTech application but a systematic, end-to-end validation of its struggle and difficulty scores against an LLM rater, reporting both positive and negative findings, including a negative result for the Item Response Theory difficulty model that was retained as an additional view rather than the main difficulty model.
 
 \subsection{Risks and Mitigation}
 
@@ -94,7 +94,7 @@ Early work focused on understanding the educational and technical context throug
 This established the problem framing, clarified the type of analytics that would be most useful to the lab instructor during a computer lab and also addressed the limitations of current approaches.
 
 The next stage focused on system design. This included defining the system architecture, understanding the structure of the data endpoint and deciding which data can aid in creating our student struggle and question difficulty metrics.
-The process also also considered how the system could be extended to smart devices, ensuring that the design was flexible enough to accommodate future extensions.
+The process also considered how the system could be extended to smart devices, ensuring that the design was flexible enough to accommodate future extensions.
 
 Implementation then progressed from core functionality to increasing the complexity of our analytics.
 The priority was to establish reliable data retrieval, parsing and processing. 
@@ -102,7 +102,7 @@ Once this was in place, we extended the dashboard to include live monitoring, dr
 More advanced analytical components were implemented such as collaborative filtering, mistake clustering and alternative modelling approaches which use Item Response Theory and Bayesian Knowledge Tracing.
 
 The incremental approach was appropriate for this project as it reduced risk and made it possible to validate each layer of the system before moving on to the next step.
-This was approach allowed us to turn a functioning pipeline into a more complete analytics platform.
+This approach allowed us to turn a functioning pipeline into a more complete analytics platform.
 
 Overall, the project aligned with the practical aim of the dissertation, which was to produce a working system that improves awareness and prioritisation in live computer labs.
 

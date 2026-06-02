@@ -90,7 +90,7 @@ export const LEVEL_STYLES: Record<string, { fg: string; label: string }> = {
   'Very Hard': { fg: 'var(--danger)', label: 'Very Hard' },
 }
 
-export const DEFAULT_THEME: ThemeName = 'paper'
+export const DEFAULT_THEME: ThemeName = 'scifi'
 export const DEFAULT_ACCENT = ACCENT_HUES[0]
 export const STORAGE_KEY_THEME = 'dash-theme'
 export const STORAGE_KEY_ACCENT = 'dash-accent'

@@ -32,7 +32,6 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO / "code2"))
 
-# Load .secrets/secrets.toml if present (same pattern as eval_label.py)
 SECRETS_PATH = REPO / ".secrets" / "secrets.toml"
 if SECRETS_PATH.exists():
     line_re = re.compile(r'^\s*([A-Z_][A-Z0-9_]*)\s*=\s*"([^"]*)"\s*$')
@@ -41,8 +40,6 @@ if SECRETS_PATH.exists():
         if m and m.group(1) not in os.environ:
             os.environ[m.group(1)] = m.group(2)
 
-# Reuse the exact prompt helper from scripts/eval_label.py so the comparison is
-# apples-to-apples (only the OpenAI model changes).
 sys.path.insert(0, str(REPO / "scripts"))
 from eval_label import _struggle_prompt, _call_openai  # noqa: E402
 
@@ -52,9 +49,8 @@ EVAL = REPO / "data" / "eval"
 OUT = EVAL / "experiments"
 OUT.mkdir(parents=True, exist_ok=True)
 
-# Override model for this experiment ONLY (does not touch config.py)
 RELABEL_MODEL = "gpt-4o"   # full GPT-4o, not 4o-mini
-BATCH = 5                   # smaller batch than 4o-mini (longer context per call)
+BATCH = 5
 
 
 def _stratified_sample(snapshots, labels, n_per_band, self_label_ids=None, seed=42):
@@ -95,7 +91,6 @@ def main() -> int:
                     help="Print cost estimate; no API calls")
     args = ap.parse_args()
 
-    # Load canonical inputs (read-only)
     snaps = json.loads((EVAL / "snapshots.json").read_text(encoding="utf-8"))["struggle_snapshots"]
     labels = json.loads((EVAL / "llm_struggle_labels.json").read_text(encoding="utf-8"))["labels"]
     self_labels_path = EVAL / "self_labels.json"
@@ -113,16 +108,11 @@ def main() -> int:
     picked = _stratified_sample(snaps, labels, n_per_band, self_label_ids=set(self_labels.keys()))
     print(f"Picked {len(picked)} snapshots total")
 
-    # Prioritise overlap with author self-labels for direct κ comparison
     self_ids = set(self_labels.keys())
     overlap = [s for s in picked if s["snapshot_id"] in self_ids]
     print(f"  → {len(overlap)} overlap with author self-labels (head-to-head κ available)")
     print()
 
-    # Cost estimate: GPT-4o is ~$2.50 per 1M input tokens, ~$10 per 1M output.
-    # Each snapshot prompt is ~1000 tokens; output is ~50 tokens. With batch=5,
-    # each call is ~5000 input + 250 output = $0.0125 + $0.0025 = ~$0.015/call.
-    # 150 snapshots / 5 per batch = 30 calls → ~$0.45. Conservative ~$1-2 ceiling.
     n_batches = (len(picked) + BATCH - 1) // BATCH
     est_cost = n_batches * 0.015
     print(f"Estimated cost: ~${est_cost:.2f} ({n_batches} API calls, batch={BATCH})")
@@ -130,13 +120,11 @@ def main() -> int:
         print("DRY RUN — no API calls made.")
         return 0
 
-    # Sanity-check API key
     key = os.environ.get("OPENAI_API_KEY")
     if not key:
         print("ERROR: OPENAI_API_KEY not set; cannot call OpenAI.", file=sys.stderr)
         return 1
 
-    # Monkeypatch the model used by _call_openai
     import backend.config as bk_config
     original_model = bk_config.OPENAI_MODEL
     bk_config.OPENAI_MODEL = RELABEL_MODEL
@@ -170,7 +158,6 @@ def main() -> int:
         print(f"  Batch {bi//BATCH + 1}/{n_batches}: {done}/{len(picked)} done "
               f"({elapsed:.0f}s elapsed, ETA {eta:.0f}s)")
 
-    # Restore canonical model (defensive — script ends anyway)
     bk_config.OPENAI_MODEL = original_model
 
     out_path = OUT / "relabel_subset_gpt4o.json"

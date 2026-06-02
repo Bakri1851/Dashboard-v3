@@ -1,2 +1,120 @@
 \section{Code Snippets}
+\label{app:code}
 
+This appendix shows the principal analytical functions of the deployed system together with the offline pipeline used to train and validate it. Every listing is included from its source file at the stated line range, so the code shown here is exactly the code that runs. The analytical core of V2 is organised as per-concern modules under \texttt{code2/backend/}, and the evaluation and training scripts live under \texttt{scripts/}.
+
+% Source files are UTF-8; listingsutf8 reads them without splitting multi-byte
+% sequences, and the literate map below lets pdflatex render the Greek/maths
+% glyphs that appear in code comments. Scoped to this appendix (Ch4 listings are
+% already typeset by the time this \lstset runs).
+\lstset{
+  inputencoding=utf8/latin1,
+  extendedchars=true,
+  columns=fullflexible,
+  basicstyle=\scriptsize\ttfamily,
+  literate=%
+    {α}{{$\alpha$}}1 {β}{{$\beta$}}1 {γ}{{$\gamma$}}1 {δ}{{$\delta$}}1
+    {ε}{{$\epsilon$}}1 {ζ}{{$\zeta$}}1 {η}{{$\eta$}}1 {θ}{{$\theta$}}1
+    {ι}{{$\iota$}}1 {κ}{{$\kappa$}}1 {λ}{{$\lambda$}}1 {μ}{{$\mu$}}1
+    {ν}{{$\nu$}}1 {ξ}{{$\xi$}}1 {π}{{$\pi$}}1 {ρ}{{$\rho$}}1
+    {σ}{{$\sigma$}}1 {τ}{{$\tau$}}1 {φ}{{$\phi$}}1 {χ}{{$\chi$}}1
+    {ψ}{{$\psi$}}1 {ω}{{$\omega$}}1
+    {Δ}{{$\Delta$}}1 {Σ}{{$\Sigma$}}1 {Π}{{$\Pi$}}1 {Ω}{{$\Omega$}}1
+    {Θ}{{$\Theta$}}1 {Λ}{{$\Lambda$}}1 {Φ}{{$\Phi$}}1 {Γ}{{$\Gamma$}}1
+    {−}{{$-$}}1 {∂}{{$\partial$}}1 {∑}{{$\sum$}}1 {∏}{{$\prod$}}1
+    {∈}{{$\in$}}1 {∞}{{$\infty$}}1 {∇}{{$\nabla$}}1 {√}{{$\surd$}}1
+    {≈}{{$\approx$}}1 {≥}{{$\geq$}}1 {≤}{{$\leq$}}1 {≠}{{$\neq$}}1
+    {±}{{$\pm$}}1 {×}{{$\times$}}1 {÷}{{$\div$}}1 {·}{{$\cdot$}}1
+    {→}{{$\rightarrow$}}1 {←}{{$\leftarrow$}}1 {↑}{{$\uparrow$}}1 {↓}{{$\downarrow$}}1
+    {²}{{\textsuperscript{2}}}1 {³}{{\textsuperscript{3}}}1 {°}{{$^\circ$}}1
+    {’}{{'}}1 {‘}{{'}}1 {“}{{"}}1 {”}{{"}}1 {–}{{-}}1 {—}{{-}}1
+    {…}{{$\ldots$}}1 {•}{{$\bullet$}}1 {£}{{\pounds}}1 {©}{{\copyright}}1
+}
+
+\subsection{Analytical Core (V2 Backend)}
+
+\begin{figure}[H]
+\lstinputlisting[firstline=245,lastline=277,firstnumber=245]{../code2/backend/struggle.py}
+\caption{Baseline seven-signal struggle scorer with shrinkage in \texttt{compute\_student\_struggle\_scores}.}
+\label{fig:appx-struggle}
+\end{figure}
+
+\begin{figure}[H]
+\lstinputlisting[firstline=138,lastline=157,firstnumber=138]{../code2/backend/difficulty.py}
+\caption{Five-signal question-difficulty scorer in \texttt{compute\_question\_difficulty\_scores}.}
+\label{fig:appx-difficulty}
+\end{figure}
+
+\begin{figure}[H]
+\lstinputlisting[firstline=46,lastline=94,firstnumber=46]{../code2/backend/collab.py}
+\caption{Collaborative-filtering struggle augmentation in \texttt{compute\_cf\_struggle\_scores}.}
+\label{fig:appx-cf}
+\end{figure}
+
+\begin{figure}[H]
+\lstinputlisting[firstline=137,lastline=188,firstnumber=137]{../code2/backend/clustering.py}
+\caption{TF--IDF $k$-means mistake clustering in \texttt{cluster\_question\_mistakes}.}
+\label{fig:appx-cluster}
+\end{figure}
+
+\begin{figure}[H]
+\lstinputlisting[firstline=327,lastline=346,firstnumber=327]{../code2/backend/rag.py}
+\caption{RAG suggestion generation in \texttt{generate\_assistant\_suggestions}.}
+\label{fig:appx-rag}
+\end{figure}
+
+\begin{figure}[H]
+\lstinputlisting[firstline=192,lastline=226,firstnumber=192]{../code2/backend/models/irt.py}
+\caption{2PL IRT maximum-likelihood fit in \texttt{fit\_2pl\_model}.}
+\label{fig:appx-irt}
+\end{figure}
+
+\begin{figure}[H]
+\lstinputlisting[firstline=422,lastline=439,firstnumber=422]{../code2/backend/models/bkt.py}
+\caption{BKT parameter fit in \texttt{fit\_bkt\_parameters}.}
+\label{fig:appx-bkt}
+\end{figure}
+
+\begin{figure}[H]
+\lstinputlisting[firstline=231,lastline=254,firstnumber=231]{../code2/backend/models/improved_struggle.py}
+\caption{Improved three-signal struggle blend in \texttt{compute\_improved\_struggle\_scores}.}
+\label{fig:appx-improved}
+\end{figure}
+
+\subsection{Evaluation and Training Pipeline}
+
+\begin{figure}[H]
+\lstinputlisting[firstline=297,lastline=316,firstnumber=297]{../scripts/eval_label.py}
+\caption{GPT-4o second-opinion rater call in \texttt{\_call\_openai}.}
+\label{fig:appx-label}
+\end{figure}
+
+\begin{figure}[H]
+\lstinputlisting[firstline=382,lastline=402,firstnumber=382]{../scripts/eval_common.py}
+\caption{Stratified snapshot sampling in \texttt{sample\_struggle\_snapshots}.}
+\label{fig:appx-snapshots}
+\end{figure}
+
+\begin{figure}[H]
+\lstinputlisting[firstline=50,lastline=81,firstnumber=50]{../scripts/experiments/model_class_bakeoff.py}
+\caption{Regression model-class bake-off under GroupKFold CV.}
+\label{fig:appx-bakeoff}
+\end{figure}
+
+\begin{figure}[H]
+\lstinputlisting[firstline=230,lastline=252,firstnumber=230]{../scripts/optimise_hyperparams.py}
+\caption{Optuna TPE studies for $K$ and $\tau$.}
+\label{fig:appx-optuna}
+\end{figure}
+
+\begin{figure}[H]
+\lstinputlisting[firstline=66,lastline=100,firstnumber=66]{../scripts/experiments/threshold_search_constrained.py}
+\caption{Constrained $\kappa$-maximising threshold search in \texttt{search\_constrained}.}
+\label{fig:appx-threshold}
+\end{figure}
+
+\begin{figure}[H]
+\lstinputlisting[firstline=31,lastline=56,firstnumber=31]{../code2/backend/runtime_config.py}
+\caption{Runtime loader for tuned hyperparameters in \texttt{\_load\_optimised\_hyperparams}.}
+\label{fig:appx-runtimeconfig}
+\end{figure}

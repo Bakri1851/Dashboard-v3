@@ -54,11 +54,9 @@ def main() -> int:
             applied += 1
     NB.write_text(json.dumps(nb, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"reframed {applied} markdown cell(s)")
-    # Report any unapplied replacements (so a future drift is visible)
     blob = NB.read_text(encoding="utf-8")
     for i, (find, _) in enumerate(REPLACEMENTS):
         marker = find.split("\n")[0][:40]
-        # crude check: the *replaced* text's first distinctive token should be present
         print(f"  replacement {i}: source phrase {'GONE (applied)' if find not in blob else 'STILL PRESENT'}")
     return 0 if applied == len(REPLACEMENTS) else 1
 

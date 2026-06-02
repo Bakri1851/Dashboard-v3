@@ -1,18 +1,30 @@
 # 09 — Possible New Design/Implementation Work (rationale-only)
 
-**No features are built this pass.** Per your direction, the action is to *amend the relevant sections to explain why we did, or deferred,* each — not to implement. If any is later promoted to actual building, that is a separate, explicitly-approved pass. ← [[00 Index]]
+✅ **Verified 2026-06-01 — already covered in the report; effectively no new writing required.** No features built (per direction). On checking the live report, the deferred-work rationale this note calls for is **already present and comprehensive** in `conclusion.tex` §6 *Future Work*, which covers all three items below plus four more. ← [[00 Index]]
 
-## P1. Incorrectness-scorer robustness (highest-leverage)
-- **Context:** §5.6.3 flags that the OpenAI scorer returns the 0.5 fallback on **92.5%** of submissions (see [[01 Integrity & Consistency Fixes]] I9), yet recent incorrectness is the strongest struggle signal (η=0.38 / trained +0.314). This caps every downstream model.
-- **Rationale to write (not build):** explain *why* the current design uses a midpoint fallback (most submissions lack AI feedback because students opt out of the LLM tutor), why this is a degraded-signal limitation rather than a bug, and *why* a more robust scorer (retry/backoff, structured-output validation, or a local fallback model) is named as the **highest-leverage future improvement** — above retraining any weights/thresholds. Surface the 92.5% figure in Ch3 where the signal is introduced, and frame the fix in Future Work (Ch6 already has a stub).
+## Status of the three flagged items
 
-## P2. Joint weight + threshold optimisation (ordinal logistic regression)
-- **Context:** weights (§5.4.3) and thresholds (§5.4.5) are trained in two separate passes; the deployed-composite recalibration exists because the promoted cutpoints were fit on a different score scale. `conclusion.tex` l53–57 already proposes proportional-odds ordinal logistic regression and carries the unresolved mord/statsmodels FLAG.
-- **Rationale to write:** explain *why* the two-pass approach was used (separable, interpretable, each independently validated) and *why* a single joint ordinal-logistic fit would remove the scale-mismatch failure mode — as Future Work. Resolve the FLAG per [[07 Citations — wire orphans + Candidate References]] (either add refs for mord/statsmodels or reword generically as "a proportional-odds ordinal logistic regression"). No implementation.
+**P1. Incorrectness-scorer robustness** — ✅ **done.**
+- Future-work rationale at `conclusion.tex:68–71` ("Restoring the OpenAI incorrectness scorer to a non-fallback rate"): explains the 92.5% midpoint fallback, why it degrades the strongest single signal, and names a robust scorer (retry/backoff, structured-output validation, or a local fallback model) as the **highest-leverage** future change.
+- The 92.5% figure is also already surfaced in Ch3 where the signal is introduced — `design-and-architecture.tex:516` ("returns its 0.5 fallback for 92.5% of submissions… in practice the most weakly informed of the seven").
+- Nothing to add.
 
-## P3. Cross-session struggle aggregation
-- **Context:** the only direct survey feature request (Q11, §5.5.5) — a view of how often a student is flagged across multiple labs, not just within one. Already named in Ch6 future work.
-- **Rationale to write:** explain *why* the dashboard is scoped to a single live session (the deployed design persists no per-snapshot history beyond the live window) and *why* cross-session aggregation is deferred (needs persistent per-snapshot storage and session-grouped re-evaluation). No implementation.
+**P2. Joint weight + threshold optimisation (ordinal logistic)** — ✅ **done.**
+- Future-work rationale at `conclusion.tex:55–57`: explains the two-pass weights/thresholds design and the score-scale mismatch it caused, and proposes a proportional-odds ordinal logistic regression (via `mord` or `statsmodels.OrderedModel`) to fit weights + cutpoints jointly.
+- **`mord`/`statsmodels` FLAG resolved:** these are software libraries named in a *future-work proposal*, not methods the project actually used — naming the tool is standard and needs **no academic citation**. (If preferred, reword to "a proportional-odds ordinal logistic regression" without naming libraries; either is fine.) So the index's "+1 cite" is **not required**.
 
-## Related open decision
-- **τ deployment** (from [[01 Integrity & Consistency Fixes]]): Optuna suggests `cf_threshold` 0.7→0.90. Decide whether to change the deployed `config.py` default (a small, low-risk config change — not a feature) or to report it only as a finding. If you want the config changed, that is a separate approved edit.
+**P3. Cross-session struggle aggregation** — ✅ **done.**
+- Future-work rationale at `conclusion.tex:49–53` ("Cross-session aggregation"): the most direct survey-driven request (Q11), with the why-deferred — it needs per-snapshot scoring persisted beyond the live window plus session-grouped aggregation.
+- *Optional, minor:* one sentence in Ch3 stating the dashboard is single-session **by design** would pre-empt the "why not cross-session?" question, but the Future-Work paragraph already carries the rationale.
+
+## Also already in the report (beyond this note's original three — good)
+`conclusion.tex` §6 additionally covers cohort-balanced re-evaluation (`:59–62`), per-semester threshold re-tuning as a maintenance concern (`:64–66`), a prospective intervention study (`:73–76`), and smart-device integration / FR6 (`:78–82`). The deferred-work section is thorough.
+
+## Related open decision — resolved
+- **τ deployment:** ✅ resolved 2026-05-31 — `cf_threshold` is deployed at **0.90** (seeded from the Optuna-tuned JSON) and the report states 0.90 throughout (see [[01 Integrity & Consistency Fixes]] / [[00 Index]]). No config change outstanding; report it as a finding only.
+
+## Definition of done
+- ✅ Report already explains why each deferred item was deferred (§6 Future Work + the Ch3 92.5% mention).
+- ⬜ *Optional:* reword the `mord`/`statsmodels` mention generically, or leave as-is (recommended).
+- ⬜ *Optional:* add one "single-session by design" sentence in Ch3 for P3.
+- Flip Note 09 in [[00 Index]] to ✅ (no blocking work remains).

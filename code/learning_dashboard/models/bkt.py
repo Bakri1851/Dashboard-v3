@@ -93,9 +93,6 @@ def compute_all_mastery(
     if df.empty or not required.issubset(df.columns):
         return empty
 
-    # BKT is a sequential HMM; replay order determines the posterior.
-    # Sort with a secondary key so submissions at identical timestamps
-    # (bulk imports, same-second posts) replay in a deterministic order.
     ordered = df.sort_values(
         ["timestamp", "question"], ascending=True, kind="mergesort"
     )
@@ -178,7 +175,6 @@ def _walk_and_score(
                 p_obs = eps
             log_lik += float(np.log(p_obs))
 
-            # Bayes update + transition — identical to bkt_update().
             if c:
                 p_posterior = mastery * (1.0 - p_slip) / p_obs
             else:
@@ -242,10 +238,6 @@ def fit_bkt_parameters(
         )
         return result_stub
 
-    # Refuse to fit when every attempt is graded the same way.  With one class
-    # the log-likelihood surface is maximised at a bounds corner where every
-    # prediction is 1 (LL = 0), AUC is undefined, and the fitted parameters
-    # carry no information about learning dynamics.
     all_outcomes = np.concatenate([seq for seq in sequences])
     if len(np.unique(all_outcomes)) < 2:
         only_class = "correct" if int(all_outcomes[0]) == 1 else "incorrect"

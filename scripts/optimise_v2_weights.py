@@ -64,7 +64,6 @@ DIFFICULTY_FEATURE_COLS = ["c_norm", "t_tilde", "a_tilde", "f_norm", "p_norm"]
 IMPROVED_FEATURE_COLS = ["behavioural_composite", "mastery_gap", "difficulty_adjusted_score"]
 DEFAULT_SEED = 42
 
-# 4-band target encoded as integer index 0-3.
 STRUGGLE_BAND_INDEX = {
     "On Track": 0,
     "Minor Issues": 1,
@@ -85,8 +84,6 @@ TARGET_DESCRIPTION = (
 )
 
 
-# -------------------- Data loading --------------------
-
 def _load_snapshots() -> dict:
     path = paths.DATA_DIR / "eval" / "snapshots.json"
     if not path.exists():
@@ -103,8 +100,6 @@ def _load_labels(kind: str) -> dict[str, dict]:
     blob = json.loads(path.read_text(encoding="utf-8"))
     return blob.get("labels", {})
 
-
-# -------------------- Coefficient post-processing --------------------
 
 def _unscale_coefs(coefs_std: np.ndarray, scaler: StandardScaler) -> np.ndarray:
     """Convert OLS coefficients fit on standardised features back to raw-feature space.
@@ -129,8 +124,6 @@ def _normalise_to_convex(coefs: np.ndarray) -> np.ndarray:
         return np.full_like(coefs, 1.0 / len(coefs))
     return coefs / l1
 
-
-# -------------------- Metric helpers --------------------
 
 def _pred_to_band(pred: np.ndarray) -> np.ndarray:
     """Round + clip continuous OLS prediction to a valid band index in {0..3}."""
@@ -159,8 +152,6 @@ def _fold_metrics(y_true: np.ndarray, pred: np.ndarray) -> dict[str, float]:
         "mae_continuous": float(np.mean(np.abs(pred - y_true))),
     }
 
-
-# -------------------- Core training loop --------------------
 
 def _train_one_fold(
     X_train: np.ndarray,
@@ -263,8 +254,6 @@ def _summarise_folds(per_fold: list[dict], feature_cols: list[str], n_folds: int
     }
 
 
-# -------------------- Mode dispatchers --------------------
-
 def train_struggle(
     snapshots: list[dict],
     labels: dict[str, dict],
@@ -340,8 +329,6 @@ def train_difficulty(
         )
         result["fold"] = fold_idx
         per_fold.append(result)
-        # Per-fold metrics are NaN for single-test-point LOO (need N≥2 for Spearman);
-        # we accumulate predictions and compute pooled metrics below.
         if result.get("skipped_reason") is None:
             scaler = StandardScaler().fit(X[tr])
             lr = LinearRegression()
@@ -520,8 +507,6 @@ def train_improved(
     }
 
 
-# -------------------- Main --------------------
-
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--kind", required=True, choices=["struggle", "difficulty", "improved"])
@@ -543,7 +528,7 @@ def main() -> int:
         result = train_difficulty(questions, labels, seed=args.seed)
         out = args.out or paths.DATA_DIR / "eval" / "optimised_difficulty_weights_v2.json"
     else:  # improved
-        labels = _load_labels("struggle")  # same 4-band target as struggle pass
+        labels = _load_labels("struggle")
         result = train_improved(snapshots, labels, n_folds=args.n_folds, seed=args.seed)
         out = args.out or paths.DATA_DIR / "eval" / "optimised_improved_weights_v2.json"
 

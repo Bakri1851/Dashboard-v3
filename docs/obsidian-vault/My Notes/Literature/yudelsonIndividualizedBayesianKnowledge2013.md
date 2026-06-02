@@ -7,11 +7,11 @@ status: active
 last_imported: 2026-05-05
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:22
-  - Report/main-sections/design-and-architecture.tex:978
+  - Report/main-sections/design-and-architecture.tex:979
   - Report/main-sections/requirements-specification.tex:125
-  - Report/main-sections/requirements-specification.tex:331
+  - Report/main-sections/requirements-specification.tex:366
 cited_in_planned: []
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # Individualized Bayesian Knowledge Tracing Models
 

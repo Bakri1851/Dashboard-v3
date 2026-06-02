@@ -1,14 +1,5 @@
 # clustering.py — TF-IDF + KMeans mistake clustering for incorrect submissions.
-#
-# Carved out of the old analytics.py during the 2026-05-20 split. Holds:
-#   - `cluster_question_mistakes` (the public entry; called from the
-#     instructor question-detail view and from the RAG cluster-feedback flow)
-#   - `_label_clusters_with_openai` (assigns short conceptual labels via a
-#     single OpenAI call after the unsupervised cluster centroids are found).
-#
-# Caches keyed on (question_id, count, content-hash) so repeated views of
-# the same question don't re-vectorise. Depends on `analytics._get_openai_client`
-# for the labelling call.
+
 import hashlib
 import json
 import logging
@@ -99,8 +90,6 @@ def cluster_question_mistakes(
     if total_wrong < config.CLUSTER_MIN_WRONG:
         return None
 
-    # Deterministic digest — Python's built-in hash() is salted per process,
-    # so caching keyed on it collides or misses unpredictably across reruns.
     _answer_payload = "\0".join(sorted(wrong_df["student_answer"].tolist()))
     _answer_hash = hashlib.sha1(_answer_payload.encode("utf-8")).hexdigest()
     cache_key = (question_id, total_wrong, _answer_hash)
@@ -109,7 +98,6 @@ def cluster_question_mistakes(
 
     unique_answers = wrong_df["student_answer"].unique().tolist()
 
-    # Single unique answer — no point clustering
     if len(unique_answers) == 1:
         result = [{
             "label": "Common Wrong Answer",
@@ -120,7 +108,6 @@ def cluster_question_mistakes(
         _cluster_cache[cache_key] = result
         return result
 
-    # TF-IDF on deduplicated texts
     vectorizer = TfidfVectorizer(
         max_features=500,
         sublinear_tf=True,
@@ -147,7 +134,6 @@ def cluster_question_mistakes(
         _cluster_cache[cache_key] = result
         return result
 
-    # Auto-select k via silhouette score
     best_k = 2
     best_score = -1.0
     for k in range(2, max_k + 1):
@@ -166,7 +152,6 @@ def cluster_question_mistakes(
     km_final = KMeans(n_clusters=best_k, random_state=42, n_init=10)
     dedup_labels = km_final.fit_predict(X)
 
-    # Map cluster assignment back to all (non-deduped) rows
     answer_to_cluster: dict[str, int] = dict(zip(unique_answers, dedup_labels.tolist()))
     wrong_df["_cluster"] = wrong_df["student_answer"].map(answer_to_cluster)
 
@@ -181,7 +166,6 @@ def cluster_question_mistakes(
 
         dedup_indices = [i for i, lbl in enumerate(dedup_labels) if lbl == cluster_id]
 
-        # Cosine similarity to centroid → pick most representative answers
         centroid = centroids[cluster_id]
         centroid_norm = centroid / (np.linalg.norm(centroid) + 1e-9)
         cluster_dense = X[dedup_indices].toarray()

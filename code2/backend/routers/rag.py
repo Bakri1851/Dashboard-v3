@@ -26,10 +26,6 @@ from backend import clustering, incorrectness, lab_state, rag
 
 router = APIRouter(prefix="/rag", tags=["rag"])
 
-# Hover-prefetch on a leaderboard fires one /rag/student/{id} per row, then
-# clicking opens the panel and refetches. Without a result cache that's an
-# OpenAI round-trip on every interaction. Cache the bullet list — not the
-# full RagSuggestions, so audience/subject_id stay correct on rebuild.
 _RAG_TTL = 600
 _student_rag_cache: TTLCache = TTLCache(maxsize=64, ttl=_RAG_TTL)
 _question_rag_cache: TTLCache = TTLCache(maxsize=64, ttl=_RAG_TTL)
@@ -62,11 +58,6 @@ async def student_suggestions(
     if df[df["user"].astype(str) == student_id].empty:
         raise HTTPException(status_code=404, detail=f"Student {student_id!r} not found.")
 
-    # Match /student/{id} — uses the active leaderboard (improved when enabled,
-    # baseline otherwise) and honours the module filter, so the prompt's
-    # struggle context lines up with what the page just rendered. Missing rows
-    # downgrade to None instead of 404 — generate_assistant_suggestions reads
-    # struggle fields with getattr defaults.
     struggle_all = load_active_struggle_df(window.from_, window.to_, window.module)
     if struggle_all.empty:
         struggle_row = None
@@ -78,9 +69,6 @@ async def student_suggestions(
     cache_key = (student_id, window.from_ or "", window.to_ or "", window.module or "", session_id)
     bullets = _student_rag_cache.get(cache_key)
     if bullets is None:
-        # No single-flight lock here — `threading.Lock` held across `await`
-        # would block the event loop. A concurrent miss for the same key
-        # may double-fire OpenAI, which is acceptable.
         bullets = await asyncio.to_thread(
             rag.generate_assistant_suggestions,
             student_id,
@@ -130,8 +118,6 @@ async def question_suggestions(
     cache_key = (question_id, session_id)
     bullets = _question_rag_cache.get(cache_key)
     if bullets is None:
-        # See note in /student endpoint — no async-unsafe sync lock around the
-        # OpenAI call.
         bullets = await asyncio.to_thread(_work)
         _question_rag_cache[cache_key] = bullets or []
     return RagSuggestions(

@@ -22,7 +22,7 @@ import pandas as pd
 from .academic_calendar import get_academic_period
 
 
-_GAP_THRESHOLD_SECONDS = 45 * 60   # split clusters where consecutive records gap > 45 min
+_GAP_THRESHOLD_SECONDS = 45 * 60
 
 _DOW_SHORT = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 _DOW_TITLE = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -89,7 +89,6 @@ def build_class_label(module: str, week_label: str, dow: int, median_ts: pd.Time
     wk = week_label or "Unknown"
     dow_title = _DOW_TITLE[int(dow) % 7]
     if isinstance(median_ts, pd.Timestamp) and not pd.isna(median_ts):
-        # round to nearest 5 min for readability
         rounded = median_ts.round("5min") if hasattr(median_ts, "round") else median_ts
         hhmm = rounded.strftime("%H:%M")
     else:
@@ -143,7 +142,6 @@ def discover_classes(df: pd.DataFrame) -> list[ClassRecord]:
         ["module", "_week_label", "_week_num", "_dow"], dropna=False
     ):
         clusters = _gap_cluster(group["timestamp"])
-        # Track slot collisions per group (e.g. two morning clusters → mor, mor2)
         slot_counts: dict[str, int] = {}
         for cluster_idx in clusters:
             cluster = group.loc[cluster_idx]
@@ -188,7 +186,6 @@ def tag_records(df: pd.DataFrame) -> pd.DataFrame:
         out["class_id"] = None
         return out
 
-    # Build a lookup: (module, week_num, dow) -> list of (slot_start, slot_end, class_id)
     lookup: dict[tuple, list[tuple]] = {}
     for c in classes:
         key = (c.module, c.week_num, c.dow)

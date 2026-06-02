@@ -1,25 +1,5 @@
 # analytics.py — shared scoring utilities (UI-independent).
-#
-# This file used to hold every scoring concern under one roof. During the
-# 2026-05-20 split it was carved into five per-concern modules — each now
-# imports from this file only for the genuinely shared helpers below:
-#
-#   incorrectness.py — OpenAI scoring + persistent cache + feedback confidence
-#   struggle.py      — 7-signal student struggle + Bayesian shrinkage
-#   difficulty.py    — 5-signal question difficulty
-#   collab.py        — collaborative-filtering similar-students lookup
-#   clustering.py    — TF-IDF + KMeans mistake clustering
-#
-# What stays here:
-#   _get_openai_client       — shared OpenAI client factory (also imported by
-#                              rag.py and clustering.py)
-#   min_max_normalise        — clamped [0, 1] normalisation; used by struggle
-#                              and improved_struggle
-#   min_max_normalise_grouped — within-group variant; used by difficulty
-#   classify_score           — threshold-band lookup; used by struggle,
-#                              difficulty, irt
-#   apply_temporal_smoothing — EWMA smoother kept for completeness; not on
-#                              any current hot path
+
 import os
 from typing import Optional
 
@@ -30,13 +10,9 @@ from . import config
 
 
 def _get_openai_client() -> OpenAI:
-    # Key is sourced from OPENAI_API_KEY in the environment. backend/main.py
-    # lifts it out of .secrets/secrets.toml at FastAPI boot.
     key = os.environ.get("OPENAI_API_KEY", "")
     return OpenAI(api_key=key, max_retries=1, timeout=20.0)
 
-
-# Min-Max Normalization
 
 def min_max_normalise(series: pd.Series) -> pd.Series:
     """(x - min) / (max - min), clamped to [0, 1].
@@ -78,8 +54,6 @@ def min_max_normalise_grouped(
     return out
 
 
-# Classification Helpers
-
 def classify_score(
     score: float,
     thresholds: list[tuple[float, float, str, str]],
@@ -94,8 +68,6 @@ def classify_score(
                 return label, color
     return thresholds[-1][2], thresholds[-1][3]
 
-
-# Temporal Smoothing (Stub — not actively used)
 
 def apply_temporal_smoothing(
     s_raw: float,

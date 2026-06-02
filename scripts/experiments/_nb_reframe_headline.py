@@ -18,7 +18,6 @@ REPO = Path(__file__).resolve().parent.parent.parent
 NB = REPO / "notebooks" / "eval_main.ipynb"
 
 REPLACEMENTS = [
-    # Cell 9 — demote v1-vs-v2 weight chart from headline to baseline check
     (
         "## §5.4.3 — v1 vs v2 weights: STRUGGLE model (HEADLINE)\n"
         "\n"
@@ -27,7 +26,6 @@ REPLACEMENTS = [
         "\n"
         "Paired bars: v1 hand-set weights vs v2 OLS-trained weights. Error bars on v2 from per-fold std (5 folds, session-grouped GroupKFold). Target: 4-band rating (`On Track` ... `Needs Help`). Sign-flipped signals indicate where the trained model disagrees with the hand-set direction. This is the **baseline** result — it establishes that empirical training improves on hand-setting; the **headline** model-class comparison (which model family to train) is the bake-off at §5.4.x below.",
     ),
-    # Cell 44 — mark model-class bake-off as the headline
     (
         "## §5.4.x — Model-class selection (regression alternatives)\n",
         "## §5.4.x — Model-class selection (regression alternatives) — HEADLINE comparison\n",

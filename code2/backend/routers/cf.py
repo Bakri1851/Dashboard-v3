@@ -29,7 +29,6 @@ router = APIRouter(tags=["cf"])
 
 
 _CF_FEATURES = collab.CF_FEATURES  # ["n_hat", "t_hat", "i_norm", "A_norm", "d_hat"]
-# Graceful fallback if struggle_df doesn't expose *_norm variants — use raw.
 _CF_FEATURE_FALLBACKS = {
     "i_norm": "i_hat",
     "A_norm": "A_raw",
@@ -45,7 +44,6 @@ def _feature_matrix(struggle_df: pd.DataFrame) -> tuple[np.ndarray, list[str]]:
             cols.append(f)
         elif _CF_FEATURE_FALLBACKS.get(f) in struggle_df.columns:
             cols.append(_CF_FEATURE_FALLBACKS[f])
-        # else: skip silently
     if not cols:
         return np.empty((0, 0)), []
     X = struggle_df[cols].astype(float).fillna(0.0).to_numpy()
@@ -74,22 +72,16 @@ def get_cf(window: TimeWindow = Depends(get_time_window)) -> CFDiagnostics:
         _cf_cache[cache_key] = result
         return result
 
-    # Run the analytics function directly to reuse its logic.
     try:
         _cf_series, diagnostics = collab.compute_cf_struggle_scores(
             struggle_df, threshold=rc.cf_threshold, k=3
         )
     except Exception as e:
-        # Don't cache transient failures.
         return CFDiagnostics(
             threshold=rc.cf_threshold, k=3, n_flagged_parametric=0, n_elevated_cf=0,
             fallback=True, reason=f"{type(e).__name__}: {e}", elevated_students=[],
         )
 
-    # Shape the elevated list for the UI. collab.compute_cf_struggle_scores
-    # emits rows keyed for the legacy table schema ("Student" / "Parametric
-    # Score" / "CF Score"); the React frontend expects snake_case, and level
-    # isn't carried in the dict, so look it up from struggle_df.
     user_to_level: dict[str, str] = {}
     if "struggle_level" in struggle_df.columns:
         user_to_level = dict(
@@ -168,7 +160,6 @@ def get_similar(
 
     i = ids.index(student_id)
     sims = W[i]
-    # Build (id, similarity) pairs excluding self.
     pairs = [(ids[j], float(sims[j])) for j in range(len(ids)) if j != i]
     pairs.sort(key=lambda p: -p[1])
 

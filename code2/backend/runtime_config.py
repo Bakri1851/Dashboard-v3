@@ -47,12 +47,10 @@ def _load_optimised_hyperparams() -> dict[str, Any] | None:
         logger.warning("optimised hyperparams v2 load failed: %s", exc)
         return None
     if payload.get("status") == "DEFERRED":
-        # Stub file — no real grid-search results yet. Don't override.
         return None
     overrides = payload.get("best_values") or payload.get("optimal") or payload.get("values")
     if not isinstance(overrides, dict):
         return None
-    # Coerce to a flat dict of known keys, ignoring unknowns.
     allowed = {"cf_threshold", "bkt_p_init", "bkt_p_learn", "bkt_p_guess",
                "bkt_p_slip", "bkt_mastery_threshold", "shrinkage_k"}
     return {k: v for k, v in overrides.items() if k in allowed}
@@ -73,15 +71,10 @@ class RuntimeConfig:
     bkt_p_guess: float = 0.2
     bkt_p_slip: float = 0.1
     bkt_mastery_threshold: float = 0.95
-    # Shrinkage K — promoted from a hardcoded constant so it can be seeded
-    # from the Optuna-tuned v2 value at boot. Stays user-adjustable.
     shrinkage_k: int = 5
 
     @classmethod
     def defaults(cls) -> "RuntimeConfig":
-        # Seed the scalar sliders from the Optuna-tuned v2 hyperparameters on
-        # disk so a fresh boot matches the deployed (trained) configuration.
-        # Falls back to config.py defaults if the v2 JSON is missing.
         scalars = {
             "cf_threshold": 0.7,
             "bkt_p_init": config.BKT_P_INIT,
@@ -93,9 +86,6 @@ class RuntimeConfig:
         }
         v2_overrides = _load_optimised_hyperparams()
         if v2_overrides:
-            # K is retained at its hand-set default: the Optuna tuning of K was
-            # within per-fold noise (see Ch5) and the design relies on shrinkage,
-            # so only cf_threshold (and the BKT priors) seed from the v2 study.
             v2_overrides.pop("shrinkage_k", None)
             scalars.update(v2_overrides)
         return cls(
@@ -118,7 +108,7 @@ _current: RuntimeConfig = RuntimeConfig.defaults()
 
 def get() -> RuntimeConfig:
     with _lock:
-        return replace(_current)  # return a copy so callers can't mutate directly
+        return replace(_current)
 
 
 def update(partial: dict[str, Any]) -> RuntimeConfig:

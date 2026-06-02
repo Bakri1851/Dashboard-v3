@@ -71,8 +71,6 @@ def parse_json_response(raw: str) -> list[dict]:
                         record["student_answer"] = (
                             srep.text if srep is not None and srep.text else ""
                         )
-                        # Live schema: <feedback model="..." friend="..." time="...">TEXT</feedback>
-                        # (no nested <response>). Matches code2/data_loader.py.
                         feedback_el = sub.find("feedback")
                         record["ai_feedback"] = (
                             feedback_el.text
@@ -123,7 +121,6 @@ def parse_xml_response(raw: str) -> list[dict]:
                 record = base.copy()
                 record["timestamp"] = _xml_text(sub, "timestamp")
                 record["student_answer"] = _xml_text(sub, "srep")
-                # Live schema: flat <feedback>TEXT</feedback>, no nested <response>.
                 feedback_el = sub.find("feedback")
                 record["ai_feedback"] = (
                     feedback_el.text
@@ -169,17 +166,13 @@ def normalise_and_clean(records: list[dict]) -> pd.DataFrame:
         if col not in df.columns:
             df[col] = ""
 
-    # Exclude modules
     df = df[~df["module"].isin(config.EXCLUDED_MODULES)].copy()
 
-    # Parse timestamps
     df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
     df = df.dropna(subset=["timestamp"]).copy()
 
-    # Sort by timestamp
     df = df.sort_values("timestamp").reset_index(drop=True)
 
-    # Add academic period label
     from learning_dashboard.academic_calendar import add_academic_period_column
     df = add_academic_period_column(df)
 
@@ -211,7 +204,6 @@ def load_data() -> tuple[pd.DataFrame, str]:
     except Exception as e:
         return empty_df, f"API connection failed: {type(e).__name__} - {e}"
 
-    # Skip parse/normalise when raw data hasn't changed since last render
     raw_hash = hash(raw)
     if st.session_state.get("_df_hash") == raw_hash and "_df" in st.session_state:
         return st.session_state["_df"], ""
@@ -384,7 +376,6 @@ def load_saved_sessions() -> list[dict]:
                 }
             )
         except OSError:
-            # Read path must not break on a write failure; in-memory backfill is still valid.
             pass
         sessions = backfilled
 
@@ -583,7 +574,6 @@ def apply_saved_session_to_state(
 
     saved_preset = context.get("time_filter_preset")
     if saved_preset is None:
-        # Backward-compat: derive preset from old time_filter_enabled flag.
         saved_preset = "Custom" if context.get("time_filter_enabled") else "Today"
     date_range_value = context.get("time_date_range")
     saved_start_time = _parse_iso_time(context.get("time_start"))

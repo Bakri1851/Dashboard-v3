@@ -12,7 +12,7 @@ cited_in_tex:
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Student Struggle Logic
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # The journal of learning analytics works under a creative commons license
 

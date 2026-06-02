@@ -7,13 +7,13 @@ status: active
 last_imported: 2026-05-05
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:22
-  - Report/main-sections/design-and-architecture.tex:940
-  - Report/main-sections/implementation.tex:875
+  - Report/main-sections/design-and-architecture.tex:941
+  - Report/main-sections/implementation.tex:876
   - Report/main-sections/requirements-specification.tex:115
   - Report/main-sections/requirements-specification.tex:121
-  - Report/main-sections/requirements-specification.tex:331
+  - Report/main-sections/requirements-specification.tex:366
 cited_in_planned: []
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # Knowledge tracing: Modeling the acquisition of procedural knowledge
 

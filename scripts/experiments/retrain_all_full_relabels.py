@@ -134,7 +134,6 @@ def main() -> int:
 
     results = {"ran_at": datetime.now(timezone.utc).isoformat(), "models": {}}
 
-    # -------- STRUGGLE --------
     print("=" * 70 + "\nSTRUGGLE\n" + "=" * 70)
     for name, lbls in [("canonical (4o-mini)", canon_struggle), ("new (4o-full)", new_struggle)]:
         matched = [s for s in snapshots if s["snapshot_id"] in lbls]
@@ -147,7 +146,6 @@ def main() -> int:
               f"κ={res['kappa_mean']:+.4f}  MAE={res['mae_mean']:.3f}  "
               f"folds={[round(r, 3) for r in res['rho_per_fold']]}")
 
-    # -------- DIFFICULTY --------
     print("\n" + "=" * 70 + "\nDIFFICULTY\n" + "=" * 70)
     for name, lbls in [("canonical (4o-mini)", canon_difficulty), ("new (4o-full)", new_difficulty)]:
         matched = [q for q in questions if q["question"] in lbls]
@@ -158,7 +156,6 @@ def main() -> int:
         print(f"  {name:<22s} N={res['n_samples']:>3d}  ρ={res['rho_mean']:+.4f}  "
               f"κ={res['kappa_mean']:+.4f}  MAE={res['mae_mean']:.3f}")
 
-    # -------- IMPROVED-STRUGGLE --------
     print("\n" + "=" * 70 + "\nIMPROVED-STRUGGLE\n" + "=" * 70)
     for name, lbls in [("canonical (4o-mini)", canon_struggle), ("new (4o-full)", new_struggle)]:
         matched = [
@@ -176,7 +173,6 @@ def main() -> int:
               f"κ={res['kappa_mean']:+.4f}  MAE={res['mae_mean']:.3f}  "
               f"folds={[round(r, 3) for r in res['rho_per_fold']]}")
 
-    # -------- Summary table --------
     print("\n" + "=" * 70 + "\nDELTAS (new − canonical)\n" + "=" * 70)
     print(f"  {'Model':<20s} {'canon ρ':>10s} {'new ρ':>10s} {'Δρ':>10s}")
     for kind in ["struggle", "difficulty", "improved_struggle"]:

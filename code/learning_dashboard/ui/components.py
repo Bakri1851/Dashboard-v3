@@ -9,8 +9,6 @@ from learning_dashboard import config
 from learning_dashboard.ui import theme
 
 
-# Header
-
 def render_header() -> None:
     """Dashboard title with gradient text and subtitle."""
     st.markdown(
@@ -24,8 +22,6 @@ def render_header() -> None:
         unsafe_allow_html=True,
     )
 
-
-# Info Bar
 
 def render_info_bar(
     view_name: str,
@@ -51,8 +47,6 @@ def render_info_bar(
     )
 
 
-# Metric Cards
-
 def render_metric_card(label: str, value, color: str, tooltip: str = "") -> None:
     """Single metric card with glow border. Pass tooltip for hover explanation."""
     tooltip_attr = f' data-tooltip="{tooltip}"' if tooltip else ""
@@ -77,7 +71,6 @@ _SUMMARY_TOOLTIPS = {
 
 def render_summary_cards(struggle_df: pd.DataFrame) -> None:
     """4 summary cards counting students per struggle level."""
-    # Count per level — order: Needs Help, Struggling, Minor Issues, On Track
     level_order = list(reversed(config.STRUGGLE_THRESHOLDS))
     cols = st.columns(4)
 
@@ -234,8 +227,6 @@ def render_mistake_clusters(clusters: list[dict]) -> None:
                             )
 
 
-# Leaderboard Charts
-
 def _apply_leaderboard_layout(
     fig: go.Figure,
     title: str,
@@ -302,7 +293,6 @@ def render_student_leaderboard(
 
     fig = go.Figure()
 
-    # One trace per struggle level (reversed so legend reads severe → mild)
     for _low, _high, label, color in reversed(config.STRUGGLE_THRESHOLDS):
         level_df = display[display["struggle_level"] == label]
         if level_df.empty:
@@ -326,7 +316,6 @@ def render_student_leaderboard(
             customdata=level_df["user"].values,
             hovertemplate="Student: %{customdata}<br>Score: %{x:.3f}<extra></extra>",
         ))
-        # Score text outside bar (right of bar end) — same legendgroup so it toggles
         fig.add_trace(go.Scatter(
             y=level_df["user"],
             x=level_df["struggle_score"] + 0.005,
@@ -386,7 +375,6 @@ def render_question_leaderboard(
         st.info("No question data available.")
         return None
 
-    # Truncate labels
     max_len = config.QUESTION_LABEL_MAX_LEN
     display["display_label"] = display["question"].apply(
         lambda q: q if len(str(q)) <= max_len else str(q)[:max_len] + "..."
@@ -394,7 +382,6 @@ def render_question_leaderboard(
 
     fig = go.Figure()
 
-    # One trace per difficulty level (reversed so legend reads severe → mild)
     for _low, _high, label, color in reversed(config.DIFFICULTY_THRESHOLDS):
         level_df = display[display["difficulty_level"] == label]
         if level_df.empty:
@@ -418,7 +405,6 @@ def render_question_leaderboard(
             customdata=level_df["question"].values,
             hovertemplate="Question: %{customdata}<br>Score: %{x:.3f}<extra></extra>",
         ))
-        # Score text outside bar (right of bar end) — same legendgroup so it toggles
         fig.add_trace(go.Scatter(
             y=level_df["display_label"],
             x=level_df["difficulty_score"] + 0.005,
@@ -459,8 +445,6 @@ def render_question_leaderboard(
 
     return None
 
-
-# Score Distributions
 
 def render_score_distributions(
     struggle_df: pd.DataFrame,
@@ -518,8 +502,6 @@ def render_score_distributions(
         else:
             st.info("No question data for distribution.")
 
-
-# Formula Info Panel (Bug #1 fix: all values from config)
 
 def render_formula_info() -> None:
     """Expandable section showing scoring formulas with dynamic config values."""
@@ -586,14 +568,10 @@ def render_formula_info() -> None:
                 )
 
 
-# Back Button
-
 def render_back_button(key: str = "back") -> bool:
     """Styled back button. Returns True if clicked."""
     return st.button("\u2190 Back to Dashboard", key=key)
 
-
-# Navigation Loader (full-page overlay shown between view transitions)
 
 def render_nav_loader() -> None:
     """Full-viewport neon loader that hides any lingering deltas from the previous view."""
@@ -647,8 +625,6 @@ def render_nav_loader() -> None:
     )
 
 
-# Entity Header Card (drill-down)
-
 def render_entity_header_card(
     title: str,
     score: float,
@@ -667,8 +643,6 @@ def render_entity_header_card(
         unsafe_allow_html=True,
     )
 
-
-# Generic Charts for Drill-Downs
 
 def render_bar_chart(
     data: pd.DataFrame,
@@ -809,8 +783,6 @@ def render_data_table(
     st.dataframe(display, use_container_width=True, hide_index=True)
 
 
-# Data Analysis Charts
-
 def render_module_usage_chart(df: pd.DataFrame) -> None:
     """Vertical bar chart of submission counts per module."""
     if df.empty:
@@ -878,8 +850,6 @@ def render_students_by_module_chart(df: pd.DataFrame) -> None:
     counts = df.groupby("module")["user"].nunique().reset_index(name="students").sort_values("students", ascending=False)
     render_bar_chart(counts, x_col="module", y_col="students", title="Students by Module", color=config.COLORS["purple"])
 
-
-# Model Comparison Components (Phase 5)
 
 def render_agreement_summary(
     baseline_levels: pd.Series,
@@ -951,7 +921,6 @@ def render_comparison_scatter(
 
     fig = go.Figure()
 
-    # Diagonal reference line (y = x)
     fig.add_trace(go.Scatter(
         x=[score_min, score_max],
         y=[score_min, score_max],
@@ -961,7 +930,6 @@ def render_comparison_scatter(
         hoverinfo="skip",
     ))
 
-    # Data points
     fig.add_trace(go.Scatter(
         x=baseline_scores,
         y=improved_scores,
@@ -1020,7 +988,6 @@ def render_comparison_table(
     try:
         styler = display.style.map(_colour_delta, subset=["Delta"])
     except AttributeError:
-        # pandas < 2.1 uses applymap
         styler = display.style.applymap(_colour_delta, subset=["Delta"])  # type: ignore[attr-defined]
 
     st.markdown(
@@ -1030,8 +997,6 @@ def render_comparison_table(
     )
     st.dataframe(styler, use_container_width=True, hide_index=True)
 
-
-# Helpers
 
 def _hex_to_rgb(hex_color: str) -> str:
     """Convert '#rrggbb' to 'r, g, b' string for rgba()."""

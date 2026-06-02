@@ -37,8 +37,6 @@ DEFAULT_DUP_THRESHOLD = 3
 DEFAULT_INCORRECT_THRESHOLD = 0.5
 
 
-# ---------- shared library functions ----------
-
 def load_cached_df() -> pd.DataFrame:
     """Read cached DataFrame from data/eval/submissions.{parquet,pkl}."""
     stem = paths.DATA_DIR / "eval" / "submissions"
@@ -165,7 +163,6 @@ def cohort_horizon_labels(
             "L_struggling_plus_obs": 0,
         }
 
-    # Past median gap per user, as a personal-baseline reference
     past = sliced_at_t.assign(
         _ts=pd.to_datetime(sliced_at_t["timestamp"], errors="coerce", utc=True)
     ).dropna(subset=["_ts"])
@@ -176,7 +173,6 @@ def cohort_horizon_labels(
             if len(gaps):
                 per_user[str(user)]["past_median_gap_s"] = float(gaps.median())
 
-    # Per-user horizon metrics
     if not horizon.empty:
         h_ts = pd.to_datetime(horizon["timestamp"], errors="coerce", utc=True)
         horizon = horizon.assign(_ts=h_ts).dropna(subset=["_ts"])
@@ -206,7 +202,6 @@ def cohort_horizon_labels(
                         seen.add(ans)
             per_user[key]["future_dup_count"] = dup
 
-    # L_top20_obs over students with non-zero horizon activity
     rated = [
         (u, d["future_mean_incorrectness"])
         for u, d in per_user.items()
@@ -219,7 +214,6 @@ def cohort_horizon_labels(
         for u in top_users:
             per_user[u]["L_top20_obs"] = 1
 
-    # L_needs_help_obs (retry spiral OR abandonment) + L_struggling_plus_obs
     for d in per_user.values():
         retry_spiral = d["future_dup_count"] >= dup_threshold
         abandonment = (
@@ -247,11 +241,6 @@ def compute_improved_components_at_t(slice_df: pd.DataFrame) -> dict[str, dict]:
     if slice_df.empty:
         return {}
 
-    # BKT: per-skill MLE fit using config defaults. fit_all_skills is the
-    # heavy operation but we can call compute_all_mastery directly with the
-    # default priors and let it use whatever per-skill fitted params are
-    # cached. For per-cutoff training we use the config-default BKT priors
-    # (BKT priors are not part of the Optuna-tuned hyperparameters).
     mastery_summary = None
     try:
         mastery_df = bkt.compute_all_mastery(
@@ -267,7 +256,6 @@ def compute_improved_components_at_t(slice_df: pd.DataFrame) -> dict[str, dict]:
     except Exception:
         mastery_summary = None
 
-    # IRT 2PL fit
     irt_difficulty = None
     irt_ability = None
     try:
@@ -282,7 +270,6 @@ def compute_improved_components_at_t(slice_df: pd.DataFrame) -> dict[str, dict]:
         irt_difficulty = None
         irt_ability = None
 
-    # Call improved_struggle to extract the three component columns
     try:
         improved_df = improved_struggle.compute_improved_struggle_scores(
             slice_df,
@@ -326,8 +313,6 @@ def recent_submissions_trail(
         for _, row in sub.iterrows()
     ]
 
-
-# ---------- Phase 2 main: sampler ----------
 
 def _build_snapshot(
     session: dict,
@@ -399,10 +384,6 @@ def sample_struggle_snapshots(
             if scores.empty:
                 continue
             horizon = cohort_horizon_labels(window, slice_df, t, horizon_minutes)
-            # Improved-struggle component scores per user (B_s, M_s, D_s) — needed
-            # by Phase 4c training. Fits BKT + IRT on the slice; ~3–15 s per cutoff
-            # depending on slice size. Empty dict on failure → snapshots still
-            # written but with empty improved_components (train_improved filters).
             improved = compute_improved_components_at_t(slice_df)
             for band in STRUGGLE_BANDS:
                 band_rows = scores[scores["struggle_level"] == band]
@@ -511,7 +492,6 @@ def main() -> int:
     print()
     print(f"Wrote {len(snapshots)} struggle snapshots + {len(questions)} difficulty entries to {args.out}")
 
-    # Sanity prints
     band_counts = Counter(s["v1_struggle_level"] for s in snapshots)
     print()
     print("Struggle band distribution:")

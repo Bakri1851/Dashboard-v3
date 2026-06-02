@@ -67,7 +67,6 @@ V1_TAU = 0.7
 DEFAULT_N_TRIALS = 50
 DEFAULT_SEED = 42
 
-# 4-band target encoded as integer index 0-3 (matches optimise_v2_weights.py)
 STRUGGLE_BAND_INDEX = {
     "On Track": 0,
     "Minor Issues": 1,
@@ -75,8 +74,6 @@ STRUGGLE_BAND_INDEX = {
     "Needs Help": 3,
 }
 
-
-# -------------------- Data loaders --------------------
 
 def _load_jsons() -> tuple[list[dict], dict[str, dict]]:
     snap_path = paths.DATA_DIR / "eval" / "snapshots.json"
@@ -96,7 +93,6 @@ def _build_matched(snapshots: list[dict], labels: dict[str, dict]) -> dict[str, 
     y = np.array([STRUGGLE_BAND_INDEX[labels[s["snapshot_id"]]["band"]] for s in matched])
     groups = np.array([s["session_id"] for s in matched])
 
-    # Cohort grouping for shrinkage class-mean + CF cohort-relative similarity
     cohorts: dict[tuple[str, str], list[int]] = defaultdict(list)
     for idx, s in enumerate(matched):
         cohorts[(s["session_id"], s["t"])].append(idx)
@@ -112,10 +108,6 @@ def _build_matched(snapshots: list[dict], labels: dict[str, dict]) -> dict[str, 
     return {"matched": matched, "y": y, "groups": groups, "cohorts": cohorts, "fold_splits": fold_splits}
 
 
-# -------------------- Score recomputation --------------------
-
-# v1 weights (hardcoded from config — same values, but explicit so the script
-# is self-contained and would still work if config.py drifted).
 V1_W = {
     "n_hat":    config.STRUGGLE_WEIGHT_N,
     "t_hat":    config.STRUGGLE_WEIGHT_T,
@@ -165,13 +157,10 @@ def score_with_tau(data: dict, tau: float) -> np.ndarray:
             rows.append(row)
         cohort_df = pd.DataFrame(rows)
         cf_series, _diag = collab.compute_cf_struggle_scores(cohort_df, threshold=tau, k=3)
-        # cf_series is indexed by cohort_df row positions
         for i, idx in enumerate(member_indices):
             preds[idx] = float(np.clip(cf_series.iloc[i], 0.0, 1.0))
     return preds
 
-
-# -------------------- CV scoring --------------------
 
 def cv_spearman(data: dict, preds: np.ndarray) -> tuple[float, list[float]]:
     """Mean Spearman ρ across 5 session-grouped folds + the per-fold list.
@@ -190,8 +179,6 @@ def cv_spearman(data: dict, preds: np.ndarray) -> tuple[float, list[float]]:
         fold_rhos.append(float(rho))
     return float(np.mean(fold_rhos)) if fold_rhos else float("nan"), fold_rhos
 
-
-# -------------------- Optuna objectives --------------------
 
 def make_k_objective(data: dict):
     def objective(trial: optuna.Trial) -> float:
@@ -213,8 +200,6 @@ def make_tau_objective(data: dict):
     return objective
 
 
-# -------------------- Main --------------------
-
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--n-trials", type=int, default=DEFAULT_N_TRIALS,
@@ -233,7 +218,6 @@ def main() -> int:
     data = _build_matched(snapshots, labels)
     print()
 
-    # ---- Baseline: v1 defaults ----
     print(f"Baseline Spearman ρ at v1 defaults (K={V1_K}, τ={V1_TAU})...")
     base_k_preds = score_with_k(data, V1_K)
     base_k_rho, base_k_folds = cv_spearman(data, base_k_preds)
@@ -243,7 +227,6 @@ def main() -> int:
     print(f"  CF τ={V1_TAU}    → CV ρ = {base_t_rho:+.4f}  (folds: {[round(r, 3) for r in base_t_folds]})")
     print()
 
-    # ---- Optuna study 1: shrinkage_k ----
     print(f"Optuna TPE study 1/2: shrinkage_k ({args.n_trials} trials)...")
     study_k = optuna.create_study(
         direction="maximize",
@@ -256,7 +239,6 @@ def main() -> int:
     print(f"  best K = {best_k}  CV ρ = {best_k_rho:+.4f}  (Δ vs v1: {best_k_rho - base_k_rho:+.4f})")
     print()
 
-    # ---- Optuna study 2: cf_threshold ----
     print(f"Optuna TPE study 2/2: cf_threshold ({args.n_trials} trials)...")
     study_t = optuna.create_study(
         direction="maximize",
@@ -269,7 +251,6 @@ def main() -> int:
     print(f"  best τ = {best_t:.3f}  CV ρ = {best_t_rho:+.4f}  (Δ vs v1: {best_t_rho - base_t_rho:+.4f})")
     print()
 
-    # ---- Compile + persist ----
     payload = {
         "version": "v2",
         "kind": "hyperparams",
@@ -289,10 +270,6 @@ def main() -> int:
         "best_values": {
             "shrinkage_k": int(best_k),
             "cf_threshold": float(best_t),
-            # Defaults preserved for hyperparams we did NOT optimise — the
-            # runtime_config boot overlay (RuntimeConfig.defaults) seeds the
-            # scalar sliders from the full set; the trained v2 values are the
-            # unconditional deployed default.
             "bkt_p_init":           config.BKT_P_INIT,
             "bkt_p_learn":          config.BKT_P_LEARN,
             "bkt_p_guess":          config.BKT_P_GUESS,

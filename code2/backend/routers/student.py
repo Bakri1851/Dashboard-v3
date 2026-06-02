@@ -56,27 +56,23 @@ def get_student(
     if user_df.empty:
         raise HTTPException(status_code=404, detail=f"Student {student_id!r} not found")
 
-    # Pull pre-computed struggle row from the cached window-specific leaderboard
     struggle_all = load_active_struggle_df(window.from_, window.to_)
     row = struggle_all[struggle_all["user"].astype(str) == student_id]
     if row.empty:
         raise HTTPException(status_code=404, detail=f"Student {student_id!r} has no struggle score")
     r = row.iloc[0]
 
-    # --- score components ---------------------------------------------------
     components = [
         ScoreComponent(key=k, label=lbl, value=_safe(r.get(k, 0.0)), weight=w)
         for (k, lbl, w) in _COMPONENT_KEYS
     ]
 
-    # --- trajectory (up to last 10 incorrectness scores, chronological) ----
     if "incorrectness" not in user_df.columns:
         user_df["incorrectness"] = incorrectness.compute_incorrectness_column(user_df)
     ts = pd.to_datetime(user_df["timestamp"], errors="coerce", utc=True)
     user_df = user_df.assign(_ts=ts).sort_values("_ts", kind="stable")
     trajectory = user_df["incorrectness"].dropna().tail(10).astype(float).tolist()
 
-    # --- top questions attempted ------------------------------------------
     top_q = (
         user_df.groupby("question")
         .agg(attempts=("question", "size"), last_inc=("incorrectness", "last"))
@@ -98,7 +94,6 @@ def get_student(
         for r2 in top_q.reset_index().to_dict("records")
     ]
 
-    # --- recent submissions (newest first) --------------------------------
     recent = user_df.dropna(subset=["_ts"]).sort_values("_ts", ascending=False).head(10)
     recent_submissions = [
         StudentRecentRow(

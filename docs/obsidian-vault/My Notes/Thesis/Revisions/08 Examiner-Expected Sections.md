@@ -1,34 +1,52 @@
-# 08 — Examiner-Expected Sections (author writes)
+# 08 — Data Protection (GDPR)
 
-Things an MSc examiner expects that are currently absent. Lists are mechanical ([[02 Proposed Report Edits — structural]]); the rest are short authored sections. ← [[00 Index]]
+**Scope narrowed 2026-06-01:** this note now covers **only the GDPR / data-protection statement** — how the project complies through anonymised data and minimisation. The Loughborough ethics-approval reference is **out of scope** here (your steer); it is in any case **already covered** in the report — the NFR5 row of `appendix-sections/detailed-test-results.tex` records that ethical approval was granted through the University's LEON system. So nothing is missing on that front; this note is GDPR-only. The other "examiner-expected" candidates (reproducibility, comparison table, threats-to-validity, accessibility) are out of scope for this pass. ← [[00 Index]]
 
-## E1. Ethics approval reference (HIGH — ties to [[01 Integrity & Consistency Fixes]] I3)
-- The survey collects human-subject data (10 respondents incl. staff/students) and the replay uses student submission logs, yet no ethics board ID / approval date / exemption statement appears anywhere — and §5.5.1's heading even promises "Ethical Approval".
-- **Write:** the Loughborough ethics approval (or exemption) reference + date, under §5.5.1 and/or a methods/ethics statement. If none was obtained, state the basis (e.g. anonymised secondary data, voluntary anonymous survey) explicitly.
+## The angle
 
-## E2. GDPR / data-protection statement
-- The survey itself surfaced re-identification and data-use-scope concerns (§5.5.4). 
-- **Write:** a short data-protection paragraph — controller, lawful basis, what is stored, retention, anonymisation of student IDs, and that the dashboard is instructor-facing only (students are not shown their scores). Natural home: Ethics/Methods or a Limitations subsection.
+A short, confident subsection showing the project was **data-protection-compliant by design**: it never held information that identifies a student, collected only what the analytics needed, and used the data solely for in-lab triage. Frame it around GDPR's core principles rather than a compliance checklist.
 
-## E3. Reproducibility / code-and-data availability
-- The thesis describes `config.py`, trained weight JSONs, Optuna studies, eval scripts and notebooks but never states whether code/weights/anonymised data are available.
-- **Write:** a one-paragraph statement — what is released, where (repo/archive), under what licence, and which artefacts reproduce which figures (e.g. `notebooks/eval_main.ipynb` → §5.4 figures).
+## Grounding — verified facts already in the report (build on these, don't contradict)
 
-## E4. Prior-systems comparison table (HIGH for positioning)
-- SAM/EMODA/Edsight/Blocks/MM Dashboard and the requirements-era dashboards are described in prose only.
-- **Write:** a feature-by-feature matrix (rows = systems incl. *this* dashboard; columns = real-time, in-lab vs post-hoc, instructor-facing, struggle modelling, question difficulty, assistant dispatch, advanced models IRT/BKT, RAG feedback) so the contribution is visible at a glance. **This connects directly to [[10 Related Work & Research-Gap Expansion]] — populate the table from that scan.**
+- **Data minimisation — only seven fields per record:** the parsed submission record carries `module, question, timestamp, student_answer, ai_feedback, session` and an **anonymised `user` code** ([implementation.tex:451](../../../../Report/main-sections/implementation.tex)). No name, email, or university ID number is ingested or stored.
+- **Deliberately uncollected data:** demographic data and gaze patterns were available but **not used** ("we can get away without using… demographic data and gaze patterns", [requirements:20](../../../../Report/main-sections/requirements-specification.tex)).
+- **No linkage:** "the anonymisation of student identifiers rules out grade linkage, and submission records cannot currently be mapped to individual lab seats" ([results:13](../../../../Report/main-sections/results-and-evaluation.tex)).
+- **Anonymous survey:** "Participation was voluntary, anonymous, and the form recorded no personal identifiers" ([results:386](../../../../Report/main-sections/results-and-evaluation.tex)).
+- **Instructor-facing only:** the dashboard is "never being surfaced to students themselves" ([results:423](../../../../Report/main-sections/results-and-evaluation.tex)); outputs are advisory, not decisional.
+- **Privacy stated as a priority** in Ch2 ("protecting students' identities and data is a priority", [requirements:30](../../../../Report/main-sections/requirements-specification.tex)) and **NFR5 (Privacy & Ethics)** holds by construction (Appendix detailed-test-results).
 
-## E5. Threats-to-validity framework
-- §5.6 covers only rater fidelity, module skew, and the scorer fallback.
-- **Write:** name the four standard categories — **construct** (does the LLM-rated 4-band target measure "struggle"/"difficulty"?), **internal** (retrospective replay, no intervention), **external** (single module/institution; cohort skew), **statistical-conclusion** (n=72 LOO variance; n=10 survey). Fold the existing caveats under these headings.
+## GDPR principles → how the project meets them (the content to write)
 
-## E6. Sample-size / power note
-- The thesis acknowledges small samples but states no bound on what they support.
-- **Write:** one or two sentences on what the n=10 survey and n=50 calibration set can and cannot support (qualitative triangulation only; no statistical inference), and why the difficulty n=72 LOO results are "directional".
+| GDPR principle | How the project satisfies it |
+|---|---|
+| **Lawfulness & purpose limitation** | Data used solely to surface struggling students / hard questions to instructors *during the lab* — not for grading, ranking, or any secondary purpose; outputs are advisory. |
+| **Data minimisation** | Only the seven fields above; no names, emails, ID numbers, demographics, or biometric/gaze data. The incorrectness signal reads AI-feedback text, not student identity. |
+| **Pseudonymisation (Art. 4(5))** | Students appear only as anonymised codes (e.g. `uo0752`). The system holds nothing that re-identifies them, and cannot link a code to a grade or a lab seat. |
+| **Storage limitation** | Operates on the live/replayed session export; runtime artefacts live under `data/`. *(Confirm retention: caches such as `incorrectness_cache.json` persist — state that they hold no identifiers and are bound to the project.)* |
+| **No automated decision-making with legal effect** | The dashboard recommends; the instructor decides (human-in-the-loop). No grade or sanction is produced automatically. |
 
-## E7. Accessibility / colour-blindness note
-- The traffic-light (green/amber/orange/red) scheme is central to the interpretability claim; §5 states no accessibility audit was run.
-- **Write:** acknowledge the gap and offer a mitigation (redundant cue — band label/position/icon alongside colour; a colour-blind-safe palette option). Ties to the visual-encoding rationale in [[03 Design Rationale & Missing Views]] R1.
+## Honest limitation to include (keeps it consistent with §5.5 Q10)
 
-## E8. List of Figures / List of Tables
-- 30+ numbered floats, no `\listoffigures`/`\listoftables`. Mechanical — handled in [[02 Proposed Report Edits — structural]] S6.
+The identifiers are **pseudonyms, not full anonymisation**: because a code persists across sessions, an instructor holding the class roster could in principle re-associate a repeat code with a person (the report already raises this — "even an anonymised student ID still lets the lecturer recognise the same struggler week after week", [results:437](../../../../Report/main-sections/results-and-evaluation.tex), and the reputation-effect risk at [results:444](../../../../Report/main-sections/results-and-evaluation.tex)). Treat this as a **deployment-policy** matter (informed consent, anonymisation review, a data-use scope statement) rather than a system flaw. Naming this *strengthens* the section — it shows GDPR-literate judgement rather than overclaiming "fully anonymous".
+
+## Draft prose (adapt into Report/ — your voice; do not paste verbatim without a read)
+
+> **Data Protection.** The system was built to be data-protection-compliant by design. It processes only the minimum needed to score struggle and difficulty: per submission, the module, question, timestamp, submitted answer, AI-feedback text, session, and an anonymised user code; no names, email addresses, university identification numbers, demographic attributes, or biometric data are collected or stored, and demographic and gaze data that some learning-analytics systems use were deliberately excluded. Students are represented throughout by pseudonymous codes, and the pipeline holds nothing that links a code to a grade, a timetable, or a lab seat, so no individual is identifiable from the data the system retains. The analytics serve a single purpose — helping instructors prioritise help within the live session — and never feed grading or any automated decision; every recommendation is advisory, with the instructor retaining the decision. The accompanying survey was voluntary and anonymous and recorded no personal identifiers. The one residual consideration is that the codes are pseudonyms rather than fully anonymous: because a code persists across weeks, an instructor with the class list could re-associate it with a student, so deployment should be accompanied by informed consent and a stated data-use scope.
+
+## Placement
+
+- **Primary home (recommended): extend the existing `\subsection{Graceful Degradation and Privacy}`** at `implementation.tex:1098` — it already states retrieval is local and that "no student identifier of any kind" is sent to the LLM (`:1103`–`:1105`); add the data-protection / anonymisation paragraph there so all privacy material sits together. (The data dictionary already calls `user` "the anonymised identifier", `design:381`.)
+- Alternative home: a short **`\subsection{Data Protection}`** in the evaluation chapter near the survey's ethical-concerns discussion (§5.5), **or** repurpose the unmet `§5.5.1` heading flagged in [[01 Integrity & Consistency Fixes]] — rename it from "Ethical Approval" to **"Data Protection"** and fill it with this content. *(Confirm that heading still exists before renaming.)*
+- ~1 paragraph (the draft above) plus, optionally, the principle→mechanism points as 3–4 sentences.
+
+## To confirm before writing
+
+1. **ID provenance:** are the user codes anonymised **at source** (platform/technician export) or hashed **in the pipeline**? The compliance claim holds either way (the system stores only the codes), but state it accurately.
+2. **Retention:** confirm the persisted caches (`data/incorrectness_cache.json`, saved sessions) contain no identifiers and a one-line retention intent.
+3. **Heading:** does the unmet `§5.5.1` "Ethical Approval" heading exist to rename, or add a fresh subsection?
+
+## Definition of done
+
+- ⬜ Author writes the Data-Protection subsection (from the draft above) into `Report/`.
+- ⬜ Confirm the three points above.
+- ⬜ Recompile clean; flip Note 08 in [[00 Index]] to ✅ (scope = GDPR only).

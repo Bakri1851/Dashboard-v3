@@ -67,7 +67,6 @@ def main() -> int:
         out.write_bytes(body)
         index.append({"uuid": uuid, "ext": ext, "size": len(body), "compressed": compressed})
 
-    # Sort index by size descending so the biggest (component) files are easy to find.
     index.sort(key=lambda r: -r["size"])
     (OUT_DIR / "INDEX.json").write_text(json.dumps(index, indent=2), encoding="utf-8")
 

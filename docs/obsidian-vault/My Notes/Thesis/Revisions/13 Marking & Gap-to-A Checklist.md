@@ -4,12 +4,12 @@ Indicative marking of the **complete 125-page `Report/main.pdf`** (read end-to-e
 
 ## Indicative marks
 
-| Component (weight) | Band | Indicative | Why (against band wording) |
-| --- | --- | --- | --- |
-| Knowledge & Understanding (30%) | **A** | ~76% | "Comprehensive grasp … excellent understanding of research methods": IRT, BKT, RAG, empirical-Bayes shrinkage, OLS/TPE, κ/ρ — learnt and applied correctly |
-| Cognitive Abilities (30%) | **high B → A−** | ~71% | Clear, well-framed original contribution + honest IRT anti-result; but B-band "publication if supplemented" fits — single-module, retrospective, LLM-rater-as-truth cap it under A |
-| Practical Abilities (30%) | **A** | ~78% | "Very well planned and executed … contribution achieved and evaluated": designed, implemented **twice** (V1 Streamlit, V2 React/FastAPI), tested (FR/NFR), extensively evaluated |
-| Transferable Skills (10%) | **high B → A−** | ~70% | Comprehensive 68-ref review + detailed methodology section (both A-band requirements present); dragged by empty *referenced* appendices and proofreading |
+| Component (weight)              | Band            | Indicative | Why (against band wording)                                                                                                                                                         |
+| ------------------------------- | --------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Knowledge & Understanding (30%) | **A**           | ~76%       | "Comprehensive grasp … excellent understanding of research methods": IRT, BKT, RAG, empirical-Bayes shrinkage, OLS/TPE, κ/ρ — learnt and applied correctly                         |
+| Cognitive Abilities (30%)       | **high B → A−** | ~71%       | Clear, well-framed original contribution + honest IRT anti-result; but B-band "publication if supplemented" fits — single-module, retrospective, LLM-rater-as-truth cap it under A |
+| Practical Abilities (30%)/      | **A**           | ~78%       | "Very well planned and executed … contribution achieved and evaluated": designed, implemented **twice** (V1 Streamlit, V2 React/FastAPI), tested (FR/NFR), extensively evaluated   |
+| Transferable Skills (10%)       | **high B → A−** | ~70%       | Comprehensive 68-ref review + detailed methodology section (both A-band requirements present); dragged by empty *referenced* appendices and proofreading                           |
 
 **Weighted ≈ 74–75%** — distinction-level, sitting right on the A boundary (A = ≥75%). The four items below are what stand between it and a clean, unarguable A.
 
@@ -26,6 +26,31 @@ Indicative marking of the **complete 125-page `Report/main.pdf`** (read end-to-e
 - The **evaluation rigour**: model-class bake-off (OLS vs Ridge/Lasso/ElasticNet/RF/GB), GroupKFold CV, Optuna TPE (τ 0.7→0.900, Δρ +0.160; K non-consequential), threshold training by κ-maximisation, and the **rater-fidelity ceiling** analysis (LLM-vs-human κ = +0.198 bounds the claim). Don't let any trim flatten this.
 - The **negative-findings-on-equal-footing** framing and the **threats-to-validity / limitations** depth.
 
+## Second-pass execution log (2026-06-02)
+
+The post-00–12 second pass was run. **Gap-to-A Items 1 and 2 are done; Items 3 and 4 (prose) remain.**
+
+**Item 1 — appendices (DONE).**
+- Appendix A (Code Snippets) **populated** with 14 `\lstinputlisting` excerpts pulled verbatim from live source (exact, not transcribed): 8 backend-core functions (struggle, difficulty, CF, clustering, RAG, 2PL-IRT fit, BKT fit, improved-struggle) + 6 evaluation-pipeline excerpts (GPT-4o labelling, snapshot stratification, model-class bake-off, Optuna TPE, κ-threshold search, runtime-config loader). Captions later shortened to the report's house style. **⚠️ Dependency:** these `\lstinputlisting` blocks use hardcoded `firstline`/`lastline`/`firstnumber` line ranges. If codebase comments are reduced (planned) or any of the 14 source functions are edited, the line numbers shift and **all 14 ranges must be re-pinned** to the new positions before rebuilding — do the code-comment pass *first*, then re-pin, then build.
+- The two broken literal "Appendix E" pointers in `implementation.tex` (struggle/difficulty maths recaps) **re-pointed to the Formulae appendix** (`\ref{app:formulae}`); `formulae-derivation` stays commented out. Formulae appendix (D) was already populated (Note 04), so no blank *referenced* appendix remains.
+
+**Item 2 — proofreading (DONE).** The 7 confirmed slips fixed (note-13 #3 "i.e.different" and #7 "scenaro" were already gone). A full read-only multi-agent sweep over every chapter found ~10 more genuine slips, all applied: "The include"→"These include", "also also", "difficultt", "MosCoW", "pairs associates"→"associated", a missing full-stop (§3 difficulty), similarity-matrix dimension `n×x`→`n×n`, "than the V1 and give"→"than V1 and gives", "skewed ,", "separately a single joint". Two prose-judgement items also fixed: §design help-seeking condition completed to `h_{s,σ}=0`, and "collaborative filtering alternatively"→"alternative". Spaced-label refs (`\ref{sec: intro}` etc.) left as-is — they resolve fine; changing them risks breaking refs.
+
+**Items 3 & 4 — still PENDING (author-writes briefs).** Sharpen the contribution claim (abstract + intro §1.3 + conclusion §5.2) and recast 3–4 descriptive lit-review paragraphs (§2.1 ll.13–26, §2.5 ll.246–255). Locations pinned; briefs + proposed draft wording delivered in [[14 Contribution Claim & Lit-Review Recasts (Items 3 & 4)]] (2026-06-02) for the author to write into Report/.
+
+**Handoff scaffold for the next chat:**
+- *Item 3 (contribution claim).* Add the crisp claim early in the **abstract** (`main.tex` ~ll.97–101, currently leads with validation mechanics); reframe **intro §1.3 aims** (`introduction.tex` ~ll.46/57) from system-building to research-contribution; tighten **conclusion §5.2** (`conclusion.tex` ~ll.24–34, strongest but subordinates the session-scale angle). Claim to adopt/edit: *"a live, session-scale, instructor-facing struggle- and difficulty-detection system, validated end-to-end against a scalable LLM second-opinion rater, with a documented negative finding (2PL IRT κ = −0.024, retained not promoted)."* Add a **publication-scope line** (turns the limitation into a controlled claim — needs human-labelled and/or multi-module validation + a prospective intervention study; source already in `conclusion.tex` ll.59–76 and `results-and-evaluation.tex` ll.70–78).
+- *Item 4 (lit-review → analytical).* Recast 3–4 descriptive paragraphs in `requirements-specification.tex`: **§2.1** "Learning Analytics and Dashboards" (~ll.13–26) and **§2.5** "Existing Systems" (~ll.246–255). Pattern: turn "X did Y. Z found W." into "X found A, but did not address B, which this project does", borrowing the gap-pointing voice **§2.6** already uses (leave §2.6 as-is — it is A-grade). Deliver brief + proposed draft wording in the vault; author writes final prose into `Report/`.
+- *Appendix — themes & references table (flagged 2026-06-02).* `Report/appendix-sections/themes-and-references.tex` may be stale — reconcile its theme→reference table against the current `\cite{}` usage and `references.bib`. Run `scripts/sync_literature.py` first (regenerates the vault coverage index), then update the appendix table by hand and verify every listed cite still exists (no hallucinated entries).
+
+**Formatting / build changes this session (requested live, not gap-items):**
+- Cover page swapped to the Loughborough CS project template (boxed border, top-right Degree/Module/ID, centred title, supervisor, dept+university, date); logo-less to match the template (logo file kept in repo).
+- Margins thinned to 0.85in.
+- Off-page overflow fixed: `\emergencystretch=3em` (absorbs tight prose lines — hyphenation is off via `[none]{hyphenat}`); listings `breakatwhitespace=false` (the `=true` setting was causing a pdflatex infinite-loop spin); appendix listings `columns=fullflexible` + `\scriptsize` (wrap the long bake-off lines, 149–215pt overflows cleared); `listingsutf8` (UTF-8 glyphs in appendix code). Storyboard Fig 3.2 "needs help" label moved inside the panel frame (was at `y=-0.05`, below the box).
+- Build is now ~141 pages and compiles clean (`latexmk` exit 0, all refs/citations resolved).
+
+**Build-environment gotchas (for future builds):** the VSCode LaTeX-Workshop auto-build was **disabled** (`latex-workshop.latex.autoBuild.run: never` in `.vscode/settings.json`) because it raced terminal builds and corrupted `.aux`/`.out` (null-byte fills, `\@@BOOKMARK` runaway). The repo lives in OneDrive, which intermittently locks output files. Clean rebuild = kill stray `pdflatex`/`latexmk` + delete `*.aux/*.out/*.toc/*.bbl` + one `latexmk`.
+
 ## Status
 
-Reference note, not a task list to action now. Revisit once Notes 00–12 are ✅; this drives the post-00–12 marking pass.
+Second pass **partly complete**: Items 1 (appendices) and 2 (proofreading) done; Items 3 (contribution claim) and 4 (lit-review recasts) remain as author-writes briefs. The Transferable-Skills drag (empty referenced appendices + proofreading slips) is largely cleared; the Cognitive band still wants Items 3 & 4. Minor overfull boxes (~13–50pt) remain but no dramatic off-page lines.

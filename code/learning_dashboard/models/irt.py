@@ -10,7 +10,6 @@ from scipy.special import expit  # sigmoid
 from learning_dashboard import config
 from learning_dashboard.analytics import classify_score
 
-# Column schema for the output DataFrame (used for empty-data fallback).
 _OUTPUT_COLUMNS = [
     "question",
     "irt_difficulty",
@@ -34,7 +33,6 @@ def build_response_matrix(
     if df.empty or "incorrectness" not in df.columns:
         return pd.DataFrame()
 
-    # Best attempt per student-question pair.
     best = (
         df.groupby(["user", "question"])["incorrectness"]
         .min()
@@ -44,17 +42,14 @@ def build_response_matrix(
 
     matrix = best.pivot(index="user", columns="question", values="correct")
 
-    # Iteratively filter until minimums are met.
     changed = True
     while changed:
         changed = False
-        # Drop questions with too few responding students.
         col_counts = matrix.notna().sum(axis=0)
         keep_cols = col_counts[col_counts >= config.IRT_MIN_ATTEMPTS_PER_QUESTION].index
         if len(keep_cols) < len(matrix.columns):
             matrix = matrix[keep_cols]
             changed = True
-        # Drop students with too few attempted questions.
         row_counts = matrix.notna().sum(axis=1)
         keep_rows = row_counts[row_counts >= config.IRT_MIN_ATTEMPTS_PER_STUDENT].index
         if len(keep_rows) < len(matrix.index):
@@ -95,7 +90,6 @@ def fit_rasch_model(
             "log_likelihood": 0.0,
         }
 
-    # Observed (row, col, value) triples — skip NaN.
     obs_rows, obs_cols, obs_vals = [], [], []
     values = response_matrix.values
     for i in range(n_students):
@@ -112,11 +106,9 @@ def fit_rasch_model(
     def _neg_log_likelihood(params: np.ndarray) -> float:
         theta = params[:n_students]
         b = params[n_students:]
-        # Centre abilities for identifiability.
         theta = theta - theta.mean()
         logit = theta[obs_rows] - b[obs_cols]
         p = expit(logit)
-        # Clip to avoid log(0).
         p = np.clip(p, 1e-12, 1.0 - 1e-12)
         ll = (obs_vals * np.log(p) + (1.0 - obs_vals) * np.log(1.0 - p)).sum()
         return -ll
@@ -127,18 +119,15 @@ def fit_rasch_model(
         theta = theta - theta.mean()
         logit = theta[obs_rows] - b[obs_cols]
         p = expit(logit)
-        residual = obs_vals - p  # y - p
+        residual = obs_vals - p
 
         grad_theta = np.zeros(n_students)
         grad_b = np.zeros(n_questions)
         np.add.at(grad_theta, obs_rows, residual)
         np.add.at(grad_b, obs_cols, -residual)
 
-        # Project through the centering used in the loss: θ' = θ − mean(θ),
-        # so ∂L/∂θ_k = ∂L/∂θ'_k − mean(∂L/∂θ'_·). b is not centered.
         grad_theta = grad_theta - grad_theta.mean()
 
-        # Negate because we minimise negative log-likelihood.
         return np.concatenate([-grad_theta, -grad_b])
 
     x0 = np.zeros(n_students + n_questions)
@@ -152,7 +141,6 @@ def fit_rasch_model(
 
     theta_hat = result.x[:n_students]
     b_hat = result.x[n_students:]
-    # Final centring.
     theta_hat = theta_hat - theta_hat.mean()
 
     return {
@@ -187,7 +175,7 @@ def compute_irt_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
 
     rows = []
     for qid, b_raw in fit["difficulty"].items():
-        score = float(expit(b_raw))  # map logit → [0, 1]
+        score = float(expit(b_raw))
         level, color = classify_score(score, config.IRT_DIFFICULTY_THRESHOLDS)
         rows.append({
             "question": qid,

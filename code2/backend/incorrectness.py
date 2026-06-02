@@ -1,16 +1,5 @@
 # incorrectness.py — OpenAI batched incorrectness scoring + persistent cache + feedback confidence.
-#
-# Carved out of the old analytics.py during the 2026-05-20 split. Holds:
-#   - the disk-persisted `_incorrectness_cache` (survives uvicorn restarts;
-#     keyed by feedback text, model-versioned)
-#   - the OpenAI batch caller and JSON-array parser
-#   - the per-row `compute_incorrectness_column` driver used by every
-#     scoring pipeline downstream
-#   - `compute_feedback_confidence` and `_confidence_weighted_mean` which
-#     attach a measurement-confidence weight to each scored row.
-#
-# The OpenAI client itself still lives in analytics.py (shared with rag.py
-# and clustering.py).
+
 import json
 import logging
 import re
@@ -27,12 +16,6 @@ from .analytics import _get_openai_client
 logger = logging.getLogger(__name__)
 
 
-# Incorrectness Estimation via OpenAI
-
-# Disk-backed cache: scores persist across uvicorn restarts so a clean boot
-# doesn't re-score ~3,400 unique feedbacks against OpenAI. The on-disk file
-# stores the OPENAI_MODEL it was built with — if the model changes, the cache
-# is discarded on load because scores are model-dependent.
 _SAVE_DEBOUNCE_SECONDS = 30.0
 _incorrectness_save_lock = threading.Lock()
 _last_incorrectness_save_ts: float = 0.0
@@ -108,14 +91,12 @@ def _parse_scores_response(text: str, expected_len: int) -> Optional[list[float]
     if not text:
         return None
     cleaned = text.strip()
-    # Strip markdown fences: ```json ... ``` or ``` ... ```
     if cleaned.startswith("```"):
         cleaned = re.sub(r"^```[a-zA-Z0-9]*\s*", "", cleaned)
         cleaned = re.sub(r"\s*```$", "", cleaned)
         cleaned = cleaned.strip()
 
     candidates = [cleaned]
-    # Fallback — pull the first [...] block out of whatever prose wraps it.
     match = _JSON_ARRAY_RE.search(cleaned)
     if match and match.group(0) != cleaned:
         candidates.append(match.group(0))
@@ -229,13 +210,10 @@ def compute_incorrectness_column(
     unique_feedbacks = feedbacks.unique()
     already_cached = sum(1 for t in unique_feedbacks if t in _incorrectness_cache)
 
-    # Collect unique non-empty texts not yet cached
     uncached_all = [t for t in unique_feedbacks if t and t not in _incorrectness_cache]
     n_empty = sum(1 for t in unique_feedbacks if not t)
 
     if not score_new:
-        # Pure cache-lookup mode — no OpenAI, no blocking. Deferred items
-        # remain at 0.5 until the background prewarm fills the cache.
         result = feedbacks.map(lambda t: _incorrectness_cache.get(t, 0.5))
         logger.info(
             "compute_incorrectness_column: score_new=False lookup-only — "
@@ -246,12 +224,6 @@ def compute_incorrectness_column(
         )
         return result
 
-    # Cap the number of new feedbacks scored per request so a cold cache
-    # (~3k uniques on this dataset) doesn't block the first /struggle or /live
-    # call for 5–10 minutes of serial OpenAI round-trips. Remaining uncached
-    # feedbacks stay at 0.5 for this request and get picked up by subsequent
-    # calls (the raw-data TTL evicts the window cache every CACHE_TTL seconds,
-    # so the cache fills progressively across a few poll cycles).
     if max_new_scores is None:
         cap = int(getattr(config, "SCORING_PER_RUN_CAP", 0) or 0)
     else:
@@ -271,7 +243,6 @@ def compute_incorrectness_column(
     batches_succeeded = 0
     scores_added = 0
 
-    # Fetch in batches — only cache successful responses.
     for i in range(0, len(uncached), config.OPENAI_BATCH_SIZE):
         batch = uncached[i : i + config.OPENAI_BATCH_SIZE]
         batches_attempted += 1
@@ -301,8 +272,6 @@ def compute_incorrectness_column(
 
     return result
 
-
-# Feedback Confidence (consumed by struggle pipeline and measurement.py)
 
 _EMPTY_FEEDBACK_MARKERS = {"", "nan", "none", "null", "n/a", "na"}
 
@@ -346,13 +315,6 @@ def compute_feedback_confidence(
     return confidence
 
 
-# Minimum weight applied to every row regardless of confidence. Without this
-# floor, rows with empty / short feedback (confidence = 0) are dropped
-# entirely from the aggregation. That systematically under-counts correct
-# answers (which in this dataset often have shorter / empty feedback)
-# and biases the resulting i_hat / A_raw upward — producing a false
-# "everyone is struggling" signal in the aggregate. The floor keeps every
-# row in the mean while still letting high-confidence rows count more.
 _CONFIDENCE_FLOOR: float = 0.2
 
 

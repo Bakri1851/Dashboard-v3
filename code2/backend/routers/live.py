@@ -29,11 +29,6 @@ from backend import data_loader
 router = APIRouter(tags=["live"])
 
 
-# ----------------------------------------------------------------
-# helpers
-# ----------------------------------------------------------------
-
-
 def _nunique(df: pd.DataFrame, col: str) -> int:
     return int(df[col].nunique()) if col in df.columns and not df.empty else 0
 
@@ -69,11 +64,6 @@ STRUGGLE_ORDER = ["On Track", "Minor Issues", "Struggling", "Needs Help"]
 DIFFICULTY_ORDER = ["Easy", "Medium", "Hard", "Very Hard"]
 
 
-# ----------------------------------------------------------------
-# endpoints
-# ----------------------------------------------------------------
-
-
 @router.get("/live", response_model=LiveDataResponse)
 def get_live(
     df: pd.DataFrame = Depends(get_dataframe),
@@ -81,7 +71,6 @@ def get_live(
 ) -> LiveDataResponse:
     if demo_data.is_active():
         return demo_data.live_response()
-    # Hero stats + buckets reflect the filter window + module. Timeline stays wall-clock-24h.
     working = filter_df(df, window.from_, window.to_) if (window.from_ or window.to_) else df
     if window.module:
         working = data_loader.filter_by_module(working, window.module)
@@ -90,8 +79,6 @@ def get_live(
 
     mean_inc = float(working["incorrectness"].mean()) if "incorrectness" in working.columns and not working.empty else 0.0
 
-    # Full module list comes from the unfiltered df so the frontend pill list
-    # stays stable regardless of the active module filter.
     if "module" in df.columns and not df.empty:
         all_modules = sorted(
             m for m in df["module"].dropna().astype(str).unique() if m
@@ -149,7 +136,6 @@ def get_difficulty(
         return []
     q = q.sort_values("difficulty_score", ascending=False)
 
-    # Representative module per question from the (filtered) source df.
     working = filter_df(df, window.from_, window.to_) if (window.from_ or window.to_) else df
     if window.module:
         working = data_loader.filter_by_module(working, window.module)

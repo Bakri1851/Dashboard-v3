@@ -415,7 +415,6 @@ def main() -> int:
         print('FAIL: could not find results.md export anchor', file=sys.stderr)
         return 1
 
-    # Insert in reverse order so earlier indices stay valid
     insertions = [
         (a3,     [md(IRT_MD), code(IRT_CODE),
                   md(INC_MD), code(INC_CODE)]),

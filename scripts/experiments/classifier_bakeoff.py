@@ -59,20 +59,15 @@ def _build_struggle():
 def _build_difficulty():
     qs = _load("snapshots.json")["difficulty_questions"]
     labels = _load("llm_difficulty_labels.json")["labels"]
-    # difficulty_questions DO carry per-question feature VALUES in `v1_features`
-    # (a dict keyed by DIFFICULTY_SIGNALS) — the regressor bake-off uses these.
-    # No grouping is available (one row per question), so the caller uses LOO.
     matched = [q for q in qs if q["question"] in labels]
     X = np.array([[q["v1_features"][k] for k in DIFFICULTY_SIGNALS] for q in matched])
     y = np.array([DIFFICULTY_BAND_INDEX[labels[q["question"]]["band"]] for q in matched])
-    return X, y, None  # groups=None signals LOO
+    return X, y, None
 
 
 def _build_improved():
     snaps = _load("snapshots.json")["struggle_snapshots"]
     labels = _load("llm_struggle_labels.json")["labels"]
-    # The improved (BKT+IRT) component scores live under `improved_components`,
-    # not `improved_features`.
     matched = [s for s in snaps
                if s["snapshot_id"] in labels and "improved_components" in s
                and s["improved_components"].get("improved_struggle_score") is not None]
@@ -93,7 +88,6 @@ def _eval_classifier(make_clf, X, y, groups, cv_splits, n_classes=4):
         clf = make_clf()
         clf.fit(sc.transform(X[tr]), y[tr])
         proba = clf.predict_proba(sc.transform(X[te]))
-        # Some folds may not see all classes — pad missing-class probabilities to 0
         full_proba = np.zeros((proba.shape[0], n_classes))
         for col, c in enumerate(clf.classes_):
             full_proba[:, int(c)] = proba[:, col]

@@ -20,7 +20,8 @@ The 2PL Item Response Theory difficulty model was retained as a complementary to
 The system is deployed and in use; the sections that follow set out what the validation contributed and what remains for future work.
 
 \subsection{Key Findings and Contributions}
-
+The project delivers a live, session-scale, instructor-facing system that detects student struggle and question difficulty; its novelty lies in the combination of multiple signals into interpretable composite signals. 
+The signals were validated end-to-end against a second-opinion LLM rater. 
 The first contribution is a systematic empirical validation of every tunable component of the deployed scoring pipeline against second-opinion labels from a large language model rater, with positive and negative findings reported in equal weight.
 The validation covered three tiers of parameter.
 The composite weights were refit by ordinary least-squares regression against the four-band rater target (Section~\ref{sec:eval-results}); the two scalar hyperparameters, the Bayesian shrinkage constant $K$ and the collaborative-filtering threshold $\tau$, were tuned by Tree-structured Parzen Estimator across fifty-trial Optuna studies (Section~\ref{sec:eval-hyperopt}); and the score-to-band thresholds were trained by brute-force linear-weighted $\kappa$ maximisation across six model variants under constrained group five-fold and leave-one-out cross-validation (Section~\ref{sec:eval-thresholds}).
@@ -43,6 +44,9 @@ The model-class-selection rigour is the bake-off in Section~\ref{sec:eval-result
 Ordinary least-squares won the struggle target decisively at $\rho = +0.588$ against the next-best random forest at $\rho = +0.565$, tied the difficulty target within per-fold noise at $\rho = +0.468$ against random forest's $\rho = +0.479$, and was the only competitive class with interpretable signed weights.
 Tree based alternatives offered no consistent gain large enough to outweigh that interpretability and were dropped from the deployed path.
 
+The claims made are also bounded by their evaluation design: validation against a single LLM rater on one module's data, where the rater's own agreement with human judgement ($\kappa = +0.198$) sets a ceiling on the achievable scores. 
+Establishing the result as a general finding would additionally require validation against human-labelled ratings and across multiple modules, together with an intervention study where the assistant functionality is used. 
+The study could compare dashboard-informed decisions against a control group on student outcomes, which is beyond the scope of this project but may be a step for future work.
 
 \subsection{Future Work}
 

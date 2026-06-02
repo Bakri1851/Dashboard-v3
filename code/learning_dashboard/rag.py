@@ -1,14 +1,4 @@
 # rag.py — RAG pipeline for lab assistant coaching suggestions
-#
-# Architecture: Dr. Batmaz's hybrid two-layer retrieval (FYP Meeting 3, 2026-04-08).
-#   Layer 1 — pandas pre-filter by student_id (SQL concept, pandas implementation)
-#   Layer 2 — ChromaDB semantic search with student_id metadata filter
-#   Generation — GPT-4o-mini (via shared _get_openai_client()) → 2–3 bullet points
-#
-# chromadb and sentence-transformers are optional; if either is missing the entire
-# module degrades gracefully — generate_assistant_suggestions returns [] silently.
-#
-# Cache pattern mirrors _incorrectness_cache in analytics.py.
 
 from __future__ import annotations
 
@@ -25,19 +15,12 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Module-level state (mirrors _incorrectness_cache in analytics.py:26)
-# ---------------------------------------------------------------------------
 _suggestion_cache: dict[str, list[str]] = {}
 _cluster_suggestion_cache: dict[str, list[str]] = {}
 _cached_session_id: str | None = None
 _cached_row_count: int = 0
 _collection: Any = None  # chromadb.Collection once built
 
-
-# ---------------------------------------------------------------------------
-# Internal helpers
-# ---------------------------------------------------------------------------
 
 _lazy_import_warned: bool = False
 
@@ -61,10 +44,6 @@ def _lazy_import() -> tuple[Any, Any]:
         return None, None
 
 
-# ---------------------------------------------------------------------------
-# Public API
-# ---------------------------------------------------------------------------
-
 def build_rag_collection(df: Any, session_id: str) -> Any:
     """Build (or reuse) a ChromaDB collection for the current session.
 
@@ -75,7 +54,6 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
     """
     global _collection, _cached_session_id, _cached_row_count
 
-    # Rebuild guard
     if (
         _collection is not None
         and session_id == _cached_session_id
@@ -92,16 +70,14 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
 
         collection_name = f"session_{session_id}"
 
-        # If session changed, delete the old collection to prevent stale cross-session bleed
         if session_id != _cached_session_id:
             try:
                 client.delete_collection(name=collection_name)
             except Exception:
-                pass  # collection didn't exist yet — fine
+                pass
 
         collection = client.get_or_create_collection(name=collection_name)
 
-        # Build document lists from the dataframe
         ids: list[str] = []
         documents: list[str] = []
         metadatas: list[dict] = []
@@ -124,7 +100,6 @@ def build_rag_collection(df: Any, session_id: str) -> Any:
         if not documents:
             return None
 
-        # Compute embeddings
         model = SentenceTransformer(config.RAG_EMBEDDING_MODEL)
         embeddings = model.encode(documents, show_progress_bar=False).tolist()
 
@@ -157,19 +132,16 @@ def _extract_bullets(parsed: Any) -> list[str]:
         return [str(b).strip() for b in parsed if isinstance(b, (str, int, float)) and str(b).strip()]
 
     if isinstance(parsed, dict):
-        # First: any value that is a list of short-ish things
         for value in parsed.values():
             if isinstance(value, list) and value:
                 items = [str(v).strip() for v in value if isinstance(v, (str, int, float)) and str(v).strip()]
                 if items:
                     return items
-        # Next: any value that is itself a dict containing a list (one level of nesting)
         for value in parsed.values():
             if isinstance(value, dict):
                 nested = _extract_bullets(value)
                 if nested:
                     return nested
-        # Last resort: treat all string values as bullets
         return [str(v).strip() for v in parsed.values() if isinstance(v, str) and v.strip()]
 
     return []
@@ -186,22 +158,18 @@ def generate_assistant_suggestions(
     Returns [] silently on any error — never breaks the UI.
     Cached per student_id within a session; cleared on session change via clear_suggestion_cache().
     """
-    # Cache hit
     if student_id in _suggestion_cache:
         return _suggestion_cache[student_id]
 
     try:
-        # Layer 1 — pre-filter by student_id
         student_df = df[df["user"] == student_id]
         if len(student_df) < config.RAG_MIN_SUBMISSIONS:
             return []
 
-        # Build (or reuse) collection
         collection = build_rag_collection(df, session_id)
         if collection is None:
             return []
 
-        # Build query from the top-incorrectness question's latest ai_feedback
         top_question_series = (
             student_df.groupby("question")["incorrectness"]
             .mean()
@@ -220,7 +188,6 @@ def generate_assistant_suggestions(
         if not query_text:
             query_text = str(top_question)
 
-        # Layer 2 — ChromaDB semantic search filtered by student_id
         results = collection.query(
             query_texts=[query_text],
             n_results=config.RAG_SUGGESTION_MAX_RESULTS,
@@ -230,7 +197,6 @@ def generate_assistant_suggestions(
         retrieved_docs: list[str] = results.get("documents", [[]])[0] or []
         retrieved_metas: list[dict] = results.get("metadatas", [[]])[0] or []
 
-        # Sort by incorrectness descending so worst errors appear first in the prompt
         paired = sorted(
             zip(retrieved_docs, retrieved_metas),
             key=lambda x: x[1].get("incorrectness", 0.0),
@@ -238,7 +204,6 @@ def generate_assistant_suggestions(
         )
         sorted_docs = [d for d, _ in paired]
 
-        # Build struggle context
         struggle_score: float = 0.0
         struggle_label: str = "Unknown"
         try:
@@ -247,7 +212,6 @@ def generate_assistant_suggestions(
         except Exception:
             pass
 
-        # Top-3 questions by incorrectness for the prompt
         top3 = (
             student_df.groupby("question")["incorrectness"]
             .mean()

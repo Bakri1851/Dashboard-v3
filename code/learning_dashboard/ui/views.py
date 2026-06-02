@@ -26,8 +26,6 @@ def _format_duration(seconds: int) -> str:
     return f"{hours:02d}:{minutes:02d}:{secs:02d}"
 
 
-# In Class View (default)
-
 def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd.DataFrame) -> None:
     """Main leaderboard view with summary cards, leaderboards, and distributions."""
     load_warning = st.session_state.get("session_load_warning")
@@ -42,7 +40,6 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
         unique_questions=df["question"].nunique() if not df.empty else 0,
     )
 
-    # Secondary module filter (in main content area, NOT sidebar)
     modules = ["All Modules"] + sorted(df["module"].unique().tolist()) if not df.empty else ["All Modules"]
     locked_to_session = (
         st.session_state.get("session_active")
@@ -50,7 +47,6 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
         and st.session_state.get("secondary_module_filter") != "All Modules"
     )
     if locked_to_session:
-        # Module is locked by the active lab session — read directly, no widget.
         secondary_module = st.session_state.get("secondary_module_filter", "All Modules")
     else:
         secondary_module = st.selectbox(
@@ -64,8 +60,6 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
         st.warning("No data available for the selected filters.")
         return
 
-    # When a secondary module filter is active, scores must be relative to that
-    # subset — but only recompute when the filter or underlying data changes.
     if secondary_module != "All Modules":
         _sec_key = (st.session_state.get("_analytics_key"), secondary_module)
         if st.session_state.get("_sec_analytics_key") != _sec_key:
@@ -78,13 +72,9 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
             struggle_df = st.session_state["_sec_struggle_df"]
             difficulty_df = st.session_state["_sec_difficulty_df"]
 
-    # Keep a handle on the baseline frame — CF features (n_hat, t_hat, i_norm,
-    # A_norm, d_hat) only exist on the baseline struggle DataFrame.
     baseline_struggle_df = struggle_df
 
-    # --- Model selection (driven by Settings toggles) ---
     if st.session_state.get("improved_models_enabled", False):
-        # Difficulty model
         if st.session_state.get("difficulty_model") == "IRT":
             _irt_df = st.session_state.get("_irt_difficulty_df")
             if _irt_df is not None and not _irt_df.empty:
@@ -98,18 +88,15 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
                 difficulty_df["difficulty_level"] = _d_classified.str[0]
                 difficulty_df["difficulty_color"] = _d_classified.str[1]
 
-        # Struggle model
         if st.session_state.get("struggle_model") == "Improved":
             _improved_struggle_df = st.session_state.get("_improved_struggle_df")
             if _improved_struggle_df is not None and not _improved_struggle_df.empty:
                 struggle_df = _improved_struggle_df
 
-    # Summary cards
     components.render_summary_cards(struggle_df)
 
     st.markdown("---")
 
-    # Side-by-side leaderboards
     left_col, right_col = st.columns(2, gap="large")
 
     with left_col:
@@ -128,7 +115,6 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
 
     st.markdown("---")
 
-    # --- Collaborative Filtering Panel ---
     if st.session_state.get("cf_enabled", False):
         try:
             cf_threshold = st.session_state.get("cf_threshold", 0.6)
@@ -177,27 +163,21 @@ def in_class_view(df: pd.DataFrame, struggle_df: pd.DataFrame, difficulty_df: pd
             st.warning(f"Collaborative Filtering encountered an error: {e}")
             st.markdown("---")
 
-    # Score distributions
     components.render_score_distributions(struggle_df, difficulty_df)
 
     st.markdown("---")
 
-    # Formula info panel
     components.render_formula_info()
 
 
-# Student Drill-Down View
-
 def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataFrame, difficulty_df: pd.DataFrame | None = None) -> None:
     """Detailed view for a single student."""
-    # Back button
     if components.render_back_button(key="back_student"):
         st.session_state["selected_student"] = None
         st.session_state.pop("student_leaderboard", None)
         st.session_state["_nav_loading"] = True
         st.rerun()
 
-    # Filter to this student
     student_df = df[df["user"] == student_id].copy()
     if student_df.empty:
         st.warning(f"No data found for student: {student_id}")
@@ -211,7 +191,6 @@ def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataF
 
     student_data = student_row.iloc[0].to_dict()
 
-    # Header card
     components.render_entity_header_card(
         title=student_id,
         score=student_data["struggle_score"],
@@ -219,12 +198,10 @@ def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataF
         level_color=student_data["struggle_color"],
     )
 
-    # 4 Metric cards
     components.render_student_detail_metrics(student_data)
 
     st.markdown("---")
 
-    # Questions Attempted chart (top 10)
     question_counts = (
         student_df.groupby("question").size().reset_index(name="attempts")
         .sort_values("attempts", ascending=False)
@@ -241,7 +218,6 @@ def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataF
 
     st.markdown("---")
 
-    # Questions table
     student_df_with_fb = data_loader.add_feedback_flag(student_df)
 
     questions_table = (
@@ -260,14 +236,12 @@ def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataF
 
     st.markdown("---")
 
-    # Submission Timeline (hourly)
     components.render_timeline_chart(
         student_df, "timestamp", "Submission Timeline", config.COLORS["cyan"]
     )
 
     st.markdown("---")
 
-    # Retry intensity trend — attempt number per question, rolling average
     trend_df = student_df.sort_values("timestamp").copy().reset_index(drop=True)
     trend_df["attempt_number"] = trend_df.groupby("question").cumcount() + 1
     if len(trend_df) >= 3:
@@ -277,7 +251,6 @@ def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataF
 
     st.markdown("---")
 
-    # Recent Submissions table (last 10, newest first)
     recent = (
         student_df.sort_values("timestamp", ascending=False)
         .head(config.RECENT_SUBMISSIONS_LIMIT)
@@ -285,7 +258,6 @@ def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataF
     )
     components.render_data_table(recent, "Recent Submissions", max_rows=config.RECENT_SUBMISSIONS_LIMIT)
 
-    # --- CF: Similar Students ---
     if st.session_state.get("cf_enabled", False):
         try:
             similar_df = analytics.get_similar_students(student_id, struggle_df, k=5)
@@ -306,18 +278,14 @@ def student_detail_view(df: pd.DataFrame, student_id: str, struggle_df: pd.DataF
             st.warning(f"Could not compute similar students: {e}")
 
 
-# Question Drill-Down View
-
 def question_detail_view(df: pd.DataFrame, question_id: str, difficulty_df: pd.DataFrame) -> None:
     """Detailed view for a single question."""
-    # Back button
     if components.render_back_button(key="back_question"):
         st.session_state["selected_question"] = None
         st.session_state.pop("question_leaderboard", None)
         st.session_state["_nav_loading"] = True
         st.rerun()
 
-    # Filter to this question
     question_df = df[df["question"] == question_id].copy()
     if question_df.empty:
         st.warning(f"No data found for question: {question_id}")
@@ -331,7 +299,6 @@ def question_detail_view(df: pd.DataFrame, question_id: str, difficulty_df: pd.D
 
     question_data = question_row.iloc[0].to_dict()
 
-    # Header card
     components.render_entity_header_card(
         title=question_id,
         score=question_data["difficulty_score"],
@@ -339,10 +306,8 @@ def question_detail_view(df: pd.DataFrame, question_id: str, difficulty_df: pd.D
         level_color=question_data["difficulty_color"],
     )
 
-    # 4 Metric cards
     components.render_question_detail_metrics(question_data)
 
-    # Confidence indicator (only when measurement data available)
     _mdf = st.session_state.get("_measurement_df")
     if _mdf is not None and "incorrectness_confidence" in _mdf.columns:
         q_conf = _mdf[_mdf["question"] == question_id]["incorrectness_confidence"]
@@ -353,7 +318,6 @@ def question_detail_view(df: pd.DataFrame, question_id: str, difficulty_df: pd.D
 
     st.markdown("---")
 
-    # Mistake Clusters
     if "incorrectness" not in question_df.columns:
         st.info("Incorrectness scores not yet computed.")
     else:
@@ -371,7 +335,6 @@ def question_detail_view(df: pd.DataFrame, question_id: str, difficulty_df: pd.D
             else:
                 components.render_mistake_clusters(clusters)
 
-                # RAG pedagogical feedback
                 current_session_id = str(
                     st.session_state.get("loaded_session_id")
                     or lab_state.read_lab_state().get("session_code")
@@ -406,7 +369,6 @@ def question_detail_view(df: pd.DataFrame, question_id: str, difficulty_df: pd.D
 
     st.markdown("---")
 
-    # Students table
     question_df_with_fb = data_loader.add_feedback_flag(question_df)
 
     students_table = (
@@ -422,14 +384,11 @@ def question_detail_view(df: pd.DataFrame, question_id: str, difficulty_df: pd.D
 
     st.markdown("---")
 
-    # Attempt Timeline (hourly)
     components.render_timeline_chart(
         question_df, "timestamp", "Attempt Timeline", config.COLORS["magenta"]
     )
 
 
-
-# Data Analysis View
 
 def data_analysis_view(df: pd.DataFrame) -> None:
     """Secondary view with 5 analytical chart types."""
@@ -478,8 +437,6 @@ def data_analysis_view(df: pd.DataFrame) -> None:
     elif selected_chart == "Students by Module":
         components.render_students_by_module_chart(df)
 
-
-# Settings View
 
 def _setting_toggle(label: str, state_key: str, **kwargs) -> None:
     """Render a checkbox that persists via session state (survives view changes).
@@ -861,7 +818,6 @@ def previous_sessions_view(df: pd.DataFrame) -> None:
         st.caption("No previous sessions yet. End an active lab session to store one.")
         return
 
-    # Academic period filter
     from learning_dashboard.academic_calendar import get_academic_period, academic_period_sorter
 
     def _session_period(record):

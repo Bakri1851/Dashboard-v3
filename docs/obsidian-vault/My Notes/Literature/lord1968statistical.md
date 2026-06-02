@@ -7,14 +7,14 @@ status: active
 last_imported: 2026-05-05
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:24
-  - Report/main-sections/design-and-architecture.tex:871
-  - Report/main-sections/design-and-architecture.tex:886
+  - Report/main-sections/design-and-architecture.tex:872
+  - Report/main-sections/design-and-architecture.tex:887
   - Report/main-sections/requirements-specification.tex:142
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Ch3 – Design and Modelling
   - IRT Difficulty Logic
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # Statistical theories of mental test scores
 

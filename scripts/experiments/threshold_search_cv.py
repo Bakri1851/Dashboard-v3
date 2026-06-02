@@ -29,9 +29,6 @@ import pandas as pd
 from sklearn.metrics import cohen_kappa_score
 from sklearn.model_selection import GroupKFold, LeaveOneOut
 
-# Precomputed linear-weights matrix for 4-class κ — used by fast_kappa() to
-# avoid per-iteration sklearn dispatch (sklearn imports BLAS lazily and the
-# 360k+ calls in the difficulty LOO loop trigger memory pressure).
 _W4 = np.abs(np.arange(4)[:, None] - np.arange(4)[None, :]).astype(np.float64)
 
 
@@ -87,7 +84,6 @@ def search_cutpoints(score: np.ndarray, y: np.ndarray,
         k = fast_kappa(y, pred)
         if k > best[0]:
             best = (k, (float(c1), float(c2), float(c3)))
-    # Refine
     c1b, c2b, c3b = best[1]
     fs = step / 5
     ext = step * 1.5
@@ -101,7 +97,7 @@ def search_cutpoints(score: np.ndarray, y: np.ndarray,
         k = fast_kappa(y, pred)
         if k > best[0]:
             best = (k, (float(c1), float(c2), float(c3)))
-    return best  # (kappa, (c1, c2, c3))
+    return best
 
 
 def cv_threshold_eval(score, y, groups, lo, hi, step, name, baseline_cutpoints):
@@ -124,7 +120,7 @@ def cv_threshold_eval(score, y, groups, lo, hi, step, name, baseline_cutpoints):
         fold_train_kappa.append(train_kappa)
         pooled_pred[te] = to_band(score[te], *cuts)
         if groups is None and fold_idx < 3:
-            continue  # don't spam LOO
+            continue
     cv_kappa = fast_kappa(y, pooled_pred)
     print(f"  CV-pooled κ:  {cv_kappa:+.4f}  (Δ over baseline = {cv_kappa - base_kappa:+.4f})")
 
@@ -165,9 +161,6 @@ def main() -> int:
     v2_score = np.array(pooled["pred"])
     assert np.array_equal(np.array(pooled["y"]), y_s), "pooled_y mismatch"
 
-    # Improved-struggle (BKT + IRT blend) — separate [0,1] score, currently
-    # shares STRUGGLE_THRESHOLDS with the baseline composite even though its
-    # distribution is different. Train its own threshold set.
     matched_imp = [s for s in matched_s
                    if (s.get("improved_components") or {}).get("improved_struggle_score") is not None]
     imp_score = np.array([s["improved_components"]["improved_struggle_score"] for s in matched_imp])
@@ -204,8 +197,6 @@ def main() -> int:
     results["difficulty_v2"] = cv_threshold_eval(
         v2_diff, y_d, None, 0.0, 3.0, 0.05, "difficulty v2 [0,3] LOO (OLS band-index)", (0.5, 1.5, 2.5))
 
-    # IRT difficulty (Rasch 1PL b_raw, min-max scaled to [0,1]) — separate
-    # score from the baseline composite, currently shares DIFFICULTY_THRESHOLDS.
     from backend.models.irt import compute_irt_model
     subs_df = pd.read_parquet(EVAL / "submissions.parquet")
     print(f"  fitting 2PL on {len(subs_df):,} submissions for IRT thresholds...")
@@ -225,7 +216,6 @@ def main() -> int:
         "difficulty IRT [0,1] LOO (Rasch 1PL, scaled) — currently shares DIFFICULTY_THRESHOLDS",
         (0.35, 0.5, 0.75))
 
-    # Compare against the in-sample fit numbers from threshold_search.json
     try:
         in_sample = _load("experiments/threshold_search.json")
         print()

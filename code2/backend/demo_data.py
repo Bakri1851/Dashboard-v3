@@ -97,7 +97,6 @@ def live_response() -> LiveDataResponse:
     total_subs = sum(row.submissions for row in s)
     mean_inc = round(sum(row.recent for row in s) / max(len(s), 1), 3)
 
-    # Tiny synthetic 24h heartbeat — gentle ramp peaking at the most recent hours.
     timeline = [0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 5, 7, 9, 12, 14, 18, 22, 25, 28, 31, 34]
 
     return LiveDataResponse(
@@ -115,12 +114,10 @@ def live_response() -> LiveDataResponse:
     )
 
 
-# Index struggle data by id so /student/<id> can build a detail row from it.
 _STRUGGLE_BY_ID: dict[str, tuple[str, str, float, int, float, float]] = {
     row[0]: row for row in _DEMO_STRUGGLE
 }
 
-# Same for difficulty so /question/<id> can build a detail row from it.
 _DIFFICULTY_BY_ID: dict[str, tuple[str, str, float, int, float, str]] = {
     row[0]: row for row in _DEMO_DIFFICULTY
 }
@@ -136,9 +133,6 @@ def student_detail(student_id: str) -> StudentDetail | None:
         return None
     _id, level, score, subs, recent, trend = row
 
-    # Synthetic component breakdown that sums (weighted) to roughly `score`.
-    # Values are 0–1; weights mirror config but the exact total isn't critical
-    # for the preview UI, which just renders bars + labels.
     components = [
         ScoreComponent(key="n_hat", label="n̂ submissions", value=min(subs / 50.0, 1.0), weight=0.10),
         ScoreComponent(key="t_hat", label="t̂ time active", value=0.55, weight=0.05),
@@ -149,7 +143,6 @@ def student_detail(student_id: str) -> StudentDetail | None:
         ScoreComponent(key="rep_hat", label="rep̂ repetition", value=0.18, weight=0.10),
     ]
 
-    # 10-point trajectory drifting around `recent` so the sparkline isn't flat.
     trajectory = [
         round(max(0.0, min(1.0, recent + 0.08 * ((i % 3) - 1) - 0.01 * i)), 3)
         for i in range(10)
@@ -249,7 +242,6 @@ def has_question(question_id: str) -> bool:
     return question_id in _DIFFICULTY_BY_ID
 
 
-# Per-question canned mistake clusters + recent answers. Keyed by question id.
 _QUESTION_DETAILS: dict[str, dict] = {
     "Q-1407": {
         "clusters": [
@@ -337,7 +329,6 @@ def question_detail(question_id: str) -> QuestionDetail | None:
         for label, count, pct, examples in cluster_specs
     ]
 
-    # Pull a few real demo student ids so the cross-link to /student/<id> works.
     demo_student_ids = [r[0] for r in _DEMO_STRUGGLE]
     top_strugglers: list[QuestionStudentRow] = []
     for i, sid in enumerate(demo_student_ids[:7]):
@@ -412,11 +403,6 @@ def question_rag(question_id: str) -> RagSuggestions | None:
     )
 
 
-# ----------------------------------------------------------------
-# Saved sessions + progression replay (Previous Sessions view)
-# ----------------------------------------------------------------
-
-# (id, name, start_iso, end_iso, students, flagged)
 _DEMO_SESSIONS: tuple[tuple[str, str, str, str, int, int], ...] = (
     ("demo-mon-1400",
      "25COA122 · Monday 14:00 (demo)",
@@ -487,18 +473,14 @@ def _progression_curve(
 
         needs = max(end_needs, int(round(start_needs - (start_needs - end_needs) * frac)))
         strug = max(end_strug, int(round(start_strug - (start_strug - end_strug) * frac)))
-        # On-track + minor grow as needs/strug shrink, capped at total students.
         on_track = min(total_students - needs - strug, max(0, int(round(frac * (total_students - end_needs - end_strug)))))
         minor = max(0, total_students - needs - strug - on_track)
 
-        # Difficulty roughly steady — questions don't change mid-session. Tiny
-        # tail growth in 'Easy' as students get exposure.
         easy = 2 + int(round(frac * 2))
         medium = 3
         hard = 3
         very_hard = 2
 
-        # Pop the first few struggle ids as they get helped — visual narrative.
         slots = max(needs, flagged_at_end)
         needs_ids = needs_help_pool[:max(0, slots)]
 
@@ -532,8 +514,6 @@ def session_progression(session_id: str, buckets: int = 12) -> SessionProgressio
     flagged = record[5]
     students = record[4]
 
-    # Each session has a slightly different shape — Monday went well, Thursday
-    # had a stubborn group, Friday was a quick clean lab.
     profiles = {
         "demo-mon-1400": dict(start_inc=0.55, end_inc=0.32, start_needs=5, end_needs=flagged,
                               start_strug=4, end_strug=2),

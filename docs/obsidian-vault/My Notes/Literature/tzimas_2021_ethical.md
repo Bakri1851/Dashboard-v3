@@ -11,7 +11,7 @@ cited_in_tex:
   - Report/main-sections/requirements-specification.tex:35
 cited_in_planned:
   - Ch2 – Background and Requirements
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # Ethical issues in learning analytics: a review of the field
 

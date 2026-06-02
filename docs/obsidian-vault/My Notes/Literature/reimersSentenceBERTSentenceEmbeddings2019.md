@@ -8,11 +8,11 @@ last_imported: 2026-05-05
 tags: [Computation and Language (cs.CL), FOS: Computer and information sciences]
 cited_in_tex:
   - Report/appendix-sections/themes-and-references.tex:30
-  - Report/main-sections/design-and-architecture.tex:1200
+  - Report/main-sections/design-and-architecture.tex:1201
   - Report/main-sections/requirements-specification.tex:230
   - Report/main-sections/requirements-specification.tex:231
 cited_in_planned: []
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks
 

@@ -47,8 +47,6 @@ def make_irt_discrimination():
         return
     print(f"  fitted: {len(qdf)} questions, convergence={model['convergence']}, log-likelihood={model['log_likelihood']:.1f}")
 
-    # Use the raw logit difficulty (b_raw) for the x-axis — that's the natural
-    # 2PL parameterisation. discrimination is alpha (irt_discrimination).
     if "b_raw" not in qdf.columns or "irt_discrimination" not in qdf.columns:
         print(f"  expected b_raw + irt_discrimination columns, got {list(qdf.columns)} — skipping")
         return
@@ -59,14 +57,12 @@ def make_irt_discrimination():
     fig, ax = plt.subplots(figsize=(10, 6.5))
     ax.scatter(beta, alpha, s=60, c="#F08080", alpha=0.65, edgecolor="black", linewidth=0.5)
 
-    # Reference lines
     ax.axhline(1.0, color="grey", linestyle="--", linewidth=1, alpha=0.7,
                label="Rasch-equivalent ($\\alpha = 1$)")
     ax.axhline(0.5, color="grey", linestyle=":", linewidth=1, alpha=0.7,
                label="low-discrimination cutoff ($\\alpha \\leq 0.5$)")
     ax.axvline(0.0, color="grey", linestyle=":", linewidth=0.8, alpha=0.5)
 
-    # Highlight low-discrimination items
     low_disc_mask = alpha <= 0.5
     n_low = int(low_disc_mask.sum())
     if n_low > 0:
@@ -84,7 +80,6 @@ def make_irt_discrimination():
     ax.legend(loc="best", fontsize=9, framealpha=0.95)
     ax.grid(True, alpha=0.3)
 
-    # Annotation box: methodology note
     n_neg_disc = int((alpha < 0).sum())
     annot = (
         f"{n_low} of {len(qdf)} questions have $\\alpha \\leq 0.5$\n"
@@ -117,7 +112,6 @@ def make_incorrectness_histogram():
     fig, ax = plt.subplots(figsize=(11, 6))
     counts, edges, patches = ax.hist(inc, bins=50, color="#F08080", edgecolor="black", linewidth=0.4)
 
-    # Highlight the 0.5 bin in red
     centre_bin_idx = int(np.argmin(np.abs(edges[:-1] - 0.5)))
     if 0 <= centre_bin_idx < len(patches):
         patches[centre_bin_idx].set_facecolor("#ff2d55")

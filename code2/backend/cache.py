@@ -32,31 +32,16 @@ _EMPTY_DF = pd.DataFrame(
     ]
 )
 
-# Analytics caches hold aggregate leaderboards (struggle/difficulty) — 15
-# min is tolerable because individual live-dispatch events flow through the
-# raw-data path (60 s TTL) and the lab-assistant view. The longer TTL stops
-# fixed-window views ("Today", saved-session windows, scrubbing back through
-# Previous Sessions) from rebuilding on every poll cycle; live polling with
-# a rolling `to=` value misses the cache regardless and is unaffected.
 _ANALYTICS_TTL = 900  # seconds
-_IMPROVED_TTL = 600   # seconds — IRT+BKT fits are the most expensive path
+_IMPROVED_TTL = 600   # seconds
 
 _df_cache: TTLCache = TTLCache(maxsize=1, ttl=config.CACHE_TTL)
-# maxsize=16 covers a full day of window flips (Today / Past Hour / Current
-# Week / Custom × live-session toggles) without eviction thrash.
 _struggle_cache: TTLCache = TTLCache(maxsize=16, ttl=_ANALYTICS_TTL)
 _difficulty_cache: TTLCache = TTLCache(maxsize=16, ttl=_ANALYTICS_TTL)
 _improved_cache: TTLCache = TTLCache(maxsize=4, ttl=_IMPROVED_TTL)
-# IRT difficulty fit is expensive (Rasch MLE on question × student matrix);
-# cache separately so the Model Comparison view can reuse it cheaply.
 _irt_difficulty_cache: TTLCache = TTLCache(maxsize=4, ttl=_IMPROVED_TTL)
-# CF diagnostics derive from struggle_df + threshold; mirror the analytics TTL.
 _cf_cache: TTLCache = TTLCache(maxsize=16, ttl=_ANALYTICS_TTL)
 
-# Single-flight locks prevent thundering-herd rebuilds when TTL expires and
-# multiple pollers hit the endpoint at the same moment. Without these, a
-# single slow rebuild (>2 min on 34k records) was fanned out across every
-# queued request, saturating the FastAPI threadpool.
 _df_lock = threading.Lock()
 _struggle_lock = threading.Lock()
 _difficulty_lock = threading.Lock()
@@ -112,11 +97,6 @@ def _load_dataframe_uncached() -> tuple[pd.DataFrame, str]:
             logger.warning("lab_classes.tag_records raised: %s", e)
 
     if not df.empty and "ai_feedback" in df.columns and "incorrectness" not in df.columns:
-        # Cache-lookup only — never block the request path on OpenAI. The
-        # background prewarm in main.py::_prewarm fills _incorrectness_cache
-        # (capped on its first load_dataframe(), then uncapped in a follow-up
-        # call). Uncached feedbacks resolve to 0.5 here and upgrade to real
-        # scores on the next cache expiry once the prewarm has populated them.
         try:
             df["incorrectness"] = incorrectness.compute_incorrectness_column(df, score_new=False)
         except Exception:
@@ -235,7 +215,6 @@ def load_improved_struggle_df(
     that the Settings sliders (p_init, p_learn, p_guess, p_slip) actually
     shape the output. The cache key is the window only — runtime-param
     changes go through `POST /api/settings` which calls `invalidate()`."""
-    # Local import keeps the cache module import-safe during router boot.
     from backend import runtime_config as _rc_mod
 
     key = _window_key(from_, to_, module)
@@ -247,11 +226,6 @@ def load_improved_struggle_df(
         df, _ = load_dataframe()
         sliced = _slice_df(df, from_, to_, module)
         rc = _rc_mod.get()
-        # If the user hasn't touched the sliders, prefer the per-skill fitted
-        # params populated by the prewarm (_bkt.fit_all_skills). Any slider
-        # deviation from the config defaults counts as an explicit override
-        # and disables the fitted-params path so the slider actually takes
-        # effect.
         at_defaults = (
             rc.bkt_p_init == config.BKT_P_INIT
             and rc.bkt_p_learn == config.BKT_P_LEARN
@@ -259,8 +233,6 @@ def load_improved_struggle_df(
             and rc.bkt_p_slip == config.BKT_P_SLIP
         )
         per_skill = bkt.get_fitted_params() if at_defaults else None
-        # Trained v2 mix-weights, loaded unconditionally (the trained model is
-        # the deployed system).
         mix_weights = improved_struggle._load_v2_weights()
         try:
             mastery_df = bkt.compute_all_mastery(
@@ -276,10 +248,6 @@ def load_improved_struggle_df(
                 if not mastery_df.empty
                 else None
             )
-            # Reuse the IRT model cache so a back-to-back request doesn't
-            # re-fit. We need the full model dict here (not just the difficulty
-            # projection) because the IRT-residual difficulty-adjusted signal
-            # needs b_raw + a_j + per-student θ.
             irt_model = load_irt_model(from_, to_, module)
             irt_diff_full = irt_model.get("difficulty_df", pd.DataFrame())
             irt_ability = irt_model.get("ability_df", pd.DataFrame())
@@ -453,8 +421,6 @@ def invalidate() -> None:
     _improved_cache.clear()
     _irt_difficulty_cache.clear()
     _cf_cache.clear()
-    # Result caches that live in router modules. Lazy-imported to avoid an
-    # import cycle (the routers import from cache).
     try:
         from backend.routers import analysis as _analysis_router
         _analysis_router.invalidate()

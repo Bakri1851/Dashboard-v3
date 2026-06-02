@@ -1,45 +1,61 @@
 # 07 — Citations: wire orphans + Candidate References
 
-Two-step. **Step 1** needs no new references at all — 16 already-present entries in `references.bib` are uncited and several are the exact methods the chapters use. **Step 2** is a small set of genuinely-new refs for you to validate in Zotero (I do **not** edit `references.bib`). ← [[00 Index]]
+✅ **Closed 2026-06-01.** Re-audited against the live report with `scripts/sync_literature.py` (authoritative). **12 orphaned keys wired** into the `.tex` (gated, verbatim — `references.bib` never hand-edited); **4 keys recommended for Zotero removal**. Result: **0 broken cites**; the only remaining orphans are those 4 deliberate cuts. ← [[00 Index]]
 
-## Step 1 — Wire orphaned references into prose (no Zotero, no `.bib` edit)
-All 16 keys confirmed present in `references.bib` (line numbers given) with **0 current citations**. Attach each at the point of use, then they stop being dead entries (`ieeetr` silently drops uncited ones).
+> Method: I do **not** edit `references.bib` (Zotero/Better BibTeX is source of truth). Cuts are actioned by you in Zotero; every wiring was previewed as a `.tex` diff and applied after sign-off.
 
-| Orphan key (`.bib` line) | Attach at |
+## Final coverage (`coverage.md`, 2026-06-01)
+
+90 bib entries · 228 `\cite{}` calls across 86 keys · **0 broken** · **4 orphans** (the cuts below). Backend: `\usepackage{cite}` + `\bibliographystyle{ieeetr}` (plain `\cite{}`).
+
+## Wired (12) — applied
+
+| # | Key | File:line | Grounds the claim |
+|---|---|---|---|
+| 1 | `cohenWeightedKappaNominal1968` | `results-and-evaluation.tex:33` | weighted κ (linear-vs-quadratic weighting) — the weighted-κ source |
+| 2 | `breimanRandomForests2001` | `results-and-evaluation.tex:220` | "random forest" in the model-class bake-off |
+| 3 | `friedmanGreedyFunctionApproximation2001` | `results-and-evaluation.tex:220` | "gradient boosting" in the bake-off |
+| 4 | `pedregosaScikitlearnMachineLearning2012` | `implementation.tex:68` | scikit-learn dependency row |
+| 5 | `hunterExponentiallyWeightedMoving1986` | `design-and-architecture.tex:593` | EWMA temporal smoothing |
+| 6 | `gelmanBayesianDataAnalysis2013` | `design-and-architecture.tex:562` | conjugate-prior Bayesian shrinkage |
+| 7 | `oecdHandbookConstructingComposite2008` | `design-and-architecture.tex:443` | composite-indicator normalisation |
+| 8 | `saisanaUncertaintySensitivityAnalysis2005` | `results-and-evaluation.tex:325` | cohort-sensitivity of the cutpoints |
+| 9 | `liuGEvalNLGEvaluation2023` | `requirements-specification.tex:154` | LLM-as-rater cluster (G-Eval) |
+| 10 | `beckWheelSpinningStudentsWho2013` | `requirements-specification.tex:93` | wheel-spinning / repeated failure |
+| 11 | `hattiePowerFeedback2007` | `requirements-specification.tex:13` | feedback improves learning |
+| 12 | `blackAssessmentClassroomLearning1998` | `requirements-specification.tex:13` | formative-assessment grounding |
+
+## Cut (4) — remove in Zotero, then re-export
+
+| Key | Why |
 |---|---|
-| `spearmanProofMeasurementAssociation1904` (984) | first Spearman ρ use, Eval Metrics subsection / §5.4 ~l149 |
-| `CoefficientAgreementNominal` (171, Cohen 1960) | first Cohen's κ use ~l255 (unweighted basis) |
-| `landisMeasurementObserverAgreement1977` (570) | "fair-to-moderate" κ band reading ~l503 |
-| `fawcettIntroductionROCAnalysis2006` (261) | BKT ROC-AUC, design l705 + §5.3 per-skill AUC |
-| `hanleyMeaningUseArea1982` (357) | alongside Fawcett at the AUC mentions |
-| `oecdHandbookConstructingComposite2008` (788) | composite normalisation (Ch3 §3.3) + threshold sensitivity (§5.4.5) |
-| `saisanaUncertaintySensitivityAnalysis2005` (920) | cohort-dependence of cutpoints (§5.4.5, §5.6.3; conclusion l59–69) |
-| `hunterExponentiallyWeightedMoving1986` (442) | EWMA / time-decay definitions (Ch3 l209–215, l336–338) |
-| `korenCollaborativeFilteringTemporal2010` (545) | CF cold-start (Ch3 l156) **and** the Netflix claim (req §2.1.3 l62) |
-| `liuGEvalNLGEvaluation2023` (641) | LLM-as-rater first mention (§5.4 l24) — Ch5 only (Ch2 §2.2.4 left unexpanded; see [[06 Background Lit-Review Expansion]]) |
-| `gelmanBayesianDataAnalysis2013` (317) | Bayesian shrinkage conjugate-prior framing (Ch3 l293–303; Ch2 B2) |
-| `hattiePowerFeedback2007` (373) | feedback-value framing (Intro / Ch2 struggle) |
-| `blackAssessmentClassroomLearning1998` (108) | formative-assessment framing (Intro / Ch2) |
-| `bakerDevelopingGeneralizableDetector2008` (74) | struggle/affect-detector context (Ch2 §2.2.1) |
-| `beckWheelSpinningStudentsWho2013` (91) | "wheel-spinning"/repeated-failure struggle context (Ch2 §2.2.1) |
-| `fisherMathematicalFoundationsTheoretical1922` (278) | correlation/statistics grounding (Eval Metrics) — or drop if no clean home |
+| `bakerDevelopingGeneralizableDetector2008` | Paper is about students *gaming the system*, not struggle — no honest home in the current text. |
+| `korenCollaborativeFilteringTemporal2010` | *Temporal-dynamics* CF; no claim invokes it (briefly wired at `:168`, reverted on review). |
+| `LimitedMemoryAlgorithm` | Exact duplicate of the already-cited `byrdLimitedMemoryAlgorithm1995` (`design:908`, `implementation.tex:66`/`:842`). |
+| `fisherMathematicalFoundationsTheoretical1922` | Redundant with `spearman…1904`. *(Optional keep: MLE home at `design:899`.)* |
 
-- Any orphan with no natural home (likely `fisherMathematicalFoundationsTheoretical1922`) should be **deleted** from `.bib` rather than left padding the bibliography — an examiner may probe uncited entries.
+## Already resolved before this pass (verify only)
 
-## Step 2 — Candidate references to validate in Zotero (web-verified metadata)
-**Workflow:** add each to Zotero → check the DOI/details → Better BibTeX export updates `references.bib`. I will **not** touch `.bib`. Suggested citekey shown; adjust to your BBT convention.
+`spearmanProofMeasurementAssociation1904` (`results:25`), `CoefficientAgreementNominal` / Cohen 1960 (`results:33`), `landisMeasurementObserverAgreement1977` (`results:33`), `fawcettIntroductionROCAnalysis2006` + `hanleyMeaningUseArea1982` (`results:35`).
 
-1. **Cohen, J. (1968).** Weighted kappa: Nominal scale agreement with provision for scaled disagreement or partial credit. *Psychological Bulletin* 70(4), 213–220. DOI `10.1037/h0026256`. → `cohenWeightedKappaNominal1968`. **Why:** the chapter uses *linear-weighted* κ; the `.bib` only has Cohen 1960 (unweighted). Attach at first weighted-κ use (`sec:eval-metrics`) + threshold table (`sec:eval-thresholds`); Ch2 B3 dropped — eval methodology, not background ([[06 Background Lit-Review Expansion]]).
-2. **Breiman, L. (2001).** Random Forests. *Machine Learning* 45(1), 5–32. DOI `10.1023/A:1010933404324`. → `breimanRandomForests2001`. **Why:** named in the §5.4 bake-off (`sec:eval-comparison`) — eval baseline, not Ch2 background ([[06 Background Lit-Review Expansion]]).
-3. **Friedman, J. H. (2001).** Greedy function approximation: A gradient boosting machine. *The Annals of Statistics* 29(5), 1189–1232. DOI `10.1214/aos/1013203451`. → `friedmanGreedyFunctionApproximation2001`. **Why:** gradient boosting in the §5.4 bake-off (`sec:eval-comparison`) — eval baseline, not Ch2 background ([[06 Background Lit-Review Expansion]]).
-4. **Ryan, A. M., Pintrich, P. R., & Midgley, C. (2001).** Avoiding seeking help in the classroom: Who and why? *Educational Psychology Review* 13(2), 93–114. DOI `10.1023/A:1009013420053`. → `ryanAvoidingSeekingHelp2001`. **Why:** grounds the help-seeking-reluctance claim. **Not needed this pass — [[06 Background Lit-Review Expansion]] A2 dropped; the claim is grounded by the survey (§5.5). Optional literature anchor only.**
-5. **Hastie, T., Tibshirani, R., & Friedman, J. (2009).** *The Elements of Statistical Learning* (2nd ed.). Springer. DOI `10.1007/978-0-387-84858-7`, ISBN 9780387848570. → `hastieElementsStatisticalLearning2009`. **Why:** anchors OLS as the deployed linear estimator (Ch2 §2.2.4 — [[06 Background Lit-Review Expansion]] A1; Ch3 R5). The model-class bake-off discussion stays in Ch5 (`sec:eval-comparison`). **✅ In `.bib` 2026-06-01 and cited at §2.2.4 — delete the duplicate `hastieElementsStatisticalLearning2009a` (l435) in Zotero.**
-6. **Bass, L., Clements, P., & Kazman, R. (2012).** *Software Architecture in Practice* (3rd ed.). Addison-Wesley. ISBN 9780321815736. → `bassSoftwareArchitecturePractice2012`. **Why:** optional grounding for the layered-architecture rationale (Ch3 l6–7). Low priority; [[06 Background Lit-Review Expansion]] B5 dropped from the scoped pass (still optional).
+## Candidate references (Step 2) — status
 
-**Footnote URLs (not Zotero papers):**
-- `all-MiniLM-L6-v2` model card → `https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2` (cite as a footnote at the embedding-model choice, `implementation.tex` l1053).
-- `gpt-4o-mini` → OpenAI model docs (`https://platform.openai.com/docs/models`) as a footnote at the incorrectness-scorer model choice.
+- **Cohen-1968 / Breiman / Friedman / scikit-learn** → were added to Zotero, now wired above (#1–4).
+- **Hastie ESL** (`hastieElementsStatisticalLearning2009`) → in bib + cited at `requirements:152`. Done.
+- **Ryan help-seeking** (`ryanAvoidingSeekingHelp2001`), **Bass architecture** (`bassSoftwareArchitecturePractice2012`) → not added; optional only.
+- **Outstanding (planned, not in Zotero):** `khajah_2014_incorporating` (add only if citing); `manningIntroductionInformationRetrieval2008` — **edition clash** with the already-cited `manningIntroductionInformationRetrieval2006` (`requirements:186`); pick one.
 
-**Reframed, not cited:** the class-size→monitoring-difficulty claim (Intro l15–16) — reframe as a design premise rather than chase a possibly-shaky citation (no confidently-canonical source found).
+## Hygiene flags (author's call — not silently changed)
 
-> After any `.bib` change, re-run `python scripts/sync_literature.py` (keeps the vault literature notes + `coverage.md` in sync). Verify every newly-cited key resolves with a clean `bibtex` pass.
+- `results:33` still phrases it "quadratic-weighted" while now citing the weighted-κ source — confirm the wording matches the deployed metric (linear-weighted).
+- Typo "simated alternatives" at `results-and-evaluation.tex:176`.
+- 10 bib entries have **no literature note** (`coverage.md` → *no literature note*), several of them cited (`landis…1977`, `akiba…2019`, `hastie…2009`, `morris…1983`, `NIPS2011_86e8f7ab`). Run the Zotero Integration import so `sync_literature.py` tracks them. Non-blocking.
+- Footnote URLs (not Zotero papers): `all-MiniLM-L6-v2` model card, `gpt-4o`/`gpt-4o-mini` docs — cite as footnotes at the model-choice mentions in `implementation.tex`.
+
+## Definition of done
+
+- ✅ 12 wirings applied; `sync_literature.py` clean — **0 broken cites**.
+- ⬜ **You (Zotero):** remove the 4 cuts → re-export `references.bib` → re-run `python scripts/sync_literature.py` → **0 orphans**.
+- ⬜ Flip Note 07 in [[00 Index]] to ✅ once the Zotero cuts land.
+
+> This (07) is the sole reference-reform note. (An earlier draft referenced "22/23 reference reform"; those files do not exist.)

@@ -26,8 +26,6 @@ def _get_openai_client() -> OpenAI:
     return OpenAI(api_key=key)
 
 
-# Incorrectness Estimation via OpenAI
-
 _incorrectness_cache: dict[str, float] = {}
 _cluster_cache: dict[tuple[str, int, str], list[dict] | None] = {}
 
@@ -45,14 +43,12 @@ def _parse_scores_response(text: str, expected_len: int) -> Optional[list[float]
     if not text:
         return None
     cleaned = text.strip()
-    # Strip markdown fences: ```json ... ``` or ``` ... ```
     if cleaned.startswith("```"):
         cleaned = re.sub(r"^```[a-zA-Z0-9]*\s*", "", cleaned)
         cleaned = re.sub(r"\s*```$", "", cleaned)
         cleaned = cleaned.strip()
 
     candidates = [cleaned]
-    # Fallback — pull the first [...] block out of whatever prose wraps it.
     match = _JSON_ARRAY_RE.search(cleaned)
     if match and match.group(0) != cleaned:
         candidates.append(match.group(0))
@@ -136,10 +132,8 @@ def compute_incorrectness_column(df: pd.DataFrame) -> pd.Series:
     """
     feedbacks = df["ai_feedback"].astype(str).str.strip()
 
-    # Collect unique non-empty texts not yet cached
     uncached = [t for t in feedbacks.unique() if t and t not in _incorrectness_cache]
 
-    # Fetch in batches — only cache successful responses.
     for i in range(0, len(uncached), config.OPENAI_BATCH_SIZE):
         batch = uncached[i : i + config.OPENAI_BATCH_SIZE]
         scores = _call_openai_batch(batch)
@@ -148,8 +142,6 @@ def compute_incorrectness_column(df: pd.DataFrame) -> pd.Series:
 
     return feedbacks.map(lambda t: _incorrectness_cache.get(t, 0.5))
 
-
-# Min-Max Normalization
 
 def min_max_normalise(series: pd.Series) -> pd.Series:
     """(x - min) / (max - min), clamped to [0, 1].
@@ -165,10 +157,6 @@ def min_max_normalise(series: pd.Series) -> pd.Series:
     result = (series - min_val) / (max_val - min_val)
     return result.clip(0.0, 1.0)
 
-
-# -----------------------------------------------------------------
-# Recent Incorrectness (A_raw)
-# -----------------------------------------------------------------
 
 def compute_recent_incorrectness(student_submissions: pd.DataFrame) -> float:
     """
@@ -196,8 +184,6 @@ def compute_recent_incorrectness(student_submissions: pd.DataFrame) -> float:
         for ts in timestamps
     ]
 
-    # Equal-weight fallback if all timestamps are identical (e.g. bulk import).
-    # Exponentials are always positive, so no zero-sum check needed.
     if all(w == raw_weights[0] for w in raw_weights):
         return sum(scores) / n_actual
 
@@ -205,10 +191,6 @@ def compute_recent_incorrectness(student_submissions: pd.DataFrame) -> float:
     weights = [w / weight_sum for w in raw_weights]
     return sum(w * s for w, s in zip(weights, scores))
 
-
-# -----------------------------------------------------------------
-# Improvement Trajectory Helper
-# -----------------------------------------------------------------
 
 def _compute_slope(student_submissions: pd.DataFrame) -> float:
     """
@@ -225,10 +207,6 @@ def _compute_slope(student_submissions: pd.DataFrame) -> float:
     return float(slope)
 
 
-# -----------------------------------------------------------------
-# Classification Helpers
-# -----------------------------------------------------------------
-
 def classify_score(
     score: float,
     thresholds: list[tuple[float, float, str, str]],
@@ -243,10 +221,6 @@ def classify_score(
                 return label, color
     return thresholds[-1][2], thresholds[-1][3]
 
-
-# -----------------------------------------------------------------
-# Student Struggle Score
-# -----------------------------------------------------------------
 
 def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -271,27 +245,21 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
     for user, group in grouped:
         n = len(group)
 
-        # Time active (minutes from first to last submission)
         if n > 1:
             t = (group["timestamp"].max() - group["timestamp"].min()).total_seconds() / 60.0
         else:
             t = 0.0
 
-        # Mean incorrectness: continuous gradient, no binary threshold
         i_hat = group["incorrectness"].mean()
 
-        # Retry rate: fraction of submissions that are repeats of an already-attempted question
         unique_q = group["question"].nunique()
         r_hat = 1.0 - (unique_q / n) if n > 0 else 0.0
 
         # Recent incorrectness (A_raw)
         a_raw = compute_recent_incorrectness(group)
 
-        # Improvement trajectory: linear slope of incorrectness over submission order
         d_raw = _compute_slope(group)
 
-        # Answer repetition rate: fraction of submissions that exactly repeat
-        # a previously submitted answer on the same question (exact match after strip).
         total_repeat_submissions = 0
         for _q, q_group in group.groupby("question"):
             answers = q_group.sort_values("timestamp")["student_answer"].tolist()
@@ -319,9 +287,6 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
 
     result = pd.DataFrame(rows)
 
-    # Min-max normalise every composite input so the configured weights match
-    # the effective weights. Raw [0, 1] rates (i_hat, r_hat, A_raw, rep_hat)
-    # are retained for display; the _norm columns feed the weighted sum.
     result["n_hat"] = min_max_normalise(result["n_raw"])
     result["t_hat"] = min_max_normalise(result["t_raw"])
     result["d_hat"] = min_max_normalise(result["d_raw"])  # positive = getting worse
@@ -330,7 +295,6 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
     result["A_norm"] = min_max_normalise(result["A_raw"])
     result["rep_norm"] = min_max_normalise(result["rep_hat"])
 
-    # Compute S_raw
     result["struggle_score"] = (
         config.STRUGGLE_WEIGHT_N * result["n_hat"]
         + config.STRUGGLE_WEIGHT_T * result["t_hat"]
@@ -341,37 +305,26 @@ def compute_student_struggle_scores(df: pd.DataFrame) -> pd.DataFrame:
         + config.STRUGGLE_WEIGHT_REP * result["rep_norm"]
     ).clip(0.0, 1.0)
 
-    # Bayesian shrinkage: pull low-n scores toward the class mean to reduce noise.
-    # w_n = n / (n + K) → students with few submissions are shrunk more strongly.
     s_class_mean = result["struggle_score"].mean()
     w_n = result["n_raw"] / (result["n_raw"] + config.SHRINKAGE_K)
     result["struggle_score"] = (
         w_n * result["struggle_score"] + (1 - w_n) * s_class_mean
     ).clip(0.0, 1.0)
 
-    # Classify
     levels_colors = result["struggle_score"].apply(
         lambda s: classify_score(s, config.STRUGGLE_THRESHOLDS)
     )
     result["struggle_level"] = levels_colors.apply(lambda x: x[0])
     result["struggle_color"] = levels_colors.apply(lambda x: x[1])
 
-    # Convenience columns
     result["mean_incorrectness_pct"] = (result["i_hat"] * 100).round(1)
     result["recent_incorrectness"] = result["A_raw"].round(3)
 
-    # Sort descending by score
     result = result.sort_values("struggle_score", ascending=False).reset_index(drop=True)
 
     return result
 
 
-# -----------------------------------------------------------------
-# Collaborative Filtering Struggle Detection
-# -----------------------------------------------------------------
-
-# All CF features must be on the same cohort-relative [0, 1] scale for
-# cosine similarity to be meaningful — use the normalised columns added in M1.
 CF_FEATURES = ["n_hat", "t_hat", "i_norm", "A_norm", "d_hat"]
 
 
@@ -408,16 +361,10 @@ def compute_cf_struggle_scores(
             diagnostics["reason"] = f"missing baseline feature columns: {missing}"
             return struggle_df["struggle_score"].copy(), diagnostics
 
-        # Interaction matrix from normalised features. Guard against NaN
-        # leaking in from upstream (e.g. min_max_normalise on all-equal
-        # columns in degenerate cohorts) — cosine_similarity returns NaN
-        # rows when fed NaN, which would silently collapse scores to 0.
         X = np.nan_to_num(struggle_df[CF_FEATURES].values, nan=0.0)
 
-        # Pairwise cosine similarity
         W = cosine_similarity(X)
 
-        # Binary help-need labels from parametric scores
         h = (struggle_df["struggle_score"].values >= threshold).astype(float)
         diagnostics["n_flagged_parametric"] = int(h.sum())
 
@@ -517,10 +464,6 @@ def get_similar_students(
         return None
 
 
-# -----------------------------------------------------------------
-# Question Difficulty Score
-# -----------------------------------------------------------------
-
 def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
     """
     Compute difficulty scores for all questions in the DataFrame.
@@ -549,7 +492,6 @@ def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
         correct_count = (group["incorrectness"] < config.CORRECT_THRESHOLD).sum()
         c_tilde = 1.0 - (correct_count / total_attempts) if total_attempts > 0 else 0.0
 
-        # t_raw: avg time per student (all students; 1-attempt students contribute 0)
         time_values = []
         for _user, user_group in group.groupby("user"):
             if len(user_group) >= 2:
@@ -586,16 +528,12 @@ def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
 
     result = pd.DataFrame(rows)
 
-    # Min-max normalise every composite input so configured weights match
-    # effective weights. Raw rates (c_tilde, f_tilde, p_tilde) are retained
-    # for display (incorrect_rate_pct); _norm columns feed the weighted sum.
     result["t_tilde"] = min_max_normalise(result["t_raw"])
     result["a_tilde"] = min_max_normalise(result["a_raw"])
     result["c_norm"] = min_max_normalise(result["c_tilde"])
     result["f_norm"] = min_max_normalise(result["f_tilde"])
     result["p_norm"] = min_max_normalise(result["p_tilde"])
 
-    # Compute D_raw
     result["difficulty_score"] = (
         config.DIFFICULTY_WEIGHT_C * result["c_norm"]
         + config.DIFFICULTY_WEIGHT_T * result["t_tilde"]
@@ -604,25 +542,18 @@ def compute_question_difficulty_scores(df: pd.DataFrame) -> pd.DataFrame:
         + config.DIFFICULTY_WEIGHT_P * result["p_norm"]
     ).clip(0.0, 1.0)
 
-    # Classify
     levels_colors = result["difficulty_score"].apply(
         lambda s: classify_score(s, config.DIFFICULTY_THRESHOLDS)
     )
     result["difficulty_level"] = levels_colors.apply(lambda x: x[0])
     result["difficulty_color"] = levels_colors.apply(lambda x: x[1])
 
-    # Convenience columns
     result["incorrect_rate_pct"] = (result["c_tilde"] * 100).round(1)
 
-    # Sort descending by score
     result = result.sort_values("difficulty_score", ascending=False).reset_index(drop=True)
 
     return result
 
-
-# -----------------------------------------------------------------
-# Mistake Clustering
-# -----------------------------------------------------------------
 
 def _label_clusters_with_openai(clusters: list[dict], question_id: str) -> list[dict]:
     """
@@ -694,8 +625,6 @@ def cluster_question_mistakes(
     if total_wrong < config.CLUSTER_MIN_WRONG:
         return None
 
-    # Deterministic digest — Python's built-in hash() is salted per process,
-    # so caching keyed on it collides or misses unpredictably across reruns.
     _answer_payload = "\0".join(sorted(wrong_df["student_answer"].tolist()))
     _answer_hash = hashlib.sha1(_answer_payload.encode("utf-8")).hexdigest()
     cache_key = (question_id, total_wrong, _answer_hash)
@@ -704,7 +633,6 @@ def cluster_question_mistakes(
 
     unique_answers = wrong_df["student_answer"].unique().tolist()
 
-    # Single unique answer — no point clustering
     if len(unique_answers) == 1:
         result = [{
             "label": "Common Wrong Answer",
@@ -715,7 +643,6 @@ def cluster_question_mistakes(
         _cluster_cache[cache_key] = result
         return result
 
-    # TF-IDF on deduplicated texts
     vectorizer = TfidfVectorizer(
         max_features=500,
         sublinear_tf=True,
@@ -742,7 +669,6 @@ def cluster_question_mistakes(
         _cluster_cache[cache_key] = result
         return result
 
-    # Auto-select k via silhouette score
     best_k = 2
     best_score = -1.0
     for k in range(2, max_k + 1):
@@ -761,7 +687,6 @@ def cluster_question_mistakes(
     km_final = KMeans(n_clusters=best_k, random_state=42, n_init=10)
     dedup_labels = km_final.fit_predict(X)
 
-    # Map cluster assignment back to all (non-deduped) rows
     answer_to_cluster: dict[str, int] = dict(zip(unique_answers, dedup_labels.tolist()))
     wrong_df["_cluster"] = wrong_df["student_answer"].map(answer_to_cluster)
 
@@ -776,7 +701,6 @@ def cluster_question_mistakes(
 
         dedup_indices = [i for i, lbl in enumerate(dedup_labels) if lbl == cluster_id]
 
-        # Cosine similarity to centroid → pick most representative answers
         centroid = centroids[cluster_id]
         centroid_norm = centroid / (np.linalg.norm(centroid) + 1e-9)
         cluster_dense = X[dedup_indices].toarray()
@@ -801,10 +725,6 @@ def cluster_question_mistakes(
     _cluster_cache[cache_key] = clusters
     return clusters
 
-
-# -----------------------------------------------------------------
-# Temporal Smoothing (Stub — not actively used)
-# -----------------------------------------------------------------
 
 def apply_temporal_smoothing(
     s_raw: float,

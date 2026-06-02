@@ -21,10 +21,6 @@ from backend import academic_calendar
 
 router = APIRouter(tags=["analysis"])
 
-# /api/analysis iterates the full df several times per call. The view isn't
-# live-polled, but the same window is hit repeatedly when the user scrolls
-# between panels. Cache the response by `(from, to, module)` so a re-render
-# is instant.
 _ANALYSIS_TTL = 300
 _analysis_cache: TTLCache = TTLCache(maxsize=8, ttl=_ANALYSIS_TTL)
 _analysis_lock = threading.Lock()
@@ -110,7 +106,6 @@ def _activity_by_week(df: pd.DataFrame) -> list[WeekActivityCell]:
     if ts.empty:
         return []
 
-    # For each ts, ask the academic calendar for its label; skip missing.
     cells: dict[tuple[str, int], int] = {}
     for t in ts:
         label = academic_calendar.get_academic_period(t.date())
@@ -166,7 +161,6 @@ def _compute_analysis(df: pd.DataFrame, window: TimeWindow) -> AnalysisStats:
 
     timeline, peak_hour, peak_count = _timeline_stats(df)
 
-    # Module breakdown
     module_breakdown: list[ModuleBreakdown] = []
     if "module" in df.columns:
         for mod, g in df.groupby("module"):
@@ -179,7 +173,6 @@ def _compute_analysis(df: pd.DataFrame, window: TimeWindow) -> AnalysisStats:
             )
         module_breakdown.sort(key=lambda m: -m.submissions)
 
-    # Avg attempts per question
     q_counts = df.groupby("question").size() if "question" in df.columns else pd.Series(dtype=int)
     avg_attempts = float(q_counts.mean()) if not q_counts.empty else 0.0
 

@@ -100,7 +100,6 @@ def relabel_kind(kind: str, items: list[dict], id_key: str, prompt_fn, batch_siz
                 "reason": result.get("reason", ""),
                 "model": MODEL,
             }
-        # Periodic save so interruption is recoverable
         if (bi // batch_size) % save_every == 0:
             _save(out_path, kind, labels)
 
@@ -108,7 +107,7 @@ def relabel_kind(kind: str, items: list[dict], id_key: str, prompt_fn, batch_siz
         elapsed = time.time() - t0
         rate = done / elapsed if elapsed > 0 else 0
         eta = (len(to_label) - done) / rate if rate > 0 else 0
-        if (bi // batch_size) % 5 == 0:  # log every 5 batches
+        if (bi // batch_size) % 5 == 0:
             print(f"    Batch {bi // batch_size + 1}/{n_batches}: "
                   f"{done}/{len(to_label)} new ({elapsed:.0f}s, ETA {eta:.0f}s)")
 
@@ -130,7 +129,6 @@ def main() -> int:
     snapshots = snap_blob.get("struggle_snapshots", [])
     questions = snap_blob.get("difficulty_questions", [])
 
-    # Cost estimate
     n_struggle_batches = (len(snapshots) + BATCH_STRUGGLE - 1) // BATCH_STRUGGLE
     n_difficulty_batches = (len(questions) + BATCH_DIFFICULTY - 1) // BATCH_DIFFICULTY
     cost_struggle = n_struggle_batches * 0.015

@@ -197,8 +197,6 @@ def end_lab_session() -> None:
         state["assignments"] = {}
         for info in state["lab_assistants"].values():
             info["assigned_student"] = None
-        # class_id / class_label are retained on the inactive record so the
-        # last-known class is still visible until the next session starts.
         _write_state_unlocked(state)
 
 

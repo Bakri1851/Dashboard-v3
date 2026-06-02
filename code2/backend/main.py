@@ -21,11 +21,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-# Bootstrap OPENAI_API_KEY from .secrets/secrets.toml at the repo root.
-# Lift it into the environment so analytics._get_openai_client() finds it.
-# Without this, the backend runs with an empty key, every OpenAI call 401s,
-# and every incorrectness score falls back to 0.5 — IRT, improved struggle,
-# and measurement confidence all degrade silently.
 if not os.environ.get("OPENAI_API_KEY"):
     _secrets_path = Path(__file__).resolve().parents[2] / ".secrets" / "secrets.toml"
     if _secrets_path.is_file():
@@ -45,11 +40,6 @@ from backend import rag as rag_module
 from backend.models import bkt as _bkt
 
 logger = logging.getLogger("backend")
-# Attach a single console handler at the `backend` root so prewarm / RAG /
-# IRT / BKT diagnostics actually print under uvicorn (which only configures
-# its own "uvicorn.*" loggers by default). Every submodule's
-# logging.getLogger(__name__) call produces a `backend.*` logger that
-# propagates up to this handler.
 if not logger.handlers:
     _h = logging.StreamHandler()
     _h.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s", datefmt="%H:%M:%S"))
@@ -77,20 +67,7 @@ async def lifespan(app: FastAPI):
             t0 = _time.monotonic()
             df, err = load_dataframe()
             logger.info("prewarm: loaded %d records in %.1fs (err=%r)", len(df), _time.monotonic() - t0, err)
-            # `load_dataframe` respects SCORING_PER_RUN_CAP so the df it just
-            # cached has real incorrectness for only the first N uniques and
-            # 0.5 for the rest — leaderboards computed on that would diverge
-            # from code/'s (which has no cap). Score the remaining uncached
-            # feedbacks here with the cap disabled; in-request calls still
-            # use the cap, but the module-level _incorrectness_cache is now
-            # fully warm, and the cached df's incorrectness column gets
-            # updated in place because `df` and `_df_cache["df"][0]` are the
-            # same object. Running in the background thread means this ~5–7
-            # min OpenAI pass doesn't block concurrent requests.
             if not df.empty and "ai_feedback" in df.columns:
-                # Skip the uncapped scoring pass when the disk-backed cache
-                # already covers nearly every unique feedback — a warm restart
-                # should boot in seconds, not minutes.
                 feedbacks = df["ai_feedback"].astype(str).str.strip()
                 unique_fbs = [t for t in feedbacks.unique() if t]
                 if unique_fbs:
@@ -130,11 +107,6 @@ async def lifespan(app: FastAPI):
                     "prewarm: df has no 'incorrectness' column after load_dataframe — "
                     "compute_incorrectness_column was bypassed or crashed silently"
                 )
-            # Fit BKT parameters per skill (module) on the warmed df. The
-            # fitted params live in _bkt._BKT_PARAMS_CACHE and are used by
-            # compute_all_mastery when the runtime sliders are at their
-            # config defaults. Calibrates each skill to its own cohort
-            # rather than using literature-averaged priors globally.
             if not df.empty:
                 t_bkt = _time.monotonic()
                 try:
@@ -146,9 +118,6 @@ async def lifespan(app: FastAPI):
                 except Exception as e:  # noqa: BLE001
                     logger.warning("prewarm: BKT fit raised: %s", e)
 
-                # Prime the IRT cache so the first /api/models/compare hit
-                # doesn't pay the 30–60 s Rasch fit. load_irt_model already
-                # memoizes via _irt_difficulty_cache.
                 t_irt = _time.monotonic()
                 try:
                     from backend import cache as _cache
@@ -182,7 +151,6 @@ async def lifespan(app: FastAPI):
     loop.run_in_executor(None, _prewarm)
     yield
 
-# Resolve absolute path so the StaticFiles mount works regardless of CWD.
 _DIST_DIR = Path(__file__).resolve().parent.parent / "frontend" / "dist"
 
 app = FastAPI(
@@ -216,13 +184,9 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-# Serve the built React SPA when dist/ exists (Phase 6 onward).
-# During Phase 2-5 the frontend is served by Vite on :5173 instead.
 if _DIST_DIR.exists():
     _MOBILE_HTML = _DIST_DIR / "mobile.html"
 
-    # Clean URL for the mobile lab-assistant portal: /mobile → mobile.html.
-    # Registered BEFORE the StaticFiles mount so it wins against the catch-all.
     if _MOBILE_HTML.exists():
 
         @app.get("/mobile", include_in_schema=False)

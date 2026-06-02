@@ -15,7 +15,7 @@ cited_in_planned:
   - Ch2 – Background and Requirements
   - Student Struggle Logic
   - Improved Struggle Logic
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # Modeling how students learn to program
 

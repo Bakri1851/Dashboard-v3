@@ -9,25 +9,25 @@ Several deployed V2 views were changed *after* the current screenshots were capt
 
 ## Re-shoot / verify checklist
 Tick once the screenshot matches the current deployed UI. Instructor views (Appendix B → *Instructor Dashboard (V2)*):
-- [ ] `ui-inclass-basic.png` — In-Class, Basic layout
-- [ ] `ui-inclass.png` — In-Class, Advanced layout
-- [ ] `v2-inclass.png` — In-Class, scifi theme
-- [ ] `ui-studentdetail.png` — Student Detail (Improved Models on)
-- [ ] `ui-questiondetail.png` — Question Detail (clusters + RAG)
-- [ ] `ui-dataanalysis.png` — Data Analysis (e.g. Activity-by-Week heatmap)
+- [x] `ui-inclass-basic.png` — In-Class, Basic layout
+- [x] `ui-inclass.png` — In-Class, Advanced layout
+- [x] `v2-inclass.png` — In-Class, scifi theme
+- [x] `ui-studentdetail.png` — Student Detail (Improved Models on)
+- [x] `ui-questiondetail.png` — Question Detail (clusters + RAG)
+- [x] `ui-dataanalysis.png` — Data Analysis (e.g. Activity-by-Week heatmap)
 - [x] `ui-settings.png` — **Settings — re-shoot (stale)**
-- [ ] `ui-previoussessions.png` — Previous Sessions
-- [ ] `ui-progression.png` — Session Progression
+- [x] `ui-previoussessions.png` — Previous Sessions
+- [x] `ui-progression.png` — Session Progression
 
 Assistant views (Appendix B → *Lab Assistant (mobile)*):
-- [ ] `asst-join.png` — join screen
-- [ ] `asst-unassigned.png` — standby, self-allocation OFF
-- [ ] `asst-unassigned2.png` — standby, self-allocation ON
-- [ ] `asst-assigned.png` — assigned student card (mark-helped)
-- [ ] `asst-dispatch.png` — instructor dispatch console
+- [x] `asst-join.png` — join screen
+- [x] `asst-unassigned.png` — standby, self-allocation OFF
+- [x] `asst-unassigned2.png` — standby, self-allocation ON
+- [x] `asst-assigned.png` — assigned student card (mark-helped)
+- [x] `asst-dispatch.png` — instructor dispatch console
 
 Kept inline (not in Appendix B) — also verify:
-- [ ] `v2-live-session.png` — instructor sidebar during a live session (Implementation §4.6, `fig:session-live`)
+- [x] `v2-live-session.png` — instructor sidebar during a live session (Implementation §4.6, `fig:session-live`)
 
 ## After re-shooting
 - Confirm captions in `ui-screenshots.tex` still describe what the new image shows (e.g. if a panel was removed/renamed).

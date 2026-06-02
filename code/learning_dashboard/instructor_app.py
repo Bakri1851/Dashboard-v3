@@ -28,7 +28,6 @@ try:
 except Exception:
     pass
 
-# Session State Initialization
 
 def init_session_state() -> None:
     """Initialize all session state keys with defaults if not present."""
@@ -77,7 +76,6 @@ def init_session_state() -> None:
         "_measurement_df": None,
         "_improved_models_key": None,
         "_improved_struggle_df": None,
-        # BKT parameter overrides (used when struggle_model == "Improved")
         "bkt_p_init":                    config.BKT_P_INIT,
         "bkt_p_learn":                   config.BKT_P_LEARN,
         "bkt_p_guess":                   config.BKT_P_GUESS,
@@ -215,8 +213,6 @@ def _resolve_display_academic_period(df: pd.DataFrame) -> str:
     return format_academic_period_window(datetime.now(), None)
 
 
-# Lab Assignment Panel
-
 def _render_lab_assignment_panel() -> None:
     """
     Render lab assistant management panel inside the sidebar.
@@ -261,10 +257,8 @@ def _render_lab_assignment_panel() -> None:
             st.caption("No lab assistants have joined yet.")
             return
 
-        # Use scores cached from the previous render cycle (at most one rerun stale)
         struggle_df = st.session_state.get("_struggle_df")
 
-        # List each assistant with their current assignment
         unassigned_assistants: list[tuple[str, str]] = []
         for aid, info in assistants.items():
             assigned_student = info.get("assigned_student")
@@ -319,7 +313,6 @@ def _render_lab_assignment_panel() -> None:
                         st.session_state["pending_remove_assistant_id"] = None
                         st.rerun()
 
-        # Instructor assignment controls
         if struggle_df is not None and not struggle_df.empty and unassigned_assistants:
             assigned_student_ids = set(assignments.keys())
             eligible = struggle_df[
@@ -353,8 +346,6 @@ def _render_lab_assignment_panel() -> None:
                         st.error("Assignment failed — student may already be claimed.")
 
 
-# Sidebar
-
 def _on_view_change() -> None:
     """Callback when the view radio changes — clear drill-down selections."""
     st.session_state["selected_student"] = None
@@ -386,7 +377,6 @@ def _render_lab_code_card(code: str) -> None:
 def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
     """Render all sidebar controls and return the filtered DataFrame."""
     with st.sidebar:
-        # --- Lab Session Management ---
         st.markdown(
             f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
             f'text-transform:uppercase; letter-spacing:2px; font-size:0.9rem;">Lab Session</h3>',
@@ -503,11 +493,9 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
 
         st.markdown("---")
 
-        # Keep selector and active view aligned before rendering the widget.
         if st.session_state["current_view"] in {"In Class View", "Data Analysis View", "Model Comparison"}:
             st.session_state["dashboard_view"] = st.session_state["current_view"]
 
-        # --- Dashboard View ---
         st.markdown(
             f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
             f'text-transform:uppercase; letter-spacing:2px; font-size:0.9rem;">Dashboard View</h3>',
@@ -523,7 +511,6 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
 
         st.markdown("---")
 
-        # --- Settings ---
         st.markdown(
             f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
             f'text-transform:uppercase; letter-spacing:2px; font-size:0.9rem;">Settings</h3>',
@@ -543,7 +530,6 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
 
         st.markdown("---")
 
-        # --- Quick Refresh ---
         if st.session_state.get("auto_refresh") and st.session_state["last_refresh"]:
             st.caption(
                 f"Last refresh: {st.session_state['last_refresh'].strftime('%H:%M:%S')}"
@@ -554,14 +540,12 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
 
         st.markdown("---")
 
-        # --- History (time filter + previous sessions + save) ---
         st.markdown(
             f'<h3 style="color:{config.COLORS["cyan"]}; font-family:{config.FONT_HEADING}; '
             f'text-transform:uppercase; letter-spacing:2px; font-size:0.9rem;">History</h3>',
             unsafe_allow_html=True,
         )
 
-        # Loaded saved session overrides the preset entirely
         loaded_start = st.session_state.get("loaded_session_start")
         loaded_end = st.session_state.get("loaded_session_end")
         viewing_saved_session = loaded_start is not None and loaded_end is not None
@@ -639,7 +623,6 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
 
         st.markdown("")
 
-        # Previous sessions / save
         if st.session_state["current_view"] == "Previous Sessions":
             if st.button("Back to Dashboard", key="back_from_previous_sessions"):
                 _on_view_change()
@@ -695,8 +678,6 @@ def render_sidebar(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-# Main
-
 def main() -> None:
     """Main application entry point."""
     st.set_page_config(
@@ -705,10 +686,8 @@ def main() -> None:
         page_icon="📶",
     )
 
-    # Initialize state
     init_session_state()
 
-    # Sound: session lifecycle (detect start/end transitions)
     _prev_active = st.session_state.get("_prev_session_active", False)
     _curr_active = st.session_state["session_active"]
     if _curr_active and not _prev_active:
@@ -717,20 +696,14 @@ def main() -> None:
         sound.play_session_end()
     st.session_state["_prev_session_active"] = _curr_active
 
-    # Inject theme
     st.markdown(theme.get_google_fonts_import(), unsafe_allow_html=True)
     st.markdown(f"<style>{theme.get_main_css()}</style>", unsafe_allow_html=True)
 
-    # Navigation loader gate: on a user-initiated view change the previous
-    # view's DOM lingers until the new view's deltas arrive. Render a full-page
-    # loader for one render cycle so the old content is visually replaced before
-    # we kick off data loading and analytics.
     if st.session_state.pop("_nav_loading", False):
         components.render_nav_loader()
         time.sleep(0.08)
         st.rerun()
 
-    # Auto-refresh
     if st.session_state["auto_refresh"]:
         refresh_count = st_autorefresh(
             interval=st.session_state["refresh_interval"] * 1000,
@@ -744,7 +717,6 @@ def main() -> None:
             sound.play_refresh()
         st.session_state["_autorefresh_count"] = refresh_count
 
-    # Load data
     df, load_error = data_loader.load_data()
 
     if st.session_state["current_view"] not in {"Settings", "Previous Sessions"}:
@@ -796,40 +768,34 @@ def main() -> None:
         st.session_state["_nav_loading"] = True
         st.rerun()
 
-    # Cache lab session state — read file at most once per second across all consumers
     _now = time.time()
     if _now - st.session_state.get("_lab_state_ts", 0) > 1.0:
         st.session_state["_lab_state_cache"] = _lab_state.read_lab_state()
         st.session_state["_lab_state_ts"] = _now
 
-    # Sidebar controls and filtering (preset-driven — see render_sidebar)
     df = render_sidebar(df)
     st.session_state["_today_has_data"] = True
 
     st.session_state["current_academic_period"] = _resolve_display_academic_period(df)
 
-    # Sound: navigation transition
     _prev_view = st.session_state.get("_prev_dashboard_view")
     _curr_view = st.session_state["current_view"]
     if _prev_view is not None and _prev_view != _curr_view and _curr_view in {"In Class View", "Data Analysis View"}:
         sound.play_navigation()
     st.session_state["_prev_dashboard_view"] = _curr_view
 
-    # Sound: student selected
     _prev_s = st.session_state.get("_prev_selected_student")
     _curr_s = st.session_state["selected_student"]
     if _curr_s is not None and _curr_s != _prev_s:
         sound.play_selection()
     st.session_state["_prev_selected_student"] = _curr_s
 
-    # Sound: question selected
     _prev_q = st.session_state.get("_prev_selected_question")
     _curr_q = st.session_state["selected_question"]
     if _curr_q is not None and _curr_q != _prev_q:
         sound.play_selection()
     st.session_state["_prev_selected_question"] = _curr_q
 
-    # Sound: lab assistant joined (instructor hears it)
     _lab_sound_data = st.session_state.get("_lab_state_cache", {})
     _curr_aids = set((_lab_sound_data.get("lab_assistants") or {}).keys())
     _prev_aids = st.session_state.get("_prev_lab_assistant_ids", _curr_aids)
@@ -837,13 +803,10 @@ def main() -> None:
         sound.play_assistant_join()
     st.session_state["_prev_lab_assistant_ids"] = _curr_aids
 
-    # Cache analytics scores — only recompute when the filtered data changes.
-    # Key on row count + timestamp range as a fast fingerprint of df content.
     _analytics_key = (len(df), str(df["timestamp"].min()), str(df["timestamp"].max()),
                       int(pd.util.hash_pandas_object(df).sum()))
     if st.session_state.get("_analytics_key") != _analytics_key:
         struggle_df = analytics.compute_student_struggle_scores(df)
-        # Apply temporal EMA if enabled
         if st.session_state.get("smoothing_enabled", True) and not struggle_df.empty:
             prev = st.session_state.get("previous_scores", {})
             struggle_df = struggle_df.copy()
@@ -863,15 +826,14 @@ def main() -> None:
         st.session_state["_struggle_df"] = struggle_df
         st.session_state["_difficulty_df"] = difficulty_df
         st.session_state["_analytics_key"] = _analytics_key
-        st.session_state["_sec_analytics_key"] = None  # invalidate secondary cache
-        st.session_state["_improved_models_key"] = None  # invalidate improved models cache
+        st.session_state["_sec_analytics_key"] = None
+        st.session_state["_improved_models_key"] = None
     else:
         struggle_df = st.session_state["_struggle_df"]
         difficulty_df = st.session_state["_difficulty_df"]
 
     df["incorrectness"] = analytics.compute_incorrectness_column(df)
 
-    # --- Improved models (Phases 1–4), gated by the Settings dropdowns ---
     _struggle_model = st.session_state.get("struggle_model", "Baseline")
     _difficulty_model = st.session_state.get("difficulty_model", "Baseline")
     _improved_struggle_active = _struggle_model == "Improved"
@@ -938,7 +900,6 @@ def main() -> None:
             st.session_state["_improved_models_key"] = None
             st.session_state["_improved_models_settings_key"] = None
 
-    # Sound: high-struggle student count increased
     if st.session_state["session_active"] and struggle_df is not None and not struggle_df.empty:
         _curr_hs = int((struggle_df["struggle_level"] == "Needs Help").sum())
         _prev_hs = st.session_state.get("_prev_high_struggle_count", 0)
@@ -946,7 +907,6 @@ def main() -> None:
             sound.play_high_struggle()
         st.session_state["_prev_high_struggle_count"] = _curr_hs
 
-    # Route to view
     if st.session_state["selected_student"] is not None:
         views.student_detail_view(df, st.session_state["selected_student"], struggle_df, difficulty_df)
     elif st.session_state["selected_question"] is not None:

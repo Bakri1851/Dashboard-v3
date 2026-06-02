@@ -3,7 +3,6 @@ from datetime import date as _date, timedelta
 
 import pandas as pd
 
-# Ordered list of (start_date, end_date_exclusive, label) for every period in 2025/26.
 ACADEMIC_PERIODS = []
 
 def _build_periods():
@@ -56,7 +55,6 @@ def _build_periods():
 
 _build_periods()
 
-# All period labels in chronological order (for dropdowns).
 ALL_PERIOD_LABELS = [label for _, _, label in ACADEMIC_PERIODS]
 
 

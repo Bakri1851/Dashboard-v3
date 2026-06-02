@@ -51,14 +51,12 @@ def get_question(
         raise HTTPException(status_code=404, detail=f"No difficulty score for {question_id!r}")
     r = row_sel.iloc[0]
 
-    # --- ensure incorrectness column for cluster + rate calcs -------------
     if "incorrectness" not in q_df.columns:
         q_df["incorrectness"] = incorrectness.compute_incorrectness_column(q_df)
 
     wrong_mask = q_df["incorrectness"] > config.CORRECT_THRESHOLD
     incorrect_rate = float(wrong_mask.mean()) if len(q_df) else 0.0
 
-    # First-attempt failure rate: group by user, take first attempt, count wrong.
     ts = pd.to_datetime(q_df["timestamp"], errors="coerce", utc=True)
     q_df = q_df.assign(_ts=ts).sort_values("_ts", kind="stable")
     first_attempts = q_df.groupby("user").first()
@@ -67,7 +65,6 @@ def get_question(
     else:
         first_fail_rate = 0.0
 
-    # --- clusters ---------------------------------------------------------
     try:
         clusters = clustering.cluster_question_mistakes(q_df, question_id) or []
     except Exception:
@@ -84,7 +81,6 @@ def get_question(
         for c in clusters
     ]
 
-    # --- top strugglers on this question (per-student summary) -----------
     top_strugglers: list[QuestionStudentRow] = []
     if "user" in q_df.columns:
         per_user = (
@@ -93,7 +89,6 @@ def get_question(
                 mean_inc=("incorrectness", "mean"),
             )
         )
-        # Join struggle-level + global-score from the cached window-specific leaderboard.
         struggle_all = load_struggle_df(window.from_, window.to_)
         level_lookup: dict[str, str] = {}
         score_lookup: dict[str, float] = {}
@@ -117,7 +112,6 @@ def get_question(
                 )
             )
 
-    # --- recent attempts --------------------------------------------------
     recent = q_df.dropna(subset=["_ts"]).sort_values("_ts", ascending=False).head(10)
     recent_attempts = [
         QuestionRecentAttempt(

@@ -77,14 +77,12 @@ def search_constrained(score, y, lo, hi, step, min_c1, score_max, min_width):
         if k > best[0]:
             best = (k, (float(c1), float(c2), float(c3)))
     if best[1] is None:
-        # No combo satisfied constraints — fall back to relaxed min_width
         for c1, c2, c3 in product(grid, grid, grid):
             if not (c1 < c2 < c3): continue
             if c1 < min_c1: continue
             k = fast_kappa(y, to_band(score, c1, c2, c3))
             if k > best[0]:
                 best = (k, (float(c1), float(c2), float(c3)))
-    # Refine around the coarse best
     c1b, c2b, c3b = best[1]
     fs = step / 5
     ext = step * 1.5

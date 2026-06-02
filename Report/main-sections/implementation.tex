@@ -65,7 +65,7 @@ The presentation and service layers are where the systems diverge, with V1 using
     \hline
     SciPy & L-BFGS-B optimiser for IRT (Rasch 1PL in V1, 2PL in V2) and BKT MLE fits & Both \\
     \hline
-    scikit-learn & TF-IDF + KMeans for mistake clustering; \texttt{roc\_auc\_score} for BKT predictive AUC & Both \\
+    scikit-learn~\cite{pedregosaScikitlearnMachineLearning2012} & TF-IDF + KMeans for mistake clustering; \texttt{roc\_auc\_score} for BKT predictive AUC & Both \\
     \hline
     OpenAI Python SDK & Batched incorrectness scoring (gpt-4o) and RAG generation & Both \\
     \hline
@@ -496,7 +496,7 @@ else:
     \label{fig:code-warmratio}
 \end{figure}
 
-The net effect is that V2's cold-start cost is paid once per process restart rather than once per Streamlit rerun, converting the rerun-time scoring cost that V1's per-run cap (\texttt{SCORING\_PER\_RUN\_CAP = 500}) is built to absorb into a one-shot startup cost paid before any user request reaches the routers. V2 therefore runs significantly faster than the V1 and give a greater user experience (Table \ref{tab:cache-hierarchy}).
+The net effect is that V2's cold-start cost is paid once per process restart rather than once per Streamlit rerun, converting the rerun-time scoring cost that V1's per-run cap (\texttt{SCORING\_PER\_RUN\_CAP = 500}) is built to absorb into a one-shot startup cost paid before any user request reaches the routers. V2 therefore runs significantly faster than V1 and gives a greater user experience (Table \ref{tab:cache-hierarchy}).
 
 \begin{table}[H]
 \centering
@@ -646,7 +646,7 @@ S(s)
 + \theta\, \mathrm{Rep}_s,
 \]
 where each capital symbol is the min-max normalisation of its raw per-student signal across the cohort; the mapping back to the Chapter \ref{sec:design} hat-tilde notation is given in Table \ref{tab:struggle-7sig}.
-A Bayesian shrinkage step then pulls students with few submissions toward the cohort mean (full derivation in Section \ref{sec:design} and Appendix E):
+A Bayesian shrinkage step then pulls students with few submissions toward the cohort mean (full derivation in Section \ref{sec:design}; formulae collected in Appendix \ref{app:formulae}):
 \[
 S_{\mathrm{final}}(s) = w_n\, S(s) + (1 - w_n)\,\bar{S}, \qquad w_n = \frac{n}{n + K}, \qquad K = 5,
 \]
@@ -656,6 +656,7 @@ The recent-incorrectness signal $A$ uses an exponential time decay $w_i = e^{-\l
 The seven signals and their default weights are listed in Table \ref{tab:struggle-7sig}; an import-time assertion in \texttt{config.py} enforces the weight sum to $1.0$.
 Each per-student aggregate is computed once over a single \texttt{groupby("user")} pass; the seven signals are then min-max normalised across the cohort and combined under the weighted sum above as vector operations on the DataFrame.
 Bayesian shrinkage is the final step: a student with $n \gg K$ submissions is unaffected, whereas a student with $n \ll K$ is pulled toward the cohort mean, which stops a single noisy submission from putting a low-volume student at the top of the leaderboard (Figure \ref{fig:code-shrinkage}).
+The cross-refresh EWMA smoother of the design (\texttt{apply\_temporal\_smoothing}, rate \texttt{SMOOTHING\_ALPHA} $\lambda = 0.3$) is applied on V1's live path, whose Streamlit session persists $S_{t-1}$ across reruns; V2 retains the function but does not apply it on the live path, since each request recomputes the score from the active window and so carries no cross-refresh state, and the per-submission time decay and shrinkage already stabilise the score.
 
 V1 takes the unweighted arithmetic mean when computing both the overall incorrectness signal $I$ and the recent-incorrectness signal $A$.
 V2 weights both by the per-row measurement confidence introduced in Section \ref{sec:advanced}, so a submission with low-confidence feedback contributes less to the incorrectness signals and therefore to the struggle score; this is an improvement since the OpenAI scorer can be noisy on short or ambiguous feedback texts.
@@ -712,7 +713,7 @@ Each question $q$ scores
 \[
 D(q) = \alpha\, C_q + \beta\, T_q + \gamma\, A_q + \delta\, F_q + \epsilon\, P_q,
 \]
-where each capital symbol is the min-max normalisation of its raw per-question signal across the question set; the mapping back to the Chapter \ref{sec:design} tilde notation is given in Table \ref{tab:difficulty-5sig} (full derivation in Section \ref{sec:design} and Appendix E). The Greek weights are reused across the struggle and difficulty models in line with Section \ref{sec:design}; the formulas are otherwise independent.
+where each capital symbol is the min-max normalisation of its raw per-question signal across the question set; the mapping back to the Chapter \ref{sec:design} tilde notation is given in Table \ref{tab:difficulty-5sig} (full derivation in Section \ref{sec:design}; formulae collected in Appendix \ref{app:formulae}). The Greek weights are reused across the struggle and difficulty models in line with Section \ref{sec:design}; the formulas are otherwise independent.
 
 The five signals and their weights are listed in Table \ref{tab:difficulty-5sig}; an import-time assertion in \texttt{config.py} enforces the weight sum to $1.0$.
 V1 normalises each signal globally across the full question set using \texttt{min\_max\_normalise}; V2 instead normalises within each module using \texttt{min\_max\_normalise\_grouped} keyed by \texttt{module}.
@@ -763,11 +764,11 @@ For each pair of students $(s, t)$, similarity is the cosine over the five-eleme
 \[
 \mathrm{sim}(s, t) = \frac{\mathbf{v}_s^{\top} \mathbf{v}_t}{\lVert \mathbf{v}_s \rVert_2 \, \lVert \mathbf{v}_t \rVert_2}.
 \]
-A struggling student $s^\star$ flagged by the parametric model "infects" any peer $t$ with $\mathrm{sim}(s^\star, t) \geq \tau$ and $t$ not already flagged, surfacing students whose behaviour looks like a struggler's even when their parametric score does not yet cross the threshold.
+The parametric model first flags every student whose struggle score crosses the elevation threshold $\tau$ ($S_t \geq \tau$). Each not-yet-flagged student then inherits the similarity-weighted average of its $k$ nearest neighbours' flag indicators, surfacing students whose behaviour resembles a flagged peer's before their own score crosses $\tau$.
 
 The five-element feature vector \texttt{CF\_FEATURES} carries the four normalised struggle signals $N$, $T$, $I$, $A$ and the improvement-slope $D$ (named \texttt{n\_hat}, \texttt{t\_hat}, \texttt{i\_norm}, \texttt{A\_norm}, \texttt{d\_hat} respectively in code).
 The algorithm considers $k = 3$ nearest neighbours per flagged struggler.
-The similarity threshold $\tau$ defaults differ between versions, with V1 at $\tau = 0.6$ and V2 at $\tau \approx 0.90$ (the Optuna-tuned value of Section~\ref{sec:eval-hyperopt}); the higher default trades recall for tighter precision, and a slider in the Settings view (Section \ref{sec:views}) allows the user to toggle $\tau$.
+The elevation threshold $\tau$ - the parametric-struggle level at which a student is flagged as a seed - defaults differ between versions, with V1 at $\tau = 0.6$ and V2 at $\tau \approx 0.90$ (the Optuna-tuned value of Section~\ref{sec:eval-hyperopt}); the higher default flags fewer seeds, trading recall for tighter precision, and a slider in the Settings view (Section \ref{sec:views}) allows the user to adjust $\tau$.
 The output is a list of (similar student, source student, similarity score) tuples rendered in the In-Class view's CF diagnostic panel beneath the leaderboards if the collaborative-filtering flag \texttt{cf\_enabled} is set to \texttt{True}.
 
 
@@ -793,7 +794,7 @@ For an incorrectness score $x \in [0, 1]$ with feedback text of length $\ell$ ch
 \[
 \kappa = \mathrm{ramp}_{\ell, 0, L} \cdot \big(0.5 + 0.5\,|2x - 1|\big) \cdot \kappa_{\text{base}},
 \]
-where $\mathrm{ramp}_{\ell, 0, L}$ rises linearly from $0$ to $1$ over $[0, L]$ characters ($L = 20$ from \texttt{MEASUREMENT\_CONFIDENCE\_MIN\_LENGTH}), $|2x - 1|$ is the extremity term (1 at the ends of $[0,1]$, 0 at $x = 0.5$), and $\kappa_{\text{base}} = 0.7$ (\texttt{MEASUREMENT\_CONFIDENCE\_BASE}).
+where $\mathrm{ramp}_{\ell, 0, L}$ rises linearly from $0$ to $1$ over $[0, L]$ characters ($L = 20$ from \texttt{MEASUREMENT\_CONFIDENCE\_MIN\_LENGTH}), $|2x - 1|$ is the extremity term (1 at the ends of $[0,1]$, 0 at $x = 0.5$), and $\kappa_{\text{base}} = 0.7$ (\texttt{MEASUREMENT\_CONFIDENCE\_BASE}). These constants are conservative un-tuned defaults; measurement confidence is a down-weighting heuristic rather than a calibrated probability, so they were not fit against ground truth.
 
 Confidence is a meta-signal that quantifies how much the system trusts a given scorer verdict; short or empty feedback texts and verdicts near the middle of the scale are flagged as less trustworthy than long, decisive ones.
 Only two factors feed the formula: feedback length and extremity, combined under the base ceiling shown in Figure \ref{fig:code-confidence}.
@@ -886,7 +887,7 @@ The fit refuses when fewer than \texttt{BKT\_FIT\_MIN\_OBSERVATIONS = 50} attemp
 V2's \texttt{fit\_all\_skills} fits one parameter set per skill (module), not per question.
 This is a deliberate choice: a question-level fit would require more data than most individual questions ever see, whereas a module-level fit pools across the questions in a single subject area and remains stable on session-sized data.
 Predictive AUC via \texttt{sklearn.metrics.roc\_auc\_score} is computed alongside the fit and reported back to the UI.
-The mastery threshold \texttt{BKT\_MASTERY\_THRESHOLD = 0.95} is the bar for the ``mastered'' badge on the Student Detail page.
+The mastery threshold \texttt{BKT\_MASTERY\_THRESHOLD = 0.95} is the bar for the ``mastered'' badge on the Student Detail page; it is set deliberately high so the badge marks near-certain mastery rather than a marginal pass.
 
 \begin{table}[H]
 \centering

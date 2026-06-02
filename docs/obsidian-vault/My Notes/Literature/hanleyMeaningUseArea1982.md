@@ -8,7 +8,7 @@ last_imported: 2026-05-05
 cited_in_tex:
   - Report/main-sections/results-and-evaluation.tex:35
 cited_in_planned: []
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # The meaning and use of the area under a receiver operating characteristic (ROC) curve.
 

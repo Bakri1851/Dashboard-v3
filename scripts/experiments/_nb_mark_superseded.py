@@ -25,15 +25,12 @@ SUPERSEDED = (
     "§5.4 comparison). Retained for provenance; NOT used in the report.\n\n"
 )
 
-# header-prefix → note to insert after the header line.
-# Tier 1: cleanly v1-vs-v2 (full superseded banner).
 FULL = {
     "## §5.4.3a — Per-snapshot score delta (v1 vs v2)": SUPERSEDED,
     "## §5.6.1 — Model disagreement matrix (v1 ↔ v2 bands on shared snapshots)": SUPERSEDED,
     "## §5.6.1a — Leaderboard rank shift v1 → v2": SUPERSEDED,
     "## §5.6.1b — Per-question difficulty rank shift v1 → v2": SUPERSEDED,
 }
-# Tier 2: entangled (v2 content kept; only v1 portion cut).
 ENTANGLED = {
     "## §5.4.3 — Baseline check: v1 hand-set vs v2 trained weights (struggle)":
         "> ⓘ v1 cut from the report 2026-05-27 — present the **v2** trained weights only "
@@ -64,7 +61,6 @@ def main() -> int:
         note = FULL.get(header) or ENTANGLED.get(header)
         if not note or already_noted(src):
             continue
-        # Insert the note right after the header line (+ its blank line).
         parts = src.split("\n", 1)
         rest = parts[1] if len(parts) > 1 else ""
         rest = rest.lstrip("\n")

@@ -10,7 +10,7 @@ cited_in_tex:
   - Report/main-sections/requirements-specification.tex:167
 cited_in_planned:
   - Ch2 – Background and Requirements
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # A systematic literature review on educational recommender systems for teaching and learning: research trends, limitations and opportunities
 

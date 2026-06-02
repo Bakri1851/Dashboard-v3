@@ -23,9 +23,6 @@ from .. import config
 
 import logging
 
-# Column kept as "skill" (module) for clarity. `question` retained as an
-# alias in compute_all_mastery for backward compatibility with any external
-# consumer that hasn't migrated — new code should read `skill`.
 _MASTERY_COLUMNS = ["user", "skill", "mastery", "n_attempts"]
 _SUMMARY_COLUMNS = [
     "user",
@@ -38,9 +35,6 @@ _SUMMARY_COLUMNS = [
 _logger = logging.getLogger(__name__)
 
 
-# Per-skill fitted parameters populated by ``fit_all_skills`` during prewarm.
-# ``compute_all_mastery`` reads from this when no per-skill override is passed
-# in by the caller. Map skill → {p_init, p_learn, p_guess, p_slip}.
 _BKT_PARAMS_CACHE: dict[str, dict[str, float]] = {}
 
 
@@ -163,9 +157,6 @@ def compute_all_mastery(
     if skill_col not in df.columns:
         return empty
 
-    # BKT is a sequential HMM; replay order determines the posterior.
-    # Sort with a secondary key so submissions at identical timestamps
-    # (bulk imports, same-second posts) replay in a deterministic order.
     ordered = (
         df.dropna(subset=["timestamp"])
         .sort_values(["timestamp", skill_col], ascending=True, kind="mergesort")
@@ -232,9 +223,6 @@ def fit_all_skills(df: pd.DataFrame) -> dict[str, dict[str, float]]:
             "p_guess": float(res["p_guess"]),
             "p_slip": float(res["p_slip"]),
         }
-        # Guard against degenerate fits: values pinned at bounds carry no
-        # information (e.g. p_guess=0.5 means "50% chance to get it right
-        # without knowing", usually a sign of all-correct data).
         if params["p_guess"] >= 0.499 and params["p_slip"] >= 0.499:
             _logger.info(
                 "fit_all_skills: skill=%r fit pinned at bounds (pG=%.2f pS=%.2f); keeping defaults",
@@ -320,7 +308,6 @@ def _walk_and_score(
                 p_obs = eps
             log_lik += float(np.log(p_obs))
 
-            # Bayes update + transition — identical to bkt_update().
             if c:
                 p_posterior = mastery * (1.0 - p_slip) / p_obs
             else:
@@ -384,10 +371,6 @@ def fit_bkt_parameters(
         )
         return result_stub
 
-    # Refuse to fit when every attempt is graded the same way.  With one class
-    # the log-likelihood surface is maximised at a bounds corner where every
-    # prediction is 1 (LL = 0), AUC is undefined, and the fitted parameters
-    # carry no information about learning dynamics.
     all_outcomes = np.concatenate([seq for seq in sequences])
     if len(np.unique(all_outcomes)) < 2:
         only_class = "correct" if int(all_outcomes[0]) == 1 else "incorrect"

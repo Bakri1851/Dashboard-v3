@@ -1,20 +1,10 @@
 # collab.py — collaborative-filtering struggle detection (CF layer over the baseline).
-#
-# Carved out of the old analytics.py during the 2026-05-20 split. Module
-# name is `collab` rather than `cf` to avoid clashing with the router
-# `backend/routers/cf.py`.
-#
-# Self-contained: only depends on numpy, pandas, and sklearn's
-# cosine_similarity. The CF input features come from a pre-computed
-# struggle DataFrame (the normalised `_hat` / `_norm` columns produced by
-# `struggle.compute_student_struggle_scores`).
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-# All CF features must be on the same cohort-relative [0, 1] scale for
-# cosine similarity to be meaningful — use the normalised columns added in M1.
 CF_FEATURES = ["n_hat", "t_hat", "i_norm", "A_norm", "d_hat"]
 
 
@@ -51,13 +41,8 @@ def compute_cf_struggle_scores(
             diagnostics["reason"] = f"missing baseline feature columns: {missing}"
             return struggle_df["struggle_score"].copy(), diagnostics
 
-        # Interaction matrix from normalised features. Guard against NaN
-        # leaking in from upstream (e.g. min_max_normalise on all-equal
-        # columns in degenerate cohorts) — cosine_similarity returns NaN
-        # rows when fed NaN, which would silently collapse scores to 0.
         X = np.nan_to_num(struggle_df[CF_FEATURES].values, nan=0.0)
 
-        # Pairwise cosine similarity
         W = cosine_similarity(X)
 
         # Binary help-need labels from parametric scores

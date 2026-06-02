@@ -11,7 +11,7 @@ cited_in_tex:
 cited_in_planned:
   - Ch2 – Background and Requirements
   - Analytics Engine
-last_synced: 2026-06-01
+last_synced: 2026-06-02
 ---
 # GroupLens: an open architecture for collaborative filtering of netnews
 

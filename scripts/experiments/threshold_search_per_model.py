@@ -136,7 +136,6 @@ def main() -> int:
     print("  + difficulty_irt    (Rasch 1PL b_raw, scaled to [0,1])")
     print("=" * 78)
 
-    # --- struggle IMPROVED ---
     snaps = json.loads((EVAL / "snapshots.json").read_text(encoding="utf-8"))["struggle_snapshots"]
     llm_s = json.loads((EVAL / "llm_struggle_labels.json").read_text(encoding="utf-8"))["labels"]
     matched = [s for s in snaps
@@ -151,9 +150,6 @@ def main() -> int:
                      "struggle IMPROVED [0,1] (BKT+IRT blend) — GroupKFold(5)",
                      (0.2, 0.35, 0.5))
 
-    # --- difficulty IRT ---
-    # Lift IRT scores from comparison_difficulty_pairs.csv (saved by the
-    # model_comparison notebook). Avoids re-fitting the 2PL model.
     pairs_path = EVAL / "comparison_difficulty_pairs.csv"
     if not pairs_path.exists():
         print(f"\nFAIL: {pairs_path.relative_to(REPO)} not found — "
@@ -163,7 +159,6 @@ def main() -> int:
     rows = list(csv.DictReader(pairs_path.open(encoding="utf-8")))
     irt_score = np.array([float(r["irt_score"]) for r in rows])
     y_irt     = np.array([DIFFICULTY_BAND_INDEX[r["llm_band"]] for r in rows if r["llm_band"]])
-    # Filter rows that had a llm_band (some questions may lack labels)
     rows_l = [r for r in rows if r["llm_band"]]
     irt_score = np.array([float(r["irt_score"]) for r in rows_l])
     y_irt     = np.array([DIFFICULTY_BAND_INDEX[r["llm_band"]] for r in rows_l])
@@ -173,7 +168,6 @@ def main() -> int:
                      "difficulty IRT [0,1] (Rasch scaled) — LOO",
                      (0.35, 0.5, 0.75))
 
-    # Merge into existing threshold_search_cv.json
     cv_path = OUT / "threshold_search_cv.json"
     existing = json.loads(cv_path.read_text(encoding="utf-8")) if cv_path.exists() else {}
     existing["struggle_improved"] = res_imp
@@ -181,7 +175,6 @@ def main() -> int:
     cv_path.write_text(json.dumps(existing, indent=2), encoding="utf-8")
     print(f"\nWritten merged results to {cv_path.relative_to(REPO)}")
 
-    # --- final summary table ---
     print()
     print("=" * 78)
     print("SUMMARY — all 6 model threshold sets, CV-trained vs hand-set")
